@@ -1,8 +1,8 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
-import { $, browser, expect } from "@wdio/globals";
 import { SEED_USERS } from "@core/e2e/seed-users";
+import { $, browser, expect } from "@wdio/globals";
 
 // SP2 gate item 8: the native Tauri app opens the user area. The e2e world makes "Alpha Org" the
 // owner's last context. Screenshots go to NATIVE_SCREENSHOT_DIR when set (report evidence).
@@ -17,7 +17,9 @@ const screenshot = async (name: string): Promise<void> => {
 
 /** Windows Credential Manager holds the desktop session entry (decision 0017 §1); other OSes: unknown. */
 const keychainHasSession = (): boolean | undefined =>
-  process.platform === "win32" ? execFileSync("cmdkey", ["/list"], { encoding: "utf8" }).includes(KEYCHAIN_ENTRY) : undefined;
+  process.platform === "win32"
+    ? execFileSync("cmdkey", ["/list"], { encoding: "utf8" }).includes(KEYCHAIN_ENTRY)
+    : undefined;
 
 /**
  * Clicks once the element stays put: the shell re-renders when the session's claims arrive, so a
@@ -56,12 +58,16 @@ describe("desktop user area (native Tauri window)", () => {
     await expect($("main")).toBeDisplayed();
     await expect($("h1=Alpha Org")).toBeDisplayed();
     await screenshot("native-2-user-area");
-    if (keychainHasSession() !== undefined) await browser.waitUntil(() => keychainHasSession() === true, { timeoutMsg: "no keychain entry after sign-in" });
+    if (keychainHasSession() !== undefined)
+      await browser.waitUntil(() => keychainHasSession() === true, { timeoutMsg: "no keychain entry after sign-in" });
 
     await clickWhenStable(`aria/${owner.displayName}, menu da conta`);
     await clickWhenStable("aria/Sair");
     await expect($("aria/Senha")).toBeDisplayed();
     await screenshot("native-3-signed-out");
-    if (keychainHasSession() !== undefined) await browser.waitUntil(() => keychainHasSession() === false, { timeoutMsg: "keychain entry left after sign-out" });
+    if (keychainHasSession() !== undefined)
+      await browser.waitUntil(() => keychainHasSession() === false, {
+        timeoutMsg: "keychain entry left after sign-out",
+      });
   });
 });

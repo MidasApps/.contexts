@@ -9,7 +9,12 @@ import { ApiErrorState } from "./ApiErrorState.tsx";
 describe("ApiErrorState", () => {
   it("shows the copy of the error code and its reference, never the raw message", async () => {
     const onRetry = vi.fn();
-    const error = new ApiError({ status: 409, code: "CONFLICT", message: "row version mismatch at db", requestId: "01K6REQ" });
+    const error = new ApiError({
+      status: 409,
+      code: "CONFLICT",
+      message: "row version mismatch at db",
+      requestId: "01K6REQ",
+    });
     const { user, container } = renderWithProviders(<ApiErrorState error={error} onRetry={onRetry} />);
     const alert = screen.getByRole("alert");
     expect(alert.textContent).toContain("Este item foi alterado por outra pessoa.");
@@ -35,7 +40,10 @@ describe("ApiErrorState", () => {
     const session = createRecordingSession();
     const onRetry = vi.fn();
     const error = new ApiError({ status: 401, code: "UNAUTHORIZED", message: "x", requestId: "01K6REQ" });
-    const { user, router, container } = renderWithClient(<ApiErrorState error={error} onRetry={onRetry} />, { path: "/o/org-1/settings/members?tab=all", session });
+    const { user, router, container } = renderWithClient(<ApiErrorState error={error} onRetry={onRetry} />, {
+      path: "/o/org-1/settings/members?tab=all",
+      session,
+    });
     expect(screen.getByRole("alert").textContent).toContain("Sua sessão expirou. Entre novamente para continuar.");
     expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
     await expectNoAxeViolations(container);

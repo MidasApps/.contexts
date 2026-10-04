@@ -1,7 +1,7 @@
 "use client";
 
 import type { UIMessage } from "ai";
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { fetchMessagePage } from "./use-conversation-thread.ts";
 
@@ -49,7 +49,12 @@ export const useOlderMessages = (args: {
     try {
       const page = await fetchMessagePage(callEndpoint, args.conversationId, cursor);
       const scroller = scrollElementRef.current;
-      if (scroller !== null) anchor.current = { height: scroller.scrollHeight, top: scroller.scrollTop, last: page.olderCursor === undefined };
+      if (scroller !== null)
+        anchor.current = {
+          height: scroller.scrollHeight,
+          top: scroller.scrollTop,
+          last: page.olderCursor === undefined,
+        };
       args.prepend(page.messages);
       setCursor(page.olderCursor);
     } catch {

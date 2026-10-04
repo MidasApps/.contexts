@@ -16,7 +16,11 @@ export type RateLimiter = {
    * Gives back a hit `consume` counted (`consumed` is its decision), in the same window only.
    * @returns the decision after the refund, or null when the window already ended.
    */
-  readonly refund: (policyId: string, subject: string, consumed: RateLimitDecision) => Promise<RateLimitDecision | null>;
+  readonly refund: (
+    policyId: string,
+    subject: string,
+    consumed: RateLimitDecision,
+  ) => Promise<RateLimitDecision | null>;
 };
 
 /** Opaque bucket id: `sha256(policyId + ":" + subject)`, so no IP or uid is stored in clear. */

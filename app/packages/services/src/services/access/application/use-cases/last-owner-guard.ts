@@ -12,7 +12,8 @@ export const wouldLoseLastOwner = async (
   deps: Pick<AccessWriteDeps, "memberships">,
   membership: Membership,
 ): Promise<boolean> => {
-  if (membership.node.level !== "organization" || membership.principalType !== "user" || !holdsOwner(membership.roles)) return false;
+  if (membership.node.level !== "organization" || membership.principalType !== "user" || !holdsOwner(membership.roles))
+    return false;
   const owners = await deps.memberships.listOrganizationOwners(tx, membership.tenantId);
   return !owners.some((owner) => owner.id !== membership.id);
 };

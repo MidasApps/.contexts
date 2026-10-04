@@ -1,5 +1,16 @@
 import { defineClientModule, type ModulePageProps } from "@core/client/app-shell";
-import { apiError, expectNoAxeViolations, IDS, MEMBER_PERMISSIONS, ok, page, renderApp, shellRoutes, type FakeRequest, type FakeRoutes } from "@core/client/testing";
+import {
+  apiError,
+  expectNoAxeViolations,
+  type FakeRequest,
+  type FakeRoutes,
+  IDS,
+  MEMBER_PERMISSIONS,
+  ok,
+  page,
+  renderApp,
+  shellRoutes,
+} from "@core/client/testing";
 import { ModulePageView } from "@core/client/views/module-page";
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -13,7 +24,10 @@ function FixedClockPage(props: ModulePageProps) {
   return <ExampleHomePage {...props} now={() => NOW} />;
 }
 
-const testModule = defineClientModule({ manifest: exampleManifest, pages: { "": () => Promise.resolve({ default: FixedClockPage }) } });
+const testModule = defineClientModule({
+  manifest: exampleManifest,
+  pages: { "": () => Promise.resolve({ default: FixedClockPage }) },
+});
 
 const VIEWER = [...MEMBER_PERMISSIONS, "example.item.read"];
 const EDITOR = [...VIEWER, "example.item.write"];
@@ -32,11 +46,19 @@ const note = (id: string, title: string, extra: Record<string, unknown> = {}) =>
 });
 
 const storedSettings = (values: Record<string, unknown> | null) =>
-  ok({ tenantId: IDS.organization, moduleId: "example", values, updatedAt: values === null ? null : "2026-09-29T15:00:00.000Z", updatedBy: values === null ? null : IDS.user });
+  ok({
+    tenantId: IDS.organization,
+    moduleId: "example",
+    values,
+    updatedAt: values === null ? null : "2026-09-29T15:00:00.000Z",
+    updatedBy: values === null ? null : IDS.user,
+  });
 
 const CONFIGURED = storedSettings({ greeting: "Bem-vindos", defaultBudget: { amountMinor: 123_456, currency: "BRL" } });
 
-const renderPage = (args: { permissions?: readonly string[]; routes?: FakeRoutes; locale?: "pt-BR" | "en-US" | "es-419" } = {}) =>
+const renderPage = (
+  args: { permissions?: readonly string[]; routes?: FakeRoutes; locale?: "pt-BR" | "en-US" | "es-419" } = {},
+) =>
   renderApp(
     <main>
       <ModulePageView />
@@ -45,7 +67,11 @@ const renderPage = (args: { permissions?: readonly string[]; routes?: FakeRoutes
       path: `/o/${IDS.organization}/p/${IDS.project}/m/example`,
       modules: [testModule],
       locale: args.locale ?? "pt-BR",
-      routes: shellRoutes((args.permissions ?? EDITOR), { [SETTINGS_ROUTE]: CONFIGURED, [NOTES_ROUTE]: page([]), ...args.routes }),
+      routes: shellRoutes(args.permissions ?? EDITOR, {
+        [SETTINGS_ROUTE]: CONFIGURED,
+        [NOTES_ROUTE]: page([]),
+        ...args.routes,
+      }),
     },
   );
 
@@ -83,7 +109,13 @@ describe("ExampleHomePage", () => {
       requests.push(request);
       return request.query.get("cursor") === "next"
         ? page([note("NoteOld0000000000001", "Older note")], { limit: 20 })
-        : page([note("NoteNew0000000000001", "Supplier follow-up", { body: "Call Ana on Monday." }), note("NoteArc0000000000001", "Archived note", { archivedAt: "2026-09-30T13:00:00.000Z" })], { cursor: "next", limit: 20 });
+        : page(
+            [
+              note("NoteNew0000000000001", "Supplier follow-up", { body: "Call Ana on Monday." }),
+              note("NoteArc0000000000001", "Archived note", { archivedAt: "2026-09-30T13:00:00.000Z" }),
+            ],
+            { cursor: "next", limit: 20 },
+          );
     };
     const { user, container } = renderPage({ permissions: VIEWER, routes: { [NOTES_ROUTE]: notesRoute } });
 
@@ -95,7 +127,10 @@ describe("ExampleHomePage", () => {
 
     expect(await screen.findByText("Older note")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Carregar mais" })).toBeNull();
-    expect(requests.map((request) => [request.params["organizationId"], request.query.get("limit")])).toEqual([[IDS.organization, "20"], [IDS.organization, "20"]]);
+    expect(requests.map((request) => [request.params["organizationId"], request.query.get("limit")])).toEqual([
+      [IDS.organization, "20"],
+      [IDS.organization, "20"],
+    ]);
   });
 
   it("says where notes come from while the organization has none, and offers no write action", async () => {
@@ -123,7 +158,9 @@ describe("ExampleHomePage", () => {
   it("shows an empty state with a link to the module settings until the module is set up", async () => {
     const { container } = renderPage({ routes: { [SETTINGS_ROUTE]: storedSettings(null) } });
 
-    const empty = (await screen.findByRole("heading", { name: "Módulo ainda não configurado" })).closest("[data-slot=state-panel]");
+    const empty = (await screen.findByRole("heading", { name: "Módulo ainda não configurado" })).closest(
+      "[data-slot=state-panel]",
+    );
     if (!(empty instanceof HTMLElement)) throw new Error("empty state not found");
     const link = within(empty).getByRole("link", { name: "Configurar" });
     expect(link.getAttribute("href")).toBe(`/o/${IDS.organization}/settings/m/example`);
@@ -133,7 +170,9 @@ describe("ExampleHomePage", () => {
   it("tells viewers who to ask instead of linking to settings they cannot change", async () => {
     renderPage({ permissions: VIEWER, routes: { [SETTINGS_ROUTE]: storedSettings(null) } });
 
-    expect(await screen.findByText("Peça a um administrador da organização para configurar este módulo.")).toBeDefined();
+    expect(
+      await screen.findByText("Peça a um administrador da organização para configurar este módulo."),
+    ).toBeDefined();
     expect(screen.queryByRole("link", { name: "Configurar" })).toBeNull();
   });
 

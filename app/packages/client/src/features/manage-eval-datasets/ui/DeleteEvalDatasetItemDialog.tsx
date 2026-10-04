@@ -27,7 +27,10 @@ export function DeleteEvalDatasetItemDialog({ organizationId, item, onOpenChange
   const action = useConfirmedAction(
     async () => {
       if (item === null) return;
-      await callEndpoint(deleteEvalDatasetItemEndpoint, { params: { datasetId: item.datasetId, itemId: item.id }, query: { organizationId } });
+      await callEndpoint(deleteEvalDatasetItemEndpoint, {
+        params: { datasetId: item.datasetId, itemId: item.id },
+        query: { organizationId },
+      });
       await queryClient.invalidateQueries({ queryKey: tenantEvalKeys.all(organizationId) });
     },
     () => notify.success(t("done")),

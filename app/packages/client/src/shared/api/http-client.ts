@@ -1,4 +1,4 @@
-import { ErrorEnvelopeSchema, type EndpointAuth, type HttpMethod } from "@core/contracts";
+import { type EndpointAuth, ErrorEnvelopeSchema, type HttpMethod } from "@core/contracts";
 import { ulid } from "ulid";
 import { ApiError } from "./api-error.ts";
 
@@ -57,7 +57,11 @@ const readJson = async (response: Response): Promise<{ ok: true; value: unknown 
   }
 };
 
-const toApiError = (status: number, body: { ok: true; value: unknown } | { ok: false }, requestId: string | undefined): ApiError => {
+const toApiError = (
+  status: number,
+  body: { ok: true; value: unknown } | { ok: false },
+  requestId: string | undefined,
+): ApiError => {
   const envelope = body.ok ? ErrorEnvelopeSchema.safeParse(body.value) : undefined;
   if (envelope?.success === true) {
     const { code, message, details, requestId: bodyRequestId } = envelope.data.error;
@@ -67,10 +71,19 @@ const toApiError = (status: number, body: { ok: true; value: unknown } | { ok: f
 };
 
 /** A failed fetch: the caller's abort passes through; our timeout and network errors become ApiError. */
-const toFetchFailure = (thrown: unknown, callerSignal: AbortSignal | undefined, timeout: AbortSignal, requestId: string): unknown => {
+const toFetchFailure = (
+  thrown: unknown,
+  callerSignal: AbortSignal | undefined,
+  timeout: AbortSignal,
+  requestId: string,
+): unknown => {
   if (callerSignal?.aborted === true) return thrown;
-  if (timeout.aborted) return new ApiError({ status: 0, code: "TIMEOUT", message: "Request timed out.", requestId }, { cause: thrown });
-  return new ApiError({ status: 0, code: "NETWORK_ERROR", message: "Network request failed.", requestId }, { cause: thrown });
+  if (timeout.aborted)
+    return new ApiError({ status: 0, code: "TIMEOUT", message: "Request timed out.", requestId }, { cause: thrown });
+  return new ApiError(
+    { status: 0, code: "NETWORK_ERROR", message: "Network request failed.", requestId },
+    { cause: thrown },
+  );
 };
 
 /**
@@ -79,7 +92,13 @@ const toFetchFailure = (thrown: unknown, callerSignal: AbortSignal | undefined, 
  * one token refresh and retries once, only for idempotent calls (GET/PUT/DELETE or a call with
  * `Idempotency-Key`); nothing else is retried here (TanStack Query owns query retries).
  */
-export const createHttpClient = ({ baseUrl, getIdToken, fetch, timeoutMs = DEFAULT_TIMEOUT_MS, newRequestId = ulid }: HttpClientOptions): HttpClient => {
+export const createHttpClient = ({
+  baseUrl,
+  getIdToken,
+  fetch,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  newRequestId = ulid,
+}: HttpClientOptions): HttpClient => {
   const attempt = async (request: HttpRequest, forceRefresh: boolean): Promise<Response> => {
     const token = request.auth === "none" ? null : await getIdToken({ forceRefresh });
     const requestId = newRequestId();
@@ -101,7 +120,13 @@ export const createHttpClient = ({ baseUrl, getIdToken, fetch, timeoutMs = DEFAU
     const requestId = response.headers.get("x-request-id") ?? undefined;
     const body = await readJson(response);
     if (!response.ok) throw toApiError(response.status, body, requestId);
-    if (!body.ok) throw new ApiError({ status: response.status, code: "INVALID_RESPONSE", message: "Response is not JSON.", requestId });
+    if (!body.ok)
+      throw new ApiError({
+        status: response.status,
+        code: "INVALID_RESPONSE",
+        message: "Response is not JSON.",
+        requestId,
+      });
     return { status: response.status, body: body.value, requestId };
   };
 

@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { useFormatter, useTranslations } from "use-intl";
 import { useAllAdminOrganizations } from "#/entities/admin-organization/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
-import { TraceCost, TraceDuration, TraceStatusPill, useAdminTraces, type TracePage } from "#/entities/trace/index.ts";
+import { TraceCost, TraceDuration, type TracePage, TraceStatusPill, useAdminTraces } from "#/entities/trace/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -22,7 +22,11 @@ function TraceName({ trace }: { trace: TraceSummary }) {
   const t = useTranslations("admin.traces");
   return (
     <span className="flex min-w-0 flex-col">
-      <RouteLink to={{ id: "admin", rest: `traces/${trace.traceId}` }} aria-label={t("open", { name: trace.name })} className="truncate font-medium underline-offset-4 hover:underline">
+      <RouteLink
+        to={{ id: "admin", rest: `traces/${trace.traceId}` }}
+        aria-label={t("open", { name: trace.name })}
+        className="truncate font-medium underline-offset-4 hover:underline"
+      >
         {trace.name}
       </RouteLink>
       <span className="font-mono text-caption text-muted-foreground">{trace.traceId}</span>
@@ -43,7 +47,10 @@ const useTargetLabel = () => {
 /** Organization name when the list knows it, else the id; platform jobs have no organization. */
 const useOrganizationLabel = (organizations: readonly OrganizationAdminSummary[] | undefined) => {
   const t = useTranslations("admin.traces");
-  return (tenantId: string | null): string => (tenantId === null ? t("platform") : (organizations?.find((organization) => organization.id === tenantId)?.name ?? tenantId));
+  return (tenantId: string | null): string =>
+    tenantId === null
+      ? t("platform")
+      : (organizations?.find((organization) => organization.id === tenantId)?.name ?? tenantId);
 };
 
 type Labels = { target: ReturnType<typeof useTargetLabel>; organization: ReturnType<typeof useOrganizationLabel> };
@@ -54,19 +61,44 @@ const useColumns = ({ target, organization }: Labels) => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.display({ id: "trace", header: () => t("columns.trace"), cell: ({ row }) => <TraceName trace={row.original} /> }),
-      column.accessor("tenantId", { header: () => t("columns.organization"), cell: ({ getValue }) => organization(getValue()) }),
+      column.display({
+        id: "trace",
+        header: () => t("columns.trace"),
+        cell: ({ row }) => <TraceName trace={row.original} />,
+      }),
+      column.accessor("tenantId", {
+        header: () => t("columns.organization"),
+        cell: ({ getValue }) => organization(getValue()),
+      }),
       column.display({ id: "target", header: () => t("columns.target"), cell: ({ row }) => target(row.original) }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <TraceStatusPill status={getValue()} /> }),
-      column.accessor("startedAt", { header: () => t("columns.startedAt"), cell: ({ getValue }) => formatDateTime(getValue(), "precise") }),
-      column.accessor("durationMs", { header: () => t("columns.duration"), meta: { numeric: true }, cell: ({ getValue }) => <TraceDuration durationMs={getValue()} /> }),
+      column.accessor("status", {
+        header: () => t("columns.status"),
+        cell: ({ getValue }) => <TraceStatusPill status={getValue()} />,
+      }),
+      column.accessor("startedAt", {
+        header: () => t("columns.startedAt"),
+        cell: ({ getValue }) => formatDateTime(getValue(), "precise"),
+      }),
+      column.accessor("durationMs", {
+        header: () => t("columns.duration"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => <TraceDuration durationMs={getValue()} />,
+      }),
       column.display({
         id: "tokens",
         header: () => t("columns.tokens"),
         meta: { numeric: true },
-        cell: ({ row }) => t("tokensValue", { input: format.number(row.original.inputTokens), output: format.number(row.original.outputTokens) }),
+        cell: ({ row }) =>
+          t("tokensValue", {
+            input: format.number(row.original.inputTokens),
+            output: format.number(row.original.outputTokens),
+          }),
       }),
-      column.accessor("costMicroUsd", { header: () => t("columns.cost"), meta: { numeric: true }, cell: ({ getValue }) => <TraceCost costMicroUsd={getValue()} /> }),
+      column.accessor("costMicroUsd", {
+        header: () => t("columns.cost"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => <TraceCost costMicroUsd={getValue()} />,
+      }),
     ],
     [format, formatDateTime, organization, t, target],
   );
@@ -106,7 +138,14 @@ function TraceEmpty({ filtering, onClear }: { filtering: boolean; onClear: () =>
   );
 }
 
-type TraceTableProps = { page: TracePage; labels: Labels; fetching: boolean; filtering: boolean; search: { page: number; setPage: (page: number) => void }; onClear: () => void };
+type TraceTableProps = {
+  page: TracePage;
+  labels: Labels;
+  fetching: boolean;
+  filtering: boolean;
+  search: { page: number; setPage: (page: number) => void };
+  onClear: () => void;
+};
 
 function TraceTable({ page, labels, fetching, filtering, search, onClear }: TraceTableProps) {
   const t = useTranslations("admin.traces");
@@ -131,7 +170,8 @@ function TraceTable({ page, labels, fetching, filtering, search, onClear }: Trac
             {labels.organization(trace.tenantId)} · {labels.target(trace)}
           </span>
           <span className="text-xs text-muted-foreground">
-            {formatDateTime(trace.startedAt, "precise")} · <TraceDuration durationMs={trace.durationMs} /> · <TraceCost costMicroUsd={trace.costMicroUsd} />
+            {formatDateTime(trace.startedAt, "precise")} · <TraceDuration durationMs={trace.durationMs} /> ·{" "}
+            <TraceCost costMicroUsd={trace.costMicroUsd} />
           </span>
         </div>
       )}
@@ -153,23 +193,37 @@ export function AdminTracesView() {
   const values: TraceFilterValues = {
     organizationId: search.values.organizationId,
     // A hand-edited URL must not turn into a 400: an invalid agent key is ignored.
-    agentId: search.values.agentId !== undefined && AGENT_ID.test(search.values.agentId) ? search.values.agentId : undefined,
+    agentId:
+      search.values.agentId !== undefined && AGENT_ID.test(search.values.agentId) ? search.values.agentId : undefined,
     status: search.values.status === "ok" || search.values.status === "error" ? search.values.status : undefined,
     from: validDay(search.values.from),
     to: validDay(search.values.to),
   };
   const { from, to, ...listFilters } = values;
-  const traces = useAdminTraces({ page: search.page, ...listFilters, ...traceDateRange(from, to) }, { enabled: allowed });
+  const traces = useAdminTraces(
+    { page: search.page, ...listFilters, ...traceDateRange(from, to) },
+    { enabled: allowed },
+  );
   const organizations = useAllAdminOrganizations({ enabled: allowed && permissions.can("platform.organization.read") });
   const labels: Labels = { target: useTargetLabel(), organization: useOrganizationLabel(organizations.data) };
   const filtering = Object.values(values).some((value) => value !== undefined);
-  const clear = (): void => search.set({ organizationId: undefined, agentId: undefined, status: undefined, from: undefined, to: undefined });
+  const clear = (): void =>
+    search.set({ organizationId: undefined, agentId: undefined, status: undefined, from: undefined, to: undefined });
   return (
     <AdminPageFrame permission="platform.trace.read" title={t("title")} description={t("description")}>
       <div className="flex flex-col gap-4">
         <TraceFilters key={values.agentId ?? ""} values={values} onChange={search.set} />
         <AdminQuerySection query={traces} loadingLabel={t("loading")}>
-          {(page) => <TraceTable page={page} labels={labels} fetching={traces.isFetching} filtering={filtering} search={search} onClear={clear} />}
+          {(page) => (
+            <TraceTable
+              page={page}
+              labels={labels}
+              fetching={traces.isFetching}
+              filtering={filtering}
+              search={search}
+              onClear={clear}
+            />
+          )}
         </AdminQuerySection>
       </div>
     </AdminPageFrame>

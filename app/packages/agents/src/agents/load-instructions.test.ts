@@ -27,7 +27,9 @@ describe("loadInstructions", () => {
     const devBundleDir = path.resolve(import.meta.dirname, "..", "..", "node_modules", ".cache");
     const fromDevBundle = packageInstructionDirs(devBundleDir).slice(1);
     expect(fromDevBundle).toEqual([path.join(import.meta.dirname, "instructions")]);
-    expect(readFileSync(path.join(fromDevBundle[0] ?? "", "knowledge.v1.md"), "utf8")).toContain("knowledge.searchKnowledge");
+    expect(readFileSync(path.join(fromDevBundle[0] ?? "", "knowledge.v1.md"), "utf8")).toContain(
+      "knowledge.searchKnowledge",
+    );
   });
 
   it("refuses unknown and malformed names (boot error)", () => {

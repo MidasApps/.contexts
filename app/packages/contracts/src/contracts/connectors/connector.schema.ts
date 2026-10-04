@@ -12,22 +12,40 @@ export type ConnectorId = z.infer<typeof ConnectorIdSchema>;
 /** DNS host name without scheme or port; IP literals and single-label hosts (`localhost`) are rejected (SSRF). */
 export const AllowedHostSchema = z
   .string()
-  .regex(/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/, { error: "Expected a lowercase DNS host name." });
+  .regex(/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/, {
+    error: "Expected a lowercase DNS host name.",
+  });
 
-const httpsUrl = (description: string) => z.url({ protocol: /^https$/ }).max(2048).meta(none(description));
-const allowedHosts = z.array(AllowedHostSchema).min(1).max(20).meta(none("Hosts requests may reach, redirects included."));
+const httpsUrl = (description: string) =>
+  z
+    .url({ protocol: /^https$/ })
+    .max(2048)
+    .meta(none(description));
+const allowedHosts = z
+  .array(AllowedHostSchema)
+  .min(1)
+  .max(20)
+  .meta(none("Hosts requests may reach, redirects included."));
 
 const OpenApiConfigSchema = z.strictObject({
   specUrl: httpsUrl("URL of the OpenAPI 3.0/3.1 document."),
   allowedHosts,
-  auth: z.enum(["none", "bearer", "api-key"]).meta(none("How the secret is sent; the secret itself is in the secret store.")),
-  apiKeyHeader: z.string().regex(/^[A-Za-z0-9-]{1,100}$/).nullable().meta(none("Header name for api-key auth; null otherwise.")),
+  auth: z
+    .enum(["none", "bearer", "api-key"])
+    .meta(none("How the secret is sent; the secret itself is in the secret store.")),
+  apiKeyHeader: z
+    .string()
+    .regex(/^[A-Za-z0-9-]{1,100}$/)
+    .nullable()
+    .meta(none("Header name for api-key auth; null otherwise.")),
 });
 
 const McpConfigSchema = z.strictObject({
   url: httpsUrl("Streamable HTTP endpoint of the MCP server."),
   allowedHosts,
-  auth: z.enum(["none", "bearer", "oauth"]).meta(none("How the connector authenticates; tokens live in the secret store.")),
+  auth: z
+    .enum(["none", "bearer", "oauth"])
+    .meta(none("How the connector authenticates; tokens live in the secret store.")),
 });
 
 const PostgresConfigSchema = z.strictObject({
@@ -48,7 +66,15 @@ const BrowserConfigSchema = z.strictObject({
  * missing secret, the OpenAPI document (unreachable, invalid, too large, a server outside the
  * allowed hosts), the MCP server refusing the connection, or anything else.
  */
-export const CONNECTOR_LOAD_ERROR_CODES = ["SECRET_MISSING", "SPEC_UNAVAILABLE", "SPEC_INVALID", "SPEC_TOO_LARGE", "SERVER_NOT_ALLOWED", "CONNECT_FAILED", "LOAD_FAILED"] as const;
+export const CONNECTOR_LOAD_ERROR_CODES = [
+  "SECRET_MISSING",
+  "SPEC_UNAVAILABLE",
+  "SPEC_INVALID",
+  "SPEC_TOO_LARGE",
+  "SERVER_NOT_ALLOWED",
+  "CONNECT_FAILED",
+  "LOAD_FAILED",
+] as const;
 export const ConnectorLoadErrorCodeSchema = z.enum(CONNECTOR_LOAD_ERROR_CODES);
 export type ConnectorLoadErrorCode = z.infer<typeof ConnectorLoadErrorCodeSchema>;
 
@@ -63,9 +89,16 @@ const baseShape = {
   tenantId: TenantIdSchema.meta(none("Owning organization.")),
   name: z.string().min(1).max(100).meta(none("Display name; also the prefix of the generated tool names.")),
   status: z.enum(["active", "disabled", "error"]).meta(none("Whether agents can use the connector.")),
-  secretRef: z.string().min(1).max(255).nullable().meta(none("Name of the secret in the secret store; never the secret.")),
+  secretRef: z
+    .string()
+    .min(1)
+    .max(255)
+    .nullable()
+    .meta(none("Name of the secret in the secret store; never the secret.")),
   // Optional: written by the agent runtime, absent on connectors it never failed to load (additive).
-  lastError: ConnectorLoadErrorSchema.nullable().optional().meta(none("Why the agent runtime could not load the connector the last time; null once it loads again.")),
+  lastError: ConnectorLoadErrorSchema.nullable()
+    .optional()
+    .meta(none("Why the agent runtime could not load the connector the last time; null once it loads again.")),
   toolPolicy: buildConnectorToolPolicySchema().meta(none("Tools agents may call and which skip approval.")),
   createdBy: UserIdSchema.meta({ description: "Uid of the admin who created it.", pii: "personal" }),
   createdAt: IsoDateTimeSchema.meta(none("When the connector was created (UTC).")),
@@ -74,10 +107,26 @@ const baseShape = {
 
 /** Tenant connector (SP3 spec §9, decision 0027), discriminated by `type`. Secrets never appear here. */
 export const ConnectorSchema = z.discriminatedUnion("type", [
-  z.strictObject({ ...baseShape, type: z.literal("openapi").meta(none("HTTP API described by OpenAPI.")), config: OpenApiConfigSchema.meta(none("OpenAPI settings.")) }),
-  z.strictObject({ ...baseShape, type: z.literal("mcp").meta(none("Remote MCP server.")), config: McpConfigSchema.meta(none("MCP settings.")) }),
-  z.strictObject({ ...baseShape, type: z.literal("postgres").meta(none("Tenant-owned Postgres, read only.")), config: PostgresConfigSchema.meta(none("Postgres settings; the DSN is the secret.")) }),
-  z.strictObject({ ...baseShape, type: z.literal("browser").meta(none("Browser automation via Playwright MCP.")), config: BrowserConfigSchema.meta(none("Browser settings.")) }),
+  z.strictObject({
+    ...baseShape,
+    type: z.literal("openapi").meta(none("HTTP API described by OpenAPI.")),
+    config: OpenApiConfigSchema.meta(none("OpenAPI settings.")),
+  }),
+  z.strictObject({
+    ...baseShape,
+    type: z.literal("mcp").meta(none("Remote MCP server.")),
+    config: McpConfigSchema.meta(none("MCP settings.")),
+  }),
+  z.strictObject({
+    ...baseShape,
+    type: z.literal("postgres").meta(none("Tenant-owned Postgres, read only.")),
+    config: PostgresConfigSchema.meta(none("Postgres settings; the DSN is the secret.")),
+  }),
+  z.strictObject({
+    ...baseShape,
+    type: z.literal("browser").meta(none("Browser automation via Playwright MCP.")),
+    config: BrowserConfigSchema.meta(none("Browser settings.")),
+  }),
 ]);
 export type Connector = z.infer<typeof ConnectorSchema>;
 export type ConnectorType = Connector["type"];
@@ -109,7 +158,12 @@ export const ConnectorContract = defineContract(ConnectorSchema, {
       type: "openapi",
       secretRef: "connector-Jd8sK2lPq0WnR5tYu3bV-Cn4sK2lPq0WnR5tYu3bV",
       toolPolicy: { allow: ["listIssues", "createIssue"], readOnly: ["listIssues"] },
-      config: { specUrl: "https://api.example.com/openapi.json", allowedHosts: ["api.example.com"], auth: "bearer", apiKeyHeader: null },
+      config: {
+        specUrl: "https://api.example.com/openapi.json",
+        allowedHosts: ["api.example.com"],
+        auth: "bearer",
+        apiKeyHeader: null,
+      },
     },
     {
       ...common,

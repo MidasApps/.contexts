@@ -1,6 +1,6 @@
 import type { SessionSummary, UserPrincipal } from "@core/contracts";
 import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
-import { isSessionOpen, toSessionSummary, type SessionDeps } from "../session-deps.ts";
+import { isSessionOpen, type SessionDeps, toSessionSummary } from "../session-deps.ts";
 
 export type ListSessions = (command: { actor: UserPrincipal; page: PageRequest }) => Promise<Page<SessionSummary>>;
 
@@ -14,5 +14,10 @@ export const makeListSessions =
   async ({ actor, page }) => {
     const fetched = await deps.sessions.listOpen({ uid: actor.uid, page });
     const now = deps.clock.now();
-    return { items: fetched.items.filter((record) => isSessionOpen(record, now)).map((record) => toSessionSummary(record, actor.sessionId)), nextCursor: fetched.nextCursor };
+    return {
+      items: fetched.items
+        .filter((record) => isSessionOpen(record, now))
+        .map((record) => toSessionSummary(record, actor.sessionId)),
+      nextCursor: fetched.nextCursor,
+    };
   };

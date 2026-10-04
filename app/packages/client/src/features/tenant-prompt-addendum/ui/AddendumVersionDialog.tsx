@@ -2,7 +2,7 @@
 
 import { createAddendumVersionEndpoint, type PromptAgentId } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { tenantAddendumKeys } from "#/entities/prompt-version/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -10,7 +10,14 @@ import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 
@@ -71,7 +78,11 @@ function AddendumVersionForm({ organizationId, agentId, initialBody, onOpenChang
       onOpenChange(false);
     } catch (error: unknown) {
       const described = describe(error);
-      setFailure(described.requestId === undefined ? described.message : tCommon("errorState.messageWithReference", { message: described.message, requestId: described.requestId }));
+      setFailure(
+        described.requestId === undefined
+          ? described.message
+          : tCommon("errorState.messageWithReference", { message: described.message, requestId: described.requestId }),
+      );
     } finally {
       setPending(false);
     }
@@ -87,7 +98,14 @@ function AddendumVersionForm({ organizationId, agentId, initialBody, onOpenChang
       <Field invalid={bodyError !== undefined}>
         <FieldLabel>{t("body")}</FieldLabel>
         <FieldControl>
-          <Textarea ref={bodyRef} value={body} onChange={(event) => setBody(event.target.value)} required rows={10} className="max-h-[50vh] font-mono text-body-sm" />
+          <Textarea
+            ref={bodyRef}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            required
+            rows={10}
+            className="max-h-[50vh] font-mono text-body-sm"
+          />
         </FieldControl>
         <FieldDescription>{t("bodyHint")}</FieldDescription>
         <FieldError>{bodyError}</FieldError>

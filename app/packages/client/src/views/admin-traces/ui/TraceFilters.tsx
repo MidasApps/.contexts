@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { type FormEvent, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
@@ -52,11 +52,23 @@ export function TraceFilters({ values, onChange }: TraceFiltersProps) {
     if (valid) onChange({ agentId: agent });
   };
   return (
-    <form role="search" aria-label={t("label")} noValidate onSubmit={submit} className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-      <AdminOrganizationFilter value={values.organizationId} onValueChange={(organizationId) => onChange({ organizationId })} />
+    <form
+      role="search"
+      aria-label={t("label")}
+      noValidate
+      onSubmit={submit}
+      className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end"
+    >
+      <AdminOrganizationFilter
+        value={values.organizationId}
+        onValueChange={(organizationId) => onChange({ organizationId })}
+      />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={statusId}>{t("status")}</Label>
-        <Select value={values.status ?? ANY_STATUS} onValueChange={(value) => onChange({ status: value === ANY_STATUS ? undefined : value })}>
+        <Select
+          value={values.status ?? ANY_STATUS}
+          onValueChange={(value) => onChange({ status: value === ANY_STATUS ? undefined : value })}
+        >
           <SelectTrigger id={statusId} className="w-full lg:w-44">
             <SelectValue />
           </SelectTrigger>
@@ -69,11 +81,27 @@ export function TraceFilters({ values, onChange }: TraceFiltersProps) {
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={fromId}>{t("from")}</Label>
-        <Input id={fromId} type="date" className="lg:w-40" value={values.from ?? ""} max={values.to} aria-describedby={dateHintId} onChange={(event) => onChange({ from: event.target.value })} />
+        <Input
+          id={fromId}
+          type="date"
+          className="lg:w-40"
+          value={values.from ?? ""}
+          max={values.to}
+          aria-describedby={dateHintId}
+          onChange={(event) => onChange({ from: event.target.value })}
+        />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={toId}>{t("to")}</Label>
-        <Input id={toId} type="date" className="lg:w-40" value={values.to ?? ""} min={values.from} aria-describedby={dateHintId} onChange={(event) => onChange({ to: event.target.value })} />
+        <Input
+          id={toId}
+          type="date"
+          className="lg:w-40"
+          value={values.to ?? ""}
+          min={values.from}
+          aria-describedby={dateHintId}
+          onChange={(event) => onChange({ to: event.target.value })}
+        />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={agentId}>{t("agent")}</Label>

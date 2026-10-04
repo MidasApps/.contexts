@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { test as base } from "@playwright/test";
-import { readE2eEnv, type E2eEnv } from "./e2e-env.ts";
 import type { V1Client } from "./api.ts";
+import { type E2eEnv, readE2eEnv } from "./e2e-env.ts";
 import { createEmulatorAuth, type EmulatorAuth } from "./emulator.ts";
-import { apiFor, joinOrganization, readWorld, SEED_USERS, type RoleRef, type World } from "./seed-users.ts";
+import { apiFor, joinOrganization, type RoleRef, readWorld, SEED_USERS, type World } from "./seed-users.ts";
 
 export type FreshUser = { uid: string; email: string; password: string; displayName: string; api: V1Client };
 
@@ -28,37 +28,43 @@ const MEMBER: RoleRef[] = [{ kind: "system", key: "member" }];
  */
 export const createE2eTest = (options: { authDir: string }) =>
   base.extend<Fixtures>({
-  // Playwright fixtures must destructure their dependencies, even when empty.
-  // eslint-disable-next-line no-empty-pattern -- fixture signature
-  env: async ({}, provide) => {
-    await provide(readE2eEnv());
-  },
-  // eslint-disable-next-line no-empty-pattern -- fixture signature
-  world: async ({}, provide) => {
-    await provide(readWorld(options.authDir));
-  },
-  emulator: async ({ env }, provide) => {
-    await provide(createEmulatorAuth(env));
-  },
-  ownerApi: async ({ env, emulator }, provide) => {
-    await provide(await apiFor(env, emulator, SEED_USERS.owner));
-  },
-  createUser: async ({ env, emulator, ownerApi }, provide) => {
-    await provide(async (args = {}) => {
-      // A new account per call, also when the same test re-runs against long-lived emulators.
-      const id = randomUUID().replaceAll("-", "").slice(0, 12);
-      const label = args.label ?? "User";
-      const input = { email: `u-${id}@e2e.local`, password: `pw-${id}`, displayName: `${label} ${id.slice(0, 4)}` };
-      const { uid } = await emulator.upsertUser(input);
-      const api = await apiFor(env, emulator, input);
-      await api.get("/v1/me");
-      for (const organization of args.organizations ?? []) {
-        await joinOrganization({ owner: ownerApi, member: api, email: input.email, organizationId: organization.id, roles: organization.roles ?? MEMBER });
-        await api.put("/v1/me/active-organization", { organizationId: organization.id });
-      }
-      return { uid, ...input, api };
-    });
-  },
-});
+    // Playwright fixtures must destructure their dependencies, even when empty.
+    // eslint-disable-next-line no-empty-pattern -- fixture signature
+    env: async ({}, provide) => {
+      await provide(readE2eEnv());
+    },
+    // eslint-disable-next-line no-empty-pattern -- fixture signature
+    world: async ({}, provide) => {
+      await provide(readWorld(options.authDir));
+    },
+    emulator: async ({ env }, provide) => {
+      await provide(createEmulatorAuth(env));
+    },
+    ownerApi: async ({ env, emulator }, provide) => {
+      await provide(await apiFor(env, emulator, SEED_USERS.owner));
+    },
+    createUser: async ({ env, emulator, ownerApi }, provide) => {
+      await provide(async (args = {}) => {
+        // A new account per call, also when the same test re-runs against long-lived emulators.
+        const id = randomUUID().replaceAll("-", "").slice(0, 12);
+        const label = args.label ?? "User";
+        const input = { email: `u-${id}@e2e.local`, password: `pw-${id}`, displayName: `${label} ${id.slice(0, 4)}` };
+        const { uid } = await emulator.upsertUser(input);
+        const api = await apiFor(env, emulator, input);
+        await api.get("/v1/me");
+        for (const organization of args.organizations ?? []) {
+          await joinOrganization({
+            owner: ownerApi,
+            member: api,
+            email: input.email,
+            organizationId: organization.id,
+            roles: organization.roles ?? MEMBER,
+          });
+          await api.put("/v1/me/active-organization", { organizationId: organization.id });
+        }
+        return { uid, ...input, api };
+      });
+    },
+  });
 
 export { expect } from "@playwright/test";

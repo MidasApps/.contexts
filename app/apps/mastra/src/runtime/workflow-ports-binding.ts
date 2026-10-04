@@ -8,7 +8,14 @@ import {
   WORKFLOW_RESUME_ACTION_KIND,
   WorkflowResumeActionInputSchema,
 } from "@core/contracts";
-import { type AccessCore, AgentCommandError, type AgentCommandExecutors, type ApprovalServices, type CommandIdempotency, type WorkflowApprovalSettler } from "@core/services";
+import {
+  type AccessCore,
+  AgentCommandError,
+  type AgentCommandExecutors,
+  type ApprovalServices,
+  type CommandIdempotency,
+  type WorkflowApprovalSettler,
+} from "@core/services";
 import { ApprovalRefusedError } from "./approvals-port-binding.ts";
 
 /** Workflow approvals only name nodes of a tenant; the platform node has no approvers. */
@@ -27,10 +34,16 @@ class WorkflowApprovalNodeError extends Error {
  * input schema; a refusal rejects with SP1's code), the system read `getApprovalRequest` and the
  * system cancel of the request a cancelled run waited for (follow-up 82).
  */
-export const bindWorkflowApprovalsPort = (approvals: Pick<ApprovalServices, "requestApproval" | "getApprovalRequest" | "cancelApprovalRequest">): WorkflowApprovalPort => ({
+export const bindWorkflowApprovalsPort = (
+  approvals: Pick<ApprovalServices, "requestApproval" | "getApprovalRequest" | "cancelApprovalRequest">,
+): WorkflowApprovalPort => ({
   requestWorkflowApproval: async ({ principal, node, permission, action, summary, requestId }) => {
     if (node.level === "platform") throw new WorkflowApprovalNodeError();
-    const input = CreateApprovalRequestInputSchema.parse({ node, permission, action: { kind: WORKFLOW_RESUME_ACTION_KIND, input: action, summary } });
+    const input = CreateApprovalRequestInputSchema.parse({
+      node,
+      permission,
+      action: { kind: WORKFLOW_RESUME_ACTION_KIND, input: action, summary },
+    });
     const result = await approvals.requestApproval({ principal: PrincipalSchema.parse(principal), input, requestId });
     if (!result.ok) throw new ApprovalRefusedError(result.error.code);
     return { approvalId: result.data.id };
@@ -85,7 +98,9 @@ export const bindWorkflowCommandsPort = (deps: {
     const tenantNode = TenantNodeRefSchema.safeParse(node satisfies NodeRef);
     if (!tenantNode.success || tenantNode.data.tenantId !== tenantId) return refuse("TENANT_MISMATCH");
     const actor = PrincipalSchema.parse(principal);
-    const decision = await deps.access.forRequest().authorize({ principal: actor, permission: executor.permission, node: tenantNode.data });
+    const decision = await deps.access
+      .forRequest()
+      .authorize({ principal: actor, permission: executor.permission, node: tenantNode.data });
     if (!decision.allowed) return refuse("REQUESTER_FORBIDDEN");
     // A four-eyes command never runs straight from a workflow: it needs its own SP1 approval request.
     if (decision.requiresApproval) return refuse("APPROVAL_REQUIRED");
@@ -98,7 +113,14 @@ export const bindWorkflowCommandsPort = (deps: {
         commandId,
         idempotencyKey: `workflow:${idempotencyKey}`,
         input,
-        run: () => run({ principal: actor, tenantId: tenant, node: tenantNode.data, requestId, idempotencyKey: `workflow:${idempotencyKey}` }),
+        run: () =>
+          run({
+            principal: actor,
+            tenantId: tenant,
+            node: tenantNode.data,
+            requestId,
+            idempotencyKey: `workflow:${idempotencyKey}`,
+          }),
       });
       return { ok: true, output: result.output, replayed: result.replayed };
     } catch (error: unknown) {

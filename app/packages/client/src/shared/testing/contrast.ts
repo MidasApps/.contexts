@@ -19,6 +19,9 @@ const relativeLuminance = ({ r, g, b }: Rgb): number =>
 
 /** WCAG 2.x contrast ratio between two opaque colors (1–21). */
 export const contrastRatio = (first: Rgb, second: Rgb): number => {
-  const [lighter, darker] = [relativeLuminance(first), relativeLuminance(second)].sort((a, b) => b - a) as [number, number];
+  const [lighter, darker] = [relativeLuminance(first), relativeLuminance(second)].sort((a, b) => b - a) as [
+    number,
+    number,
+  ];
   return (lighter + 0.05) / (darker + 0.05);
 };

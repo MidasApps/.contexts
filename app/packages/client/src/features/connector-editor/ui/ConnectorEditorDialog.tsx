@@ -1,19 +1,33 @@
 "use client";
 
-import { createConnectorEndpoint, updateConnectorEndpoint, type Connector } from "@core/contracts";
+import { type Connector, createConnectorEndpoint, updateConnectorEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useTranslations } from "use-intl";
 import { tenantConnectorKeys } from "#/entities/connector/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
-import { connectorInputOf, draftFromConnector, emptyConnectorDraft, problemsFromDetails, type ConnectorDraft, type DraftProblems } from "../model/connector-draft.ts";
+import {
+  type ConnectorDraft,
+  connectorInputOf,
+  type DraftProblems,
+  draftFromConnector,
+  emptyConnectorDraft,
+  problemsFromDetails,
+} from "../model/connector-draft.ts";
 import { ConnectorFields } from "./ConnectorFields.tsx";
 
 export type ConnectorEditorDialogProps = {
@@ -26,12 +40,19 @@ export type ConnectorEditorDialogProps = {
   onCreated?: ((connector: Connector) => void) | undefined;
 };
 
-function ConnectorEditorBody({ organizationId, onOpenChange, connector = null, onCreated }: ConnectorEditorDialogProps) {
+function ConnectorEditorBody({
+  organizationId,
+  onOpenChange,
+  connector = null,
+  onCreated,
+}: ConnectorEditorDialogProps) {
   const t = useTranslations("settings.connectors.editor");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const idempotency = useIdempotencyKey();
-  const [draft, keepDraft] = useState<ConnectorDraft>(() => (connector === null ? emptyConnectorDraft() : draftFromConnector(connector)));
+  const [draft, keepDraft] = useState<ConnectorDraft>(() =>
+    connector === null ? emptyConnectorDraft() : draftFromConnector(connector),
+  );
   // Typed work has no draft elsewhere: Esc, an outside click or the X ask before dropping it (decision 0048).
   const [dirty, setDirty] = useState(false);
   useDialogDismissGuard(dirty ? "confirmUnsaved" : "allow");
@@ -56,11 +77,20 @@ function ConnectorEditorBody({ organizationId, onOpenChange, connector = null, o
     let created: Connector | null = null;
     try {
       if (connector === null) {
-        created = (await callEndpoint(createConnectorEndpoint, { params: { organizationId }, body: input, idempotencyKey: idempotency.keyFor(input) })).data;
+        created = (
+          await callEndpoint(createConnectorEndpoint, {
+            params: { organizationId },
+            body: input,
+            idempotencyKey: idempotency.keyFor(input),
+          })
+        ).data;
         idempotency.reset();
       } else {
         // The type never changes: `config` replaces the whole config of the connector's own type.
-        await callEndpoint(updateConnectorEndpoint, { params: { organizationId, connectorId: connector.id }, body: { name: input.name, toolPolicy: input.toolPolicy, config: input.config } });
+        await callEndpoint(updateConnectorEndpoint, {
+          params: { organizationId, connectorId: connector.id },
+          body: { name: input.name, toolPolicy: input.toolPolicy, config: input.config },
+        });
       }
       await queryClient.invalidateQueries({ queryKey: tenantConnectorKeys.all(organizationId) });
       notify.success(t(mode === "create" ? "created" : "saved", { name: input.name }));

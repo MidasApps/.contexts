@@ -9,7 +9,12 @@ const INLINE_TYPES = [/^image\//, /^application\/pdf$/, /^text\//, /^application
 const MEDIA_TYPES = [/^video\//, /^audio\//];
 
 /** A `file` part with the bytes as a data URL: the provider never gets a signed or local URL. */
-export type InlineFilePart = { readonly type: "file"; readonly mediaType: string; readonly filename: string; readonly url: string };
+export type InlineFilePart = {
+  readonly type: "file";
+  readonly mediaType: string;
+  readonly filename: string;
+  readonly url: string;
+};
 export type NoteTextPart = { readonly type: "text"; readonly text: string };
 
 export type ResolvedAttachments = {
@@ -18,13 +23,18 @@ export type ResolvedAttachments = {
   readonly attachments: readonly MessageAttachment[];
 };
 
-export type AttachmentIssue = { readonly field: string; readonly issue: "FILE_NOT_FOUND" | "FILE_NOT_READY" | "FILE_PURPOSE_MISMATCH" };
+export type AttachmentIssue = {
+  readonly field: string;
+  readonly issue: "FILE_NOT_FOUND" | "FILE_NOT_READY" | "FILE_PURPOSE_MISMATCH";
+};
 
 export type ResolveAttachments = (input: {
   readonly tenantId: string;
   readonly ownerId: string;
   readonly fileIds: readonly string[];
-}) => Promise<Result<ResolvedAttachments, { readonly code: "ATTACHMENTS_INVALID"; readonly details: readonly AttachmentIssue[] }>>;
+}) => Promise<
+  Result<ResolvedAttachments, { readonly code: "ATTACHMENTS_INVALID"; readonly details: readonly AttachmentIssue[] }>
+>;
 
 const noteOf = (file: StoredFile, reason: "not-viewable" | "too-large"): NoteTextPart => ({
   type: "text",
@@ -34,9 +44,15 @@ const noteOf = (file: StoredFile, reason: "not-viewable" | "too-large"): NoteTex
       : `[Attachment "${file.fileName}" is larger than 10 MB; offer to add it to the knowledge base.]`,
 });
 
-const isInline = (file: StoredFile) => INLINE_TYPES.some((pattern) => pattern.test(file.contentType)) && file.sizeBytes <= MAX_INLINE_ATTACHMENT_BYTES;
+const isInline = (file: StoredFile) =>
+  INLINE_TYPES.some((pattern) => pattern.test(file.contentType)) && file.sizeBytes <= MAX_INLINE_ATTACHMENT_BYTES;
 
-const metadataOf = (file: StoredFile): MessageAttachment => ({ fileId: file.id, name: file.fileName, mediaType: file.contentType, sizeBytes: file.sizeBytes });
+const metadataOf = (file: StoredFile): MessageAttachment => ({
+  fileId: file.id,
+  name: file.fileName,
+  mediaType: file.contentType,
+  sizeBytes: file.sizeBytes,
+});
 
 /**
  * Chat attachments (spec §4.3, decision 0035): only `ready` `chat-attachment` files of the same
@@ -48,12 +64,15 @@ const metadataOf = (file: StoredFile): MessageAttachment => ({ fileId: file.id, 
 export const makeResolveAttachments =
   (deps: { readonly getReadyFile: GetReadyFile; readonly readFileBytes: ReadFileBytes }): ResolveAttachments =>
   async ({ tenantId, ownerId, fileIds }) => {
-    const found = await Promise.all(fileIds.map((fileId) => deps.getReadyFile({ tenantId, fileId, purpose: "chat-attachment" })));
+    const found = await Promise.all(
+      fileIds.map((fileId) => deps.getReadyFile({ tenantId, fileId, purpose: "chat-attachment" })),
+    );
     const details: AttachmentIssue[] = [];
     const files: StoredFile[] = [];
     found.forEach((result, index) => {
       if (!result.ok) details.push({ field: `attachments.${index}`, issue: result.error.code });
-      else if (result.data.createdBy !== ownerId) details.push({ field: `attachments.${index}`, issue: "FILE_NOT_FOUND" });
+      else if (result.data.createdBy !== ownerId)
+        details.push({ field: `attachments.${index}`, issue: "FILE_NOT_FOUND" });
       else files.push(result.data);
     });
     if (details.length > 0) return err({ code: "ATTACHMENTS_INVALID", details });
@@ -61,10 +80,19 @@ export const makeResolveAttachments =
     return ok({ parts, attachments: files.map(metadataOf) });
   };
 
-const partOf = async (deps: { readonly readFileBytes: ReadFileBytes }, tenantId: string, file: StoredFile): Promise<InlineFilePart | NoteTextPart> => {
+const partOf = async (
+  deps: { readonly readFileBytes: ReadFileBytes },
+  tenantId: string,
+  file: StoredFile,
+): Promise<InlineFilePart | NoteTextPart> => {
   if (MEDIA_TYPES.some((pattern) => pattern.test(file.contentType))) return noteOf(file, "not-viewable");
   if (!isInline(file)) return noteOf(file, "too-large");
   const read = await deps.readFileBytes({ tenantId, fileId: file.id, purpose: "chat-attachment" });
   if (!read.ok) return noteOf(file, "not-viewable");
-  return { type: "file", mediaType: file.contentType, filename: file.fileName, url: `data:${file.contentType};base64,${Buffer.from(read.data.bytes).toString("base64")}` };
+  return {
+    type: "file",
+    mediaType: file.contentType,
+    filename: file.fileName,
+    url: `data:${file.contentType};base64,${Buffer.from(read.data.bytes).toString("base64")}`,
+  };
 };

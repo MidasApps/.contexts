@@ -1,10 +1,20 @@
-import { createCustomSkillEndpoint, deleteCustomSkillEndpoint, getCustomSkillEndpoint, listCustomSkillsEndpoint, updateCustomSkillEndpoint } from "@core/contracts";
+import {
+  createCustomSkillEndpoint,
+  deleteCustomSkillEndpoint,
+  getCustomSkillEndpoint,
+  listCustomSkillsEndpoint,
+  updateCustomSkillEndpoint,
+} from "@core/contracts";
 import { dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
 import { invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
 import { withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import { tenantOfCall } from "../../../workflows/adapters/driving/workflow-call-scope.ts";
-import { customAgentErrorResponse, type CustomAgentsRouteDeps, invalidateRuntimeCache } from "./custom-agents-route-handler.ts";
+import {
+  type CustomAgentsRouteDeps,
+  customAgentErrorResponse,
+  invalidateRuntimeCache,
+} from "./custom-agents-route-handler.ts";
 
 const skillPath = (skillId: string, tenantId: string) => `/v1/skills/${skillId}?organizationId=${tenantId}`;
 
@@ -27,13 +37,24 @@ export const buildCustomSkillsRoutes = (deps: CustomAgentsRouteDeps): Record<str
     [getCustomSkillEndpoint.id]: withApiRoute(getCustomSkillEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);
       if (tenantId instanceof Response) return tenantId;
-      const result = await customAgents.getCustomSkill({ actor: ctx.principal, access: ctx.scope, tenantId, skillId: ctx.input.params.skillId });
+      const result = await customAgents.getCustomSkill({
+        actor: ctx.principal,
+        access: ctx.scope,
+        tenantId,
+        skillId: ctx.input.params.skillId,
+      });
       return result.ok ? dataResponse({ data: result.data }) : customAgentErrorResponse(result.error, ctx.requestId);
     }),
     [createCustomSkillEndpoint.id]: withApiRoute(createCustomSkillEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);
       if (tenantId instanceof Response) return tenantId;
-      const result = await customAgents.createCustomSkill({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, input: ctx.input.body });
+      const result = await customAgents.createCustomSkill({
+        actor: ctx.principal,
+        access: ctx.scope,
+        tenantId,
+        requestId: ctx.requestId,
+        input: ctx.input.body,
+      });
       if (!result.ok) return customAgentErrorResponse(result.error, ctx.requestId);
       await invalidateRuntimeCache(deps, ctx, tenantId);
       return dataResponse({ data: result.data }, { status: 201, location: skillPath(result.data.id, tenantId) });
@@ -41,7 +62,14 @@ export const buildCustomSkillsRoutes = (deps: CustomAgentsRouteDeps): Record<str
     [updateCustomSkillEndpoint.id]: withApiRoute(updateCustomSkillEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);
       if (tenantId instanceof Response) return tenantId;
-      const result = await customAgents.updateCustomSkill({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, skillId: ctx.input.params.skillId, input: ctx.input.body });
+      const result = await customAgents.updateCustomSkill({
+        actor: ctx.principal,
+        access: ctx.scope,
+        tenantId,
+        requestId: ctx.requestId,
+        skillId: ctx.input.params.skillId,
+        input: ctx.input.body,
+      });
       if (!result.ok) return customAgentErrorResponse(result.error, ctx.requestId);
       await invalidateRuntimeCache(deps, ctx, tenantId);
       return dataResponse({ data: result.data });
@@ -49,7 +77,13 @@ export const buildCustomSkillsRoutes = (deps: CustomAgentsRouteDeps): Record<str
     [deleteCustomSkillEndpoint.id]: withApiRoute(deleteCustomSkillEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);
       if (tenantId instanceof Response) return tenantId;
-      const result = await customAgents.deleteCustomSkill({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, skillId: ctx.input.params.skillId });
+      const result = await customAgents.deleteCustomSkill({
+        actor: ctx.principal,
+        access: ctx.scope,
+        tenantId,
+        requestId: ctx.requestId,
+        skillId: ctx.input.params.skillId,
+      });
       if (!result.ok) return customAgentErrorResponse(result.error, ctx.requestId);
       await invalidateRuntimeCache(deps, ctx, tenantId);
       return noContentResponse();

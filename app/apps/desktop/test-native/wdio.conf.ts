@@ -23,7 +23,11 @@ export const config: WebdriverIO.Config = {
   services: [
     [
       "@wdio/tauri-service",
-      { appBinaryPath: application, driverProvider: "external", ...(tauriDriverPath === undefined ? { autoInstallTauriDriver: true } : { tauriDriverPath }) },
+      {
+        appBinaryPath: application,
+        driverProvider: "external",
+        ...(tauriDriverPath === undefined ? { autoInstallTauriDriver: true } : { tauriDriverPath }),
+      },
     ],
   ],
   framework: "mocha",

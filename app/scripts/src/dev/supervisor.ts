@@ -1,4 +1,4 @@
-import { spawn, spawnSync, type ChildProcess } from "node:child_process";
+import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import { createInterface } from "node:readline";
 import { buildKillTreeCommand } from "./dev-plan.ts";
 

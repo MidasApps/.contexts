@@ -26,7 +26,9 @@ export class ModuleSettingsRegistryError extends Error {
  * Registry of the installed modules' settings (decision 0015 §6).
  * @throws {ModuleSettingsRegistryError} for a duplicate module id.
  */
-export const createModuleSettingsRegistry = (definitions: readonly ModuleSettingsDefinition[]): ModuleSettingsRegistry => {
+export const createModuleSettingsRegistry = (
+  definitions: readonly ModuleSettingsDefinition[],
+): ModuleSettingsRegistry => {
   const byId = new Map<string, ModuleSettingsDefinition>();
   for (const definition of definitions) {
     if (byId.has(definition.moduleId)) throw new ModuleSettingsRegistryError(definition.moduleId);

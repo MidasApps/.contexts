@@ -14,7 +14,11 @@ const currentTenant = sql`current_setting('app.tenant_id', true)`;
 
 // A tenant reads and writes only its own rows; there are no shared platform rows here.
 const tenantPolicy = (table: string) =>
-  pgPolicy(`${table}_tenant_rows`, { for: "all", using: sql`tenant_id = ${currentTenant}`, withCheck: sql`tenant_id = ${currentTenant}` });
+  pgPolicy(`${table}_tenant_rows`, {
+    for: "all",
+    using: sql`tenant_id = ${currentTenant}`,
+    withCheck: sql`tenant_id = ${currentTenant}`,
+  });
 
 /** One model call (contract `usage.LlmCall`); append-only, written in batches by the ledger exporter. */
 export const usageLlmCalls = usageSchema
@@ -43,7 +47,10 @@ export const usageLlmCalls = usageSchema
     },
     (table) => [
       index("llm_calls_tenant_occurred_idx").on(table.tenantId, table.occurredAt),
-      check("llm_calls_tokens_check", sql`${table.inputTokens} >= 0 AND ${table.outputTokens} >= 0 AND ${table.cachedTokens} >= 0`),
+      check(
+        "llm_calls_tokens_check",
+        sql`${table.inputTokens} >= 0 AND ${table.outputTokens} >= 0 AND ${table.cachedTokens} >= 0`,
+      ),
       check("llm_calls_cost_check", sql`${table.costMicroUsd} IS NULL OR ${table.costMicroUsd} >= 0`),
       check("llm_calls_latency_check", sql`${table.latencyMs} >= 0`),
       check("llm_calls_trace_id_check", sql`${table.traceId} IS NULL OR ${table.traceId} ~ '^[0-9a-f]{32}$'`),
@@ -123,7 +130,10 @@ export const usageDailyRollups = usageSchema
     },
     (table) => [
       unique("daily_rollups_tenant_day_model_agent_key").on(table.tenantId, table.day, table.model, table.agentId),
-      check("daily_rollups_counts_check", sql`${table.calls} >= 0 AND ${table.inputTokens} >= 0 AND ${table.outputTokens} >= 0 AND ${table.costMicroUsd} >= 0`),
+      check(
+        "daily_rollups_counts_check",
+        sql`${table.calls} >= 0 AND ${table.inputTokens} >= 0 AND ${table.outputTokens} >= 0 AND ${table.costMicroUsd} >= 0`,
+      ),
       tenantPolicy("daily_rollups"),
     ],
   )

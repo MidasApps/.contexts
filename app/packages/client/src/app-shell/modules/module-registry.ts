@@ -1,6 +1,12 @@
 import type { ModuleManifest } from "@core/contracts";
 import type { ExtraNamespaces, MessageTree } from "@core/i18n";
-import type { ClientModule, ModuleRegistry, NavTarget, ResolvedModulePage, ShellNavItem } from "#/shared/lib/shell/shell-types.ts";
+import type {
+  ClientModule,
+  ModuleRegistry,
+  NavTarget,
+  ResolvedModulePage,
+  ShellNavItem,
+} from "#/shared/lib/shell/shell-types.ts";
 import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
 
 export type { ModuleRegistry, ResolvedModulePage } from "#/shared/lib/shell/shell-types.ts";
@@ -64,7 +70,17 @@ const navItemsOf = ({ manifest }: ClientModule): ShellNavItem[] => [
   })),
   ...(manifest.settings === undefined
     ? []
-    : [{ id: `${manifest.id}.settings`, slot: "settings" as const, labelKey: manifest.labelKey, icon: "puzzle" as const, permission: manifest.settings.readPermission, order: SETTINGS_ORDER, target: { kind: "settings-module" as const, moduleId: manifest.id } }]),
+    : [
+        {
+          id: `${manifest.id}.settings`,
+          slot: "settings" as const,
+          labelKey: manifest.labelKey,
+          icon: "puzzle" as const,
+          permission: manifest.settings.readPermission,
+          order: SETTINGS_ORDER,
+          target: { kind: "settings-module" as const, moduleId: manifest.id },
+        },
+      ]),
 ];
 
 /**

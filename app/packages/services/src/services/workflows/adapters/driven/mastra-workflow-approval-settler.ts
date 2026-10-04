@@ -1,8 +1,12 @@
 import { FORWARDED_HEADERS } from "@core/contracts";
 import { z } from "zod";
-import type { GatewayResult } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import { mapMastraStatus, UPSTREAM_TIMEOUT, UPSTREAM_UNAVAILABLE } from "../../../agents/adapters/driven/mastra-error-mapper.ts";
+import {
+  mapMastraStatus,
+  UPSTREAM_TIMEOUT,
+  UPSTREAM_UNAVAILABLE,
+} from "../../../agents/adapters/driven/mastra-error-mapper.ts";
 import type { ServerlessIdTokenSource } from "../../../agents/adapters/driven/serverless-id-token.ts";
+import type { GatewayResult } from "../../../agents/application/ports/agent-runtime-gateway.ts";
 import type { SettleOutcome, WorkflowApprovalSettler } from "../../application/ports/workflow-approval-settler.ts";
 
 /** A settle waits for the run's next suspension or end (decision 0036). */
@@ -25,9 +29,14 @@ export type MastraWorkflowApprovalSettlerOptions = {
   readonly fetch?: typeof fetch;
 };
 
-const headersOf = async (options: MastraWorkflowApprovalSettlerOptions, requestId: string): Promise<Record<string, string>> => ({
+const headersOf = async (
+  options: MastraWorkflowApprovalSettlerOptions,
+  requestId: string,
+): Promise<Record<string, string>> => ({
   [FORWARDED_HEADERS.requestId]: requestId,
-  ...(options.serverlessToken === null ? {} : { [FORWARDED_HEADERS.serverlessAuthorization]: await options.serverlessToken.headerValue() }),
+  ...(options.serverlessToken === null
+    ? {}
+    : { [FORWARDED_HEADERS.serverlessAuthorization]: await options.serverlessToken.headerValue() }),
 });
 
 /**
@@ -36,7 +45,9 @@ const headersOf = async (options: MastraWorkflowApprovalSettlerOptions, requestI
  * what SP1 stored (decision 0036). Status-only error mapping, like the gateway: the upstream body
  * of an error is never read.
  */
-export const createMastraWorkflowApprovalSettler = (options: MastraWorkflowApprovalSettlerOptions): WorkflowApprovalSettler => {
+export const createMastraWorkflowApprovalSettler = (
+  options: MastraWorkflowApprovalSettlerOptions,
+): WorkflowApprovalSettler => {
   const baseUrl = options.baseUrl.replace(/\/+$/, "");
   const fetchFn = options.fetch ?? fetch;
   return {

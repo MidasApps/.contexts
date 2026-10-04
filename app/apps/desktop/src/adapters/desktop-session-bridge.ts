@@ -1,9 +1,20 @@
 import type { ReportError } from "@core/client/app-shell";
-import { ApiError, createEndpointCaller, createHttpClient, type CallEndpoint, type FetchLike, type GetIdToken } from "@core/client/shared/api";
+import {
+  ApiError,
+  type CallEndpoint,
+  createEndpointCaller,
+  createHttpClient,
+  type FetchLike,
+  type GetIdToken,
+} from "@core/client/shared/api";
 import { SecureStoreError, type SecureStorePort } from "@core/client/shared/lib/secure-store";
 import type { SessionBridgePort } from "@core/client/shared/lib/session-bridge";
 import { createDesktopSessionEndpoint, exchangeDesktopSessionEndpoint, revokeSessionEndpoint } from "@core/contracts";
-import { parseDesktopSessionRecord, serializeDesktopSessionRecord, type DesktopSessionRecord } from "./desktop-session-record.schema.ts";
+import {
+  type DesktopSessionRecord,
+  parseDesktopSessionRecord,
+  serializeDesktopSessionRecord,
+} from "./desktop-session-record.schema.ts";
 
 export type DesktopSessionBridgeArgs = {
   readonly apiBaseUrl: string;
@@ -15,7 +26,8 @@ export type DesktopSessionBridgeArgs = {
   readonly reportError: ReportError;
 };
 
-const isUnavailable = (error: unknown): boolean => error instanceof SecureStoreError && error.code === "SECURE_STORE_UNAVAILABLE";
+const isUnavailable = (error: unknown): boolean =>
+  error instanceof SecureStoreError && error.code === "SECURE_STORE_UNAVAILABLE";
 
 type Context = DesktopSessionBridgeArgs & { readonly callEndpoint: CallEndpoint };
 
@@ -70,7 +82,8 @@ const establish = async (ctx: Context, idToken: string): Promise<void> => {
     ctx.reportError(error, { operation: "desktop_session_store" });
     return;
   }
-  if (leftover !== null && leftover.sessionId !== data.sessionId) await revokeQuietly(ctx, callEndpoint, leftover.sessionId);
+  if (leftover !== null && leftover.sessionId !== data.sessionId)
+    await revokeQuietly(ctx, callEndpoint, leftover.sessionId);
 };
 
 /**

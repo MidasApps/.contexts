@@ -6,14 +6,25 @@ import { IDS } from "#/shared/testing/fixtures.ts";
 import { renderClientHook, renderWithClient } from "#/shared/testing/render-client.tsx";
 import { MemberChip, memberKeys, useMembers, useMemberships } from "./index.ts";
 
-const grant = { membershipId: "Mb6nB8vC0xZ2lK4jH6gF", node: { level: "organization", tenantId: IDS.organization }, roles: [{ kind: "system", key: "admin" }] };
-const member = (uid: string, displayName: string) => ({ uid, displayName, email: `${uid}@example.com`, grants: [grant] });
+const grant = {
+  membershipId: "Mb6nB8vC0xZ2lK4jH6gF",
+  node: { level: "organization", tenantId: IDS.organization },
+  roles: [{ kind: "system", key: "admin" }],
+};
+const member = (uid: string, displayName: string) => ({
+  uid,
+  displayName,
+  email: `${uid}@example.com`,
+  grants: [grant],
+});
 
 describe("member entity", () => {
   it("merges member pages under the organization's key", async () => {
     const api = createFakeApi({
       [`GET /v1/organizations/${IDS.organization}/members`]: (request) =>
-        request.query.get("cursor") === "n" ? page([member("u2", "Bia")], { limit: 50 }) : page([member("u1", "Ana")], { cursor: "n", limit: 50 }),
+        request.query.get("cursor") === "n"
+          ? page([member("u2", "Bia")], { limit: 50 })
+          : page([member("u1", "Ana")], { cursor: "n", limit: 50 }),
     });
     const { result, queryClient } = renderClientHook(() => useMembers(IDS.organization), { api });
     await waitFor(() => expect(result.current.data).toHaveLength(1));

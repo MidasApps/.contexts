@@ -25,7 +25,11 @@ export type TenantAgentSettings = {
 
 const WEB_OFF: AgentSettings["webTools"] = { firecrawl: false, browser: false };
 
-const DEFAULTS: TenantAgentSettings = { enabledAgents: new Set(DEFAULT_ENABLED_SUBAGENTS), webTools: WEB_OFF, fromStore: false };
+const DEFAULTS: TenantAgentSettings = {
+  enabledAgents: new Set(DEFAULT_ENABLED_SUBAGENTS),
+  webTools: WEB_OFF,
+  fromStore: false,
+};
 
 /** No subagent at all: the context is incomplete (the run then fails on its schema anyway). */
 const NOTHING: TenantAgentSettings = { enabledAgents: new Set(), webTools: WEB_OFF, fromStore: false };
@@ -38,7 +42,9 @@ const fromSettings = (settings: AgentSettings, webAllowed: boolean): TenantAgent
   return { enabledAgents: new Set(enabled), webTools, fromStore: true };
 };
 
-export type TenantAgentSettingsReader = (requestContext: RequestContextReader | undefined) => Promise<TenantAgentSettings>;
+export type TenantAgentSettingsReader = (
+  requestContext: RequestContextReader | undefined,
+) => Promise<TenantAgentSettings>;
 
 /**
  * Reads the tenant settings of a run through the settings port, memoized per request
@@ -46,14 +52,18 @@ export type TenantAgentSettingsReader = (requestContext: RequestContextReader | 
  * An unreadable store falls back to the core defaults with the web off. With a flag reader, the
  * flag `ai.web-tools` (decision 0039) must also be on for any web opt-in to count.
  */
-export const createTenantAgentSettingsReader = (settings: SettingsPort, flags?: FlagReader): TenantAgentSettingsReader => {
+export const createTenantAgentSettingsReader = (
+  settings: SettingsPort,
+  flags?: FlagReader,
+): TenantAgentSettingsReader => {
   const memo = new WeakMap<object, Promise<TenantAgentSettings>>();
   const load = async (requestContext: RequestContextReader | undefined): Promise<TenantAgentSettings> => {
     const read = readAgentContext(requestContext);
     if (!read.ok) return NOTHING;
     try {
       const { tenantId } = read.data.context;
-      const webAllowed = flags === undefined || (await flags.isEnabled({ key: CORE_FLAG_KEYS.webTools, tenantId, fallback: false }));
+      const webAllowed =
+        flags === undefined || (await flags.isEnabled({ key: CORE_FLAG_KEYS.webTools, tenantId, fallback: false }));
       return fromSettings(await settings.getAgentSettings({ tenantId }), webAllowed);
     } catch {
       // Store unreachable: core subagents only, never an opt-in.

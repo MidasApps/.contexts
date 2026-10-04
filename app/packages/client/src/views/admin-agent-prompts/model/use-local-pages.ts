@@ -12,4 +12,8 @@ const NOTHING_MORE = (): Promise<void> => Promise.resolve();
  * activations): the same paging as a cursor list with every page already loaded.
  */
 export const useLocalPages = <T>(rows: readonly T[], pageSize: number, label: string): CursorPages<T> =>
-  useCursorPages({ data: rows, hasNextPage: false, isFetchingNextPage: false, fetchNextPage: NOTHING_MORE }, pageSize, label);
+  useCursorPages(
+    { data: rows, hasNextPage: false, isFetchingNextPage: false, fetchNextPage: NOTHING_MORE },
+    pageSize,
+    label,
+  );

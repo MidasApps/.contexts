@@ -55,7 +55,8 @@ const decodeCredentials = (raw: { username: string; password: string | undefined
   const username = decodeComponent(raw.username);
   const database = decodeComponent(raw.database);
   const password = raw.password === undefined ? undefined : decodeComponent(raw.password);
-  if (username === undefined || database === undefined || (raw.password !== undefined && password === undefined)) return undefined;
+  if (username === undefined || database === undefined || (raw.password !== undefined && password === undefined))
+    return undefined;
   return { username, database, ...(password === undefined ? {} : { password }) };
 };
 

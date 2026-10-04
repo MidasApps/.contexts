@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteConnectorEndpoint, updateConnectorEndpoint, type Connector } from "@core/contracts";
+import { type Connector, deleteConnectorEndpoint, updateConnectorEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { tenantConnectorKeys } from "#/entities/connector/index.ts";
@@ -9,7 +9,11 @@ import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts"
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
-type ConnectorDialogProps = { organizationId: string; connector: Connector | null; onOpenChange: (open: boolean) => void };
+type ConnectorDialogProps = {
+  organizationId: string;
+  connector: Connector | null;
+  onOpenChange: (open: boolean) => void;
+};
 
 /**
  * Deletes a connector and its stored secret (`DELETE …/connectors/{id}`, core.connector.write).
@@ -56,7 +60,10 @@ export function ToggleConnectorDialog({ organizationId, connector, onOpenChange 
   const action = useConfirmedAction(
     async () => {
       if (connector === null) return;
-      await callEndpoint(updateConnectorEndpoint, { params: { organizationId, connectorId: connector.id }, body: { status: disabling ? "disabled" : "active" } });
+      await callEndpoint(updateConnectorEndpoint, {
+        params: { organizationId, connectorId: connector.id },
+        body: { status: disabling ? "disabled" : "active" },
+      });
       await queryClient.invalidateQueries({ queryKey: tenantConnectorKeys.all(organizationId) });
     },
     () => notify.success(t(disabling ? "doneDisabled" : "doneEnabled", { name: connector?.name ?? "" })),

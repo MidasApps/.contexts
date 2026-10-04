@@ -3,7 +3,9 @@ import { buildSupervisorHarness, memberContext } from "./supervisor.fixture.ts";
 
 const commandToolIds = async (harness: ReturnType<typeof buildSupervisorHarness>): Promise<string[]> => {
   const action = harness.runtime.subagents.action;
-  return Object.keys((await action?.listTools({ requestContext: memberContext() })) ?? {}).filter((id) => id.startsWith("command")).sort();
+  return Object.keys((await action?.listTools({ requestContext: memberContext() })) ?? {})
+    .filter((id) => id.startsWith("command"))
+    .sort();
 };
 
 describe("action agent command tools and module enablement", () => {

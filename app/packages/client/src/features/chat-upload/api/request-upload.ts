@@ -1,16 +1,21 @@
 import {
   addKnowledgeSourceEndpoint,
-  getFileEndpoint,
-  requestFileUploadEndpoint,
   type FilePurpose,
   type FileUploadTicket,
+  getFileEndpoint,
+  requestFileUploadEndpoint,
   type StoredFile,
   type UploadInstructions,
 } from "@core/contracts";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 
 /** What the queue knows about a picked file before any byte leaves the browser. */
-export type UploadSource = { readonly name: string; readonly mediaType: string; readonly sizeBytes: number; readonly blob: Blob };
+export type UploadSource = {
+  readonly name: string;
+  readonly mediaType: string;
+  readonly sizeBytes: number;
+  readonly blob: Blob;
+};
 
 /** Declared type of a file the browser could not name a type for. */
 export const FALLBACK_MEDIA_TYPE = "application/octet-stream";
@@ -20,10 +25,18 @@ export const FALLBACK_MEDIA_TYPE = "application/octet-stream";
  * answers where to send the bytes. The server checks type and size for the purpose; a refusal is
  * a 400 `VALIDATION_FAILED` whose detail names `TYPE_NOT_ALLOWED` or `TOO_LARGE`.
  */
-export const requestUpload = async (callEndpoint: CallEndpoint, input: { organizationId: string; purpose: FilePurpose; source: UploadSource; signal?: AbortSignal }): Promise<FileUploadTicket> => {
+export const requestUpload = async (
+  callEndpoint: CallEndpoint,
+  input: { organizationId: string; purpose: FilePurpose; source: UploadSource; signal?: AbortSignal },
+): Promise<FileUploadTicket> => {
   const answer = await callEndpoint(requestFileUploadEndpoint, {
     params: { organizationId: input.organizationId },
-    body: { purpose: input.purpose, fileName: input.source.name, contentType: input.source.mediaType, sizeBytes: input.source.sizeBytes },
+    body: {
+      purpose: input.purpose,
+      fileName: input.source.name,
+      contentType: input.source.mediaType,
+      sizeBytes: input.source.sizeBytes,
+    },
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   });
   return answer.data;
@@ -75,13 +88,16 @@ export const sendBytes = (upload: UploadInstructions, blob: Blob, options: SendB
       reject(abortError());
       return;
     }
-    const request = (options.createRequest ?? ((): UploadRequest => new XMLHttpRequest() as unknown as UploadRequest))();
+    const request = (
+      options.createRequest ?? ((): UploadRequest => new XMLHttpRequest() as unknown as UploadRequest)
+    )();
     request.open(upload.method, upload.url);
     for (const [name, value] of Object.entries(upload.headers)) request.setRequestHeader(name, value);
     request.upload.onprogress = (event) => {
       if (event.lengthComputable && event.total > 0) options.onProgress?.(Math.min(1, event.loaded / event.total));
     };
-    request.onload = () => (request.status >= 200 && request.status < 300 ? resolve() : reject(new UploadTransferError(request.status)));
+    request.onload = () =>
+      request.status >= 200 && request.status < 300 ? resolve() : reject(new UploadTransferError(request.status));
     request.onerror = () => reject(new UploadTransferError(0));
     request.onabort = () => reject(abortError());
     options.signal?.addEventListener("abort", () => request.abort(), { once: true });
@@ -137,14 +153,21 @@ const defaultSleep = (ms: number, signal?: AbortSignal): Promise<void> =>
  * calls `onSlow` once and keeps polling.
  * @throws {UploadValidationTimeoutError} after `timeoutMs`.
  */
-export const waitForValidation = async (callEndpoint: CallEndpoint, fileId: string, options: WaitOptions = {}): Promise<StoredFile> => {
+export const waitForValidation = async (
+  callEndpoint: CallEndpoint,
+  fileId: string,
+  options: WaitOptions = {},
+): Promise<StoredFile> => {
   const sleep = options.sleep ?? defaultSleep;
   const now = options.now ?? Date.now;
   const startedAt = now();
   const deadline = startedAt + (options.timeoutMs ?? VALIDATION_TIMEOUT_MS);
   let slow = false;
   for (;;) {
-    const answer = await callEndpoint(getFileEndpoint, { params: { fileId }, ...(options.signal === undefined ? {} : { signal: options.signal }) });
+    const answer = await callEndpoint(getFileEndpoint, {
+      params: { fileId },
+      ...(options.signal === undefined ? {} : { signal: options.signal }),
+    });
     if (answer.data.status !== "pending") return answer.data;
     if (now() >= deadline) throw new UploadValidationTimeoutError();
     if (!slow && now() - startedAt >= VALIDATION_SLOW_MS) {
@@ -156,7 +179,10 @@ export const waitForValidation = async (callEndpoint: CallEndpoint, fileId: stri
 };
 
 /** `POST …/knowledge/sources { kind: "file", fileId }`: starts the ingestion of a ready knowledge file. */
-export const addKnowledgeSource = async (callEndpoint: CallEndpoint, input: { organizationId: string; fileId: string; signal?: AbortSignal }): Promise<void> => {
+export const addKnowledgeSource = async (
+  callEndpoint: CallEndpoint,
+  input: { organizationId: string; fileId: string; signal?: AbortSignal },
+): Promise<void> => {
   await callEndpoint(addKnowledgeSourceEndpoint, {
     params: { organizationId: input.organizationId },
     body: { kind: "file", fileId: input.fileId },

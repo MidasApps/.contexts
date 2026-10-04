@@ -11,5 +11,8 @@ export type SettleOutcome =
  * no user credential is sent (decision 0036). Errors are the gateway's status-only codes.
  */
 export type WorkflowApprovalSettler = {
-  readonly settle: (input: { readonly approvalRequestId: string; readonly requestId: string }) => Promise<GatewayResult<SettleOutcome>>;
+  readonly settle: (input: {
+    readonly approvalRequestId: string;
+    readonly requestId: string;
+  }) => Promise<GatewayResult<SettleOutcome>>;
 };

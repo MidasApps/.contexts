@@ -1,4 +1,4 @@
-import { createColumnHelper, tableFeatures, type ColumnDef, type RowData } from "@tanstack/react-table";
+import { type ColumnDef, createColumnHelper, type RowData, tableFeatures } from "@tanstack/react-table";
 
 /** Per-column presentation hints read by `DataTable`. */
 export type DataTableColumnMeta = {

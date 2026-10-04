@@ -2,11 +2,18 @@ import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { renderWithClient, type RecordingSession } from "#/shared/testing/render-client.tsx";
+import { type RecordingSession, renderWithClient } from "#/shared/testing/render-client.tsx";
 import { PageError, PageForbidden, PageNotFound } from "./PageState.tsx";
-import { QueryPage, type PageQuery } from "./QueryPage.tsx";
+import { type PageQuery, QueryPage } from "./QueryPage.tsx";
 
-const query = <T,>(overrides: Partial<PageQuery<T>>): PageQuery<T> => ({ status: "success", data: undefined, error: null, isFetching: false, refetch: () => undefined, ...overrides });
+const query = <T,>(overrides: Partial<PageQuery<T>>): PageQuery<T> => ({
+  status: "success",
+  data: undefined,
+  error: null,
+  isFetching: false,
+  refetch: () => undefined,
+  ...overrides,
+});
 
 describe("page states", () => {
   it("renders not-found and forbidden pages with one h1 and a way home", async () => {
@@ -24,7 +31,12 @@ describe("page states", () => {
 
   it("renders a failed page as an alert with the reference and a retry", async () => {
     const onRetry = vi.fn();
-    const { user, container } = renderWithClient(<PageError error={new ApiError({ status: 503, code: "INTERNAL_ERROR", message: "x", requestId: "01K6REQ" })} onRetry={onRetry} />);
+    const { user, container } = renderWithClient(
+      <PageError
+        error={new ApiError({ status: 503, code: "INTERNAL_ERROR", message: "x", requestId: "01K6REQ" })}
+        onRetry={onRetry}
+      />,
+    );
     expect(screen.getByRole("alert").textContent).toContain("Referência: 01K6REQ");
     await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
     expect(onRetry).toHaveBeenCalledOnce();
@@ -32,7 +44,10 @@ describe("page states", () => {
   });
 
   it("offers signing in again on a page whose session is gone (401)", async () => {
-    const { user, router, session } = renderWithClient(<PageError error={new ApiError({ status: 401, code: "UNAUTHORIZED", message: "x" })} onRetry={vi.fn()} />, { path: "/o/org-1" });
+    const { user, router, session } = renderWithClient(
+      <PageError error={new ApiError({ status: 401, code: "UNAUTHORIZED", message: "x" })} onRetry={vi.fn()} />,
+      { path: "/o/org-1" },
+    );
     expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
     await user.click(screen.getByRole("button", { name: "Entrar novamente" }));
     expect((session as RecordingSession).actions).toEqual(["signOut"]);
@@ -41,17 +56,59 @@ describe("page states", () => {
 
   it("QueryPage picks loading, not-found (404 or null), forbidden (403), error or the page", () => {
     const page = (data: string) => <p>{data}</p>;
-    const { rerender } = renderWithClient(<QueryPage query={query<string>({ status: "pending" })} loadingLabel="Carregando a página">{page}</QueryPage>);
+    const { rerender } = renderWithClient(
+      <QueryPage query={query<string>({ status: "pending" })} loadingLabel="Carregando a página">
+        {page}
+      </QueryPage>,
+    );
     expect(screen.getByRole("status").textContent).toContain("Carregando a página");
-    rerender(<QueryPage query={query<string>({ status: "error", error: new ApiError({ status: 404, code: "NOT_FOUND", message: "x" }) })} loadingLabel="x">{page}</QueryPage>);
+    rerender(
+      <QueryPage
+        query={query<string>({
+          status: "error",
+          error: new ApiError({ status: 404, code: "NOT_FOUND", message: "x" }),
+        })}
+        loadingLabel="x"
+      >
+        {page}
+      </QueryPage>,
+    );
     expect(screen.getByRole("heading", { name: "Página não encontrada" })).toBeDefined();
-    rerender(<QueryPage query={query<string | null>({ data: null })} loadingLabel="x">{page}</QueryPage>);
+    rerender(
+      <QueryPage query={query<string | null>({ data: null })} loadingLabel="x">
+        {page}
+      </QueryPage>,
+    );
     expect(screen.getByRole("heading", { name: "Página não encontrada" })).toBeDefined();
-    rerender(<QueryPage query={query<string>({ status: "error", error: new ApiError({ status: 403, code: "FORBIDDEN", message: "x" }) })} loadingLabel="x">{page}</QueryPage>);
+    rerender(
+      <QueryPage
+        query={query<string>({
+          status: "error",
+          error: new ApiError({ status: 403, code: "FORBIDDEN", message: "x" }),
+        })}
+        loadingLabel="x"
+      >
+        {page}
+      </QueryPage>,
+    );
     expect(screen.getByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();
-    rerender(<QueryPage query={query<string>({ status: "error", error: new ApiError({ status: 0, code: "NETWORK_ERROR", message: "x" }) })} loadingLabel="x">{page}</QueryPage>);
+    rerender(
+      <QueryPage
+        query={query<string>({
+          status: "error",
+          error: new ApiError({ status: 0, code: "NETWORK_ERROR", message: "x" }),
+        })}
+        loadingLabel="x"
+      >
+        {page}
+      </QueryPage>,
+    );
     expect(screen.getByRole("alert").textContent).toContain("Não foi possível conectar.");
-    rerender(<QueryPage query={query<string>({ data: "conteúdo" })} loadingLabel="x">{page}</QueryPage>);
+    rerender(
+      <QueryPage query={query<string>({ data: "conteúdo" })} loadingLabel="x">
+        {page}
+      </QueryPage>,
+    );
     expect(screen.getByText("conteúdo")).toBeDefined();
   });
 });

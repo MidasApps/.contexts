@@ -1,4 +1,9 @@
-import { createFirebaseAdmin, createFirestoreApprovalRequestRepository, createLogger, type WorkflowApprovalSettler } from "@core/services";
+import {
+  createFirebaseAdmin,
+  createFirestoreApprovalRequestRepository,
+  createLogger,
+  type WorkflowApprovalSettler,
+} from "@core/services";
 import { describe, expect, it } from "vitest";
 import { makeOnApprovalRequestSettled } from "./on-approval-request-settled.ts";
 
@@ -9,7 +14,10 @@ import { makeOnApprovalRequestSettled } from "./on-approval-request-settled.ts";
 const PROJECT_ID = process.env["GCLOUD_PROJECT"] ?? "demo-core";
 const TENANT = "OrgFunctionsHitl0001";
 
-const firebase = createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: PROJECT_ID }, processEnv: process.env });
+const firebase = createFirebaseAdmin({
+  env: { APP_ENV: "local", FIREBASE_PROJECT_ID: PROJECT_ID },
+  processEnv: process.env,
+});
 const repository = createFirestoreApprovalRequestRepository({ firestore: firebase.firestore });
 type StoredRequest = Parameters<typeof repository.create>[1]["request"];
 type StatusChange = Parameters<typeof repository.setStatus>[1];
@@ -36,7 +44,11 @@ const createPending = async (kind: string): Promise<StoredRequest> => {
     node: { level: "organization", tenantId: TENANT },
     permission: "core.workflow-run.approve-demo",
     requestedBy: { type: "user", id: "member-uid" },
-    action: { kind, input: { workflowId: "approval-demo", runId: "run-1", stepId: "request-human-approval" }, summary: "Create the note" },
+    action: {
+      kind,
+      input: { workflowId: "approval-demo", runId: "run-1", stepId: "request-human-approval" },
+      summary: "Create the note",
+    },
     status: "pending",
     decidedBy: null,
     reason: null,
@@ -44,7 +56,9 @@ const createPending = async (kind: string): Promise<StoredRequest> => {
     createdAt: "2026-09-30T12:00:00.000Z",
     updatedAt: "2026-09-30T12:00:00.000Z",
   } as unknown as StoredRequest;
-  await firebase.firestore.runTransaction((tx) => Promise.resolve(repository.create(tx, { request, actorId: "member-uid" })));
+  await firebase.firestore.runTransaction((tx) =>
+    Promise.resolve(repository.create(tx, { request, actorId: "member-uid" })),
+  );
   return request;
 };
 
@@ -53,7 +67,15 @@ const settleTo = async (request: StoredRequest, status: ApprovalStatus) => {
   const ref = firebase.firestore.collection("approval-requests").doc(request.id);
   const before = await ref.get();
   await firebase.firestore.runTransaction((tx) =>
-    Promise.resolve(repository.setStatus(tx, { id: request.id, status, ...(status === "expired" ? {} : { decidedBy: "admin-uid" as NonNullable<StatusChange["decidedBy"]> }), updatedAt: "2026-09-30T12:05:00.000Z", actorId: "admin-uid" })),
+    Promise.resolve(
+      repository.setStatus(tx, {
+        id: request.id,
+        status,
+        ...(status === "expired" ? {} : { decidedBy: "admin-uid" as NonNullable<StatusChange["decidedBy"]> }),
+        updatedAt: "2026-09-30T12:05:00.000Z",
+        actorId: "admin-uid",
+      }),
+    ),
   );
   const after = await ref.get();
   return { id: `evt-${request.id}-${status}`, params: { id: request.id }, data: { before, after } };

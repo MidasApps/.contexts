@@ -7,7 +7,9 @@ import { Switch } from "./Switch.tsx";
 describe("Switch", () => {
   it("toggles with Space and reports the change", async () => {
     const onCheckedChange = vi.fn();
-    const { user, container } = renderWithProviders(<Switch aria-label="Auto-salvar" onCheckedChange={onCheckedChange} />);
+    const { user, container } = renderWithProviders(
+      <Switch aria-label="Auto-salvar" onCheckedChange={onCheckedChange} />,
+    );
     const control = screen.getByRole("switch", { name: "Auto-salvar" });
     control.focus();
     await user.keyboard(" ");

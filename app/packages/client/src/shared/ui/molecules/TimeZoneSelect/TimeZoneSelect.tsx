@@ -1,7 +1,7 @@
 "use client";
 
 import { listTimeZonesByRegion } from "@core/i18n";
-import { useMemo, type ComponentProps } from "react";
+import { type ComponentProps, useMemo } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { Combobox, type ComboboxGroup } from "#/shared/ui/molecules/Combobox/Combobox.tsx";
 
@@ -12,7 +12,8 @@ const currentOffset = (timeZone: string, locale: string, now: Date): string =>
     .find((part) => part.type === "timeZoneName")?.value ?? "";
 
 /** "(GMT-03:00) America/Sao Paulo": how the picker names a zone, also used where a zone is only shown. */
-export const timeZoneLabel = (zone: string, locale: string, now: Date): string => `(${currentOffset(zone, locale, now)}) ${zone.replaceAll("_", " ")}`;
+export const timeZoneLabel = (zone: string, locale: string, now: Date): string =>
+  `(${currentOffset(zone, locale, now)}) ${zone.replaceAll("_", " ")}`;
 
 /** IANA zones grouped by region; labels show the current offset and the zone with spaces. */
 export const buildTimeZoneGroups = (locale: string, now: Date): ComboboxGroup[] =>

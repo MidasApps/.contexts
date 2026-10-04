@@ -2,12 +2,12 @@
 // `/v1/conversations` and the row that shows one conversation.
 export {
   CONVERSATION_PAGE_SIZE,
+  type ConversationFilter,
   conversationListKey,
   conversationListsKey,
   conversationsQuery,
   deleteConversation,
   summarizeConversation,
   updateConversation,
-  type ConversationFilter,
 } from "./api/conversations-api.ts";
 export { ConversationItem, type ConversationItemProps } from "./ui/conversation-item.tsx";

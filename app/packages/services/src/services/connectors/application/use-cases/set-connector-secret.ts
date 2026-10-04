@@ -4,7 +4,13 @@ import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { ConnectorNotFoundError } from "../../domain/connector-errors.ts";
 import { connectorSecretName } from "../../domain/connector-policy.ts";
-import { authorizeConnectors, CONNECTOR_WRITE_PERMISSION, type ConnectorsCommand, type ConnectorsDeps, recordConnectorAudit } from "../connectors-deps.ts";
+import {
+  authorizeConnectors,
+  CONNECTOR_WRITE_PERMISSION,
+  type ConnectorsCommand,
+  type ConnectorsDeps,
+  recordConnectorAudit,
+} from "../connectors-deps.ts";
 
 export type SetConnectorSecret = (
   command: ConnectorsCommand & { readonly connectorId: ConnectorId; readonly input: SetConnectorSecretInput },
@@ -30,7 +36,10 @@ export const makeSetConnectorSecret =
       const fresh = await deps.connectors.get(tx, key);
       // Deleted meanwhile: drop the secret we just wrote instead of reviving the connector.
       if (fresh === null) return;
-      deps.connectors.replace(tx, { connector: { ...fresh, secretRef, updatedAt: now }, actorId: auditActorOf(command.actor).id });
+      deps.connectors.replace(tx, {
+        connector: { ...fresh, secretRef, updatedAt: now },
+        actorId: auditActorOf(command.actor).id,
+      });
       await recordConnectorAudit(deps, command, { action: "CONNECTOR_SECRET_SET", connectorId: fresh.id }, tx);
     });
     const still = await deps.connectors.get(undefined, key);

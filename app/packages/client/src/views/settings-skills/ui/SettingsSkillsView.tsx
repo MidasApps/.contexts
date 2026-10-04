@@ -2,12 +2,20 @@
 
 import type { AccessContext } from "@core/contracts";
 import { useTranslations } from "use-intl";
-import { skillsOfCatalog, useAgentCatalog, type CatalogSkill } from "#/entities/agent-catalog/index.ts";
+import { type CatalogSkill, skillsOfCatalog, useAgentCatalog } from "#/entities/agent-catalog/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/shared/ui/atoms/Table/Table.tsx";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "#/shared/ui/atoms/Table/Table.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
@@ -51,7 +59,9 @@ function SkillsTable({ skills, organizationName }: { skills: readonly CatalogSki
               </ul>
             </TableCell>
             <TableCell>
-              <StatusPill tone={skill.active ? "emerald" : "neutral"}>{skill.active ? t("active") : t("inactive")}</StatusPill>
+              <StatusPill tone={skill.active ? "emerald" : "neutral"}>
+                {skill.active ? t("active") : t("inactive")}
+              </StatusPill>
             </TableCell>
           </TableRow>
         ))}
@@ -70,17 +80,29 @@ function SettingsSkills({ context }: { context: AccessContext }) {
     <SettingsPageFrame
       organizationId={organization.id}
       allowed={allowed}
-      header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} description={t("description")} />}
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow", { organization: organization.name })}
+          title={t("title")}
+          description={t("description")}
+        />
+      }
     >
       <div className="flex flex-col gap-5">
         {online ? null : <OfflineNotice />}
-        <OrganizationSkills organizationId={organization.id} organizationName={organization.name} canUpdate={permissions.includes("core.agent-settings.update")} />
+        <OrganizationSkills
+          organizationId={organization.id}
+          organizationName={organization.name}
+          canUpdate={permissions.includes("core.agent-settings.update")}
+        />
         <SectionCard
           title={t("inUse.title")}
           description={t("inUse.description")}
           actions={
             <Button variant="outline" size="sm" asChild>
-              <RouteLink to={{ id: "settings", organizationId: organization.id, section: "agents" }}>{t("agentsLink")}</RouteLink>
+              <RouteLink to={{ id: "settings", organizationId: organization.id, section: "agents" }}>
+                {t("agentsLink")}
+              </RouteLink>
             </Button>
           }
         >
@@ -88,7 +110,13 @@ function SettingsSkills({ context }: { context: AccessContext }) {
             {(data) => {
               const skills = skillsOfCatalog(data);
               return skills.length === 0 ? (
-                <EmptyState frame="plain" headingLevel={3} icon="sparkles" title={t("emptyTitle")} description={t("emptyDescription")} />
+                <EmptyState
+                  frame="plain"
+                  headingLevel={3}
+                  icon="sparkles"
+                  title={t("emptyTitle")}
+                  description={t("emptyDescription")}
+                />
               ) : (
                 <SkillsTable skills={skills} organizationName={organization.name} />
               );

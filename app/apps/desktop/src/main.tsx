@@ -2,8 +2,8 @@ import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { resolveDesktopLocale } from "@/adapters/desktop-locale.ts";
-import { InvalidDesktopEnvError } from "@/config/desktop-env.schema.ts";
 import { ConfigErrorScreen } from "@/ConfigErrorScreen.tsx";
+import { InvalidDesktopEnvError } from "@/config/desktop-env.schema.ts";
 import "@/styles.css";
 
 const rootElement = document.getElementById("root");
@@ -33,5 +33,10 @@ try {
   );
 } catch (error: unknown) {
   if (!(error instanceof InvalidDesktopEnvError)) throw error;
-  root.render(<ConfigErrorScreen fields={error.fields} locale={resolveDesktopLocale({ profileLocale: undefined, languages: navigator.languages })} />);
+  root.render(
+    <ConfigErrorScreen
+      fields={error.fields}
+      locale={resolveDesktopLocale({ profileLocale: undefined, languages: navigator.languages })}
+    />,
+  );
 }

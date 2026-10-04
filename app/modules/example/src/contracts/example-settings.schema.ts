@@ -7,12 +7,16 @@ import { z } from "zod";
  * field `ui` meta (labels in the module namespace, `<labelKey>Hint` as help text).
  */
 export const ExampleSettingsSchema = z.strictObject({
-  greeting: z.string().min(1).max(80).meta({
-    description: "Short greeting shown at the top of the module to every member of the organization.",
-    pii: "none",
-    ui: { widget: "text", labelKey: "example.settings.greeting", order: 1 },
-    examples: ["Welcome to the example module"],
-  }),
+  greeting: z
+    .string()
+    .min(1)
+    .max(80)
+    .meta({
+      description: "Short greeting shown at the top of the module to every member of the organization.",
+      pii: "none",
+      ui: { widget: "text", labelKey: "example.settings.greeting", order: 1 },
+      examples: ["Welcome to the example module"],
+    }),
   defaultBudget: MoneySchema.meta({
     description: "Amount suggested for new items; currency defaults to the organization's regional currency in forms.",
     pii: "none",

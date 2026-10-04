@@ -7,6 +7,8 @@ describe("waitingForDecision", () => {
     const other = buildApprovalRequest({ id: "Ap1qW2eR3tY4uI5oP6aS" });
     const own = buildApprovalRequest({ id: "Ap2qW2eR3tY4uI5oP6aS", requestedBy: { type: "user", id: "viewer-uid" } });
     const settled = buildApprovalRequest({ id: "Ap3qW2eR3tY4uI5oP6aS", status: "executed" });
-    expect(waitingForDecision([other, own, settled], "viewer-uid").map((request) => request.id)).toEqual(["Ap1qW2eR3tY4uI5oP6aS"]);
+    expect(waitingForDecision([other, own, settled], "viewer-uid").map((request) => request.id)).toEqual([
+      "Ap1qW2eR3tY4uI5oP6aS",
+    ]);
   });
 });

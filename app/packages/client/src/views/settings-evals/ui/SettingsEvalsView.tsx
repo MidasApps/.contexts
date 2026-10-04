@@ -23,7 +23,11 @@ const TABS = ["experiments", "datasets"] as const;
 type EvalTab = (typeof TABS)[number];
 const isTab = (value: string): value is EvalTab => (TABS as readonly string[]).includes(value);
 
-type EvalsContentProps = { organization: { id: string; name: string }; onStart: (() => void) | null; canWrite: boolean };
+type EvalsContentProps = {
+  organization: { id: string; name: string };
+  onStart: (() => void) | null;
+  canWrite: boolean;
+};
 
 function EvalsContent({ organization, onStart, canWrite }: EvalsContentProps) {
   const t = useTranslations("settings.evals");
@@ -33,7 +37,8 @@ function EvalsContent({ organization, onStart, canWrite }: EvalsContentProps) {
   const datasetId = tab === "datasets" ? search.values.dataset : undefined;
   const [creating, setCreating] = useState(false);
   // Switching tabs drops the page and the open dataset: they belong to the other tab.
-  const setTab = (next: EvalTab): void => search.set({ tab: next === "experiments" ? undefined : next, dataset: undefined });
+  const setTab = (next: EvalTab): void =>
+    search.set({ tab: next === "experiments" ? undefined : next, dataset: undefined });
   const openItems = (id: string): void => search.set({ tab: "datasets", dataset: id });
   const writable = canWrite && online;
   return (
@@ -50,13 +55,30 @@ function EvalsContent({ organization, onStart, canWrite }: EvalsContentProps) {
         </TabsContent>
         <TabsContent value="datasets" className="pt-3">
           {tab !== "datasets" ? null : datasetId === undefined ? (
-            <DatasetsPanel organization={organization} onSeeExperiments={() => setTab("experiments")} onOpenItems={openItems} onCreate={writable ? () => setCreating(true) : null} />
+            <DatasetsPanel
+              organization={organization}
+              onSeeExperiments={() => setTab("experiments")}
+              onOpenItems={openItems}
+              onCreate={writable ? () => setCreating(true) : null}
+            />
           ) : (
-            <DatasetItemsPanel organization={organization} datasetId={datasetId} canWrite={writable} onBack={() => search.set({ dataset: undefined })} />
+            <DatasetItemsPanel
+              organization={organization}
+              datasetId={datasetId}
+              canWrite={writable}
+              onBack={() => search.set({ dataset: undefined })}
+            />
           )}
         </TabsContent>
       </Tabs>
-      {canWrite ? <CreateEvalDatasetDialog organizationId={organization.id} open={creating} onOpenChange={setCreating} onCreated={(dataset) => openItems(dataset.id)} /> : null}
+      {canWrite ? (
+        <CreateEvalDatasetDialog
+          organizationId={organization.id}
+          open={creating}
+          onOpenChange={setCreating}
+          onCreated={(dataset) => openItems(dataset.id)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -69,7 +91,8 @@ function SettingsEvals({ context }: { context: AccessContext }) {
   const allowed = context.permissions.includes("core.eval.read");
   const canStart = context.permissions.includes("core.eval.write");
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={allowed}
       header={
@@ -88,8 +111,14 @@ function SettingsEvals({ context }: { context: AccessContext }) {
         />
       }
     >
-      <EvalsContent organization={organization} onStart={canStart && online ? () => setStarting(true) : null} canWrite={canStart} />
-      {canStart ? <StartEvalExperimentDialog organizationId={organization.id} open={starting} onOpenChange={setStarting} /> : null}
+      <EvalsContent
+        organization={organization}
+        onStart={canStart && online ? () => setStarting(true) : null}
+        canWrite={canStart}
+      />
+      {canStart ? (
+        <StartEvalExperimentDialog organizationId={organization.id} open={starting} onOpenChange={setStarting} />
+      ) : null}
     </SettingsPageFrame>
   );
 }

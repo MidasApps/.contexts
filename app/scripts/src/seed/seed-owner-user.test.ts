@@ -40,7 +40,10 @@ describe("upsertOwnerUser", () => {
 
     const result = await upsertOwnerUser(auth, OWNER);
 
-    expect(result).toMatchObject({ action: "updated", user: { localId: "uid-1", displayName: "Demo Owner", emailVerified: true } });
+    expect(result).toMatchObject({
+      action: "updated",
+      user: { localId: "uid-1", displayName: "Demo Owner", emailVerified: true },
+    });
     expect(auth.users).toEqual([expect.objectContaining({ localId: "uid-1", password: "local-password" })]);
   });
 });

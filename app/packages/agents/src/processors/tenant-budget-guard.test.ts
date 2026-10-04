@@ -36,7 +36,11 @@ const context = () => new RequestContext<unknown>(buildAgentContextEntries());
 describe("tenant budget guard", () => {
   it("lets the run through below the cap and checks the context tenant", async () => {
     const tenants: string[] = [];
-    const usage = { checkTenantBudget: ({ tenantId }: { tenantId: string }) => (tenants.push(tenantId), Promise.resolve<BudgetCheck>({ allowed: true, alert: true })) };
+    const usage = {
+      checkTenantBudget: ({ tenantId }: { tenantId: string }) => (
+        tenants.push(tenantId), Promise.resolve<BudgetCheck>({ allowed: true, alert: true })
+      ),
+    };
     expect(await run(usage, context())).toEqual({ result: [] });
     expect(tenants).toEqual([TEST_TENANT]);
   });
@@ -44,21 +48,31 @@ describe("tenant budget guard", () => {
   it("aborts with BUDGET_EXCEEDED at the cap", async () => {
     const outcome = await run(createFakeUsagePort({ allowed: false, reason: "BUDGET_EXCEEDED" }), context());
     expect(outcome).toEqual({
-      aborted: { reason: "BUDGET_EXCEEDED", options: { metadata: { processorId: TENANT_BUDGET_GUARD_ID, code: "BUDGET_EXCEEDED" } } },
+      aborted: {
+        reason: "BUDGET_EXCEEDED",
+        options: { metadata: { processorId: TENANT_BUDGET_GUARD_ID, code: "BUDGET_EXCEEDED" } },
+      },
     });
   });
 
   it("fails closed with BUDGET_UNAVAILABLE when the usage port fails", async () => {
     const outcome = await run({ checkTenantBudget: () => Promise.reject(new Error("db down")) }, context());
     expect(outcome).toEqual({
-      aborted: { reason: "BUDGET_UNAVAILABLE", options: { metadata: { processorId: TENANT_BUDGET_GUARD_ID, code: "BUDGET_UNAVAILABLE" } } },
+      aborted: {
+        reason: "BUDGET_UNAVAILABLE",
+        options: { metadata: { processorId: TENANT_BUDGET_GUARD_ID, code: "BUDGET_UNAVAILABLE" } },
+      },
     });
   });
 
   it("fails closed without a server-built request context (no tenant to bill)", async () => {
     let called = false;
-    const usage = { checkTenantBudget: () => ((called = true), Promise.resolve<BudgetCheck>({ allowed: true, alert: false })) };
-    expect(await run(usage, new RequestContext<unknown>([["tenantId", TEST_TENANT]]))).toMatchObject({ aborted: { reason: "BUDGET_UNAVAILABLE" } });
+    const usage = {
+      checkTenantBudget: () => ((called = true), Promise.resolve<BudgetCheck>({ allowed: true, alert: false })),
+    };
+    expect(await run(usage, new RequestContext<unknown>([["tenantId", TEST_TENANT]]))).toMatchObject({
+      aborted: { reason: "BUDGET_UNAVAILABLE" },
+    });
     expect(called).toBe(false);
   });
 });

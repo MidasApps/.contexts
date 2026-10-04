@@ -1,6 +1,7 @@
 import type { Agent } from "@mastra/core/agent";
 import type { AgentSkillsResolver, InlineSkill } from "@mastra/core/skills";
 import type { Memory } from "@mastra/memory";
+import type { InstructionsResolver } from "../agents/prompt-instructions.ts";
 import type { TenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import type { ConnectorToolsResolver } from "../connectors/connector-registry.ts";
 import type { AgentModels } from "../models/model-factory.ts";
@@ -9,7 +10,6 @@ import type { AgentCommand } from "../tools/commands/agent-command.ts";
 import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
 import type { WebToolsRuntime } from "../tools/web/web-tools-runtime.ts";
-import type { InstructionsResolver } from "../agents/prompt-instructions.ts";
 import { type ModuleWorkflow, workflowIdOf } from "../workflows/workflow-catalog.ts";
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
 
@@ -94,7 +94,12 @@ export type AgentModule = {
   readonly workflows?: readonly ModuleWorkflow[];
 };
 
-export type AgentModuleErrorCode = "INVALID_MODULE_ID" | "UNPREFIXED_CAPABILITY" | "DUPLICATE_CAPABILITY" | "UNKNOWN_CAPABILITY_REF" | "MANIFEST_MISMATCH";
+export type AgentModuleErrorCode =
+  | "INVALID_MODULE_ID"
+  | "UNPREFIXED_CAPABILITY"
+  | "DUPLICATE_CAPABILITY"
+  | "UNKNOWN_CAPABILITY_REF"
+  | "MANIFEST_MISMATCH";
 
 /** Boot error: a module's agent manifest is inconsistent (decision 0019). */
 export class AgentModuleError extends Error {
@@ -103,7 +108,9 @@ export class AgentModuleError extends Error {
   readonly capabilityId?: string;
 
   constructor(args: { code: AgentModuleErrorCode; moduleId: string; capabilityId?: string }) {
-    super(`${args.code}: module ${args.moduleId}${args.capabilityId === undefined ? "" : ` capability ${args.capabilityId}`}`);
+    super(
+      `${args.code}: module ${args.moduleId}${args.capabilityId === undefined ? "" : ` capability ${args.capabilityId}`}`,
+    );
     this.name = "AgentModuleError";
     this.code = args.code;
     this.moduleId = args.moduleId;
@@ -120,21 +127,28 @@ const isPrefixed = (moduleId: string, capabilityId: string): boolean =>
 const checkCapabilities = (moduleId: string, ids: readonly string[]): void => {
   const seen = new Set<string>();
   for (const id of ids) {
-    if (!isPrefixed(moduleId, id)) throw new AgentModuleError({ code: "UNPREFIXED_CAPABILITY", moduleId, capabilityId: id });
+    if (!isPrefixed(moduleId, id))
+      throw new AgentModuleError({ code: "UNPREFIXED_CAPABILITY", moduleId, capabilityId: id });
     if (seen.has(id)) throw new AgentModuleError({ code: "DUPLICATE_CAPABILITY", moduleId, capabilityId: id });
     seen.add(id);
   }
 };
 
 // Every ref the manifest names needs an implementation, and nothing is implemented unnamed.
-const checkManifest = (module: AgentModule, kind: "agents" | "tools" | "workflows" | "skills", implemented: readonly string[]): void => {
+const checkManifest = (
+  module: AgentModule,
+  kind: "agents" | "tools" | "workflows" | "skills",
+  implemented: readonly string[],
+): void => {
   const manifest = module.manifest;
   if (manifest === undefined) return;
   const refs = new Set((manifest[kind] ?? []).map((ref) => ref.id));
   const unknown = [...refs].find((ref) => !implemented.includes(ref));
-  if (unknown !== undefined) throw new AgentModuleError({ code: "UNKNOWN_CAPABILITY_REF", moduleId: module.id, capabilityId: unknown });
+  if (unknown !== undefined)
+    throw new AgentModuleError({ code: "UNKNOWN_CAPABILITY_REF", moduleId: module.id, capabilityId: unknown });
   const unnamed = implemented.find((id) => !refs.has(id));
-  if (unnamed !== undefined) throw new AgentModuleError({ code: "MANIFEST_MISMATCH", moduleId: module.id, capabilityId: unnamed });
+  if (unnamed !== undefined)
+    throw new AgentModuleError({ code: "MANIFEST_MISMATCH", moduleId: module.id, capabilityId: unnamed });
 };
 
 // Commands are mutations named after their module's command contract (`command.<module>.<Name>`).
@@ -142,8 +156,10 @@ const checkCommands = (module: AgentModule): void => {
   const seen = new Set<string>();
   for (const { tool } of module.commands ?? []) {
     const named = tool.id.startsWith(`command.${module.id}.`) && tool.kind === "mutation";
-    if (!named) throw new AgentModuleError({ code: "UNPREFIXED_CAPABILITY", moduleId: module.id, capabilityId: tool.id });
-    if (seen.has(tool.id)) throw new AgentModuleError({ code: "DUPLICATE_CAPABILITY", moduleId: module.id, capabilityId: tool.id });
+    if (!named)
+      throw new AgentModuleError({ code: "UNPREFIXED_CAPABILITY", moduleId: module.id, capabilityId: tool.id });
+    if (seen.has(tool.id))
+      throw new AgentModuleError({ code: "DUPLICATE_CAPABILITY", moduleId: module.id, capabilityId: tool.id });
     seen.add(tool.id);
   }
 };
@@ -157,7 +173,8 @@ export const defineAgentModule = (module: AgentModule): AgentModule => {
   if (!MODULE_ID_PATTERN.test(module.id) || RESERVED_MODULE_IDS.has(module.id)) {
     throw new AgentModuleError({ code: "INVALID_MODULE_ID", moduleId: module.id });
   }
-  if (module.manifest !== undefined && module.manifest.id !== module.id) throw new AgentModuleError({ code: "MANIFEST_MISMATCH", moduleId: module.id });
+  if (module.manifest !== undefined && module.manifest.id !== module.id)
+    throw new AgentModuleError({ code: "MANIFEST_MISMATCH", moduleId: module.id });
   const agentIds = (module.agents ?? []).map((agent) => agent.id);
   const toolIds = (module.tools ?? []).map((tool) => tool.id);
   checkCapabilities(module.id, agentIds);

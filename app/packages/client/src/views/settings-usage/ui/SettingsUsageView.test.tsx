@@ -5,7 +5,7 @@ import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildTenantAgentSettings, buildUsageSummary, buildUsageTotals } from "#/entities/usage/usage.fixture.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildMember } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsUsageView } from "./SettingsUsageView.tsx";
@@ -26,7 +26,11 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     </main>,
     {
       path: `/o/${IDS.organization}/settings/usage`,
-      routes: shellRoutes(permissions, { "GET /v1/usage": ok(buildUsageSummary()), "GET /v1/agent-settings": ok(buildTenantAgentSettings()), ...routes }),
+      routes: shellRoutes(permissions, {
+        "GET /v1/usage": ok(buildUsageSummary()),
+        "GET /v1/agent-settings": ok(buildTenantAgentSettings()),
+        ...routes,
+      }),
     },
   );
 
@@ -54,7 +58,14 @@ describe("SettingsUsageView", () => {
   });
 
   it("breaks the month down by day, agent and user, naming agents and members", async () => {
-    const { container } = renderView({ [`GET /v1/organizations/${IDS.organization}/members`]: page([buildMember({ uid: IDS.user, displayName: "Ana Souza" })]) }, [...ADMIN, "core.member.read"]);
+    const { container } = renderView(
+      {
+        [`GET /v1/organizations/${IDS.organization}/members`]: page([
+          buildMember({ uid: IDS.user, displayName: "Ana Souza" }),
+        ]),
+      },
+      [...ADMIN, "core.member.read"],
+    );
     const days = await screen.findByRole("table", { name: "Custo por dia" });
     expect(within(days).getAllByRole("row")).toHaveLength(3);
     expect(within(days).getByRole("row", { name: /01\/10/u }).textContent).toMatch(/US\$\s12,00/u);
@@ -75,7 +86,11 @@ describe("SettingsUsageView", () => {
 
   it("says in words when usage is near the cap and when the cap is reached", async () => {
     renderView({
-      "GET /v1/usage": ok(buildUsageSummary({ totals: buildUsageTotals({ costMicroUsd: 45_000_000, inputTokens: 15_000_000, outputTokens: 5_000_000 }) })),
+      "GET /v1/usage": ok(
+        buildUsageSummary({
+          totals: buildUsageTotals({ costMicroUsd: 45_000_000, inputTokens: 15_000_000, outputTokens: 5_000_000 }),
+        }),
+      ),
     });
     const budget = await screen.findByRole("region", { name: "Orçamento" });
     expect(within(budget).getByText("Perto do limite")).toBeDefined();
@@ -88,7 +103,16 @@ describe("SettingsUsageView", () => {
     const { user } = renderView({
       "GET /v1/usage": (request: FakeRequest) => {
         months.push(request.query.get("month"));
-        return ok(buildUsageSummary({ month: request.query.get("month"), totals: buildUsageTotals({ calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0 }), byModel: [], byDay: [], byAgent: [], byUser: [] }));
+        return ok(
+          buildUsageSummary({
+            month: request.query.get("month"),
+            totals: buildUsageTotals({ calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0 }),
+            byModel: [],
+            byDay: [],
+            byAgent: [],
+            byUser: [],
+          }),
+        );
       },
     });
     await screen.findByRole("region", { name: "Totais do mês" });
@@ -107,7 +131,9 @@ describe("SettingsUsageView", () => {
   });
 
   it("says when the plan is below part of the organization's own cap", async () => {
-    renderView({ "GET /v1/agent-settings": ok(buildTenantAgentSettings({ ownBudget: { ...OWN_CAP, monthlyTokens: 30_000_000 } })) });
+    renderView({
+      "GET /v1/agent-settings": ok(buildTenantAgentSettings({ ownBudget: { ...OWN_CAP, monthlyTokens: 30_000_000 } })),
+    });
     const card = await screen.findByRole("region", { name: "Limite próprio da organização" });
     expect(await within(card).findByText(/onde o limite do plano é menor, vale o do plano/u)).toBeDefined();
   });
@@ -139,7 +165,9 @@ describe("SettingsUsageView", () => {
     await waitFor(() => expect(patches).toHaveLength(1));
     expect(patches[0]?.query.get("organizationId")).toBe(IDS.organization);
     expect(patches[0]?.body).toEqual({ budget: { monthlyMicroUsd: 20_000_000, monthlyTokens: 10_000_000 } });
-    expect(await within(card).findByText(/^Limite próprio em vigor: US\$\s20,00 e 10\.000\.000 tokens por mês\.$/u)).toBeDefined();
+    expect(
+      await within(card).findByText(/^Limite próprio em vigor: US\$\s20,00 e 10\.000\.000 tokens por mês\.$/u),
+    ).toBeDefined();
 
     // Removing lifts a cost guard: it asks first, and Cancel sends nothing.
     await user.click(await within(card).findByRole("button", { name: "Remover limite próprio" }));
@@ -155,15 +183,22 @@ describe("SettingsUsageView", () => {
 
   it("explains a cap above the plan instead of a generic validation error", async () => {
     const { user } = renderView({
-      "PATCH /v1/agent-settings": apiError(400, "VALIDATION_FAILED", [{ field: "budget.monthlyMicroUsd", issue: "ABOVE_PLAN" }]),
+      "PATCH /v1/agent-settings": apiError(400, "VALIDATION_FAILED", [
+        { field: "budget.monthlyMicroUsd", issue: "ABOVE_PLAN" },
+      ]),
     });
     const card = await screen.findByRole("region", { name: "Limite próprio da organização" });
     await user.click(await within(card).findByRole("button", { name: "Salvar limite" }));
-    expect((await within(card).findByRole("alert")).textContent).toContain("O limite informado é maior que o do plano.");
+    expect((await within(card).findByRole("alert")).textContent).toContain(
+      "O limite informado é maior que o do plano.",
+    );
   });
 
   it("closes the remove confirmation on a failure and shows why next to the form", async () => {
-    const { user } = renderView({ "GET /v1/agent-settings": ok(buildTenantAgentSettings({ ownBudget: OWN_CAP, budget: OWN_CAP })), "PATCH /v1/agent-settings": apiError(403, "FORBIDDEN") });
+    const { user } = renderView({
+      "GET /v1/agent-settings": ok(buildTenantAgentSettings({ ownBudget: OWN_CAP, budget: OWN_CAP })),
+      "PATCH /v1/agent-settings": apiError(403, "FORBIDDEN"),
+    });
     const card = await screen.findByRole("region", { name: "Limite próprio da organização" });
     await user.click(await within(card).findByRole("button", { name: "Remover limite próprio" }));
     await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remover limite" }));

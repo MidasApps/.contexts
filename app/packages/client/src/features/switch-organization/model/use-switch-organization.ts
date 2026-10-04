@@ -1,7 +1,7 @@
 "use client";
 
 import { setActiveOrganizationEndpoint } from "@core/contracts";
-import { useIsMutating, useMutation, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
+import { type UseMutationResult, useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";

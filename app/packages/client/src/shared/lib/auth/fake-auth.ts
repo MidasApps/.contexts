@@ -1,4 +1,11 @@
-import { AuthError, type AuthPort, type AuthState, type AuthUser, type EnrolledFactor, type MfaChallenge } from "./auth-port.ts";
+import {
+  AuthError,
+  type AuthPort,
+  type AuthState,
+  type AuthUser,
+  type EnrolledFactor,
+  type MfaChallenge,
+} from "./auth-port.ts";
 
 /** What the fake accepts: the current password, the one-time code and the enrolled factors. */
 export type FakeAuthOptions = {
@@ -14,7 +21,10 @@ export type FakeAuth = AuthPort & {
   /** Moves the fake to a new state and notifies subscribers (tests, stories, browser mode). */
   setState: (state: AuthState) => void;
   /** Replaces the claims `getIdTokenClaims` returns; a forced refresh applies `claimsAfterRefresh`. */
-  setClaims: (claims: Readonly<Record<string, unknown>>, claimsAfterRefresh?: Readonly<Record<string, unknown>>) => void;
+  setClaims: (
+    claims: Readonly<Record<string, unknown>>,
+    claimsAfterRefresh?: Readonly<Record<string, unknown>>,
+  ) => void;
   /** The password after `updatePassword` calls. */
   currentPassword: () => string;
   /** Every `sendPasswordReset` call, oldest first. */
@@ -45,18 +55,27 @@ const createFakeSecurity = (initial: FakeAuthOptions, isSignedIn: () => boolean)
   let factors: EnrolledFactor[] = [...(initial.factors ?? [])];
   let recentlyReauthenticated = false;
   const enroll = (factor: EnrolledFactor["factor"], displayName: string, phoneNumber: string | null): void => {
-    factors = [...factors, { uid: `factor-${String(factors.length + 1)}`, factor, displayName, phoneNumber, enrolledAt: FAKE_ENROLLED_AT }];
+    factors = [
+      ...factors,
+      { uid: `factor-${String(factors.length + 1)}`, factor, displayName, phoneNumber, enrolledAt: FAKE_ENROLLED_AT },
+    ];
   };
-  const reauthChallenge = (): MfaChallenge => ({ hints: factors.map(({ uid, factor, displayName, phoneNumber }) => ({ uid, factor, displayName, phoneNumber })), handle: REAUTH_HANDLE });
+  const reauthChallenge = (): MfaChallenge => ({
+    hints: factors.map(({ uid, factor, displayName, phoneNumber }) => ({ uid, factor, displayName, phoneNumber })),
+    handle: REAUTH_HANDLE,
+  });
   return {
     currentPassword: () => password,
     getEnrolledFactors: () => (isSignedIn() ? [...factors] : []),
-    unenrollMfa: (factorUid: string) => Promise.resolve(void (factors = factors.filter((factor) => factor.uid !== factorUid))),
+    unenrollMfa: (factorUid: string) =>
+      Promise.resolve(void (factors = factors.filter((factor) => factor.uid !== factorUid))),
     reauthenticate: (candidate: string) =>
       settle(() => {
         if (candidate !== password) throw new AuthError("INVALID_CREDENTIALS");
         recentlyReauthenticated = true;
-        return factors.length === 0 ? { kind: "signed-in" as const } : { kind: "mfa-required" as const, challenge: reauthChallenge() };
+        return factors.length === 0
+          ? { kind: "signed-in" as const }
+          : { kind: "mfa-required" as const, challenge: reauthChallenge() };
       }),
     updatePassword: (next: string) =>
       settle(() => {
@@ -84,7 +103,10 @@ const createFakeSecurity = (initial: FakeAuthOptions, isSignedIn: () => boolean)
 };
 
 /** Account creation and password reset emails, recorded for assertions. */
-const createFakeAccounts = (initial: FakeAuthOptions, signIn: (user: Pick<AuthUser, "email" | "displayName">) => void) => {
+const createFakeAccounts = (
+  initial: FakeAuthOptions,
+  signIn: (user: Pick<AuthUser, "email" | "displayName">) => void,
+) => {
   const taken = new Set(initial.takenEmails ?? []);
   const resets: { email: string; locale: string }[] = [];
   const created: { email: string; displayName: string }[] = [];
@@ -109,7 +131,11 @@ const createFakeAccounts = (initial: FakeAuthOptions, signIn: (user: Pick<AuthUs
  * `token-<uid>` (`-fresh` when forced), claims come from `setClaims`. Sign-in MFA rejects (tests
  * override it); enrollment and re-authentication accept `FAKE_MFA_CODE` and `options.password`.
  */
-export const createFakeAuth = (user: AuthUser, initial: AuthState = { status: "signed-out" }, options: FakeAuthOptions = {}): FakeAuth => {
+export const createFakeAuth = (
+  user: AuthUser,
+  initial: AuthState = { status: "signed-out" },
+  options: FakeAuthOptions = {},
+): FakeAuth => {
   let state = initial;
   let claims: Readonly<Record<string, unknown>> = {};
   let refreshedClaims: Readonly<Record<string, unknown>> | undefined;
@@ -136,12 +162,15 @@ export const createFakeAuth = (user: AuthUser, initial: AuthState = { status: "s
     },
     getIdToken: ({ forceRefresh }) => {
       if (forceRefresh && refreshedClaims !== undefined) claims = refreshedClaims;
-      return Promise.resolve(state.status === "signed-in" ? `token-${state.user.uid}${forceRefresh ? "-fresh" : ""}` : null);
+      return Promise.resolve(
+        state.status === "signed-in" ? `token-${state.user.uid}${forceRefresh ? "-fresh" : ""}` : null,
+      );
     },
     getIdTokenClaims: () => Promise.resolve(state.status === "signed-in" ? claims : null),
     signOut: () => Promise.resolve(setState({ status: "signed-out" })),
     // Only the re-authentication challenge of `reauthenticate` resolves here; sign-in MFA tests override these.
-    sendMfaSmsCode: (challenge) => (challenge.handle === REAUTH_HANDLE ? Promise.resolve("verification-reauth") : notSupported()),
+    sendMfaSmsCode: (challenge) =>
+      challenge.handle === REAUTH_HANDLE ? Promise.resolve("verification-reauth") : notSupported(),
     resolveMfa: async (challenge, answer) => {
       if (challenge.handle !== REAUTH_HANDLE) return notSupported();
       checkCode(answer.code);

@@ -5,7 +5,11 @@ import { useFormatter, useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { Popover, PopoverContent, PopoverTrigger } from "#/shared/ui/molecules/Popover/Popover.tsx";
 
-export type ContextUsage = { readonly inputTokens: number; readonly outputTokens: number; readonly reasoningTokens?: number | undefined };
+export type ContextUsage = {
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly reasoningTokens?: number | undefined;
+};
 
 export type ContextProps = Omit<ComponentProps<"button">, "children"> & {
   usage: ContextUsage;
@@ -38,12 +42,24 @@ export function Context({ usage, maxTokens, className, ...props }: ContextProps)
       <PopoverTrigger
         data-slot="context"
         aria-label={t("label", { percent })}
-        className={cn("inline-flex h-8 items-center gap-1.5 rounded-sm px-2 font-mono text-caption text-muted-foreground tabular-nums hover:bg-muted", className)}
+        className={cn(
+          "inline-flex h-8 items-center gap-1.5 rounded-sm px-2 font-mono text-caption text-muted-foreground tabular-nums hover:bg-muted",
+          className,
+        )}
         {...props}
       >
         <svg aria-hidden="true" viewBox="0 0 18 18" className="size-4 -rotate-90">
           <circle cx="9" cy="9" r={RADIUS} fill="none" strokeWidth="2" className="stroke-border" />
-          <circle cx="9" cy="9" r={RADIUS} fill="none" strokeWidth="2" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={CIRCUMFERENCE * (1 - ratio)} className="stroke-blue" />
+          <circle
+            cx="9"
+            cy="9"
+            r={RADIUS}
+            fill="none"
+            strokeWidth="2"
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
+            className="stroke-blue"
+          />
         </svg>
         {percent}
       </PopoverTrigger>

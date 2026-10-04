@@ -1,15 +1,38 @@
 "use client";
 
 import type { Conversation } from "@core/contracts";
-import { ArchiveIcon, ArchiveRestoreIcon, EllipsisIcon, FileTextIcon, PencilIcon, PinIcon, PinOffIcon, Trash2Icon } from "lucide-react";
+import {
+  ArchiveIcon,
+  ArchiveRestoreIcon,
+  EllipsisIcon,
+  FileTextIcon,
+  PencilIcon,
+  PinIcon,
+  PinOffIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
@@ -24,14 +47,23 @@ export type ConversationActionsMenuProps = {
   onDeleted?: ((conversationId: string) => void) | undefined;
 };
 
-type Summary = { readonly status: "closed" } | { readonly status: "loading" } | { readonly status: "done"; readonly text: string } | { readonly status: "failed"; readonly message: string };
+type Summary =
+  | { readonly status: "closed" }
+  | { readonly status: "loading" }
+  | { readonly status: "done"; readonly text: string }
+  | { readonly status: "failed"; readonly message: string };
 
 /**
  * The actions of one conversation in the history (SP4 spec §4.1): rename, pin, archive,
  * summarize and delete. Deleting asks first — it removes the messages too. The summary is shown
  * in a dialog as soon as it is asked for (it takes a model call), then stays in the search words.
  */
-export function ConversationActionsMenu({ organizationId, conversation, onRename, onDeleted }: ConversationActionsMenuProps) {
+export function ConversationActionsMenu({
+  organizationId,
+  conversation,
+  onRename,
+  onDeleted,
+}: ConversationActionsMenuProps) {
   const t = useTranslations("chat.history");
   const describe = useDescribeError();
   const actions = useConversationActions(organizationId);
@@ -104,7 +136,11 @@ export function ConversationActionsMenu({ organizationId, conversation, onRename
             {t(conversation.pinned ? "actions.unpin" : "actions.pin")}
           </DropdownMenuItem>
           <DropdownMenuItem disabled={toggling} onSelect={() => void toggle(actions.toggleArchive)}>
-            {conversation.archivedAt === null ? <ArchiveIcon aria-hidden="true" /> : <ArchiveRestoreIcon aria-hidden="true" />}
+            {conversation.archivedAt === null ? (
+              <ArchiveIcon aria-hidden="true" />
+            ) : (
+              <ArchiveRestoreIcon aria-hidden="true" />
+            )}
             {t(conversation.archivedAt === null ? "actions.archive" : "actions.restore")}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => void summarize()}>
@@ -131,14 +167,19 @@ export function ConversationActionsMenu({ organizationId, conversation, onRename
         onConfirm={remove.confirm}
         error={remove.error}
       />
-      <Dialog open={summary.status !== "closed"} onOpenChange={(open) => (open ? undefined : setSummary({ status: "closed" }))}>
+      <Dialog
+        open={summary.status !== "closed"}
+        onOpenChange={(open) => (open ? undefined : setSummary({ status: "closed" }))}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("summary.title", { title })}</DialogTitle>
             <DialogDescription>{t("summary.description")}</DialogDescription>
           </DialogHeader>
           {summary.status === "loading" ? <LoadingState variant="spinner" label={t("summary.loading")} /> : null}
-          {summary.status === "done" ? <p className="text-sm whitespace-pre-wrap text-foreground">{summary.text}</p> : null}
+          {summary.status === "done" ? (
+            <p className="text-sm whitespace-pre-wrap text-foreground">{summary.text}</p>
+          ) : null}
           {summary.status === "failed" ? (
             <p role="alert" className="text-sm text-destructive-text">
               {summary.message}

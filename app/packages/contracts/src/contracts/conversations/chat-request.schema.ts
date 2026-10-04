@@ -35,7 +35,13 @@ export const ToolApprovalResponsePartSchema = z.strictObject({
     .strictObject({
       id: z.string().min(1).max(400).meta(none("Approval id, <runId>::<toolCallId>.")),
       approved: z.boolean().meta(none("Whether the member approved the call.")),
-      reason: z.string().trim().min(1).max(MAX_APPROVAL_REASON_CHARS).optional().meta(personal("Why the member declined or approved.")),
+      reason: z
+        .string()
+        .trim()
+        .min(1)
+        .max(MAX_APPROVAL_REASON_CHARS)
+        .optional()
+        .meta(personal("Why the member declined or approved.")),
     })
     .meta(personal("The member's decision.")),
 });
@@ -62,9 +68,13 @@ export const ChatRequestSchema = z
   .strictObject({
     organizationId: OrganizationIdSchema.optional().meta(none("Organization of a new conversation.")),
     projectId: ProjectIdSchema.optional().meta(none("Project of a new conversation; organization level when absent.")),
-    conversationId: ConversationIdSchema.optional().meta(none("Existing conversation; a new one is created when absent.")),
+    conversationId: ConversationIdSchema.optional().meta(
+      none("Existing conversation; a new one is created when absent."),
+    ),
     agentId: ChatAgentIdSchema.optional().meta(none("Chat agent of a new conversation (default assistant).")),
-    message: z.discriminatedUnion("role", [UserMessageSchema, ApprovalMessageSchema]).meta(personal("The last message of the chat.")),
+    message: z
+      .discriminatedUnion("role", [UserMessageSchema, ApprovalMessageSchema])
+      .meta(personal("The last message of the chat.")),
     trigger: z.enum(["submit-message", "regenerate-message"]).optional().meta(none("useChat trigger.")),
     attachments: z
       .array(FileIdSchema)
@@ -86,15 +96,26 @@ export type ChatRequest = z.infer<typeof ChatRequestSchema>;
 export const ChatRequestContract = defineContract(ChatRequestSchema, {
   id: "conversations.ChatRequest",
   kind: "command",
-  description: "One chat turn: the member's message (or approval responses) sent to the assistant, answered as a UI message stream.",
+  description:
+    "One chat turn: the member's message (or approval responses) sent to the assistant, answered as a UI message stream.",
   examples: [
-    { organizationId: EXAMPLE_IDS.organization, message: { id: "msg-1", role: "user", parts: [{ type: "text", text: "Summarize the onboarding guide." }] } },
+    {
+      organizationId: EXAMPLE_IDS.organization,
+      message: { id: "msg-1", role: "user", parts: [{ type: "text", text: "Summarize the onboarding guide." }] },
+    },
     {
       conversationId: EXAMPLE_CONVERSATION_ID,
       message: {
         id: "msg-2",
         role: "assistant",
-        parts: [{ type: "tool-command_tenancy_CreateProjectInput", toolCallId: "call-1", state: "approval-responded", approval: { id: "run-1::call-1", approved: true } }],
+        parts: [
+          {
+            type: "tool-command_tenancy_CreateProjectInput",
+            toolCallId: "call-1",
+            state: "approval-responded",
+            approval: { id: "run-1::call-1", approved: true },
+          },
+        ],
       },
     },
   ],

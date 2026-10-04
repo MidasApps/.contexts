@@ -232,7 +232,9 @@ describe("AI Elements (ported)", () => {
         <Suggestion title="Consultar dados" description="Entidades" prompt="Quais dados?" onSelect={onSelect} />
       </Suggestions>,
     );
-    await user.click(within(screen.getByRole("list", { name: "Sugestões" })).getByRole("button", { name: /Consultar dados/ }));
+    await user.click(
+      within(screen.getByRole("list", { name: "Sugestões" })).getByRole("button", { name: /Consultar dados/ }),
+    );
     expect(onSelect).toHaveBeenCalledWith("Quais dados?");
   });
 
@@ -261,7 +263,12 @@ describe("AI Elements (ported)", () => {
         </ChainOfThought>
         <Context usage={{ inputTokens: 1000, outputTokens: 500 }} maxTokens={6000} />
         <Attachments label="Anexos">
-          <Attachment name="diagrama.png" mediaType="image/png" detail="48 KB" action={<AttachmentRemove label="Remover diagrama.png" />} />
+          <Attachment
+            name="diagrama.png"
+            mediaType="image/png"
+            detail="48 KB"
+            action={<AttachmentRemove label="Remover diagrama.png" />}
+          />
         </Attachments>
         <SpeechInput recording label="Segurar para falar" />
         <AudioPlayer label="Resposta em áudio" src="data:audio/mpeg;base64," />

@@ -3,7 +3,10 @@ import { z } from "zod";
 import { defineContract } from "./contract.ts";
 import { createContractRegistry } from "./registry.ts";
 
-const buildThing = (id = "example.Thing", schema = z.object({ title: z.string().meta({ description: "Title.", pii: "none" }) })) =>
+const buildThing = (
+  id = "example.Thing",
+  schema = z.object({ title: z.string().meta({ description: "Title.", pii: "none" }) }),
+) =>
   defineContract(schema, {
     id,
     kind: "entity",

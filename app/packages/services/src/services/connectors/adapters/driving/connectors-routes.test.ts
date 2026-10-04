@@ -4,7 +4,10 @@ import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
 import type { ErrorEnvelope } from "../../../shared/http/error-envelope.ts";
 import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
 import { createConnectorsServices } from "../../composition.ts";
-import { createInMemoryConnectorRepository, createInMemorySecretStore } from "../driven/in-memory-connector-adapters.ts";
+import {
+  createInMemoryConnectorRepository,
+  createInMemorySecretStore,
+} from "../driven/in-memory-connector-adapters.ts";
 import { buildConnectorsRoutes } from "./connectors-route-handler.ts";
 
 const ORG_A = "OrgAaaaaaaaaaaaaaaaaa";
@@ -22,7 +25,13 @@ const setup = () => {
   });
   const repository = createInMemoryConnectorRepository();
   const secrets = createInMemorySecretStore();
-  const connectors = createConnectorsServices({ connectors: repository, secrets, audit: pipeline.audit, unitOfWork: inMemoryUnitOfWork, clock });
+  const connectors = createConnectorsServices({
+    connectors: repository,
+    secrets,
+    audit: pipeline.audit,
+    unitOfWork: inMemoryUnitOfWork,
+    clock,
+  });
   return { routes: buildConnectorsRoutes({ pipeline, connectors }), repository, secrets };
 };
 
@@ -57,8 +66,12 @@ describe("/v1 connectors", () => {
     expect((await create(routes, MCP_BODY, "mia")).status).toBe(403);
     expect((await callRoute(routes, "connectors.list", base(ORG_A), { as: "mia" })).status).toBe(403);
     const connector = await dataOf<Connector>(await create(routes));
-    expect((await callRoute(routes, "connectors.get", `${base(ORG_A)}/${connector.id}`, { as: "bob" })).status).toBe(404);
-    expect((await callRoute(routes, "connectors.get", `${base(ORG_B)}/${connector.id}`, { as: "bob" })).status).toBe(404);
+    expect((await callRoute(routes, "connectors.get", `${base(ORG_A)}/${connector.id}`, { as: "bob" })).status).toBe(
+      404,
+    );
+    expect((await callRoute(routes, "connectors.get", `${base(ORG_B)}/${connector.id}`, { as: "bob" })).status).toBe(
+      404,
+    );
   });
 
   it("requires allowedHosts, https and an endpoint host inside the allowlist", async () => {
@@ -78,7 +91,11 @@ describe("/v1 connectors", () => {
   it("stores the secret write-only: 204, never in a response, deleted with the connector", async () => {
     const { routes, secrets } = setup();
     const connector = await dataOf<Connector>(await create(routes));
-    const put = await callRoute(routes, "connectors.setSecret", `${base(ORG_A)}/${connector.id}/secret`, { method: "PUT", as: "alice", body: { value: SECRET } });
+    const put = await callRoute(routes, "connectors.setSecret", `${base(ORG_A)}/${connector.id}/secret`, {
+      method: "PUT",
+      as: "alice",
+      body: { value: SECRET },
+    });
     expect(put.status).toBe(204);
     const name = `connector-${ORG_A}-${connector.id}`;
     expect(secrets.values.get(name)).toBe(SECRET);
@@ -86,7 +103,10 @@ describe("/v1 connectors", () => {
     const text = await read.text();
     expect(text).not.toContain(SECRET);
     expect((JSON.parse(text) as { data: Connector }).data.secretRef).toBe(name);
-    const removed = await callRoute(routes, "connectors.delete", `${base(ORG_A)}/${connector.id}`, { method: "DELETE", as: "alice" });
+    const removed = await callRoute(routes, "connectors.delete", `${base(ORG_A)}/${connector.id}`, {
+      method: "DELETE",
+      as: "alice",
+    });
     expect(removed.status).toBe(204);
     expect(secrets.values.has(name)).toBe(false);
   });
@@ -95,10 +115,21 @@ describe("/v1 connectors", () => {
     const { routes } = setup();
     const connector = await dataOf<Connector>(await create(routes));
     const url = `${base(ORG_A)}/${connector.id}`;
-    const patched = await callRoute(routes, "connectors.update", url, { method: "PATCH", as: "alice", body: { status: "disabled", name: "docs" } });
+    const patched = await callRoute(routes, "connectors.update", url, {
+      method: "PATCH",
+      as: "alice",
+      body: { status: "disabled", name: "docs" },
+    });
     expect(await dataOf<Connector>(patched)).toMatchObject({ status: "disabled", name: "docs" });
-    const wrongType = await callRoute(routes, "connectors.update", url, { method: "PATCH", as: "alice", body: { config: { allowedRelations: ["public.orders"] } } });
+    const wrongType = await callRoute(routes, "connectors.update", url, {
+      method: "PATCH",
+      as: "alice",
+      body: { config: { allowedRelations: ["public.orders"] } },
+    });
     expect(wrongType.status).toBe(400);
-    expect((await callRoute(routes, "connectors.update", url, { method: "PATCH", as: "mia", body: { status: "active" } })).status).toBe(403);
+    expect(
+      (await callRoute(routes, "connectors.update", url, { method: "PATCH", as: "mia", body: { status: "active" } }))
+        .status,
+    ).toBe(403);
   });
 });

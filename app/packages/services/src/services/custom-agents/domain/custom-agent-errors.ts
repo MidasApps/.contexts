@@ -50,7 +50,10 @@ export class InvalidCustomDefinitionError extends Error {
   readonly details: readonly ErrorDetail[];
 
   constructor(details: readonly ErrorDetail[], options?: ErrorOptions) {
-    super(`invalid custom definition: ${details.map((detail) => `${detail.field} ${detail.issue}`).join(", ")}`, options);
+    super(
+      `invalid custom definition: ${details.map((detail) => `${detail.field} ${detail.issue}`).join(", ")}`,
+      options,
+    );
     this.name = "InvalidCustomDefinitionError";
     this.details = details;
   }

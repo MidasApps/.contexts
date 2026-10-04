@@ -8,5 +8,11 @@ import { cn } from "#/shared/lib/cn.ts";
  * pulse would. The global reduced-motion rule stops it.
  */
 export function Shimmer({ className, ...props }: ComponentProps<"span">) {
-  return <span data-slot="shimmer" className={cn("animate-shimmer text-muted-foreground motion-reduce:animate-none", className)} {...props} />;
+  return (
+    <span
+      data-slot="shimmer"
+      className={cn("animate-shimmer text-muted-foreground motion-reduce:animate-none", className)}
+      {...props}
+    />
+  );
 }

@@ -22,7 +22,11 @@ describe("Firestore approval stats (emulator)", () => {
       ["tenantB", "approved", "2099-02-27T00:00:00.000Z"],
       ["tenantB", "rejected", "2099-02-28T00:00:00.000Z"],
     ];
-    await Promise.all(rows.map(([tenantId, status, updatedAt]) => requests.doc().set({ tenantId, status, updatedAt: at(updatedAt), createdAt: at(updatedAt) })));
+    await Promise.all(
+      rows.map(([tenantId, status, updatedAt]) =>
+        requests.doc().set({ tenantId, status, updatedAt: at(updatedAt), createdAt: at(updatedAt) }),
+      ),
+    );
     const stats = createFirestoreApprovalStats({ firestore: firebase.firestore });
     expect(await stats.countDecidedSince(WINDOW_START)).toEqual({ approved: 3, rejected: 1 });
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDateTime, type DateTimeStyle } from "@core/i18n";
+import { type DateTimeStyle, formatDateTime } from "@core/i18n";
 import { useCallback } from "react";
 import { useLocale, useTimeZone } from "use-intl";
 
@@ -13,5 +13,8 @@ export const useFormatDateTime = (): ((iso: string, style?: DateTimeStyle) => st
   const locale = useLocale();
   const timeZone = useTimeZone() ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
   // Stable per locale and zone: tables list it in their column dependencies, and new columns remount cells.
-  return useCallback((iso: string, style: DateTimeStyle = "datetime") => formatDateTime(iso, { locale, timeZone, style }), [locale, timeZone]);
+  return useCallback(
+    (iso: string, style: DateTimeStyle = "datetime") => formatDateTime(iso, { locale, timeZone, style }),
+    [locale, timeZone],
+  );
 };

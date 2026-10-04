@@ -46,8 +46,8 @@ export const createFakeEmbeddingModel = (dimensions = FAKE_EMBEDDING_DIMENSIONS)
   supportsParallelCalls: true,
   doEmbed: ({ values }) =>
     deferred(() => ({
-    embeddings: values.map((value) => embedFakeText(value, dimensions)),
-    usage: { tokens: values.reduce((sum, value) => sum + tokenize(value).length, 0) },
-    warnings: [],
-  })),
+      embeddings: values.map((value) => embedFakeText(value, dimensions)),
+      usage: { tokens: values.reduce((sum, value) => sum + tokenize(value).length, 0) },
+      warnings: [],
+    })),
 });

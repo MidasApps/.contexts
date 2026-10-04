@@ -1,20 +1,32 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
+import type { ShellNavItem } from "#/shared/lib/shell/shell-types.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { ok } from "#/shared/testing/fake-api.ts";
 import { buildMe } from "#/shared/testing/fixtures.ts";
-import type { ShellNavItem } from "#/shared/lib/shell/shell-types.ts";
 import { AdminSlotView } from "./AdminSlotView.tsx";
 
-const STAFF_MANAGE: ShellNavItem = { id: "core.admin.staff", slot: "admin", labelKey: "shell.nav.admin.users", icon: "shield", permission: "platform.staff.manage", order: 5, target: { kind: "admin", rest: "staff" } };
+const STAFF_MANAGE: ShellNavItem = {
+  id: "core.admin.staff",
+  slot: "admin",
+  labelKey: "shell.nav.admin.users",
+  icon: "shield",
+  permission: "platform.staff.manage",
+  order: 5,
+  target: { kind: "admin", rest: "staff" },
+};
 
 const renderSlot = (path: string) =>
   renderApp(
     <main>
       <AdminSlotView />
     </main>,
-    { path, navigation: [STAFF_MANAGE], routes: { "GET /v1/me": ok(buildMe({ isPlatformStaff: true, platformRole: "platform-support" })) } },
+    {
+      path,
+      navigation: [STAFF_MANAGE],
+      routes: { "GET /v1/me": ok(buildMe({ isPlatformStaff: true, platformRole: "platform-support" })) },
+    },
   );
 
 describe("AdminSlotView", () => {

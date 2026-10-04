@@ -21,10 +21,14 @@ describe("createUnitTypeRegistry", () => {
 
   it("rejects duplicate ids and parents that are not registered types", () => {
     expect(() => createUnitTypeRegistry([site, site])).toThrow(UnitTypeRegistryError);
-    expect(() => createUnitTypeRegistry([room])).toThrow(expect.objectContaining({ code: "UNKNOWN_PARENT_TYPE", unitTypeId: "sample.room" }));
+    expect(() => createUnitTypeRegistry([room])).toThrow(
+      expect.objectContaining({ code: "UNKNOWN_PARENT_TYPE", unitTypeId: "sample.room" }),
+    );
   });
 
   it("rejects an invalid definition", () => {
-    expect(() => createUnitTypeRegistry([{ ...site, id: "Site" }])).toThrow(expect.objectContaining({ code: "INVALID_UNIT_TYPE" }));
+    expect(() => createUnitTypeRegistry([{ ...site, id: "Site" }])).toThrow(
+      expect.objectContaining({ code: "INVALID_UNIT_TYPE" }),
+    );
   });
 });

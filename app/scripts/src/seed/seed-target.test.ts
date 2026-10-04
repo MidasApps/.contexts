@@ -24,7 +24,9 @@ describe("resolveSeedTarget", () => {
   });
 
   it("takes each seeded user's password from its SEED_*_PASSWORD variable", () => {
-    expect(resolveSeedTarget({ ...LOCAL_ENV, SEED_STAFF_PASSWORD: "staff-secret", SEED_MEMBER_PASSWORD: "" }).users).toMatchObject({
+    expect(
+      resolveSeedTarget({ ...LOCAL_ENV, SEED_STAFF_PASSWORD: "staff-secret", SEED_MEMBER_PASSWORD: "" }).users,
+    ).toMatchObject({
       staff: { password: "staff-secret" },
       member: { password: "demo-member-password" },
     });
@@ -35,18 +37,28 @@ describe("resolveSeedTarget", () => {
   });
 
   it("takes the owner password from SEED_OWNER_PASSWORD", () => {
-    expect(resolveSeedTarget({ ...LOCAL_ENV, SEED_OWNER_PASSWORD: "another-secret" }).owner.password).toBe("another-secret");
+    expect(resolveSeedTarget({ ...LOCAL_ENV, SEED_OWNER_PASSWORD: "another-secret" }).owner.password).toBe(
+      "another-secret",
+    );
   });
 
   it.each([
     ["a non-demo project", { FIREBASE_PROJECT_ID: "acme-prod" }, "FIREBASE_PROJECT_ID"],
     ["no auth emulator", { FIREBASE_AUTH_EMULATOR_HOST: undefined }, "FIREBASE_AUTH_EMULATOR_HOST"],
-    ["a remote auth emulator host", { FIREBASE_AUTH_EMULATOR_HOST: "auth.example.com:9099" }, "FIREBASE_AUTH_EMULATOR_HOST"],
+    [
+      "a remote auth emulator host",
+      { FIREBASE_AUTH_EMULATOR_HOST: "auth.example.com:9099" },
+      "FIREBASE_AUTH_EMULATOR_HOST",
+    ],
     ["an environment other than local", { APP_ENV: "staging" }, "APP_ENV"],
     ["a short password", { SEED_OWNER_PASSWORD: "12345" }, "SEED_OWNER_PASSWORD"],
     ["a short member password", { SEED_MEMBER_PASSWORD: "12345" }, "SEED_MEMBER_PASSWORD"],
     ["no firestore emulator", { FIRESTORE_EMULATOR_HOST: undefined }, "FIRESTORE_EMULATOR_HOST"],
-    ["a remote firestore emulator host", { FIRESTORE_EMULATOR_HOST: "firestore.example.com:8080" }, "FIRESTORE_EMULATOR_HOST"],
+    [
+      "a remote firestore emulator host",
+      { FIRESTORE_EMULATOR_HOST: "firestore.example.com:8080" },
+      "FIRESTORE_EMULATOR_HOST",
+    ],
   ])("refuses %s and names the variable, never its value", (_label, overrides, variable) => {
     const env = { ...LOCAL_ENV, SEED_OWNER_PASSWORD: "hunter2-value", ...overrides };
     const error: unknown = (() => {

@@ -10,7 +10,10 @@ import type { UsageSink } from "../ports/usage-sink.ts";
 import { makeReportTenantUsage } from "./report-tenant-usage.ts";
 
 // Needs the compose container and `pnpm db:migrate` (migrations 0006–0009).
-const sql = createPostgresClient({ DATABASE_URL: process.env.DATABASE_URL ?? "postgresql://app:app@127.0.0.1:5432/app" }, { max: 2 });
+const sql = createPostgresClient(
+  { DATABASE_URL: process.env.DATABASE_URL ?? "postgresql://app:app@127.0.0.1:5432/app" },
+  { max: 2 },
+);
 const repository = createPostgresUsageRepository(sql);
 const reports = createPostgresUsageReportRepository(sql);
 const TENANT_A = "usageReportTenantA0";
@@ -58,7 +61,13 @@ const setup = (now = NOW) => {
   const writer = createInMemoryAuditLogWriter();
   const clock = fixedClock(now);
   const recorded = recordingSink();
-  const report = makeReportTenantUsage({ repository, reports, sink: recorded.sink, audit: makeRecordAudit({ writer, clock }), clock });
+  const report = makeReportTenantUsage({
+    repository,
+    reports,
+    sink: recorded.sink,
+    audit: makeRecordAudit({ writer, clock }),
+    clock,
+  });
   return { report, writer, ...recorded };
 };
 
@@ -101,13 +110,19 @@ describe("report tenant usage (Postgres)", () => {
     const second = await report({ tenantId: TENANT_A, requestId: "r2" });
     expect(second).toMatchObject({ rollups: 3, exportedCalls: 0 });
     expect(calls).toHaveLength(3);
-    const [stored] = await sql<{ count: string }[]>`SELECT count(*) FROM usage.daily_rollups WHERE tenant_id = ${TENANT_A}`;
+    const [stored] = await sql<
+      { count: string }[]
+    >`SELECT count(*) FROM usage.daily_rollups WHERE tenant_id = ${TENANT_A}`;
     expect(stored?.count).toBe("3");
   });
 
   it("keeps tenants apart and holds back ledger rows inside the export lag", async () => {
     const { report, calls } = setup();
-    expect(await report({ tenantId: TENANT_B, requestId: "r1" })).toMatchObject({ rollups: 1, exportedCalls: 1, newAlerts: [] });
+    expect(await report({ tenantId: TENANT_B, requestId: "r1" })).toMatchObject({
+      rollups: 1,
+      exportedCalls: 1,
+      newAlerts: [],
+    });
     expect(calls.every((row) => row.tenantId === TENANT_B)).toBe(true);
     const later = setup("2026-09-30T12:30:00.000Z");
     expect(await later.report({ tenantId: TENANT_B, requestId: "r2" })).toMatchObject({ exportedCalls: 1 });

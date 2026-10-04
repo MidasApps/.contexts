@@ -126,7 +126,10 @@ export function DropdownMenuLabel({
     <DropdownMenuPrimitive.Label
       data-slot="dropdown-menu-label"
       data-inset={inset}
-      className={cn("px-2 pt-2 pb-1 font-mono text-tiny tracking-widest text-muted-foreground uppercase data-[inset]:pl-8", className)}
+      className={cn(
+        "px-2 pt-2 pb-1 font-mono text-tiny tracking-widest text-muted-foreground uppercase data-[inset]:pl-8",
+        className,
+      )}
       {...props}
     />
   );
@@ -163,7 +166,11 @@ export function DropdownMenuSubTrigger({
     <DropdownMenuPrimitive.SubTrigger
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
-      className={cn(menuItemClasses, "data-[inset]:pl-8 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground", className)}
+      className={cn(
+        menuItemClasses,
+        "data-[inset]:pl-8 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+        className,
+      )}
       {...props}
     >
       {children}
@@ -172,7 +179,10 @@ export function DropdownMenuSubTrigger({
   );
 }
 
-export function DropdownMenuSubContent({ className, ...props }: ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
+export function DropdownMenuSubContent({
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.SubContent

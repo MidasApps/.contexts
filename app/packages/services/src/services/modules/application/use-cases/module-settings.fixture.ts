@@ -1,5 +1,12 @@
 // Test world for the module settings use cases: fresh per call (rule `testing`).
-import { defineContract, MoneySchema, OrganizationIdSchema, UserIdSchema, type PermissionDefinition, type Principal } from "@core/contracts";
+import {
+  defineContract,
+  MoneySchema,
+  OrganizationIdSchema,
+  type PermissionDefinition,
+  type Principal,
+  UserIdSchema,
+} from "@core/contracts";
 import { z } from "zod";
 import { createInMemoryAccessStore } from "../../../access/adapters/driven/in-memory-access-store.ts";
 import { createAccessCore } from "../../../access/composition.ts";
@@ -35,8 +42,20 @@ export const SAMPLE_SETTINGS: ModuleSettingsDefinition = {
 };
 
 export const SAMPLE_PERMISSIONS: PermissionDefinition[] = [
-  { id: "sample.item.read", descriptionKey: "sample.permissions.item.read", kind: "read", scope: "tenant", defaultRoles: ["owner", "admin", "member", "viewer"] },
-  { id: "sample.item.write", descriptionKey: "sample.permissions.item.write", kind: "write", scope: "tenant", defaultRoles: ["owner", "admin"] },
+  {
+    id: "sample.item.read",
+    descriptionKey: "sample.permissions.item.read",
+    kind: "read",
+    scope: "tenant",
+    defaultRoles: ["owner", "admin", "member", "viewer"],
+  },
+  {
+    id: "sample.item.write",
+    descriptionKey: "sample.permissions.item.write",
+    kind: "write",
+    scope: "tenant",
+    defaultRoles: ["owner", "admin"],
+  },
 ];
 
 export const validValues = { greeting: "Olá", defaultBudget: { amountMinor: 150_000, currency: "BRL" } };
@@ -49,9 +68,23 @@ export const buildModuleSettingsWorld = () => {
   const store = createInMemoryAccessStore();
   store.putOrganization({ id: "org-a" });
   for (const uid of ["owner-1", "viewer-1", "stranger"]) store.putUser(uid);
-  store.putGrant({ tenantId: "org-a", principalId: "owner-1", nodeId: "org-a", roles: [{ kind: "system", key: "owner" }] });
-  store.putGrant({ tenantId: "org-a", principalId: "viewer-1", nodeId: "org-a", roles: [{ kind: "system", key: "viewer" }] });
-  const access = createAccessCore({ permissions: [{ moduleId: "sample", permissions: SAMPLE_PERMISSIONS }], readers: store, clock });
+  store.putGrant({
+    tenantId: "org-a",
+    principalId: "owner-1",
+    nodeId: "org-a",
+    roles: [{ kind: "system", key: "owner" }],
+  });
+  store.putGrant({
+    tenantId: "org-a",
+    principalId: "viewer-1",
+    nodeId: "org-a",
+    roles: [{ kind: "system", key: "viewer" }],
+  });
+  const access = createAccessCore({
+    permissions: [{ moduleId: "sample", permissions: SAMPLE_PERMISSIONS }],
+    readers: store,
+    clock,
+  });
   const auditLog = createInMemoryAuditLogWriter();
   const repository = createInMemoryModuleSettingsRepository();
   const services = createModuleSettingsServices({

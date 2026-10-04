@@ -19,7 +19,13 @@ export const registerAgentCommandApprovals = (deps: {
 }): CommandIdempotency => {
   const commands = createCommandIdempotency({ store: deps.idempotency });
   if (deps.approvals.handlers.get(AGENT_COMMAND_HANDLER_KIND) === undefined) {
-    deps.approvals.handlers.register(createAgentCommandApprovalHandler({ executors: agentCommandExecutors(deps.executors), access: deps.access, commands }));
+    deps.approvals.handlers.register(
+      createAgentCommandApprovalHandler({
+        executors: agentCommandExecutors(deps.executors),
+        access: deps.access,
+        commands,
+      }),
+    );
   }
   return commands;
 };

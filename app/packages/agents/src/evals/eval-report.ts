@@ -11,13 +11,22 @@ export const EVAL_REPORT_SCHEMA_VERSION = 1;
 export type ScorerSummary = { readonly scorerId: string; readonly mean: number | null; readonly notScorable: number };
 
 /** Per-case scores, so a failed gate points at the cases that moved. */
-export type CaseResult = { readonly caseId: string; readonly scores: Readonly<Record<string, number | null>>; readonly answerExcerpt: string };
+export type CaseResult = {
+  readonly caseId: string;
+  readonly scores: Readonly<Record<string, number | null>>;
+  readonly answerExcerpt: string;
+};
 
 export type EvalReport = {
   readonly schemaVersion: number;
   readonly runId: string;
   readonly agentId: string;
-  readonly dataset: { readonly name: string; readonly version: number; readonly sha256: string; readonly itemCount: number };
+  readonly dataset: {
+    readonly name: string;
+    readonly version: number;
+    readonly sha256: string;
+    readonly itemCount: number;
+  };
   readonly mode: EvalMode;
   readonly startedAt: string;
   readonly finishedAt: string;
@@ -89,7 +98,12 @@ export const buildEvalReport = (args: {
     schemaVersion: EVAL_REPORT_SCHEMA_VERSION,
     runId: args.runId,
     agentId: args.dataset.agentId,
-    dataset: { name: args.dataset.name, version: args.dataset.version, sha256: args.dataset.sha256, itemCount: args.dataset.cases.length },
+    dataset: {
+      name: args.dataset.name,
+      version: args.dataset.version,
+      sha256: args.dataset.sha256,
+      itemCount: args.dataset.cases.length,
+    },
     mode: args.mode,
     startedAt: args.startedAt.toISOString(),
     finishedAt: args.finishedAt.toISOString(),
@@ -105,7 +119,10 @@ export const buildEvalReport = (args: {
 /** Writes `<dir>/<agent>.json` (fake) or `<agent>.real.json`; returns the path. */
 export const writeEvalReport = (report: EvalReport, dir: string = EVAL_REPORT_DIR): string => {
   mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, report.mode === "fake" ? `${report.agentId}.json` : `${report.agentId}.${report.mode}.json`);
+  const file = path.join(
+    dir,
+    report.mode === "fake" ? `${report.agentId}.json` : `${report.agentId}.${report.mode}.json`,
+  );
   writeFileSync(file, `${JSON.stringify(report, null, 2)}\n`, "utf8");
   return file;
 };

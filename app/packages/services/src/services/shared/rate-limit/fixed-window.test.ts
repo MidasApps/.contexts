@@ -43,7 +43,10 @@ describe("applyFixedWindowRefund", () => {
 
   it("gives one hit back inside the window that counted it", () => {
     const result = applyFixedWindowRefund({ bucket: { count: 2, windowStart: START }, policy, consumed });
-    expect(result).toEqual({ decision: { allowed: true, limit: 2, remaining: 1, resetAt: consumed.resetAt }, next: { count: 1, windowStart: START } });
+    expect(result).toEqual({
+      decision: { allowed: true, limit: 2, remaining: 1, resetAt: consumed.resetAt },
+      next: { count: 1, windowStart: START },
+    });
   });
 
   it("changes nothing once that window ended or the bucket is empty", () => {

@@ -17,22 +17,22 @@ import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput, ToolStatus } from
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { linkCitationMarkers } from "../lib/citation-markers.ts";
 import {
+  type ApprovalRequestView,
+  type AttachmentView,
   approvalRequestOf,
   attachmentsOf,
   collectSources,
-  delegationOf,
-  partsOf,
-  toolPartOf,
-  toolPreviewOf,
-  tripwireOf,
-  type ApprovalRequestView,
-  type AttachmentView,
   type DelegationView,
+  delegationOf,
   type LoosePart,
+  partsOf,
   type SourceView,
   type ToolPartView,
   type ToolPreviewView,
   type TripwireView,
+  toolPartOf,
+  toolPreviewOf,
+  tripwireOf,
 } from "../lib/part-guards.ts";
 import { parseUiSubmission } from "../lib/ui-submission.ts";
 
@@ -73,7 +73,11 @@ function DelegationCard({ tool, delegation }: { tool: ToolPartView; delegation: 
   const toolLabel = useToolLabel();
   // A module agent named by its module reads as its label; only an agent no catalog names shows its key.
   const named = agentLabel(delegation.agentId);
-  const agent = KNOWN_AGENTS.has(delegation.agentId) ? t(`agents.${delegation.agentId as "knowledge"}`) : named === delegation.agentId ? t("agents.unknown", { id: delegation.agentId }) : named;
+  const agent = KNOWN_AGENTS.has(delegation.agentId)
+    ? t(`agents.${delegation.agentId as "knowledge"}`)
+    : named === delegation.agentId
+      ? t("agents.unknown", { id: delegation.agentId })
+      : named;
   return (
     <Agent data-agent={delegation.agentId}>
       <AgentHeader name={t("label", { agent })} status={<ToolStatus state={tool.state} />} />
@@ -125,12 +129,15 @@ function ToolCard({ tool }: { tool: ToolPartView }) {
 
 function TripwireAlert({ tripwire }: { tripwire: TripwireView }) {
   const t = useTranslations("chat.tripwire");
-  const known = tripwire.processorId !== undefined && tripwire.processorId !== "title" && t.has(tripwire.processorId as "default");
+  const known =
+    tripwire.processorId !== undefined && tripwire.processorId !== "title" && t.has(tripwire.processorId as "default");
   return (
     <Alert variant="warning" data-slot="tripwire" data-processor={tripwire.processorId ?? "unknown"}>
       <ShieldAlertIcon aria-hidden="true" />
       <AlertTitle>{t("title")}</AlertTitle>
-      <AlertDescription className="text-inherit">{t(known ? (tripwire.processorId as "default") : "default")}</AlertDescription>
+      <AlertDescription className="text-inherit">
+        {t(known ? (tripwire.processorId as "default") : "default")}
+      </AlertDescription>
     </Alert>
   );
 }
@@ -144,7 +151,9 @@ function UserText({ text }: { text: string }) {
   return (
     <p data-slot="ui-submission" className="flex items-center gap-2">
       <ClipboardCheckIcon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-      {submission.kind === "picker" ? t("choiceSubmitted", { choice: submission.labels.join(", ") }) : t("formSubmitted", { command: commandLabel(submission.commandId) })}
+      {submission.kind === "picker"
+        ? t("choiceSubmitted", { choice: submission.labels.join(", ") })
+        : t("formSubmitted", { command: commandLabel(submission.commandId) })}
     </p>
   );
 }
@@ -182,7 +191,13 @@ const indexParts = (message: UIMessage, parts: readonly LoosePart[]): Lookup => 
  * citations, reasoning and tool calls collapsed, delegation as an agent card, a tripwire as an
  * alert, and the sources the text cites. Parts it does not know render nothing.
  */
-export function MessageParts({ message, streaming = false, showReasoning = true, renderTool, attachmentAction }: MessagePartsProps) {
+export function MessageParts({
+  message,
+  streaming = false,
+  showReasoning = true,
+  renderTool,
+  attachmentAction,
+}: MessagePartsProps) {
   const t = useTranslations("chat");
   const format = useFormatter();
   const parts = partsOf(message);
@@ -209,13 +224,21 @@ export function MessageParts({ message, streaming = false, showReasoning = true,
 
   const renderToolPart = (tool: ToolPartView, key: number): ReactNode => {
     const delegation = delegationOf(tool);
-    const fallback = delegation === null ? <ToolCard tool={tool} /> : <DelegationCard tool={tool} delegation={delegation} />;
-    const context: ToolPartContext = { tool, delegation, preview: lookup.previews.get(tool.toolCallId), request: lookup.requests.get(tool.toolCallId), message };
+    const fallback =
+      delegation === null ? <ToolCard tool={tool} /> : <DelegationCard tool={tool} delegation={delegation} />;
+    const context: ToolPartContext = {
+      tool,
+      delegation,
+      preview: lookup.previews.get(tool.toolCallId),
+      request: lookup.requests.get(tool.toolCallId),
+      message,
+    };
     return <div key={key}>{renderTool === undefined ? fallback : renderTool(context, fallback)}</div>;
   };
 
   const rendered = parts.map((part, index): ReactNode => {
-    if (part.type === "text" && typeof part["text"] === "string") return part["text"].trim() === "" ? null : renderText(part["text"], index);
+    if (part.type === "text" && typeof part["text"] === "string")
+      return part["text"].trim() === "" ? null : renderText(part["text"], index);
     if (part.type === "reasoning" && typeof part["text"] === "string") {
       if (!showReasoning || part["text"].trim() === "") return null;
       return <Reasoning key={index} text={part["text"]} streaming={streaming && part["state"] === "streaming"} />;
@@ -247,7 +270,15 @@ export function MessageParts({ message, streaming = false, showReasoning = true,
         <Sources count={lookup.cited.length}>
           {lookup.cited.map((id, index) => {
             const source = lookup.sources.get(id);
-            return <Source key={id} index={index + 1} title={source?.title ?? t("elements.citation.fallback", { index: index + 1 })} href={source?.url} snippet={source?.snippet} />;
+            return (
+              <Source
+                key={id}
+                index={index + 1}
+                title={source?.title ?? t("elements.citation.fallback", { index: index + 1 })}
+                href={source?.url}
+                snippet={source?.snippet}
+              />
+            );
           })}
         </Sources>
       )}

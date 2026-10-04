@@ -27,7 +27,8 @@ describe("NodeRefSchema", () => {
 
   it("parses its catalog examples", () => {
     for (const example of NodeRefContract.meta.examples) expect(NodeRefSchema.safeParse(example).success).toBe(true);
-    for (const example of TenantNodeRefContract.meta.examples) expect(TenantNodeRefSchema.safeParse(example).success).toBe(true);
+    for (const example of TenantNodeRefContract.meta.examples)
+      expect(TenantNodeRefSchema.safeParse(example).success).toBe(true);
   });
 });
 

@@ -2,7 +2,7 @@ import { ApprovalFailureCodeSchema, type ApprovalRequest, type Principal, type U
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { nextApprovalStatus } from "../../domain/approval-state.ts";
-import { decidePending, loadDecidable, type DecideCommand, type DecisionError } from "../approval-decision.ts";
+import { type DecideCommand, type DecisionError, decidePending, loadDecidable } from "../approval-decision.ts";
 import type { ApprovalDeps } from "../approval-deps.ts";
 
 export type ApproveRequest = (command: DecideCommand) => Promise<Result<ApprovalRequest, DecisionError>>;
@@ -17,20 +17,38 @@ const errorCodeOf = (error: unknown): string => {
 };
 
 // The one execution of an approved request; a handler error is recorded, never rethrown.
-const execute = async (deps: ApprovalDeps, args: { request: ApprovalRequest; requester: Principal | null; approver: UserPrincipal; requestId: string }): Promise<Execution> => {
+const execute = async (
+  deps: ApprovalDeps,
+  args: { request: ApprovalRequest; requester: Principal | null; approver: UserPrincipal; requestId: string },
+): Promise<Execution> => {
   const handler = deps.handlers.get(args.request.action.kind);
   if (handler === undefined) return { status: "failed", errorCode: "UNKNOWN_APPROVAL_ACTION" };
   try {
-    await handler.run(args.request.action.input, { request: args.request, requester: args.requester, approver: args.approver, requestId: args.requestId });
+    await handler.run(args.request.action.input, {
+      request: args.request,
+      requester: args.requester,
+      approver: args.approver,
+      requestId: args.requestId,
+    });
     return { status: "executed" };
   } catch (error: unknown) {
-    deps.logger.error("approval_execution_failed", { requestId: args.requestId, approvalRequestId: args.request.id, kind: args.request.action.kind, err: error });
+    deps.logger.error("approval_execution_failed", {
+      requestId: args.requestId,
+      approvalRequestId: args.request.id,
+      kind: args.request.action.kind,
+      err: error,
+    });
     return { status: "failed", errorCode: errorCodeOf(error) };
   }
 };
 
 // approved → executed|failed in a transaction, with its audit entry.
-const recordExecution = (deps: ApprovalDeps, approved: ApprovalRequest, execution: Execution, requestId: string): Promise<ApprovalRequest> =>
+const recordExecution = (
+  deps: ApprovalDeps,
+  approved: ApprovalRequest,
+  execution: Execution,
+  requestId: string,
+): Promise<ApprovalRequest> =>
   deps.unitOfWork.run(async (tx) => {
     const current = (await deps.approvals.get(tx, approved.id)) ?? approved;
     const status = nextApprovalStatus(current.status, execution.status === "executed" ? "execute" : "fail");
@@ -72,14 +90,38 @@ export const makeApproveRequest =
     const { actor, requestId } = command;
     const auditActor = auditActorOf(actor);
     const approved = await deps.unitOfWork.run(async (tx) => {
-      const decided = await decidePending(tx, deps, { id: command.approvalRequestId, transition: "approve", decidedBy: actor.uid, reason: command.reason ?? null, actorId: auditActor.id });
+      const decided = await decidePending(tx, deps, {
+        id: command.approvalRequestId,
+        transition: "approve",
+        decidedBy: actor.uid,
+        reason: command.reason ?? null,
+        actorId: auditActor.id,
+      });
       if (!decided.ok) return decided;
       const { tenantId, node, id } = decided.data;
       const reason = command.reason === undefined ? {} : { reason: command.reason };
-      await deps.audit.record({ log: "tenant", tenantId, action: "APPROVAL_APPROVED", actor: auditActor, target: { type: "approval-request", id }, node, outcome: "success", requestId, ...reason }, tx);
+      await deps.audit.record(
+        {
+          log: "tenant",
+          tenantId,
+          action: "APPROVAL_APPROVED",
+          actor: auditActor,
+          target: { type: "approval-request", id },
+          node,
+          outcome: "success",
+          requestId,
+          ...reason,
+        },
+        tx,
+      );
       return decided;
     });
     if (!approved.ok) return err(approved.error);
-    const execution = await execute(deps, { request: approved.data, requester: decidable.data.requester, approver: actor, requestId });
+    const execution = await execute(deps, {
+      request: approved.data,
+      requester: decidable.data.requester,
+      approver: actor,
+      requestId,
+    });
     return ok(await recordExecution(deps, approved.data, execution, requestId));
   };

@@ -1,10 +1,4 @@
-import {
-  MembershipIdSchema,
-  RoleIdSchema,
-  type AccessProjection,
-  type Membership,
-  type Role,
-} from "@core/contracts";
+import { type AccessProjection, type Membership, MembershipIdSchema, type Role, RoleIdSchema } from "@core/contracts";
 import { paginateInMemory } from "../../../shared/pagination/page.ts";
 import type { AccessProjectionStore } from "../../application/ports/driven/access-projection-writer.ts";
 import type { ClaimsWriter, CoreClaims } from "../../application/ports/driven/claims-writer.ts";
@@ -12,7 +6,11 @@ import type { GrantReader } from "../../application/ports/driven/grant-reader.ts
 import type { MembershipRepository } from "../../application/ports/driven/membership-repository.ts";
 import type { RoleReader } from "../../application/ports/driven/role-reader.ts";
 import type { RoleRepository } from "../../application/ports/driven/role-repository.ts";
-import type { NewUserProfile, UserAccessState, UserAccessVersionStore } from "../../application/ports/driven/user-access-version.ts";
+import type {
+  NewUserProfile,
+  UserAccessState,
+  UserAccessVersionStore,
+} from "../../application/ports/driven/user-access-version.ts";
 import { nodeIdOf } from "../../domain/access-projection.ts";
 import { holdsOwner } from "../../domain/role-permissions.ts";
 
@@ -49,7 +47,8 @@ type Tables = {
   sequence: { next: number; failClaims: boolean };
 };
 
-const liveValues = <T>(table: Map<string, Stored<T>>): T[] => [...table.values()].filter((row) => row.deletedAt === null).map((row) => row.value);
+const liveValues = <T>(table: Map<string, Stored<T>>): T[] =>
+  [...table.values()].filter((row) => row.deletedAt === null).map((row) => row.value);
 
 const nextId = (tables: Tables, prefix: string): string => {
   tables.sequence.next += 1;
@@ -64,20 +63,36 @@ const makeMemberships = (tables: Tables): MembershipRepository => {
       const row = tables.memberships.get(id);
       return Promise.resolve(row === undefined || row.deletedAt !== null ? null : row.value);
     },
-    listOfPrincipal: (_tx, { tenantId, principalId }) => Promise.resolve(live().filter((m) => m.tenantId === tenantId && m.principalId === principalId)),
-    listOfPrincipals: ({ tenantId, principalIds }) => Promise.resolve(live().filter((m) => m.tenantId === tenantId && principalIds.includes(m.principalId))),
+    listOfPrincipal: (_tx, { tenantId, principalId }) =>
+      Promise.resolve(live().filter((m) => m.tenantId === tenantId && m.principalId === principalId)),
+    listOfPrincipals: ({ tenantId, principalIds }) =>
+      Promise.resolve(live().filter((m) => m.tenantId === tenantId && principalIds.includes(m.principalId))),
     list: ({ tenantId, principalId, page }) =>
       Promise.resolve(
         paginateInMemory({
-          items: live().filter((m) => m.tenantId === tenantId && (principalId === undefined || m.principalId === principalId)),
+          items: live().filter(
+            (m) => m.tenantId === tenantId && (principalId === undefined || m.principalId === principalId),
+          ),
           page,
           positionOf: (m) => [m.createdAt, m.id],
         }),
       ),
     listOrganizationOwners: (_tx, tenantId) =>
-      Promise.resolve(live().filter((m) => m.tenantId === tenantId && m.node.level === "organization" && m.principalType === "user" && holdsOwner(m.roles))),
+      Promise.resolve(
+        live().filter(
+          (m) =>
+            m.tenantId === tenantId &&
+            m.node.level === "organization" &&
+            m.principalType === "user" &&
+            holdsOwner(m.roles),
+        ),
+      ),
     isRoleInUse: (_tx, { tenantId, roleId }) =>
-      Promise.resolve(live().some((m) => m.tenantId === tenantId && m.roles.some((role) => role.kind === "custom" && role.roleId === roleId))),
+      Promise.resolve(
+        live().some(
+          (m) => m.tenantId === tenantId && m.roles.some((role) => role.kind === "custom" && role.roleId === roleId),
+        ),
+      ),
     create: (_tx, { membership }) => void tables.memberships.set(membership.id, { value: membership, deletedAt: null }),
     updateRoles: (_tx, { id, roles, updatedAt }) => {
       const row = tables.memberships.get(id);
@@ -97,7 +112,13 @@ const makeRoles = (tables: Tables): RoleRepository => ({
     return Promise.resolve(row === undefined || row.deletedAt !== null ? null : row.value);
   },
   list: ({ tenantId, page }) =>
-    Promise.resolve(paginateInMemory({ items: liveValues(tables.roles).filter((r) => r.tenantId === tenantId), page, positionOf: (r) => [r.name, r.id] })),
+    Promise.resolve(
+      paginateInMemory({
+        items: liveValues(tables.roles).filter((r) => r.tenantId === tenantId),
+        page,
+        positionOf: (r) => [r.name, r.id],
+      }),
+    ),
   create: (_tx, { role }) => void tables.roles.set(role.id, { value: role, deletedAt: null }),
   update: (_tx, { role }) => {
     const row = tables.roles.get(role.id);
@@ -112,12 +133,15 @@ const makeRoles = (tables: Tables): RoleRepository => ({
 const projectionKey = (tenantId: string, principalId: string): string => `${tenantId}_${principalId}`;
 
 const makeProjections = (tables: Tables): AccessProjectionStore => ({
-  get: (_tx, { tenantId, principalId }) => Promise.resolve(tables.projections.get(projectionKey(tenantId, principalId)) ?? null),
+  get: (_tx, { tenantId, principalId }) =>
+    Promise.resolve(tables.projections.get(projectionKey(tenantId, principalId)) ?? null),
   write: (_tx, { projection }) => void tables.projections.set(projection.id, projection),
   listMembers: ({ tenantId, page }) =>
     Promise.resolve(
       paginateInMemory({
-        items: [...tables.projections.values()].filter((p) => p.tenantId === tenantId && p.principalType === "user" && !p.isRevoked),
+        items: [...tables.projections.values()].filter(
+          (p) => p.tenantId === tenantId && p.principalType === "user" && !p.isRevoked,
+        ),
         page,
         positionOf: (p) => [p.principalId, p.id],
       }),
@@ -131,9 +155,12 @@ const makeProjections = (tables: Tables): AccessProjectionStore => ({
       }),
     ),
   listUnrevoked: (_tx, { tenantId, limit }) =>
-    Promise.resolve([...tables.projections.values()].filter((p) => p.tenantId === tenantId && !p.isRevoked).slice(0, limit)),
+    Promise.resolve(
+      [...tables.projections.values()].filter((p) => p.tenantId === tenantId && !p.isRevoked).slice(0, limit),
+    ),
   markRevoked: (_tx, { projections, updatedAt }) => {
-    for (const p of projections) tables.projections.set(p.id, { ...p, isRevoked: true, version: p.version + 1, updatedAt });
+    for (const p of projections)
+      tables.projections.set(p.id, { ...p, isRevoked: true, version: p.version + 1, updatedAt });
     return Promise.resolve();
   },
 });
@@ -141,7 +168,9 @@ const makeProjections = (tables: Tables): AccessProjectionStore => ({
 const makeUsers = (tables: Tables): UserAccessVersionStore => ({
   read: (_tx, uid) => {
     const row = tables.users.get(uid);
-    return Promise.resolve(row === undefined ? null : { accessVersion: row.accessVersion, activeOrganizationId: row.activeOrganizationId });
+    return Promise.resolve(
+      row === undefined ? null : { accessVersion: row.accessVersion, activeOrganizationId: row.activeOrganizationId },
+    );
   },
   bump: (_tx, { uid, current, activeOrganizationId }) =>
     void tables.users.set(uid, {
@@ -149,7 +178,8 @@ const makeUsers = (tables: Tables): UserAccessVersionStore => ({
       accessVersion: current.accessVersion + 1,
       activeOrganizationId: activeOrganizationId ?? current.activeOrganizationId,
     }),
-  create: (_tx, { uid, profile, accessVersion, activeOrganizationId }) => void tables.users.set(uid, { accessVersion, activeOrganizationId, profile }),
+  create: (_tx, { uid, profile, accessVersion, activeOrganizationId }) =>
+    void tables.users.set(uid, { accessVersion, activeOrganizationId, profile }),
 });
 
 const makeClaims = (tables: Tables): InMemoryAccessWriteStore["claims"] => ({
@@ -170,7 +200,12 @@ const makeReaders = (tables: Tables): Pick<InMemoryAccessWriteStore, "grantReade
     listGrants: ({ tenantId, principalId, nodeIds }) =>
       Promise.resolve(
         [...tables.memberships.values()]
-          .filter(({ value }) => value.tenantId === tenantId && value.principalId === principalId && nodeIds.includes(nodeIdOf(value.node)))
+          .filter(
+            ({ value }) =>
+              value.tenantId === tenantId &&
+              value.principalId === principalId &&
+              nodeIds.includes(nodeIdOf(value.node)),
+          )
           .map(({ value, deletedAt }) => ({
             membershipId: value.id,
             tenantId: value.tenantId,
@@ -186,7 +221,16 @@ const makeReaders = (tables: Tables): Pick<InMemoryAccessWriteStore, "grantReade
       Promise.resolve(
         roleIds.flatMap((id) => {
           const row = tables.roles.get(id);
-          return row === undefined ? [] : [{ id: row.value.id, tenantId: row.value.tenantId, permissions: row.value.permissions, isDeleted: row.deletedAt !== null }];
+          return row === undefined
+            ? []
+            : [
+                {
+                  id: row.value.id,
+                  tenantId: row.value.tenantId,
+                  permissions: row.value.permissions,
+                  isDeleted: row.deletedAt !== null,
+                },
+              ];
         }),
       ),
   },
@@ -194,7 +238,14 @@ const makeReaders = (tables: Tables): Pick<InMemoryAccessWriteStore, "grantReade
 
 /** Creates an empty in-memory access write store. */
 export const createInMemoryAccessWriteStore = (): InMemoryAccessWriteStore => {
-  const tables: Tables = { memberships: new Map(), roles: new Map(), projections: new Map(), users: new Map(), claims: new Map(), sequence: { next: 0, failClaims: false } };
+  const tables: Tables = {
+    memberships: new Map(),
+    roles: new Map(),
+    projections: new Map(),
+    users: new Map(),
+    claims: new Map(),
+    sequence: { next: 0, failClaims: false },
+  };
   return {
     memberships: makeMemberships(tables),
     roles: makeRoles(tables),
@@ -203,7 +254,10 @@ export const createInMemoryAccessWriteStore = (): InMemoryAccessWriteStore => {
     claims: makeClaims(tables),
     ...makeReaders(tables),
     putUser: (uid, state = {}) =>
-      void tables.users.set(uid, { accessVersion: state.accessVersion ?? 0, activeOrganizationId: state.activeOrganizationId ?? null }),
+      void tables.users.set(uid, {
+        accessVersion: state.accessVersion ?? 0,
+        activeOrganizationId: state.activeOrganizationId ?? null,
+      }),
     userOf: (uid) => tables.users.get(uid),
     allMemberships: () => [...tables.memberships.values()].map(({ value, deletedAt }) => ({ ...value, deletedAt })),
     projectionOf: (tenantId, principalId) => tables.projections.get(projectionKey(tenantId, principalId)),

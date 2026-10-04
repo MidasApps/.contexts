@@ -5,8 +5,10 @@ export const typesAllowedUnder = (types: readonly UnitTypeDefinition[], parentKi
   types.filter((type) => type.allowedParents.includes(parentKind));
 
 /** Ids of every unit below `unitId` (from the flat tree), for "move" exclusions and delete warnings. */
-export const descendantIds = (units: readonly { id: string; ancestorIds: readonly string[] }[], unitId: string): Set<string> =>
-  new Set(units.filter((unit) => unit.ancestorIds.includes(unitId)).map((unit) => unit.id));
+export const descendantIds = (
+  units: readonly { id: string; ancestorIds: readonly string[] }[],
+  unitId: string,
+): Set<string> => new Set(units.filter((unit) => unit.ancestorIds.includes(unitId)).map((unit) => unit.id));
 
 export type MoveTarget = { readonly value: string; readonly parentUnitId: string | null; readonly label: string };
 
@@ -28,9 +30,15 @@ export const moveTargets = (args: {
   const { unit, units, types } = args;
   const allowed = types.find((type) => type.id === unit.type)?.allowedParents ?? [];
   const excluded = descendantIds(units, unit.id).add(unit.id);
-  const root: MoveTarget[] = allowed.includes("project") && unit.parentUnitId !== null ? [{ value: PROJECT_ROOT, parentUnitId: null, label: args.projectLabel }] : [];
+  const root: MoveTarget[] =
+    allowed.includes("project") && unit.parentUnitId !== null
+      ? [{ value: PROJECT_ROOT, parentUnitId: null, label: args.projectLabel }]
+      : [];
   const underUnits = units
-    .filter((candidate) => !excluded.has(candidate.id) && candidate.id !== unit.parentUnitId && allowed.includes(candidate.type))
+    .filter(
+      (candidate) =>
+        !excluded.has(candidate.id) && candidate.id !== unit.parentUnitId && allowed.includes(candidate.type),
+    )
     .map((candidate) => ({ value: candidate.id, parentUnitId: candidate.id, label: args.pathOf(candidate) }));
   return [...root, ...underUnits];
 };

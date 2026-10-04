@@ -12,7 +12,9 @@ const UserPrincipalSchema = z.strictObject({
   uid: UserIdSchema.meta(personal("Firebase Auth uid of the user.")),
   mfa: z.boolean().meta(none("Whether the verified token proves a second factor (SP1 spec §3.4).")),
   sessionId: SessionIdSchema.optional().meta(
-    none("Web or desktop session whose exchange minted the token (developer claim `sessionId` of a custom-token sign-in)."),
+    none(
+      "Web or desktop session whose exchange minted the token (developer claim `sessionId` of a custom-token sign-in).",
+    ),
   ),
   impersonation: z
     .strictObject({
@@ -40,7 +42,11 @@ const ServicePrincipalSchema = z.strictObject({
  * Who is calling (SP1 spec §3.1). Platform staff is a `user` with an active
  * `platform-staff/{uid}` doc, not a principal type.
  */
-export const PrincipalSchema = z.discriminatedUnion("type", [UserPrincipalSchema, DevicePrincipalSchema, ServicePrincipalSchema]);
+export const PrincipalSchema = z.discriminatedUnion("type", [
+  UserPrincipalSchema,
+  DevicePrincipalSchema,
+  ServicePrincipalSchema,
+]);
 export type Principal = z.infer<typeof PrincipalSchema>;
 export type UserPrincipal = z.infer<typeof UserPrincipalSchema>;
 export type DevicePrincipal = z.infer<typeof DevicePrincipalSchema>;

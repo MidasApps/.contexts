@@ -1,6 +1,6 @@
 import { type Conversation, FORWARDED_HEADERS, type UserPrincipal } from "@core/contracts";
-import type { ChatStreamAnswer, ChatRuntimeGateway } from "../../../agents/application/ports/chat-runtime-gateway.ts";
 import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+import type { ChatRuntimeGateway, ChatStreamAnswer } from "../../../agents/application/ports/chat-runtime-gateway.ts";
 import type { GetReadyFile, ReadFileBytes } from "../../../files/application/use-cases/read-file-bytes.ts";
 import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
 import type { ApiRouteDeps } from "../../../shared/http/api-route.ts";
@@ -48,7 +48,10 @@ export const chatScopeOf = async (args: {
   readonly requestId: string;
 }): Promise<AgentCallScope | null> => {
   const { conversation, request } = args;
-  const context = await args.deps.resolveAccessContext({ principal: args.principal, node: conversationNode(conversation) });
+  const context = await args.deps.resolveAccessContext({
+    principal: args.principal,
+    node: conversationNode(conversation),
+  });
   const bearer = BEARER.exec(request.headers.get(FORWARDED_HEADERS.authorization) ?? "")?.[1];
   if (context === null || bearer === undefined) return null;
   const traceparent = request.headers.get(FORWARDED_HEADERS.traceparent);
@@ -67,29 +70,48 @@ export const chatScopeOf = async (args: {
  * Ends the run when its upstream stream closed: copies the thread title Mastra generated (best
  * effort, bounded) and clears `activeRunId`. Failures are logged, never thrown into the stream.
  */
-export const endRunOnClose = (args: {
-  readonly deps: Pick<ChatRoutesDeps, "chat" | "conversations" | "wait">;
-  readonly logger: Logger;
+export const endRunOnClose =
+  (args: {
+    readonly deps: Pick<ChatRoutesDeps, "chat" | "conversations" | "wait">;
+    readonly logger: Logger;
+    readonly scope: AgentCallScope;
+    readonly conversation: Conversation;
+    readonly runId: string;
+  }) =>
+  async (): Promise<void> => {
+    const { deps, conversation, runId, logger } = args;
+    try {
+      const title = conversation.titleSource === "auto" ? await titleOf(args) : undefined;
+      await deps.conversations.activeRuns.end({
+        conversationId: conversation.id,
+        runId,
+        ...(title === undefined ? {} : { title }),
+      });
+      logger.info("chat_run_ended", { requestId: args.scope.requestId, conversationId: conversation.id, runId });
+    } catch (error: unknown) {
+      logger.error("chat_run_end_failed", {
+        requestId: args.scope.requestId,
+        conversationId: conversation.id,
+        runId,
+        err: error,
+      });
+    }
+  };
+
+const titleOf = async (args: {
+  readonly deps: Pick<ChatRoutesDeps, "chat" | "wait">;
   readonly scope: AgentCallScope;
   readonly conversation: Conversation;
-  readonly runId: string;
-}) => async (): Promise<void> => {
-  const { deps, conversation, runId, logger } = args;
-  try {
-    const title = conversation.titleSource === "auto" ? await titleOf(args) : undefined;
-    await deps.conversations.activeRuns.end({ conversationId: conversation.id, runId, ...(title === undefined ? {} : { title }) });
-    logger.info("chat_run_ended", { requestId: args.scope.requestId, conversationId: conversation.id, runId });
-  } catch (error: unknown) {
-    logger.error("chat_run_end_failed", { requestId: args.scope.requestId, conversationId: conversation.id, runId, err: error });
-  }
-};
-
-const titleOf = async (args: { readonly deps: Pick<ChatRoutesDeps, "chat" | "wait">; readonly scope: AgentCallScope; readonly conversation: Conversation }): Promise<string | undefined> => {
+}): Promise<string | undefined> => {
   const signal = AbortSignal.timeout(TITLE_TIMEOUT_MS);
   const attempts = args.conversation.title === null ? TITLE_ATTEMPTS : 1;
   try {
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
-      const answer = await args.deps.chat.threadTitle({ scope: { ...args.scope, signal }, agentId: args.conversation.agentId, threadId: args.conversation.id });
+      const answer = await args.deps.chat.threadTitle({
+        scope: { ...args.scope, signal },
+        agentId: args.conversation.agentId,
+        threadId: args.conversation.id,
+      });
       if (!answer.ok) return undefined;
       if (answer.data !== null && answer.data.trim() !== "") return answer.data;
       if (attempt < attempts) await (args.deps.wait ?? sleep)(TITLE_RETRY_MS);
@@ -103,7 +125,11 @@ const titleOf = async (args: { readonly deps: Pick<ChatRoutesDeps, "chat" | "wai
 };
 
 /** The UI message stream response: Mastra's bytes unchanged, `useChat` headers and the conversation id. */
-export const chatStreamResponse = (stream: ChatStreamAnswer, conversationId: string, onUpstreamEnd: () => Promise<void>): Response =>
+export const chatStreamResponse = (
+  stream: ChatStreamAnswer,
+  conversationId: string,
+  onUpstreamEnd: () => Promise<void>,
+): Response =>
   new Response(trackRunStream(stream.body, onUpstreamEnd), {
     status: 200,
     headers: {

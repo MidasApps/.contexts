@@ -22,7 +22,12 @@ const useNotes = (organizationId: string) => {
   return useInfiniteQuery({
     ...cursorListQuery<Note>({
       queryKey: queryKeys.organizationScoped(organizationId, "example-notes"),
-      fetchPage: (cursor, signal) => callEndpoint(listNotesEndpoint, { params: { organizationId }, query: pageQuery(cursor, NOTES_PAGE_LIMIT), signal }),
+      fetchPage: (cursor, signal) =>
+        callEndpoint(listNotesEndpoint, {
+          params: { organizationId },
+          query: pageQuery(cursor, NOTES_PAGE_LIMIT),
+          signal,
+        }),
     }),
     enabled: signedIn && organizationId !== "",
   });
@@ -37,7 +42,9 @@ function NoteItem({ note }: { note: Note }) {
         <span className="text-sm font-medium break-words">{note.title}</span>
         {note.archivedAt === undefined ? null : <StatusPill tone="neutral">{t("notesArchived")}</StatusPill>}
       </span>
-      {note.body === "" ? null : <span className="line-clamp-3 text-sm break-words text-muted-foreground">{note.body}</span>}
+      {note.body === "" ? null : (
+        <span className="line-clamp-3 text-sm break-words text-muted-foreground">{note.body}</span>
+      )}
       <time className="text-xs text-muted-foreground" dateTime={note.createdAt}>
         {formatDateTime(note.createdAt)}
       </time>
@@ -57,7 +64,12 @@ export function ExampleNotesCard({ organizationId }: { organizationId: string })
       <QuerySection query={notes} loadingLabel={t("notesLoading")}>
         {(items) =>
           items.length === 0 ? (
-            <EmptyState frame="plain" headingLevel={3} title={t("notesEmptyTitle")} description={t("notesEmptyDescription")} />
+            <EmptyState
+              frame="plain"
+              headingLevel={3}
+              title={t("notesEmptyTitle")}
+              description={t("notesEmptyDescription")}
+            />
           ) : (
             <div className="flex flex-col gap-4">
               <ul className="flex flex-col divide-y divide-border">
@@ -66,7 +78,12 @@ export function ExampleNotesCard({ organizationId }: { organizationId: string })
                 ))}
               </ul>
               {notes.hasNextPage ? (
-                <Button variant="outline" className="self-start" disabled={notes.isFetchingNextPage} onClick={() => void notes.fetchNextPage()}>
+                <Button
+                  variant="outline"
+                  className="self-start"
+                  disabled={notes.isFetchingNextPage}
+                  onClick={() => void notes.fetchNextPage()}
+                >
                   {t("notesLoadMore")}
                 </Button>
               ) : null}

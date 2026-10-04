@@ -1,6 +1,12 @@
-import { type Principal, type TenantId, type ToolApprovalDecision, ToolApprovalDecisionSchema, type ToolApprovalResponsePart } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
+import {
+  type Principal,
+  type TenantId,
+  type ToolApprovalDecision,
+  ToolApprovalDecisionSchema,
+  type ToolApprovalResponsePart,
+} from "@core/contracts";
 import type { AuditWriter } from "../../../audit/application/use-cases/record-audit.ts";
+import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 
 const APPROVAL_SEPARATOR = "::";
 const TOOL_PREFIX = "tool-";
@@ -13,7 +19,8 @@ const TOOL_PREFIX = "tool-";
 export const decisionOf = (conversationId: string, part: ToolApprovalResponsePart): ToolApprovalDecision | null => {
   const at = part.approval.id.lastIndexOf(APPROVAL_SEPARATOR);
   if (at <= 0 || part.approval.id.slice(at + APPROVAL_SEPARATOR.length) !== part.toolCallId) return null;
-  const toolName = part.type === "dynamic-tool" ? (part.toolName ?? "dynamic-tool") : part.type.slice(TOOL_PREFIX.length);
+  const toolName =
+    part.type === "dynamic-tool" ? (part.toolName ?? "dynamic-tool") : part.type.slice(TOOL_PREFIX.length);
   const parsed = ToolApprovalDecisionSchema.safeParse({
     conversationId,
     runId: part.approval.id.slice(0, at),

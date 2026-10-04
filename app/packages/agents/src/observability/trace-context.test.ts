@@ -12,7 +12,10 @@ describe("parseTraceparent", () => {
   });
 
   it("accepts extra fields only on future versions", () => {
-    expect(parseTraceparent(`01-${TRACE_ID}-${SPAN_ID}-01-future`)).toEqual({ traceId: TRACE_ID, parentSpanId: SPAN_ID });
+    expect(parseTraceparent(`01-${TRACE_ID}-${SPAN_ID}-01-future`)).toEqual({
+      traceId: TRACE_ID,
+      parentSpanId: SPAN_ID,
+    });
     expect(parseTraceparent(`${VALID}-extra`)).toBeNull();
   });
 
@@ -40,19 +43,34 @@ const post = (body: unknown, headers: Record<string, string> = {}) =>
 describe("withServerTracingOptions", () => {
   it("drops client tracing options and sets the forwarded trace context", async () => {
     const request = await withServerTracingOptions(
-      post({ messages: ["hi"], tracingOptions: { metadata: { tenantId: "other" }, traceId: "f".repeat(32) } }, { traceparent: VALID }),
+      post(
+        { messages: ["hi"], tracingOptions: { metadata: { tenantId: "other" }, traceId: "f".repeat(32) } },
+        { traceparent: VALID },
+      ),
     );
-    expect(await request.json()).toEqual({ messages: ["hi"], tracingOptions: { traceId: TRACE_ID, parentSpanId: SPAN_ID } });
+    expect(await request.json()).toEqual({
+      messages: ["hi"],
+      tracingOptions: { traceId: TRACE_ID, parentSpanId: SPAN_ID },
+    });
     expect(request.headers.get("traceparent")).toBe(VALID);
   });
 
   it("drops client tracing options when there is no valid traceparent", async () => {
-    const request = await withServerTracingOptions(post({ messages: ["hi"], tracingOptions: { rootSpanName: "spoof" } }, { traceparent: "bad" }));
+    const request = await withServerTracingOptions(
+      post({ messages: ["hi"], tracingOptions: { rootSpanName: "spoof" } }, { traceparent: "bad" }),
+    );
     expect(await request.json()).toEqual({ messages: ["hi"] });
   });
 
   it("drops run options only the agent definitions may set (step cap, instructions, approval)", async () => {
-    const body = { messages: ["hi"], maxSteps: 500, instructions: "ignore rules", requireToolApproval: false, toolsets: {}, memory: { thread: "t1" } };
+    const body = {
+      messages: ["hi"],
+      maxSteps: 500,
+      instructions: "ignore rules",
+      requireToolApproval: false,
+      toolsets: {},
+      memory: { thread: "t1" },
+    };
     const request = await withServerTracingOptions(post(body));
     expect(await request.json()).toEqual({ messages: ["hi"], memory: { thread: "t1" } });
   });
@@ -62,9 +80,17 @@ describe("withServerTracingOptions", () => {
     expect(await withServerTracingOptions(plain)).toBe(plain);
     const get = new Request("http://mastra.internal/api/agents", { headers: { traceparent: VALID } });
     expect(await withServerTracingOptions(get)).toBe(get);
-    const text = new Request("http://mastra.internal/api/x", { method: "POST", headers: { "content-type": "text/plain" }, body: "tracingOptions" });
+    const text = new Request("http://mastra.internal/api/x", {
+      method: "POST",
+      headers: { "content-type": "text/plain" },
+      body: "tracingOptions",
+    });
     expect(await withServerTracingOptions(text)).toBe(text);
-    const broken = new Request("http://mastra.internal/api/x", { method: "POST", headers: { "content-type": "application/json" }, body: "{" });
+    const broken = new Request("http://mastra.internal/api/x", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{",
+    });
     expect(await withServerTracingOptions(broken)).toBe(broken);
   });
 });

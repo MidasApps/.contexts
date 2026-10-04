@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { SAMPLE_SETTINGS } from "../application/use-cases/module-settings.fixture.ts";
-import { createModuleSettingsRegistry, ModuleSettingsRegistryError, moduleSettingsDefinitionsOf } from "./module-settings-registry.ts";
+import {
+  createModuleSettingsRegistry,
+  ModuleSettingsRegistryError,
+  moduleSettingsDefinitionsOf,
+} from "./module-settings-registry.ts";
 
 describe("module settings registry", () => {
   it("finds a definition by module id and nothing for other ids", () => {

@@ -3,7 +3,9 @@ import { matchPathParams } from "./path-params.ts";
 
 describe("matchPathParams", () => {
   it("extracts named segments of an OpenAPI-style template", () => {
-    expect(matchPathParams("/v1/organizations/{organizationId}/members/{userId}", "/v1/organizations/org-1/members/u-9")).toEqual({
+    expect(
+      matchPathParams("/v1/organizations/{organizationId}/members/{userId}", "/v1/organizations/org-1/members/u-9"),
+    ).toEqual({
       organizationId: "org-1",
       userId: "u-9",
     });

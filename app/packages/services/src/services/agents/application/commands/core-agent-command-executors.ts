@@ -26,8 +26,15 @@ export const createCoreAgentCommandExecutors = (deps: {
     summarize: (input) => `Create the project "${input.name}"`,
     preview: (input) => ({ before: null, after: { name: input.name, description: input.description ?? null } }),
     execute: async ({ principal, tenantId, input, requestId }) => {
-      const result = await deps.tenancy.createProject({ actor: principal, access: deps.access.forRequest(), requestId, tenantId, input });
-      if (!result.ok) throw new AgentCommandError("COMMAND_REFUSED", CREATE_PROJECT_COMMAND_ID, { cause: result.error });
+      const result = await deps.tenancy.createProject({
+        actor: principal,
+        access: deps.access.forRequest(),
+        requestId,
+        tenantId,
+        input,
+      });
+      if (!result.ok)
+        throw new AgentCommandError("COMMAND_REFUSED", CREATE_PROJECT_COMMAND_ID, { cause: result.error });
       return { projectId: result.data.id, name: result.data.name };
     },
   }),

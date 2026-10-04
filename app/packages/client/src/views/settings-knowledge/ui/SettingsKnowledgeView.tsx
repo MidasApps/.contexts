@@ -3,13 +3,18 @@
 import type { AccessContext, KnowledgeDocument } from "@core/contracts";
 import { useId, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
-import { collectionOfNamespace, namespaceOfTarget, ORGANIZATION_NAMESPACE, useKnowledgeDocuments } from "#/entities/knowledge/index.ts";
+import {
+  collectionOfNamespace,
+  namespaceOfTarget,
+  ORGANIZATION_NAMESPACE,
+  useKnowledgeDocuments,
+} from "#/entities/knowledge/index.ts";
 import { useProjects } from "#/entities/project/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { DeleteKnowledgeDocumentDialog } from "#/features/delete-knowledge-document/index.ts";
 import { AddKnowledgeDocumentDialog, type StartedKnowledgeIngestion } from "#/features/knowledge-upload/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
+import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
@@ -28,10 +33,24 @@ import { documentName, KnowledgeDocumentsTable, useCollectionName } from "./Know
 const ALL = "all";
 
 /** Runs started here whose document is not in the list yet (the workflow registers it once it fetched the content). */
-const stillIndexing = (started: readonly StartedKnowledgeIngestion[], documents: readonly KnowledgeDocument[]): StartedKnowledgeIngestion[] =>
-  started.filter((run) => !documents.some((document) => document.sourceRef === run.sourceRef || document.sourceUrl === run.sourceRef));
+const stillIndexing = (
+  started: readonly StartedKnowledgeIngestion[],
+  documents: readonly KnowledgeDocument[],
+): StartedKnowledgeIngestion[] =>
+  started.filter(
+    (run) =>
+      !documents.some((document) => document.sourceRef === run.sourceRef || document.sourceUrl === run.sourceRef),
+  );
 
-function CollectionPicker({ value, onChange, projects }: { value: string; onChange: (value: string) => void; projects: readonly { id: string; name: string }[] }) {
+function CollectionPicker({
+  value,
+  onChange,
+  projects,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  projects: readonly { id: string; name: string }[];
+}) {
   const t = useTranslations("settings.knowledge");
   const id = useId();
   return (
@@ -68,10 +87,16 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
   const ingestions = useStartedIngestions(organization.id);
   const { started } = ingestions;
   const projects = useProjects(organization.id);
-  const projectNames = useMemo(() => new Map((projects.data ?? []).map((project) => [String(project.id), project.name] as const)), [projects.data]);
+  const projectNames = useMemo(
+    () => new Map((projects.data ?? []).map((project) => [String(project.id), project.name] as const)),
+    [projects.data],
+  );
   const collectionName = useCollectionName(projectNames, projects.isSuccess && !projects.hasNextPage);
   const allowed = permissions.includes("core.knowledge.read");
-  const documents = useKnowledgeDocuments(organization.id, selected === ALL ? undefined : selected, { poll: started.length > 0, enabled: allowed });
+  const documents = useKnowledgeDocuments(organization.id, selected === ALL ? undefined : selected, {
+    poll: started.length > 0,
+    enabled: allowed,
+  });
   const indexing = stillIndexing(started, documents.data ?? []);
   // An upload goes to the collection being looked at; "all" has no single target, so it goes to the organization.
   const collection = collectionOfNamespace(selected === ALL ? ORGANIZATION_NAMESPACE : selected);
@@ -80,7 +105,8 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
   const canDelete = permissions.includes("core.knowledge.delete");
   const openAdd = canWrite && online ? () => setAdding(true) : null;
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={allowed}
       header={
@@ -104,7 +130,11 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
         <AlertTitle>{t("collectionsNote.title")}</AlertTitle>
         <AlertDescription>{t("collectionsNote.description")}</AlertDescription>
       </Alert>
-      <CollectionPicker value={selected} onChange={setSelected} projects={(projects.data ?? []).map((project) => ({ id: String(project.id), name: project.name }))} />
+      <CollectionPicker
+        value={selected}
+        onChange={setSelected}
+        projects={(projects.data ?? []).map((project) => ({ id: String(project.id), name: project.name }))}
+      />
       <IngestionNotices
         organizationId={organization.id}
         runs={indexing}

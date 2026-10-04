@@ -5,9 +5,13 @@ import { stdout } from "node:process";
 import { composeCoreContracts, composeCoreEndpoints } from "../src/composition.ts";
 import { readGeneratedFiles } from "./catalog/artifact-files.ts";
 import { buildCatalogArtifacts } from "./catalog/artifacts.ts";
-import { loadModuleContracts, loadModuleEndpoints } from "./catalog/module-contracts.ts";
-import { findContractProblems, findDanglingRefsInArtifacts, findRawMetaInArtifacts } from "./catalog/contract-problems.ts";
+import {
+  findContractProblems,
+  findDanglingRefsInArtifacts,
+  findRawMetaInArtifacts,
+} from "./catalog/contract-problems.ts";
 import { findCatalogDrift } from "./catalog/drift.ts";
+import { loadModuleContracts, loadModuleEndpoints } from "./catalog/module-contracts.ts";
 
 const main = async (): Promise<number> => {
   // Core contracts and endpoints plus those of the modules listed in app/catalog.modules.ts (decision 0015).
@@ -22,7 +26,9 @@ const main = async (): Promise<number> => {
     ...findCatalogDrift({ expected, onDisk }),
   ];
   if (problems.length === 0) {
-    stdout.write(`contracts:check ok (${contracts.length} contracts, ${endpoints.length} endpoints, ${expected.length} files)\n`);
+    stdout.write(
+      `contracts:check ok (${contracts.length} contracts, ${endpoints.length} endpoints, ${expected.length} files)\n`,
+    );
     return 0;
   }
   stdout.write(

@@ -56,7 +56,14 @@ export type SidebarMenuButtonProps = ComponentProps<"button"> &
  * remains in the DOM (truncated to zero width) so the link keeps its accessible name, and the
  * tooltip repeats it for pointer users.
  */
-export function SidebarMenuButton({ asChild = false, isActive = false, size = "default", tooltip, className, ...props }: SidebarMenuButtonProps) {
+export function SidebarMenuButton({
+  asChild = false,
+  isActive = false,
+  size = "default",
+  tooltip,
+  className,
+  ...props
+}: SidebarMenuButtonProps) {
   const Component = asChild ? Slot.Root : "button";
   const { isMobile, state } = useSidebar();
   const button = (
@@ -127,7 +134,11 @@ const SKELETON_WIDTHS = ["w-3/4", "w-2/3", "w-4/5", "w-1/2"] as const;
 /** Placeholder item while navigation loads (deterministic widths; the container announces loading). */
 export function SidebarMenuSkeleton({ className, index = 0, ...props }: ComponentProps<"div"> & { index?: number }) {
   return (
-    <div data-slot="sidebar-menu-skeleton" className={cn("flex h-8 items-center gap-2 rounded-xs px-2", className)} {...props}>
+    <div
+      data-slot="sidebar-menu-skeleton"
+      className={cn("flex h-8 items-center gap-2 rounded-xs px-2", className)}
+      {...props}
+    >
       <Skeleton className="size-4 rounded-2xs" />
       <Skeleton className={cn("h-3.5", SKELETON_WIDTHS[index % SKELETON_WIDTHS.length])} />
     </div>

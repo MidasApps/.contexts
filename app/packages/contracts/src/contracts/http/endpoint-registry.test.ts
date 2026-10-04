@@ -13,7 +13,11 @@ const makeEndpoint = (args: { id: string; method: "GET" | "POST"; path: string }
   });
 
 const listOrganizations = makeEndpoint({ id: "tenancy.listOrganizations", method: "GET", path: "/v1/organizations" });
-const createOrganization = makeEndpoint({ id: "tenancy.createOrganization", method: "POST", path: "/v1/organizations" });
+const createOrganization = makeEndpoint({
+  id: "tenancy.createOrganization",
+  method: "POST",
+  path: "/v1/organizations",
+});
 const getMe = makeEndpoint({ id: "identity.getMe", method: "GET", path: "/v1/me" });
 
 describe("createEndpointRegistry", () => {
@@ -53,7 +57,14 @@ describe("createEndpointRegistry", () => {
       responses: { 200: z.object({ data: z.string() }) },
       summary: "Reads a project.",
     });
-    const second = defineEndpoint({ ...first, id: "tenancy.readProject", path: "/v1/projects/{id}", params: z.object({ id: z.string() }) });
-    expect(() => createEndpointRegistry([first, second])).toThrow(/GET \/v1\/projects\/\{id\} is already tenancy\.getProject/);
+    const second = defineEndpoint({
+      ...first,
+      id: "tenancy.readProject",
+      path: "/v1/projects/{id}",
+      params: z.object({ id: z.string() }),
+    });
+    expect(() => createEndpointRegistry([first, second])).toThrow(
+      /GET \/v1\/projects\/\{id\} is already tenancy\.getProject/,
+    );
   });
 });

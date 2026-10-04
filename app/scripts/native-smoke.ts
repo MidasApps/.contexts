@@ -3,7 +3,7 @@
 // with the e2e config (apps/desktop/README.md "Native smoke test"). Steps: seed the e2e world (web
 // Playwright `setup` project), `next start` on E2E_WEB_PORT, `wdio run` in apps/desktop, then stop
 // the web server this script started (and only it). Local only; never part of CI.
-import { spawn, spawnSync, type ChildProcess } from "node:child_process";
+import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import path from "node:path";
 
 const APP_ROOT = path.resolve(import.meta.dirname, "..");
@@ -25,7 +25,10 @@ const run = (command: string, args: readonly string[], cwd: string): number => {
 const waitForHealth = async (origin: string): Promise<void> => {
   const deadline = Date.now() + HEALTH_TIMEOUT_MS;
   while (Date.now() < deadline) {
-    const healthy = await fetch(`${origin}/v1/health`).then((response) => response.ok, () => false);
+    const healthy = await fetch(`${origin}/v1/health`).then(
+      (response) => response.ok,
+      () => false,
+    );
     if (healthy) return;
     await new Promise((resolve) => setTimeout(resolve, 1_000));
   }
@@ -46,7 +49,10 @@ const DRIVER_IMAGES = ["tauri-driver.exe", "msedgedriver.exe"] as const;
 const driverPids = (): Set<string> => {
   if (!isWindows) return new Set();
   const pids = DRIVER_IMAGES.flatMap((image) => {
-    const listing = spawnSync("tasklist", ["/FI", `IMAGENAME eq ${image}`, "/FO", "CSV", "/NH"], { encoding: "utf8", windowsHide: true }).stdout;
+    const listing = spawnSync("tasklist", ["/FI", `IMAGENAME eq ${image}`, "/FO", "CSV", "/NH"], {
+      encoding: "utf8",
+      windowsHide: true,
+    }).stdout;
     return listing.split(/\r?\n/).flatMap((line) => /^"[^"]+","(\d+)"/.exec(line)?.[1] ?? []);
   });
   return new Set(pids);
@@ -75,10 +81,16 @@ const runSmoke = (): number => {
 const main = async (): Promise<number> => {
   const port = process.env["E2E_WEB_PORT"];
   const origin = process.env["E2E_WEB_ORIGIN"];
-  if (port === undefined || origin === undefined) throw new Error("run through `pnpm test:e2e -- node scripts/native-smoke.ts`");
+  if (port === undefined || origin === undefined)
+    throw new Error("run through `pnpm test:e2e -- node scripts/native-smoke.ts`");
   const seeded = run("pnpm", ["exec", "playwright", "test", "--project", "setup"], WEB_DIR);
   if (seeded !== 0) return seeded;
-  const web = spawn("pnpm", ["exec", "next", "start", "--port", port], { cwd: WEB_DIR, stdio: "ignore", shell: isWindows, windowsHide: true });
+  const web = spawn("pnpm", ["exec", "next", "start", "--port", port], {
+    cwd: WEB_DIR,
+    stdio: "ignore",
+    shell: isWindows,
+    windowsHide: true,
+  });
   try {
     await waitForHealth(origin);
     return runSmoke();

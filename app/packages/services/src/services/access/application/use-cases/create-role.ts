@@ -1,4 +1,4 @@
-import { OrganizationIdSchema, type CreateRoleInput, type Principal, type Role, type TenantId } from "@core/contracts";
+import { type CreateRoleInput, OrganizationIdSchema, type Principal, type Role, type TenantId } from "@core/contracts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
@@ -21,7 +21,11 @@ export const checkRolePermissions = async (
 ): Promise<Result<void, RolePermissionError>> => {
   const unknown = unknownTenantPermissions(args.permissions, deps.registry);
   if (unknown.length > 0) return err(new UnknownPermissionError(unknown));
-  return requireNoEscalation({ ...args, node: { level: "organization", tenantId: args.tenantId }, requested: args.permissions });
+  return requireNoEscalation({
+    ...args,
+    node: { level: "organization", tenantId: args.tenantId },
+    requested: args.permissions,
+  });
 };
 
 export type CreateRoleCommand = {
@@ -45,12 +49,28 @@ export const makeCreateRole =
     const checked = await checkRolePermissions(deps, { ...command, permissions: command.input.permissions });
     if (!checked.ok) return checked;
     const now = deps.clock.now().toISOString();
-    const role: Role = { id: deps.roles.newId(), tenantId, ...command.input, permissions: [...command.input.permissions], createdAt: now, updatedAt: now };
+    const role: Role = {
+      id: deps.roles.newId(),
+      tenantId,
+      ...command.input,
+      permissions: [...command.input.permissions],
+      createdAt: now,
+      updatedAt: now,
+    };
     const actor = auditActorOf(command.actor);
     await deps.unitOfWork.run(async (tx) => {
       deps.roles.create(tx, { role, actorId: actor.id });
       await deps.audit.record(
-        { log: "tenant", tenantId, action: "ROLE_CREATED", actor, target: { type: "role", id: role.id }, node, outcome: "success", requestId: command.requestId },
+        {
+          log: "tenant",
+          tenantId,
+          action: "ROLE_CREATED",
+          actor,
+          target: { type: "role", id: role.id },
+          node,
+          outcome: "success",
+          requestId: command.requestId,
+        },
         tx,
       );
     });

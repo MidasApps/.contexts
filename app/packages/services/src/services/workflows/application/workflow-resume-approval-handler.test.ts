@@ -1,9 +1,12 @@
-import { ApprovalRequestSchema, type ApprovalRequest, type UserPrincipal } from "@core/contracts";
+import { type ApprovalRequest, ApprovalRequestSchema, type UserPrincipal } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { createApprovalHandlerRegistry } from "../../access/application/approval-handler-registry.ts";
 import type { WorkflowApprovalSettler } from "./ports/workflow-approval-settler.ts";
 import { registerWorkflowApprovals } from "./register-workflow-approvals.ts";
-import { createWorkflowResumeApprovalHandler, WORKFLOW_RESUME_HANDLER_KIND } from "./workflow-resume-approval-handler.ts";
+import {
+  createWorkflowResumeApprovalHandler,
+  WORKFLOW_RESUME_HANDLER_KIND,
+} from "./workflow-resume-approval-handler.ts";
 
 const ACTION = { workflowId: "approval-demo", runId: "run-1", stepId: "request-human-approval" };
 
@@ -53,7 +56,9 @@ describe("workflow-resume approval handler (decision 0036)", () => {
   });
 
   it("validates the action input with the contract", () => {
-    const handler = createWorkflowResumeApprovalHandler({ settler: recordingSettler({ ok: true, data: { settled: true, runStatus: "success" } }).settler });
+    const handler = createWorkflowResumeApprovalHandler({
+      settler: recordingSettler({ ok: true, data: { settled: true, runStatus: "success" } }).settler,
+    });
     expect(handler.kind).toBe(WORKFLOW_RESUME_HANDLER_KIND);
     expect(handler.inputSchema.safeParse(ACTION).success).toBe(true);
     expect(handler.inputSchema.safeParse({ ...ACTION, extra: 1 }).success).toBe(false);
@@ -64,9 +69,12 @@ describe("workflow-resume approval handler (decision 0036)", () => {
     [{ ok: true, data: { settled: false, reason: "NOT_SETTLED" } }, "APPROVAL_NOT_SETTLED"],
     [{ ok: false, error: { code: "NOT_FOUND", status: 404 } }, "WORKFLOW_RUN_NOT_FOUND"],
     [{ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } }, "UPSTREAM_UNAVAILABLE"],
-  ] as const)("fails the approval with a SCREAMING_SNAKE code when the run is not resumed (%j)", async (answer, code) => {
-    await expect(run(recordingSettler(answer).settler)).rejects.toMatchObject({ code });
-  });
+  ] as const)(
+    "fails the approval with a SCREAMING_SNAKE code when the run is not resumed (%j)",
+    async (answer, code) => {
+      await expect(run(recordingSettler(answer).settler)).rejects.toMatchObject({ code });
+    },
+  );
 
   it("refuses when the requester no longer resolves, without calling Mastra", async () => {
     const { settler, calls } = recordingSettler({ ok: true, data: { settled: true, runStatus: "success" } });

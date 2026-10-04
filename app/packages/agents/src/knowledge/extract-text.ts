@@ -9,9 +9,13 @@ import type { ChunkFormat } from "./chunk-document.ts";
 
 export type ExtractedText = { readonly text: string; readonly format: ChunkFormat };
 
-export type ExtractTextError = { readonly code: "UNSUPPORTED_MEDIA"; readonly contentType: string } | { readonly code: "EMPTY_CONTENT" };
+export type ExtractTextError =
+  | { readonly code: "UNSUPPORTED_MEDIA"; readonly contentType: string }
+  | { readonly code: "EMPTY_CONTENT" };
 
-export type ExtractTextResult = { readonly ok: true; readonly data: ExtractedText } | { readonly ok: false; readonly error: ExtractTextError };
+export type ExtractTextResult =
+  | { readonly ok: true; readonly data: ExtractedText }
+  | { readonly ok: false; readonly error: ExtractTextError };
 
 /** Turns PDF bytes into Markdown; configured only when a parser service exists. */
 export type PdfParser = (bytes: Uint8Array) => Promise<string>;
@@ -48,11 +52,16 @@ const fromText = (text: string, format: ChunkFormat): ExtractTextResult =>
   text.trim() === "" ? { ok: false, error: { code: "EMPTY_CONTENT" } } : { ok: true, data: { text, format } };
 
 /** Extracts the indexable text of a document. */
-export const extractText = async (input: { readonly bytes: Uint8Array; readonly contentType: string; readonly parsePdf?: PdfParser }): Promise<ExtractTextResult> => {
+export const extractText = async (input: {
+  readonly bytes: Uint8Array;
+  readonly contentType: string;
+  readonly parsePdf?: PdfParser;
+}): Promise<ExtractTextResult> => {
   const type = baseType(input.contentType);
   const textFormat = TEXT_TYPES[type];
   if (textFormat !== undefined) return fromText(decodeUtf8(input.bytes), textFormat);
   if (type === "text/html") return fromText(htmlToText(decodeUtf8(input.bytes)), "text");
-  if (type === "application/pdf" && input.parsePdf !== undefined) return fromText(await input.parsePdf(input.bytes), "markdown");
+  if (type === "application/pdf" && input.parsePdf !== undefined)
+    return fromText(await input.parsePdf(input.bytes), "markdown");
   return { ok: false, error: { code: "UNSUPPORTED_MEDIA", contentType: type } };
 };

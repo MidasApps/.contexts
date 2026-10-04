@@ -15,8 +15,8 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
-import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
@@ -25,13 +25,18 @@ import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 const column = dataTableColumnHelper<ApiKey>();
 type KeyState = "active" | "revoked" | "expired";
 
-const keyState = (key: ApiKey, now: number): KeyState => (key.status === "revoked" ? "revoked" : Date.parse(key.expiresAt) <= now ? "expired" : "active");
+const keyState = (key: ApiKey, now: number): KeyState =>
+  key.status === "revoked" ? "revoked" : Date.parse(key.expiresAt) <= now ? "expired" : "active";
 
 function KeyStatus({ apiKey, now }: { apiKey: ApiKey; now: number }) {
   const t = useTranslations("settings.apiKeys.status");
   const state = keyState(apiKey, now);
   const tone = state === "active" ? "emerald" : state === "expired" ? "amber" : "neutral";
-  return <StatusPill tone={tone}>{state === "revoked" && apiKey.revokedReason === "owner-removed" ? t("ownerRemoved") : t(state)}</StatusPill>;
+  return (
+    <StatusPill tone={tone}>
+      {state === "revoked" && apiKey.revokedReason === "owner-removed" ? t("ownerRemoved") : t(state)}
+    </StatusPill>
+  );
 }
 
 function KeyName({ apiKey }: { apiKey: ApiKey }) {
@@ -48,19 +53,46 @@ const useColumns = (now: number, onRevoke: ((key: ApiKey) => void) | null) => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.display({ id: "name", header: () => t("columns.name"), cell: ({ row }) => <KeyName apiKey={row.original} /> }),
-      column.display({ id: "node", header: () => t("columns.node"), cell: ({ row }) => <NodeName node={row.original.node} /> }),
-      column.accessor("scopes", { header: () => t("columns.scopes"), meta: { numeric: true }, cell: ({ getValue }) => t("scopeCount", { count: getValue().length }) }),
-      column.accessor("lastUsedAt", { header: () => t("columns.lastUsed"), cell: ({ getValue }) => (getValue() === null ? t("neverUsed") : formatDateTime(getValue() ?? "")) }),
-      column.accessor("expiresAt", { header: () => t("columns.expires"), cell: ({ getValue }) => formatDateTime(getValue(), "date") }),
-      column.display({ id: "status", header: () => t("columns.status"), cell: ({ row }) => <KeyStatus apiKey={row.original} now={now} /> }),
+      column.display({
+        id: "name",
+        header: () => t("columns.name"),
+        cell: ({ row }) => <KeyName apiKey={row.original} />,
+      }),
+      column.display({
+        id: "node",
+        header: () => t("columns.node"),
+        cell: ({ row }) => <NodeName node={row.original.node} />,
+      }),
+      column.accessor("scopes", {
+        header: () => t("columns.scopes"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => t("scopeCount", { count: getValue().length }),
+      }),
+      column.accessor("lastUsedAt", {
+        header: () => t("columns.lastUsed"),
+        cell: ({ getValue }) => (getValue() === null ? t("neverUsed") : formatDateTime(getValue() ?? "")),
+      }),
+      column.accessor("expiresAt", {
+        header: () => t("columns.expires"),
+        cell: ({ getValue }) => formatDateTime(getValue(), "date"),
+      }),
+      column.display({
+        id: "status",
+        header: () => t("columns.status"),
+        cell: ({ row }) => <KeyStatus apiKey={row.original} now={now} />,
+      }),
       column.display({
         id: "actions",
         header: () => t("columns.actions"),
         meta: { headerHidden: true },
         cell: ({ row }) =>
           onRevoke === null || keyState(row.original, now) !== "active" ? null : (
-            <Button variant="outline" size="sm" onClick={() => onRevoke(row.original)} aria-label={t("revokeNamed", { name: row.original.name })}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onRevoke(row.original)}
+              aria-label={t("revokeNamed", { name: row.original.name })}
+            >
               {t("revokeAction")}
             </Button>
           ),
@@ -101,9 +133,17 @@ function ApiKeysTable({ context, onCreate }: { context: AccessContext; onCreate:
             <span className="text-body">
               <NodeName node={key.node} />
             </span>
-            <span className="text-xs text-muted-foreground">{t("cardMeta", { scopes: key.scopes.length, date: formatDateTime(key.expiresAt, "date") })}</span>
+            <span className="text-xs text-muted-foreground">
+              {t("cardMeta", { scopes: key.scopes.length, date: formatDateTime(key.expiresAt, "date") })}
+            </span>
             {canRevoke && keyState(key, now) === "active" ? (
-              <Button variant="outline" size="sm" className="self-start" onClick={() => setRevoking(key)} aria-label={t("revokeNamed", { name: key.name })}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start"
+                onClick={() => setRevoking(key)}
+                aria-label={t("revokeNamed", { name: key.name })}
+              >
                 {t("revokeAction")}
               </Button>
             ) : null}
@@ -126,7 +166,11 @@ function ApiKeysTable({ context, onCreate }: { context: AccessContext; onCreate:
           />
         }
       />
-      <RevokeApiKeyDialog organizationId={organization.id} apiKey={revoking} onOpenChange={(open) => !open && setRevoking(null)} />
+      <RevokeApiKeyDialog
+        organizationId={organization.id}
+        apiKey={revoking}
+        onOpenChange={(open) => !open && setRevoking(null)}
+      />
     </>
   );
 }
@@ -138,7 +182,8 @@ function SettingsApiKeys({ context }: { context: AccessContext }) {
   const [creating, setCreating] = useState(false);
   const canCreate = context.permissions.includes("core.api-key.create");
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.api-key.read")}
       header={

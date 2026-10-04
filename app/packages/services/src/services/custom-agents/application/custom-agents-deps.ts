@@ -1,7 +1,7 @@
 import type { AuditAction, ErrorDetail, Principal, TenantId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { RequestAccess } from "../../access/composition.ts";
 import { requirePermission } from "../../access/application/grant-checks.ts";
+import type { RequestAccess } from "../../access/composition.ts";
 import type { AccessDeniedError } from "../../access/domain/errors/access-denied-error.ts";
 import type { AuditWriter } from "../../audit/application/use-cases/record-audit.ts";
 import { auditActorOf } from "../../audit/domain/audit-actor.ts";
@@ -32,17 +32,32 @@ export type CustomAgentsCommand = {
   readonly requestId: string;
 };
 
-type CustomPermission = typeof CUSTOM_AGENTS_READ_PERMISSION | typeof CUSTOM_AGENTS_WRITE_PERMISSION | typeof CHAT_USE_PERMISSION;
+type CustomPermission =
+  | typeof CUSTOM_AGENTS_READ_PERMISSION
+  | typeof CUSTOM_AGENTS_WRITE_PERMISSION
+  | typeof CHAT_USE_PERMISSION;
 
 /** Authorizes a permission at the organization (fail-closed). */
-export const authorizeCustomAgents = (command: Pick<CustomAgentsCommand, "actor" | "access" | "tenantId">, permission: CustomPermission): Promise<Result<void, AccessDeniedError>> =>
-  requirePermission({ access: command.access, actor: command.actor, permission, node: { level: "organization", tenantId: command.tenantId } });
+export const authorizeCustomAgents = (
+  command: Pick<CustomAgentsCommand, "actor" | "access" | "tenantId">,
+  permission: CustomPermission,
+): Promise<Result<void, AccessDeniedError>> =>
+  requirePermission({
+    access: command.access,
+    actor: command.actor,
+    permission,
+    node: { level: "organization", tenantId: command.tenantId },
+  });
 
 /** One audit entry per change; field names only in `changes`, never the instructions. */
 export const recordCustomAudit = async (
   deps: Pick<CustomAgentsDeps, "audit">,
   command: CustomAgentsCommand,
-  fact: { readonly action: AuditAction; readonly target: { readonly type: "custom-agent" | "custom-skill"; readonly id: string }; readonly changes?: readonly string[] },
+  fact: {
+    readonly action: AuditAction;
+    readonly target: { readonly type: "custom-agent" | "custom-skill"; readonly id: string };
+    readonly changes?: readonly string[];
+  },
   tx?: Transaction,
 ): Promise<void> => {
   await deps.audit.record(
@@ -82,17 +97,32 @@ export const selectionIssues = (
   input: { readonly tools?: readonly string[] | undefined; readonly coreSkills?: readonly string[] | undefined },
   selectable: SelectableAgentOptions | undefined,
 ): ErrorDetail[] => {
-  const unknown = (field: string, issue: string, items: readonly string[] | undefined, known: ReadonlySet<string> | undefined): ErrorDetail[] =>
-    (items ?? []).flatMap((item, index) => (known?.has(item) === true ? [] : [{ field: `${field}.${String(index)}`, issue }]));
-  return [...unknown("tools", "UNKNOWN_TOOL", input.tools, selectable?.tools), ...unknown("coreSkills", "UNKNOWN_SKILL", input.coreSkills, selectable?.coreSkills)];
+  const unknown = (
+    field: string,
+    issue: string,
+    items: readonly string[] | undefined,
+    known: ReadonlySet<string> | undefined,
+  ): ErrorDetail[] =>
+    (items ?? []).flatMap((item, index) =>
+      known?.has(item) === true ? [] : [{ field: `${field}.${String(index)}`, issue }],
+    );
+  return [
+    ...unknown("tools", "UNKNOWN_TOOL", input.tools, selectable?.tools),
+    ...unknown("coreSkills", "UNKNOWN_SKILL", input.coreSkills, selectable?.coreSkills),
+  ];
 };
 
 /** The plan's instruction cap (the schema only knows the hard cap). */
 export const instructionIssues = (instructions: string | undefined, maxChars: number): ErrorDetail[] =>
   instructions !== undefined && instructions.length > maxChars ? [{ field: "instructions", issue: "TOO_BIG" }] : [];
 
-export const schemaIssuesOf = (error: { readonly issues: readonly { readonly path: readonly PropertyKey[]; readonly code: string }[] }): ErrorDetail[] =>
-  error.issues.map((issue) => ({ field: issue.path.map(String).join(".") || "(body)", issue: issue.code.toUpperCase() }));
+export const schemaIssuesOf = (error: {
+  readonly issues: readonly { readonly path: readonly PropertyKey[]; readonly code: string }[];
+}): ErrorDetail[] =>
+  error.issues.map((issue) => ({
+    field: issue.path.map(String).join(".") || "(body)",
+    issue: issue.code.toUpperCase(),
+  }));
 
 /** A patch without its absent fields (`exactOptionalPropertyTypes`: undefined must not overwrite). */
 export const definedOf = <T extends Readonly<Record<string, unknown>>>(input: T): Partial<T> =>

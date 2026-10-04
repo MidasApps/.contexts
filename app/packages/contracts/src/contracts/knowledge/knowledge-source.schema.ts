@@ -12,7 +12,10 @@ export const KnowledgeSourceSchema = z.discriminatedUnion("kind", [
   }),
   z.strictObject({
     kind: z.literal("url").meta(none("Ingest a public web page.")),
-    url: z.url({ protocol: /^https$/ }).max(2048).meta(none("Public https URL to scrape.")),
+    url: z
+      .url({ protocol: /^https$/ })
+      .max(2048)
+      .meta(none("Public https URL to scrape.")),
   }),
 ]);
 export type KnowledgeSource = z.infer<typeof KnowledgeSourceSchema>;

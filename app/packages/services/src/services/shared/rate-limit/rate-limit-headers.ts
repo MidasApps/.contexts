@@ -20,7 +20,13 @@ export const rateLimitHeaders = (decision: RateLimitDecision, now: Date): Record
 
 /** `429 RATE_LIMITED` with the canonical envelope and the rate limit headers. */
 export const rateLimitedResponse = (args: { decision: RateLimitDecision; now: Date; requestId: string }): Response => {
-  const response = errorResponse({ status: 429, code: "RATE_LIMITED", message: "Too many requests.", requestId: args.requestId });
-  for (const [name, value] of Object.entries(rateLimitHeaders(args.decision, args.now))) response.headers.set(name, value);
+  const response = errorResponse({
+    status: 429,
+    code: "RATE_LIMITED",
+    message: "Too many requests.",
+    requestId: args.requestId,
+  });
+  for (const [name, value] of Object.entries(rateLimitHeaders(args.decision, args.now)))
+    response.headers.set(name, value);
   return response;
 };

@@ -1,4 +1,4 @@
-import { DeviceActivationIdSchema, DeviceIdSchema, type Device } from "@core/contracts";
+import { type Device, DeviceActivationIdSchema, DeviceIdSchema } from "@core/contracts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
 import type { DeviceActivationRepository } from "../../application/ports/driven/device-activation-repository.ts";
 import type { DeviceRepository } from "../../application/ports/driven/device-repository.ts";
@@ -25,7 +25,13 @@ export const createInMemoryDeviceRepository = (): InMemoryDeviceRepository => {
         .filter((device) => device.tenantId === tenantId)
         .sort(newestFirst)
         .filter((device) => page.after === undefined || isAfter(device, page.after));
-      return Promise.resolve(pageFromOverfetch({ fetched: matching.slice(0, page.limit + 1), limit: page.limit, positionOf: (d) => [d.createdAt, d.id] }));
+      return Promise.resolve(
+        pageFromOverfetch({
+          fetched: matching.slice(0, page.limit + 1),
+          limit: page.limit,
+          positionOf: (d) => [d.createdAt, d.id],
+        }),
+      );
     },
     revoke: (_tx, { id, updatedAt }) => {
       const row = rows.get(id);
@@ -37,7 +43,9 @@ export const createInMemoryDeviceRepository = (): InMemoryDeviceRepository => {
 
 type ActivationRow = { activation: DeviceActivationRecord; codeHash: string };
 
-export type InMemoryDeviceActivationRepository = DeviceActivationRepository & { readonly rowOf: (id: string) => ActivationRow | undefined };
+export type InMemoryDeviceActivationRepository = DeviceActivationRepository & {
+  readonly rowOf: (id: string) => ActivationRow | undefined;
+};
 
 /** In-memory `DeviceActivationRepository` for unit tests; transactions are ignored. */
 export const createInMemoryDeviceActivationRepository = (): InMemoryDeviceActivationRepository => {
@@ -47,7 +55,8 @@ export const createInMemoryDeviceActivationRepository = (): InMemoryDeviceActiva
     newId: () => DeviceActivationIdSchema.parse(`activation-${String((sequence += 1)).padStart(3, "0")}`),
     create: (_tx, { activation, codeHash }) => void rows.set(activation.id, { activation, codeHash }),
     get: (_tx, id) => Promise.resolve(rows.get(id)?.activation ?? null),
-    findByCodeHash: (codeHash) => Promise.resolve([...rows.values()].find((row) => row.codeHash === codeHash)?.activation ?? null),
+    findByCodeHash: (codeHash) =>
+      Promise.resolve([...rows.values()].find((row) => row.codeHash === codeHash)?.activation ?? null),
     markRedeemed: (_tx, { id, deviceId, updatedAt }) => {
       const row = rows.get(id);
       if (row !== undefined) row.activation = { ...row.activation, status: "redeemed", deviceId, updatedAt };

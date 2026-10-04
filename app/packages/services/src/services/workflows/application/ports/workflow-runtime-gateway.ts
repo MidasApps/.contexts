@@ -1,4 +1,14 @@
-import type { AgentCatalogEntry, CustomAgentRuntimeOptions, Schedule, SchedulePreview, SchedulePreviewInput, WorkflowCatalogEntry, WorkflowEvent, WorkflowRun, WorkflowRunStatus } from "@core/contracts";
+import type {
+  AgentCatalogEntry,
+  CustomAgentRuntimeOptions,
+  Schedule,
+  SchedulePreview,
+  SchedulePreviewInput,
+  WorkflowCatalogEntry,
+  WorkflowEvent,
+  WorkflowRun,
+  WorkflowRunStatus,
+} from "@core/contracts";
 import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
 
 /**
@@ -17,7 +27,9 @@ export type WorkflowGatewayError = {
   readonly details?: readonly FieldIssue[];
 };
 
-export type WorkflowGatewayResult<T> = { readonly ok: true; readonly data: T } | { readonly ok: false; readonly error: WorkflowGatewayError };
+export type WorkflowGatewayResult<T> =
+  | { readonly ok: true; readonly data: T }
+  | { readonly ok: false; readonly error: WorkflowGatewayError };
 
 export type PageMeta = { readonly cursor: string | null; readonly hasMore: boolean; readonly limit: number };
 
@@ -39,19 +51,42 @@ export type ScheduleWriteInput = {
 export type ScheduleAction = "pause" | "resume" | "run";
 
 export type WorkflowRuntimeGateway = {
-  readonly listRuns: (scope: AgentCallScope, query: ListRunsQuery) => Promise<WorkflowGatewayResult<{ readonly runs: WorkflowRun[]; readonly page: PageMeta }>>;
+  readonly listRuns: (
+    scope: AgentCallScope,
+    query: ListRunsQuery,
+  ) => Promise<WorkflowGatewayResult<{ readonly runs: WorkflowRun[]; readonly page: PageMeta }>>;
   readonly getRun: (scope: AgentCallScope, runId: string) => Promise<WorkflowGatewayResult<WorkflowRun>>;
-  readonly getRunEvents: (scope: AgentCallScope, runId: string) => Promise<WorkflowGatewayResult<{ readonly run: WorkflowRun; readonly events: WorkflowEvent[] }>>;
+  readonly getRunEvents: (
+    scope: AgentCallScope,
+    runId: string,
+  ) => Promise<WorkflowGatewayResult<{ readonly run: WorkflowRun; readonly events: WorkflowEvent[] }>>;
   readonly cancelRun: (scope: AgentCallScope, runId: string) => Promise<WorkflowGatewayResult<null>>;
-  readonly startRun: (scope: AgentCallScope, input: { readonly workflowId: string; readonly inputData: Readonly<Record<string, unknown>> }) => Promise<WorkflowGatewayResult<{ readonly runId: string }>>;
+  readonly startRun: (
+    scope: AgentCallScope,
+    input: { readonly workflowId: string; readonly inputData: Readonly<Record<string, unknown>> },
+  ) => Promise<WorkflowGatewayResult<{ readonly runId: string }>>;
   readonly listSchedules: (scope: AgentCallScope) => Promise<WorkflowGatewayResult<Schedule[]>>;
   readonly getSchedule: (scope: AgentCallScope, scheduleId: string) => Promise<WorkflowGatewayResult<Schedule>>;
-  readonly createSchedule: (scope: AgentCallScope, input: ScheduleWriteInput) => Promise<WorkflowGatewayResult<Schedule>>;
-  readonly updateSchedule: (scope: AgentCallScope, scheduleId: string, input: ScheduleWriteInput) => Promise<WorkflowGatewayResult<Schedule>>;
-  readonly actOnSchedule: (scope: AgentCallScope, scheduleId: string, action: ScheduleAction) => Promise<WorkflowGatewayResult<Schedule | { readonly scheduleId: string }>>;
+  readonly createSchedule: (
+    scope: AgentCallScope,
+    input: ScheduleWriteInput,
+  ) => Promise<WorkflowGatewayResult<Schedule>>;
+  readonly updateSchedule: (
+    scope: AgentCallScope,
+    scheduleId: string,
+    input: ScheduleWriteInput,
+  ) => Promise<WorkflowGatewayResult<Schedule>>;
+  readonly actOnSchedule: (
+    scope: AgentCallScope,
+    scheduleId: string,
+    action: ScheduleAction,
+  ) => Promise<WorkflowGatewayResult<Schedule | { readonly scheduleId: string }>>;
   readonly deleteSchedule: (scope: AgentCallScope, scheduleId: string) => Promise<WorkflowGatewayResult<null>>;
   /** The next fires of an unsaved cron, from the scheduler's own engine (`/tenant-schedules/preview`, decision 0061). */
-  readonly previewSchedule: (scope: AgentCallScope, input: SchedulePreviewInput) => Promise<WorkflowGatewayResult<SchedulePreview>>;
+  readonly previewSchedule: (
+    scope: AgentCallScope,
+    input: SchedulePreviewInput,
+  ) => Promise<WorkflowGatewayResult<SchedulePreview>>;
   /** The subagents of the caller's tenant with their tools and skills (`/tenant-catalog/agents`, SP5 Task 14). */
   readonly listAgentCatalog: (scope: AgentCallScope) => Promise<WorkflowGatewayResult<AgentCatalogEntry[]>>;
   /** The workflows the tenant may start or schedule (`/tenant-catalog/workflows`, SP5 Task 14). */

@@ -18,7 +18,9 @@ const item = (overrides: Partial<UploadItem> = {}): UploadItem => ({
 describe("AttachmentChips", () => {
   // Follow-up 79: a slow first validation reads as processing, never as a failure.
   it("says a slow validation is still processing", () => {
-    renderWithProviders(<AttachmentChips items={[item({ slow: true })]} onRemove={() => undefined} onRetry={() => undefined} />);
+    renderWithProviders(
+      <AttachmentChips items={[item({ slow: true })]} onRemove={() => undefined} onRetry={() => undefined} />,
+    );
     expect(screen.getByText("Processando… a verificação pode levar alguns minutos")).toBeDefined();
     expect(screen.queryByText("A verificação demorou demais")).toBeNull();
   });

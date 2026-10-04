@@ -1,11 +1,11 @@
-import { AdminWorkflowRunSchema, type AdminWorkflowRun } from "@core/contracts";
+import { type AdminWorkflowRun, AdminWorkflowRunSchema } from "@core/contracts";
 import { screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { buildAdminRun, OPS_IDS } from "#/shared/testing/admin-operations-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, noContent, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, FAKE_REQUEST_ID, type FakeRoutes, noContent } from "#/shared/testing/fake-api.ts";
 import { holdResponse, setOnline } from "#/shared/testing/network.ts";
 import { CancelRunDialog } from "./CancelRunDialog.tsx";
 
@@ -24,7 +24,9 @@ afterEach(() => setOnline(true));
 describe("CancelRunDialog", () => {
   it("cancels the run after the confirmation, closes and says so", async () => {
     const { user, api, container } = render({ [CANCEL]: noContent() });
-    const dialog = await screen.findByRole("alertdialog", { name: "Cancelar a execução de Demonstração de aprovação?" });
+    const dialog = await screen.findByRole("alertdialog", {
+      name: "Cancelar a execução de Demonstração de aprovação?",
+    });
     expect(dialog.textContent).toContain("A solicitação de aprovação que ela aguardava é cancelada junto");
     await expectNoAxeViolations(container.ownerDocument.body);
     await user.click(within(dialog).getByRole("button", { name: "Cancelar execução" }));
@@ -45,7 +47,9 @@ describe("CancelRunDialog", () => {
     const { user } = render({ [CANCEL]: held.handler });
     const dialog = await screen.findByRole("alertdialog");
     await user.click(within(dialog).getByRole("button", { name: "Cancelar execução" }));
-    await waitFor(() => expect(within(dialog).getByRole("button", { name: "Cancelar execução" }).getAttribute("aria-busy")).toBe("true"));
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: "Cancelar execução" }).getAttribute("aria-busy")).toBe("true"),
+    );
     expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Manter execução" }).disabled).toBe(true);
     held.release(noContent());
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
@@ -63,7 +67,9 @@ describe("CancelRunDialog", () => {
     const { api } = render({ [CANCEL]: noContent() });
     const dialog = await screen.findByRole("alertdialog");
     setOnline(false);
-    await waitFor(() => expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Cancelar execução" }).disabled).toBe(true));
+    await waitFor(() =>
+      expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Cancelar execução" }).disabled).toBe(true),
+    );
     expect(within(dialog).getByText(/Você está sem conexão/u)).toBeDefined();
     expect(api.callLines()).not.toContain(`POST /v1/admin/workflow-runs/${OPS_IDS.run}/cancel`);
   });

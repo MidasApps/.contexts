@@ -26,7 +26,12 @@ export type FakeChatTransport = ChatTransport<UIMessage> & {
   readonly resumeCalls: () => number;
 };
 
-const openStream = (trigger: FakeStream["trigger"], messages: readonly UIMessage[], abortSignal: AbortSignal | undefined, body?: Record<string, unknown>): { stream: ReadableStream<UIMessageChunk>; handle: FakeStream } => {
+const openStream = (
+  trigger: FakeStream["trigger"],
+  messages: readonly UIMessage[],
+  abortSignal: AbortSignal | undefined,
+  body?: Record<string, unknown>,
+): { stream: ReadableStream<UIMessageChunk>; handle: FakeStream } => {
   let controller: ReadableStreamDefaultController<UIMessageChunk> | undefined;
   let done = false;
   let aborted = false;
@@ -77,7 +82,12 @@ export const createFakeChatTransport = (): FakeChatTransport => {
         nextFailure = undefined;
         return Promise.reject(failure);
       }
-      const { stream, handle } = openStream(trigger, messages, abortSignal, body as Record<string, unknown> | undefined);
+      const { stream, handle } = openStream(
+        trigger,
+        messages,
+        abortSignal,
+        body as Record<string, unknown> | undefined,
+      );
       streams.push(handle);
       return Promise.resolve(stream);
     },
@@ -93,9 +103,18 @@ export const createFakeChatTransport = (): FakeChatTransport => {
 };
 
 /** Chunks of a plain text answer: `start`, the text in `pieces`, optionally the `finish`. */
-export const textChunks = (pieces: readonly string[], options: { messageId?: string; finish?: boolean; metadata?: unknown } = {}): UIMessageChunk[] => [
-  { type: "start", messageId: options.messageId ?? "a-1", ...(options.metadata === undefined ? {} : { messageMetadata: options.metadata }) },
+export const textChunks = (
+  pieces: readonly string[],
+  options: { messageId?: string; finish?: boolean; metadata?: unknown } = {},
+): UIMessageChunk[] => [
+  {
+    type: "start",
+    messageId: options.messageId ?? "a-1",
+    ...(options.metadata === undefined ? {} : { messageMetadata: options.metadata }),
+  },
   { type: "text-start", id: "t-1" },
   ...pieces.map((delta): UIMessageChunk => ({ type: "text-delta", id: "t-1", delta })),
-  ...(options.finish === false ? [] : ([{ type: "text-end", id: "t-1" }, { type: "finish" }] satisfies UIMessageChunk[])),
+  ...(options.finish === false
+    ? []
+    : ([{ type: "text-end", id: "t-1" }, { type: "finish" }] satisfies UIMessageChunk[])),
 ];

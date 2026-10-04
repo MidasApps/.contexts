@@ -23,7 +23,11 @@ export const resolveRolePermissions = (args: {
   tenantId: TenantId;
   registry: PermissionRegistry;
 }): ResolvedRolePermissions => {
-  const live = new Map(args.customRoles.filter((role) => !role.isDeleted && role.tenantId === args.tenantId).map((role) => [role.id, role]));
+  const live = new Map(
+    args.customRoles
+      .filter((role) => !role.isDeleted && role.tenantId === args.tenantId)
+      .map((role) => [role.id, role]),
+  );
   const permissions = new Set<Permission>();
   const unknownRoleIds: RoleId[] = [];
   for (const role of args.roles) {
@@ -45,4 +49,5 @@ export const unknownTenantPermissions = (ids: readonly string[], registry: Permi
   [...new Set(ids)].filter((id) => registry.get(id)?.scope !== "tenant").sort();
 
 /** Whether a role list holds the system `owner` role. */
-export const holdsOwner = (roles: readonly RoleRef[]): boolean => roles.some((role) => role.kind === "system" && role.key === "owner");
+export const holdsOwner = (roles: readonly RoleRef[]): boolean =>
+  roles.some((role) => role.kind === "system" && role.key === "owner");

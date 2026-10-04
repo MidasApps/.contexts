@@ -26,7 +26,11 @@ function GlobalErrorPage({ locale, reference, onRetry }: GlobalErrorContentProps
       <div role="alert" className="mx-auto flex max-w-md flex-col items-center py-16 text-center">
         <h1 className="text-xl font-semibold tracking-tight">{t("shell.serverError.title")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{t("shell.serverError.description")}</p>
-        {reference === undefined ? null : <p className="mt-2 font-mono text-xs text-muted-foreground">{t("common.errorState.reference", { requestId: reference })}</p>}
+        {reference === undefined ? null : (
+          <p className="mt-2 font-mono text-xs text-muted-foreground">
+            {t("common.errorState.reference", { requestId: reference })}
+          </p>
+        )}
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Button variant="secondary" onClick={onRetry}>
             {t("common.actions.retry")}

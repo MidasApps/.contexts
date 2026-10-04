@@ -61,7 +61,8 @@ const parseArgs = (raw: string | undefined, directive: string): Record<string, u
   if (raw === undefined) return {};
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) return parsed as Record<string, unknown>;
+    if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed))
+      return parsed as Record<string, unknown>;
   } catch (error: unknown) {
     throw new InvalidFakeDirectiveError(directive, { cause: error });
   }
@@ -73,7 +74,10 @@ const parseArgs = (raw: string | undefined, directive: string): Record<string, u
  * @throws {InvalidFakeDirectiveError} when a directive body is not a JSON object.
  */
 export const parseFakeDirectives = (text: string): FakeDirective[] =>
-  [...text.matchAll(DIRECTIVE_PATTERN)].map((match) => ({ scenario: match[1] ?? "", args: parseArgs(match[2], match[0]) }));
+  [...text.matchAll(DIRECTIVE_PATTERN)].map((match) => ({
+    scenario: match[1] ?? "",
+    args: parseArgs(match[2], match[0]),
+  }));
 
 /** A directive without JSON that also has an unparseable body is still invalid. */
 export const assertNoMalformedDirectives = (text: string): void => {
@@ -82,7 +86,8 @@ export const assertNoMalformedDirectives = (text: string): void => {
   if (malformed !== null) throw new InvalidFakeDirectiveError(malformed[0]);
 };
 
-export const stripFakeDirectives = (text: string): string => text.replace(DIRECTIVE_PATTERN, " ").replace(/\s+/g, " ").trim();
+export const stripFakeDirectives = (text: string): string =>
+  text.replace(DIRECTIVE_PATTERN, " ").replace(/\s+/g, " ").trim();
 
 export const hashText = (text: string): string => createHash("sha256").update(text).digest("hex");
 
@@ -122,7 +127,11 @@ export const resolveFakeTurn = (context: FakeTurnContext, registry: FakeScenario
   assertNoMalformedDirectives(context.text);
   const directives = parseFakeDirectives(context.text);
   const scripted = turnFromDirectives(directives);
-  const needsAnswer = scripted !== undefined && scripted.text === undefined && scripted.toolCalls === undefined && scripted.error === undefined;
+  const needsAnswer =
+    scripted !== undefined &&
+    scripted.text === undefined &&
+    scripted.toolCalls === undefined &&
+    scripted.error === undefined;
   if (scripted !== undefined && !needsAnswer) return scripted;
   const rule = registry.rulesFor(context.agentId).find((candidate) => candidate.matches(context));
   const base = rule?.respond(context) ?? { text: echoText(context.text) };
@@ -152,7 +161,9 @@ const modelToolName = (toolNames: readonly string[], toolId: string): string | u
 const delegation = (id: string, agentKey: string, pattern: RegExp): FakeScenarioRule => ({
   id,
   matches: ({ text, toolNames }) => toolNames.includes(`agent-${agentKey}`) && pattern.test(stripFakeDirectives(text)),
-  respond: ({ text }) => ({ toolCalls: [{ toolName: `agent-${agentKey}`, input: { prompt: stripFakeDirectives(text) } }] }),
+  respond: ({ text }) => ({
+    toolCalls: [{ toolName: `agent-${agentKey}`, input: { prompt: stripFakeDirectives(text) } }],
+  }),
 });
 
 const contractName = (contractId: string): string => (contractId.split(".").at(-1) ?? contractId).toLowerCase();
@@ -164,11 +175,14 @@ const renderFormRule = (commands: readonly FakeCommandRef[]): FakeScenarioRule =
   };
   return {
     id: "data-render-form",
-    matches: ({ text, toolNames }) => modelToolName(toolNames, "catalog.renderForm") !== undefined && commandFor(text) !== undefined,
+    matches: ({ text, toolNames }) =>
+      modelToolName(toolNames, "catalog.renderForm") !== undefined && commandFor(text) !== undefined,
     respond: ({ text, toolNames }) => {
       const command = commandFor(text);
       const input = { contractId: command?.targetContractId, mode: "create", commandId: command?.commandId };
-      return { toolCalls: [{ toolName: modelToolName(toolNames, "catalog.renderForm") ?? "catalog.renderForm", input }] };
+      return {
+        toolCalls: [{ toolName: modelToolName(toolNames, "catalog.renderForm") ?? "catalog.renderForm", input }],
+      };
     },
   };
 };
@@ -187,7 +201,8 @@ const SUBMITTED_FORM = new RegExp(`\\[ui:schema-form\\][\\s\\S]*?${FENCE}json\\s
 
 type SubmittedForm = { readonly commandId: string; readonly values: Readonly<Record<string, unknown>> };
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 /** The form a `[ui:schema-form]` user turn carries (written by the chat client, decision 0032), or `undefined`. */
 const submittedFormOf = (text: string): SubmittedForm | undefined => {
@@ -210,7 +225,8 @@ const submittedFormOf = (text: string): SubmittedForm | undefined => {
 const runSubmittedFormRule = (commands: readonly FakeCommandRef[]): FakeScenarioRule => {
   const callFor = (text: string, toolNames: readonly string[]): FakeToolCall | undefined => {
     const form = submittedFormOf(text);
-    const command = form === undefined ? undefined : commands.find((candidate) => candidate.commandId === form.commandId);
+    const command =
+      form === undefined ? undefined : commands.find((candidate) => candidate.commandId === form.commandId);
     const toolName = command === undefined ? undefined : modelToolName(toolNames, command.toolId);
     return form === undefined || toolName === undefined ? undefined : { toolName, input: form.values };
   };
@@ -245,7 +261,8 @@ const namedCommandOf = (text: string): SubmittedForm | undefined => {
 const runNamedCommandRule = (commands: readonly FakeCommandRef[]): FakeScenarioRule => {
   const callFor = (text: string, toolNames: readonly string[]): FakeToolCall | undefined => {
     const named = namedCommandOf(text);
-    const command = named === undefined ? undefined : commands.find((candidate) => candidate.commandId === named.commandId);
+    const command =
+      named === undefined ? undefined : commands.find((candidate) => candidate.commandId === named.commandId);
     const toolName = command === undefined ? undefined : modelToolName(toolNames, command.toolId);
     return named === undefined || toolName === undefined ? undefined : { toolName, input: named.values };
   };
@@ -261,23 +278,39 @@ const runNamedCommandRule = (commands: readonly FakeCommandRef[]): FakeScenarioR
 
 const listEntitiesRule: FakeScenarioRule = {
   id: "data-list-entities",
-  matches: ({ text, toolNames }) => modelToolName(toolNames, "catalog.listEntities") !== undefined && /\b(entities|which data)\b/i.test(text),
-  respond: ({ toolNames }) => ({ toolCalls: [{ toolName: modelToolName(toolNames, "catalog.listEntities") ?? "catalog.listEntities", input: {} }] }),
+  matches: ({ text, toolNames }) =>
+    modelToolName(toolNames, "catalog.listEntities") !== undefined && /\b(entities|which data)\b/i.test(text),
+  respond: ({ toolNames }) => ({
+    toolCalls: [{ toolName: modelToolName(toolNames, "catalog.listEntities") ?? "catalog.listEntities", input: {} }],
+  }),
 };
 
 /** The knowledge agent searches the knowledge base with the request itself (SP3 Task 27 evals). */
 const searchKnowledgeRule: FakeScenarioRule = {
   id: "knowledge-search",
-  matches: ({ text, toolNames }) => modelToolName(toolNames, "knowledge.searchKnowledge") !== undefined && stripFakeDirectives(text) !== "",
+  matches: ({ text, toolNames }) =>
+    modelToolName(toolNames, "knowledge.searchKnowledge") !== undefined && stripFakeDirectives(text) !== "",
   respond: ({ text, toolNames }) => ({
-    toolCalls: [{ toolName: modelToolName(toolNames, "knowledge.searchKnowledge") ?? "knowledge.searchKnowledge", input: { query: stripFakeDirectives(text).slice(0, 1000) } }],
+    toolCalls: [
+      {
+        toolName: modelToolName(toolNames, "knowledge.searchKnowledge") ?? "knowledge.searchKnowledge",
+        input: { query: stripFakeDirectives(text).slice(0, 1000) },
+      },
+    ],
   }),
 };
 
 const webSearchRule: FakeScenarioRule = {
   id: "web-search",
   matches: ({ toolNames }) => modelToolName(toolNames, "web.search") !== undefined,
-  respond: ({ text, toolNames }) => ({ toolCalls: [{ toolName: modelToolName(toolNames, "web.search") ?? "web.search", input: { query: stripFakeDirectives(text).slice(0, 400), limit: 3 } }] }),
+  respond: ({ text, toolNames }) => ({
+    toolCalls: [
+      {
+        toolName: modelToolName(toolNames, "web.search") ?? "web.search",
+        input: { query: stripFakeDirectives(text).slice(0, 400), limit: 3 },
+      },
+    ],
+  }),
 };
 
 // The member's message ends where the answer or the result of a delegation starts.
@@ -292,7 +325,11 @@ const MAX_FAKE_TITLE_CHARS = 60;
 const conversationTitleRule: FakeScenarioRule = {
   id: "memory-conversation-title",
   matches: ({ text }) => stripFakeDirectives(TITLE_PROMPT.exec(text)?.[1] ?? "") !== "",
-  respond: ({ text }) => ({ text: stripFakeDirectives(TITLE_PROMPT.exec(text)?.[1] ?? "").slice(0, MAX_FAKE_TITLE_CHARS).trim() }),
+  respond: ({ text }) => ({
+    text: stripFakeDirectives(TITLE_PROMPT.exec(text)?.[1] ?? "")
+      .slice(0, MAX_FAKE_TITLE_CHARS)
+      .trim(),
+  }),
 };
 
 /**
@@ -305,7 +342,9 @@ const conversationTitleRule: FakeScenarioRule = {
  * knowledge agent searches the knowledge base with the request; the web agent searches
  * the web with the message when Firecrawl is offered.
  */
-export const coreFakeRules = (commands: readonly FakeCommandRef[]): readonly (readonly [string, FakeScenarioRule])[] => [
+export const coreFakeRules = (
+  commands: readonly FakeCommandRef[],
+): readonly (readonly [string, FakeScenarioRule])[] => [
   ["assistant", delegation("supervisor-action", "action", CONFIRMED)],
   ["assistant", delegation("supervisor-data", "data", /\b(create|add|new|entities|which data|query)\b/i)],
   ["assistant", delegation("supervisor-web", "web", /\b(web|online|internet)\b/i)],

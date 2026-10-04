@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, Suspense, type ReactNode } from "react";
+import { Component, type ReactNode, Suspense } from "react";
 import { useTranslations } from "use-intl";
 import { usePermissions } from "#/entities/permission/index.ts";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
@@ -14,7 +14,10 @@ type BoundaryState = { error: unknown };
  * A module page that fails to load its chunk or to render stays inside the shell (the rest of the
  * app keeps working) and offers a retry. Class component: React exposes error boundaries only so.
  */
-class ModulePageBoundary extends Component<{ children: ReactNode; onError?: ((error: unknown) => void) | undefined }, BoundaryState> {
+class ModulePageBoundary extends Component<
+  { children: ReactNode; onError?: ((error: unknown) => void) | undefined },
+  BoundaryState
+> {
   override state: BoundaryState = { error: undefined };
 
   static getDerivedStateFromError(error: unknown): BoundaryState {
@@ -34,7 +37,10 @@ class ModulePageBoundary extends Component<{ children: ReactNode; onError?: ((er
 /** The permission of the navigation item that opens this page (the module's own gate for it). */
 const usePagePermission = (moduleId: string, pageKey: string | undefined): string | undefined => {
   const items = useNavigationRegistry().visibleItems("project", () => true);
-  const item = items.find((candidate) => candidate.target.kind === "module" && candidate.target.moduleId === moduleId && candidate.target.path === pageKey);
+  const item = items.find(
+    (candidate) =>
+      candidate.target.kind === "module" && candidate.target.moduleId === moduleId && candidate.target.path === pageKey,
+  );
   return item?.permission;
 };
 
@@ -52,7 +58,8 @@ export function ModulePageView({ onError }: { onError?: (error: unknown) => void
   const permission = usePagePermission(moduleId, resolved?.key);
   const permissions = usePermissions();
   if (resolved === null) return <PageNotFound />;
-  if (permission !== undefined && permissions.status === "pending") return <LoadingState label={t("loading")} rows={5} />;
+  if (permission !== undefined && permissions.status === "pending")
+    return <LoadingState label={t("loading")} rows={5} />;
   if (permission !== undefined && !permissions.can(permission)) return <PageForbidden />;
   const { Page } = resolved;
   return (

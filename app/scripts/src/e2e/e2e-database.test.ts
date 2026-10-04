@@ -10,12 +10,18 @@ describe("resolveE2eDatabaseTarget", () => {
   });
 
   it("refuses a remote host", () => {
-    expect(() => resolveE2eDatabaseTarget("postgresql://app:app@db.example.test:5432/app_e2e")).toThrow(UnsafeE2eDatabaseError);
+    expect(() => resolveE2eDatabaseTarget("postgresql://app:app@db.example.test:5432/app_e2e")).toThrow(
+      UnsafeE2eDatabaseError,
+    );
   });
 
   it("refuses a name that would need quoting and the maintenance database itself", () => {
-    expect(() => resolveE2eDatabaseTarget('postgresql://app:app@127.0.0.1:5432/a";drop')).toThrow(UnsafeE2eDatabaseError);
-    expect(() => resolveE2eDatabaseTarget("postgresql://app:app@127.0.0.1:5432/postgres")).toThrow(UnsafeE2eDatabaseError);
+    expect(() => resolveE2eDatabaseTarget('postgresql://app:app@127.0.0.1:5432/a";drop')).toThrow(
+      UnsafeE2eDatabaseError,
+    );
+    expect(() => resolveE2eDatabaseTarget("postgresql://app:app@127.0.0.1:5432/postgres")).toThrow(
+      UnsafeE2eDatabaseError,
+    );
   });
 
   it("refuses something that is not a postgres URL", () => {

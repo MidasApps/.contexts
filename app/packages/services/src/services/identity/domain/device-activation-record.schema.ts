@@ -1,4 +1,13 @@
-import { DeviceActivationIdSchema, DeviceIdSchema, DeviceLabelSchema, IsoDateTimeSchema, RoleRefSchema, TenantIdSchema, TenantNodeRefSchema, UserIdSchema } from "@core/contracts";
+import {
+  DeviceActivationIdSchema,
+  DeviceIdSchema,
+  DeviceLabelSchema,
+  IsoDateTimeSchema,
+  RoleRefSchema,
+  TenantIdSchema,
+  TenantNodeRefSchema,
+  UserIdSchema,
+} from "@core/contracts";
 import { z } from "zod";
 
 /**

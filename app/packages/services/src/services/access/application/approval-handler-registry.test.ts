@@ -3,7 +3,11 @@ import { z } from "zod";
 import { ApprovalHandlerRegistryError, createApprovalHandlerRegistry } from "./approval-handler-registry.ts";
 import type { ApprovalActionHandler } from "./ports/driven/approval-action-handler.ts";
 
-const handler = (kind: string): ApprovalActionHandler => ({ kind, inputSchema: z.unknown(), execute: () => Promise.resolve() });
+const handler = (kind: string): ApprovalActionHandler => ({
+  kind,
+  inputSchema: z.unknown(),
+  execute: () => Promise.resolve(),
+});
 
 describe("createApprovalHandlerRegistry", () => {
   it("finds registered handlers, including ones registered after composition (SP3, SP5)", () => {

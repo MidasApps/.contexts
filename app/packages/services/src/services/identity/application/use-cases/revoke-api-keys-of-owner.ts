@@ -1,5 +1,5 @@
-import type { ApiKeyRevoker } from "../ports/driven/api-key-revoker.ts";
 import type { ApiKeyDeps } from "../api-key-deps.ts";
+import type { ApiKeyRevoker } from "../ports/driven/api-key-revoker.ts";
 import { revokeKey } from "./revoke-api-key.ts";
 
 /**

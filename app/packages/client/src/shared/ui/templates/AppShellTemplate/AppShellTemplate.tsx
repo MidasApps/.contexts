@@ -2,10 +2,10 @@
 
 import type { ReactNode } from "react";
 import { cn } from "#/shared/lib/cn.ts";
+import { SkipLink } from "#/shared/ui/atoms/SkipLink/SkipLink.tsx";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "#/shared/ui/molecules/Sheet/Sheet.tsx";
 import { SidebarInset } from "#/shared/ui/organisms/Sidebar/Sidebar.tsx";
 import { SidebarProvider } from "#/shared/ui/organisms/Sidebar/sidebar-context.tsx";
-import { SkipLink } from "#/shared/ui/atoms/SkipLink/SkipLink.tsx";
 
 export type RightPanelSlot = {
   /** Landmark name (`aside` label) and sheet title below `lg`. */
@@ -56,7 +56,10 @@ export function AppShellTemplate({
       <SkipLink />
       {sidebar}
       <SidebarInset>
-        <header data-slot="app-topbar" className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/95 px-4 backdrop-blur-sm">
+        <header
+          data-slot="app-topbar"
+          className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/95 px-4 backdrop-blur-sm"
+        >
           {topbar}
         </header>
         <div className="flex min-h-0 flex-1">
@@ -88,7 +91,10 @@ function RightPanel({ slot, compact }: { slot: RightPanelSlot; compact: boolean 
     <aside
       aria-label={slot.label}
       data-slot="right-panel"
-      className={cn("sticky top-14 hidden h-[calc(100svh-3.5rem)] w-[360px] shrink-0 border-l border-border bg-card lg:flex", !slot.open && "lg:hidden")}
+      className={cn(
+        "sticky top-14 hidden h-[calc(100svh-3.5rem)] w-[360px] shrink-0 border-l border-border bg-card lg:flex",
+        !slot.open && "lg:hidden",
+      )}
     >
       {slot.content}
     </aside>

@@ -14,11 +14,18 @@ const REPORT_DIR = path.join(APP_ROOT, ".evals");
 const run = promisify(execFile);
 
 test.describe("evals", () => {
-  test("shows the published experiments with their verdict and scores, and their datasets", async ({ staffPage, env }) => {
+  test("shows the published experiments with their verdict and scores, and their datasets", async ({
+    staffPage,
+    env,
+  }) => {
     test.setTimeout(180_000);
     const reports = existsSync(REPORT_DIR) ? readdirSync(REPORT_DIR).filter((file) => file.endsWith(".json")) : [];
     expect(reports, "no eval reports in app/.evals: run `AI_MODE=fake pnpm evals` before the e2e").not.toEqual([]);
-    const seeded = await run(process.execPath, [path.join(APP_ROOT, "apps", "mastra", "scripts", "seed-eval-datasets.ts")], { cwd: path.join(APP_ROOT, "apps", "mastra"), env: process.env });
+    const seeded = await run(
+      process.execPath,
+      [path.join(APP_ROOT, "apps", "mastra", "scripts", "seed-eval-datasets.ts")],
+      { cwd: path.join(APP_ROOT, "apps", "mastra"), env: process.env },
+    );
     expect(seeded.stdout).toMatch(/cases\)/);
     const { stdout } = await run(process.execPath, [path.join(APP_ROOT, "scripts", "evals-publish.ts")], {
       cwd: APP_ROOT,
@@ -31,11 +38,22 @@ test.describe("evals", () => {
     const latest = experiments.getByRole("row").nth(1);
     await expect(latest).toContainText(/Aprovado|Reprovado/);
     await expect(latest).toContainText("Concluído");
-    await expect(experiments.getByRole("row").filter({ hasText: /assistant|knowledge|data|action/ }).first()).toBeVisible();
+    await expect(
+      experiments
+        .getByRole("row")
+        .filter({ hasText: /assistant|knowledge|data|action/ })
+        .first(),
+    ).toBeVisible();
 
     // Two experiments side by side.
-    await experiments.getByRole("button", { name: /^Comparar o experimento / }).nth(0).click();
-    await experiments.getByRole("button", { name: /^Comparar o experimento / }).nth(1).click();
+    await experiments
+      .getByRole("button", { name: /^Comparar o experimento / })
+      .nth(0)
+      .click();
+    await experiments
+      .getByRole("button", { name: /^Comparar o experimento / })
+      .nth(1)
+      .click();
     await expect(staffPage.getByRole("heading", { name: "Comparação de experimentos" })).toBeVisible();
     await expect(staffPage.getByRole("table", { name: "Nota média por avaliador" })).toBeVisible();
 

@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 import { cn } from "#/shared/lib/cn.ts";
 
 export type SectionCardProps = {
@@ -24,7 +24,11 @@ export function SectionCard({ title, description, actions, children, tone = "def
     <section
       aria-labelledby={`${id}-title`}
       data-slot="section-card"
-      className={cn("flex flex-col gap-4 rounded-xl border bg-card p-4 sm:p-5", tone === "danger" ? "border-destructive/40" : "border-border", className)}
+      className={cn(
+        "flex flex-col gap-4 rounded-xl border bg-card p-4 sm:p-5",
+        tone === "danger" ? "border-destructive/40" : "border-border",
+        className,
+      )}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">

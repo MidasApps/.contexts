@@ -1,7 +1,12 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import { runCoreTool } from "./core-tool-pipeline.ts";
-import { type CoreToolDefinition, type CoreToolDeps, PendingApprovalResultSchema, type ToolCallInfo } from "./define-core-tool.ts";
+import {
+  type CoreToolDefinition,
+  type CoreToolDeps,
+  PendingApprovalResultSchema,
+  type ToolCallInfo,
+} from "./define-core-tool.ts";
 import { CoreToolError } from "./tool-errors.ts";
 
 /** Execution context fields the binding reads from Mastra (agent, workflow or MCP call). */
@@ -29,15 +34,23 @@ const toCallInfo = (ctx: MastraToolCallContext | undefined, fixedAgentId?: strin
  * approval result, so their output schema accepts it.
  * @param options.agentId caller key for the ceiling when no agent runs the tool (the core MCP server).
  */
-export const bindCoreTool = (definition: CoreToolDefinition, deps: CoreToolDeps, options: { readonly agentId?: string } = {}) =>
+export const bindCoreTool = (
+  definition: CoreToolDefinition,
+  deps: CoreToolDeps,
+  options: { readonly agentId?: string } = {},
+) =>
   createTool({
     id: definition.id,
     description: definition.description,
     inputSchema: definition.inputSchema,
-    outputSchema: definition.kind === "mutation" ? z.union([definition.outputSchema, PendingApprovalResultSchema]) : definition.outputSchema,
+    outputSchema:
+      definition.kind === "mutation"
+        ? z.union([definition.outputSchema, PendingApprovalResultSchema])
+        : definition.outputSchema,
     requireApproval: definition.kind === "mutation",
     strict: true,
-    execute: (input, ctx) => runCoreTool(definition, deps, input, toCallInfo(ctx as MastraToolCallContext, options.agentId)),
+    execute: (input, ctx) =>
+      runCoreTool(definition, deps, input, toCallInfo(ctx as MastraToolCallContext, options.agentId)),
   });
 
 export type ToolRegistry = {

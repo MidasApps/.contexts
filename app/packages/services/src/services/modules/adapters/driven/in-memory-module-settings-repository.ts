@@ -1,4 +1,7 @@
-import type { ModuleSettingsRepository, StoredModuleSettings } from "../../application/ports/driven/module-settings-repository.ts";
+import type {
+  ModuleSettingsRepository,
+  StoredModuleSettings,
+} from "../../application/ports/driven/module-settings-repository.ts";
 
 export type InMemoryModuleSettingsRepository = ModuleSettingsRepository & {
   /** Every stored record, in insertion order (assertions). */

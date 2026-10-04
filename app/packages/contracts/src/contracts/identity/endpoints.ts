@@ -15,13 +15,13 @@ import {
   ExchangeDesktopSessionInputSchema,
   ExchangeDesktopSessionResponseSchema,
 } from "./desktop-session.schema.ts";
+import { DeviceSchema } from "./device.schema.ts";
 import {
   CreateDeviceActivationInputSchema,
   CreateDeviceActivationResponseSchema,
   RedeemDeviceActivationInputSchema,
   RedeemDeviceActivationResponseSchema,
 } from "./device-activation.schema.ts";
-import { DeviceSchema } from "./device.schema.ts";
 import { ApiKeyIdSchema, DeviceIdSchema, ImpersonationSessionIdSchema, SessionIdSchema } from "./ids.schema.ts";
 import { StartImpersonationInputSchema, StartImpersonationResponseSchema } from "./impersonation-session.schema.ts";
 import { MeSchema } from "./me.schema.ts";

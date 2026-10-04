@@ -16,26 +16,41 @@ const hasEvalSet = (agentId: string): boolean => (EVAL_AGENT_IDS as readonly str
  * In fake mode the models ignore instructions, so the verdict only proves the wiring.
  */
 export const createHarnessPromptEvalRunner =
-  (args: { readonly mode: EvalMode; readonly processEnv?: Readonly<Record<string, string | undefined>> }): PromptEvalRunner =>
+  (args: {
+    readonly mode: EvalMode;
+    readonly processEnv?: Readonly<Record<string, string | undefined>>;
+  }): PromptEvalRunner =>
   async ({ agentId, platform, addendum }) => {
     if (!hasEvalSet(agentId)) return "NO_DATASET";
     const active: Record<string, PromptBody> = {
       ...(platform === null ? {} : { [agentId]: platform }),
       ...(addendum === null ? {} : { [`${agentId}:${EVAL_TENANT}`]: addendum }),
     };
-    const harness = buildEvalHarness({ mode: args.mode, ...(args.processEnv === undefined ? {} : { processEnv: args.processEnv }), prompts: createFakePromptStorePort({ active }) });
+    const harness = buildEvalHarness({
+      mode: args.mode,
+      ...(args.processEnv === undefined ? {} : { processEnv: args.processEnv }),
+      prompts: createFakePromptStorePort({ active }),
+    });
     const { report } = await runAgentEvals({ agentId, harness, reportDir: null });
     return {
       experimentId: report.runId,
       verdict: report.gate.passed ? "passed" : "failed",
-      scorers: report.gate.scorers.map((scorer) => ({ scorerId: scorer.scorerId, mean: scorer.mean, passed: scorer.passed })),
+      scorers: report.gate.scorers.map((scorer) => ({
+        scorerId: scorer.scorerId,
+        mean: scorer.mean,
+        passed: scorer.passed,
+      })),
       run: {
         datasetName: report.dataset.name,
         datasetVersion: report.dataset.version,
         itemCount: report.dataset.itemCount,
         startedAt: report.startedAt,
         finishedAt: report.finishedAt,
-        scores: report.gate.scorers.flatMap((scorer) => (scorer.mean === null ? [] : [{ scorer: scorer.scorerId, mean: scorer.mean, baseline: Math.max(0, scorer.floor) }])),
+        scores: report.gate.scorers.flatMap((scorer) =>
+          scorer.mean === null
+            ? []
+            : [{ scorer: scorer.scorerId, mean: scorer.mean, baseline: Math.max(0, scorer.floor) }],
+        ),
       },
     };
   };

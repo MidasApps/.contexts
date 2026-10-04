@@ -1,6 +1,12 @@
 import { createServer } from "node:net";
 import type { RegionalSettings } from "@core/agents";
-import { createAccessCore, createFirebaseAdmin, createInMemoryAccessStore, createMastraWorkflowGateway, type ResolveAccessContext } from "@core/services";
+import {
+  createAccessCore,
+  createFirebaseAdmin,
+  createInMemoryAccessStore,
+  createMastraWorkflowGateway,
+  type ResolveAccessContext,
+} from "@core/services";
 import { Mastra } from "@mastra/core/mastra";
 import { InMemoryStore } from "@mastra/core/storage";
 import { createNodeServer } from "@mastra/deployer/server";
@@ -14,7 +20,12 @@ import { createAgentRuntime } from "../runtime/create-agent-runtime.ts";
 // Emulator tokens, the custom `/workflow-runs/*` routes reached through the `/v1` gateway adapter.
 const TENANT = "EmuTenantWorkflowRuns";
 const OTHER_TENANT = "EmuTenantWorkflowRunsB";
-const REGIONAL: RegionalSettings = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" };
+const REGIONAL: RegionalSettings = {
+  locale: "pt-BR",
+  displayTimeZone: "America/Sao_Paulo",
+  nodeTimeZone: "America/Sao_Paulo",
+  currency: "BRL",
+};
 
 const env = loadMastraEnv({
   APP_ENV: "local",
@@ -31,7 +42,11 @@ const signUp = async (label: string): Promise<{ uid: string; idToken: string }> 
   const response = await fetch(`http://${host}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ email: `${label}-${Date.now()}@example.test`, password: "secret-password", returnSecureToken: true }),
+    body: JSON.stringify({
+      email: `${label}-${Date.now()}@example.test`,
+      password: "secret-password",
+      returnSecureToken: true,
+    }),
   });
   const body = (await response.json()) as { localId: string; idToken: string };
   return { uid: body.localId, idToken: body.idToken };
@@ -71,15 +86,34 @@ beforeAll(async () => {
   readers.putOrganization({ id: TENANT });
   readers.putOrganization({ id: OTHER_TENANT });
   for (const uid of [member.uid, admin.uid, outsider.uid]) readers.putUser(uid);
-  readers.putGrant({ tenantId: TENANT, principalId: admin.uid, nodeId: TENANT, roles: [{ kind: "system", key: "admin" }] });
-  readers.putGrant({ tenantId: TENANT, principalId: member.uid, nodeId: TENANT, roles: [{ kind: "system", key: "member" }] });
-  readers.putGrant({ tenantId: OTHER_TENANT, principalId: outsider.uid, nodeId: OTHER_TENANT, roles: [{ kind: "system", key: "admin" }] });
+  readers.putGrant({
+    tenantId: TENANT,
+    principalId: admin.uid,
+    nodeId: TENANT,
+    roles: [{ kind: "system", key: "admin" }],
+  });
+  readers.putGrant({
+    tenantId: TENANT,
+    principalId: member.uid,
+    nodeId: TENANT,
+    roles: [{ kind: "system", key: "member" }],
+  });
+  readers.putGrant({
+    tenantId: OTHER_TENANT,
+    principalId: outsider.uid,
+    nodeId: OTHER_TENANT,
+    roles: [{ kind: "system", key: "admin" }],
+  });
   const firebase = createFirebaseAdmin({ env, processEnv: process.env });
   const runtime = createAgentRuntime({
     env,
     processEnv: process.env,
     modules: APP_MODULES,
-    overrides: { firebase, storage: new InMemoryStore(), adapters: { accessReaders: readers, resolveAccessContext: resolveFromReaders(readers) } },
+    overrides: {
+      firebase,
+      storage: new InMemoryStore(),
+      adapters: { accessReaders: readers, resolveAccessContext: resolveFromReaders(readers) },
+    },
   });
   const port = await freePort();
   mastra = new Mastra({
@@ -87,7 +121,13 @@ beforeAll(async () => {
     workflows: runtime.workflows,
     storage: runtime.storage,
     observability: runtime.observability,
-    server: { port, host: "127.0.0.1", auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes },
+    server: {
+      port,
+      host: "127.0.0.1",
+      auth: runtime.auth,
+      middleware: runtime.middleware,
+      apiRoutes: runtime.apiRoutes,
+    },
   });
   const server = await createNodeServer(mastra, { tools: {} });
   baseUrl = `http://127.0.0.1:${port}`;
@@ -99,7 +139,12 @@ afterAll(async () => {
   await mastra?.shutdown();
 });
 
-const scopeOf = (user: { idToken: string }, tenantId = TENANT) => ({ bearer: user.idToken, tenantId, regional: REGIONAL, requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" });
+const scopeOf = (user: { idToken: string }, tenantId = TENANT) => ({
+  bearer: user.idToken,
+  tenantId,
+  regional: REGIONAL,
+  requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+});
 
 const eventsUntil = async (runId: string, status: string) => {
   const gateway = createMastraWorkflowGateway({ baseUrl, serverlessToken: null });
@@ -114,13 +159,24 @@ const eventsUntil = async (runId: string, status: string) => {
 describe("workflow runs API (Auth emulator, real Mastra server)", () => {
   it("starts a startable workflow, lists and streams it for the tenant only, and cancels it with the cancel permission", async () => {
     const gateway = createMastraWorkflowGateway({ baseUrl, serverlessToken: null });
-    expect(await gateway.startRun(scopeOf(member), { workflowId: "catalog-reindex", inputData: {} })).toMatchObject({ ok: false, error: { code: "WORKFLOW_NOT_STARTABLE", status: 422 } });
-    const started = await gateway.startRun(scopeOf(member), { workflowId: "approval-demo", inputData: { title: "Runs API" } });
+    expect(await gateway.startRun(scopeOf(member), { workflowId: "catalog-reindex", inputData: {} })).toMatchObject({
+      ok: false,
+      error: { code: "WORKFLOW_NOT_STARTABLE", status: 422 },
+    });
+    const started = await gateway.startRun(scopeOf(member), {
+      workflowId: "approval-demo",
+      inputData: { title: "Runs API" },
+    });
     if (!started.ok) throw new Error(`start failed: ${JSON.stringify(started.error)}`);
     const { runId } = started.data;
 
     const suspended = await eventsUntil(runId, "suspended");
-    expect(suspended.run).toMatchObject({ runId, workflowId: "approval-demo", tenantId: TENANT, startedBy: member.uid });
+    expect(suspended.run).toMatchObject({
+      runId,
+      workflowId: "approval-demo",
+      tenantId: TENANT,
+      startedBy: member.uid,
+    });
     expect(suspended.run.approvalRequestId).not.toBeNull();
     expect(suspended.events.map((event) => event.type)).toContain("workflow-step-suspended");
 
@@ -129,7 +185,10 @@ describe("workflow runs API (Auth emulator, real Mastra server)", () => {
     // Another tenant neither lists nor reads the run.
     const foreignList = await gateway.listRuns(scopeOf(outsider, OTHER_TENANT), { limit: 20 });
     expect(foreignList.ok && foreignList.data.runs).toEqual([]);
-    expect(await gateway.getRun(scopeOf(outsider, OTHER_TENANT), runId)).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await gateway.getRun(scopeOf(outsider, OTHER_TENANT), runId)).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND" },
+    });
 
     expect(await gateway.cancelRun(scopeOf(member), runId)).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(await gateway.cancelRun(scopeOf(admin), runId)).toEqual({ ok: true, data: null });
@@ -139,23 +198,56 @@ describe("workflow runs API (Auth emulator, real Mastra server)", () => {
 
   it("manages tenant schedules of schedulable workflows for the tenant only", async () => {
     const gateway = createMastraWorkflowGateway({ baseUrl, serverlessToken: null });
-    const input = { workflowId: "usage-report", slug: "daily-usage", cron: "0 9 * * *", timezone: "America/Sao_Paulo", inputData: {} };
-    expect(await gateway.createSchedule(scopeOf(member), input)).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
-    expect(await gateway.createSchedule(scopeOf(admin), { ...input, workflowId: "approval-demo" })).toMatchObject({ ok: false, error: { code: "WORKFLOW_NOT_SCHEDULABLE", status: 422 } });
-    expect(await gateway.createSchedule(scopeOf(admin), { ...input, cron: "* * * * *" })).toMatchObject({ ok: false, error: { code: "SCHEDULE_INTERVAL_TOO_SHORT", status: 422 } });
+    const input = {
+      workflowId: "usage-report",
+      slug: "daily-usage",
+      cron: "0 9 * * *",
+      timezone: "America/Sao_Paulo",
+      inputData: {},
+    };
+    expect(await gateway.createSchedule(scopeOf(member), input)).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN" },
+    });
+    expect(await gateway.createSchedule(scopeOf(admin), { ...input, workflowId: "approval-demo" })).toMatchObject({
+      ok: false,
+      error: { code: "WORKFLOW_NOT_SCHEDULABLE", status: 422 },
+    });
+    expect(await gateway.createSchedule(scopeOf(admin), { ...input, cron: "* * * * *" })).toMatchObject({
+      ok: false,
+      error: { code: "SCHEDULE_INTERVAL_TOO_SHORT", status: 422 },
+    });
     const created = await gateway.createSchedule(scopeOf(admin), input);
     if (!created.ok) throw new Error(`create failed: ${JSON.stringify(created.error)}`);
-    expect(created.data).toMatchObject({ tenantId: TENANT, workflowId: "usage-report", createdBy: admin.uid, status: "active", timezone: "America/Sao_Paulo" });
+    expect(created.data).toMatchObject({
+      tenantId: TENANT,
+      workflowId: "usage-report",
+      createdBy: admin.uid,
+      status: "active",
+      timezone: "America/Sao_Paulo",
+    });
     expect(created.data.nextFireAt?.endsWith("T12:00:00.000Z")).toBe(true);
-    expect(await gateway.createSchedule(scopeOf(admin), input)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    expect(await gateway.createSchedule(scopeOf(admin), input)).toMatchObject({
+      ok: false,
+      error: { code: "CONFLICT" },
+    });
 
     const listed = await gateway.listSchedules(scopeOf(admin));
     expect(listed.ok && listed.data.map((schedule) => schedule.id)).toEqual([created.data.id]);
     expect(await gateway.listSchedules(scopeOf(outsider, OTHER_TENANT))).toEqual({ ok: true, data: [] });
-    expect(await gateway.getSchedule(scopeOf(outsider, OTHER_TENANT), created.data.id)).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await gateway.getSchedule(scopeOf(outsider, OTHER_TENANT), created.data.id)).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND" },
+    });
 
-    expect(await gateway.actOnSchedule(scopeOf(admin), created.data.id, "pause")).toMatchObject({ ok: true, data: { status: "paused", nextFireAt: null } });
+    expect(await gateway.actOnSchedule(scopeOf(admin), created.data.id, "pause")).toMatchObject({
+      ok: true,
+      data: { status: "paused", nextFireAt: null },
+    });
     expect(await gateway.deleteSchedule(scopeOf(admin), created.data.id)).toEqual({ ok: true, data: null });
-    expect(await gateway.getSchedule(scopeOf(admin), created.data.id)).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await gateway.getSchedule(scopeOf(admin), created.data.id)).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND" },
+    });
   }, 60_000);
 });

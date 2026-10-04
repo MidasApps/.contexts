@@ -22,7 +22,10 @@ export const threadOwnerFromStorage =
 const THREAD_PATH = /\/memory\/threads\/([A-Za-z0-9_-]{1,128})(?:\/|$)/;
 
 /** Thread ids a request names: the forwarded conversation id and a `/memory/threads/:threadId` path. */
-export const threadIdsOfRequest = (input: { readonly path: string; readonly conversationId: string | undefined }): string[] => {
+export const threadIdsOfRequest = (input: {
+  readonly path: string;
+  readonly conversationId: string | undefined;
+}): string[] => {
   const fromPath = THREAD_PATH.exec(input.path)?.[1];
   return [...new Set([input.conversationId, fromPath].filter((id): id is string => id !== undefined))];
 };

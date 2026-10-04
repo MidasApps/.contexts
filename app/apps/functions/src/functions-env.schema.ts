@@ -42,7 +42,8 @@ export const FunctionsEnvSchema = z
   })
   .superRefine((env, ctx) => {
     if (env.APP_ENV === "local") return;
-    if (env.MASTRA_URL?.startsWith("https://") === false) ctx.addIssue({ code: "custom", path: ["MASTRA_URL"], message: "https is required outside local" });
+    if (env.MASTRA_URL?.startsWith("https://") === false)
+      ctx.addIssue({ code: "custom", path: ["MASTRA_URL"], message: "https is required outside local" });
     for (const key of EMULATOR_HOST_KEYS) {
       if (env[key]) ctx.addIssue({ code: "custom", path: [key], message: "emulators are local only" });
     }

@@ -1,7 +1,7 @@
-import { loadMessages, type ExtraNamespaces, type SupportedLocale } from "@core/i18n";
+import { type ExtraNamespaces, loadMessages, type SupportedLocale } from "@core/i18n";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, type RenderOptions, type RenderResult } from "@testing-library/react";
-import { userEvent, type UserEvent } from "@testing-library/user-event";
+import { type RenderOptions, type RenderResult, render } from "@testing-library/react";
+import { type UserEvent, userEvent } from "@testing-library/user-event";
 import type { ReactElement, ReactNode } from "react";
 import { IntlProvider } from "use-intl";
 
@@ -30,7 +30,13 @@ const throwOnIntlError = (error: Error): never => {
  */
 export const renderWithProviders = (
   ui: ReactElement,
-  { locale = "pt-BR", timeZone = "America/Sao_Paulo", extraMessages = {}, queryClient, ...options }: RenderWithProvidersOptions = {},
+  {
+    locale = "pt-BR",
+    timeZone = "America/Sao_Paulo",
+    extraMessages = {},
+    queryClient,
+    ...options
+  }: RenderWithProvidersOptions = {},
 ): RenderWithProvidersResult => {
   const client = queryClient ?? createTestQueryClient();
   const messages = loadMessages(locale, extraMessages);

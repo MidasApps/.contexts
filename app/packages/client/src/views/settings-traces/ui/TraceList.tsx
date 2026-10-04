@@ -3,16 +3,16 @@
 import type { TraceSummary } from "@core/contracts";
 import { useMemo } from "react";
 import { useFormatter, useTranslations } from "use-intl";
-import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
-import { TraceCost, TraceDuration, TraceStatusPill, useTenantTraces, type TracePage } from "#/entities/trace/index.ts";
+import { TraceCost, TraceDuration, type TracePage, TraceStatusPill, useTenantTraces } from "#/entities/trace/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { TraceFilters, type TraceFilterValues } from "./TraceFilters.tsx";
 import { SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
+import { TraceFilters, type TraceFilterValues } from "./TraceFilters.tsx";
 import { useTargetLabel } from "./trace-target.ts";
 
 const column = dataTableColumnHelper<TraceSummary>();
@@ -47,18 +47,44 @@ const useColumns = (organizationId: string) => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.display({ id: "trace", header: () => t("columns.trace"), cell: ({ row }) => <TraceName trace={row.original} organizationId={organizationId} /> }),
-      column.display({ id: "target", header: () => t("columns.target"), cell: ({ row }) => <TraceTarget trace={row.original} /> }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <TraceStatusPill status={getValue()} /> }),
-      column.accessor("startedAt", { header: () => t("columns.startedAt"), cell: ({ getValue }) => formatDateTime(getValue()) }),
-      column.accessor("durationMs", { header: () => t("columns.duration"), meta: { numeric: true }, cell: ({ getValue }) => <TraceDuration durationMs={getValue()} /> }),
+      column.display({
+        id: "trace",
+        header: () => t("columns.trace"),
+        cell: ({ row }) => <TraceName trace={row.original} organizationId={organizationId} />,
+      }),
+      column.display({
+        id: "target",
+        header: () => t("columns.target"),
+        cell: ({ row }) => <TraceTarget trace={row.original} />,
+      }),
+      column.accessor("status", {
+        header: () => t("columns.status"),
+        cell: ({ getValue }) => <TraceStatusPill status={getValue()} />,
+      }),
+      column.accessor("startedAt", {
+        header: () => t("columns.startedAt"),
+        cell: ({ getValue }) => formatDateTime(getValue()),
+      }),
+      column.accessor("durationMs", {
+        header: () => t("columns.duration"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => <TraceDuration durationMs={getValue()} />,
+      }),
       column.display({
         id: "tokens",
         header: () => t("columns.tokens"),
         meta: { numeric: true },
-        cell: ({ row }) => t("tokensValue", { input: format.number(row.original.inputTokens), output: format.number(row.original.outputTokens) }),
+        cell: ({ row }) =>
+          t("tokensValue", {
+            input: format.number(row.original.inputTokens),
+            output: format.number(row.original.outputTokens),
+          }),
       }),
-      column.accessor("costMicroUsd", { header: () => t("columns.cost"), meta: { numeric: true }, cell: ({ getValue }) => <TraceCost costMicroUsd={getValue()} /> }),
+      column.accessor("costMicroUsd", {
+        header: () => t("columns.cost"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => <TraceCost costMicroUsd={getValue()} />,
+      }),
     ],
     [format, formatDateTime, organizationId, t],
   );
@@ -66,7 +92,16 @@ const useColumns = (organizationId: string) => {
 
 function TraceEmpty({ filtering, onClear }: { filtering: boolean; onClear: () => void }) {
   const t = useTranslations("settings.traces");
-  if (!filtering) return <EmptyState frame="plain" headingLevel={2} icon="scroll-text" title={t("emptyTitle")} description={t("emptyDescription")} />;
+  if (!filtering)
+    return (
+      <EmptyState
+        frame="plain"
+        headingLevel={2}
+        icon="scroll-text"
+        title={t("emptyTitle")}
+        description={t("emptyDescription")}
+      />
+    );
   return (
     <EmptyState
       frame="plain"
@@ -87,9 +122,24 @@ type Paging = { page: number; setPage: (page: number) => void; hasMore: boolean;
 
 /** Numbered paging as previous/next (the console lists page by number, without a total). */
 const paginationOf = ({ page, setPage, hasMore, pending }: Paging, label: string) =>
-  page === 1 && !hasMore ? undefined : { hasPrevious: page > 1, hasNext: hasMore, pending, onPrevious: () => setPage(page - 1), onNext: () => setPage(page + 1), label };
+  page === 1 && !hasMore
+    ? undefined
+    : {
+        hasPrevious: page > 1,
+        hasNext: hasMore,
+        pending,
+        onPrevious: () => setPage(page - 1),
+        onNext: () => setPage(page + 1),
+        label,
+      };
 
-type TraceTableProps = { organization: Organization; data: TracePage; paging: Paging; filtering: boolean; onClear: () => void };
+type TraceTableProps = {
+  organization: Organization;
+  data: TracePage;
+  paging: Paging;
+  filtering: boolean;
+  onClear: () => void;
+};
 
 function TraceTable({ organization, data, paging, filtering, onClear }: TraceTableProps) {
   const t = useTranslations("settings.traces");
@@ -114,7 +164,8 @@ function TraceTable({ organization, data, paging, filtering, onClear }: TraceTab
             <TraceTarget trace={trace} />
           </span>
           <span className="text-xs text-muted-foreground">
-            {formatDateTime(trace.startedAt)} · <TraceDuration durationMs={trace.durationMs} /> · <TraceCost costMicroUsd={trace.costMicroUsd} />
+            {formatDateTime(trace.startedAt)} · <TraceDuration durationMs={trace.durationMs} /> ·{" "}
+            <TraceCost costMicroUsd={trace.costMicroUsd} />
           </span>
         </div>
       )}
@@ -131,7 +182,10 @@ function TraceTable({ organization, data, paging, filtering, onClear }: TraceTab
 export function TraceList({ organization }: { organization: Organization }) {
   const t = useTranslations("settings.traces");
   const search = useSettingsSearch(["agentId", "status"]);
-  const values: TraceFilterValues = { agentId: search.values.agentId, status: search.values.status === "ok" || search.values.status === "error" ? search.values.status : undefined };
+  const values: TraceFilterValues = {
+    agentId: search.values.agentId,
+    status: search.values.status === "ok" || search.values.status === "error" ? search.values.status : undefined,
+  };
   const { page, setPage } = search;
   const traces = useTenantTraces(organization.id, { page, ...values });
   // Writing a filter returns to the first page.

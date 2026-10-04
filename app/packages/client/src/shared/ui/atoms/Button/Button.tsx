@@ -2,7 +2,7 @@ import { Slot } from "radix-ui";
 import type { ComponentProps } from "react";
 import { cn } from "#/shared/lib/cn.ts";
 import { Spinner } from "#/shared/ui/atoms/Spinner/Spinner.tsx";
-import { buttonVariants, type ButtonVariantProps } from "./button-variants.ts";
+import { type ButtonVariantProps, buttonVariants } from "./button-variants.ts";
 
 export type ButtonProps = ComponentProps<"button"> &
   ButtonVariantProps & {

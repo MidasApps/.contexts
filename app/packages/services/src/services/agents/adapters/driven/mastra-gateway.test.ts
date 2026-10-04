@@ -32,7 +32,9 @@ beforeAll(async () => {
       recorded.push({ method: request.method ?? "", url: request.url ?? "", headers: request.headers, body });
       const route = routes.get(key);
       if (route === undefined) {
-        response.writeHead(404, { "content-type": "application/json" }).end(JSON.stringify({ error: "no route in stub" }));
+        response
+          .writeHead(404, { "content-type": "application/json" })
+          .end(JSON.stringify({ error: "no route in stub" }));
         return;
       }
       route(request, response);
@@ -53,9 +55,11 @@ beforeEach(() => {
   routes.clear();
 });
 
-const json = (status: number, body: unknown, headers: Record<string, string> = {}): Route => (_request, response) => {
-  response.writeHead(status, { "content-type": "application/json", ...headers }).end(JSON.stringify(body));
-};
+const json =
+  (status: number, body: unknown, headers: Record<string, string> = {}): Route =>
+  (_request, response) => {
+    response.writeHead(status, { "content-type": "application/json", ...headers }).end(JSON.stringify(body));
+  };
 
 const SCOPE: AgentCallScope = {
   bearer: "caller-id-token",
@@ -69,14 +73,24 @@ const SCOPE: AgentCallScope = {
 };
 
 const gateway = (overrides: Partial<Parameters<typeof createMastraGateway>[0]> = {}) =>
-  createMastraGateway({ baseUrl, serverlessToken: null, timeouts: { jsonMs: 2_000, streamConnectMs: 2_000 }, ...overrides });
+  createMastraGateway({
+    baseUrl,
+    serverlessToken: null,
+    timeouts: { jsonMs: 2_000, streamConnectMs: 2_000 },
+    ...overrides,
+  });
 
 const readText = async (stream: ReadableStream<Uint8Array>): Promise<string> => new Response(stream).text();
 
 describe("createMastraGateway headers and body", () => {
   it("forwards the caller's Bearer and the /v1 scope, and runs with runId = requestId", async () => {
     routes.set("POST /api/agents/ping/generate", json(200, { text: "pong" }));
-    const result = await gateway().generate({ scope: SCOPE, agentId: "ping", messages: "ping", options: { maxSteps: 2 } });
+    const result = await gateway().generate({
+      scope: SCOPE,
+      agentId: "ping",
+      messages: "ping",
+      options: { maxSteps: 2 },
+    });
     expect(result).toEqual({ ok: true, data: { text: "pong" } });
     const [call] = recorded;
     expect(call?.headers).toMatchObject({
@@ -117,14 +131,22 @@ describe("createMastraGateway headers and body", () => {
 
   it("adds X-Serverless-Authorization outside local", async () => {
     routes.set("POST /api/agents/ping/generate", json(200, { text: "pong" }));
-    await gateway({ serverlessToken: { headerValue: () => Promise.resolve("Bearer google-signed") } }).generate({ scope: SCOPE, agentId: "ping", messages: "ping" });
+    await gateway({ serverlessToken: { headerValue: () => Promise.resolve("Bearer google-signed") } }).generate({
+      scope: SCOPE,
+      agentId: "ping",
+      messages: "ping",
+    });
     expect(recorded[0]?.headers["x-serverless-authorization"]).toBe("Bearer google-signed");
     expect(recorded[0]?.headers.authorization).toBe("Bearer caller-id-token");
   });
 
   it("answers UPSTREAM_UNAVAILABLE without calling Mastra when no ID token can be minted", async () => {
     const failing = { headerValue: () => Promise.reject(new Error("metadata server down")) };
-    const result = await gateway({ serverlessToken: failing }).generate({ scope: SCOPE, agentId: "ping", messages: "ping" });
+    const result = await gateway({ serverlessToken: failing }).generate({
+      scope: SCOPE,
+      agentId: "ping",
+      messages: "ping",
+    });
     expect(result).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
     expect(recorded).toEqual([]);
   });
@@ -151,7 +173,10 @@ describe("createMastraGateway error mapping", () => {
   });
 
   it("passes the kill-switch's 503 FEATURE_DISABLED from the envelope code, never its message", async () => {
-    routes.set("POST /api/agents/ping/generate", json(503, { error: { code: "FEATURE_DISABLED", message: "internal stack at /srv/mastra.js" } }));
+    routes.set(
+      "POST /api/agents/ping/generate",
+      json(503, { error: { code: "FEATURE_DISABLED", message: "internal stack at /srv/mastra.js" } }),
+    );
     const result = await gateway().generate({ scope: SCOPE, agentId: "ping", messages: "ping" });
     expect(result).toEqual({ ok: false, error: { code: "FEATURE_DISABLED", status: 503 } });
   });
@@ -172,12 +197,20 @@ describe("createMastraGateway error mapping", () => {
 
   it("maps a deadline to UPSTREAM_UNAVAILABLE 504", async () => {
     routes.set("POST /api/agents/ping/generate", () => undefined); // never answers
-    const result = await gateway({ timeouts: { jsonMs: 50 } }).generate({ scope: SCOPE, agentId: "ping", messages: "ping" });
+    const result = await gateway({ timeouts: { jsonMs: 50 } }).generate({
+      scope: SCOPE,
+      agentId: "ping",
+      messages: "ping",
+    });
     expect(result).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 504 } });
   });
 
   it("maps an unreachable Mastra to UPSTREAM_UNAVAILABLE 502", async () => {
-    const result = await createMastraGateway({ baseUrl: "http://127.0.0.1:1", serverlessToken: null }).generate({ scope: SCOPE, agentId: "ping", messages: "ping" });
+    const result = await createMastraGateway({ baseUrl: "http://127.0.0.1:1", serverlessToken: null }).generate({
+      scope: SCOPE,
+      agentId: "ping",
+      messages: "ping",
+    });
     expect(result).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
   });
 });
@@ -198,9 +231,16 @@ describe("createMastraGateway streams", () => {
 
   it("returns the conversation Mastra created for a run that named none (follow-up #24)", async () => {
     routes.set("POST /api/agents/assistant/stream", (_request, response) => {
-      response.writeHead(200, { "content-type": "text/event-stream", "x-conversation-id": "Nw4sK2lPq0WnR5tYu3bV" }).end("data: {}\n\n");
+      response
+        .writeHead(200, { "content-type": "text/event-stream", "x-conversation-id": "Nw4sK2lPq0WnR5tYu3bV" })
+        .end("data: {}\n\n");
     });
-    const withoutConversation: AgentCallScope = { bearer: SCOPE.bearer, tenantId: SCOPE.tenantId, regional: SCOPE.regional, requestId: SCOPE.requestId };
+    const withoutConversation: AgentCallScope = {
+      bearer: SCOPE.bearer,
+      tenantId: SCOPE.tenantId,
+      regional: SCOPE.regional,
+      requestId: SCOPE.requestId,
+    };
     const result = await gateway().stream({ scope: withoutConversation, agentId: "assistant", messages: "hi" });
     if (!result.ok) throw new Error("expected a stream");
     expect(recorded[0]?.headers["x-conversation-id"]).toBeUndefined();
@@ -213,7 +253,11 @@ describe("createMastraGateway streams", () => {
       response.write("data: {}\n\n"); // then keeps the stream open
     });
     const controller = new AbortController();
-    const result = await gateway().stream({ scope: { ...SCOPE, signal: controller.signal }, agentId: "ping", messages: "ping" });
+    const result = await gateway().stream({
+      scope: { ...SCOPE, signal: controller.signal },
+      agentId: "ping",
+      messages: "ping",
+    });
     if (!result.ok) throw new Error("expected a stream");
     const reader = result.data.body.getReader();
     await reader.read();
@@ -225,20 +269,31 @@ describe("createMastraGateway streams", () => {
   it("rejects with the caller's reason when aborted before Mastra answers", async () => {
     routes.set("POST /api/agents/ping/stream", () => undefined);
     const controller = new AbortController();
-    const pending = gateway().stream({ scope: { ...SCOPE, signal: controller.signal }, agentId: "ping", messages: "ping" });
+    const pending = gateway().stream({
+      scope: { ...SCOPE, signal: controller.signal },
+      agentId: "ping",
+      messages: "ping",
+    });
     await expect.poll(() => recorded.length).toBe(1);
     controller.abort(new Error("client left"));
     await expect(pending).rejects.toThrow("client left");
   });
 
   it("sends tool decisions and MCP messages to their routes", async () => {
-    const sse: Route = (_request, response) => response.writeHead(200, { "content-type": "text/event-stream" }).end("data: {}\n\n");
+    const sse: Route = (_request, response) =>
+      response.writeHead(200, { "content-type": "text/event-stream" }).end("data: {}\n\n");
     routes.set("POST /api/agents/ping/approve-tool-call", sse);
     routes.set("POST /api/agents/ping/decline-tool-call", sse);
     routes.set("POST /api/mcp/core/mcp", sse);
     const client = gateway();
     await client.approveToolCall({ scope: SCOPE, agentId: "ping", runId: SCOPE.requestId, toolCallId: "call-1" });
-    await client.declineToolCall({ scope: SCOPE, agentId: "ping", runId: SCOPE.requestId, toolCallId: "call-2", reason: "not now" });
+    await client.declineToolCall({
+      scope: SCOPE,
+      agentId: "ping",
+      runId: SCOPE.requestId,
+      toolCallId: "call-2",
+      reason: "not now",
+    });
     await client.callMcp({ scope: SCOPE, serverId: "core", body: { jsonrpc: "2.0", id: 1, method: "tools/list" } });
     expect(recorded.map((call) => call.body)).toEqual([
       { runId: SCOPE.requestId, toolCallId: "call-1" },
@@ -252,45 +307,82 @@ describe("createMastraGateway streams", () => {
 describe("createMastraGateway MCP calls", () => {
   it("forwards the MCP headers under the caller's scope and passes status and MCP headers back", async () => {
     routes.set("POST /api/mcp/core/mcp", (_request, response) => {
-      response.writeHead(200, { "content-type": "text/event-stream", "mcp-session-id": "sess-9", "set-cookie": "x=1" }).end("data: {}\n\n");
+      response
+        .writeHead(200, { "content-type": "text/event-stream", "mcp-session-id": "sess-9", "set-cookie": "x=1" })
+        .end("data: {}\n\n");
     });
     const result = await gateway().callMcp({
       scope: SCOPE,
       serverId: "core",
       body: { jsonrpc: "2.0", id: 1, method: "tools/list" },
-      headers: { "mcp-method": "tools/list", "mcp-protocol-version": "2026-07-28", authorization: "Bearer forged", "x-tenant-id": "Intruder" },
+      headers: {
+        "mcp-method": "tools/list",
+        "mcp-protocol-version": "2026-07-28",
+        authorization: "Bearer forged",
+        "x-tenant-id": "Intruder",
+      },
     });
     if (!result.ok) throw new Error("expected an answer");
-    expect(result.data).toMatchObject({ status: 200, contentType: "text/event-stream", headers: { "mcp-session-id": "sess-9" } });
+    expect(result.data).toMatchObject({
+      status: 200,
+      contentType: "text/event-stream",
+      headers: { "mcp-session-id": "sess-9" },
+    });
     expect(result.data.headers).not.toHaveProperty("set-cookie");
-    expect(recorded[0]?.headers).toMatchObject({ "mcp-method": "tools/list", "mcp-protocol-version": "2026-07-28", authorization: "Bearer caller-id-token", "x-tenant-id": SCOPE.tenantId });
+    expect(recorded[0]?.headers).toMatchObject({
+      "mcp-method": "tools/list",
+      "mcp-protocol-version": "2026-07-28",
+      authorization: "Bearer caller-id-token",
+      "x-tenant-id": SCOPE.tenantId,
+    });
   });
 
   it("passes a 202 without a body (notification) and maps an upstream 403", async () => {
     routes.set("POST /api/mcp/core/mcp", (_request, response) => response.writeHead(202).end());
-    const accepted = await gateway().callMcp({ scope: SCOPE, serverId: "core", body: { jsonrpc: "2.0", method: "notifications/cancelled" } });
+    const accepted = await gateway().callMcp({
+      scope: SCOPE,
+      serverId: "core",
+      body: { jsonrpc: "2.0", method: "notifications/cancelled" },
+    });
     expect(accepted).toMatchObject({ ok: true, data: { status: 202 } });
     routes.set("POST /api/mcp/core/mcp", json(403, { error: "Forbidden" }));
-    expect(await gateway().callMcp({ scope: SCOPE, serverId: "core", body: {} })).toEqual({ ok: false, error: { code: "FORBIDDEN", status: 403 } });
+    expect(await gateway().callMcp({ scope: SCOPE, serverId: "core", body: {} })).toEqual({
+      ok: false,
+      error: { code: "FORBIDDEN", status: 403 },
+    });
   });
 });
 
 describe("createMastraGateway JSON calls", () => {
   it("starts a workflow run and deletes a thread through the SDK", async () => {
     routes.set("POST /api/workflows/knowledge-ingest/create-run", json(200, { runId: "run-1" }));
-    routes.set("POST /api/workflows/knowledge-ingest/start-async", json(200, { status: "success", result: { documents: 1 } }));
+    routes.set(
+      "POST /api/workflows/knowledge-ingest/start-async",
+      json(200, { status: "success", result: { documents: 1 } }),
+    );
     routes.set("DELETE /api/memory/threads/Cv3sK2lPq0WnR5tYu3bV", json(200, { result: "Thread deleted" }));
     const client = gateway();
-    const started = await client.startWorkflow({ scope: SCOPE, workflowId: "knowledge-ingest", inputData: { source: "url" } });
+    const started = await client.startWorkflow({
+      scope: SCOPE,
+      workflowId: "knowledge-ingest",
+      inputData: { source: "url" },
+    });
     expect(started).toMatchObject({ ok: true, data: { runId: "run-1", result: { status: "success" } } });
-    expect(await client.deleteThread({ scope: SCOPE, agentId: "ping", threadId: SCOPE.conversationId ?? "" })).toEqual({ ok: true, data: null });
+    expect(await client.deleteThread({ scope: SCOPE, agentId: "ping", threadId: SCOPE.conversationId ?? "" })).toEqual({
+      ok: true,
+      data: null,
+    });
     for (const call of recorded) expect(call.headers.authorization).toBe("Bearer caller-id-token");
   });
 
   it("launches a workflow run without waiting for its result", async () => {
     routes.set("POST /api/workflows/knowledge-ingest/create-run", json(200, { runId: "run-2" }));
     routes.set("POST /api/workflows/knowledge-ingest/start", json(200, { message: "Workflow run started" }));
-    const launched = await gateway().launchWorkflow({ scope: SCOPE, workflowId: "knowledge-ingest", inputData: { source: { kind: "url", url: "https://docs.example.com" } } });
+    const launched = await gateway().launchWorkflow({
+      scope: SCOPE,
+      workflowId: "knowledge-ingest",
+      inputData: { source: { kind: "url", url: "https://docs.example.com" } },
+    });
     expect(launched).toEqual({ ok: true, data: { runId: "run-2" } });
     const start = recorded.find((call) => call.url.includes("/start"));
     expect(start?.url).toContain("runId=run-2");
@@ -300,6 +392,8 @@ describe("createMastraGateway JSON calls", () => {
 
   it("maps an upstream 403 of a launch", async () => {
     routes.set("POST /api/workflows/knowledge-ingest/create-run", json(403, { error: "forbidden" }));
-    expect(await gateway().launchWorkflow({ scope: SCOPE, workflowId: "knowledge-ingest", inputData: {} })).toMatchObject({ ok: false, error: { code: "FORBIDDEN", status: 403 } });
+    expect(
+      await gateway().launchWorkflow({ scope: SCOPE, workflowId: "knowledge-ingest", inputData: {} }),
+    ).toMatchObject({ ok: false, error: { code: "FORBIDDEN", status: 403 } });
   });
 });

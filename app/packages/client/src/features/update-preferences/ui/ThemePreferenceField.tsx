@@ -12,7 +12,8 @@ import { useSaveThemePreference } from "../model/use-save-theme-preference.ts";
 
 const ICONS: Record<ThemePreference, IconName> = { system: "monitor", light: "sun", dark: "moon" };
 
-const isThemePreference = (value: string): value is ThemePreference => (THEME_PREFERENCES as readonly string[]).includes(value);
+const isThemePreference = (value: string): value is ThemePreference =>
+  (THEME_PREFERENCES as readonly string[]).includes(value);
 
 /**
  * Theme choice (system, light, dark) as a segmented radio group (formularios.html): applied as

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "use-intl";
 import { SignInForm } from "#/features/auth-by-email/index.ts";
 import { MfaChallengeForm } from "#/features/mfa-challenge/index.ts";
@@ -30,7 +30,9 @@ function SignedOutNotice({ reason }: { reason: SignedOutReason }) {
   if (reason === "none") return null;
   return (
     <Alert variant={reason === "session-expired" ? "warning" : "info"}>
-      <AlertDescription className="text-inherit">{reason === "session-expired" ? t("sessionExpired") : t("signedOut")}</AlertDescription>
+      <AlertDescription className="text-inherit">
+        {reason === "session-expired" ? t("sessionExpired") : t("signedOut")}
+      </AlertDescription>
     </Alert>
   );
 }
@@ -43,7 +45,10 @@ function SignUpPrompt({ next }: { next: string | null }) {
   return (
     <p className="text-center text-sm text-muted-foreground">
       {t("noAccount")}{" "}
-      <RouteLink to={{ id: "sign-up", next: next ?? undefined }} className="font-medium text-foreground underline underline-offset-4">
+      <RouteLink
+        to={{ id: "sign-up", next: next ?? undefined }}
+        className="font-medium text-foreground underline underline-offset-4"
+      >
         {t("createAccount")}
       </RouteLink>
     </p>

@@ -2,7 +2,6 @@
 
 import type { AccessContext, ApprovalRequest } from "@core/contracts";
 import { useTranslations } from "use-intl";
-import { searchOption, useCarriedSearch, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import {
   APPROVAL_HISTORY_PAGE_SIZE,
   ApprovalRequestItem,
@@ -12,6 +11,7 @@ import {
 } from "#/entities/approval-request/index.ts";
 import { ApprovalDecision } from "#/features/approval-decision/index.ts";
 import { useCursorPages } from "#/shared/lib/pagination/index.ts";
+import { searchOption, useCarriedSearch, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
@@ -26,9 +26,15 @@ type Tab = (typeof TABS)[number];
 const isTab = (value: string): value is Tab => (TABS as readonly string[]).includes(value);
 
 /** The two pending lists of the inbox (SP5 spec §3.4): waiting for the viewer, and asked by the viewer. */
-export const splitPending = (requests: readonly ApprovalRequest[], viewerUid: string | null): Record<"waiting" | "mine", ApprovalRequest[]> => {
+export const splitPending = (
+  requests: readonly ApprovalRequest[],
+  viewerUid: string | null,
+): Record<"waiting" | "mine", ApprovalRequest[]> => {
   const pending = requests.filter((request) => request.status === "pending");
-  return { waiting: waitingForDecision(pending, viewerUid), mine: pending.filter((request) => request.requestedBy.id === viewerUid) };
+  return {
+    waiting: waitingForDecision(pending, viewerUid),
+    mine: pending.filter((request) => request.requestedBy.id === viewerUid),
+  };
 };
 
 type ListProps = {
@@ -42,7 +48,8 @@ function RequestList({ tab, requests, viewerUid, requesterName }: ListProps) {
   const t = useTranslations("settings.approvals");
   // The request page carries the inbox tab, so its "back" returns to the same tab.
   const search = useCarriedSearch();
-  if (requests.length === 0) return <EmptyState icon="inbox" title={t(`empty.${tab}Title`)} description={t(`empty.${tab}Description`)} />;
+  if (requests.length === 0)
+    return <EmptyState icon="inbox" title={t(`empty.${tab}Title`)} description={t(`empty.${tab}Description`)} />;
   return (
     <ul className="flex flex-col gap-3" aria-label={t(`tabs.${tab}`)}>
       {requests.map((request) => (
@@ -52,7 +59,13 @@ function RequestList({ tab, requests, viewerUid, requesterName }: ListProps) {
             headingLevel={2}
             requesterName={requesterName(request)}
             node={<NodeName node={request.node} />}
-            titleRoute={{ id: "settings", organizationId: request.tenantId, section: "approvals", rest: request.id, search }}
+            titleRoute={{
+              id: "settings",
+              organizationId: request.tenantId,
+              section: "approvals",
+              rest: request.id,
+              search,
+            }}
             actions={tab === "waiting" ? <ApprovalDecision request={request} viewerUid={viewerUid} /> : undefined}
           />
         </li>
@@ -62,7 +75,11 @@ function RequestList({ tab, requests, viewerUid, requesterName }: ListProps) {
 }
 
 /** The settled requests, paged by cursor; read only once the tab is open. */
-function HistoryList({ organizationId, viewerUid, requesterName }: Omit<ListProps, "tab" | "requests"> & { organizationId: string }) {
+function HistoryList({
+  organizationId,
+  viewerUid,
+  requesterName,
+}: Omit<ListProps, "tab" | "requests"> & { organizationId: string }) {
   const t = useTranslations("settings.approvals");
   const history = useApprovalHistory(organizationId);
   const paged = useCursorPages(history, APPROVAL_HISTORY_PAGE_SIZE, t("historyPagination"));
@@ -102,7 +119,11 @@ export function ApprovalsInbox({ context, viewerUid }: { context: AccessContext;
   const setTab = (next: Tab): void => search.set({ tab: next === "waiting" ? undefined : next });
   const { organization } = context;
   const inbox = useApprovalRequests({ organizationId: organization.id, status: "pending" });
-  const requesterName = useRequesterNames({ organizationId: organization.id, viewerUid, canReadMembers: context.permissions.includes("core.member.read") });
+  const requesterName = useRequesterNames({
+    organizationId: organization.id,
+    viewerUid,
+    canReadMembers: context.permissions.includes("core.member.read"),
+  });
   return (
     <QuerySection query={inbox.query} loadingLabel={t("loading")}>
       {(collected) => {
@@ -121,7 +142,12 @@ export function ApprovalsInbox({ context, viewerUid }: { context: AccessContext;
                   {tab !== name ? null : name === "history" ? (
                     <HistoryList organizationId={organization.id} viewerUid={viewerUid} requesterName={requesterName} />
                   ) : (
-                    <RequestList tab={name} requests={lists[name]} viewerUid={viewerUid} requesterName={requesterName} />
+                    <RequestList
+                      tab={name}
+                      requests={lists[name]}
+                      viewerUid={viewerUid}
+                      requesterName={requesterName}
+                    />
                   )}
                 </TabsContent>
               ))}

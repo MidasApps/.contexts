@@ -7,8 +7,10 @@ import type { ToolState } from "#/shared/ui/ai/tool.tsx";
 
 export type LoosePart = { readonly type: string; readonly [key: string]: unknown };
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
-const stringOf = (value: unknown): string | undefined => (typeof value === "string" && value !== "" ? value : undefined);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+const stringOf = (value: unknown): string | undefined =>
+  typeof value === "string" && value !== "" ? value : undefined;
 
 const TOOL_STATES: ReadonlySet<string> = new Set<ToolState>([
   "input-streaming",
@@ -20,7 +22,11 @@ const TOOL_STATES: ReadonlySet<string> = new Set<ToolState>([
   "output-denied",
 ]);
 
-export type ToolApprovalView = { readonly id: string; readonly approved?: boolean | undefined; readonly reason?: string | undefined };
+export type ToolApprovalView = {
+  readonly id: string;
+  readonly approved?: boolean | undefined;
+  readonly reason?: string | undefined;
+};
 
 /** A `tool-<name>` or `dynamic-tool` part, normalized. */
 export type ToolPartView = {
@@ -45,10 +51,22 @@ const approvalOf = (value: unknown): ToolApprovalView | undefined => {
 };
 
 export const toolPartOf = (part: LoosePart): ToolPartView | null => {
-  const toolName = part.type === "dynamic-tool" ? stringOf(part["toolName"]) : part.type.startsWith("tool-") ? part.type.slice("tool-".length) : undefined;
+  const toolName =
+    part.type === "dynamic-tool"
+      ? stringOf(part["toolName"])
+      : part.type.startsWith("tool-")
+        ? part.type.slice("tool-".length)
+        : undefined;
   const toolCallId = stringOf(part["toolCallId"]);
   const state = part["state"];
-  if (toolName === undefined || toolName === "" || toolCallId === undefined || typeof state !== "string" || !TOOL_STATES.has(state)) return null;
+  if (
+    toolName === undefined ||
+    toolName === "" ||
+    toolCallId === undefined ||
+    typeof state !== "string" ||
+    !TOOL_STATES.has(state)
+  )
+    return null;
   return {
     type: part.type,
     toolName,
@@ -62,7 +80,13 @@ export const toolPartOf = (part: LoosePart): ToolPartView | null => {
 };
 
 /** One tool call a subagent made while handling a delegation. */
-export type DelegationStep = { readonly toolName: string; readonly toolCallId: string; readonly result: unknown; readonly args: unknown; readonly isError: boolean };
+export type DelegationStep = {
+  readonly toolName: string;
+  readonly toolCallId: string;
+  readonly result: unknown;
+  readonly args: unknown;
+  readonly isError: boolean;
+};
 
 /** The supervisor handing the request to a subagent (`tool-agent-<id>`, spike report SP4 Task 1). */
 export type DelegationView = {
@@ -75,7 +99,13 @@ export type DelegationView = {
 
 const stepOf = (value: unknown): DelegationStep | null => {
   if (!isRecord(value) || typeof value["toolName"] !== "string" || typeof value["toolCallId"] !== "string") return null;
-  return { toolName: value["toolName"], toolCallId: value["toolCallId"], result: value["result"], args: value["args"], isError: value["isError"] === true };
+  return {
+    toolName: value["toolName"],
+    toolCallId: value["toolCallId"],
+    result: value["result"],
+    args: value["args"],
+    isError: value["isError"] === true,
+  };
 };
 
 const AGENT_PREFIX = "agent-";
@@ -99,7 +129,10 @@ export const tripwireOf = (part: LoosePart): TripwireView | null => {
   if (part.type !== "data-tripwire") return null;
   const data = isRecord(part["data"]) ? part["data"] : {};
   const metadata = isRecord(data["metadata"]) ? data["metadata"] : {};
-  return { processorId: stringOf(data["processorId"]) ?? stringOf(metadata["processorId"]), reason: stringOf(data["reason"]) };
+  return {
+    processorId: stringOf(data["processorId"]) ?? stringOf(metadata["processorId"]),
+    reason: stringOf(data["reason"]),
+  };
 };
 
 /** `data-tool-preview` (decision 0032): what an approval card shows about the pending call. */
@@ -118,8 +151,17 @@ export const toolPreviewOf = (part: LoosePart): ToolPreviewView | null => {
   const toolCallId = stringOf(data["toolCallId"]);
   const toolName = stringOf(data["toolName"]);
   if (toolCallId === undefined || toolName === undefined) return null;
-  const preview = isRecord(data["preview"]) ? { before: data["preview"]["before"], after: data["preview"]["after"] } : null;
-  return { toolCallId, toolName, toolId: stringOf(data["toolId"]), permission: stringOf(data["permission"]), summary: stringOf(data["summary"]), preview };
+  const preview = isRecord(data["preview"])
+    ? { before: data["preview"]["before"], after: data["preview"]["after"] }
+    : null;
+  return {
+    toolCallId,
+    toolName,
+    toolId: stringOf(data["toolId"]),
+    permission: stringOf(data["permission"]),
+    summary: stringOf(data["summary"]),
+    preview,
+  };
 };
 
 /** `data-tool-call-approval`: the sanitized name and arguments of the call waiting for approval. */
@@ -129,7 +171,9 @@ export const approvalRequestOf = (part: LoosePart): ApprovalRequestView | null =
   if (part.type !== "data-tool-call-approval" || !isRecord(part["data"])) return null;
   const toolCallId = stringOf(part["data"]["toolCallId"]);
   const toolName = stringOf(part["data"]["toolName"]);
-  return toolCallId === undefined || toolName === undefined ? null : { toolCallId, toolName, args: part["data"]["args"] };
+  return toolCallId === undefined || toolName === undefined
+    ? null
+    : { toolCallId, toolName, args: part["data"]["args"] };
 };
 
 /** A tool output that asks for a generative UI component (`{ ui: { component, props } }`). */
@@ -154,19 +198,33 @@ export const partsOf = (message: UIMessage): readonly LoosePart[] => message.par
  * `confidence: "low"` (`MessageMetadataSchema`: `low | normal`): the chat stream and the history
  * grade the answer's knowledge delegation with the citation guard's rule (SP3).
  */
-export const isLowConfidence = (message: UIMessage): boolean => isRecord(message.metadata) && message.metadata["confidence"] === "low";
+export const isLowConfidence = (message: UIMessage): boolean =>
+  isRecord(message.metadata) && message.metadata["confidence"] === "low";
 
-export type AttachmentView = { readonly fileId: string; readonly name: string; readonly mediaType: string; readonly sizeBytes: number | undefined };
+export type AttachmentView = {
+  readonly fileId: string;
+  readonly name: string;
+  readonly mediaType: string;
+  readonly sizeBytes: number | undefined;
+};
 
 /** Attachments of a user message, from its metadata (history) — never from client URLs. */
 export const attachmentsOf = (message: UIMessage): readonly AttachmentView[] => {
-  const list = isRecord(message.metadata) && Array.isArray(message.metadata["attachments"]) ? message.metadata["attachments"] : [];
+  const list =
+    isRecord(message.metadata) && Array.isArray(message.metadata["attachments"]) ? message.metadata["attachments"] : [];
   return list.flatMap((item: unknown) => {
     if (!isRecord(item)) return [];
     const fileId = stringOf(item["fileId"]);
     const name = stringOf(item["name"]);
     if (fileId === undefined || name === undefined) return [];
-    return [{ fileId, name, mediaType: stringOf(item["mediaType"]) ?? "application/octet-stream", sizeBytes: typeof item["sizeBytes"] === "number" ? item["sizeBytes"] : undefined }];
+    return [
+      {
+        fileId,
+        name,
+        mediaType: stringOf(item["mediaType"]) ?? "application/octet-stream",
+        sizeBytes: typeof item["sizeBytes"] === "number" ? item["sizeBytes"] : undefined,
+      },
+    ];
   });
 };
 
@@ -177,11 +235,21 @@ export const textOf = (message: UIMessage): string =>
     .join("\n\n");
 
 /** Something an answer can cite: a knowledge passage or a source part of the stream. */
-export type SourceView = { readonly id: string; readonly title: string | undefined; readonly url: string | undefined; readonly snippet: string | undefined };
+export type SourceView = {
+  readonly id: string;
+  readonly title: string | undefined;
+  readonly url: string | undefined;
+  readonly snippet: string | undefined;
+};
 
 const citationOf = (value: unknown): SourceView | null => {
   if (!isRecord(value) || typeof value["citationId"] !== "string") return null;
-  return { id: value["citationId"].toLowerCase(), title: stringOf(value["title"]), url: stringOf(value["sourceUrl"]), snippet: stringOf(value["snippet"]) };
+  return {
+    id: value["citationId"].toLowerCase(),
+    title: stringOf(value["title"]),
+    url: stringOf(value["sourceUrl"]),
+    snippet: stringOf(value["snippet"]),
+  };
 };
 
 const citationsIn = (output: unknown): SourceView[] => {
@@ -192,7 +260,9 @@ const citationsIn = (output: unknown): SourceView[] => {
 const sourcePartOf = (part: LoosePart): SourceView | null => {
   if (part.type !== "source-url" && part.type !== "source-document") return null;
   const id = stringOf(part["sourceId"]);
-  return id === undefined ? null : { id: id.toLowerCase(), title: stringOf(part["title"]), url: stringOf(part["url"]), snippet: undefined };
+  return id === undefined
+    ? null
+    : { id: id.toLowerCase(), title: stringOf(part["title"]), url: stringOf(part["url"]), snippet: undefined };
 };
 
 /**

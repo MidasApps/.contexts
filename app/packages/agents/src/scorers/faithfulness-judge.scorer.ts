@@ -28,7 +28,9 @@ export const faithfulnessOf = (verdict: FaithfulnessVerdict): number =>
 
 const evidenceOf = (output: unknown, reference: string | undefined): string => {
   const results = allToolCalls(viewAgentRun(output)).map((call) => JSON.stringify(call.result ?? null));
-  return [reference === undefined ? "" : `Reference answer: ${reference}`, ...results].join("\n").slice(0, MAX_CONTEXT_CHARS);
+  return [reference === undefined ? "" : `Reference answer: ${reference}`, ...results]
+    .join("\n")
+    .slice(0, MAX_CONTEXT_CHARS);
 };
 
 /**

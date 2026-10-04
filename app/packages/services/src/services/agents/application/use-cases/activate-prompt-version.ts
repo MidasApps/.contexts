@@ -4,7 +4,10 @@ import type { PromptKey } from "../ports/prompt-repository.ts";
 import type { PromptActor, PromptDeps } from "../prompt-deps.ts";
 import { recordPromptAudit } from "./prompt-audit.ts";
 
-export type ActivationError = { readonly code: "NOT_FOUND" } | { readonly code: "EVAL_REQUIRED" } | { readonly code: "FORCE_FORBIDDEN" };
+export type ActivationError =
+  | { readonly code: "NOT_FOUND" }
+  | { readonly code: "EVAL_REQUIRED" }
+  | { readonly code: "FORCE_FORBIDDEN" };
 
 export type ActivatePromptVersion = (command: {
   readonly actor: UserPrincipal;
@@ -24,11 +27,23 @@ export const makeActivatePromptVersion =
   async (command) => {
     const { key, input } = command;
     const version = await deps.prompts.getVersion({ versionId: input.versionId, tenantId: key.tenantId });
-    if (version === null || version.agentId !== key.agentId || version.scope !== key.scope || version.tenantId !== key.tenantId) return err({ code: "NOT_FOUND" });
+    if (
+      version === null ||
+      version.agentId !== key.agentId ||
+      version.scope !== key.scope ||
+      version.tenantId !== key.tenantId
+    )
+      return err({ code: "NOT_FOUND" });
     const forced = input.force === true;
     if (forced && command.by !== "staff") return err({ code: "FORCE_FORBIDDEN" });
     if (!forced && version.evalVerdict !== "passed") return err({ code: "EVAL_REQUIRED" });
-    const activation = await deps.prompts.insertActivation({ ...key, versionId: version.id, forced, reason: input.reason ?? null, activatedBy: command.actor.uid });
+    const activation = await deps.prompts.insertActivation({
+      ...key,
+      versionId: version.id,
+      forced,
+      reason: input.reason ?? null,
+      activatedBy: command.actor.uid,
+    });
     await recordPromptAudit(deps, {
       action: forced ? "PROMPT_ACTIVATION_FORCED" : "PROMPT_ACTIVATED",
       actor: command.actor,

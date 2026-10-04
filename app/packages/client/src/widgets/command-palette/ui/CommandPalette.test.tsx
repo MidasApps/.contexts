@@ -20,7 +20,10 @@ function Harness() {
 
 describe("CommandPalette", () => {
   it("lists only permitted navigation at the node and filters by label", async () => {
-    const { user } = renderWidget(<Harness />, { path: `/o/${IDS.organization}`, permissions: ["core.organization.read"] });
+    const { user } = renderWidget(<Harness />, {
+      path: `/o/${IDS.organization}`,
+      permissions: ["core.organization.read"],
+    });
     await user.click(screen.getByRole("button", { name: "abrir" }));
     const dialog = await screen.findByRole("dialog", { name: "Paleta de comandos" });
     await waitFor(() => expect(within(dialog).getByRole("option", { name: "Geral" })).toBeDefined());

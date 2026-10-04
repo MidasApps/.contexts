@@ -40,6 +40,7 @@ import {
   ListIcon,
   LockIcon,
   LogOutIcon,
+  type LucideIcon,
   MessageSquareIcon,
   MonitorIcon,
   MoonIcon,
@@ -65,7 +66,6 @@ import {
   WifiOffIcon,
   WorkflowIcon,
   XIcon,
-  type LucideIcon,
 } from "lucide-react";
 
 /**

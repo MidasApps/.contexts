@@ -60,7 +60,11 @@ describe("callEndpoint", () => {
       params: { organizationId: "org/1 ä" },
       query: { limit: 20, status: ["open", "done"], cursor: undefined },
     });
-    expect(requests[0]).toMatchObject({ method: "GET", path: "/v1/organizations/org%2F1%20%C3%A4/items?limit=20&status=open%2Cdone", auth: "user" });
+    expect(requests[0]).toMatchObject({
+      method: "GET",
+      path: "/v1/organizations/org%2F1%20%C3%A4/items?limit=20&status=open%2Cdone",
+      auth: "user",
+    });
   });
 
   it("parses the success body with the descriptor schema and returns it typed", async () => {
@@ -73,7 +77,10 @@ describe("callEndpoint", () => {
 
   it("returns the parsed body and forwards the body and Idempotency-Key", async () => {
     const { http, requests } = fakeHttp(201, { data: { id: "i1", name: "Pen" } });
-    const created = await createEndpointCaller(http)(createItemEndpoint, { body: { name: "Pen" }, idempotencyKey: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" });
+    const created = await createEndpointCaller(http)(createItemEndpoint, {
+      body: { name: "Pen" },
+      idempotencyKey: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+    });
     expect(created).toEqual({ data: { id: "i1", name: "Pen" } });
     expect(requests[0]).toMatchObject({ body: { name: "Pen" }, idempotencyKey: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" });
   });
@@ -86,8 +93,12 @@ describe("callEndpoint", () => {
 
   it("returns undefined for 204 and rejects a status the descriptor does not declare", async () => {
     const ok = fakeHttp(204, undefined);
-    await expect(createEndpointCaller(ok.http)(deleteItemEndpoint, { params: { itemId: "i1" } })).resolves.toBeUndefined();
+    await expect(
+      createEndpointCaller(ok.http)(deleteItemEndpoint, { params: { itemId: "i1" } }),
+    ).resolves.toBeUndefined();
     const odd = fakeHttp(200, { data: null });
-    await expect(createEndpointCaller(odd.http)(deleteItemEndpoint, { params: { itemId: "i1" } })).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
+    await expect(
+      createEndpointCaller(odd.http)(deleteItemEndpoint, { params: { itemId: "i1" } }),
+    ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
   });
 });

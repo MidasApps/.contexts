@@ -1,5 +1,11 @@
 import { ImpersonationSessionIdSchema, ImpersonationSessionSchema, PlatformStaffSchema } from "@core/contracts";
-import { FieldPath, Timestamp, type DocumentReference, type Firestore, type Transaction } from "firebase-admin/firestore";
+import {
+  type DocumentReference,
+  FieldPath,
+  type Firestore,
+  Timestamp,
+  type Transaction,
+} from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
@@ -22,14 +28,21 @@ export const createFirestorePlatformStaffRepository = (deps: { firestore: Firest
     put: (tx, { staff, actorId }) =>
       void tx.set(
         raw().doc(staff.uid),
-        { ...staffConverter.toFirestore(staff), ...(staff.createdAt === staff.updatedAt ? { createdBy: actorId } : {}), updatedBy: actorId, schemaVersion: CORE_SCHEMA_VERSION },
+        {
+          ...staffConverter.toFirestore(staff),
+          ...(staff.createdAt === staff.updatedAt ? { createdBy: actorId } : {}),
+          updatedBy: actorId,
+          schemaVersion: CORE_SCHEMA_VERSION,
+        },
         { merge: true },
       ),
   };
 };
 
 /** Firestore `ImpersonationSessionRepository` over `impersonation-sessions` (server-only). */
-export const createFirestoreImpersonationSessionRepository = (deps: { firestore: Firestore }): ImpersonationSessionRepository => {
+export const createFirestoreImpersonationSessionRepository = (deps: {
+  firestore: Firestore;
+}): ImpersonationSessionRepository => {
   const raw = () => deps.firestore.collection(CORE_COLLECTIONS.impersonationSessions);
   return {
     newId: () => ImpersonationSessionIdSchema.parse(raw().doc().id),
@@ -48,14 +61,27 @@ export const createFirestoreImpersonationSessionRepository = (deps: { firestore:
     },
     // One field plus the document id in the same direction: the automatic single-field index serves it.
     listRecent: async ({ after, limit }) => {
-      let query = raw().withConverter(sessionConverter).orderBy("createdAt", "desc").orderBy(FieldPath.documentId(), "desc").limit(limit + 1);
+      let query = raw()
+        .withConverter(sessionConverter)
+        .orderBy("createdAt", "desc")
+        .orderBy(FieldPath.documentId(), "desc")
+        .limit(limit + 1);
       if (after !== undefined) query = query.startAfter(Timestamp.fromDate(new Date(after[0])), after[1]);
       const snapshot = await query.get();
-      return pageFromOverfetch({ fetched: snapshot.docs.map((doc) => doc.data()), limit, positionOf: (session) => [session.createdAt, session.id] });
+      return pageFromOverfetch({
+        fetched: snapshot.docs.map((doc) => doc.data()),
+        limit,
+        positionOf: (session) => [session.createdAt, session.id],
+      });
     },
     // A range on `expiresAt` alone (no composite index); the few ended ones among them are dropped here.
     listOpen: async ({ now, limit }) => {
-      const snapshot = await raw().withConverter(sessionConverter).where("expiresAt", ">", Timestamp.fromDate(now)).orderBy("expiresAt").limit(limit).get();
+      const snapshot = await raw()
+        .withConverter(sessionConverter)
+        .where("expiresAt", ">", Timestamp.fromDate(now))
+        .orderBy("expiresAt")
+        .limit(limit)
+        .get();
       return snapshot.docs.map((doc) => doc.data()).filter((session) => session.endedAt === null);
     },
   };

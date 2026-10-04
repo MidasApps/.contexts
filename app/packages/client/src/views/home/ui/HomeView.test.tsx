@@ -19,7 +19,10 @@ describe("HomeView", () => {
   it("goes to the organizations page without a last context", async () => {
     const { router } = renderApp(<HomeView />);
     await waitFor(() => expect(router.current()).toBe("/organizations"));
-    expect(lastContextRoute({ organizationId: IDS.organization } as Parameters<typeof lastContextRoute>[0])).toEqual({ id: "organization", organizationId: IDS.organization });
+    expect(lastContextRoute({ organizationId: IDS.organization } as Parameters<typeof lastContextRoute>[0])).toEqual({
+      id: "organization",
+      organizationId: IDS.organization,
+    });
   });
 
   it("offers a retry with the reference when the profile cannot load", async () => {

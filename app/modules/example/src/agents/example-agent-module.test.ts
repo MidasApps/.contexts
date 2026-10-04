@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { AgentModuleError, defineAgentModule, type WorkflowCommandPort } from "@core/agents";
 import { buildAgentContextEntries, TEST_REQUEST_ID, TEST_TENANT } from "@core/agents/testing";
-import { validateSkillContent } from "@mastra/core/skills";
 import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
+import { validateSkillContent } from "@mastra/core/skills";
 import { InMemoryStore } from "@mastra/core/storage";
 import { describe, expect, it } from "vitest";
 import { exampleManifest } from "../manifest.ts";
@@ -26,7 +26,9 @@ describe("createExampleAgentModule", () => {
     const { module } = build();
     expect(module.id).toBe("example");
     expect((module.skills ?? []).map((skill) => skill.name)).toEqual(exampleManifest.skills.map((ref) => ref.id));
-    expect((module.workflows ?? []).map((entry) => String(entry.workflow.id))).toEqual(exampleManifest.workflows.map((ref) => ref.id));
+    expect((module.workflows ?? []).map((entry) => String(entry.workflow.id))).toEqual(
+      exampleManifest.workflows.map((ref) => ref.id),
+    );
     expect(module.workflows?.[0]).toMatchObject({ startable: true });
   });
 
@@ -55,9 +57,15 @@ describe("example-note-intake workflow", () => {
   };
 
   it("creates the note through the command registry as the caller, keyed by the run", async () => {
-    const { commands, result, runId } = await run(new RequestContext<unknown>(buildAgentContextEntries({ permissions: ["example.note.create"] })));
+    const { commands, result, runId } = await run(
+      new RequestContext<unknown>(buildAgentContextEntries({ permissions: ["example.note.create"] })),
+    );
     expect(result.status).toBe("success");
-    expect(result.status === "success" ? result.result : null).toEqual({ outcome: "created", noteId: "note-1", code: null });
+    expect(result.status === "success" ? result.result : null).toEqual({
+      outcome: "created",
+      noteId: "note-1",
+      code: null,
+    });
     expect(commands.calls).toHaveLength(1);
     expect(commands.calls[0]).toMatchObject({
       tenantId: TEST_TENANT,
@@ -71,7 +79,11 @@ describe("example-note-intake workflow", () => {
 
   it("creates nothing without the server context", async () => {
     const { commands, result } = await run(new RequestContext<unknown>());
-    expect(result.status === "success" ? result.result : null).toEqual({ outcome: "failed", noteId: null, code: "CONTEXT_MISSING" });
+    expect(result.status === "success" ? result.result : null).toEqual({
+      outcome: "failed",
+      noteId: null,
+      code: "CONTEXT_MISSING",
+    });
     expect(commands.calls).toEqual([]);
   });
 });

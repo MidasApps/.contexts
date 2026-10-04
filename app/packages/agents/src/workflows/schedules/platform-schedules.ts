@@ -16,7 +16,8 @@ export const platformScheduleIdOf = (workflowId: string): string => `schedule_pl
 
 type SchedulesApi = Pick<Mastra["schedules"], "get" | "create" | "update">;
 
-const isAlreadyExists = (error: unknown): boolean => typeof error === "object" && error !== null && "id" in error && error.id === "SCHEDULES_ID_EXISTS";
+const isAlreadyExists = (error: unknown): boolean =>
+  typeof error === "object" && error !== null && "id" in error && error.id === "SCHEDULES_ID_EXISTS";
 
 /**
  * Creates or realigns each platform schedule (idempotent; another instance creating the same row at
@@ -32,7 +33,14 @@ export const ensurePlatformSchedules = async (args: {
     const current = await args.schedules.get(id);
     if (current === null) {
       try {
-        await args.schedules.create({ id, workflowId: spec.workflowId, cron: spec.cron, timezone: PLATFORM_SCHEDULE_TIMEZONE, inputData: {}, metadata: { platform: true } });
+        await args.schedules.create({
+          id,
+          workflowId: spec.workflowId,
+          cron: spec.cron,
+          timezone: PLATFORM_SCHEDULE_TIMEZONE,
+          inputData: {},
+          metadata: { platform: true },
+        });
         args.logger.info("platform_schedule_created", { scheduleId: id, workflowId: spec.workflowId, cron: spec.cron });
       } catch (error: unknown) {
         if (!isAlreadyExists(error)) throw error;

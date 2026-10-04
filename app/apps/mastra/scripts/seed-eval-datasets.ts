@@ -24,7 +24,10 @@ const main = async (): Promise<void> => {
   const storage = new PostgresStore(buildStorageConfig(env, { init: "force" }));
   try {
     const mastra = new Mastra({ storage });
-    const outcomes = await seedEvalDatasets({ mastra, datasets: EVAL_AGENT_IDS.map((agentId) => loadEvalDataset(agentId)) });
+    const outcomes = await seedEvalDatasets({
+      mastra,
+      datasets: EVAL_AGENT_IDS.map((agentId) => loadEvalDataset(agentId)),
+    });
     for (const outcome of outcomes) print(`${outcome.name}: ${outcome.status} (${outcome.itemCount} cases)`);
   } finally {
     await storage.close();

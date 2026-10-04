@@ -27,6 +27,8 @@ export const createInMemoryAuditLogReader = (deps: { writer: InMemoryAuditLogWri
       .sort((left, right) => compare(positionOf(left), positionOf(right)));
     const { after } = page;
     const remaining = after === undefined ? sorted : sorted.filter((entry) => compare(positionOf(entry), after) > 0);
-    return Promise.resolve(pageFromOverfetch({ fetched: remaining.slice(0, page.limit + 1), limit: page.limit, positionOf }));
+    return Promise.resolve(
+      pageFromOverfetch({ fetched: remaining.slice(0, page.limit + 1), limit: page.limit, positionOf }),
+    );
   },
 });

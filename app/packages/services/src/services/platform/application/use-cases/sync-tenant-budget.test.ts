@@ -38,7 +38,11 @@ const setup = async () => {
     audit: makeRecordAudit({ writer: createInMemoryAuditLogWriter(), clock }),
     clock,
   });
-  const plan = await services.createPlan({ actor: STAFF, requestId: "r0", input: { name: "Base", limits: limits(100) } });
+  const plan = await services.createPlan({
+    actor: STAFF,
+    requestId: "r0",
+    input: { name: "Base", limits: limits(100) },
+  });
   await services.updateOrganization({ actor: STAFF, tenantId: TENANT, requestId: "r1", input: { planId: plan.id } });
   upserts.length = 0;
   const enforced = () => memory.budgets.get(TENANT);
@@ -52,7 +56,12 @@ const setup = async () => {
 describe("budget changes keep the enforced caps never looser than intended", () => {
   it("tightens Postgres to the lower of old and new caps before writing the inputs, then writes the new caps", async () => {
     const { services, upserts, enforced } = await setup();
-    await services.setOrganizationBudget({ actor: STAFF, tenantId: TENANT, requestId: "r", input: { override: caps(500) } });
+    await services.setOrganizationBudget({
+      actor: STAFF,
+      tenantId: TENANT,
+      requestId: "r",
+      input: { override: caps(500) },
+    });
     expect(upserts).toEqual([caps(100), caps(500)]);
     expect(enforced()).toEqual(caps(500));
   });
@@ -60,15 +69,28 @@ describe("budget changes keep the enforced caps never looser than intended", () 
   it("keeps the old caps when a raise fails to reach Firestore", async () => {
     const { services, enforced, failNext } = await setup();
     failNext({ inputs: true });
-    await expect(services.setOrganizationBudget({ actor: STAFF, tenantId: TENANT, requestId: "r", input: { override: caps(500) } })).rejects.toThrow("store down");
+    await expect(
+      services.setOrganizationBudget({
+        actor: STAFF,
+        tenantId: TENANT,
+        requestId: "r",
+        input: { override: caps(500) },
+      }),
+    ).rejects.toThrow("store down");
     expect(enforced()).toEqual(caps(100));
   });
 
   it("enforces a lowered plan even when its Firestore write fails", async () => {
     const { services, memory, enforced, failNext } = await setup();
-    const lower = await services.createPlan({ actor: STAFF, requestId: "r", input: { name: "Lower", limits: limits(40) } });
+    const lower = await services.createPlan({
+      actor: STAFF,
+      requestId: "r",
+      input: { name: "Lower", limits: limits(40) },
+    });
     failNext({ inputs: true });
-    await expect(services.updateOrganization({ actor: STAFF, tenantId: TENANT, requestId: "r", input: { planId: lower.id } })).rejects.toThrow("store down");
+    await expect(
+      services.updateOrganization({ actor: STAFF, tenantId: TENANT, requestId: "r", input: { planId: lower.id } }),
+    ).rejects.toThrow("store down");
     expect(enforced()).toEqual(caps(40));
     expect(memory.assignments.get(TENANT)?.planId).not.toBe(lower.id);
   });
@@ -76,28 +98,63 @@ describe("budget changes keep the enforced caps never looser than intended", () 
   it("enforces a lowered plan when the final Postgres upsert fails", async () => {
     const { services, plan, enforced, failNext } = await setup();
     failNext({ upsertNumber: 2 });
-    await expect(services.updatePlan({ actor: STAFF, planId: plan.id, requestId: "r", input: { name: "Base", limits: limits(30) } })).rejects.toThrow("store down");
+    await expect(
+      services.updatePlan({
+        actor: STAFF,
+        planId: plan.id,
+        requestId: "r",
+        input: { name: "Base", limits: limits(30) },
+      }),
+    ).rejects.toThrow("store down");
     expect(enforced()).toEqual(caps(30));
   });
 
   it("keeps every tenant's caps when a plan raise fails to reach Firestore, and changes nothing for an unknown plan", async () => {
     const { services, plan, upserts, enforced, failNext } = await setup();
     failNext({ inputs: true });
-    await expect(services.updatePlan({ actor: STAFF, planId: plan.id, requestId: "r", input: { name: "Base", limits: limits(900) } })).rejects.toThrow("store down");
+    await expect(
+      services.updatePlan({
+        actor: STAFF,
+        planId: plan.id,
+        requestId: "r",
+        input: { name: "Base", limits: limits(900) },
+      }),
+    ).rejects.toThrow("store down");
     expect(enforced()).toEqual(caps(100));
     failNext({});
     upserts.length = 0;
-    expect(await services.updatePlan({ actor: STAFF, planId: "planUnknown000000000", requestId: "r", input: { name: "X", limits: limits(1) } })).toEqual({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(
+      await services.updatePlan({
+        actor: STAFF,
+        planId: "planUnknown000000000",
+        requestId: "r",
+        input: { name: "X", limits: limits(1) },
+      }),
+    ).toEqual({ ok: false, error: { code: "NOT_FOUND" } });
     expect(upserts).toEqual([]);
   });
 
   it("enforces a tenant's lower cap first, and keeps it when lifting the cap fails to reach Firestore", async () => {
     const { services, upserts, enforced, failNext } = await setup();
-    await services.updateAgentSettings({ actor: OWNER, by: "tenant", tenantId: TENANT, requestId: "r", input: { budget: caps(20) } });
+    await services.updateAgentSettings({
+      actor: OWNER,
+      by: "tenant",
+      tenantId: TENANT,
+      requestId: "r",
+      input: { budget: caps(20) },
+    });
     expect(upserts[0]).toEqual(caps(20));
     expect(enforced()).toEqual(caps(20));
     failNext({ inputs: true });
-    await expect(services.updateAgentSettings({ actor: OWNER, by: "tenant", tenantId: TENANT, requestId: "r", input: { budget: null } })).rejects.toThrow("store down");
+    await expect(
+      services.updateAgentSettings({
+        actor: OWNER,
+        by: "tenant",
+        tenantId: TENANT,
+        requestId: "r",
+        input: { budget: null },
+      }),
+    ).rejects.toThrow("store down");
     expect(enforced()).toEqual(caps(20));
   });
 });

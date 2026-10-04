@@ -10,7 +10,11 @@ const clock = fixedClock(NOW);
 const DAY = 86_400_000;
 const ago = (days: number) => new Date(Date.parse(NOW) - days * DAY);
 
-const experiment = (verdict: EvalExperimentSummary["verdict"], finishedAt: string | null, startedAt = "2026-10-01T00:00:00.000Z"): EvalExperimentSummary => ({
+const experiment = (
+  verdict: EvalExperimentSummary["verdict"],
+  finishedAt: string | null,
+  startedAt = "2026-10-01T00:00:00.000Z",
+): EvalExperimentSummary => ({
   experimentId: `exp-${verdict}-${finishedAt ?? "running"}`,
   datasetId: "ds-1",
   agentId: "data",
@@ -24,7 +28,9 @@ const experiment = (verdict: EvalExperimentSummary["verdict"], finishedAt: strin
 });
 
 const setup = (extra: { approvals?: ApprovalStats; experiments?: () => Promise<EvalExperimentSummary[]> } = {}) => {
-  const memory = createInMemoryConsoleStores({ organizations: [{ id: "OrgA" }, { id: "OrgB" }, { id: "OrgC", status: "suspended" }] });
+  const memory = createInMemoryConsoleStores({
+    organizations: [{ id: "OrgA" }, { id: "OrgB" }, { id: "OrgC", status: "suspended" }],
+  });
   const evals =
     extra.experiments === undefined
       ? undefined
@@ -84,12 +90,18 @@ describe("admin overview", () => {
   it("answers unknown eval status without experiments, without a console, or when the console fails", async () => {
     expect((await setup({ experiments: () => Promise.resolve([]) }).getOverview()).evalStatus).toBe("unknown");
     expect((await setup().getOverview()).evalStatus).toBe("unknown");
-    expect((await setup({ experiments: () => Promise.reject(new Error("mastra down")) }).getOverview()).evalStatus).toBe("unknown");
+    expect(
+      (await setup({ experiments: () => Promise.reject(new Error("mastra down")) }).getOverview()).evalStatus,
+    ).toBe("unknown");
   });
 
   it("computes the tripwire rate from the agent runs of the last 7 days of active organizations, and says it is measured", async () => {
     const { memory, getOverview } = setup();
-    const run = (tenantId: string, days: number, stoppedBy: string | null = null) => ({ tenantId, at: ago(days), stoppedBy });
+    const run = (tenantId: string, days: number, stoppedBy: string | null = null) => ({
+      tenantId,
+      at: ago(days),
+      stoppedBy,
+    });
     memory.agentRuns.push(
       run("OrgA", 1, "prompt-injection-detector"),
       run("OrgA", 2),

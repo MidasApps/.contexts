@@ -10,7 +10,8 @@ export const CATALOG_QUERY_PERMISSION = "core.catalog.query";
 export const SEMANTIC_QUERY_EXECUTED = "SEMANTIC_QUERY_EXECUTED";
 
 const MESSAGES: Readonly<Record<RunSemanticQueryError["code"], string>> = {
-  SQL_REJECTED: "The SQL is not allowed: only one SELECT over the semantic views you can read, with allowlisted functions.",
+  SQL_REJECTED:
+    "The SQL is not allowed: only one SELECT over the semantic views you can read, with allowlisted functions.",
   QUERY_TIMEOUT: "The query took longer than 5 seconds; narrow it down or aggregate.",
   QUERY_FAILED: "The query failed; check column names with describeEntity.",
   CONNECTOR_DISABLED: "This data source is not enabled.",
@@ -20,9 +21,17 @@ const MESSAGES: Readonly<Record<RunSemanticQueryError["code"], string>> = {
 };
 
 const toToolError = (error: RunSemanticQueryError) =>
-  toolFailure(TOOL_ID, error.code, MESSAGES[error.code], error.code === "SQL_REJECTED" ? { reason: error.reason, ...(error.detail === undefined ? {} : { detail: error.detail }) } : undefined);
+  toolFailure(
+    TOOL_ID,
+    error.code,
+    MESSAGES[error.code],
+    error.code === "SQL_REJECTED"
+      ? { reason: error.reason, ...(error.detail === undefined ? {} : { detail: error.detail }) }
+      : undefined,
+  );
 
-const nodeIdsOf = (ctx: CoreToolContext): string[] => [ctx.agent.projectId, ctx.agent.unitId].filter((id): id is NonNullable<typeof id> => id !== undefined);
+const nodeIdsOf = (ctx: CoreToolContext): string[] =>
+  [ctx.agent.projectId, ctx.agent.unitId].filter((id): id is NonNullable<typeof id> => id !== undefined);
 
 const SqlParamSchema = z.union([z.string().max(1000), z.number(), z.boolean(), z.null()]);
 
@@ -40,7 +49,11 @@ export const createQuerySemanticSqlTool = (deps: { readonly catalog: SemanticQue
     kind: "read",
     permission: CATALOG_QUERY_PERMISSION,
     inputSchema: z.strictObject({
-      sql: z.string().min(1).max(10_000).describe("One PostgreSQL SELECT over semantic.<view> names; no semicolons, no DML."),
+      sql: z
+        .string()
+        .min(1)
+        .max(10_000)
+        .describe("One PostgreSQL SELECT over semantic.<view> names; no semicolons, no DML."),
       params: z.array(SqlParamSchema).max(20).optional().describe("Values for $1, $2, ... in order."),
       limit: z.int().min(1).max(1000).optional().describe("Maximum rows to return (default 100, max 1000)."),
     }),
@@ -51,9 +64,16 @@ export const createQuerySemanticSqlTool = (deps: { readonly catalog: SemanticQue
       truncated: z.boolean(),
       fingerprint: z.string(),
     }),
-    audit: { action: SEMANTIC_QUERY_EXECUTED, metadata: (output) => ({ fingerprint: output.fingerprint, rowCount: String(output.rowCount) }) },
+    audit: {
+      action: SEMANTIC_QUERY_EXECUTED,
+      metadata: (output) => ({ fingerprint: output.fingerprint, rowCount: String(output.rowCount) }),
+    },
     execute: async (input, ctx) => {
-      const principal = { tenantId: ctx.agent.tenantId, nodeIds: nodeIdsOf(ctx), permissions: new Set(ctx.agent.permissions) };
+      const principal = {
+        tenantId: ctx.agent.tenantId,
+        nodeIds: nodeIdsOf(ctx),
+        permissions: new Set(ctx.agent.permissions),
+      };
       const result = await deps.catalog.runSemanticQuery({
         principal,
         sql: input.sql,

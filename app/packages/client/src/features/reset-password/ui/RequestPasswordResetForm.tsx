@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleAlertIcon } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { z } from "zod";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
@@ -89,7 +89,18 @@ export function RequestPasswordResetForm() {
       <Field>
         <FieldLabel>{t("resetPassword.email")}</FieldLabel>
         <FieldControl>
-          <Input ref={input} name="email" type="email" inputMode="email" autoComplete="username" autoCapitalize="none" spellCheck={false} required value={email} onChange={(event) => setEmail(event.target.value)} />
+          <Input
+            ref={input}
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
         </FieldControl>
         <FieldError errors={[problem === undefined ? undefined : t(`validation.${problem}`)]} />
       </Field>

@@ -1,15 +1,15 @@
 import { AccessContextContract, defineModule, MeContract } from "@core/contracts";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
 import { useTimeZone, useTranslations } from "use-intl";
+import { describe, expect, it } from "vitest";
 import type { StateStorage } from "zustand/middleware";
 import { ApiError } from "#/shared/api/api-error.ts";
 import type { ClientConfig } from "#/shared/config/client-config.schema.ts";
 import { createFakeAuth } from "#/shared/lib/auth/fake-auth.ts";
 import { createMemoryRouter } from "#/shared/lib/router/memory-router.tsx";
-import type { SessionBridgePort } from "#/shared/lib/session-bridge/session-bridge-port.ts";
 import { useSession } from "#/shared/lib/session/session-context.tsx";
+import type { SessionBridgePort } from "#/shared/lib/session-bridge/session-bridge-port.ts";
 import { useNavigationRegistry, useShellUi } from "#/shared/lib/shell/index.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { createClientApp } from "./create-client-app.tsx";
@@ -20,7 +20,13 @@ const ME = { ...(MeContract.meta.examples[0] as Record<string, unknown>), access
 const CONTEXT = AccessContextContract.meta.examples[0] as { regional: Record<string, string> };
 const ACCESS_CONTEXT = { ...CONTEXT, regional: { ...CONTEXT.regional, displayTimeZone: "Asia/Tokyo" } };
 const USER = { uid: "u1", email: null, displayName: "Ana", emailVerified: true, mfaFactors: [] };
-const config: ClientConfig = { appEnv: "local", apiBaseUrl: "", firebase: { apiKey: "k", authDomain: "d", projectId: "demo-core" }, authEmulatorUrl: "http://127.0.0.1:9099", mfaFactors: ["phone"] };
+const config: ClientConfig = {
+  appEnv: "local",
+  apiBaseUrl: "",
+  firebase: { apiKey: "k", authDomain: "d", projectId: "demo-core" },
+  authEmulatorUrl: "http://127.0.0.1:9099",
+  mfaFactors: ["phone"],
+};
 
 const sampleModule = defineClientModule({
   manifest: defineModule({
@@ -34,11 +40,18 @@ const sampleModule = defineClientModule({
 
 const memoryStorage = (): StateStorage => {
   const data = new Map<string, string>();
-  return { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => void data.set(key, value), removeItem: (key) => void data.delete(key) };
+  return {
+    getItem: (key) => data.get(key) ?? null,
+    setItem: (key, value) => void data.set(key, value),
+    removeItem: (key) => void data.delete(key),
+  };
 };
 
 const json = (status: number, body?: unknown) =>
-  new Response(body === undefined ? null : JSON.stringify(body), { status, headers: { "content-type": "application/json", "x-request-id": "req-1" } });
+  new Response(body === undefined ? null : JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json", "x-request-id": "req-1" },
+  });
 
 const setup = (args: { restored?: string | null; path?: string } = {}) => {
   const calls: string[] = [];
@@ -55,13 +68,21 @@ const setup = (args: { restored?: string | null; path?: string } = {}) => {
   const bridge = { established: [] as string[], ended: 0 };
   const sessionBridge: SessionBridgePort = {
     establish: ({ idToken }) => Promise.resolve(void bridge.established.push(idToken)),
-    restore: () => Promise.resolve(args.restored === undefined || args.restored === null ? null : { customToken: args.restored }),
+    restore: () =>
+      Promise.resolve(args.restored === undefined || args.restored === null ? null : { customToken: args.restored }),
     end: () => Promise.resolve(void (bridge.ended += 1)),
   };
   const app = createClientApp({
     config,
     modules: [sampleModule],
-    adapters: { auth, router: createMemoryRouter(args.path ?? "/"), sessionBridge, platform: { kind: "desktop", apiBaseUrl: "" }, fetch, shellUiStorage: memoryStorage() },
+    adapters: {
+      auth,
+      router: createMemoryRouter(args.path ?? "/"),
+      sessionBridge,
+      platform: { kind: "desktop", apiBaseUrl: "" },
+      fetch,
+      shellUiStorage: memoryStorage(),
+    },
   });
   return { app, auth, bridge, calls };
 };
@@ -100,7 +121,9 @@ describe("createClientApp", () => {
     );
     expect(await screen.findByRole("heading", { name: "Módulo de amostra" })).toBeTruthy();
     await waitFor(() => expect(screen.getByTestId("status").textContent).toBe("signed-out"));
-    expect(screen.getByRole("list", { name: "Navegação" }).textContent).toBe("ContaPreferênciasSegurançaSessõesNotificações");
+    expect(screen.getByRole("list", { name: "Navegação" }).textContent).toBe(
+      "ContaPreferênciasSegurançaSessõesNotificações",
+    );
     await expectNoAxeViolations(container);
   });
 
@@ -133,7 +156,12 @@ describe("createClientApp", () => {
     expect(auth.getState().status).toBe("signed-out");
     expect(screen.getByTestId("recents").textContent).toBe("");
     // Mounted observers re-create disabled entries after clear(); none may keep the user's data.
-    expect(app.queryClient.getQueryCache().getAll().filter((query) => query.state.data !== undefined)).toEqual([]);
+    expect(
+      app.queryClient
+        .getQueryCache()
+        .getAll()
+        .filter((query) => query.state.data !== undefined),
+    ).toEqual([]);
   });
 
   it("catches render errors and shows the request reference, never the message", async () => {
@@ -157,7 +185,16 @@ describe("createClientApp", () => {
       createClientApp({
         config,
         modules: [sampleModule, sampleModule],
-        adapters: { auth: createFakeAuth(USER), router: createMemoryRouter(), sessionBridge: { establish: () => Promise.resolve(), restore: () => Promise.resolve(null), end: () => Promise.resolve() }, platform: { kind: "web", apiBaseUrl: "" } },
+        adapters: {
+          auth: createFakeAuth(USER),
+          router: createMemoryRouter(),
+          sessionBridge: {
+            establish: () => Promise.resolve(),
+            restore: () => Promise.resolve(null),
+            end: () => Promise.resolve(),
+          },
+          platform: { kind: "web", apiBaseUrl: "" },
+        },
       }),
     ).toThrow(ModuleRegistryError);
   });

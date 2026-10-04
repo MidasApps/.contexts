@@ -6,9 +6,29 @@ import { z } from "zod";
 import { buildAgentPrincipal } from "../auth/agent-principal.ts";
 import { buildAgentRequestContext, writeAgentContext } from "../context/write-agent-context.ts";
 import type { AccessPort, WorkflowApprovalPort } from "../runtime/runtime-ports.ts";
-import { addDatasetItem, addFeedbackItem, createTenantDataset, deleteDatasetItem, listDatasetItems, listDatasets } from "./dataset-console.ts";
-import { EvalRunRecordSchema, type ExperimentStore, getExperimentSummary, listExperimentSummaries, recordEvalRun } from "./eval-console.ts";
-import { actOnAdminSchedule, AdminRunsQuerySchema, cancelAdminRun, listAdminRuns, listAdminSchedules, SCHEDULE_ACTIONS } from "./operations-console.ts";
+import {
+  addDatasetItem,
+  addFeedbackItem,
+  createTenantDataset,
+  deleteDatasetItem,
+  listDatasetItems,
+  listDatasets,
+} from "./dataset-console.ts";
+import {
+  EvalRunRecordSchema,
+  type ExperimentStore,
+  getExperimentSummary,
+  listExperimentSummaries,
+  recordEvalRun,
+} from "./eval-console.ts";
+import {
+  AdminRunsQuerySchema,
+  actOnAdminSchedule,
+  cancelAdminRun,
+  listAdminRuns,
+  listAdminSchedules,
+  SCHEDULE_ACTIONS,
+} from "./operations-console.ts";
 import { createTraceReader, type TraceStore } from "./trace-reader.ts";
 
 /**
@@ -42,7 +62,13 @@ type Ctx = {
 };
 
 type HonoLike = {
-  readonly req: { url: string; query: (key: string) => string | undefined; param: () => Record<string, string>; json: () => Promise<unknown>; header: (key: string) => string | undefined };
+  readonly req: {
+    url: string;
+    query: (key: string) => string | undefined;
+    param: () => Record<string, string>;
+    json: () => Promise<unknown>;
+    header: (key: string) => string | undefined;
+  };
   readonly get: (key: "mastra") => Mastra;
 };
 
@@ -58,7 +84,10 @@ const ctxOf = (c: HonoLike): Ctx => ({
 const json = (status: number, body: unknown): Response => Response.json(body, { status });
 const fail = (status: number, code: string): Response => json(status, { error: { code, message: code } });
 const tenantOf = (ctx: Ctx): string | null => ctx.query("tenantId") ?? null;
-const pageOf = (ctx: Ctx) => ({ page: Math.max(0, Number(ctx.query("page") ?? 0) || 0), perPage: Math.min(100, Math.max(1, Number(ctx.query("perPage") ?? 20) || 20)) });
+const pageOf = (ctx: Ctx) => ({
+  page: Math.max(0, Number(ctx.query("page") ?? 0) || 0),
+  perPage: Math.min(100, Math.max(1, Number(ctx.query("perPage") ?? 20) || 20)),
+});
 
 // `undefined` = not asked; `null` = asked with something that is not an instant.
 const instantOf = (ctx: Ctx, key: string): Date | undefined | null => {
@@ -72,14 +101,15 @@ const storeOf = async <T>(ctx: Ctx, name: "observability" | "experiments"): Prom
   ((await ctx.mastra.getStorage()?.getStore(name)) as T | undefined) ?? null;
 
 // Infrastructure errors answer 500 with no detail; the log keeps the cause.
-const guarded = (deps: ConsoleRouteDeps, event: string, run: (ctx: Ctx) => Promise<Response>) => async (c: HonoLike) => {
-  try {
-    return await run(ctxOf(c));
-  } catch (error: unknown) {
-    deps.logger.error(event, { err: error });
-    return fail(500, "INTERNAL_ERROR");
-  }
-};
+const guarded =
+  (deps: ConsoleRouteDeps, event: string, run: (ctx: Ctx) => Promise<Response>) => async (c: HonoLike) => {
+    try {
+      return await run(ctxOf(c));
+    } catch (error: unknown) {
+      deps.logger.error(event, { err: error });
+      return fail(500, "INTERNAL_ERROR");
+    }
+  };
 
 const traceRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/traces`, {
@@ -109,23 +139,50 @@ const traceRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
     requiresAuth: false,
     handler: guarded(deps, "console_trace_failed", async (ctx) => {
       const store = await storeOf<TraceStore>(ctx, "observability");
-      const detail = store === null ? null : await createTraceReader(store).get({ traceId: ctx.param("traceId"), tenantId: tenantOf(ctx) });
+      const detail =
+        store === null
+          ? null
+          : await createTraceReader(store).get({ traceId: ctx.param("traceId"), tenantId: tenantOf(ctx) });
       return detail === null ? fail(404, "NOT_FOUND") : json(200, { data: detail });
     }),
   }),
 ];
 
-const StartSchema = z.strictObject({ tenantId: z.string().min(1).max(128), userId: z.string().min(1).max(128), datasetId: z.string().min(1).max(128), agentId: z.string().regex(/^[a-z][a-z0-9-]*$/) });
+const StartSchema = z.strictObject({
+  tenantId: z.string().min(1).max(128),
+  userId: z.string().min(1).max(128),
+  datasetId: z.string().min(1).max(128),
+  agentId: z.string().regex(/^[a-z][a-z0-9-]*$/),
+});
 
 /** The verified context of the requesting member, so the experiment runs with their current grants. */
-const memberContextOf = async (deps: ConsoleRouteDeps, input: z.infer<typeof StartSchema>, requestId: string): Promise<Record<string, unknown> | null> => {
+const memberContextOf = async (
+  deps: ConsoleRouteDeps,
+  input: z.infer<typeof StartSchema>,
+  requestId: string,
+): Promise<Record<string, unknown> | null> => {
   const principal = { type: "user", uid: input.userId, mfa: false } as const;
-  const context = await deps.access.resolveAccessContext({ principal, node: { level: "organization", tenantId: input.tenantId } });
-  const agentPrincipal = buildAgentPrincipal({ principal, identity: { kind: "user", uid: input.userId }, scope: { tenantId: input.tenantId }, context });
+  const context = await deps.access.resolveAccessContext({
+    principal,
+    node: { level: "organization", tenantId: input.tenantId },
+  });
+  const agentPrincipal = buildAgentPrincipal({
+    principal,
+    identity: { kind: "user", uid: input.userId },
+    scope: { tenantId: input.tenantId },
+    context,
+  });
   const built = buildAgentRequestContext({ principal: agentPrincipal, requestId, aiMode: deps.aiMode });
   if (built === null) return null;
   const store = new Map<string, unknown>();
-  writeAgentContext({ get: (key) => store.get(key), set: (key, value) => void store.set(key, value), delete: (key) => store.delete(key) }, { context: built, principal });
+  writeAgentContext(
+    {
+      get: (key) => store.get(key),
+      set: (key, value) => void store.set(key, value),
+      delete: (key) => store.delete(key),
+    },
+    { context: built, principal },
+  );
   return Object.fromEntries(store);
 };
 
@@ -145,7 +202,10 @@ const evalRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
     requiresAuth: false,
     handler: guarded(deps, "console_experiment_failed", async (ctx) => {
       const store = await storeOf<ExperimentStore>(ctx, "experiments");
-      const summary = store === null ? null : await getExperimentSummary(store, { experimentId: ctx.param("experimentId"), tenantId: tenantOf(ctx) });
+      const summary =
+        store === null
+          ? null
+          : await getExperimentSummary(store, { experimentId: ctx.param("experimentId"), tenantId: tenantOf(ctx) });
       return summary === null ? fail(404, "NOT_FOUND") : json(200, { data: summary });
     }),
   }),
@@ -157,11 +217,22 @@ const evalRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
       if (!input.success) return fail(400, "VALIDATION_FAILED");
       const mastra = ctx.mastra;
       if (mastra.getAgentById(input.data.agentId) === undefined) return fail(422, "AGENT_NOT_ENABLED");
-      const dataset = await mastra.datasets.get({ id: input.data.datasetId, organizationId: input.data.tenantId }).catch(() => null);
+      const dataset = await mastra.datasets
+        .get({ id: input.data.datasetId, organizationId: input.data.tenantId })
+        .catch(() => null);
       if (dataset === null) return fail(404, "NOT_FOUND");
-      const requestContext = await memberContextOf(deps, input.data, ctx.header("x-request-id") ?? input.data.datasetId);
+      const requestContext = await memberContextOf(
+        deps,
+        input.data,
+        ctx.header("x-request-id") ?? input.data.datasetId,
+      );
       if (requestContext === null) return fail(403, "FORBIDDEN");
-      const started = await dataset.startExperimentAsync({ targetType: "agent", targetId: input.data.agentId, requestContext, name: `tenant:${input.data.agentId}` });
+      const started = await dataset.startExperimentAsync({
+        targetType: "agent",
+        targetId: input.data.agentId,
+        requestContext,
+        name: `tenant:${input.data.agentId}`,
+      });
       return json(202, { data: { experimentId: started.experimentId } });
     }),
   }),
@@ -189,7 +260,11 @@ const FeedbackItemSchema = z.strictObject({
 
 const TenantIdSchema = z.string().min(1).max(128);
 const CreateDatasetSchema = z.strictObject({ tenantId: TenantIdSchema, name: z.string().trim().min(1).max(200) });
-const AddItemSchema = z.strictObject({ tenantId: TenantIdSchema, input: z.string().trim().min(1).max(4000), expectedOutput: z.string().trim().min(1).max(4000).optional() });
+const AddItemSchema = z.strictObject({
+  tenantId: TenantIdSchema,
+  input: z.string().trim().min(1).max(4000),
+  expectedOutput: z.string().trim().min(1).max(4000).optional(),
+});
 
 // Item routes are tenant-only (follow-up 66): no `tenantId` is a client mistake, never "every tenant".
 const datasetItemRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
@@ -209,8 +284,14 @@ const datasetItemRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
     handler: guarded(deps, "console_dataset_items_failed", async (ctx) => {
       const tenantId = TenantIdSchema.safeParse(ctx.query("tenantId"));
       if (!tenantId.success) return fail(400, "VALIDATION_FAILED");
-      const listed = await listDatasetItems(ctx.mastra.datasets, { tenantId: tenantId.data, datasetId: ctx.param("datasetId"), ...pageOf(ctx) });
-      return listed === null ? fail(404, "NOT_FOUND") : json(200, { data: listed.items, meta: { hasMore: listed.hasMore } });
+      const listed = await listDatasetItems(ctx.mastra.datasets, {
+        tenantId: tenantId.data,
+        datasetId: ctx.param("datasetId"),
+        ...pageOf(ctx),
+      });
+      return listed === null
+        ? fail(404, "NOT_FOUND")
+        : json(200, { data: listed.items, meta: { hasMore: listed.hasMore } });
     }),
   }),
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets/:datasetId/items`, {
@@ -230,7 +311,11 @@ const datasetItemRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
       const tenantId = TenantIdSchema.safeParse(ctx.query("tenantId"));
       if (!tenantId.success) return fail(400, "VALIDATION_FAILED");
       const itemId = ctx.param("itemId");
-      const deleted = await deleteDatasetItem(ctx.mastra.datasets, { tenantId: tenantId.data, datasetId: ctx.param("datasetId"), itemId });
+      const deleted = await deleteDatasetItem(ctx.mastra.datasets, {
+        tenantId: tenantId.data,
+        datasetId: ctx.param("datasetId"),
+        itemId,
+      });
       return deleted ? json(200, { data: { itemId } }) : fail(404, "NOT_FOUND");
     }),
   }),
@@ -240,7 +325,9 @@ const datasetRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets`, {
     method: "GET",
     requiresAuth: false,
-    handler: guarded(deps, "console_datasets_failed", async (ctx) => json(200, { data: await listDatasets(ctx.mastra.datasets, tenantOf(ctx)) })),
+    handler: guarded(deps, "console_datasets_failed", async (ctx) =>
+      json(200, { data: await listDatasets(ctx.mastra.datasets, tenantOf(ctx)) }),
+    ),
   }),
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/feedback-items`, {
     method: "POST",
@@ -275,16 +362,27 @@ const operationRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
     requiresAuth: false,
     handler: guarded(deps, "console_workflow_run_cancel_failed", async (ctx) => {
       const runId = ctx.param("runId");
-      const run = await cancelAdminRun(ctx.mastra, runId, { approvals: deps.approvals, requestId: ctx.header("x-request-id") ?? runId, logger: deps.logger });
+      const run = await cancelAdminRun(ctx.mastra, runId, {
+        approvals: deps.approvals,
+        requestId: ctx.header("x-request-id") ?? runId,
+        logger: deps.logger,
+      });
       if (run === null) return fail(404, "NOT_FOUND");
-      deps.logger.info("console_workflow_run_canceled", { ...requestIdOf(ctx), runId: run.runId, workflowId: run.workflowId, tenantId: run.tenantId });
+      deps.logger.info("console_workflow_run_canceled", {
+        ...requestIdOf(ctx),
+        runId: run.runId,
+        workflowId: run.workflowId,
+        tenantId: run.tenantId,
+      });
       return json(200, { data: run });
     }),
   }),
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/schedules`, {
     method: "GET",
     requiresAuth: false,
-    handler: guarded(deps, "console_schedules_failed", async (ctx) => json(200, { data: await listAdminSchedules(ctx.mastra, tenantOf(ctx)) })),
+    handler: guarded(deps, "console_schedules_failed", async (ctx) =>
+      json(200, { data: await listAdminSchedules(ctx.mastra, tenantOf(ctx)) }),
+    ),
   }),
   ...SCHEDULE_ACTIONS.map((action) =>
     registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/schedules/:scheduleId/${action}`, {
@@ -293,7 +391,11 @@ const operationRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
       handler: guarded(deps, `console_schedule_${action}_failed`, async (ctx) => {
         const schedule = await actOnAdminSchedule(ctx.mastra, ctx.param("scheduleId"), action);
         if (schedule === null) return fail(404, "NOT_FOUND");
-        deps.logger.info(`console_schedule_${action}`, { ...requestIdOf(ctx), scheduleId: schedule.id, tenantId: schedule.tenantId });
+        deps.logger.info(`console_schedule_${action}`, {
+          ...requestIdOf(ctx),
+          scheduleId: schedule.id,
+          tenantId: schedule.tenantId,
+        });
         return json(200, { data: schedule });
       }),
     }),
@@ -305,7 +407,9 @@ const agentRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/agents`, {
     method: "GET",
     requiresAuth: false,
-    handler: guarded(deps, "console_agents_failed", () => Promise.resolve(json(200, { data: deps.agentCatalog?.() ?? [] }))),
+    handler: guarded(deps, "console_agents_failed", () =>
+      Promise.resolve(json(200, { data: deps.agentCatalog?.() ?? [] })),
+    ),
   }),
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/agents/:agentId/prompt-seed`, {
     method: "GET",

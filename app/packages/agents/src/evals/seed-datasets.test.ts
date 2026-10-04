@@ -5,7 +5,9 @@ import { parseEvalDataset } from "./eval-dataset.ts";
 import { seedEvalDatasets } from "./seed-datasets.ts";
 
 const datasetOf = (text: string) => parseEvalDataset({ agentId: "data", version: 1, text });
-const V1 = datasetOf('{"id":"a","input":"Which entities exist?","expectedTools":["catalog.listEntities"]}\n{"id":"b","input":"Create a note"}\n');
+const V1 = datasetOf(
+  '{"id":"a","input":"Which entities exist?","expectedTools":["catalog.listEntities"]}\n{"id":"b","input":"Create a note"}\n',
+);
 
 const listItems = async (mastra: Mastra, datasetId: string) => {
   const dataset = await mastra.datasets.get({ id: datasetId });
@@ -20,7 +22,9 @@ describe("seedEvalDatasets", () => {
     expect(outcome).toMatchObject({ name: "data.v1", status: "created", itemCount: 2 });
     const items = await listItems(mastra, outcome?.datasetId ?? "");
     expect(items.map((item) => item.input).sort()).toEqual(["Create a note", "Which entities exist?"]);
-    expect(items.find((item) => item.input === "Which entities exist?")?.groundTruth).toMatchObject({ expectedTools: ["catalog.listEntities"] });
+    expect(items.find((item) => item.input === "Which entities exist?")?.groundTruth).toMatchObject({
+      expectedTools: ["catalog.listEntities"],
+    });
   });
 
   it("is idempotent for an unchanged file", async () => {

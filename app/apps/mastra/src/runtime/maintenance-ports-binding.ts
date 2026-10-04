@@ -23,7 +23,10 @@ export const bindApprovalSweepPort = (approvals: {
 
 /** Purge of SP4 conversation metadata soft-deleted more than 30 days ago (Firestore). */
 export const bindConversationPurgePort = (firestore: FirebaseAdmin["firestore"]): ConversationPurgePort => {
-  const purge = makePurgeDeletedConversations({ store: createFirestoreDeletedConversationStore({ firestore }), clock: systemClock });
+  const purge = makePurgeDeletedConversations({
+    store: createFirestoreDeletedConversationStore({ firestore }),
+    clock: systemClock,
+  });
   return { purgeDeleted: (input) => purge(input) };
 };
 
@@ -33,13 +36,21 @@ export const bindConversationPurgePort = (firestore: FirebaseAdmin["firestore"])
  * it with the Mastra experiments store once the storage exists (`eval-export-source.ts`, SP5 Task 11).
  */
 export const bindEvalExportPort = (deps: {
-  readonly env: { readonly USAGE_SINK: "none" | "bigquery"; readonly BIGQUERY_DATASET_AI_OBSERVABILITY: string; readonly FIREBASE_PROJECT_ID: string };
+  readonly env: {
+    readonly USAGE_SINK: "none" | "bigquery";
+    readonly BIGQUERY_DATASET_AI_OBSERVABILITY: string;
+    readonly FIREBASE_PROJECT_ID: string;
+  };
   readonly logger: Logger;
 }): EvalExportPort => {
   const sink =
     deps.env.USAGE_SINK === "bigquery"
       ? createBigQueryEvalRunSink({
-          table: createBigQueryLlmCallsTable<BigQueryEvalRunRow>({ dataset: deps.env.BIGQUERY_DATASET_AI_OBSERVABILITY, table: EVAL_RUNS_TABLE, projectId: deps.env.FIREBASE_PROJECT_ID }),
+          table: createBigQueryLlmCallsTable<BigQueryEvalRunRow>({
+            dataset: deps.env.BIGQUERY_DATASET_AI_OBSERVABILITY,
+            table: EVAL_RUNS_TABLE,
+            projectId: deps.env.FIREBASE_PROJECT_ID,
+          }),
         })
       : createNoopEvalRunSink(deps.logger);
   return {

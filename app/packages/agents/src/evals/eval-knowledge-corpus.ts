@@ -13,7 +13,12 @@ import { TEST_TENANT } from "../testing/agent-context-fixture.ts";
 export const EVAL_TENANT = TEST_TENANT;
 export const OTHER_TENANT = "Qz7vN3cL0pXe8RtY2wBk";
 
-type CorpusDocument = { readonly tenantId: string; readonly documentId: string; readonly title: string; readonly text: string };
+type CorpusDocument = {
+  readonly tenantId: string;
+  readonly documentId: string;
+  readonly title: string;
+  readonly text: string;
+};
 
 const doc = (tenantId: string, suffix: string, title: string, text: string): CorpusDocument => ({
   tenantId,
@@ -23,21 +28,76 @@ const doc = (tenantId: string, suffix: string, title: string, text: string): Cor
 });
 
 const OWN_DOCUMENTS: readonly CorpusDocument[] = [
-  doc(EVAL_TENANT, "a1", "Invitations", "New members join the workspace after an owner approves the invitation. Invitations expire after seven days."),
-  doc(EVAL_TENANT, "a2", "Password reset", "Members reset a forgotten password from the sign in page; the reset link expires after one hour."),
-  doc(EVAL_TENANT, "a3", "Data export", "Owners export workspace data as CSV files from the settings page; exports are ready within one day."),
-  doc(EVAL_TENANT, "a4", "Support hours", "The support team answers requests on business days from nine to six, local time."),
-  doc(EVAL_TENANT, "a5", "File retention", "Uploaded files are kept for twelve months after the last access, then deleted."),
-  doc(EVAL_TENANT, "a6", "Two-step sign in", "Owners can require two-step sign in for every member of the workspace in the security settings."),
-  doc(EVAL_TENANT, "a7", "Project archive", "Archived projects stay readable for members; only owners restore an archived project."),
-  doc(EVAL_TENANT, "a8", "Roles", "Owners manage members and billing; editors change records; viewers only read records."),
+  doc(
+    EVAL_TENANT,
+    "a1",
+    "Invitations",
+    "New members join the workspace after an owner approves the invitation. Invitations expire after seven days.",
+  ),
+  doc(
+    EVAL_TENANT,
+    "a2",
+    "Password reset",
+    "Members reset a forgotten password from the sign in page; the reset link expires after one hour.",
+  ),
+  doc(
+    EVAL_TENANT,
+    "a3",
+    "Data export",
+    "Owners export workspace data as CSV files from the settings page; exports are ready within one day.",
+  ),
+  doc(
+    EVAL_TENANT,
+    "a4",
+    "Support hours",
+    "The support team answers requests on business days from nine to six, local time.",
+  ),
+  doc(
+    EVAL_TENANT,
+    "a5",
+    "File retention",
+    "Uploaded files are kept for twelve months after the last access, then deleted.",
+  ),
+  doc(
+    EVAL_TENANT,
+    "a6",
+    "Two-step sign in",
+    "Owners can require two-step sign in for every member of the workspace in the security settings.",
+  ),
+  doc(
+    EVAL_TENANT,
+    "a7",
+    "Project archive",
+    "Archived projects stay readable for members; only owners restore an archived project.",
+  ),
+  doc(
+    EVAL_TENANT,
+    "a8",
+    "Roles",
+    "Owners manage members and billing; editors change records; viewers only read records.",
+  ),
 ];
 
 /** Same topics, other tenant: a missing tenant filter would retrieve these first. */
 const FOREIGN_DOCUMENTS: readonly CorpusDocument[] = [
-  doc(OTHER_TENANT, "b1", "Invitations", "OTHERTENANT-MARKER-01 new members join the workspace after an owner approves the invitation."),
-  doc(OTHER_TENANT, "b2", "Password reset", "OTHERTENANT-MARKER-02 members reset a forgotten password from the sign in page."),
-  doc(OTHER_TENANT, "b3", "Data export", "OTHERTENANT-MARKER-03 owners export workspace data as CSV files from the settings page."),
+  doc(
+    OTHER_TENANT,
+    "b1",
+    "Invitations",
+    "OTHERTENANT-MARKER-01 new members join the workspace after an owner approves the invitation.",
+  ),
+  doc(
+    OTHER_TENANT,
+    "b2",
+    "Password reset",
+    "OTHERTENANT-MARKER-02 members reset a forgotten password from the sign in page.",
+  ),
+  doc(
+    OTHER_TENANT,
+    "b3",
+    "Data export",
+    "OTHERTENANT-MARKER-03 owners export workspace data as CSV files from the settings page.",
+  ),
   doc(OTHER_TENANT, "b4", "Support hours", "OTHERTENANT-MARKER-04 the support team answers requests on business days."),
 ];
 
@@ -92,7 +152,11 @@ export const createCorpusKnowledgePort = (
       if (!namespaces.includes("tenant")) return [];
       vectors ??= embed(EVAL_CORPUS.map((document) => document.text));
       const all = await vectors;
-      return EVAL_CORPUS.flatMap((document, index) => (options.ignoreTenant === true || document.tenantId === tenantId ? [citationOf(document, cosine(embedding, all[index] ?? []))] : []))
+      return EVAL_CORPUS.flatMap((document, index) =>
+        options.ignoreTenant === true || document.tenantId === tenantId
+          ? [citationOf(document, cosine(embedding, all[index] ?? []))]
+          : [],
+      )
         .filter((citation) => citation.score >= MIN_CITATION_SCORE)
         .sort((left, right) => right.score - left.score || left.citationId.localeCompare(right.citationId))
         .slice(0, topK);

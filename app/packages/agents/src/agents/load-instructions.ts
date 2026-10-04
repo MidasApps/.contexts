@@ -35,7 +35,10 @@ export const packageInstructionDirs = (moduleDir: string): string[] => [
   path.join(moduleDir, "..", "..", "src", "agents", "instructions"),
 ];
 
-const candidateDirs = (dirs: readonly string[] | undefined): string[] => [...(dirs ?? []), ...packageInstructionDirs(import.meta.dirname)];
+const candidateDirs = (dirs: readonly string[] | undefined): string[] => [
+  ...(dirs ?? []),
+  ...packageInstructionDirs(import.meta.dirname),
+];
 
 /**
  * Reads `<name>.md` (e.g. `knowledge.v1`), trimmed.

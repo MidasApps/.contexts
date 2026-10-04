@@ -25,8 +25,16 @@ const setup = async (notes: readonly Note[]) => {
   const readers = createInMemoryAccessStore();
   for (const id of [TENANT, OTHER_TENANT]) readers.putOrganization({ id });
   for (const uid of ["uViewer0000000000001", "uStranger00000000001"]) readers.putUser(uid);
-  readers.putGrant({ tenantId: TENANT, principalId: "uViewer0000000000001", nodeId: TENANT, roles: [{ kind: "system", key: "viewer" }] });
-  const access = createAccessCore({ readers, permissions: [{ moduleId: exampleManifest.id, permissions: exampleManifest.permissions }] });
+  readers.putGrant({
+    tenantId: TENANT,
+    principalId: "uViewer0000000000001",
+    nodeId: TENANT,
+    roles: [{ kind: "system", key: "viewer" }],
+  });
+  const access = createAccessCore({
+    readers,
+    permissions: [{ moduleId: exampleManifest.id, permissions: exampleManifest.permissions }],
+  });
   const repository = createInMemoryNoteRepository();
   await inMemoryUnitOfWork.run((tx) => Promise.resolve(notes.forEach((item) => repository.create(tx, item))));
   return { listNotes: makeListNotes({ notes: repository, access }) };
@@ -45,13 +53,18 @@ describe("makeListNotes", () => {
 
     const result = await listNotes(query());
 
-    expect(result.ok && result.data.items.map((item) => item.id)).toEqual(["NoteNew0000000000001", "NoteOld0000000000001"]);
+    expect(result.ok && result.data.items.map((item) => item.id)).toEqual([
+      "NoteNew0000000000001",
+      "NoteOld0000000000001",
+    ]);
     expect(result.ok && result.data.nextCursor).toBeNull();
   });
 
   it("continues on the next page from the cursor", async () => {
     const { listNotes } = await setup(
-      ["01", "02", "03"].map((day) => note({ id: `Note${day}00000000000001`.slice(0, 20), createdAt: `2026-10-${day}T09:00:00.000Z` })),
+      ["01", "02", "03"].map((day) =>
+        note({ id: `Note${day}00000000000001`.slice(0, 20), createdAt: `2026-10-${day}T09:00:00.000Z` }),
+      ),
     );
 
     const first = await listNotes(query(VIEWER, { limit: 2 }));

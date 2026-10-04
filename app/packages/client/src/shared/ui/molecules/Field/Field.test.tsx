@@ -5,7 +5,16 @@ import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { Checkbox } from "#/shared/ui/atoms/Checkbox/Checkbox.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "./Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "./Field.tsx";
 
 const EmailField = () => {
   const [error, setError] = useState<string | undefined>(undefined);
@@ -14,7 +23,10 @@ const EmailField = () => {
       <FieldLabel>E-mail</FieldLabel>
       <FieldDescription>Usado para entrar.</FieldDescription>
       <FieldControl>
-        <Input type="email" onBlur={(event) => setError(event.target.value.includes("@") ? undefined : "Formato inválido.")} />
+        <Input
+          type="email"
+          onBlur={(event) => setError(event.target.value.includes("@") ? undefined : "Formato inválido.")}
+        />
       </FieldControl>
       <FieldError errors={[error]} />
     </Field>

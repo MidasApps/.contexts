@@ -1,12 +1,19 @@
 import { type Citation, CitationSchema } from "@core/contracts";
 import type { ChunkMatch, KnowledgeRepository } from "../ports/knowledge-repository.ts";
-import { inputErrorOf, type KnowledgeInputError, type SearchChunksInput, SearchChunksInputSchema } from "./knowledge-input.schema.ts";
+import {
+  inputErrorOf,
+  type KnowledgeInputError,
+  type SearchChunksInput,
+  SearchChunksInputSchema,
+} from "./knowledge-input.schema.ts";
 
 /** Matches below this similarity are noise, not evidence (`knowledge.Citation` contract). */
 export const MIN_CITATION_SCORE = 0.3;
 const MAX_SNIPPET_LENGTH = 4000;
 
-export type SearchChunks = (input: SearchChunksInput) => Promise<{ ok: true; data: Citation[] } | { ok: false; error: KnowledgeInputError }>;
+export type SearchChunks = (
+  input: SearchChunksInput,
+) => Promise<{ ok: true; data: Citation[] } | { ok: false; error: KnowledgeInputError }>;
 
 const toCitation = (match: ChunkMatch): Citation =>
   CitationSchema.parse({

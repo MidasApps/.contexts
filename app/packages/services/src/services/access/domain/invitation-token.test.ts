@@ -1,6 +1,11 @@
 import { InvitationTokenSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { buildAcceptUrl, generateInvitationToken, hashInvitationToken, InvalidRandomBytesError } from "./invitation-token.ts";
+import {
+  buildAcceptUrl,
+  generateInvitationToken,
+  hashInvitationToken,
+  InvalidRandomBytesError,
+} from "./invitation-token.ts";
 
 const bytes = (fill: number) => () => new Uint8Array(32).fill(fill);
 
@@ -28,7 +33,11 @@ describe("invitation token", () => {
   });
 
   it("puts the token in the fragment of `<app>/{locale}/invite`, so it never reaches server logs", () => {
-    expect(buildAcceptUrl({ appUrl: "https://app.example.com/", token: "abc", locale: "en-US" })).toBe("https://app.example.com/en-US/invite#token=abc");
-    expect(buildAcceptUrl({ appUrl: "https://app.example.com/base", token: "abc", locale: "pt-BR" })).toBe("https://app.example.com/base/pt-BR/invite#token=abc");
+    expect(buildAcceptUrl({ appUrl: "https://app.example.com/", token: "abc", locale: "en-US" })).toBe(
+      "https://app.example.com/en-US/invite#token=abc",
+    );
+    expect(buildAcceptUrl({ appUrl: "https://app.example.com/base", token: "abc", locale: "pt-BR" })).toBe(
+      "https://app.example.com/base/pt-BR/invite#token=abc",
+    );
   });
 });

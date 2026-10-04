@@ -4,9 +4,9 @@ import {
   createGcsObjectStore,
   createLogFileEventPublisher,
   detectContentType,
+  type FinalizeOutcome,
   type FirebaseAdmin,
   filesBucketOf,
-  type FinalizeOutcome,
   type Logger,
   makeFinalizeUpload,
   makeObjectFinalizedHandler,
@@ -44,7 +44,10 @@ export const makeOnFileFinalized = (deps: {
   const firebaseOf = (): FirebaseAdmin => {
     const projectId = deps.env.GCLOUD_PROJECT;
     if (projectId === undefined) throw new MissingProjectIdError();
-    firebase ??= createFirebaseAdmin({ env: { APP_ENV: deps.env.APP_ENV, FIREBASE_PROJECT_ID: projectId }, processEnv: deps.processEnv });
+    firebase ??= createFirebaseAdmin({
+      env: { APP_ENV: deps.env.APP_ENV, FIREBASE_PROJECT_ID: projectId },
+      processEnv: deps.processEnv,
+    });
     return firebase;
   };
   const handlerFor = (bucketName: string) => {

@@ -2,12 +2,21 @@
 
 import { useMemo, useState } from "react";
 import { ApiError } from "#/shared/api/api-error.ts";
-import { draftOfValue, readJsonInput, serverProblemsOf, type JsonInputDraft, type JsonInputProblems } from "./json-input-draft.ts";
-import { planJsonSchemaFields, type JsonSchemaPlan } from "./json-schema-plan.ts";
+import {
+  draftOfValue,
+  type JsonInputDraft,
+  type JsonInputProblems,
+  readJsonInput,
+  serverProblemsOf,
+} from "./json-input-draft.ts";
+import { type JsonSchemaPlan, planJsonSchemaFields } from "./json-schema-plan.ts";
 
 const NO_PROBLEMS: JsonInputProblems = { fields: {}, json: false };
 
-type Source = { readonly schema: Readonly<Record<string, unknown>> | null; readonly initial: Readonly<Record<string, unknown>> };
+type Source = {
+  readonly schema: Readonly<Record<string, unknown>> | null;
+  readonly initial: Readonly<Record<string, unknown>>;
+};
 
 export type JsonSchemaInput = {
   readonly plan: JsonSchemaPlan;
@@ -28,7 +37,10 @@ export type JsonSchemaInput = {
  * different workflow starts from its own defaults, or from `initial`), with client and server
  * problems per field.
  */
-export const useJsonSchemaInput = (schema: Readonly<Record<string, unknown>> | null, initial: Readonly<Record<string, unknown>> = {}): JsonSchemaInput => {
+export const useJsonSchemaInput = (
+  schema: Readonly<Record<string, unknown>> | null,
+  initial: Readonly<Record<string, unknown>> = {},
+): JsonSchemaInput => {
   const plan = useMemo(() => planJsonSchemaFields(schema), [schema]);
   const [source, setSource] = useState<Source>({ schema, initial });
   const [draft, setDraft] = useState<JsonInputDraft>(() => draftOfValue(plan, initial));
@@ -53,7 +65,13 @@ export const useJsonSchemaInput = (schema: Readonly<Record<string, unknown>> | n
   const edit = (next: JsonInputDraft): void => {
     setDraft(next);
     // A field the user is fixing drops its server error; client checks rerun on submit.
-    if (problems !== NO_PROBLEMS) setProblems({ fields: Object.fromEntries(Object.entries(problems.fields).filter(([name]) => next.fields[name] === draft.fields[name])), json: problems.json && next.json === draft.json });
+    if (problems !== NO_PROBLEMS)
+      setProblems({
+        fields: Object.fromEntries(
+          Object.entries(problems.fields).filter(([name]) => next.fields[name] === draft.fields[name]),
+        ),
+        json: problems.json && next.json === draft.json,
+      });
   };
   return { plan, draft, setDraft: edit, problems, read, applyFailure };
 };

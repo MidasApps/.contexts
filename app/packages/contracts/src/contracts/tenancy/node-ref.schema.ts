@@ -20,7 +20,12 @@ const UnitNodeSchema = z.strictObject({
 });
 
 /** A node of the access tree (SP1 spec §5.2): where a permission is checked or granted. */
-export const NodeRefSchema = z.discriminatedUnion("level", [PlatformNodeSchema, OrganizationNodeSchema, ProjectNodeSchema, UnitNodeSchema]);
+export const NodeRefSchema = z.discriminatedUnion("level", [
+  PlatformNodeSchema,
+  OrganizationNodeSchema,
+  ProjectNodeSchema,
+  UnitNodeSchema,
+]);
 export type NodeRef = z.infer<typeof NodeRefSchema>;
 
 const tenantNodeOptions = () => [OrganizationNodeSchema, ProjectNodeSchema, UnitNodeSchema] as const;

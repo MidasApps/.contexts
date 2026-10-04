@@ -14,8 +14,15 @@ const executionOf = (toolId: string, ctx: CoreToolContext) => {
   const principal = PrincipalSchema.safeParse(ctx.principal);
   const tenantId = TenantIdSchema.safeParse(ctx.agent.tenantId);
   const node = TenantNodeRefSchema.safeParse(ctx.node);
-  if (!principal.success || !tenantId.success || !node.success) throw toolFailure(toolId, "CONTEXT_MISSING", "The request context is incomplete; the command did not run.");
-  return { principal: principal.data, tenantId: tenantId.data, node: node.data, requestId: ctx.agent.requestId, idempotencyKey: ctx.idempotencyKey };
+  if (!principal.success || !tenantId.success || !node.success)
+    throw toolFailure(toolId, "CONTEXT_MISSING", "The request context is incomplete; the command did not run.");
+  return {
+    principal: principal.data,
+    tenantId: tenantId.data,
+    node: node.data,
+    requestId: ctx.agent.requestId,
+    idempotencyKey: ctx.idempotencyKey,
+  };
 };
 
 /**
@@ -43,11 +50,17 @@ export const commandToolOf = (command: ContractCommand): AgentCommand => {
       ...(preview === undefined ? {} : { preview: (input) => Promise.resolve(preview(input)) }),
       execute: async (input, ctx) => {
         const run = command.prepare(input);
-        if (run === null) throw toolFailure(id, "COMMAND_INPUT_INVALID", "The command input does not match its contract; nothing was changed.");
+        if (run === null)
+          throw toolFailure(
+            id,
+            "COMMAND_INPUT_INVALID",
+            "The command input does not match its contract; nothing was changed.",
+          );
         try {
           return await run(executionOf(id, ctx));
         } catch (error: unknown) {
-          if (error instanceof AgentCommandError) throw toolFailure(id, error.code, "The command was refused; nothing was changed.");
+          if (error instanceof AgentCommandError)
+            throw toolFailure(id, error.code, "The command was refused; nothing was changed.");
           throw error;
         }
       },

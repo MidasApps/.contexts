@@ -20,7 +20,10 @@ describe("section pages", () => {
   });
 
   it("renders the section named by the address", async () => {
-    renderApp(<SettingsSectionPage />, { path: `/o/${IDS.organization}/settings/general`, routes: shellRoutes(MEMBER_PERMISSIONS) });
+    renderApp(<SettingsSectionPage />, {
+      path: `/o/${IDS.organization}/settings/general`,
+      routes: shellRoutes(MEMBER_PERMISSIONS),
+    });
 
     expect(await screen.findByRole("heading", { level: 1, name: "Geral" })).toBeDefined();
   });

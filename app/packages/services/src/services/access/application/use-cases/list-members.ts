@@ -1,4 +1,4 @@
-import { UserIdSchema, type Member, type Membership, type Principal, type TenantId } from "@core/contracts";
+import { type Member, type Membership, type Principal, type TenantId, UserIdSchema } from "@core/contracts";
 import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
 import { ok, type Result } from "../../../shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
@@ -7,7 +7,12 @@ import { requirePermission } from "../grant-checks.ts";
 import type { MemberDeps } from "../member-deps.ts";
 import type { DirectoryEntry } from "../ports/driven/user-directory.ts";
 
-export type ListMembersCommand = { readonly actor: Principal; readonly access: RequestAccess; readonly tenantId: TenantId; readonly page: PageRequest };
+export type ListMembersCommand = {
+  readonly actor: Principal;
+  readonly access: RequestAccess;
+  readonly tenantId: TenantId;
+  readonly page: PageRequest;
+};
 
 export type ListMembers = (command: ListMembersCommand) => Promise<Result<Page<Member>, AccessDeniedError>>;
 
@@ -29,11 +34,18 @@ export const makeListMembers =
   (deps: Pick<MemberDeps, "projections" | "memberships" | "directory" | "logger">): ListMembers =>
   async (command) => {
     const { tenantId } = command;
-    const allowed = await requirePermission({ ...command, permission: "core.member.read", node: { level: "organization", tenantId } });
+    const allowed = await requirePermission({
+      ...command,
+      permission: "core.member.read",
+      node: { level: "organization", tenantId },
+    });
     if (!allowed.ok) return allowed;
     const projections = await deps.projections.listMembers({ tenantId, page: command.page });
     const uids = projections.items.map((projection) => UserIdSchema.parse(projection.principalId));
-    const [grants, profiles] = await Promise.all([deps.memberships.listOfPrincipals({ tenantId, principalIds: uids }), deps.directory.getMany(uids)]);
+    const [grants, profiles] = await Promise.all([
+      deps.memberships.listOfPrincipals({ tenantId, principalIds: uids }),
+      deps.directory.getMany(uids),
+    ]);
     const members = uids.flatMap((uid) => {
       const own = grants.filter((grant) => grant.principalId === uid);
       const profile = profiles.get(uid);

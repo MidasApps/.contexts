@@ -2,7 +2,14 @@ import { createHash } from "node:crypto";
 import { type AgentRequestContext, PermissionSchema } from "@core/contracts";
 import { z } from "zod";
 import type { RequestContextReader } from "../context/agent-request-context.ts";
-import type { AccessPort, AccessPrincipal, ApprovalPort, AuditPort, CommandIdempotencyPort, NodeRef } from "../runtime/runtime-ports.ts";
+import type {
+  AccessPort,
+  AccessPrincipal,
+  ApprovalPort,
+  AuditPort,
+  CommandIdempotencyPort,
+  NodeRef,
+} from "../runtime/runtime-ports.ts";
 
 /**
  * `defineCoreTool` (spec §8.1, decisions 0019, 0025): the only way the core
@@ -74,7 +81,10 @@ export type CoreToolDeps = {
    * ceiling depends on the record of the run). Asked first; `undefined` means the static
    * `agentCeilings` entry applies. A rejection fails the call closed.
    */
-  readonly runCeilingOf?: (info: { readonly agentId: string; readonly requestContext: RequestContextReader | undefined }) => Promise<ReadonlySet<string> | undefined>;
+  readonly runCeilingOf?: (info: {
+    readonly agentId: string;
+    readonly requestContext: RequestContextReader | undefined;
+  }) => Promise<ReadonlySet<string> | undefined>;
   /** Timer seam for tests; defaults to `AbortSignal.timeout`. */
   readonly timeoutSignal?: (ms: number) => AbortSignal;
   /** Fallback tool call id outside agent runs; defaults to `crypto.randomUUID`. */
@@ -123,7 +133,9 @@ const undocumentedFields = (schema: z.ZodObject): string[] =>
 const definitionIssues = (definition: CoreToolDefinition): string[] => [
   ...(TOOL_ID_PATTERN.test(definition.id) ? [] : ["id must be <area>.<name>"]),
   ...(definition.description.trim().length >= 10 ? [] : ["description must say when to use the tool"]),
-  ...(PermissionSchema.safeParse(definition.permission).success ? [] : ["permission must be <module>.<resource>.<action>"]),
+  ...(PermissionSchema.safeParse(definition.permission).success
+    ? []
+    : ["permission must be <module>.<resource>.<action>"]),
   ...(isStrictObject(definition.inputSchema) ? [] : ["inputSchema must be a z.strictObject"]),
   ...undocumentedFields(definition.inputSchema).map((field) => `input field ${field} needs .describe()`),
   ...(definition.kind === "read" && definition.preview !== undefined ? ["preview is for mutations only"] : []),
@@ -152,5 +164,5 @@ const canonicalJson = (value: unknown): string => {
 };
 
 /** Audit-safe fingerprint of a tool input: SHA-256 of canonical JSON (key order ignored). */
-export const hashToolInput = (input: unknown): string => `sha256:${createHash("sha256").update(canonicalJson(input)).digest("hex")}`;
-
+export const hashToolInput = (input: unknown): string =>
+  `sha256:${createHash("sha256").update(canonicalJson(input)).digest("hex")}`;

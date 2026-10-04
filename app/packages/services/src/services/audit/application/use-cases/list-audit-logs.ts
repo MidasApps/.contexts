@@ -24,7 +24,11 @@ export type ListAuditLogs = (command: ListAuditLogsCommand) => Promise<Result<Pa
 export const makeListAuditLogs =
   (deps: { reader: AuditLogReader }): ListAuditLogs =>
   async ({ actor, access, tenantId, filters, page }) => {
-    const decision = await access.authorize({ principal: actor, permission: "core.audit-log.read", node: { level: "organization", tenantId } });
+    const decision = await access.authorize({
+      principal: actor,
+      permission: "core.audit-log.read",
+      node: { level: "organization", tenantId },
+    });
     if (!decision.allowed) return err(new AccessDeniedError(decision.reason));
     return ok(await deps.reader.list({ tenantId, filters, page }));
   };

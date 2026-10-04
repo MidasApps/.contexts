@@ -31,15 +31,35 @@ export type ChatMessageProps = {
  * citation guard found no source (SP3), "interrompido" when it was cut short. Both are words
  * with an icon or dot, never colour alone.
  */
-export function ChatMessage({ message, streaming = false, interrupted = false, incomplete = false, showReasoning, renderTool, attachmentAction, actions, assistantName }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  streaming = false,
+  interrupted = false,
+  incomplete = false,
+  showReasoning,
+  renderTool,
+  attachmentAction,
+  actions,
+  assistantName,
+}: ChatMessageProps) {
   const t = useTranslations("chat.message");
   const from = message.role === "user" ? "user" : "assistant";
   // Shown as soon as the stream says so (the knowledge delegation ends before the answer text).
   const lowConfidence = from === "assistant" && isLowConfidence(message);
   return (
-    <Message from={from} author={from === "user" ? t("you") : (assistantName ?? t("assistant"))} data-message-id={message.id}>
+    <Message
+      from={from}
+      author={from === "user" ? t("you") : (assistantName ?? t("assistant"))}
+      data-message-id={message.id}
+    >
       <MessageContent>
-        <MessageParts message={message} streaming={streaming} showReasoning={showReasoning} renderTool={renderTool} attachmentAction={attachmentAction} />
+        <MessageParts
+          message={message}
+          streaming={streaming}
+          showReasoning={showReasoning}
+          renderTool={renderTool}
+          attachmentAction={attachmentAction}
+        />
       </MessageContent>
       {lowConfidence || interrupted || incomplete ? (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm text-muted-foreground">

@@ -15,9 +15,10 @@
  * reloads, and a clean rebuild would pull the folder from under it.
  * See docs/plans/2026-09-29-sp0-app-foundation/reports/task-9.md.
  */
-import { build, context, type BuildOptions } from "esbuild";
+
 import { mkdir, readFile, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { type BuildOptions, build, context } from "esbuild";
 
 type Manifest = { name: string; version?: string; dependencies?: Record<string, string> };
 
@@ -45,7 +46,8 @@ const resolveInstalledVersions = async (names: string[]): Promise<Record<string,
 // `require("child_process")` / `require("node:fs")` at runtime; an ESM bundle has no
 // `require`, so esbuild's shim throws "Dynamic require ... is not supported". The
 // banner gives the bundle a real `require` bound to its own URL.
-const REQUIRE_BANNER = 'import { createRequire as __coreCreateRequire } from "node:module"; const require = __coreCreateRequire(import.meta.url);';
+const REQUIRE_BANNER =
+  'import { createRequire as __coreCreateRequire } from "node:module"; const require = __coreCreateRequire(import.meta.url);';
 
 const bundleOptions = (externals: string[]): BuildOptions => ({
   entryPoints: [path.join(PACKAGE_DIR, "src/index.ts")],

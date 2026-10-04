@@ -17,7 +17,10 @@ describe("selectSecureStore", () => {
   });
 
   it("uses the native OS keychain store inside Tauri", async () => {
-    const store = selectSecureStore({ scope: { __TAURI_INTERNALS__: {} }, native: () => createMemorySecureStore("native") });
+    const store = selectSecureStore({
+      scope: { __TAURI_INTERNALS__: {} },
+      native: () => createMemorySecureStore("native"),
+    });
 
     await expect(store.get()).resolves.toBe("native");
   });

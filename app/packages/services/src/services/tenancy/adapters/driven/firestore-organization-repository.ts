@@ -1,4 +1,4 @@
-import { IsoDateTimeSchema, OrganizationIdSchema, OrganizationSchema, type Organization } from "@core/contracts";
+import { IsoDateTimeSchema, type Organization, OrganizationIdSchema, OrganizationSchema } from "@core/contracts";
 import type { Firestore } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
@@ -36,9 +36,18 @@ export const createFirestoreOrganizationRepository = (deps: { firestore: Firesto
     update: (tx, { organization, actorId }) =>
       void tx.update(
         raw().doc(organization.id),
-        toFirestoreUpdate(stored, { name: organization.name, status: organization.status, defaults: organization.defaults, updatedAt: organization.updatedAt, updatedBy: actorId }),
+        toFirestoreUpdate(stored, {
+          name: organization.name,
+          status: organization.status,
+          defaults: organization.defaults,
+          updatedAt: organization.updatedAt,
+          updatedBy: actorId,
+        }),
       ),
     softDelete: (tx, { id, deletedAt, actorId }) =>
-      void tx.update(raw().doc(id), toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId })),
+      void tx.update(
+        raw().doc(id),
+        toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId }),
+      ),
   };
 };

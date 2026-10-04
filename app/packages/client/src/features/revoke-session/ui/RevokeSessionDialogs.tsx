@@ -10,7 +10,11 @@ import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 import { useRevokeAllSessions, useRevokeSession } from "../model/use-revoke-session.ts";
 
-export type RevokeSessionDialogProps = { session: SessionSummary | null; onOpenChange: (open: boolean) => void; label: string };
+export type RevokeSessionDialogProps = {
+  session: SessionSummary | null;
+  onOpenChange: (open: boolean) => void;
+  label: string;
+};
 
 /** Confirms revoking one session (`label` names it: browser and OS family). */
 export function RevokeSessionDialog({ session, onOpenChange, label }: RevokeSessionDialogProps) {

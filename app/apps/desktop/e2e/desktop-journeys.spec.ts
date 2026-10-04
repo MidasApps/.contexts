@@ -1,6 +1,6 @@
-import type { Page } from "@playwright/test";
 import { expectNoAxeViolations } from "@core/e2e/axe";
 import { signInThroughUi } from "@core/e2e/sign-in";
+import type { Page } from "@playwright/test";
 import { expect, test } from "./desktop-test.ts";
 
 // SP2 spec §13 item 7: journeys 1–3 on the desktop frontend (TanStack Router, no locale segment).
@@ -36,7 +36,10 @@ test("signs in, lands in the last organization and signs out", async ({ page, wo
 });
 
 test("switches organization and project from the sidebar", async ({ page, world, createUser }) => {
-  const user = await createUser({ label: "DeskSwitch", organizations: [{ id: world.beta.id }, { id: world.alpha.id }] });
+  const user = await createUser({
+    label: "DeskSwitch",
+    organizations: [{ id: world.beta.id }, { id: world.alpha.id }],
+  });
   await signInThroughUi(page, user, "/sign-in");
   await page.getByRole("button", { name: `${world.alpha.name}, trocar de organização` }).click();
   await page.getByRole("menuitemradio", { name: world.beta.name }).click();
@@ -49,7 +52,11 @@ test("switches organization and project from the sidebar", async ({ page, world,
   await page.getByRole("button", { name: `${world.alpha.projects.launch.name}, trocar de projeto` }).click();
   await page.getByRole("menuitemradio", { name: world.alpha.projects.growth.name }).click();
   await expect(page).toHaveURL(new RegExp(`/p/${world.alpha.projects.growth.id}$`));
-  await expect(page.getByRole("navigation", { name: "Trilha de navegação" }).getByRole("link", { name: world.alpha.projects.growth.name })).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Trilha de navegação" })
+      .getByRole("link", { name: world.alpha.projects.growth.name }),
+  ).toBeVisible();
   await page.getByRole("navigation", { name: "Navegação" }).getByRole("link", { name: "Exemplo" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Módulo de exemplo" })).toBeVisible();
 });

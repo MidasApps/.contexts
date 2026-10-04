@@ -6,7 +6,7 @@ import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildKnowledgeDocument, KNOWLEDGE_IDS } from "#/entities/knowledge/knowledge.fixture.ts";
 import { buildWorkflowRun } from "#/entities/workflow-run/workflow-run.fixture.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsKnowledgeView } from "./SettingsKnowledgeView.tsx";
 
@@ -25,8 +25,24 @@ const PAGE_URL = "https://docs.example.com/new";
 
 const LIST = [
   buildKnowledgeDocument(),
-  buildKnowledgeDocument({ id: KNOWLEDGE_IDS.otherDocument, title: null, source: "url", sourceRef: "https://docs.example.com/faq", sourceUrl: "https://docs.example.com/faq", namespace: `project:${IDS.project}`, status: "pending" }),
-  buildKnowledgeDocument({ id: "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e11", title: "Contract reference", source: "catalog", sourceRef: "tenancy.Project", namespace: "catalog", tenantId: "_platform", createdBy: null }),
+  buildKnowledgeDocument({
+    id: KNOWLEDGE_IDS.otherDocument,
+    title: null,
+    source: "url",
+    sourceRef: "https://docs.example.com/faq",
+    sourceUrl: "https://docs.example.com/faq",
+    namespace: `project:${IDS.project}`,
+    status: "pending",
+  }),
+  buildKnowledgeDocument({
+    id: "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e11",
+    title: "Contract reference",
+    source: "catalog",
+    sourceRef: "tenancy.Project",
+    namespace: "catalog",
+    tenantId: "_platform",
+    createdBy: null,
+  }),
 ];
 
 const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] = ADMIN) =>
@@ -34,7 +50,10 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     <main>
       <SettingsKnowledgeView />
     </main>,
-    { path: `/o/${IDS.organization}/settings/knowledge`, routes: shellRoutes(permissions, { [DOCUMENTS]: page(LIST), ...routes }) },
+    {
+      path: `/o/${IDS.organization}/settings/knowledge`,
+      routes: shellRoutes(permissions, { [DOCUMENTS]: page(LIST), ...routes }),
+    },
   );
 
 // Started ingestions survive reloads in sessionStorage; each test starts without any.
@@ -108,13 +127,18 @@ describe("SettingsKnowledgeView", () => {
     await user.click(screen.getAllByRole("button", { name: "Adicionar documento" })[0] as HTMLElement);
     const dialog = await screen.findByRole("dialog", { name: "Adicionar documento" });
     await user.click(within(dialog).getByRole("tab", { name: "Página da web" }));
-    await user.type(within(dialog).getByRole("textbox", { name: "Endereço da página" }), "https://docs.example.com/new");
+    await user.type(
+      within(dialog).getByRole("textbox", { name: "Endereço da página" }),
+      "https://docs.example.com/new",
+    );
     await user.click(within(dialog).getByRole("button", { name: "Adicionar" }));
     const notices = await screen.findByRole("list", { name: "Indexações em andamento" });
     expect(within(notices).getByText(/Indexando https:\/\/docs\.example\.com\/new/u)).toBeDefined();
     expect(sources[0]?.params["organizationId"]).toBe(IDS.organization);
     expect(sources[0]?.body).toEqual({ kind: "url", url: "https://docs.example.com/new" });
-    await user.click(within(notices).getByRole("button", { name: "Dispensar o aviso de https://docs.example.com/new" }));
+    await user.click(
+      within(notices).getByRole("button", { name: "Dispensar o aviso de https://docs.example.com/new" }),
+    );
     expect(screen.queryByRole("list", { name: "Indexações em andamento" })).toBeNull();
   });
 
@@ -132,7 +156,13 @@ describe("SettingsKnowledgeView", () => {
           const runId = request.params["runId"] ?? "";
           runs.push(runId);
           expect(request.query.get("organizationId")).toBe(IDS.organization);
-          return ok(buildWorkflowRun({ runId, workflowId: "knowledge-ingest", status: runId === "run-1" ? "failed" : "running" }));
+          return ok(
+            buildWorkflowRun({
+              runId,
+              workflowId: "knowledge-ingest",
+              status: runId === "run-1" ? "failed" : "running",
+            }),
+          );
         },
       },
       RUN_READER,
@@ -159,7 +189,11 @@ describe("SettingsKnowledgeView", () => {
 
   it("keeps an ingestion started here across a reload, and shows its failure on return", async () => {
     let status: "running" | "failed" = "running";
-    const routes = { [DOCUMENTS]: page([]), [SOURCES]: ok({ runId: "run-1" }, 202), [RUN]: () => ok(buildWorkflowRun({ runId: "run-1", workflowId: "knowledge-ingest", status })) };
+    const routes = {
+      [DOCUMENTS]: page([]),
+      [SOURCES]: ok({ runId: "run-1" }, 202),
+      [RUN]: () => ok(buildWorkflowRun({ runId: "run-1", workflowId: "knowledge-ingest", status })),
+    };
     const first = renderView(routes, RUN_READER);
     await first.user.click((await screen.findAllByRole("button", { name: "Adicionar documento" }))[0] as HTMLElement);
     const dialog = await screen.findByRole("dialog", { name: "Adicionar documento" });
@@ -187,7 +221,11 @@ describe("SettingsKnowledgeView", () => {
 
   it("dismisses a failed ingestion", async () => {
     const { user } = renderView(
-      { [DOCUMENTS]: page([]), [SOURCES]: ok({ runId: "run-1" }, 202), [RUN]: ok(buildWorkflowRun({ runId: "run-1", workflowId: "knowledge-ingest", status: "failed" })) },
+      {
+        [DOCUMENTS]: page([]),
+        [SOURCES]: ok({ runId: "run-1" }, 202),
+        [RUN]: ok(buildWorkflowRun({ runId: "run-1", workflowId: "knowledge-ingest", status: "failed" })),
+      },
       RUN_READER,
     );
     await user.click((await screen.findAllByRole("button", { name: "Adicionar documento" }))[0] as HTMLElement);
@@ -206,7 +244,12 @@ describe("SettingsKnowledgeView", () => {
     const { user } = renderView(
       {
         // The document shows up once the run has finished (the list is read again then).
-        [DOCUMENTS]: () => page(listed ? [buildKnowledgeDocument({ title: null, source: "url", sourceRef: PAGE_URL, sourceUrl: PAGE_URL })] : []),
+        [DOCUMENTS]: () =>
+          page(
+            listed
+              ? [buildKnowledgeDocument({ title: null, source: "url", sourceRef: PAGE_URL, sourceUrl: PAGE_URL })]
+              : [],
+          ),
         [SOURCES]: ok({ runId: "run-1" }, 202),
         [RUN]: (request: FakeRequest) => {
           runs.push(request.params["runId"] ?? "");
@@ -241,7 +284,13 @@ describe("SettingsKnowledgeView", () => {
         },
         [RUN]: (request: FakeRequest) => {
           const runId = request.params["runId"] ?? "";
-          return ok(buildWorkflowRun({ runId, workflowId: "knowledge-ingest", status: runId === "run-1" ? "success" : "running" }));
+          return ok(
+            buildWorkflowRun({
+              runId,
+              workflowId: "knowledge-ingest",
+              status: runId === "run-1" ? "success" : "running",
+            }),
+          );
         },
       },
       RUN_READER,

@@ -19,10 +19,16 @@ describe("rate limit headers (contracts/api.md §11.2)", () => {
   });
 
   it("answers 429 RATE_LIMITED with the envelope and the headers", async () => {
-    const response = rateLimitedResponse({ decision: { allowed: false, limit: 5, remaining: 0, resetAt }, now, requestId: "req-1" });
+    const response = rateLimitedResponse({
+      decision: { allowed: false, limit: 5, remaining: 0, resetAt },
+      now,
+      requestId: "req-1",
+    });
     expect(response.status).toBe(429);
     expect(response.headers.get("retry-after")).toBe("43");
     expect(response.headers.get("x-ratelimit-limit")).toBe("5");
-    expect(await response.json()).toEqual({ error: { code: "RATE_LIMITED", message: "Too many requests.", requestId: "req-1" } });
+    expect(await response.json()).toEqual({
+      error: { code: "RATE_LIMITED", message: "Too many requests.", requestId: "req-1" },
+    });
   });
 });

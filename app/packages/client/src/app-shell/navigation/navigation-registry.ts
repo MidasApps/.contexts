@@ -14,7 +14,8 @@ export class NavigationRegistryError extends Error {
   }
 }
 
-const byOrderThenId = (a: ShellNavItem, b: ShellNavItem): number => a.order - b.order || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+const byOrderThenId = (a: ShellNavItem, b: ShellNavItem): number =>
+  a.order - b.order || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
 /**
  * Builds the navigation registry once (core items + module items).
@@ -28,6 +29,7 @@ export const createNavigationRegistry = (items: readonly ShellNavItem[]): Naviga
   }
   const sorted = items.toSorted(byOrderThenId);
   return {
-    visibleItems: (slot, can) => sorted.filter((entry) => entry.slot === slot && (entry.permission === undefined || can(entry.permission))),
+    visibleItems: (slot, can) =>
+      sorted.filter((entry) => entry.slot === slot && (entry.permission === undefined || can(entry.permission))),
   };
 };

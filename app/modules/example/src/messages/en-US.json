@@ -3,10 +3,16 @@
   "nav": { "home": "Example" },
   "permissions": {
     "item": { "read": "View the example module's items", "write": "Create and change the example module's items" },
-    "note": { "read": "View the example module's notes", "create": "Create notes in the example module", "archive": "Archive the example module's notes (needs another person's approval)" }
+    "note": {
+      "read": "View the example module's notes",
+      "create": "Create notes in the example module",
+      "archive": "Archive the example module's notes (needs another person's approval)"
+    }
   },
   "unitTypes": { "area": "Area" },
-  "workflows": { "note-intake": { "name": "Note intake", "description": "Creates a note in the caller's organization." } },
+  "workflows": {
+    "note-intake": { "name": "Note intake", "description": "Creates a note in the caller's organization." }
+  },
   "note": { "title": "Title", "body": "Text", "noteId": "Note" },
   "settings": {
     "greeting": "Greeting",

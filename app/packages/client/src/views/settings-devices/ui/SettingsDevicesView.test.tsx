@@ -4,12 +4,19 @@ import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { type FakeRequest, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildDevice } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsDevicesView } from "./SettingsDevicesView.tsx";
 
-const DEVICE_ADMIN: Permission[] = ["core.organization.read", "core.project.read", "core.device.read", "core.device.create", "core.device.revoke", "core.role.read"];
+const DEVICE_ADMIN: Permission[] = [
+  "core.organization.read",
+  "core.project.read",
+  "core.device.read",
+  "core.device.create",
+  "core.device.revoke",
+  "core.role.read",
+];
 const inTenMinutes = (): string => new Date(Date.now() + 10 * 60_000).toISOString();
 
 const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] = DEVICE_ADMIN) =>
@@ -19,7 +26,11 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     </main>,
     {
       path: `/o/${IDS.organization}/settings/devices`,
-      routes: shellRoutes(permissions, { "GET /v1/organizations/:organizationId/devices": page([buildDevice()]), "GET /v1/organizations/:organizationId/roles": page([]), ...routes }),
+      routes: shellRoutes(permissions, {
+        "GET /v1/organizations/:organizationId/devices": page([buildDevice()]),
+        "GET /v1/organizations/:organizationId/roles": page([]),
+        ...routes,
+      }),
     },
   );
 
@@ -49,7 +60,13 @@ describe("SettingsDevicesView", () => {
     const code = await within(dialog).findByRole("textbox", { name: "Código de ativação" });
     expect((code as HTMLInputElement).value).toBe("7KQ2-M9XA");
     expect(within(dialog).getByText("O código expira em 10 minutos.")).toBeDefined();
-    expect(bodies).toEqual([{ label: "Kiosk 2", node: { level: "organization", tenantId: IDS.organization }, roles: [{ kind: "system", key: "device" }] }]);
+    expect(bodies).toEqual([
+      {
+        label: "Kiosk 2",
+        node: { level: "organization", tenantId: IDS.organization },
+        roles: [{ kind: "system", key: "device" }],
+      },
+    ]);
     await expectNoAxeViolations(dialog);
 
     await user.click(within(dialog).getByRole("button", { name: "Concluir" }));
@@ -61,7 +78,8 @@ describe("SettingsDevicesView", () => {
 
   it("asks before Escape drops a live activation code", async () => {
     const { user } = renderView({
-      "POST /v1/organizations/:organizationId/device-activations": () => ok({ id: "Da4tG6bY8hN0uJ2mI4kO", code: "7KQ2M9XA", expiresAt: inTenMinutes() }, 201),
+      "POST /v1/organizations/:organizationId/device-activations": () =>
+        ok({ id: "Da4tG6bY8hN0uJ2mI4kO", code: "7KQ2M9XA", expiresAt: inTenMinutes() }, 201),
     });
     await user.click(await screen.findByRole("button", { name: "Ativar dispositivo" }));
     const dialog = await screen.findByRole("dialog", { name: "Ativar dispositivo" });
@@ -78,7 +96,10 @@ describe("SettingsDevicesView", () => {
 
   it("hides an expired code and offers a new one", async () => {
     const { user } = renderView({
-      "POST /v1/organizations/:organizationId/device-activations": ok({ id: "Da4tG6bY8hN0uJ2mI4kO", code: "7KQ2M9XA", expiresAt: new Date(Date.now() - 1000).toISOString() }, 201),
+      "POST /v1/organizations/:organizationId/device-activations": ok(
+        { id: "Da4tG6bY8hN0uJ2mI4kO", code: "7KQ2M9XA", expiresAt: new Date(Date.now() - 1000).toISOString() },
+        201,
+      ),
     });
     await user.click(await screen.findByRole("button", { name: "Ativar dispositivo" }));
     const dialog = await screen.findByRole("dialog");

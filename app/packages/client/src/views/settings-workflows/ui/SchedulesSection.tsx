@@ -4,7 +4,12 @@ import type { AccessContext, Schedule, WorkflowCatalogEntry } from "@core/contra
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { scheduleSlugOf, useTenantSchedules } from "#/entities/schedule/index.ts";
-import { ScheduleActionDialog, ScheduleEditorDialog, useResumeSchedule, type ScheduleActionTarget } from "#/features/schedule-editor/index.ts";
+import {
+  ScheduleActionDialog,
+  type ScheduleActionTarget,
+  ScheduleEditorDialog,
+  useResumeSchedule,
+} from "#/features/schedule-editor/index.ts";
 import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
@@ -40,7 +45,9 @@ export function SchedulesSection({ context, workflows, online }: SchedulesSectio
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <p className="max-w-prose text-sm text-muted-foreground">{canWrite && !schedulable && workflows.length > 0 ? t("noneSchedulable") : t("nextFireNote")}</p>
+        <p className="max-w-prose text-sm text-muted-foreground">
+          {canWrite && !schedulable && workflows.length > 0 ? t("noneSchedulable") : t("nextFireNote")}
+        </p>
         {canWrite ? (
           <Button className="shrink-0" disabled={!canCreate} onClick={() => setEditing({ schedule: null })}>
             <Icon name="plus" />
@@ -60,10 +67,26 @@ export function SchedulesSection({ context, workflows, online }: SchedulesSectio
             onResume={resume.resume}
             onRunNow={(schedule) => setTarget({ action: "run", schedule })}
             rowMenuItems={(schedule) => {
-              const named = { name: workflowLabel.name(schedule.workflowId), id: scheduleSlugOf(schedule.id) ?? schedule.id };
+              const named = {
+                name: workflowLabel.name(schedule.workflowId),
+                id: scheduleSlugOf(schedule.id) ?? schedule.id,
+              };
               return [
-                { id: "edit", label: t("edit"), accessibleLabel: t("editNamed", named), disabled: !online, onSelect: () => setEditing({ schedule }) },
-                { id: "delete", label: t("delete"), accessibleLabel: t("deleteNamed", named), disabled: !online, destructive: true, onSelect: () => setTarget({ action: "delete", schedule }) },
+                {
+                  id: "edit",
+                  label: t("edit"),
+                  accessibleLabel: t("editNamed", named),
+                  disabled: !online,
+                  onSelect: () => setEditing({ schedule }),
+                },
+                {
+                  id: "delete",
+                  label: t("delete"),
+                  accessibleLabel: t("deleteNamed", named),
+                  disabled: !online,
+                  destructive: true,
+                  onSelect: () => setTarget({ action: "delete", schedule }),
+                },
               ];
             }}
             empty={
@@ -73,7 +96,9 @@ export function SchedulesSection({ context, workflows, online }: SchedulesSectio
                 icon="calendar"
                 title={t("emptyTitle")}
                 description={canWrite ? t("emptyDescription") : t("emptyDescriptionNoPermission")}
-                action={canCreate ? <Button onClick={() => setEditing({ schedule: null })}>{t("create")}</Button> : undefined}
+                action={
+                  canCreate ? <Button onClick={() => setEditing({ schedule: null })}>{t("create")}</Button> : undefined
+                }
               />
             }
           />
@@ -89,7 +114,11 @@ export function SchedulesSection({ context, workflows, online }: SchedulesSectio
             open={editing !== null}
             onOpenChange={(open) => !open && setEditing(null)}
           />
-          <ScheduleActionDialog organizationId={organization.id} target={target} onOpenChange={(open) => !open && setTarget(null)} />
+          <ScheduleActionDialog
+            organizationId={organization.id}
+            target={target}
+            onOpenChange={(open) => !open && setTarget(null)}
+          />
         </>
       ) : null}
     </div>

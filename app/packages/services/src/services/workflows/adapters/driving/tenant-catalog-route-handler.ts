@@ -1,12 +1,15 @@
 import { listAgentCatalogEndpoint, listWorkflowCatalogEndpoint } from "@core/contracts";
 import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
 import { dataResponse } from "../../../shared/http/api-errors.ts";
-import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
+import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import type { WorkflowRuntimeGateway } from "../../application/ports/workflow-runtime-gateway.ts";
 import { workflowCallScope, workflowGatewayErrorResponse } from "./workflow-call-scope.ts";
 
-export const TENANT_CATALOG_PERMISSIONS = { agents: "core.agent-settings.read", workflows: "core.workflow-run.read" } as const;
+export const TENANT_CATALOG_PERMISSIONS = {
+  agents: "core.agent-settings.read",
+  workflows: "core.workflow-run.read",
+} as const;
 
 export type TenantCatalogRouteDeps = {
   readonly pipeline: ApiRouteDeps;
@@ -23,13 +26,23 @@ export type TenantCatalogRouteDeps = {
  */
 export const buildTenantCatalogRoutes = (deps: TenantCatalogRouteDeps): Record<string, RouteHandler> => ({
   [listAgentCatalogEndpoint.id]: withApiRoute(listAgentCatalogEndpoint, deps.pipeline, async (ctx) => {
-    const scope = await workflowCallScope({ ctx, organizationId: ctx.input.query.organizationId, permission: TENANT_CATALOG_PERMISSIONS.agents, resolveAccessContext: deps.resolveAccessContext });
+    const scope = await workflowCallScope({
+      ctx,
+      organizationId: ctx.input.query.organizationId,
+      permission: TENANT_CATALOG_PERMISSIONS.agents,
+      resolveAccessContext: deps.resolveAccessContext,
+    });
     if (scope instanceof Response) return scope;
     const result = await deps.gateway.listAgentCatalog(scope);
     return result.ok ? dataResponse({ data: result.data }) : workflowGatewayErrorResponse(result.error, ctx.requestId);
   }),
   [listWorkflowCatalogEndpoint.id]: withApiRoute(listWorkflowCatalogEndpoint, deps.pipeline, async (ctx) => {
-    const scope = await workflowCallScope({ ctx, organizationId: ctx.input.query.organizationId, permission: TENANT_CATALOG_PERMISSIONS.workflows, resolveAccessContext: deps.resolveAccessContext });
+    const scope = await workflowCallScope({
+      ctx,
+      organizationId: ctx.input.query.organizationId,
+      permission: TENANT_CATALOG_PERMISSIONS.workflows,
+      resolveAccessContext: deps.resolveAccessContext,
+    });
     if (scope instanceof Response) return scope;
     const result = await deps.gateway.listWorkflowCatalog(scope);
     return result.ok ? dataResponse({ data: result.data }) : workflowGatewayErrorResponse(result.error, ctx.requestId);

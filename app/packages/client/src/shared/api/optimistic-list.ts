@@ -10,7 +10,11 @@ type Pages<T> = InfiniteData<ListPage<T>, string | undefined>;
  * the mutation fails; invalidate afterwards either way so the server has the last word).
  * @example const rollback = await patchCachedLists(queryClient, sessionKeys.all(), (items) => items.filter((s) => s.id !== id));
  */
-export const patchCachedLists = async <T>(queryClient: QueryClient, queryKey: QueryKey, change: (items: readonly T[]) => readonly T[]): Promise<() => void> => {
+export const patchCachedLists = async <T>(
+  queryClient: QueryClient,
+  queryKey: QueryKey,
+  change: (items: readonly T[]) => readonly T[],
+): Promise<() => void> => {
   await queryClient.cancelQueries({ queryKey });
   const snapshots = queryClient.getQueriesData<Pages<T>>({ queryKey });
   queryClient.setQueriesData<Pages<T>>({ queryKey }, (data) =>

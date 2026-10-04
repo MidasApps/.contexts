@@ -4,8 +4,17 @@ import type { EvalExperimentSummary } from "@core/contracts";
 import { useFormatter, useTranslations } from "use-intl";
 import { StatusPill, type StatusTone } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 
-const STATUS_TONES: Record<EvalExperimentSummary["status"], StatusTone> = { pending: "neutral", running: "blue", completed: "emerald", failed: "danger" };
-const VERDICT_TONES: Record<EvalExperimentSummary["verdict"], StatusTone> = { passed: "emerald", failed: "danger", pending: "neutral" };
+const STATUS_TONES: Record<EvalExperimentSummary["status"], StatusTone> = {
+  pending: "neutral",
+  running: "blue",
+  completed: "emerald",
+  failed: "danger",
+};
+const VERDICT_TONES: Record<EvalExperimentSummary["verdict"], StatusTone> = {
+  passed: "emerald",
+  failed: "danger",
+  pending: "neutral",
+};
 const VERDICT_ICONS = { passed: "circle-check", failed: "circle-x", pending: "clock" } as const;
 
 export function ExperimentStatusPill({ status }: { status: EvalExperimentSummary["status"] }) {
@@ -35,7 +44,11 @@ export function ExperimentScores({ experiment }: { experiment: EvalExperimentSum
         <li key={score.scorer} className="tabular-nums">
           {score.baseline === null
             ? t("score", { scorer: score.scorer, mean: percent(score.mean) })
-            : t("scoreWithBaseline", { scorer: score.scorer, mean: percent(score.mean), baseline: percent(score.baseline) })}
+            : t("scoreWithBaseline", {
+                scorer: score.scorer,
+                mean: percent(score.mean),
+                baseline: percent(score.baseline),
+              })}
         </li>
       ))}
     </ul>

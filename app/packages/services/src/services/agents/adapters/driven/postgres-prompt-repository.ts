@@ -1,4 +1,9 @@
-import { type PromptActivation, PromptActivationSchema, type PromptVersion, PromptVersionSchema } from "@core/contracts";
+import {
+  type PromptActivation,
+  PromptActivationSchema,
+  type PromptVersion,
+  PromptVersionSchema,
+} from "@core/contracts";
 import type { Sql, TransactionSql } from "postgres";
 import { withTenantTransaction } from "../../../shared/postgres/with-tenant-transaction.ts";
 import type { ActivePrompts, PromptKey, PromptRepository } from "../../application/ports/prompt-repository.ts";
@@ -75,32 +80,39 @@ const toActivation = (row: ActivationRow): PromptActivation =>
 
 const UNIQUE_VIOLATION = "23505";
 
-const insertVersion = (sql: Sql) => async (input: Parameters<PromptRepository["insertVersion"]>[0]): Promise<PromptVersion> => {
-  const attempt = () =>
-    withTenantTransaction(sql, { tenantId: scopeOf(input.tenantId) }, async (tx) => {
-      await asRuntime(tx);
-      const [row] = await tx<VersionRow[]>`
+const insertVersion =
+  (sql: Sql) =>
+  async (input: Parameters<PromptRepository["insertVersion"]>[0]): Promise<PromptVersion> => {
+    const attempt = () =>
+      withTenantTransaction(sql, { tenantId: scopeOf(input.tenantId) }, async (tx) => {
+        await asRuntime(tx);
+        const [row] = await tx<VersionRow[]>`
         INSERT INTO agents.prompt_versions (agent_id, scope, tenant_id, version, body, body_sha256, note, created_by)
         SELECT ${input.agentId}, ${input.scope}, ${input.tenantId}, coalesce(max(version), 0) + 1, ${input.body}, ${input.bodySha256}, ${input.note}, ${input.createdBy}
         FROM agents.prompt_versions
         WHERE agent_id = ${input.agentId} AND scope = ${input.scope} AND tenant_id IS NOT DISTINCT FROM ${input.tenantId}
         RETURNING *`;
-      if (row === undefined) throw new Error("prompt version insert returned no row");
-      return toVersion(row);
-    });
-  try {
-    return await attempt();
-  } catch (error: unknown) {
-    // Two writers computed the same next version; the unique key refused one, which retries once.
-    if ((error as { code?: unknown }).code !== UNIQUE_VIOLATION) throw error;
-    return attempt();
-  }
-};
+        if (row === undefined) throw new Error("prompt version insert returned no row");
+        return toVersion(row);
+      });
+    try {
+      return await attempt();
+    } catch (error: unknown) {
+      // Two writers computed the same next version; the unique key refused one, which retries once.
+      if ((error as { code?: unknown }).code !== UNIQUE_VIOLATION) throw error;
+      return attempt();
+    }
+  };
 
 const keyFilter = (tx: TransactionSql, key: PromptKey) =>
   tx`agent_id = ${key.agentId} AND scope = ${key.scope} AND tenant_id IS NOT DISTINCT FROM ${key.tenantId}`;
 
-const latestActive = async (tx: TransactionSql, agentId: string, scope: "platform" | "tenant", tenantId: string | null) => {
+const latestActive = async (
+  tx: TransactionSql,
+  agentId: string,
+  scope: "platform" | "tenant",
+  tenantId: string | null,
+) => {
   const [row] = await tx<{ version_id: string; body: string }[]>`
     SELECT a.version_id, v.body FROM agents.prompt_activations a
     JOIN agents.prompt_versions v ON v.id = a.version_id
@@ -119,7 +131,9 @@ export const createPostgresPromptRepository = (sql: Sql): PromptRepository => ({
   listVersions: (key) =>
     withTenantTransaction(sql, { tenantId: scopeOf(key.tenantId), readOnly: true }, async (tx) => {
       await asRuntime(tx);
-      const rows = await tx<VersionRow[]>`SELECT * FROM agents.prompt_versions WHERE ${keyFilter(tx, key)} ORDER BY version DESC`;
+      const rows = await tx<
+        VersionRow[]
+      >`SELECT * FROM agents.prompt_versions WHERE ${keyFilter(tx, key)} ORDER BY version DESC`;
       return rows.map(toVersion);
     }),
   getVersion: ({ versionId, tenantId }) =>
@@ -146,7 +160,9 @@ export const createPostgresPromptRepository = (sql: Sql): PromptRepository => ({
   listActivations: (key) =>
     withTenantTransaction(sql, { tenantId: scopeOf(key.tenantId), readOnly: true }, async (tx) => {
       await asRuntime(tx);
-      const rows = await tx<ActivationRow[]>`SELECT * FROM agents.prompt_activations WHERE ${keyFilter(tx, key)} ORDER BY activated_at DESC, id DESC`;
+      const rows = await tx<
+        ActivationRow[]
+      >`SELECT * FROM agents.prompt_activations WHERE ${keyFilter(tx, key)} ORDER BY activated_at DESC, id DESC`;
       return rows.map(toActivation);
     }),
   getActive: ({ agentId, tenantId }): Promise<ActivePrompts> =>

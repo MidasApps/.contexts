@@ -15,7 +15,10 @@ import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
  * save keeps the theme here and offers a retry. While support staff view the app as a user
  * (read-only), the theme only changes here: the profile is not theirs to change.
  */
-export const useSaveThemePreference = (): { preference: ThemePreference; save: (preference: ThemePreference) => void } => {
+export const useSaveThemePreference = (): {
+  preference: ThemePreference;
+  save: (preference: ThemePreference) => void;
+} => {
   const t = useTranslations("profile.preferences.theme");
   const theme = useThemePreference();
   const signedIn = useIsSignedIn();
@@ -27,7 +30,9 @@ export const useSaveThemePreference = (): { preference: ThemePreference; save: (
       setPreference(preference);
       if (!signedIn || impersonating) return;
       const persist = (): void => {
-        updateMe({ preferences: { theme: preference } }).catch(() => notify.error(t("saveFailed"), { action: { label: t("retry"), onClick: persist } }));
+        updateMe({ preferences: { theme: preference } }).catch(() =>
+          notify.error(t("saveFailed"), { action: { label: t("retry"), onClick: persist } }),
+        );
       };
       persist();
     },

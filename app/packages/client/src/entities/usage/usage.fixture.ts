@@ -3,7 +3,14 @@ import { IDS } from "#/shared/testing/fixtures.ts";
 
 type Json = Record<string, unknown>;
 
-export const buildUsageTotals = (overrides: Json = {}): Json => ({ calls: 42, inputTokens: 50_000, outputTokens: 12_000, costMicroUsd: 12_340_000, unpricedCalls: 0, ...overrides });
+export const buildUsageTotals = (overrides: Json = {}): Json => ({
+  calls: 42,
+  inputTokens: 50_000,
+  outputTokens: 12_000,
+  costMicroUsd: 12_340_000,
+  unpricedCalls: 0,
+  ...overrides,
+});
 
 export const buildUsageSummary = (overrides: Json = {}): Json => ({
   tenantId: IDS.organization,

@@ -33,7 +33,11 @@ export type MeDeps = {
 };
 
 /** Staff flags, MFA enrollment and capabilities `Me` adds to the users doc. */
-export type MeFlags = { readonly platformRole: PlatformRole | null; readonly mfaEnrolled: boolean; readonly capabilities: MeCapabilities };
+export type MeFlags = {
+  readonly platformRole: PlatformRole | null;
+  readonly mfaEnrolled: boolean;
+  readonly capabilities: MeCapabilities;
+};
 
 /** The `Me` view of a users doc (SP1 spec §7.3). */
 export const toMe = (user: User, flags: MeFlags): Me => {

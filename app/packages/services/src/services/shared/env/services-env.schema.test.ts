@@ -33,9 +33,7 @@ describe("ServicesEnvSchema", () => {
   });
 
   it("rejects a local env that points at a non-demo Firebase project", () => {
-    expect(issuePaths({ ...LOCAL_ENV, FIREBASE_PROJECT_ID: "acme-prod" })).toEqual([
-      "FIREBASE_PROJECT_ID",
-    ]);
+    expect(issuePaths({ ...LOCAL_ENV, FIREBASE_PROJECT_ID: "acme-prod" })).toEqual(["FIREBASE_PROJECT_ID"]);
   });
 
   it("rejects a local env without the Auth and Firestore emulators", () => {
@@ -44,9 +42,7 @@ describe("ServicesEnvSchema", () => {
   });
 
   it("rejects a local env whose database is not on this machine", () => {
-    expect(issuePaths({ ...LOCAL_ENV, DATABASE_URL: "postgresql://app@db.example.com/app" })).toEqual([
-      "DATABASE_URL",
-    ]);
+    expect(issuePaths({ ...LOCAL_ENV, DATABASE_URL: "postgresql://app@db.example.com/app" })).toEqual(["DATABASE_URL"]);
   });
 
   it("rejects emulator hosts and demo projects outside local", () => {
@@ -55,7 +51,9 @@ describe("ServicesEnvSchema", () => {
   });
 
   it("rejects the Auth emulator host in prod, where it would accept unsigned tokens (follow-up 12c)", () => {
-    expect(issuePaths({ ...REMOTE_ENV, APP_ENV: "prod", FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099" })).toEqual(["FIREBASE_AUTH_EMULATOR_HOST"]);
+    expect(issuePaths({ ...REMOTE_ENV, APP_ENV: "prod", FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099" })).toEqual([
+      "FIREBASE_AUTH_EMULATOR_HOST",
+    ]);
   });
 
   it("reports an unparsable DATABASE_URL in local instead of crashing the refinement", () => {

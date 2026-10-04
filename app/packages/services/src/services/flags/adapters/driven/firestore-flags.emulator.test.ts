@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
-import { createFirestoreEnvironmentFlagValues, createFirestoreTenantFlagOverrides, FEATURE_FLAGS_COLLECTION } from "./firestore-flags.ts";
+import {
+  createFirestoreEnvironmentFlagValues,
+  createFirestoreTenantFlagOverrides,
+  FEATURE_FLAGS_COLLECTION,
+} from "./firestore-flags.ts";
 
 const firebase = emulatorFirebase();
 const RUN = Date.now().toString(36);

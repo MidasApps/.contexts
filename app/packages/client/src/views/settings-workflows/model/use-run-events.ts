@@ -3,7 +3,7 @@
 import type { WorkflowEvent } from "@core/contracts";
 import { useEffect, useState } from "react";
 import { ulid } from "ulid";
-import { useApiConnection, type ApiConnection } from "#/shared/api/api-context.tsx";
+import { type ApiConnection, useApiConnection } from "#/shared/api/api-context.tsx";
 import { takeSseFrames, workflowEventOf } from "../lib/parse-sse.ts";
 
 const streamPath = (organizationId: string, runId: string): string =>
@@ -56,7 +56,9 @@ export const useRunEvents = (organizationId: string, runId: string): readonly Wo
     const add = (event: WorkflowEvent): void =>
       setState((current) => {
         const events = current.key === key ? current.events : [];
-        return events.some((known) => known.index === event.index) ? { key, events } : { key, events: [...events, event] };
+        return events.some((known) => known.index === event.index)
+          ? { key, events }
+          : { key, events: [...events, event] };
       });
     openStream(connection, streamPath(organizationId, runId), controller.signal)
       .then((response) => (response === null ? undefined : readEvents(response, add)))

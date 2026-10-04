@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildComposeUpArgs,
   buildEmulatorEnv,
-  buildEmulatorStartArgs,
   buildEmulatorExportArgs,
+  buildEmulatorStartArgs,
   buildFunctionsProbeUrl,
   buildKillTreeCommand,
   buildReadinessChecks,
@@ -14,7 +14,14 @@ import {
 
 describe("buildComposeUpArgs", () => {
   it("waits for healthy services and reads the workspace env file when present", () => {
-    expect(buildComposeUpArgs({ envFile: ".env.local" })).toEqual(["compose", "--env-file", ".env.local", "up", "-d", "--wait"]);
+    expect(buildComposeUpArgs({ envFile: ".env.local" })).toEqual([
+      "compose",
+      "--env-file",
+      ".env.local",
+      "up",
+      "-d",
+      "--wait",
+    ]);
   });
 
   it("falls back to compose defaults without an env file", () => {
@@ -36,22 +43,38 @@ describe("buildEmulatorEnv", () => {
 describe("buildEmulatorStartArgs", () => {
   it("imports saved data only when the data folder exists and always exports on exit", () => {
     expect(buildEmulatorStartArgs({ projectId: "demo-core", dataDir: ".firebase-data", hasSavedData: true })).toEqual([
-      "emulators:start", "--project", "demo-core", "--import", ".firebase-data", "--export-on-exit", ".firebase-data",
+      "emulators:start",
+      "--project",
+      "demo-core",
+      "--import",
+      ".firebase-data",
+      "--export-on-exit",
+      ".firebase-data",
     ]);
     expect(buildEmulatorStartArgs({ projectId: "demo-core", dataDir: ".firebase-data", hasSavedData: false })).toEqual([
-      "emulators:start", "--project", "demo-core", "--export-on-exit", ".firebase-data",
+      "emulators:start",
+      "--project",
+      "demo-core",
+      "--export-on-exit",
+      ".firebase-data",
     ]);
   });
 
   it("refuses a project that is not a demo-* project", () => {
-    expect(() => buildEmulatorStartArgs({ projectId: "acme-prod", dataDir: ".firebase-data", hasSavedData: false })).toThrow(/demo-/);
+    expect(() =>
+      buildEmulatorStartArgs({ projectId: "acme-prod", dataDir: ".firebase-data", hasSavedData: false }),
+    ).toThrow(/demo-/);
   });
 });
 
 describe("buildEmulatorExportArgs", () => {
   it("exports the running emulators into the data folder", () => {
     expect(buildEmulatorExportArgs({ projectId: "demo-core", dataDir: ".firebase-data" })).toEqual([
-      "emulators:export", ".firebase-data", "--project", "demo-core", "--force",
+      "emulators:export",
+      ".firebase-data",
+      "--project",
+      "demo-core",
+      "--force",
     ]);
   });
 });

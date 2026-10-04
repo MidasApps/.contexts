@@ -2,21 +2,47 @@
 
 import { addKnowledgeSourceEndpoint, type KnowledgeSource } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
 import { knowledgeKeys } from "#/entities/knowledge/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/molecules/Tabs/Tabs.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
-import { checkKnowledgeFile, isHttpsUrl, KNOWLEDGE_EXTENSIONS, KNOWLEDGE_MAX_BYTES, type KnowledgeFileProblem } from "../model/knowledge-file-policy.ts";
-import { KnowledgeUploadError, UPLOAD_STEPS, uploadKnowledgeFile, type SendBytes, type UploadStep } from "../model/upload-knowledge-file.ts";
+import {
+  checkKnowledgeFile,
+  isHttpsUrl,
+  KNOWLEDGE_EXTENSIONS,
+  KNOWLEDGE_MAX_BYTES,
+  type KnowledgeFileProblem,
+} from "../model/knowledge-file-policy.ts";
+import {
+  KnowledgeUploadError,
+  type SendBytes,
+  UPLOAD_STEPS,
+  type UploadStep,
+  uploadKnowledgeFile,
+} from "../model/upload-knowledge-file.ts";
 
 /** Where the new document goes: the whole organization, or one project (`project:<id>`). */
 export type KnowledgeUploadTarget = { readonly projectId?: string | undefined; readonly label: string };
@@ -74,7 +100,15 @@ function Failure({ error }: { error: unknown }) {
   );
 }
 
-function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdded, sendBytes, wait, fileAllowed = true }: AddKnowledgeDocumentDialogProps) {
+function AddKnowledgeDocumentBody({
+  organizationId,
+  target,
+  onOpenChange,
+  onAdded,
+  sendBytes,
+  wait,
+  fileAllowed = true,
+}: AddKnowledgeDocumentDialogProps) {
   const t = useTranslations("settings.knowledge.add");
   const format = useFormatter();
   const callEndpoint = useCallEndpoint();
@@ -98,12 +132,25 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
   const start = async (): Promise<StartedKnowledgeIngestion> => {
     const projectId = target.projectId;
     if (kind === "file" && file !== null) {
-      const { runId, fileId, source } = await uploadKnowledgeFile({ callEndpoint, organizationId, projectId, file, onStep: setStep, onSlow: () => setSlow(true), sendBytes, wait });
+      const { runId, fileId, source } = await uploadKnowledgeFile({
+        callEndpoint,
+        organizationId,
+        projectId,
+        file,
+        onStep: setStep,
+        onSlow: () => setSlow(true),
+        sendBytes,
+        wait,
+      });
       return { runId, label: file.name, sourceRef: fileId, projectId, source };
     }
     const address = url.trim();
     const source: KnowledgeSource = { kind: "url", url: address };
-    const started = await callEndpoint(addKnowledgeSourceEndpoint, { params: { organizationId }, query: projectId === undefined ? {} : { projectId }, body: source });
+    const started = await callEndpoint(addKnowledgeSourceEndpoint, {
+      params: { organizationId },
+      query: projectId === undefined ? {} : { projectId },
+      body: source,
+    });
     return { runId: started.data.runId, label: address, sourceRef: address, projectId, source };
   };
 
@@ -130,7 +177,10 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
     }
   };
 
-  const hint = t("fileHint", { types: format.list([...KNOWLEDGE_EXTENSIONS], { type: "conjunction" }), size: KNOWLEDGE_MAX_BYTES / MIB });
+  const hint = t("fileHint", {
+    types: format.list([...KNOWLEDGE_EXTENSIONS], { type: "conjunction" }),
+    size: KNOWLEDGE_MAX_BYTES / MIB,
+  });
   return (
     <>
       <DialogHeader>
@@ -159,10 +209,22 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
               <Field>
                 <FieldLabel>{t("file")}</FieldLabel>
                 <FieldControl>
-                  <Input type="file" required disabled={pending} accept={KNOWLEDGE_EXTENSIONS.join(",")} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+                  <Input
+                    type="file"
+                    required
+                    disabled={pending}
+                    accept={KNOWLEDGE_EXTENSIONS.join(",")}
+                    onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+                  />
                 </FieldControl>
                 <FieldDescription>{hint}</FieldDescription>
-                <FieldError errors={[kind === "file" && problem !== null ? t(`problems.${problem}`, { size: KNOWLEDGE_MAX_BYTES / MIB }) : undefined]} />
+                <FieldError
+                  errors={[
+                    kind === "file" && problem !== null
+                      ? t(`problems.${problem}`, { size: KNOWLEDGE_MAX_BYTES / MIB })
+                      : undefined,
+                  ]}
+                />
               </Field>
             </FieldGroup>
           </TabsContent>
@@ -171,10 +233,25 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
               <Field>
                 <FieldLabel>{t("url")}</FieldLabel>
                 <FieldControl>
-                  <Input type="url" required disabled={pending} inputMode="url" maxLength={2048} placeholder="https://" value={url} onChange={(event) => setUrl(event.target.value)} />
+                  <Input
+                    type="url"
+                    required
+                    disabled={pending}
+                    inputMode="url"
+                    maxLength={2048}
+                    placeholder="https://"
+                    value={url}
+                    onChange={(event) => setUrl(event.target.value)}
+                  />
                 </FieldControl>
                 <FieldDescription>{t("urlHint")}</FieldDescription>
-                <FieldError errors={[kind === "url" && problem !== null ? t(`problems.${problem}`, { size: KNOWLEDGE_MAX_BYTES / MIB }) : undefined]} />
+                <FieldError
+                  errors={[
+                    kind === "url" && problem !== null
+                      ? t(`problems.${problem}`, { size: KNOWLEDGE_MAX_BYTES / MIB })
+                      : undefined,
+                  ]}
+                />
               </Field>
             </FieldGroup>
           </TabsContent>

@@ -13,7 +13,14 @@ const LOCAL_MASTRA_URL = "http://localhost:4111";
 // Comma-separated second factors the UI offers (same shape as the server's MFA_FACTORS).
 const MfaFactorListSchema = z
   .string()
-  .transform((value) => [...new Set(value.split(",").map((item) => item.trim()).filter((item) => item !== ""))])
+  .transform((value) => [
+    ...new Set(
+      value
+        .split(",")
+        .map((item) => item.trim())
+        .filter((item) => item !== ""),
+    ),
+  ])
   .pipe(z.array(z.enum(["totp", "phone"])).min(1));
 
 /** Variables only the web app reads, on top of the services env. */
@@ -35,7 +42,10 @@ export const WebOnlyEnvSchema = z.object({
   MASTRA_AUDIENCE: z.url().optional(),
   // Cloud Storage bucket of uploads (SP3 files context); local defaults to the emulator's
   // default bucket of the demo project, required outside local.
-  FILES_BUCKET: z.string().regex(/^[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]$/, { error: "expected a bucket name" }).optional(),
+  FILES_BUCKET: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]$/, { error: "expected a bucket name" })
+    .optional(),
 });
 
 type WebOnlyEnv = z.infer<typeof WebOnlyEnvSchema>;
@@ -46,9 +56,15 @@ const publicIssues = (env: WebOnlyEnv & { APP_ENV: string }): EnvIssue[] => {
   const emulator = env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL;
   return [
     ...(env.NEXT_PUBLIC_APP_ENV === undefined ? [{ field: "NEXT_PUBLIC_APP_ENV", issue: "REQUIRED" }] : []),
-    ...(env.NEXT_PUBLIC_APP_ENV !== undefined && env.NEXT_PUBLIC_APP_ENV !== env.APP_ENV ? [{ field: "NEXT_PUBLIC_APP_ENV", issue: "MISMATCH" }] : []),
-    ...(isLocal && emulator === undefined ? [{ field: "NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL", issue: "REQUIRED" }] : []),
-    ...(!isLocal && emulator !== undefined ? [{ field: "NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL", issue: "FORBIDDEN" }] : []),
+    ...(env.NEXT_PUBLIC_APP_ENV !== undefined && env.NEXT_PUBLIC_APP_ENV !== env.APP_ENV
+      ? [{ field: "NEXT_PUBLIC_APP_ENV", issue: "MISMATCH" }]
+      : []),
+    ...(isLocal && emulator === undefined
+      ? [{ field: "NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL", issue: "REQUIRED" }]
+      : []),
+    ...(!isLocal && emulator !== undefined
+      ? [{ field: "NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL", issue: "FORBIDDEN" }]
+      : []),
   ];
 };
 
@@ -57,7 +73,9 @@ const publicIssues = (env: WebOnlyEnv & { APP_ENV: string }): EnvIssue[] => {
 const remoteIssues = (env: WebOnlyEnv): EnvIssue[] => [
   ...(env.CORS_ALLOWED_ORIGINS === undefined ? [{ field: "CORS_ALLOWED_ORIGINS", issue: "REQUIRED" }] : []),
   ...(env.MASTRA_URL === undefined ? [{ field: "MASTRA_URL", issue: "REQUIRED" }] : []),
-  ...(env.MASTRA_URL !== undefined && !env.MASTRA_URL.startsWith("https://") ? [{ field: "MASTRA_URL", issue: "HTTPS_REQUIRED" }] : []),
+  ...(env.MASTRA_URL !== undefined && !env.MASTRA_URL.startsWith("https://")
+    ? [{ field: "MASTRA_URL", issue: "HTTPS_REQUIRED" }]
+    : []),
   ...(env.MASTRA_AUDIENCE === undefined ? [{ field: "MASTRA_AUDIENCE", issue: "REQUIRED" }] : []),
   ...(env.FILES_BUCKET === undefined ? [{ field: "FILES_BUCKET", issue: "REQUIRED" }] : []),
 ];
@@ -80,10 +98,20 @@ export const loadWebEnv = (source: Record<string, string | undefined>) => {
     };
   }
   const issues = [...clientIssues, ...remoteIssues(env)];
-  if (issues.length > 0 || env.CORS_ALLOWED_ORIGINS === undefined || env.MASTRA_URL === undefined || env.FILES_BUCKET === undefined) {
+  if (
+    issues.length > 0 ||
+    env.CORS_ALLOWED_ORIGINS === undefined ||
+    env.MASTRA_URL === undefined ||
+    env.FILES_BUCKET === undefined
+  ) {
     throw new InvalidEnvError(issues);
   }
-  return { ...env, CORS_ALLOWED_ORIGINS: env.CORS_ALLOWED_ORIGINS, MASTRA_URL: env.MASTRA_URL, FILES_BUCKET: env.FILES_BUCKET };
+  return {
+    ...env,
+    CORS_ALLOWED_ORIGINS: env.CORS_ALLOWED_ORIGINS,
+    MASTRA_URL: env.MASTRA_URL,
+    FILES_BUCKET: env.FILES_BUCKET,
+  };
 };
 
 export type WebEnv = ReturnType<typeof loadWebEnv>;

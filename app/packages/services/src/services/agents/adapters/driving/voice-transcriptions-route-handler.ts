@@ -1,4 +1,4 @@
-import { transcribeVoiceEndpoint, TranscriptionSchema } from "@core/contracts";
+import { TranscriptionSchema, transcribeVoiceEndpoint } from "@core/contracts";
 import { z } from "zod";
 import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
 import { withApiRoute } from "../../../shared/http/api-route.ts";
@@ -13,13 +13,17 @@ const AUDIO_FIELD = "audio";
 
 const TranscriptionAnswerSchema = z.object({ data: TranscriptionSchema });
 
-type Upload = { readonly ok: true; readonly audio: Uint8Array<ArrayBuffer>; readonly mediaType: string } | { readonly ok: false; readonly issue: string };
+type Upload =
+  | { readonly ok: true; readonly audio: Uint8Array<ArrayBuffer>; readonly mediaType: string }
+  | { readonly ok: false; readonly issue: string };
 
 // The declared length is checked before the form is parsed, so an oversized upload is never buffered.
 const readUpload = async (request: Request): Promise<Upload> => {
-  if (!(request.headers.get("content-type") ?? "").toLowerCase().startsWith("multipart/form-data")) return { ok: false, issue: "MULTIPART_REQUIRED" };
+  if (!(request.headers.get("content-type") ?? "").toLowerCase().startsWith("multipart/form-data"))
+    return { ok: false, issue: "MULTIPART_REQUIRED" };
   const declared = Number(request.headers.get("content-length") ?? Number.NaN);
-  if (!Number.isFinite(declared) || declared > MAX_AUDIO_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES) return { ok: false, issue: "TOO_LARGE" };
+  if (!Number.isFinite(declared) || declared > MAX_AUDIO_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES)
+    return { ok: false, issue: "TOO_LARGE" };
   const form = await request.formData().catch(() => null);
   const file = form?.get(AUDIO_FIELD);
   if (file === null || file === undefined || typeof file === "string") return { ok: false, issue: "REQUIRED" };
@@ -37,14 +41,28 @@ const readUpload = async (request: Request): Promise<Upload> => {
  * records the call in the usage ledger and the audit trail. Rate limit `voice-call`.
  */
 export const buildVoiceTranscriptionsRoute = (deps: VoiceRoutesDeps): Record<string, RouteHandler> => ({
-  [transcribeVoiceEndpoint.id]: withApiRoute(transcribeVoiceEndpoint, deps.pipeline, async ({ principal, input, authorize, requestId, request }) => {
-    const scope = await voiceScopeOf({ deps, principal, tenantId: input.query.organizationId, authorize, request, requestId });
-    if (scope instanceof Response) return scope;
-    const upload = await readUpload(request);
-    if (!upload.ok) return apiError(400, "VALIDATION_FAILED", requestId, [{ field: AUDIO_FIELD, issue: upload.issue }]);
-    const answer = await deps.voice.transcribe({ scope, audio: upload.audio, mediaType: upload.mediaType });
-    if (!answer.ok) return gatewayErrorResponse(answer.error, requestId);
-    const parsed = TranscriptionAnswerSchema.safeParse(answer.data);
-    return parsed.success ? dataResponse({ data: parsed.data.data }) : apiError(502, "UPSTREAM_UNAVAILABLE", requestId);
-  }),
+  [transcribeVoiceEndpoint.id]: withApiRoute(
+    transcribeVoiceEndpoint,
+    deps.pipeline,
+    async ({ principal, input, authorize, requestId, request }) => {
+      const scope = await voiceScopeOf({
+        deps,
+        principal,
+        tenantId: input.query.organizationId,
+        authorize,
+        request,
+        requestId,
+      });
+      if (scope instanceof Response) return scope;
+      const upload = await readUpload(request);
+      if (!upload.ok)
+        return apiError(400, "VALIDATION_FAILED", requestId, [{ field: AUDIO_FIELD, issue: upload.issue }]);
+      const answer = await deps.voice.transcribe({ scope, audio: upload.audio, mediaType: upload.mediaType });
+      if (!answer.ok) return gatewayErrorResponse(answer.error, requestId);
+      const parsed = TranscriptionAnswerSchema.safeParse(answer.data);
+      return parsed.success
+        ? dataResponse({ data: parsed.data.data })
+        : apiError(502, "UPSTREAM_UNAVAILABLE", requestId);
+    },
+  ),
 });

@@ -17,18 +17,32 @@ describe("exampleManifest", () => {
       { id: "example.note.create", kind: "write", defaultRoles: ["owner", "admin", "member"] },
       { id: "example.note.archive", kind: "write", defaultRoles: ["owner", "admin", "member"] },
     ]);
-    expect(exampleManifest.permissions.filter((permission) => "requiresApproval" in permission && permission.requiresApproval).map((permission) => permission.id)).toEqual(["example.note.archive"]);
+    expect(
+      exampleManifest.permissions
+        .filter((permission) => "requiresApproval" in permission && permission.requiresApproval)
+        .map((permission) => permission.id),
+    ).toEqual(["example.note.archive"]);
     const coreIds = new Set(CORE_PERMISSIONS.map((permission) => permission.id));
     expect(exampleManifest.permissions.some((permission) => coreIds.has(permission.id))).toBe(false);
   });
 
   it("declares the example.area unit type under projects and other areas", () => {
-    expect(exampleManifest.unitTypes).toEqual([{ id: "example.area", labelKey: "example.unitTypes.area", allowedParents: ["project", "example.area"] }]);
+    expect(exampleManifest.unitTypes).toEqual([
+      { id: "example.area", labelKey: "example.unitTypes.area", allowedParents: ["project", "example.area"] },
+    ]);
   });
 
   it("adds one project navigation item at the module root, gated by the read permission", () => {
     expect(exampleManifest.navigation).toEqual([
-      { id: "home", slot: "project", labelKey: "example.nav.home", icon: "puzzle", path: "", permission: "example.item.read", order: 100 },
+      {
+        id: "home",
+        slot: "project",
+        labelKey: "example.nav.home",
+        icon: "puzzle",
+        path: "",
+        permission: "example.item.read",
+        order: 100,
+      },
     ]);
   });
 
@@ -36,7 +50,10 @@ describe("exampleManifest", () => {
     expect(exampleManifest.settings.contract.id).toBe("example.ExampleSettings");
     expect(exampleManifest.settings.contract.meta.kind).toBe("settings");
     expect(EXAMPLE_CONTRACTS).toContain(exampleManifest.settings.contract);
-    expect(exampleManifest.settings).toMatchObject({ readPermission: "example.item.read", updatePermission: "example.item.write" });
+    expect(exampleManifest.settings).toMatchObject({
+      readPermission: "example.item.read",
+      updatePermission: "example.item.write",
+    });
   });
 
   it("ships messages for the three supported locales with the same keys", () => {
@@ -51,7 +68,12 @@ describe("exampleManifest", () => {
   });
 
   it("names the skill and the workflow its agent entry implements; commands are contracts, not tool refs", () => {
-    expect({ agents: exampleManifest.agents, tools: exampleManifest.tools, workflows: exampleManifest.workflows, skills: exampleManifest.skills }).toEqual({
+    expect({
+      agents: exampleManifest.agents,
+      tools: exampleManifest.tools,
+      workflows: exampleManifest.workflows,
+      skills: exampleManifest.skills,
+    }).toEqual({
       agents: [],
       tools: [],
       workflows: [{ id: "example-note-intake" }],
@@ -66,6 +88,8 @@ describe("exampleManifest", () => {
       ["example.ArchiveNoteCommand", "example.note.archive"],
     ]);
     const declared = new Set<string>(exampleManifest.permissions.map((permission) => permission.id));
-    expect(commands.every((contract) => contract.meta.permission !== undefined && declared.has(contract.meta.permission))).toBe(true);
+    expect(
+      commands.every((contract) => contract.meta.permission !== undefined && declared.has(contract.meta.permission)),
+    ).toBe(true);
   });
 });

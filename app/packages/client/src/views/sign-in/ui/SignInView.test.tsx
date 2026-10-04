@@ -8,7 +8,10 @@ import { nextRoute, SignInView } from "./SignInView.tsx";
 
 describe("SignInView", () => {
   it("renders the sign-in page, signs in through the bridge and goes to ?next=", async () => {
-    const { user, router, bridge, container } = renderApp(<SignInView />, { signedIn: false, path: "/sign-in?next=%2Fprofile%2Fsecurity" });
+    const { user, router, bridge, container } = renderApp(<SignInView />, {
+      signedIn: false,
+      path: "/sign-in?next=%2Fprofile%2Fsecurity",
+    });
     expect(await screen.findByRole("heading", { level: 1, name: "Entrar" })).toBeDefined();
     expect(screen.getByRole("main")).toBeDefined();
     expect(screen.getByText("Core")).toBeDefined();
@@ -23,14 +26,22 @@ describe("SignInView", () => {
   });
 
   it("offers open sign-up only when the app enables it, keeping ?next=", async () => {
-    renderApp(<SignInView />, { signedIn: false, path: "/sign-in?next=%2Forganizations", config: { selfServeSignUp: true } });
+    renderApp(<SignInView />, {
+      signedIn: false,
+      path: "/sign-in?next=%2Forganizations",
+      config: { selfServeSignUp: true },
+    });
     const link = await screen.findByRole("link", { name: "Criar conta" });
     expect(link.getAttribute("href")).toBe("/sign-up?next=%2Forganizations");
   });
 
   it("switches to the second factor when the account has one", async () => {
     const auth = createFakeAuth(TEST_USER);
-    auth.signInWithEmail = () => Promise.resolve({ kind: "mfa-required", challenge: { hints: [{ uid: "h1", factor: "totp", displayName: null, phoneNumber: null }], handle: {} } });
+    auth.signInWithEmail = () =>
+      Promise.resolve({
+        kind: "mfa-required",
+        challenge: { hints: [{ uid: "h1", factor: "totp", displayName: null, phoneNumber: null }], handle: {} },
+      });
     const { user, container } = renderApp(<SignInView />, { signedIn: false, auth, path: "/sign-in" });
     await user.type(await screen.findByLabelText("E-mail"), "ana@example.com");
     await user.type(screen.getByLabelText("Senha"), "s3cret-pass");

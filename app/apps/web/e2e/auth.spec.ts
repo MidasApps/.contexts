@@ -1,5 +1,5 @@
-import { expect, test } from "./web-test.ts";
 import { accountMenu, signInThroughUi, submitSignIn } from "@core/e2e/sign-in";
+import { expect, test } from "./web-test.ts";
 
 // SP2 spec §13 item 1: sign in lands in the last context; sign out closes the protected pages.
 test.describe("authentication", () => {

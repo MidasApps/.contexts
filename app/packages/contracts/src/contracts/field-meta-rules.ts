@@ -29,7 +29,16 @@ type LooseDef = {
   catchall?: z.core.$ZodType;
 };
 
-const WRAPPER_TYPES = new Set(["optional", "nullable", "default", "prefault", "readonly", "catch", "nonoptional", "success"]);
+const WRAPPER_TYPES = new Set([
+  "optional",
+  "nullable",
+  "default",
+  "prefault",
+  "readonly",
+  "catch",
+  "nonoptional",
+  "success",
+]);
 
 /** Schemas nested in a non-object schema; `z.lazy` is skipped (recursive types). */
 const childSchemasOf = (def: LooseDef): ChildSchema[] => {
@@ -47,16 +56,27 @@ const childSchemasOf = (def: LooseDef): ChildSchema[] => {
 };
 
 const joinPath = (path: string, segment: string): string =>
-  segment === "" ? path : segment.startsWith("[") || segment.startsWith("{") || path === "" ? `${path}${segment}` : `${path}.${segment}`;
+  segment === ""
+    ? path
+    : segment.startsWith("[") || segment.startsWith("{") || path === ""
+      ? `${path}${segment}`
+      : `${path}.${segment}`;
 
-const inspectField = (name: string, field: z.core.$ZodType, path: string, seen: Set<z.core.$ZodType>): FieldMetaInspection => {
+const inspectField = (
+  name: string,
+  field: z.core.$ZodType,
+  path: string,
+  seen: Set<z.core.$ZodType>,
+): FieldMetaInspection => {
   const fieldPath = joinPath(path, name);
   const meta = readFieldMeta(field, z.globalRegistry);
   const inner = inspectSchema(field, fieldPath, seen);
   if (meta === undefined) {
     return { problems: [{ path: fieldPath, issue: "MISSING_FIELD_META" }, ...inner.problems], maxPii: inner.maxPii };
   }
-  const below: FieldMetaProblem[] = isPiiBelow(meta.pii, inner.maxPii) ? [{ path: fieldPath, issue: "PII_BELOW_FIELDS" }] : [];
+  const below: FieldMetaProblem[] = isPiiBelow(meta.pii, inner.maxPii)
+    ? [{ path: fieldPath, issue: "PII_BELOW_FIELDS" }]
+    : [];
   return { problems: [...below, ...inner.problems], maxPii: maxPii([meta.pii, inner.maxPii]) };
 };
 
@@ -71,7 +91,11 @@ const mergeInspections = (inspections: readonly FieldMetaInspection[]): FieldMet
  * walked like a record value. `z.strictObject`'s never and `z.looseObject`'s
  * unknown carry nothing to walk.
  */
-const inspectCatchall = (catchall: z.core.$ZodType | undefined, path: string, seen: Set<z.core.$ZodType>): FieldMetaInspection => {
+const inspectCatchall = (
+  catchall: z.core.$ZodType | undefined,
+  path: string,
+  seen: Set<z.core.$ZodType>,
+): FieldMetaInspection => {
   if (catchall === undefined) return { problems: [], maxPii: "none" };
   const catchallPath = joinPath(path, "{}");
   const inner = inspectSchema(catchall, catchallPath, seen);
@@ -84,7 +108,11 @@ const inspectCatchall = (catchall: z.core.$ZodType | undefined, path: string, se
  * records, unions, catchalls): each field needs `description` + `pii`, and a field's pii
  * must cover the highest pii of the fields nested in it.
  */
-export function inspectSchema(schema: z.core.$ZodType, path = "", seen = new Set<z.core.$ZodType>()): FieldMetaInspection {
+export function inspectSchema(
+  schema: z.core.$ZodType,
+  path = "",
+  seen = new Set<z.core.$ZodType>(),
+): FieldMetaInspection {
   if (seen.has(schema)) return { problems: [], maxPii: "none" };
   const nextSeen = new Set(seen).add(schema);
   const def = schema._zod.def as LooseDef;
@@ -92,5 +120,7 @@ export function inspectSchema(schema: z.core.$ZodType, path = "", seen = new Set
     const fields = Object.entries(def.shape ?? {}).map(([name, field]) => inspectField(name, field, path, nextSeen));
     return mergeInspections([...fields, inspectCatchall(def.catchall, path, nextSeen)]);
   }
-  return mergeInspections(childSchemasOf(def).map((child) => inspectSchema(child.schema, joinPath(path, child.segment), nextSeen)));
+  return mergeInspections(
+    childSchemasOf(def).map((child) => inspectSchema(child.schema, joinPath(path, child.segment), nextSeen)),
+  );
 }

@@ -9,8 +9,10 @@ const CREATED = "2026-09-29T14:30:00.000Z";
 export const ADMIN_IDS = { plan: "Pl1aB2cD3eF4gH5iJ6kL", otherPlan: "Pm7nO8pQ9rS0tU1vW2xY" } as const;
 
 /** `GET /v1/me` of a platform staff member (`platform-admin` holds every `platform.*`). */
-export const buildStaffMe = (role: "platform-admin" | "platform-support" = "platform-admin", overrides: Json = {}): Json =>
-  buildMe({ isPlatformStaff: true, platformRole: role, mfaEnrolled: true, ...overrides });
+export const buildStaffMe = (
+  role: "platform-admin" | "platform-support" = "platform-admin",
+  overrides: Json = {},
+): Json => buildMe({ isPlatformStaff: true, platformRole: role, mfaEnrolled: true, ...overrides });
 
 export const buildPlan = (overrides: Json = {}): Json => ({
   id: ADMIN_IDS.plan,
@@ -32,7 +34,11 @@ export const buildOrganizationSummary = (overrides: Json = {}): Json => ({
 });
 
 /** `GET /v1/admin/organizations/{id}`: the list row plus the member count. */
-export const buildOrganizationDetail = (overrides: Json = {}): Json => ({ ...buildOrganizationSummary(), memberCount: 12, ...overrides });
+export const buildOrganizationDetail = (overrides: Json = {}): Json => ({
+  ...buildOrganizationSummary(),
+  memberCount: 12,
+  ...overrides,
+});
 
 /** `GET /v1/admin/usage`: two days, two models (the default is every organization, month to date). */
 export const buildAdminUsage = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
@@ -45,8 +51,24 @@ export const buildAdminUsage = (overrides: Record<string, unknown> = {}): Record
     { day: "2026-09-30", calls: 8, inputTokens: 6_000, outputTokens: 700, costMicroUsd: 2_500_000, unpricedCalls: 1 },
   ],
   byModel: [
-    { provider: "google", model: "gemini-3.5-flash", calls: 9, inputTokens: 7_000, outputTokens: 800, costMicroUsd: 3_000_000, unpricedCalls: 0 },
-    { provider: "anthropic", model: "claude-haiku", calls: 3, inputTokens: 2_000, outputTokens: 200, costMicroUsd: 500_000, unpricedCalls: 1 },
+    {
+      provider: "google",
+      model: "gemini-3.5-flash",
+      calls: 9,
+      inputTokens: 7_000,
+      outputTokens: 800,
+      costMicroUsd: 3_000_000,
+      unpricedCalls: 0,
+    },
+    {
+      provider: "anthropic",
+      model: "claude-haiku",
+      calls: 3,
+      inputTokens: 2_000,
+      outputTokens: 200,
+      costMicroUsd: 500_000,
+      unpricedCalls: 1,
+    },
   ],
   organizations: 3,
   truncated: false,

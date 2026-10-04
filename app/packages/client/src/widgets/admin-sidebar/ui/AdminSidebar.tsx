@@ -1,16 +1,27 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 import { useTranslations } from "use-intl";
 import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
+import { groupNavItems } from "#/shared/lib/shell/group-nav-items.ts";
+import type { NavGroup } from "#/shared/lib/shell/shell-types.ts";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Sidebar, SidebarRail } from "#/shared/ui/organisms/Sidebar/Sidebar.tsx";
 import { useCloseMobileSidebarOnChange } from "#/shared/ui/organisms/Sidebar/sidebar-context.tsx";
-import { SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader } from "#/shared/ui/organisms/Sidebar/sidebar-sections.tsx";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "#/shared/ui/organisms/Sidebar/sidebar-menu.tsx";
-import { groupNavItems } from "#/shared/lib/shell/group-nav-items.ts";
-import type { NavGroup } from "#/shared/lib/shell/shell-types.ts";
-import { isAdminAreaActive, useAdminItems, type AdminItem } from "../model/use-admin-items.ts";
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSkeleton,
+} from "#/shared/ui/organisms/Sidebar/sidebar-menu.tsx";
+import {
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+} from "#/shared/ui/organisms/Sidebar/sidebar-sections.tsx";
+import { type AdminItem, isAdminAreaActive, useAdminItems } from "../model/use-admin-items.ts";
 
 function AdminNavGroup() {
   const t = useTranslations();

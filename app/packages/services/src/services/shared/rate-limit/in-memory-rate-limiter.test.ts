@@ -50,6 +50,8 @@ describe("in-memory rate limiter", () => {
 
   it("rejects an unknown policy", async () => {
     const { clock } = movableClock("2026-09-29T12:00:00.000Z");
-    await expect(createInMemoryRateLimiter({ clock, policies }).consume("nope", "x")).rejects.toThrow("UNKNOWN_RATE_LIMIT_POLICY");
+    await expect(createInMemoryRateLimiter({ clock, policies }).consume("nope", "x")).rejects.toThrow(
+      "UNKNOWN_RATE_LIMIT_POLICY",
+    );
   });
 });

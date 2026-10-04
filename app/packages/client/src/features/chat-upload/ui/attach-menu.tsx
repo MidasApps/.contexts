@@ -2,7 +2,7 @@
 
 import type { FilePurpose } from "@core/contracts";
 import { LibraryBigIcon, PaperclipIcon } from "lucide-react";
-import { useRef, type ChangeEvent } from "react";
+import { type ChangeEvent, useRef } from "react";
 import { useTranslations } from "use-intl";
 import { PromptInputActionMenu, PromptInputActionMenuItem } from "#/shared/ui/ai/prompt-input.tsx";
 import type { UploadSource } from "../api/request-upload.ts";
@@ -47,8 +47,24 @@ export function AttachMenu({ onPick, canAddKnowledge = false, disabled }: Attach
           </PromptInputActionMenuItem>
         ) : null}
       </PromptInputActionMenu>
-      <input ref={attachRef} type="file" multiple hidden aria-label={t("fileInput")} onChange={picked("chat-attachment")} />
-      {canAddKnowledge ? <input ref={knowledgeRef} type="file" multiple hidden aria-label={t("knowledgeInput")} onChange={picked("knowledge")} /> : null}
+      <input
+        ref={attachRef}
+        type="file"
+        multiple
+        hidden
+        aria-label={t("fileInput")}
+        onChange={picked("chat-attachment")}
+      />
+      {canAddKnowledge ? (
+        <input
+          ref={knowledgeRef}
+          type="file"
+          multiple
+          hidden
+          aria-label={t("knowledgeInput")}
+          onChange={picked("knowledge")}
+        />
+      ) : null}
     </>
   );
 }

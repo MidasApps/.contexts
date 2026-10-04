@@ -6,7 +6,14 @@ import { isJsonRecord, type JsonRecord } from "./stable-json.ts";
 const RAW_META_KEYS: ReadonlySet<string> = new Set(CUSTOM_META_KEYS);
 
 /** Keys whose value is a map of name → subschema: the names are not keywords. */
-const SCHEMA_MAP_KEYS = new Set(["properties", "patternProperties", "$defs", "definitions", "dependentSchemas", "schemas"]);
+const SCHEMA_MAP_KEYS = new Set([
+  "properties",
+  "patternProperties",
+  "$defs",
+  "definitions",
+  "dependentSchemas",
+  "schemas",
+]);
 
 /** Keys holding instance data, not subschemas. */
 const DATA_KEYS = new Set(["examples", "default", "const", "enum"]);

@@ -27,7 +27,11 @@ export const validateExperimentDraft = (draft: ExperimentDraft): ExperimentDraft
  */
 export const refusalProblems = (error: unknown): ExperimentDraftProblems | null => {
   if (!(error instanceof ApiError)) return null;
-  if (error.status === 400 && (error.details ?? []).some((detail) => detail.field === "agentId" && detail.issue === "AGENT_NOT_ENABLED")) return { agent: "agentNotEnabled" };
+  if (
+    error.status === 400 &&
+    (error.details ?? []).some((detail) => detail.field === "agentId" && detail.issue === "AGENT_NOT_ENABLED")
+  )
+    return { agent: "agentNotEnabled" };
   if (error.status === 404) return { dataset: "datasetNotFound" };
   return null;
 };

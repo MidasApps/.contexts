@@ -16,5 +16,5 @@ export {
   type TotpEnrollment,
 } from "./auth-port.ts";
 export { createFakeAuth, type FakeAuth } from "./fake-auth.ts";
-export { createFirebaseAuthClient, initializeFirebaseAuth, type FirebaseInitSdk } from "./firebase-auth-client.ts";
+export { createFirebaseAuthClient, type FirebaseInitSdk, initializeFirebaseAuth } from "./firebase-auth-client.ts";
 export { useAuthState } from "./use-auth-state.ts";

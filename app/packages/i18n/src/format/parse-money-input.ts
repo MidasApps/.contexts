@@ -1,9 +1,7 @@
 import { currencyMinorDigits } from "./money.ts";
 
 export type ParseMoneyInputError = "INVALID_MONEY_INPUT" | "TOO_MANY_FRACTION_DIGITS";
-export type ParseMoneyInputResult =
-  | { ok: true; amountMinor: number }
-  | { ok: false; error: ParseMoneyInputError };
+export type ParseMoneyInputResult = { ok: true; amountMinor: number } | { ok: false; error: ParseMoneyInputError };
 
 type Separators = { group: string; decimal: string; currencyLiterals: string[] };
 

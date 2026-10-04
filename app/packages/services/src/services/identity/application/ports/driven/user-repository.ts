@@ -31,7 +31,13 @@ export type UserRepository = {
    * @returns the doc after the call.
    */
   readonly ensure: (args: { uid: UserId; profile: NewUserProfile; now: string }) => Promise<User>;
-  readonly updateProfile: (tx: Transaction, args: { uid: UserId; patch: UserProfilePatch; updatedAt: string; actorId: string }) => void;
+  readonly updateProfile: (
+    tx: Transaction,
+    args: { uid: UserId; patch: UserProfilePatch; updatedAt: string; actorId: string },
+  ) => void;
   /** Sets `lastContext` to the organization alone (project and unit belong to the previous one). */
-  readonly setActiveOrganization: (tx: Transaction, args: { uid: UserId; organizationId: OrganizationId; updatedAt: string; actorId: string }) => void;
+  readonly setActiveOrganization: (
+    tx: Transaction,
+    args: { uid: UserId; organizationId: OrganizationId; updatedAt: string; actorId: string },
+  ) => void;
 };

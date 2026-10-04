@@ -28,8 +28,8 @@ import {
 import { MemberSchema } from "./member.schema.ts";
 import { MembershipIdSchema, MembershipSchema } from "./membership.schema.ts";
 import { PermissionDefinitionSchema } from "./permission-definition.schema.ts";
-import { RoleIdSchema } from "./role-ref.schema.ts";
 import { RoleSchema } from "./role.schema.ts";
+import { RoleIdSchema } from "./role-ref.schema.ts";
 import { UpdateMembershipInputSchema } from "./update-membership-input.schema.ts";
 import { UpdateRoleInputSchema } from "./update-role-input.schema.ts";
 
@@ -130,7 +130,8 @@ export const removeMemberEndpoint = defineEndpoint({
   params: OrganizationParamsSchema.extend({ userId: UserIdSchema.meta(none("Uid of the member.")) }),
   responses: { 204: null },
   errors: { 403: NO_ESCALATION, 404: NOT_FOUND, 422: ["LAST_OWNER"] },
-  summary: "Removes a member: every grant and every API key they own there (core.member.remove; the member's permissions within the caller's).",
+  summary:
+    "Removes a member: every grant and every API key they own there (core.member.remove; the member's permissions within the caller's).",
 });
 
 export const listMembershipsEndpoint = defineEndpoint({
@@ -189,7 +190,9 @@ export const listInvitationsEndpoint = defineEndpoint({
   path: "/v1/organizations/{organizationId}/invitations",
   auth: "user",
   params: OrganizationParamsSchema,
-  query: PageQuerySchema.extend({ status: InvitationStatusSchema.optional().meta(none("Only invitations in this state.")) }),
+  query: PageQuerySchema.extend({
+    status: InvitationStatusSchema.optional().meta(none("Only invitations in this state.")),
+  }),
   responses: { 200: listEnvelope(InvitationSchema) },
   errors: { 404: NOT_FOUND },
   summary: "Lists invitations, never their tokens (core.member.read).",

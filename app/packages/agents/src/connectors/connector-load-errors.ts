@@ -11,7 +11,12 @@ export const connectorLoadErrorCodeOf = (error: unknown): ConnectorLoadErrorCode
 };
 
 /** How one connector's load ended: its tools loaded, or the code of why not. */
-export type ConnectorLoadOutcome = { readonly connector: Connector; readonly secret: string | null; readonly error: unknown; readonly failed: boolean };
+export type ConnectorLoadOutcome = {
+  readonly connector: Connector;
+  readonly secret: string | null;
+  readonly error: unknown;
+  readonly failed: boolean;
+};
 
 /** The code to record for an outcome, or `null` when the connector loaded with what it needs. */
 const codeOf = (outcome: ConnectorLoadOutcome): ConnectorLoadErrorCode | null => {
@@ -25,7 +30,12 @@ const codeOf = (outcome: ConnectorLoadOutcome): ConnectorLoadErrorCode | null =>
  * written when nothing changed, so a healthy tenant costs no write per cache refresh. Fire and
  * forget: a failed write must not fail the agent's run.
  */
-export const recordConnectorLoads = (args: { readonly connectors: ConnectorsPort; readonly tenantId: string; readonly outcomes: readonly ConnectorLoadOutcome[]; readonly at: string }): void => {
+export const recordConnectorLoads = (args: {
+  readonly connectors: ConnectorsPort;
+  readonly tenantId: string;
+  readonly outcomes: readonly ConnectorLoadOutcome[];
+  readonly at: string;
+}): void => {
   const { recordLoad } = args.connectors;
   if (recordLoad === undefined) return;
   for (const outcome of args.outcomes) {

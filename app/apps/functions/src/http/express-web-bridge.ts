@@ -1,5 +1,5 @@
-import { errorResponse, type Logger, REQUEST_ID_HEADER, resolveRequestId } from "@core/services";
 import type { IncomingHttpHeaders } from "node:http";
+import { errorResponse, type Logger, REQUEST_ID_HEADER, resolveRequestId } from "@core/services";
 
 /**
  * The part of the Express request `onRequest` hands over that the bridge

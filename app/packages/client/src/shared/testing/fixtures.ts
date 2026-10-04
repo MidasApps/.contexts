@@ -72,11 +72,24 @@ export const buildMe = (overrides: Json = {}): Json => ({
   ...overrides,
 });
 
-export const buildAccessContext = (args: { permissions?: readonly Permission[]; organization?: Json; project?: Json; unit?: Json; displayTimeZone?: string } = {}): Json => ({
+export const buildAccessContext = (
+  args: {
+    permissions?: readonly Permission[];
+    organization?: Json;
+    project?: Json;
+    unit?: Json;
+    displayTimeZone?: string;
+  } = {},
+): Json => ({
   tenantId: args.organization?.["id"] ?? IDS.organization,
   organization: buildOrganization(args.organization),
   ...(args.project === undefined ? {} : { project: buildProject(args.project) }),
   ...(args.unit === undefined ? {} : { unit: buildUnit(args.unit) }),
   permissions: [...(args.permissions ?? [])].sort(),
-  regional: { locale: "pt-BR", displayTimeZone: args.displayTimeZone ?? "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" },
+  regional: {
+    locale: "pt-BR",
+    displayTimeZone: args.displayTimeZone ?? "America/Sao_Paulo",
+    nodeTimeZone: "America/Sao_Paulo",
+    currency: "BRL",
+  },
 });

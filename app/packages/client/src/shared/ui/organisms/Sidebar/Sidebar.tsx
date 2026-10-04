@@ -25,7 +25,11 @@ export function Sidebar({ side = "left", collapsible = "icon", className, childr
 
   if (collapsible === "none") {
     return (
-      <div data-slot="sidebar" className={cn("flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground", className)} {...props}>
+      <div
+        data-slot="sidebar"
+        className={cn("flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground", className)}
+        {...props}
+      >
         {children}
       </div>
     );
@@ -139,5 +143,11 @@ export function SidebarRail({ className, ...props }: ComponentProps<"button">) {
 
 /** Column next to the sidebar holding topbar and page (the template renders `main` inside it). */
 export function SidebarInset({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="sidebar-inset" className={cn("relative flex min-w-0 w-full flex-1 flex-col bg-background", className)} {...props} />;
+  return (
+    <div
+      data-slot="sidebar-inset"
+      className={cn("relative flex min-w-0 w-full flex-1 flex-col bg-background", className)}
+      {...props}
+    />
+  );
 }

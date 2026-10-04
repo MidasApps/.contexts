@@ -21,8 +21,14 @@ const EmailSchema = z.email();
  */
 export const validateNewAccount = (input: NewAccountInput): NewAccountProblems => {
   const email = input.email.trim();
-  const emailProblem = email === "" ? "emailRequired" : EmailSchema.safeParse(email).success ? undefined : "emailInvalid";
-  const passwordProblem = input.password === "" ? "passwordRequired" : input.password.length < MIN_PASSWORD_LENGTH ? "passwordTooShort" : undefined;
+  const emailProblem =
+    email === "" ? "emailRequired" : EmailSchema.safeParse(email).success ? undefined : "emailInvalid";
+  const passwordProblem =
+    input.password === ""
+      ? "passwordRequired"
+      : input.password.length < MIN_PASSWORD_LENGTH
+        ? "passwordTooShort"
+        : undefined;
   return {
     ...(input.name.trim() === "" ? { name: "nameRequired" as const } : {}),
     ...(emailProblem === undefined ? {} : { email: emailProblem }),

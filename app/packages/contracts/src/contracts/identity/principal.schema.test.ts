@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest";
 import { EXAMPLE_IDS } from "../example-values.ts";
 import { PrincipalContract, PrincipalSchema } from "./principal.schema.ts";
 
-const { user: uid, organization: tenantId, device: deviceId, apiKey: apiKeyId, impersonationSession: sessionId, otherUser } = EXAMPLE_IDS;
+const {
+  user: uid,
+  organization: tenantId,
+  device: deviceId,
+  apiKey: apiKeyId,
+  impersonationSession: sessionId,
+  otherUser,
+} = EXAMPLE_IDS;
 
 describe("PrincipalSchema", () => {
   it("accepts the user, device and service principals of SP1 spec §3.1", () => {
@@ -19,7 +26,9 @@ describe("PrincipalSchema", () => {
 
   it("requires mfa on a user and both ids on an impersonation", () => {
     expect(PrincipalSchema.safeParse({ type: "user", uid }).success).toBe(false);
-    expect(PrincipalSchema.safeParse({ type: "user", uid, mfa: false, impersonation: { sessionId } }).success).toBe(false);
+    expect(PrincipalSchema.safeParse({ type: "user", uid, mfa: false, impersonation: { sessionId } }).success).toBe(
+      false,
+    );
   });
 
   it("binds device and service principals to a tenant", () => {
@@ -36,6 +45,7 @@ describe("PrincipalSchema", () => {
   });
 
   it("parses its catalog examples", () => {
-    for (const example of PrincipalContract.meta.examples) expect(PrincipalSchema.safeParse(example).success).toBe(true);
+    for (const example of PrincipalContract.meta.examples)
+      expect(PrincipalSchema.safeParse(example).success).toBe(true);
   });
 });

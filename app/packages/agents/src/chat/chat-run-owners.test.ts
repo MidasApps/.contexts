@@ -66,16 +66,41 @@ describe("approvalRunIdsOf", () => {
   it("reads the run ids of responded approvals whose tool call matches", () => {
     const parts = [
       { type: "step-start" },
-      { type: "tool-agent-action", toolCallId: "call-1", state: "approval-responded", approval: { id: "run-9::call-1", approved: true } },
-      { type: "tool-agent-action", toolCallId: "call-2", state: "approval-requested", approval: { id: "run-9::call-2" } },
-      { type: "tool-agent-action", toolCallId: "call-3", state: "approval-responded", approval: { id: "run-8::other" } },
-      { type: "tool-agent-action", toolCallId: "call-4", state: "approval-responded", approval: { id: "no-separator" } },
+      {
+        type: "tool-agent-action",
+        toolCallId: "call-1",
+        state: "approval-responded",
+        approval: { id: "run-9::call-1", approved: true },
+      },
+      {
+        type: "tool-agent-action",
+        toolCallId: "call-2",
+        state: "approval-requested",
+        approval: { id: "run-9::call-2" },
+      },
+      {
+        type: "tool-agent-action",
+        toolCallId: "call-3",
+        state: "approval-responded",
+        approval: { id: "run-8::other" },
+      },
+      {
+        type: "tool-agent-action",
+        toolCallId: "call-4",
+        state: "approval-responded",
+        approval: { id: "no-separator" },
+      },
     ];
     expect(approvalRunIdsOf(parts)).toEqual(["run-9"]);
   });
 
   it("returns each run once", () => {
-    const part = (toolCallId: string) => ({ type: "dynamic-tool", toolCallId, state: "approval-responded", approval: { id: `run-1::${toolCallId}`, approved: false } });
+    const part = (toolCallId: string) => ({
+      type: "dynamic-tool",
+      toolCallId,
+      state: "approval-responded",
+      approval: { id: `run-1::${toolCallId}`, approved: false },
+    });
     expect(approvalRunIdsOf([part("a"), part("b")])).toEqual(["run-1"]);
   });
 });

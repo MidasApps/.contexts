@@ -17,5 +17,8 @@ export const useWaitingApprovals = (): { organizationId: string; count: number }
   const allowed = organizationId !== null && permissions.can("core.approval.read");
   const pending = useApprovalRequests({ organizationId, status: "pending", enabled: allowed });
   if (organizationId === null || !allowed) return null;
-  return { organizationId, count: me.data === undefined ? 0 : waitingForDecision(pending.requests, me.data.uid).length };
+  return {
+    organizationId,
+    count: me.data === undefined ? 0 : waitingForDecision(pending.requests, me.data.uid).length,
+  };
 };

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
-import { useProject, type TenantNodeInput } from "#/entities/project/index.ts";
+import { type TenantNodeInput, useProject } from "#/entities/project/index.ts";
 import { unitQuery } from "#/entities/unit/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
@@ -43,7 +43,11 @@ export function NodeName({ node }: { node: TenantNodeInput }) {
     <span className="inline-flex items-center gap-1.5">
       <Icon name={node.level === "project" ? "folder" : "network"} className="size-3.5 text-muted-foreground" />
       <span className="sr-only">{t(node.level === "project" ? "projectLevel" : "unitLevel")}</span>
-      {node.level === "project" ? <ProjectName organizationId={node.tenantId} projectId={node.projectId} /> : <UnitName organizationId={node.tenantId} unitId={node.unitId} />}
+      {node.level === "project" ? (
+        <ProjectName organizationId={node.tenantId} projectId={node.projectId} />
+      ) : (
+        <UnitName organizationId={node.tenantId} unitId={node.unitId} />
+      )}
     </span>
   );
 }

@@ -11,7 +11,11 @@ export type SessionCookieOptions = {
  * `HttpOnly; Secure; SameSite=Lax; Path=/`. `Secure` is dropped only for `APP_ENV=local`
  * served over plain http (browsers refuse Secure cookies there).
  */
-export const sessionCookieOptions = (args: { appEnv: string; appUrl: string; maxAgeSeconds: number }): SessionCookieOptions => ({
+export const sessionCookieOptions = (args: {
+  appEnv: string;
+  appUrl: string;
+  maxAgeSeconds: number;
+}): SessionCookieOptions => ({
   httpOnly: true,
   secure: !(args.appEnv === "local" && args.appUrl.startsWith("http://")),
   sameSite: "lax",

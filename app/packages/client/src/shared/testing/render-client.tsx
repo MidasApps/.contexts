@@ -1,10 +1,16 @@
 // Test helper: renders client code (entities, features) inside the ports the app shell provides —
 // router (memory), auth (fake), the typed `/v1` caller over a fake API and a hand-made session —
 // plus `use-intl` and TanStack Query. Widgets and views use the full app harness instead.
-import { loadMessages, type ExtraNamespaces, type SupportedLocale } from "@core/i18n";
-import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
-import { render, renderHook, type RenderHookResult, type RenderOptions, type RenderResult } from "@testing-library/react";
-import { userEvent, type UserEvent } from "@testing-library/user-event";
+import { type ExtraNamespaces, loadMessages, type SupportedLocale } from "@core/i18n";
+import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  type RenderHookResult,
+  type RenderOptions,
+  type RenderResult,
+  render,
+  renderHook,
+} from "@testing-library/react";
+import { type UserEvent, userEvent } from "@testing-library/user-event";
 import type { ReactElement, ReactNode } from "react";
 import { IntlProvider } from "use-intl";
 import { ApiProvider } from "#/shared/api/api-context.tsx";
@@ -20,12 +26,20 @@ import type { SessionController, SessionState } from "#/shared/lib/session/sessi
 import { createFakeApi, type FakeApi } from "./fake-api.ts";
 import { createTestQueryClient } from "./render.tsx";
 
-export const TEST_USER: AuthUser = { uid: "uA1b2C3d4E5f6G7h8I9j", email: "ana@example.com", displayName: "Ana Souza", emailVerified: true, mfaFactors: [] };
+export const TEST_USER: AuthUser = {
+  uid: "uA1b2C3d4E5f6G7h8I9j",
+  email: "ana@example.com",
+  displayName: "Ana Souza",
+  emailVerified: true,
+  mfaFactors: [],
+};
 
 /** A session controller whose actions record calls (and resolve), in the given state. */
 export type RecordingSession = SessionController & { readonly actions: string[] };
 
-export const createRecordingSession = (state: SessionState = { status: "signed-in", uid: TEST_USER.uid }): RecordingSession => {
+export const createRecordingSession = (
+  state: SessionState = { status: "signed-in", uid: TEST_USER.uid },
+): RecordingSession => {
   const actions: string[] = [];
   const record = (name: string) => () => {
     actions.push(name);
@@ -83,7 +97,12 @@ export const createClientTestContext = (options: ClientTestOptions = {}): Client
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <IntlProvider locale={locale} messages={messages} timeZone={options.timeZone ?? "America/Sao_Paulo"} onError={throwOnIntlError}>
+        <IntlProvider
+          locale={locale}
+          messages={messages}
+          timeZone={options.timeZone ?? "America/Sao_Paulo"}
+          onError={throwOnIntlError}
+        >
           <RouterProvider router={router}>
             <AuthProvider auth={auth}>
               <ApiProvider callEndpoint={callEndpoint} connection={connection}>
@@ -109,7 +128,10 @@ export const renderWithClient = (ui: ReactElement, options: ClientTestOptions = 
 };
 
 /** `renderHook` with the client ports. */
-export const renderClientHook = <T,>(hook: () => T, options: ClientTestOptions = {}): RenderHookResult<T, unknown> & ClientTestContext => {
+export const renderClientHook = <T,>(
+  hook: () => T,
+  options: ClientTestOptions = {},
+): RenderHookResult<T, unknown> & ClientTestContext => {
   const context = createClientTestContext(options);
   return { ...renderHook(hook, { wrapper: context.Wrapper }), ...context };
 };

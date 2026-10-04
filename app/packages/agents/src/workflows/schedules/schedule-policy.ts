@@ -13,7 +13,10 @@ export const LOCAL_MIN_INTERVAL_FLOOR = 1;
 /** Fires inspected for the shortest gap; covers every 5-field pattern that repeats within a day or a week. */
 const FIRES_CHECKED = 200;
 
-export type SchedulePolicyEnv = { readonly APP_ENV: string; readonly SCHEDULE_MIN_INTERVAL_MINUTES?: number | undefined };
+export type SchedulePolicyEnv = {
+  readonly APP_ENV: string;
+  readonly SCHEDULE_MIN_INTERVAL_MINUTES?: number | undefined;
+};
 
 /**
  * The minimum interval in force: `SCHEDULE_MIN_INTERVAL_MINUTES` when valid, never below 15 outside
@@ -21,7 +24,10 @@ export type SchedulePolicyEnv = { readonly APP_ENV: string; readonly SCHEDULE_MI
  */
 export const minIntervalMinutesOf = (env: SchedulePolicyEnv): number => {
   const value = env.SCHEDULE_MIN_INTERVAL_MINUTES;
-  const configured = typeof value === "number" && Number.isInteger(value) && value >= LOCAL_MIN_INTERVAL_FLOOR ? value : DEFAULT_MIN_INTERVAL_MINUTES;
+  const configured =
+    typeof value === "number" && Number.isInteger(value) && value >= LOCAL_MIN_INTERVAL_FLOOR
+      ? value
+      : DEFAULT_MIN_INTERVAL_MINUTES;
   return env.APP_ENV === "local" ? configured : Math.max(configured, DEFAULT_MIN_INTERVAL_MINUTES);
 };
 
@@ -45,7 +51,12 @@ export const nextFires = (cron: string, timezone: string, after: number, count: 
  * minimum interval here: the write refuses that with its own code.
  * @returns `null` when the scheduler cannot read the cron in that zone.
  */
-export const previewFires = (input: { readonly cron: string; readonly timezone: string; readonly now: number; readonly count: number }): number[] | null => {
+export const previewFires = (input: {
+  readonly cron: string;
+  readonly timezone: string;
+  readonly now: number;
+  readonly count: number;
+}): number[] | null => {
   try {
     validateCron(input.cron, input.timezone);
     return nextFires(input.cron, input.timezone, input.now, input.count);
@@ -54,9 +65,10 @@ export const previewFires = (input: { readonly cron: string; readonly timezone: 
   }
 };
 
-const shortestGapMinutes =(fires: readonly number[]): number => {
+const shortestGapMinutes = (fires: readonly number[]): number => {
   let shortest = Number.POSITIVE_INFINITY;
-  for (let index = 1; index < fires.length; index += 1) shortest = Math.min(shortest, ((fires[index] ?? 0) - (fires[index - 1] ?? 0)) / 60_000);
+  for (let index = 1; index < fires.length; index += 1)
+    shortest = Math.min(shortest, ((fires[index] ?? 0) - (fires[index - 1] ?? 0)) / 60_000);
   return shortest;
 };
 
@@ -65,14 +77,23 @@ const shortestGapMinutes =(fires: readonly number[]): number => {
  * minimum interval among the next fires from `now`.
  * @returns `null` when the schedule is acceptable.
  */
-export const checkSchedule = (input: { readonly cron: string; readonly timezone: string; readonly minIntervalMinutes: number; readonly now: number }): ScheduleViolation | null => {
-  if (!CronExpressionSchema.safeParse(input.cron).success) return { code: "VALIDATION_FAILED", field: "cron", issue: "INVALID_CRON" };
-  if (!TimeZoneSchema.safeParse(input.timezone).success) return { code: "VALIDATION_FAILED", field: "timezone", issue: "INVALID_TIME_ZONE" };
+export const checkSchedule = (input: {
+  readonly cron: string;
+  readonly timezone: string;
+  readonly minIntervalMinutes: number;
+  readonly now: number;
+}): ScheduleViolation | null => {
+  if (!CronExpressionSchema.safeParse(input.cron).success)
+    return { code: "VALIDATION_FAILED", field: "cron", issue: "INVALID_CRON" };
+  if (!TimeZoneSchema.safeParse(input.timezone).success)
+    return { code: "VALIDATION_FAILED", field: "timezone", issue: "INVALID_TIME_ZONE" };
   try {
     validateCron(input.cron, input.timezone);
   } catch {
     return { code: "VALIDATION_FAILED", field: "cron", issue: "INVALID_CRON" };
   }
   const gap = shortestGapMinutes(nextFires(input.cron, input.timezone, input.now, FIRES_CHECKED));
-  return gap < input.minIntervalMinutes ? { code: "SCHEDULE_INTERVAL_TOO_SHORT", field: "cron", issue: "TOO_FREQUENT" } : null;
+  return gap < input.minIntervalMinutes
+    ? { code: "SCHEDULE_INTERVAL_TOO_SHORT", field: "cron", issue: "TOO_FREQUENT" }
+    : null;
 };

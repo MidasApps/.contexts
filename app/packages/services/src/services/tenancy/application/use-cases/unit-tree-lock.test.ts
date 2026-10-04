@@ -11,16 +11,28 @@ const setup = async () => {
   const clock = { now: () => new Date(now) };
   const world = makeTenancyWorld({ clock });
   const organization = await world.organizationOf("owner");
-  const created = await world.tenancy.createProject({ ...world.command("owner"), tenantId: organization.id, input: { name: "Alpha" } });
+  const created = await world.tenancy.createProject({
+    ...world.command("owner"),
+    tenantId: organization.id,
+    input: { name: "Alpha" },
+  });
   if (!created.ok) throw created.error;
   const project: Project = created.data;
   const unit = async (name: string, type: string, parentUnitId: string | null = null): Promise<Unit> => {
-    const result = await world.tenancy.createUnit({ ...world.command("owner"), projectId: project.id, input: { name, type, parentUnitId: parentUnitId === null ? null : ids.unit(parentUnitId) } });
+    const result = await world.tenancy.createUnit({
+      ...world.command("owner"),
+      projectId: project.id,
+      input: { name, type, parentUnitId: parentUnitId === null ? null : ids.unit(parentUnitId) },
+    });
     if (!result.ok) throw result.error;
     return result.data;
   };
   const move = (unitId: string, parentUnitId: string | null, tenancy = world.tenancy) =>
-    tenancy.updateUnit({ ...world.command("owner"), unitId: ids.unit(unitId), input: { parentUnitId: parentUnitId === null ? null : ids.unit(parentUnitId) } });
+    tenancy.updateUnit({
+      ...world.command("owner"),
+      unitId: ids.unit(unitId),
+      input: { parentUnitId: parentUnitId === null ? null : ids.unit(parentUnitId) },
+    });
   const advance = (ms: number) => void (now += ms);
   return { ...world, clock, project, unit, move, advance };
 };
@@ -65,10 +77,21 @@ describe("unit tree lock", () => {
     });
 
     expect(await world.move(room.id, siteB.id)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
-    expect(await world.tenancy.deleteUnit({ ...world.command("owner"), unitId: room.id })).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
-    const create = await world.tenancy.createUnit({ ...world.command("owner"), projectId: world.project.id, input: { name: "New", type: "sample.site", parentUnitId: null } });
+    expect(await world.tenancy.deleteUnit({ ...world.command("owner"), unitId: room.id })).toMatchObject({
+      ok: false,
+      error: { code: "CONFLICT" },
+    });
+    const create = await world.tenancy.createUnit({
+      ...world.command("owner"),
+      projectId: world.project.id,
+      input: { name: "New", type: "sample.site", parentUnitId: null },
+    });
     expect(create).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
-    const rename = await world.tenancy.updateUnit({ ...world.command("owner"), unitId: room.id, input: { name: "Renamed" } });
+    const rename = await world.tenancy.updateUnit({
+      ...world.command("owner"),
+      unitId: room.id,
+      input: { name: "Renamed" },
+    });
     expect(rename).toMatchObject({ ok: true, data: { name: "Renamed", parentUnitId: siteA.id } });
   });
 
@@ -94,7 +117,11 @@ describe("unit tree lock", () => {
     // Half-done: the descendant is rebased, the moved unit is not, and the lock stays.
     expect(world.tenancyStore.unitRow(inner.id)?.ancestorIds).toEqual([siteB.id, room.id]);
     expect(world.tenancyStore.unitRow(room.id)?.parentUnitId).toBe(siteA.id);
-    expect(world.tenancyStore.treeLocks.lockOf(world.project.id)?.operation).toEqual({ kind: "move", unitId: room.id, parentUnitId: siteB.id });
+    expect(world.tenancyStore.treeLocks.lockOf(world.project.id)?.operation).toEqual({
+      kind: "move",
+      unitId: room.id,
+      parentUnitId: siteB.id,
+    });
 
     // Another change waits for the lease, then finishes the abandoned move first.
     expect((await world.unit("Too soon", "sample.site").catch((e: unknown) => e)) instanceof Error).toBe(true);
@@ -103,7 +130,9 @@ describe("unit tree lock", () => {
     expect(world.tenancyStore.unitRow(room.id)).toMatchObject({ parentUnitId: siteB.id, ancestorIds: [siteB.id] });
     expect(world.tenancyStore.unitRow(inner.id)).toMatchObject({ ancestorIds: [siteB.id, room.id], depth: 2 });
     expect(world.tenancyStore.treeLocks.lockOf(world.project.id)).toBeUndefined();
-    expect(world.auditLog.entries("tenant").some((entry) => entry.action === "UNIT_MOVED" && entry.actor.type === "system")).toBe(true);
+    expect(
+      world.auditLog.entries("tenant").some((entry) => entry.action === "UNIT_MOVED" && entry.actor.type === "system"),
+    ).toBe(true);
   });
 
   it("lets the same move be retried before the lease expires", async () => {

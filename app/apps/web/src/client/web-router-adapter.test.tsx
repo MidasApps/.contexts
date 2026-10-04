@@ -3,12 +3,26 @@ import "@core/client/testing/setup";
 import type { RouterLinkProps } from "@core/client/shared/lib/router";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { createWebRouterAdapter, stripLocalePrefix, type WebNavigator, type WebRouterHooks } from "./web-router-adapter";
+import {
+  createWebRouterAdapter,
+  stripLocalePrefix,
+  type WebNavigator,
+  type WebRouterHooks,
+} from "./web-router-adapter";
 
 const fakeHooks = (pathname: string, search = ""): WebRouterHooks => ({
   usePathname: () => pathname,
   useSearch: () => search,
-  Link: ({ href, replace, prefetch, children, ...props }: { href: string; replace?: boolean | undefined; prefetch?: boolean | undefined } & Omit<RouterLinkProps, "to" | "replace">) => (
+  Link: ({
+    href,
+    replace,
+    prefetch,
+    children,
+    ...props
+  }: { href: string; replace?: boolean | undefined; prefetch?: boolean | undefined } & Omit<
+    RouterLinkProps,
+    "to" | "replace"
+  >) => (
     <a data-href={href} data-replace={String(replace === true)} data-prefetch={String(prefetch)} {...props}>
       {children}
     </a>
@@ -31,7 +45,9 @@ describe("createWebRouterAdapter", () => {
 
     expect(router.href({ id: "home" })).toBe("/en-US");
     expect(router.href({ id: "sign-in", next: "/o/a" })).toBe("/en-US/sign-in?next=%2Fo%2Fa");
-    expect(router.href({ id: "project", organizationId: "org 1", projectId: "p", unit: "u" })).toBe("/en-US/o/org%201/p/p?unit=u");
+    expect(router.href({ id: "project", organizationId: "org 1", projectId: "p", unit: "u" })).toBe(
+      "/en-US/o/org%201/p/p?unit=u",
+    );
     expect(router.href({ id: "admin", rest: "users" })).toBe("/en-US/admin/users");
   });
 
@@ -50,11 +66,19 @@ describe("createWebRouterAdapter", () => {
 
   it("changes the address in place for a same-page navigation, without asking the router for a new page", () => {
     const replaceAddress = vi.fn();
-    const router = createWebRouterAdapter({ locale: "pt-BR", assign: vi.fn(), hooks: fakeHooks("/o/a/p/b/chat"), replaceAddress });
+    const router = createWebRouterAdapter({
+      locale: "pt-BR",
+      assign: vi.fn(),
+      hooks: fakeHooks("/o/a/p/b/chat"),
+      replaceAddress,
+    });
     const navigator = fakeNavigator();
     router.attach(navigator);
 
-    router.navigate({ id: "chat", organizationId: "a", projectId: "b", conversationId: "c1" }, { replace: true, samePage: true });
+    router.navigate(
+      { id: "chat", organizationId: "a", projectId: "b", conversationId: "c1" },
+      { replace: true, samePage: true },
+    );
 
     expect(replaceAddress).toHaveBeenCalledWith("/pt-BR/o/a/p/b/chat/c1");
     expect(navigator.calls).toEqual([]);
@@ -82,7 +106,11 @@ describe("createWebRouterAdapter", () => {
   });
 
   it("reads params and the location from the unprefixed pathname and search", () => {
-    const router = createWebRouterAdapter({ locale: "pt-BR", assign: vi.fn(), hooks: fakeHooks("/o/org-1/p/proj-2/m/example/items/9", "unit=u-3") });
+    const router = createWebRouterAdapter({
+      locale: "pt-BR",
+      assign: vi.fn(),
+      hooks: fakeHooks("/o/org-1/p/proj-2/m/example/items/9", "unit=u-3"),
+    });
     let seen: unknown;
     function Probe() {
       seen = { params: router.useRouteParams(), unit: router.useSearchParam("unit"), path: router.useLocationPath() };

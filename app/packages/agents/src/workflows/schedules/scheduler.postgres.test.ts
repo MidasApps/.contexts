@@ -5,7 +5,11 @@ import { PostgresStore } from "@mastra/pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../../testing/agent-context-fixture.ts";
-import { createFakeAccessPort, createRecordingNotificationPort, type FakeMembership } from "../../testing/fake-ports.ts";
+import {
+  createFakeAccessPort,
+  createRecordingNotificationPort,
+  type FakeMembership,
+} from "../../testing/fake-ports.ts";
 import { SCHEDULE_ID_CONTEXT_KEY, type StoredRun } from "../runs/workflow-run-view.ts";
 import { createReauthorizeScheduleCreatorStep } from "../steps/reauthorize-schedule-creator.step.ts";
 import { createWorkflowCatalog, policyOf } from "../workflow-catalog.ts";
@@ -59,7 +63,13 @@ const deps: TenantScheduleRouteDeps = {
 
 const createSchedule = async (slug: string): Promise<string> => {
   const requestContext = new RequestContext<unknown>(buildAgentContextEntries({ permissions: CREATOR }));
-  const body = { workflowId: WORKFLOW_ID, slug: `${slug}-${suffix}`, cron: "* * * * *", timezone: "America/Sao_Paulo", inputData: { label: slug } };
+  const body = {
+    workflowId: WORKFLOW_ID,
+    slug: `${slug}-${suffix}`,
+    cron: "* * * * *",
+    timezone: "America/Sao_Paulo",
+    inputData: { label: slug },
+  };
   const response = await handleCreateSchedule(deps, () => Promise.resolve(body))({ mastra, requestContext });
   expect(response.status).toBe(201);
   const { data } = (await response.json()) as { data: { id: string; status: string; nextFireAt: string } };
@@ -86,7 +96,11 @@ const waitFor = async <T>(probeValue: () => Promise<T | undefined>, timeoutMs: n
 const settledRun = (scheduleId: string) => async () => {
   const runs = await runsOf(scheduleId);
   const run = runs.find((candidate) => {
-    const status = (typeof candidate.snapshot === "string" ? (JSON.parse(candidate.snapshot) as { status?: string }) : (candidate.snapshot as { status?: string })).status;
+    const status = (
+      typeof candidate.snapshot === "string"
+        ? (JSON.parse(candidate.snapshot) as { status?: string })
+        : (candidate.snapshot as { status?: string })
+    ).status;
     return status === "success" || status === "failed";
   });
   return run === undefined ? undefined : { run, status: (run.snapshot as { status: string }).status };
@@ -94,7 +108,12 @@ const settledRun = (scheduleId: string) => async () => {
 
 beforeAll(async () => {
   await storage.init();
-  mastra = new Mastra({ workflows: { [WORKFLOW_ID]: probe }, storage, logger: false, scheduler: { enabled: true, tickIntervalMs: 500 } });
+  mastra = new Mastra({
+    workflows: { [WORKFLOW_ID]: probe },
+    storage,
+    logger: false,
+    scheduler: { enabled: true, tickIntervalMs: 500 },
+  });
   await mastra.startWorkers();
 });
 
@@ -112,7 +131,12 @@ describe("tenant schedules on Mastra Schedules (Postgres)", () => {
     const { run, status } = await waitFor(settledRun(id), 20_000);
     expect(status).toBe("success");
     expect(run.resourceId).toBe(`${TEST_TENANT}:${TEST_UID}`);
-    expect(seen.find((entry) => entry.scheduleId === id)).toEqual({ scheduleId: id, userId: TEST_UID, permissions: [...CREATOR].sort(), resourceId: `${TEST_TENANT}:${TEST_UID}` });
+    expect(seen.find((entry) => entry.scheduleId === id)).toEqual({
+      scheduleId: id,
+      userId: TEST_UID,
+      permissions: [...CREATOR].sort(),
+      resourceId: `${TEST_TENANT}:${TEST_UID}`,
+    });
   }, 30_000);
 
   it("fires on its own with the local 1-minute policy", async () => {
@@ -132,7 +156,12 @@ describe("tenant schedules on Mastra Schedules (Postgres)", () => {
       expect(status).toBe("failed");
       expect(seen.some((entry) => entry.scheduleId === id)).toBe(false);
       expect((await mastra.schedules.get(id))?.status).toBe("paused");
-      expect(notifications.sent).toContainEqual({ tenantId: TEST_TENANT, recipientUid: TEST_UID, kind: "SCHEDULE_PAUSED", data: { scheduleId: id, workflowId: WORKFLOW_ID, reason: "FORBIDDEN" } });
+      expect(notifications.sent).toContainEqual({
+        tenantId: TEST_TENANT,
+        recipientUid: TEST_UID,
+        kind: "SCHEDULE_PAUSED",
+        data: { scheduleId: id, workflowId: WORKFLOW_ID, reason: "FORBIDDEN" },
+      });
     } finally {
       memberships[0] = membership;
     }

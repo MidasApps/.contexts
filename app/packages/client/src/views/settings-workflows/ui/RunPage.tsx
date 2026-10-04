@@ -3,7 +3,13 @@
 import type { AccessContext, WorkflowEvent, WorkflowRun } from "@core/contracts";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { isRunCancelable, RunStatusPill, useTenantWorkflowRun, useWorkflowCatalog } from "#/entities/workflow-run/index.ts";
+import { useMemberNames } from "#/entities/member/index.ts";
+import {
+  isRunCancelable,
+  RunStatusPill,
+  useTenantWorkflowRun,
+  useWorkflowCatalog,
+} from "#/entities/workflow-run/index.ts";
 import { CancelWorkflowRunDialog } from "#/features/cancel-workflow-run/index.ts";
 import { StartWorkflowRunDialog } from "#/features/start-workflow-run/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
@@ -21,7 +27,6 @@ import { RunTimeline } from "#/widgets/run-timeline/index.ts";
 import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { useRunEvents } from "../model/use-run-events.ts";
 import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
-import { useMemberNames } from "#/entities/member/index.ts";
 
 function RunEvents({ events }: { events: readonly WorkflowEvent[] }) {
   const t = useTranslations("settings.workflows.run");
@@ -33,14 +38,21 @@ function RunEvents({ events }: { events: readonly WorkflowEvent[] }) {
         {[...events]
           .sort((a, b) => a.index - b.index)
           .map((event) => (
-            <li key={event.index} className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+            <li
+              key={event.index}
+              className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+            >
               <span className="flex min-w-0 flex-col">
                 <span className="text-sm font-medium">{t(`eventTypes.${event.type}`)}</span>
-                <span className="font-mono text-caption break-all text-muted-foreground">{event.stepId ?? t("runLevel")}</span>
+                <span className="font-mono text-caption break-all text-muted-foreground">
+                  {event.stepId ?? t("runLevel")}
+                </span>
               </span>
               <span className="flex shrink-0 items-center gap-2">
                 {event.status === null ? null : <RunStatusPill status={event.status} />}
-                <span className="font-mono text-caption text-muted-foreground tabular-nums">{formatDateTime(event.occurredAt)}</span>
+                <span className="font-mono text-caption text-muted-foreground tabular-nums">
+                  {formatDateTime(event.occurredAt)}
+                </span>
               </span>
             </li>
           ))}
@@ -49,7 +61,13 @@ function RunEvents({ events }: { events: readonly WorkflowEvent[] }) {
   );
 }
 
-type RunDetailsProps = { run: WorkflowRun; organizationId: string; canSeeApprovals: boolean; starterLabel: string | undefined; scheduleLabel: string | undefined };
+type RunDetailsProps = {
+  run: WorkflowRun;
+  organizationId: string;
+  canSeeApprovals: boolean;
+  starterLabel: string | undefined;
+  scheduleLabel: string | undefined;
+};
 
 function RunDetails({ run, organizationId, canSeeApprovals, starterLabel, scheduleLabel }: RunDetailsProps) {
   const t = useTranslations("settings.workflows.run");
@@ -58,7 +76,10 @@ function RunDetails({ run, organizationId, canSeeApprovals, starterLabel, schedu
   const live = isRunCancelable(run.status);
   return (
     <div className="flex flex-col gap-4">
-      <SectionCard title={t("timelineTitle")} description={<span role="status">{live ? t("live") : t("settled")}</span>}>
+      <SectionCard
+        title={t("timelineTitle")}
+        description={<span role="status">{live ? t("live") : t("settled")}</span>}
+      >
         <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
           <div className="flex flex-col">
             <dt className="text-xs text-muted-foreground">{t("workflow")}</dt>
@@ -78,7 +99,10 @@ function RunDetails({ run, organizationId, canSeeApprovals, starterLabel, schedu
             <span className="flex flex-col gap-1">
               <span>{t("approvalHint")}</span>
               {canSeeApprovals ? (
-                <RouteLink className="font-medium text-foreground underline underline-offset-4" to={{ id: "settings", organizationId, section: "approvals", rest: approvalRequestId }}>
+                <RouteLink
+                  className="font-medium text-foreground underline underline-offset-4"
+                  to={{ id: "settings", organizationId, section: "approvals", rest: approvalRequestId }}
+                >
                   {t("openApproval")}
                 </RouteLink>
               ) : null}
@@ -106,7 +130,9 @@ function RunNotFound({ organizationId }: { organizationId: string }) {
       description={t("run.notFoundDescription")}
       action={
         <Button variant="secondary" asChild>
-          <SettingsSectionLink organizationId={organizationId} section="workflows">{t("backToRuns")}</SettingsSectionLink>
+          <SettingsSectionLink organizationId={organizationId} section="workflows">
+            {t("backToRuns")}
+          </SettingsSectionLink>
         </Button>
       }
     />
@@ -128,18 +154,26 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
   const run = useTenantWorkflowRun(organization.id, runId);
   const workflowLabel = useWorkflowLabel();
   const scheduleLabel = useTenantScheduleLabels(context);
-  const starterName = useMemberNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
+  const starterName = useMemberNames({
+    organizationId: organization.id,
+    canReadMembers: context.permissions.includes("core.member.read"),
+  });
   const [canceling, setCanceling] = useState(false);
   const [rerunning, setRerunning] = useState(false);
   const router = useRouter();
   const current = run.data ?? null;
-  const canCancel = context.permissions.includes("core.workflow-run.cancel") && current !== null && isRunCancelable(current.status);
+  const canCancel =
+    context.permissions.includes("core.workflow-run.cancel") && current !== null && isRunCancelable(current.status);
   const canStart = context.permissions.includes("core.workflow-run.start");
   const catalog = useWorkflowCatalog(organization.id, { enabled: canStart });
   const workflows = catalog.data ?? [];
   // "Run again" after a failure or a guardrail stop, when the workflow can still be started by hand.
-  const rerunWorkflowId = current !== null && current.failure !== undefined && current.failure !== null ? current.workflowId : null;
-  const canRunAgain = canStart && rerunWorkflowId !== null && workflows.some((workflow) => workflow.id === rerunWorkflowId && workflow.startable);
+  const rerunWorkflowId =
+    current !== null && current.failure !== undefined && current.failure !== null ? current.workflowId : null;
+  const canRunAgain =
+    canStart &&
+    rerunWorkflowId !== null &&
+    workflows.some((workflow) => workflow.id === rerunWorkflowId && workflow.startable);
   return (
     <SettingsPageFrame
       organizationId={organization.id}
@@ -147,12 +181,18 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
       header={
         <PageHeader
           eyebrow={t("eyebrow", { organization: organization.name })}
-          title={current === null ? t("run.titleUnknown") : t("run.title", { workflow: workflowLabel.name(current.workflowId) })}
+          title={
+            current === null
+              ? t("run.titleUnknown")
+              : t("run.title", { workflow: workflowLabel.name(current.workflowId) })
+          }
           meta={current === null ? undefined : <RunStatusPill status={current.status} />}
           actions={
             <>
               <Button variant="secondary" asChild>
-                <SettingsSectionLink organizationId={organization.id} section="workflows">{t("backToRuns")}</SettingsSectionLink>
+                <SettingsSectionLink organizationId={organization.id} section="workflows">
+                  {t("backToRuns")}
+                </SettingsSectionLink>
               </Button>
               {canRunAgain ? (
                 <Button variant="outline" disabled={!online} onClick={() => setRerunning(true)}>
@@ -170,7 +210,11 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
       }
     >
       {online ? null : <OfflineNotice className="mb-4" />}
-      <QuerySection query={run} loadingLabel={t("run.loading")} notFound={<RunNotFound organizationId={organization.id} />}>
+      <QuerySection
+        query={run}
+        loadingLabel={t("run.loading")}
+        notFound={<RunNotFound organizationId={organization.id} />}
+      >
         {(data) => (
           <RunDetails
             run={data}
@@ -181,7 +225,11 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
           />
         )}
       </QuerySection>
-      <CancelWorkflowRunDialog organizationId={organization.id} run={canceling ? current : null} onOpenChange={(open) => !open && setCanceling(false)} />
+      <CancelWorkflowRunDialog
+        organizationId={organization.id}
+        run={canceling ? current : null}
+        onOpenChange={(open) => !open && setCanceling(false)}
+      />
       {canRunAgain ? (
         <StartWorkflowRunDialog
           organizationId={organization.id}
@@ -189,7 +237,14 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
           open={rerunning}
           onOpenChange={setRerunning}
           initialWorkflowId={rerunWorkflowId ?? undefined}
-          onStarted={(nextRunId) => router.navigate({ id: "settings", organizationId: organization.id, section: "workflows", rest: `runs/${nextRunId}` })}
+          onStarted={(nextRunId) =>
+            router.navigate({
+              id: "settings",
+              organizationId: organization.id,
+              section: "workflows",
+              rest: `runs/${nextRunId}`,
+            })
+          }
         />
       ) : null}
     </SettingsPageFrame>

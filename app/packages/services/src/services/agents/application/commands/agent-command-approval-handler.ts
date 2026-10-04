@@ -1,6 +1,14 @@
-import { AGENT_COMMAND_ACTION_KIND, type AgentApprovalRequest, AgentApprovalRequestSchema, type Principal } from "@core/contracts";
+import {
+  AGENT_COMMAND_ACTION_KIND,
+  type AgentApprovalRequest,
+  AgentApprovalRequestSchema,
+  type Principal,
+} from "@core/contracts";
+import type {
+  ApprovalActionContext,
+  ApprovalActionHandler,
+} from "../../../access/application/ports/driven/approval-action-handler.ts";
 import type { AccessCore } from "../../../access/composition.ts";
-import type { ApprovalActionContext, ApprovalActionHandler } from "../../../access/application/ports/driven/approval-action-handler.ts";
 import { AgentCommandError } from "./agent-command-error.ts";
 import type { AgentCommandExecutor, AgentCommandExecutors } from "./agent-command-executor.ts";
 import type { CommandIdempotency } from "./run-command-once.ts";
@@ -46,13 +54,17 @@ const executorOf = (deps: AgentCommandApprovalDeps, action: AgentApprovalRequest
  * `runId:toolCallId`. Every refusal throws a SCREAMING_SNAKE `code`, which SP1 audits on
  * `APPROVAL_FAILED`; nothing runs after a failed check.
  */
-export const createAgentCommandApprovalHandler = (deps: AgentCommandApprovalDeps): ApprovalActionHandler<AgentApprovalRequest> => ({
+export const createAgentCommandApprovalHandler = (
+  deps: AgentCommandApprovalDeps,
+): ApprovalActionHandler<AgentApprovalRequest> => ({
   kind: AGENT_COMMAND_HANDLER_KIND,
   inputSchema: AgentApprovalRequestSchema,
   execute: async (action, context) => {
     const requester = checkAction(action, context);
     const executor = executorOf(deps, action);
-    const decision = await deps.access.forRequest().authorize({ principal: requester, permission: action.permission, node: context.request.node });
+    const decision = await deps.access
+      .forRequest()
+      .authorize({ principal: requester, permission: action.permission, node: context.request.node });
     if (!decision.allowed) throw new AgentCommandError("REQUESTER_FORBIDDEN", action.commandId);
     const run = executor.prepare(action.input);
     if (run === null) throw new AgentCommandError("COMMAND_INPUT_INVALID", action.commandId);
@@ -61,7 +73,14 @@ export const createAgentCommandApprovalHandler = (deps: AgentCommandApprovalDeps
       commandId: action.commandId,
       idempotencyKey: action.idempotencyKey,
       input: action.input,
-      run: () => run({ principal: requester, tenantId: context.request.tenantId, node: context.request.node, requestId: context.requestId, idempotencyKey: action.idempotencyKey }),
+      run: () =>
+        run({
+          principal: requester,
+          tenantId: context.request.tenantId,
+          node: context.request.node,
+          requestId: context.requestId,
+          idempotencyKey: action.idempotencyKey,
+        }),
     });
   },
 });

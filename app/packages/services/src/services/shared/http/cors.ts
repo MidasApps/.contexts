@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { FORWARDED_HEADERS } from "@core/contracts";
+import { z } from "zod";
 import { REQUEST_ID_HEADER } from "../observability/request-id.ts";
 
 /**
@@ -62,9 +62,7 @@ const appendVary = (headers: Headers, values: readonly string[]) => {
 
 /** A CORS preflight: OPTIONS carrying `Origin` and `Access-Control-Request-Method`. */
 export const isCorsPreflight = (request: Request): boolean =>
-  request.method === "OPTIONS" &&
-  request.headers.has("origin") &&
-  request.headers.has("access-control-request-method");
+  request.method === "OPTIONS" && request.headers.has("origin") && request.headers.has("access-control-request-method");
 
 /**
  * Answers a preflight without reaching a route. A disallowed origin gets the

@@ -34,8 +34,10 @@ const socketParamOptions = (params: SocketDatabaseTarget["params"]): PostgresOpt
   const options: PostgresOptions = {};
   const connection: Record<string, string> = {};
   for (const [key, value] of Object.entries(params)) {
-    if (key === "sslmode" || key === "ssl") options.ssl = value === "disable" || value === "false" ? false : (value as NonNullable<PostgresOptions["ssl"]>);
-    else if (INTEGER_OPTION_PARAMS.has(key) && Number.isInteger(Number(value))) Object.assign(options, { [key]: Number(value) });
+    if (key === "sslmode" || key === "ssl")
+      options.ssl = value === "disable" || value === "false" ? false : (value as NonNullable<PostgresOptions["ssl"]>);
+    else if (INTEGER_OPTION_PARAMS.has(key) && Number.isInteger(Number(value)))
+      Object.assign(options, { [key]: Number(value) });
     else connection[key] = value;
   }
   return Object.keys(connection).length === 0 ? options : { ...options, connection };

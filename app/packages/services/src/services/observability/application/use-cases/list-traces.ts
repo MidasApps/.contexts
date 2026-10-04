@@ -2,7 +2,12 @@ import type { ConsoleGateway, PageNumber, TraceTimeRange } from "../ports/consol
 import { type TraceCostDeps, withLedgerCosts } from "./trace-costs.ts";
 
 export type ListTraces = (
-  query: { readonly tenantId: string | null; readonly agentId?: string; readonly status?: "ok" | "error" } & PageNumber & TraceTimeRange,
+  query: {
+    readonly tenantId: string | null;
+    readonly agentId?: string;
+    readonly status?: "ok" | "error";
+  } & PageNumber &
+    TraceTimeRange,
 ) => ReturnType<ConsoleGateway["listTraces"]>;
 
 /**
@@ -15,5 +20,8 @@ export const makeListTraces =
   async (query) => {
     const listed = await deps.console.listTraces(query);
     if (!listed.ok) return listed;
-    return { ok: true, data: { traces: await withLedgerCosts(deps, listed.data.traces), hasMore: listed.data.hasMore } };
+    return {
+      ok: true,
+      data: { traces: await withLedgerCosts(deps, listed.data.traces), hasMore: listed.data.hasMore },
+    };
   };

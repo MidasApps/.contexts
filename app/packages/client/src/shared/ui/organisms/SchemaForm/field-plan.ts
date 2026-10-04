@@ -1,4 +1,4 @@
-import { isFieldOptional, listTopLevelFields, readFieldMeta, type ContractDefinition } from "@core/contracts";
+import { type ContractDefinition, isFieldOptional, listTopLevelFields, readFieldMeta } from "@core/contracts";
 import { z } from "zod";
 
 /** Widgets SchemaForm renders (SP2 spec §3.1); `hidden` carries the value without a control. */
@@ -54,7 +54,13 @@ export class SchemaFormDefinitionError extends Error {
   }
 }
 
-type LooseDef = { type: string; innerType?: z.core.$ZodType; in?: z.core.$ZodType; format?: string; entries?: Record<string, string> };
+type LooseDef = {
+  type: string;
+  innerType?: z.core.$ZodType;
+  in?: z.core.$ZodType;
+  format?: string;
+  entries?: Record<string, string>;
+};
 
 const WRAPPERS = new Set(["optional", "nullable", "default", "prefault", "readonly", "catch", "nonoptional"]);
 
@@ -88,23 +94,32 @@ const inferWidget = (core: z.core.$ZodType): SchemaFormWidget | undefined => {
   return undefined;
 };
 
-const isWidget = (value: string): value is SchemaFormWidget => (SCHEMA_FORM_WIDGETS as readonly string[]).includes(value);
+const isWidget = (value: string): value is SchemaFormWidget =>
+  (SCHEMA_FORM_WIDGETS as readonly string[]).includes(value);
 
 /** Declared widgets that need a specific type underneath. */
 const fitsType = (widget: SchemaFormWidget, core: z.core.$ZodType): boolean => {
   const inferred = inferWidget(core);
-  if (widget === "select" || widget === "switch" || widget === "money" || widget === "number") return inferred === widget;
+  if (widget === "select" || widget === "switch" || widget === "money" || widget === "number")
+    return inferred === widget;
   if (widget === "hidden") return true;
   return (core._zod.def as LooseDef).type === "string";
 };
 
 type Candidate = { plan: FieldPlan; order: number; index: number };
 
-const planField = (contractId: string, name: string, field: z.core.$ZodType, index: number, can: (permission: string) => boolean) => {
+const planField = (
+  contractId: string,
+  name: string,
+  field: z.core.$ZodType,
+  index: number,
+  can: (permission: string) => boolean,
+) => {
   const meta = readFieldMeta(field, z.globalRegistry);
   const core = unwrap(field);
   const declared = meta?.ui?.widget;
-  if (declared !== undefined && !isWidget(declared)) throw new SchemaFormDefinitionError(contractId, name, `unknown widget "${declared}"`);
+  if (declared !== undefined && !isWidget(declared))
+    throw new SchemaFormDefinitionError(contractId, name, `unknown widget "${declared}"`);
   if (declared !== undefined && !fitsType(declared, core)) {
     throw new SchemaFormDefinitionError(contractId, name, `widget "${declared}" does not fit the field type`);
   }
@@ -112,7 +127,8 @@ const planField = (contractId: string, name: string, field: z.core.$ZodType, ind
   const visibleWith = meta?.ui?.visibleWith;
   if (widget === undefined || widget === "hidden" || (visibleWith !== undefined && !can(visibleWith))) return undefined;
   const labelKey = meta?.ui?.labelKey;
-  if (labelKey === undefined) throw new SchemaFormDefinitionError(contractId, name, "a rendered field needs ui.labelKey");
+  if (labelKey === undefined)
+    throw new SchemaFormDefinitionError(contractId, name, "a rendered field needs ui.labelKey");
   const def = core._zod.def as LooseDef;
   const plan: FieldPlan = {
     name,
@@ -144,7 +160,10 @@ const toSections = (plans: readonly FieldPlan[]): FieldSection[] =>
  * @throws {SchemaFormDefinitionError} unknown widget, widget not fitting the type, or a rendered
  *   field without `ui.labelKey`.
  */
-export const planSchemaForm = (contract: ContractDefinition, { can }: { can: (permission: string) => boolean }): FormPlan => {
+export const planSchemaForm = (
+  contract: ContractDefinition,
+  { can }: { can: (permission: string) => boolean },
+): FormPlan => {
   const candidates: Candidate[] = [];
   const carried: string[] = [];
   listTopLevelFields(contract.schema).forEach(([name, field], index) => {
@@ -152,6 +171,8 @@ export const planSchemaForm = (contract: ContractDefinition, { can }: { can: (pe
     if (candidate === undefined) carried.push(name);
     else candidates.push(candidate);
   });
-  const ordered = candidates.toSorted((a, b) => a.order - b.order || a.index - b.index).map((candidate) => candidate.plan);
+  const ordered = candidates
+    .toSorted((a, b) => a.order - b.order || a.index - b.index)
+    .map((candidate) => candidate.plan);
   return { sections: toSections(ordered), carried };
 };

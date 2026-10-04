@@ -5,9 +5,15 @@ import { fixedClock } from "../../../shared/clock/clock.ts";
 import { createPostgresClient } from "../../../shared/postgres/postgres-client.ts";
 import { makeCheckTenantBudget } from "../../application/use-cases/check-tenant-budget.ts";
 import { makeGetUsageSummary } from "../../application/use-cases/get-usage-summary.ts";
-import { makeRecordLlmCalls } from "../../application/use-cases/record-llm-calls.ts";
 import { type AgentRun, AgentRunSchema } from "../../application/use-cases/record-agent-runs.schema.ts";
-import { countAgentRuns, createPostgresUsageRepository, listActiveUserIds, listUsageBuckets, USAGE_RUNTIME_ROLE } from "./postgres-usage-repository.ts";
+import { makeRecordLlmCalls } from "../../application/use-cases/record-llm-calls.ts";
+import {
+  countAgentRuns,
+  createPostgresUsageRepository,
+  listActiveUserIds,
+  listUsageBuckets,
+  USAGE_RUNTIME_ROLE,
+} from "./postgres-usage-repository.ts";
 
 // Needs the compose container and `pnpm db:migrate` (migrations 0006/0007, 0012/0013 for agent runs).
 const LOCAL_DATABASE_URL = "postgresql://app:app@127.0.0.1:5432/app";
@@ -88,7 +94,11 @@ describe("postgres usage repository", () => {
 
     const spendA = await repository.getMonthSpend({ tenantId: TENANT_A, monthStart: SEPTEMBER });
     expect(spendA).toEqual({ calls: 2, inputTokens: 200, outputTokens: 100, costMicroUsd: 600, unpricedCalls: 1 });
-    const viewA = await asTenant(TENANT_A, (tx) => tx`SELECT tenant_id, calls, input_tokens, cost_micro_usd, unpriced_calls FROM usage.tenant_month_spend ORDER BY month_start`);
+    const viewA = await asTenant(
+      TENANT_A,
+      (tx) =>
+        tx`SELECT tenant_id, calls, input_tokens, cost_micro_usd, unpriced_calls FROM usage.tenant_month_spend ORDER BY month_start`,
+    );
     expect(viewA.map((row) => ({ ...row }))).toEqual([
       { tenant_id: TENANT_A, calls: "1", input_tokens: "100", cost_micro_usd: "600", unpriced_calls: "0" },
       { tenant_id: TENANT_A, calls: "2", input_tokens: "200", cost_micro_usd: "600", unpriced_calls: "1" },
@@ -103,14 +113,21 @@ describe("postgres usage repository", () => {
       call({ userId: null, occurredAt: "2026-09-27T10:00:00.000Z" }),
       call({ tenantId: TENANT_B, userId: "uid-3", occurredAt: "2026-09-27T10:00:00.000Z" }),
     ]);
-    expect(await listActiveUserIds(sql)({ tenantId: TENANT_A, since: new Date("2026-09-23T12:00:00.000Z") })).toEqual(["uid-1"]);
-    expect(await listActiveUserIds(sql)({ tenantId: TENANT_B, since: new Date("2026-09-23T12:00:00.000Z") })).toEqual(["uid-3"]);
+    expect(await listActiveUserIds(sql)({ tenantId: TENANT_A, since: new Date("2026-09-23T12:00:00.000Z") })).toEqual([
+      "uid-1",
+    ]);
+    expect(await listActiveUserIds(sql)({ tenantId: TENANT_B, since: new Date("2026-09-23T12:00:00.000Z") })).toEqual([
+      "uid-3",
+    ]);
   });
 
   it("never shows another tenant's rows, even through the view", async () => {
     await repository.insertCalls([call({ tenantId: TENANT_B })]);
     expect(await repository.getMonthSpend({ tenantId: TENANT_A, monthStart: SEPTEMBER })).toMatchObject({ calls: 0 });
-    const leaked = await asTenant(TENANT_A, (tx) => tx`SELECT count(*) AS n FROM usage.tenant_month_spend WHERE tenant_id = ${TENANT_B}`);
+    const leaked = await asTenant(
+      TENANT_A,
+      (tx) => tx`SELECT count(*) AS n FROM usage.tenant_month_spend WHERE tenant_id = ${TENANT_B}`,
+    );
     expect(leaked[0]?.["n"]).toBe("0");
   });
 
@@ -135,27 +152,46 @@ describe("postgres usage repository", () => {
 
   it("counts a tenant's agent runs and guardrail stops since an instant, append-only and per tenant (decision 0066)", async () => {
     const stopped = agentRun({ tripwireProcessorId: "prompt-injection-detector" });
-    expect(await repository.insertAgentRuns([stopped, agentRun(), agentRun({ occurredAt: "2026-09-20T10:00:00.000Z", tripwireProcessorId: "moderation" }), agentRun({ tenantId: TENANT_B, tripwireProcessorId: "moderation" })])).toBe(4);
+    expect(
+      await repository.insertAgentRuns([
+        stopped,
+        agentRun(),
+        agentRun({ occurredAt: "2026-09-20T10:00:00.000Z", tripwireProcessorId: "moderation" }),
+        agentRun({ tenantId: TENANT_B, tripwireProcessorId: "moderation" }),
+      ]),
+    ).toBe(4);
     expect(await repository.insertAgentRuns([stopped])).toBe(0);
     const since = new Date("2026-09-23T12:00:00.000Z");
     expect(await countAgentRuns(sql)({ tenantId: TENANT_A, since })).toEqual({ runs: 2, stopped: 1 });
     expect(await countAgentRuns(sql)({ tenantId: TENANT_B, since })).toEqual({ runs: 1, stopped: 1 });
     await expect(asTenant(TENANT_A, (tx) => tx`DELETE FROM usage.agent_runs`)).rejects.toThrow(/permission denied/);
-    const forged = (tx: TransactionSql) => tx`INSERT INTO usage.agent_runs (id, tenant_id, agent_id, occurred_at) VALUES (${nextId()}, ${TENANT_B}, 'forged', now())`;
+    const forged = (tx: TransactionSql) =>
+      tx`INSERT INTO usage.agent_runs (id, tenant_id, agent_id, occurred_at) VALUES (${nextId()}, ${TENANT_B}, 'forged', now())`;
     await expect(asTenant(TENANT_A, forged)).rejects.toThrow(/row-level security/);
   });
 
   it("reads the stored caps and falls back to the plan default without a row", async () => {
     expect(await repository.getTenantBudget({ tenantId: TENANT_A })).toBeNull();
-    await asTenant(TENANT_A, (tx) => tx`INSERT INTO usage.tenant_budgets (tenant_id, monthly_micro_usd, monthly_tokens) VALUES (${TENANT_A}, 1000, 400)`);
-    expect(await repository.getTenantBudget({ tenantId: TENANT_A })).toEqual({ monthlyMicroUsd: 1000, monthlyTokens: 400 });
+    await asTenant(
+      TENANT_A,
+      (tx) =>
+        tx`INSERT INTO usage.tenant_budgets (tenant_id, monthly_micro_usd, monthly_tokens) VALUES (${TENANT_A}, 1000, 400)`,
+    );
+    expect(await repository.getTenantBudget({ tenantId: TENANT_A })).toEqual({
+      monthlyMicroUsd: 1000,
+      monthlyTokens: 400,
+    });
     expect(await repository.getTenantBudget({ tenantId: TENANT_B })).toBeNull();
   });
 
   it("refuses the run once the month reaches the tenant cap, through the use cases", async () => {
     const record = makeRecordLlmCalls({ repository });
     const check = makeCheckTenantBudget({ repository, clock });
-    await asTenant(TENANT_A, (tx) => tx`INSERT INTO usage.tenant_budgets (tenant_id, monthly_micro_usd, monthly_tokens) VALUES (${TENANT_A}, 1000, 1000000)`);
+    await asTenant(
+      TENANT_A,
+      (tx) =>
+        tx`INSERT INTO usage.tenant_budgets (tenant_id, monthly_micro_usd, monthly_tokens) VALUES (${TENANT_A}, 1000, 1000000)`,
+    );
     await record([call({ costMicroUsd: 700 })]);
     expect(await check({ tenantId: TENANT_A })).toEqual({ allowed: true, alert: false });
     await record([call({ costMicroUsd: 150 })]);
@@ -174,11 +210,42 @@ describe("postgres usage repository", () => {
       call({ occurredAt: "2026-09-17T00:00:00.000Z", costMicroUsd: 9_000 }),
       call({ tenantId: TENANT_B, costMicroUsd: 777 }),
     ]);
-    const buckets = await listUsageBuckets(sql)({ tenantId: TENANT_A, from: new Date("2026-09-15T00:00:00.000Z"), to: new Date("2026-09-17T00:00:00.000Z") });
+    const buckets = await listUsageBuckets(sql)({
+      tenantId: TENANT_A,
+      from: new Date("2026-09-15T00:00:00.000Z"),
+      to: new Date("2026-09-17T00:00:00.000Z"),
+    });
     expect(buckets).toEqual([
-      { day: "2026-09-15", provider: "google", model: "gemini-3.5-flash", calls: 2, inputTokens: 200, outputTokens: 100, costMicroUsd: 1000, unpricedCalls: 0 },
-      { day: "2026-09-15", provider: "google", model: "gemini-3.5-flash-lite", calls: 1, inputTokens: 100, outputTokens: 50, costMicroUsd: 0, unpricedCalls: 1 },
-      { day: "2026-09-16", provider: "google", model: "gemini-3.5-flash", calls: 1, inputTokens: 100, outputTokens: 50, costMicroUsd: 5, unpricedCalls: 0 },
+      {
+        day: "2026-09-15",
+        provider: "google",
+        model: "gemini-3.5-flash",
+        calls: 2,
+        inputTokens: 200,
+        outputTokens: 100,
+        costMicroUsd: 1000,
+        unpricedCalls: 0,
+      },
+      {
+        day: "2026-09-15",
+        provider: "google",
+        model: "gemini-3.5-flash-lite",
+        calls: 1,
+        inputTokens: 100,
+        outputTokens: 50,
+        costMicroUsd: 0,
+        unpricedCalls: 1,
+      },
+      {
+        day: "2026-09-16",
+        provider: "google",
+        model: "gemini-3.5-flash",
+        calls: 1,
+        inputTokens: 100,
+        outputTokens: 50,
+        costMicroUsd: 5,
+        unpricedCalls: 0,
+      },
     ]);
   });
 
@@ -205,7 +272,13 @@ describe("postgres usage repository", () => {
       call({ tenantId: TENANT_B, costMicroUsd: 777 }),
     ]);
     const breakdowns = await repository.getMonthBreakdowns({ tenantId: TENANT_A, monthStart: SEPTEMBER });
-    const totals = (calls: number, costMicroUsd: number, unpricedCalls = 0) => ({ calls, inputTokens: 100 * calls, outputTokens: 50 * calls, costMicroUsd, unpricedCalls });
+    const totals = (calls: number, costMicroUsd: number, unpricedCalls = 0) => ({
+      calls,
+      inputTokens: 100 * calls,
+      outputTokens: 50 * calls,
+      costMicroUsd,
+      unpricedCalls,
+    });
     expect(breakdowns).toEqual({
       byDay: [
         { day: "2026-09-02", totals: totals(1, 100) },

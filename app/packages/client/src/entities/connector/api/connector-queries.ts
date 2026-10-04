@@ -22,7 +22,10 @@ export const adminConnectorsQuery = (callEndpoint: CallEndpoint, organizationId:
   cursorListQuery<Connector>({
     queryKey: connectorKeys.adminList(organizationId),
     fetchPage: async (cursor, signal) =>
-      callEndpoint(adminListConnectorsEndpoint, { query: { ...pageQuery(cursor, ADMIN_CONNECTORS_PAGE_LIMIT), organizationId }, signal }),
+      callEndpoint(adminListConnectorsEndpoint, {
+        query: { ...pageQuery(cursor, ADMIN_CONNECTORS_PAGE_LIMIT), organizationId },
+        signal,
+      }),
   });
 
 export const useAdminConnectors = (organizationId: string | undefined, options: { enabled?: boolean } = {}) => {

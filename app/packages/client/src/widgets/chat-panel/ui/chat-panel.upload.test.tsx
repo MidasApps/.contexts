@@ -4,7 +4,7 @@ import type { UIMessage } from "ai";
 import { describe, expect, it, vi } from "vitest";
 import { createFakeTransfers, routeFilesApi, storedFile } from "#/features/chat-upload/testing/fake-upload.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { createFakeApi, ok, page, type FakeApi } from "#/shared/testing/fake-api.ts";
+import { createFakeApi, type FakeApi, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { renderWithClient } from "#/shared/testing/render-client.tsx";
 import { TooltipProvider } from "#/shared/ui/atoms/Tooltip/Tooltip.tsx";
@@ -16,7 +16,11 @@ const FILE_A = "FileA000000000000001";
 const CONVERSATION_ID = "Cv8sK2lPq0WnR5tYu3bV";
 const MEMBER = new Set(["core.file.upload"]);
 
-const setup = (props: Partial<ChatPanelProps> = {}, api: FakeApi = createFakeApi(), granted: ReadonlySet<string> = MEMBER) => {
+const setup = (
+  props: Partial<ChatPanelProps> = {},
+  api: FakeApi = createFakeApi(),
+  granted: ReadonlySet<string> = MEMBER,
+) => {
   const transport = createFakeChatTransport();
   const { transfers, createRequest } = createFakeTransfers();
   const view = renderWithClient(
@@ -24,7 +28,11 @@ const setup = (props: Partial<ChatPanelProps> = {}, api: FakeApi = createFakeApi
       <ChatPanel
         scope={SCOPE}
         can={(permission) => granted.has(permission)}
-        uploadSeams={{ transfer: { createRequest }, wait: { sleep: () => Promise.resolve() }, previews: { create: () => "blob:preview", revoke: () => undefined } }}
+        uploadSeams={{
+          transfer: { createRequest },
+          wait: { sleep: () => Promise.resolve() },
+          previews: { create: () => "blob:preview", revoke: () => undefined },
+        }}
         {...props}
         transport={transport}
       />
@@ -60,7 +68,20 @@ describe("ChatPanel uploads", () => {
 
   it("uploads a picked file, holds the message until it is ready, then sends it by file id", async () => {
     const api = createFakeApi();
-    routeFilesApi(api, [FILE_A], { files: { [FILE_A]: [ok(storedFile(FILE_A, { purpose: "chat-attachment", fileName: "diagram.png", contentType: "image/png", sizeBytes: 5 }))] } });
+    routeFilesApi(api, [FILE_A], {
+      files: {
+        [FILE_A]: [
+          ok(
+            storedFile(FILE_A, {
+              purpose: "chat-attachment",
+              fileName: "diagram.png",
+              contentType: "image/png",
+              sizeBytes: 5,
+            }),
+          ),
+        ],
+      },
+    });
     const { user, transport, transfer, field, container } = setup({}, api);
     expect(screen.getByRole("button", { name: "Anexar" })).toBeTruthy();
     await user.upload(screen.getByLabelText("Arquivos para anexar"), png());
@@ -81,7 +102,10 @@ describe("ChatPanel uploads", () => {
     await user.type(field(), "{Enter}");
     const stream = await firstStream(transport);
     expect(stream.body).toEqual({ attachments: [FILE_A] });
-    expect(stream.messages.at(-1)).toMatchObject({ role: "user", metadata: { attachments: [{ fileId: FILE_A, name: "diagram.png", mediaType: "image/png", sizeBytes: 5 }] } });
+    expect(stream.messages.at(-1)).toMatchObject({
+      role: "user",
+      metadata: { attachments: [{ fileId: FILE_A, name: "diagram.png", mediaType: "image/png", sizeBytes: 5 }] },
+    });
     // The chip left the composer and the sent message lists the file.
     expect(screen.queryByRole("list", { name: "Anexos da mensagem" })).toBeNull();
     const sentFiles = screen.getByRole("list", { name: "Anexos" });
@@ -89,16 +113,23 @@ describe("ChatPanel uploads", () => {
     expect(within(sentFiles).getByText("5 bytes")).toBeTruthy();
     expect(field().value).toBe("");
     // A sent file opens through a short-lived read URL, fetched only when asked.
-    api.route(`GET /v1/files/${FILE_A}/read-url`, ok({ url: "https://storage.test/diagram.png?sig=1", expiresAt: "2026-10-01T12:05:00.000Z" }));
+    api.route(
+      `GET /v1/files/${FILE_A}/read-url`,
+      ok({ url: "https://storage.test/diagram.png?sig=1", expiresAt: "2026-10-01T12:05:00.000Z" }),
+    );
     const open = vi.spyOn(window, "open").mockReturnValue(null);
     await user.click(within(sentFiles).getByRole("button", { name: "Abrir diagram.png" }));
-    await waitFor(() => expect(open).toHaveBeenCalledWith("https://storage.test/diagram.png?sig=1", "_blank", "noopener,noreferrer"));
+    await waitFor(() =>
+      expect(open).toHaveBeenCalledWith("https://storage.test/diagram.png?sig=1", "_blank", "noopener,noreferrer"),
+    );
     open.mockRestore();
   });
 
   it("says why the server rejected a file and never sends it", async () => {
     const api = createFakeApi();
-    routeFilesApi(api, [FILE_A], { files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "rejected", rejectionReason: "CONTENT_MISMATCH" }))] } });
+    routeFilesApi(api, [FILE_A], {
+      files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "rejected", rejectionReason: "CONTENT_MISMATCH" }))] },
+    });
     const { user, transport, transfer, field } = setup({}, api);
     await user.upload(screen.getByLabelText("Arquivos para anexar"), png("renamed.png"));
     act(() => void transfer().then((sent) => sent.finish()));
@@ -155,12 +186,21 @@ describe("ChatPanel uploads", () => {
   it("adds a document to the knowledge base for a member who may write it", async () => {
     const api = createFakeApi();
     routeFilesApi(api, [FILE_A]);
-    api.route(`POST /v1/organizations/${IDS.organization}/knowledge/sources`, { status: 202, body: { data: { runId: "run-1" } } });
+    api.route(`POST /v1/organizations/${IDS.organization}/knowledge/sources`, {
+      status: 202,
+      body: { data: { runId: "run-1" } },
+    });
     const { user, transfer } = setup({}, api, new Set(["core.file.upload", "core.knowledge.write"]));
-    await user.upload(screen.getByLabelText("Arquivos para a base de conhecimento"), new File(["# Guia"], "guia.md", { type: "text/markdown" }));
+    await user.upload(
+      screen.getByLabelText("Arquivos para a base de conhecimento"),
+      new File(["# Guia"], "guia.md", { type: "text/markdown" }),
+    );
     act(() => void transfer().then((sent) => sent.finish()));
     expect(await within(chips()).findByText("Na base de conhecimento. Indexando…")).toBeTruthy();
-    expect(api.calls.find((call) => call.path.endsWith("/knowledge/sources"))?.body).toEqual({ kind: "file", fileId: FILE_A });
+    expect(api.calls.find((call) => call.path.endsWith("/knowledge/sources"))?.body).toEqual({
+      kind: "file",
+      fileId: FILE_A,
+    });
   });
 });
 
@@ -172,8 +212,17 @@ describe("ChatPanel live confidence (follow-up #42)", () => {
     act(() => {
       stream.emit(
         { type: "start", messageId: "a-1" },
-        { type: "tool-input-available", toolCallId: "c-1", toolName: "agent-knowledge", input: { prompt: "Qual é o prazo?" } },
-        { type: "tool-output-available", toolCallId: "c-1", output: { text: "Talvez 30 dias.", subAgentToolResults: [] } },
+        {
+          type: "tool-input-available",
+          toolCallId: "c-1",
+          toolName: "agent-knowledge",
+          input: { prompt: "Qual é o prazo?" },
+        },
+        {
+          type: "tool-output-available",
+          toolCallId: "c-1",
+          output: { text: "Talvez 30 dias.", subAgentToolResults: [] },
+        },
         { type: "message-metadata", messageMetadata: { confidence: "low" } },
         { type: "text-start", id: "t-1" },
         { type: "text-delta", id: "t-1", delta: "Talvez 30 dias." },
@@ -194,7 +243,10 @@ describe("ChatPanel live confidence (follow-up #42)", () => {
     await user.type(field(), "oi{Enter}");
     const stream = await firstStream(transport);
     act(() => {
-      stream.emit({ type: "start", messageId: "a-1" }, { type: "message-metadata", messageMetadata: { confidence: "grounded" } });
+      stream.emit(
+        { type: "start", messageId: "a-1" },
+        { type: "message-metadata", messageMetadata: { confidence: "grounded" } },
+      );
     });
     expect(await screen.findByRole("alert")).toBeTruthy();
     expect(screen.queryByText("Sem certeza")).toBeNull();
@@ -208,13 +260,18 @@ describe("ChatPanel history scroll", () => {
 
   it("keeps the reader at the same message when earlier messages are prepended", async () => {
     const api = createFakeApi({ [`GET /v1/conversations/${CONVERSATION_ID}`]: ok(conversation) });
-    api.route(`GET /v1/conversations/${CONVERSATION_ID}/messages`, ({ query }) => (query.get("cursor") === "1" ? page(older) : page(stored, { cursor: "1" })));
+    api.route(`GET /v1/conversations/${CONVERSATION_ID}/messages`, ({ query }) =>
+      query.get("cursor") === "1" ? page(older) : page(stored, { cursor: "1" }),
+    );
     const { user } = setup({ conversationId: CONVERSATION_ID }, api);
     const button = await screen.findByRole("button", { name: "Carregar mensagens anteriores" });
     const log = screen.getByRole("log", { name: "Conversa com o assistente" });
     // jsdom has no layout: the log is 1000 px tall before the page arrives and 1600 px after.
     let height = 1000;
-    Object.defineProperty(log, "scrollHeight", { configurable: true, get: () => (screen.queryByText("Mensagem antiga") === null ? height : 1600) });
+    Object.defineProperty(log, "scrollHeight", {
+      configurable: true,
+      get: () => (screen.queryByText("Mensagem antiga") === null ? height : 1600),
+    });
     log.scrollTop = 40;
     height = 1000;
     await user.click(button);

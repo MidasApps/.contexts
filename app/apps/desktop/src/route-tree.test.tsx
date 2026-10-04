@@ -1,4 +1,4 @@
-import { ROUTE_IDS, routeHref, WEB_ONLY_ROUTE_IDS, type Route, type RouteId } from "@core/client/shared/lib/router";
+import { ROUTE_IDS, type Route, type RouteId, routeHref, WEB_ONLY_ROUTE_IDS } from "@core/client/shared/lib/router";
 import { createMemoryHistory } from "@tanstack/react-router";
 import { describe, expect, it } from "vitest";
 import { createAppRouter } from "@/router.ts";
@@ -63,14 +63,15 @@ const matchHref = async (href: string) => {
 };
 
 describe("desktop route tree", () => {
-  it.each(ROUTE_IDS.filter((id) => !WEB_ONLY_ROUTE_IDS.includes(id)).flatMap((id) => SAMPLES[id].map((route) => [id, routeHref(route)] as const)))(
-    "serves %s at %s",
-    async (id, href) => {
-      const match = await matchHref(href);
+  it.each(
+    ROUTE_IDS.filter((id) => !WEB_ONLY_ROUTE_IDS.includes(id)).flatMap((id) =>
+      SAMPLES[id].map((route) => [id, routeHref(route)] as const),
+    ),
+  )("serves %s at %s", async (id, href) => {
+    const match = await matchHref(href);
 
-      expect(match).toEqual({ routeId: DESKTOP_ROUTE[id as Exclude<RouteId, "admin">], notFound: false });
-    },
-  );
+    expect(match).toEqual({ routeId: DESKTOP_ROUTE[id as Exclude<RouteId, "admin">], notFound: false });
+  });
 
   it("has no /admin surface: the web-only routes are not found on desktop", async () => {
     for (const id of WEB_ONLY_ROUTE_IDS) {

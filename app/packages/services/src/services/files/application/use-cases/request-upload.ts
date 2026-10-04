@@ -1,4 +1,11 @@
-import { type FileUploadRequest, type FileUploadTicket, type StoredFile, StoredFileSchema, type TenantId, UserIdSchema } from "@core/contracts";
+import {
+  type FileUploadRequest,
+  type FileUploadTicket,
+  type StoredFile,
+  StoredFileSchema,
+  type TenantId,
+  UserIdSchema,
+} from "@core/contracts";
 import type { Clock } from "../../../shared/clock/clock.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { checkUpload, storagePathOf, type UploadRejectionReason } from "../../domain/file-policy.ts";
@@ -9,7 +16,11 @@ import { canUpload, type FilesCaller, uploaderIdOf } from "./file-access.ts";
 export const UPLOAD_URL_TTL_MS = 15 * 60 * 1000;
 
 export type RequestUploadError =
-  | { readonly code: "UPLOAD_REJECTED"; readonly field: "contentType" | "sizeBytes"; readonly reason: UploadRejectionReason }
+  | {
+      readonly code: "UPLOAD_REJECTED";
+      readonly field: "contentType" | "sizeBytes";
+      readonly reason: UploadRejectionReason;
+    }
   | { readonly code: "FORBIDDEN" };
 
 export type RequestUpload = (

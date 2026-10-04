@@ -1,5 +1,5 @@
 import type { Clock } from "../clock/clock.ts";
-import { decideBegin, ownsAttempt, type IdempotencyRecord } from "./idempotency-decision.ts";
+import { decideBegin, type IdempotencyRecord, ownsAttempt } from "./idempotency-decision.ts";
 import type { IdempotencyStore } from "./idempotency-store.ts";
 
 /** In-memory `IdempotencyStore` for unit tests (one process only); attempt ids are a sequence. */
@@ -9,7 +9,12 @@ export const createInMemoryIdempotencyStore = (args: { clock: Clock }): Idempote
   return {
     begin: (scopeKey, requestHash) => {
       sequence += 1;
-      const { begin, write } = decideBegin({ record: records.get(scopeKey) ?? null, requestHash, now: args.clock.now(), attemptId: `attempt-${sequence}` });
+      const { begin, write } = decideBegin({
+        record: records.get(scopeKey) ?? null,
+        requestHash,
+        now: args.clock.now(),
+        attemptId: `attempt-${sequence}`,
+      });
       if (write !== null) records.set(scopeKey, write);
       return Promise.resolve(begin);
     },

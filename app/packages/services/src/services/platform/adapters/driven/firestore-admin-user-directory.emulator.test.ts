@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
 import { backfillUserSearchNames } from "../../../shared/firestore/backfill-user-search-names.ts";
+import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
 import { userSearchFields } from "../../../shared/firestore/user-search-fields.ts";
 import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
 import { createFirestoreAdminUserDirectory } from "./firestore-admin-user-directory.ts";
@@ -14,7 +14,14 @@ const directory = createFirestoreAdminUserDirectory({ firestore });
 const AT = Timestamp.fromDate(new Date("2026-10-01T12:00:00.000Z"));
 
 const put = (id: string, displayName: string, email: string, extra: Record<string, unknown> = {}) =>
-  users.doc(`${RUN}-${id}`).set({ email: `${RUN}.${email}`, displayName: `${RUN} ${displayName}`, ...userSearchFields(`${RUN} ${displayName}`), status: "active", createdAt: AT, ...extra });
+  users.doc(`${RUN}-${id}`).set({
+    email: `${RUN}.${email}`,
+    displayName: `${RUN} ${displayName}`,
+    ...userSearchFields(`${RUN} ${displayName}`),
+    status: "active",
+    createdAt: AT,
+    ...extra,
+  });
 
 describe("Firestore admin user directory (emulator)", () => {
   it("finds by normalized name prefix and by email prefix, paging by cursor position", async () => {
@@ -22,9 +29,20 @@ describe("Firestore admin user directory (emulator)", () => {
     await put("andre", "André Lima", "andre@example.com", { status: "disabled" });
     await put("bob", "Bob", "bob@example.com");
     const first = await directory.searchByName({ prefix: `${RUN} an`, page: { after: undefined, limit: 1 } });
-    expect(first.items).toEqual([{ id: `${RUN}-ana`, email: `${RUN}.ana@example.com`, displayName: `${RUN} Ana Souza`, status: "active", createdAt: "2026-10-01T12:00:00.000Z" }]);
+    expect(first.items).toEqual([
+      {
+        id: `${RUN}-ana`,
+        email: `${RUN}.ana@example.com`,
+        displayName: `${RUN} Ana Souza`,
+        status: "active",
+        createdAt: "2026-10-01T12:00:00.000Z",
+      },
+    ]);
     expect(first.nextCursor).not.toBeNull();
-    const second = await directory.searchByName({ prefix: `${RUN} an`, page: { after: [`${RUN} ana souza`, `${RUN}-ana`], limit: 1 } });
+    const second = await directory.searchByName({
+      prefix: `${RUN} an`,
+      page: { after: [`${RUN} ana souza`, `${RUN}-ana`], limit: 1 },
+    });
     expect(second.items.map((user) => [user.id, user.status])).toEqual([[`${RUN}-andre`, "disabled"]]);
     expect(second.nextCursor).toBeNull();
     const byEmail = await directory.searchByEmail({ prefix: `${RUN}.b`, page: { after: undefined, limit: 20 } });
@@ -42,11 +60,19 @@ describe("Firestore admin user directory (emulator)", () => {
   });
 
   it("backfills searchName on docs written before it existed, idempotently", async () => {
-    await users.doc(`${RUN}-old`).set({ email: `${RUN}.old@example.com`, displayName: `${RUN} Élodie Old`, status: "active", createdAt: AT });
-    expect((await directory.searchByName({ prefix: `${RUN} elodie`, page: { after: undefined, limit: 5 } })).items).toEqual([]);
+    await users
+      .doc(`${RUN}-old`)
+      .set({ email: `${RUN}.old@example.com`, displayName: `${RUN} Élodie Old`, status: "active", createdAt: AT });
+    expect(
+      (await directory.searchByName({ prefix: `${RUN} elodie`, page: { after: undefined, limit: 5 } })).items,
+    ).toEqual([]);
     const firstRun = await backfillUserSearchNames({ firestore, batchSize: 2 });
     expect(firstRun.updated).toBeGreaterThanOrEqual(1);
-    expect((await directory.searchByName({ prefix: `${RUN} elodie`, page: { after: undefined, limit: 5 } })).items.map((user) => user.id)).toEqual([`${RUN}-old`]);
+    expect(
+      (await directory.searchByName({ prefix: `${RUN} elodie`, page: { after: undefined, limit: 5 } })).items.map(
+        (user) => user.id,
+      ),
+    ).toEqual([`${RUN}-old`]);
     const secondRun = await backfillUserSearchNames({ firestore, batchSize: 2 });
     expect(secondRun.updated).toBe(0);
     expect(secondRun.scanned).toBe(firstRun.scanned);

@@ -22,7 +22,10 @@ export type GuardContext = {
  * log as `PLATFORM_ACCESS_DENIED`.
  * @returns null when allowed, else the response to send.
  */
-export const requireStaff = async (ctx: GuardContext, args: { readonly permission: string; readonly targetTenantId?: TenantId }): Promise<Response | null> => {
+export const requireStaff = async (
+  ctx: GuardContext,
+  args: { readonly permission: string; readonly targetTenantId?: TenantId },
+): Promise<Response | null> => {
   const impersonated = ctx.principal.type === "user" && ctx.principal.impersonation !== undefined;
   const decision = impersonated
     ? ({ allowed: false, reason: "IMPERSONATION_READ_ONLY" } as const)
@@ -53,6 +56,12 @@ export const requireTenant = async (
 ): Promise<TenantId | Response> => {
   const tenantId = tenantOfCall(ctx.principal, args.organizationId, ctx.requestId);
   if (tenantId instanceof Response) return tenantId;
-  const denied = await authorizeOrganization({ authorize: ctx.authorize, principal: ctx.principal, tenantId, permission: args.permission, requestId: ctx.requestId });
+  const denied = await authorizeOrganization({
+    authorize: ctx.authorize,
+    principal: ctx.principal,
+    tenantId,
+    permission: args.permission,
+    requestId: ctx.requestId,
+  });
   return denied ?? tenantId;
 };

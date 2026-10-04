@@ -4,7 +4,7 @@ import { listMyGrantsEndpoint, type MyGrant, type TenantNodeRef } from "@core/co
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
-import { collectAllPages, COLLECT_PAGE_LIMIT, pageQuery } from "#/shared/api/cursor-list.ts";
+import { COLLECT_PAGE_LIMIT, collectAllPages, pageQuery } from "#/shared/api/cursor-list.ts";
 import { queryKeys } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 
@@ -18,7 +18,11 @@ export const myGrantsQuery = (callEndpoint: CallEndpoint, organizationId: string
     queryKey: queryKeys.organizationScoped(organizationId, "my-grants"),
     queryFn: ({ signal }): Promise<MyGrant[]> =>
       collectAllPages<MyGrant>(
-        (cursor, pageSignal) => callEndpoint(listMyGrantsEndpoint, { query: { ...pageQuery(cursor, COLLECT_PAGE_LIMIT), organizationId }, signal: pageSignal }),
+        (cursor, pageSignal) =>
+          callEndpoint(listMyGrantsEndpoint, {
+            query: { ...pageQuery(cursor, COLLECT_PAGE_LIMIT), organizationId },
+            signal: pageSignal,
+          }),
         signal,
       ),
   });
@@ -28,7 +32,10 @@ export const useMyGrants = (organizationId: string | null | undefined, options: 
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
   const known = organizationId !== null && organizationId !== undefined && organizationId !== "";
-  return useQuery({ ...myGrantsQuery(callEndpoint, known ? organizationId : ""), enabled: signedIn && known && options.enabled !== false });
+  return useQuery({
+    ...myGrantsQuery(callEndpoint, known ? organizationId : ""),
+    enabled: signedIn && known && options.enabled !== false,
+  });
 };
 
 const covers = (grant: TenantNodeRef, node: TenantNodeRef): boolean => {
@@ -48,4 +55,5 @@ const covers = (grant: TenantNodeRef, node: TenantNodeRef): boolean => {
  * inherit downwards, SP1 spec §5.2). `false` means an action at `node` would be refused whatever
  * the viewer's roles elsewhere; `true` still needs the permission (access context) and the API.
  */
-export const grantCoversNode = (grants: readonly Pick<MyGrant, "node">[], node: TenantNodeRef): boolean => grants.some((grant) => covers(grant.node, node));
+export const grantCoversNode = (grants: readonly Pick<MyGrant, "node">[], node: TenantNodeRef): boolean =>
+  grants.some((grant) => covers(grant.node, node));

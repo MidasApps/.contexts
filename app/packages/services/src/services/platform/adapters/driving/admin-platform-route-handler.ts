@@ -11,7 +11,7 @@ import {
 } from "@core/contracts";
 import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
 import { invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
+import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import type { OrganizationAdminError } from "../../application/use-cases/update-organization-admin.ts";
 import type { ConsoleServices } from "../../composition.ts";
@@ -27,14 +27,19 @@ export const CONSOLE_PERMISSIONS = {
 } as const;
 
 const organizationErrorResponse = (error: OrganizationAdminError, requestId: string): Response =>
-  error.code === "NOT_FOUND" ? apiError(404, "NOT_FOUND", requestId) : apiError(400, "VALIDATION_FAILED", requestId, [{ field: "planId", issue: "NOT_FOUND" }]);
+  error.code === "NOT_FOUND"
+    ? apiError(404, "NOT_FOUND", requestId)
+    : apiError(400, "VALIDATION_FAILED", requestId, [{ field: "planId", issue: "NOT_FOUND" }]);
 
 /**
  * `/v1/admin` plans, organizations, budgets and overview (SP5 spec §6, decisions 0039 and 0041):
  * every handler first requires staff with MFA and the `platform.*` permission (`requireStaff`),
  * and every mutation is audited on the platform log (with `targetTenantId` for an organization).
  */
-export const buildAdminPlatformRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly console: ConsoleServices }): Record<string, RouteHandler> => ({
+export const buildAdminPlatformRoutes = (deps: {
+  readonly pipeline: ApiRouteDeps;
+  readonly console: ConsoleServices;
+}): Record<string, RouteHandler> => ({
   [listPlansEndpoint.id]: withApiRoute(listPlansEndpoint, deps.pipeline, async (ctx) => {
     const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.plans });
     return denied ?? dataResponse({ data: await deps.console.listPlans() });
@@ -42,13 +47,22 @@ export const buildAdminPlatformRoutes = (deps: { readonly pipeline: ApiRouteDeps
   [createPlanEndpoint.id]: withApiRoute(createPlanEndpoint, deps.pipeline, async (ctx) => {
     const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.plans });
     if (denied !== null) return denied;
-    const plan = await deps.console.createPlan({ actor: ctx.principal, requestId: ctx.requestId, input: ctx.input.body });
+    const plan = await deps.console.createPlan({
+      actor: ctx.principal,
+      requestId: ctx.requestId,
+      input: ctx.input.body,
+    });
     return dataResponse({ data: plan }, { status: 201, location: `/v1/admin/plans/${plan.id}` });
   }),
   [updatePlanEndpoint.id]: withApiRoute(updatePlanEndpoint, deps.pipeline, async (ctx) => {
     const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.plans });
     if (denied !== null) return denied;
-    const result = await deps.console.updatePlan({ actor: ctx.principal, requestId: ctx.requestId, planId: ctx.input.params.planId, input: ctx.input.body });
+    const result = await deps.console.updatePlan({
+      actor: ctx.principal,
+      requestId: ctx.requestId,
+      planId: ctx.input.params.planId,
+      input: ctx.input.body,
+    });
     return result.ok ? dataResponse({ data: result.data }) : apiError(404, "NOT_FOUND", ctx.requestId);
   }),
   [listOrganizationsAdminEndpoint.id]: withApiRoute(listOrganizationsAdminEndpoint, deps.pipeline, async (ctx) => {
@@ -61,23 +75,42 @@ export const buildAdminPlatformRoutes = (deps: { readonly pipeline: ApiRouteDeps
   }),
   [getOrganizationAdminEndpoint.id]: withApiRoute(getOrganizationAdminEndpoint, deps.pipeline, async (ctx) => {
     const tenantId = ctx.input.params.organizationId;
-    const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.organizationRead, targetTenantId: tenantId });
+    const denied = await requireStaff(ctx, {
+      permission: CONSOLE_PERMISSIONS.organizationRead,
+      targetTenantId: tenantId,
+    });
     if (denied !== null) return denied;
     const organization = await deps.console.getOrganization(tenantId);
     return organization === null ? apiError(404, "NOT_FOUND", ctx.requestId) : dataResponse({ data: organization });
   }),
   [updateOrganizationAdminEndpoint.id]: withApiRoute(updateOrganizationAdminEndpoint, deps.pipeline, async (ctx) => {
     const tenantId = ctx.input.params.organizationId;
-    const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.organizationUpdate, targetTenantId: tenantId });
+    const denied = await requireStaff(ctx, {
+      permission: CONSOLE_PERMISSIONS.organizationUpdate,
+      targetTenantId: tenantId,
+    });
     if (denied !== null) return denied;
-    const result = await deps.console.updateOrganization({ actor: ctx.principal, tenantId, requestId: ctx.requestId, input: ctx.input.body });
+    const result = await deps.console.updateOrganization({
+      actor: ctx.principal,
+      tenantId,
+      requestId: ctx.requestId,
+      input: ctx.input.body,
+    });
     return result.ok ? dataResponse({ data: result.data }) : organizationErrorResponse(result.error, ctx.requestId);
   }),
   [setOrganizationBudgetEndpoint.id]: withApiRoute(setOrganizationBudgetEndpoint, deps.pipeline, async (ctx) => {
     const tenantId = ctx.input.params.organizationId;
-    const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.organizationUpdate, targetTenantId: tenantId });
+    const denied = await requireStaff(ctx, {
+      permission: CONSOLE_PERMISSIONS.organizationUpdate,
+      targetTenantId: tenantId,
+    });
     if (denied !== null) return denied;
-    const result = await deps.console.setOrganizationBudget({ actor: ctx.principal, tenantId, requestId: ctx.requestId, input: ctx.input.body });
+    const result = await deps.console.setOrganizationBudget({
+      actor: ctx.principal,
+      tenantId,
+      requestId: ctx.requestId,
+      input: ctx.input.body,
+    });
     return result.ok ? dataResponse({ data: result.data }) : organizationErrorResponse(result.error, ctx.requestId);
   }),
   [getAdminOverviewEndpoint.id]: withApiRoute(getAdminOverviewEndpoint, deps.pipeline, async (ctx) => {
@@ -86,7 +119,10 @@ export const buildAdminPlatformRoutes = (deps: { readonly pipeline: ApiRouteDeps
   }),
   [getAdminUsageEndpoint.id]: withApiRoute(getAdminUsageEndpoint, deps.pipeline, async (ctx) => {
     const { from, to, organizationId } = ctx.input.query;
-    const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.usage, ...(organizationId === undefined ? {} : { targetTenantId: organizationId }) });
+    const denied = await requireStaff(ctx, {
+      permission: CONSOLE_PERMISSIONS.usage,
+      ...(organizationId === undefined ? {} : { targetTenantId: organizationId }),
+    });
     if (denied !== null) return denied;
     const result = await deps.console.getUsage({ from, to, tenantId: organizationId ?? null });
     if (result.ok) return dataResponse({ data: result.data });

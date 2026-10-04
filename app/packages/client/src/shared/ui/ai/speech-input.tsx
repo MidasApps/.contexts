@@ -17,7 +17,14 @@ export type SpeechInputProps = Omit<ComponentProps<typeof Button>, "children" | 
  * Speech API (audio leaves through the browser vendor); here audio goes to `/v1/voice`
  * (decision 0034), so the recorder lives in the voice feature and this is only its button.
  */
-export function SpeechInput({ recording, label, variant = "ghost", size = "icon-sm", className, ...props }: SpeechInputProps) {
+export function SpeechInput({
+  recording,
+  label,
+  variant = "ghost",
+  size = "icon-sm",
+  className,
+  ...props
+}: SpeechInputProps) {
   return (
     <Button
       data-slot="speech-input"
@@ -27,11 +34,20 @@ export function SpeechInput({ recording, label, variant = "ghost", size = "icon-
       aria-label={label}
       aria-pressed={recording}
       title={label}
-      className={cn("relative", recording && "bg-destructive/14 text-destructive-text hover:bg-destructive/14", className)}
+      className={cn(
+        "relative",
+        recording && "bg-destructive/14 text-destructive-text hover:bg-destructive/14",
+        className,
+      )}
       {...props}
     >
       <MicIcon aria-hidden="true" />
-      {recording ? <span aria-hidden="true" className="absolute top-1 right-1 size-1.5 animate-pulse rounded-full bg-destructive motion-reduce:animate-none" /> : null}
+      {recording ? (
+        <span
+          aria-hidden="true"
+          className="absolute top-1 right-1 size-1.5 animate-pulse rounded-full bg-destructive motion-reduce:animate-none"
+        />
+      ) : null}
     </Button>
   );
 }

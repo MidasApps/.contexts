@@ -1,33 +1,39 @@
-import { type AgentRuntimePorts, createWebContentPort, embeddingModelIdOf, type FilesPort, type PromptStorePort } from "@core/agents";
+import {
+  type AgentRuntimePorts,
+  createWebContentPort,
+  embeddingModelIdOf,
+  type FilesPort,
+  type PromptStorePort,
+} from "@core/agents";
 import { ConnectorIdSchema, TenantIdSchema } from "@core/contracts";
 import {
   type AccessReaders,
   type AgentCommandExecutor,
   type ApiKeyAuthenticator,
-  type PromptRepository,
   agentCommandExecutors,
   createCoreAgentCommandExecutors,
   createFirebaseConnectorsServices,
-  createFirebaseCustomAgentsServices,
   createFirebaseConsoleServices,
-  createPostgresPromptRepository,
-  createFirebaseFlagsServices,
-  flagEnvironmentDefaults,
+  createFirebaseCustomAgentsServices,
   createFirebaseFilesServices,
+  createFirebaseFlagsServices,
   createKnowledgeServices,
   createLogKnowledgeEventPublisher,
   createPostgresClient,
   createPostgresKnowledgeRepository,
+  createPostgresPromptRepository,
   createPostgresSemanticRunner,
   createPostgresUsageRepository,
-  createUsageServices,
   createSemanticViewRegistry,
+  createUsageServices,
   type FilesServices,
   type FirebaseAdmin,
+  flagEnvironmentDefaults,
   guardSemanticSql,
   type Logger,
-  type ResolveAccessContext,
   makeRunSemanticQuery,
+  type PromptRepository,
+  type ResolveAccessContext,
   registerAgentCommandApprovals,
   registerWorkflowApprovals,
   type ServicesEnv,
@@ -40,33 +46,44 @@ import { bindApprovalsPort } from "./approvals-port-binding.ts";
 import { bindAuditPort } from "./audit-port-binding.ts";
 import { bindCustomAgentsPort } from "./custom-agents-port-binding.ts";
 import { bindKnowledgePort } from "./knowledge-port-binding.ts";
-import { bindUsagePort } from "./usage-port-binding.ts";
-import { createLogNotificationPort } from "./notifications-port-binding.ts";
-import { bindUsageReportPort, type UsageReportBindingEnv } from "./usage-report-port-binding.ts";
 import { bindApprovalSweepPort, bindConversationPurgePort, bindEvalExportPort } from "./maintenance-ports-binding.ts";
+import { createLogNotificationPort } from "./notifications-port-binding.ts";
+import { bindUsagePort } from "./usage-port-binding.ts";
+import { bindUsageReportPort, type UsageReportBindingEnv } from "./usage-report-port-binding.ts";
 import { bindWorkflowApprovalsPort, bindWorkflowCommandsPort, RUNTIME_SIDE_SETTLER } from "./workflow-ports-binding.ts";
 
-export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST" | "FIREBASE_PROJECT_ID"> &
+export type RuntimePortsEnv = Pick<
+  ServicesEnv,
+  "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST" | "FIREBASE_PROJECT_ID"
+> &
   Partial<Pick<UsageReportBindingEnv, "USAGE_SINK" | "BIGQUERY_DATASET_AI_OBSERVABILITY">> & {
-  /** Model id of the stored vectors in real mode; search only compares vectors of this model (decision 0022). */
-  readonly AI_MODEL_EMBEDDING: string;
-  /** Bucket of uploads (files context). */
-  readonly FILES_BUCKET: string;
-  /** Boot defaults of the voice and memory flags (decision 0034 amendment, `flagEnvironmentDefaults`). */
-  readonly AI_VOICE_ENABLED?: boolean | undefined;
-  readonly AI_VOICE_REALTIME_ENABLED?: boolean | undefined;
-  readonly AI_MEMORY_OBSERVATIONAL?: boolean | undefined;
-  /** Platform Firecrawl key and self-hosted API URL (knowledge URL sources, decision 0027). */
-  readonly FIRECRAWL_API_KEY?: string | undefined;
-  readonly FIRECRAWL_API_URL?: string | undefined;
-};
+    /** Model id of the stored vectors in real mode; search only compares vectors of this model (decision 0022). */
+    readonly AI_MODEL_EMBEDDING: string;
+    /** Bucket of uploads (files context). */
+    readonly FILES_BUCKET: string;
+    /** Boot defaults of the voice and memory flags (decision 0034 amendment, `flagEnvironmentDefaults`). */
+    readonly AI_VOICE_ENABLED?: boolean | undefined;
+    readonly AI_VOICE_REALTIME_ENABLED?: boolean | undefined;
+    readonly AI_MEMORY_OBSERVATIONAL?: boolean | undefined;
+    /** Platform Firecrawl key and self-hosted API URL (knowledge URL sources, decision 0027). */
+    readonly FIRECRAWL_API_KEY?: string | undefined;
+    readonly FIRECRAWL_API_URL?: string | undefined;
+  };
 
 // SP5 prompt store (decision 0038): the agents read bodies; the eval route reads a version and records its verdict.
 const bindPromptStorePort = (repository: PromptRepository): PromptStorePort => ({
   getActive: (input) => repository.getActive(input),
   getVersion: async (input) => {
     const version = await repository.getVersion(input);
-    return version === null ? null : { versionId: version.id, agentId: version.agentId, scope: version.scope, tenantId: version.tenantId, body: version.body };
+    return version === null
+      ? null
+      : {
+          versionId: version.id,
+          agentId: version.agentId,
+          scope: version.scope,
+          tenantId: version.tenantId,
+          body: version.body,
+        };
   },
   recordEval: (input) => repository.recordEval(input),
 });
@@ -147,9 +164,17 @@ export const createRuntimePorts = (args: {
   // postgres.js connects lazily: no connection until the first query.
   const sql = createPostgresClient({ DATABASE_URL: args.env.DATABASE_URL });
   const runner = createPostgresSemanticRunner(sql);
-  const knowledge = createKnowledgeServices({ repository: createPostgresKnowledgeRepository(sql), embeddingModel: embeddingModelIdOf(args.env) });
+  const knowledge = createKnowledgeServices({
+    repository: createPostgresKnowledgeRepository(sql),
+    embeddingModel: embeddingModelIdOf(args.env),
+  });
   const files = createFirebaseFilesServices({ firebase: args.firebase, env: args.env, logger: args.logger });
-  const connectors = createFirebaseConnectorsServices({ firebase: args.firebase, env: args.env, audit: core.audit, clock: systemClock });
+  const connectors = createFirebaseConnectorsServices({
+    firebase: args.firebase,
+    env: args.env,
+    audit: core.audit,
+    clock: systemClock,
+  });
   const sinkEnv = {
     USAGE_SINK: args.env.USAGE_SINK ?? "none",
     BIGQUERY_DATASET_AI_OBSERVABILITY: args.env.BIGQUERY_DATASET_AI_OBSERVABILITY ?? "ai_observability",
@@ -161,17 +186,47 @@ export const createRuntimePorts = (args: {
     ...(args.modules ?? []).flatMap((module) => module.createCommands(moduleDeps)),
   ];
   const executors = [...commandRegistry, ...(adapters.commandExecutors ?? [])];
-  const commands = registerAgentCommandApprovals({ approvals: core.approvals, executors, access: core.access, idempotency: core.pipeline.idempotency });
+  const commands = registerAgentCommandApprovals({
+    approvals: core.approvals,
+    executors,
+    access: core.access,
+    idempotency: core.pipeline.idempotency,
+  });
   // Decided in /v1; registered here so SP1 accepts requests of the kind (decision 0036).
   registerWorkflowApprovals({ approvals: core.approvals, settler: RUNTIME_SIDE_SETTLER });
   // Remote Config outside local, Firestore in local; the agents cache the values 30 s (decision 0039).
-  const customAgents = createFirebaseCustomAgentsServices({ firebase: args.firebase, audit: core.audit, clock: systemClock });
-  const settings = createFirebaseConsoleServices({ firebase: args.firebase, sql, audit: core.audit, clock: systemClock });
-  const flags = createFirebaseFlagsServices({ firebase: args.firebase, appEnv: args.env.APP_ENV, audit: core.audit, clock: systemClock, environmentDefaults: flagEnvironmentDefaults(args.env) });
+  const customAgents = createFirebaseCustomAgentsServices({
+    firebase: args.firebase,
+    audit: core.audit,
+    clock: systemClock,
+  });
+  const settings = createFirebaseConsoleServices({
+    firebase: args.firebase,
+    sql,
+    audit: core.audit,
+    clock: systemClock,
+  });
+  const flags = createFirebaseFlagsServices({
+    firebase: args.firebase,
+    appEnv: args.env.APP_ENV,
+    audit: core.audit,
+    clock: systemClock,
+    environmentDefaults: flagEnvironmentDefaults(args.env),
+  });
   return {
-    access: bindAccessPort({ verifyBearer: core.verifyBearer, access: core.access, resolveAccessContext: adapters.resolveAccessContext ?? core.resolveAccessContext }),
+    access: bindAccessPort({
+      verifyBearer: core.verifyBearer,
+      access: core.access,
+      resolveAccessContext: adapters.resolveAccessContext ?? core.resolveAccessContext,
+    }),
     audit: bindAuditPort(core.audit),
-    catalog: { runSemanticQuery: makeRunSemanticQuery({ views: createSemanticViewRegistry([]), guard: guardSemanticSql, runner }) },
+    catalog: {
+      runSemanticQuery: makeRunSemanticQuery({
+        views: createSemanticViewRegistry([]),
+        guard: guardSemanticSql,
+        runner,
+      }),
+    },
     // SP5 Task 10: `agent-settings/{tenantId}` (defaults when missing), so the PII mode and enabled agents are the tenant's.
     settings: { getAgentSettings: ({ tenantId }) => settings.getAgentSettings({ tenantId }) },
     approvals: bindApprovalsPort(core.approvals),
@@ -179,21 +234,38 @@ export const createRuntimePorts = (args: {
     connectors: {
       listActive: ({ tenantId }) => connectors.listActiveConnectors({ tenantId: TenantIdSchema.parse(tenantId) }),
       recordLoad: ({ tenantId, connectorId, lastError }) =>
-        connectors.recordConnectorLoad({ tenantId: TenantIdSchema.parse(tenantId), connectorId: ConnectorIdSchema.parse(connectorId), lastError }),
+        connectors.recordConnectorLoad({
+          tenantId: TenantIdSchema.parse(tenantId),
+          connectorId: ConnectorIdSchema.parse(connectorId),
+          lastError,
+        }),
     },
     secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
-    webContent: createWebContentPort({ env: args.env, secrets: { get: (secretRef) => connectors.secrets.get(secretRef) } }),
+    webContent: createWebContentPort({
+      env: args.env,
+      secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
+    }),
     knowledge: bindKnowledgePort(knowledge),
     files: bindFilesPort(files),
     knowledgeEvents: createLogKnowledgeEventPublisher(args.logger),
     usage: bindUsagePort(createUsageServices({ repository: createPostgresUsageRepository(sql), clock: systemClock })),
     commandRegistry,
     workflowApprovals: bindWorkflowApprovalsPort(core.approvals),
-    workflowCommands: bindWorkflowCommandsPort({ executors: agentCommandExecutors(executors), access: core.access, commands }),
+    workflowCommands: bindWorkflowCommandsPort({
+      executors: agentCommandExecutors(executors),
+      access: core.access,
+      commands,
+    }),
     notifications: createLogNotificationPort(args.logger),
     flags: { getValues: ({ tenantId }) => flags.getFlagValues({ tenantId }) },
     prompts: bindPromptStorePort(createPostgresPromptRepository(sql)),
-    usageReport: bindUsageReportPort({ env: sinkEnv, sql, firestore: args.firebase.firestore, audit: core.audit, logger: args.logger }),
+    usageReport: bindUsageReportPort({
+      env: sinkEnv,
+      sql,
+      firestore: args.firebase.firestore,
+      audit: core.audit,
+      logger: args.logger,
+    }),
     approvalSweeps: bindApprovalSweepPort(core.approvals),
     conversationPurge: bindConversationPurgePort(args.firebase.firestore),
     evalExport: bindEvalExportPort({ env: sinkEnv, logger: args.logger }),

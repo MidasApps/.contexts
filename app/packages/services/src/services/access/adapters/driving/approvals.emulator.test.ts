@@ -2,7 +2,13 @@ import { OrganizationIdSchema, type PermissionDefinition } from "@core/contracts
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { AUDIT_LOG_COLLECTIONS } from "../../../audit/adapters/driven/firestore-audit-log-writer.ts";
-import { buildEmulatorServer, clearCoreCollections, emulatorFirebase, ensureAuthUser, seedActiveUser } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import {
+  buildEmulatorServer,
+  clearCoreCollections,
+  emulatorFirebase,
+  ensureAuthUser,
+  seedActiveUser,
+} from "../../../shared/testing/core-server-emulator.fixture.ts";
 
 // A module permission that needs a second person; members hold it, admins may approve it.
 const DELETE_INVOICE: PermissionDefinition = {
@@ -16,7 +22,11 @@ const DELETE_INVOICE: PermissionDefinition = {
 
 const firebase = emulatorFirebase();
 const { firestore, auth } = firebase;
-const harness = buildEmulatorServer({ firebase, uids: ["apr-owner", "apr-admin", "apr-member"], modules: [{ id: "sample", permissions: [DELETE_INVOICE] }] });
+const harness = buildEmulatorServer({
+  firebase,
+  uids: ["apr-owner", "apr-admin", "apr-member"],
+  modules: [{ id: "sample", permissions: [DELETE_INVOICE] }],
+});
 const executed: unknown[] = [];
 // Registered only in this test composition, after the server was built (the registry stays open).
 harness.server.approvals.handlers.register({
@@ -26,7 +36,11 @@ harness.server.approvals.handlers.register({
 });
 let tenantId = OrganizationIdSchema.parse("unset");
 
-const body = async (response: Response) => (await response.json()) as { data?: Record<string, unknown> & { id: string; status: string }; error?: { code: string } };
+const body = async (response: Response) =>
+  (await response.json()) as {
+    data?: Record<string, unknown> & { id: string; status: string };
+    error?: { code: string };
+  };
 
 const grant = async (uid: string, key: "admin" | "member") => {
   await seedActiveUser(firestore, uid);
@@ -44,11 +58,20 @@ const requestDeletion = (as: string, input: Record<string, unknown> = { invoiceI
     method: "POST",
     path: `/v1/organizations/${tenantId}/approval-requests`,
     as,
-    body: { node: { level: "organization", tenantId }, permission: "sample.invoice.delete", action: { kind: "sample-delete-invoice", input, summary: "Delete invoice 42" } },
+    body: {
+      node: { level: "organization", tenantId },
+      permission: "sample.invoice.delete",
+      action: { kind: "sample-delete-invoice", input, summary: "Delete invoice 42" },
+    },
   });
 
 const decide = (verb: "approve" | "reject", id: string, as: string) =>
-  harness.call(`access.${verb}ApprovalRequest`, { method: "POST", path: `/v1/approval-requests/${id}/${verb}`, as, body: {} });
+  harness.call(`access.${verb}ApprovalRequest`, {
+    method: "POST",
+    path: `/v1/approval-requests/${id}/${verb}`,
+    as,
+    body: {},
+  });
 
 beforeEach(async () => {
   executed.length = 0;
@@ -66,7 +89,9 @@ beforeEach(async () => {
 }, 30_000);
 
 describe("approval requests (emulator)", () => {
-  it("runs the four-eyes flow: request, self-approval refused, approval executes once, audit trail", { timeout: 60_000 }, async () => {
+  it("runs the four-eyes flow: request, self-approval refused, approval executes once, audit trail", {
+    timeout: 60_000,
+  }, async () => {
     const created = await requestDeletion("apr-member");
     expect(created.status).toBe(201);
     const request = (await body(created)).data;
@@ -75,9 +100,21 @@ describe("approval requests (emulator)", () => {
     expect(request).toMatchObject({ status: "pending", requestedBy: { type: "user", id: "apr-member" } });
 
     // The Location is readable by a member of the organization; an unknown id is 404 (SP5 Task 14).
-    const read = await harness.call("access.getApprovalRequest", { method: "GET", path: `/v1/approval-requests/${request.id}`, as: "apr-admin" });
+    const read = await harness.call("access.getApprovalRequest", {
+      method: "GET",
+      path: `/v1/approval-requests/${request.id}`,
+      as: "apr-admin",
+    });
     expect((await body(read)).data).toMatchObject({ id: request.id, status: "pending" });
-    expect((await harness.call("access.getApprovalRequest", { method: "GET", path: "/v1/approval-requests/NoSuchRequest0000000", as: "apr-admin" })).status).toBe(404);
+    expect(
+      (
+        await harness.call("access.getApprovalRequest", {
+          method: "GET",
+          path: "/v1/approval-requests/NoSuchRequest0000000",
+          as: "apr-admin",
+        })
+      ).status,
+    ).toBe(404);
 
     const self = await decide("approve", request.id, "apr-member");
     expect(self.status).toBe(403);
@@ -90,11 +127,23 @@ describe("approval requests (emulator)", () => {
     expect(again.status).toBe(409);
     expect(executed).toEqual([{ invoiceId: "inv-42" }]);
 
-    const pending = await harness.call("access.listApprovalRequests", { method: "GET", path: `/v1/organizations/${tenantId}/approval-requests?status=pending`, as: "apr-member" });
+    const pending = await harness.call("access.listApprovalRequests", {
+      method: "GET",
+      path: `/v1/organizations/${tenantId}/approval-requests?status=pending`,
+      as: "apr-member",
+    });
     expect(((await pending.json()) as { data: unknown[] }).data).toEqual([]);
-    const all = await harness.call("access.listApprovalRequests", { method: "GET", path: `/v1/organizations/${tenantId}/approval-requests`, as: "apr-member" });
-    expect(((await all.json()) as { data: { id: string; status: string }[] }).data).toMatchObject([{ id: request.id, status: "executed" }]);
-    const actions = (await firestore.collection(AUDIT_LOG_COLLECTIONS.tenant).where("target.id", "==", request.id).get()).docs.map((doc) => doc.get("action") as string);
+    const all = await harness.call("access.listApprovalRequests", {
+      method: "GET",
+      path: `/v1/organizations/${tenantId}/approval-requests`,
+      as: "apr-member",
+    });
+    expect(((await all.json()) as { data: { id: string; status: string }[] }).data).toMatchObject([
+      { id: request.id, status: "executed" },
+    ]);
+    const actions = (
+      await firestore.collection(AUDIT_LOG_COLLECTIONS.tenant).where("target.id", "==", request.id).get()
+    ).docs.map((doc) => doc.get("action") as string);
     expect(actions.sort()).toEqual(["APPROVAL_APPROVED", "APPROVAL_EXECUTED", "APPROVAL_REQUESTED"]);
   });
 
@@ -109,7 +158,11 @@ describe("approval requests (emulator)", () => {
       method: "POST",
       path: `/v1/organizations/${tenantId}/approval-requests`,
       as: "apr-member",
-      body: { node: { level: "organization", tenantId }, permission: "sample.invoice.delete", action: { kind: "nobody-home", input: {}, summary: "x" } },
+      body: {
+        node: { level: "organization", tenantId },
+        permission: "sample.invoice.delete",
+        action: { kind: "nobody-home", input: {}, summary: "x" },
+      },
     });
     expect(unknownKind.status).toBe(422);
     expect((await body(unknownKind)).error?.code).toBe("UNKNOWN_APPROVAL_ACTION");
@@ -120,16 +173,33 @@ describe("approval requests (emulator)", () => {
 
 describe("approval requests inbox queries (emulator)", () => {
   // The user menu badge asks for `?limit=100&status=pending` on every page of an organization.
-  it("lists pending requests with a page limit, for the requester, an approver and the owner", { timeout: 60_000 }, async () => {
+  it("lists pending requests with a page limit, for the requester, an approver and the owner", {
+    timeout: 60_000,
+  }, async () => {
     const request = (await body(await requestDeletion("apr-member"))).data;
     if (request === undefined) throw new Error("no request");
     for (const as of ["apr-member", "apr-admin", "apr-owner"]) {
-      for (const query of ["limit=100&status=pending", "limit=10", "limit=10&status=pending", "limit=1&status=expired"]) {
-        const response = await harness.call("access.listApprovalRequests", { method: "GET", path: `/v1/organizations/${tenantId}/approval-requests?${query}`, as });
+      for (const query of [
+        "limit=100&status=pending",
+        "limit=10",
+        "limit=10&status=pending",
+        "limit=1&status=expired",
+      ]) {
+        const response = await harness.call("access.listApprovalRequests", {
+          method: "GET",
+          path: `/v1/organizations/${tenantId}/approval-requests?${query}`,
+          as,
+        });
         expect(`${as} ${query} ${String(response.status)}`).toBe(`${as} ${query} 200`);
       }
     }
-    const listed = await harness.call("access.listApprovalRequests", { method: "GET", path: `/v1/organizations/${tenantId}/approval-requests?limit=100&status=pending`, as: "apr-owner" });
-    expect(((await listed.json()) as { data: { id: string }[] }).data).toMatchObject([{ id: request.id, status: "pending" }]);
+    const listed = await harness.call("access.listApprovalRequests", {
+      method: "GET",
+      path: `/v1/organizations/${tenantId}/approval-requests?limit=100&status=pending`,
+      as: "apr-owner",
+    });
+    expect(((await listed.json()) as { data: { id: string }[] }).data).toMatchObject([
+      { id: request.id, status: "pending" },
+    ]);
   });
 });

@@ -1,4 +1,12 @@
-import { type ApiRouteDeps, deniedResponse, invalidCursorResponse, listResponse, pageRequestOf, type RouteHandler, withApiRoute } from "@core/services";
+import {
+  type ApiRouteDeps,
+  deniedResponse,
+  invalidCursorResponse,
+  listResponse,
+  pageRequestOf,
+  type RouteHandler,
+  withApiRoute,
+} from "@core/services";
 import { listNotesEndpoint } from "../contracts/note-endpoints.ts";
 import { createExampleNotes, type ExampleServerDeps } from "./example-commands.ts";
 
@@ -7,7 +15,9 @@ import { createExampleNotes, type ExampleServerDeps } from "./example-commands.t
  * app adds them next to the core routes (`apps/web/src/server/runtime-routes.ts`). Each runs in
  * the core pipeline (`withApiRoute`: authentication, rate limit, validation, one log line).
  */
-export const createExampleRoutes = (deps: ExampleServerDeps & { readonly pipeline: ApiRouteDeps }): Record<string, RouteHandler> => {
+export const createExampleRoutes = (
+  deps: ExampleServerDeps & { readonly pipeline: ApiRouteDeps },
+): Record<string, RouteHandler> => {
   const notes = createExampleNotes(deps);
   return {
     [listNotesEndpoint.id]: withApiRoute(listNotesEndpoint, deps.pipeline, async ({ principal, input, requestId }) => {

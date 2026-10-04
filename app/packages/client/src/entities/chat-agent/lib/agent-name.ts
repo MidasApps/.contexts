@@ -6,5 +6,9 @@ import { ASSISTANT_AGENT_ID } from "../api/chat-agents-api.ts";
  * the organization, or `undefined` when that agent is no longer listed (disabled or deleted; the
  * caller shows a generic label).
  */
-export const agentNameOf = (args: { readonly agentId: string; readonly agents: readonly ChatAgentOption[] | undefined; readonly assistant: string }): string | undefined =>
+export const agentNameOf = (args: {
+  readonly agentId: string;
+  readonly agents: readonly ChatAgentOption[] | undefined;
+  readonly assistant: string;
+}): string | undefined =>
   args.agentId === ASSISTANT_AGENT_ID ? args.assistant : args.agents?.find((agent) => agent.id === args.agentId)?.name;

@@ -1,8 +1,8 @@
 import path from "node:path";
-import { defineConfig, devices } from "@playwright/test";
 import { readE2eEnv } from "@core/e2e/e2e-env";
 import { e2eMastraServer } from "@core/e2e/mastra-server";
 import { e2eWebServer } from "@core/e2e/web-server";
+import { defineConfig, devices } from "@playwright/test";
 
 // Project `desktop-web` (SP2 spec §13 item 7): the desktop frontend built by Vite with the e2e
 // public config (turbo builds it, and the web, before this runs) and served by `vite preview`,

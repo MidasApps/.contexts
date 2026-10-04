@@ -15,11 +15,16 @@ export function OrganizationStatusPill({ status }: { status: OrganizationAdminSu
  * Cost month to date as a share of the cap: plain percentage while under 80 %, an alert pill from
  * 80 % and an over-budget pill from 100 % (governance "Custo").
  */
-export function BudgetUsagePill({ organization }: { organization: Pick<OrganizationAdminSummary, "budget" | "costMtdMicroUsd"> }) {
+export function BudgetUsagePill({
+  organization,
+}: {
+  organization: Pick<OrganizationAdminSummary, "budget" | "costMtdMicroUsd">;
+}) {
   const t = useTranslations("admin.organizations.usage");
   const format = useFormatter();
   const usage = budgetUsage(organization);
-  const percent = usage.ratio === null ? t("noCap") : format.number(usage.ratio, { style: "percent", maximumFractionDigits: 0 });
+  const percent =
+    usage.ratio === null ? t("noCap") : format.number(usage.ratio, { style: "percent", maximumFractionDigits: 0 });
   if (usage.level === "ok") return <span className="font-mono tabular-nums">{percent}</span>;
   return (
     <StatusPill tone={usage.level === "over" ? "danger" : "amber"} icon="alert-triangle">

@@ -24,18 +24,21 @@ describe("parseDatabaseUrl", () => {
   });
 
   it("keeps the other socket query parameters (sslmode, application_name)", () => {
-    expect(parseDatabaseUrl(`postgresql://svc@/app?host=${INSTANCE}&sslmode=disable&application_name=core`)).toMatchObject({
+    expect(
+      parseDatabaseUrl(`postgresql://svc@/app?host=${INSTANCE}&sslmode=disable&application_name=core`),
+    ).toMatchObject({
       kind: "socket",
       params: { sslmode: "disable", application_name: "core" },
     });
   });
 
-  it.each([["postgresql://svc%zz@/app?host=/cloudsql/a:b:c"], ["postgresql://svc:%E0%A4%A@/app?host=/cloudsql/a:b:c"], ["postgresql://svc@/a%ZZ?host=/cloudsql/a:b:c"]])(
-    "treats a malformed percent-escape in %s as unsupported instead of throwing",
-    (value) => {
-      expect(parseDatabaseUrl(value)).toBeUndefined();
-    },
-  );
+  it.each([
+    ["postgresql://svc%zz@/app?host=/cloudsql/a:b:c"],
+    ["postgresql://svc:%E0%A4%A@/app?host=/cloudsql/a:b:c"],
+    ["postgresql://svc@/a%ZZ?host=/cloudsql/a:b:c"],
+  ])("treats a malformed percent-escape in %s as unsupported instead of throwing", (value) => {
+    expect(parseDatabaseUrl(value)).toBeUndefined();
+  });
 
   it("keeps a socket password and port and decodes percent-escapes", () => {
     expect(parseDatabaseUrl(`postgres://svc%40x:p%2Fw@/app?host=${INSTANCE}&port=6432`)).toMatchObject({

@@ -1,7 +1,7 @@
 import {
-  DEVICE_ACTIVATION_TTL_MINUTES,
   type CreateDeviceActivationInput,
   type CreateDeviceActivationResponse,
+  DEVICE_ACTIVATION_TTL_MINUTES,
   type TenantId,
   type UserPrincipal,
 } from "@core/contracts";
@@ -33,7 +33,13 @@ export const makeCreateDeviceActivation =
   (deps: DeviceDeps): CreateDeviceActivation =>
   async ({ actor, access, tenantId, input, requestId }) => {
     if (input.node.tenantId !== tenantId) return err(new AccessDeniedError("NODE_NOT_FOUND"));
-    const grantable = await deps.access.checkGrantable({ access, actor, permission: "core.device.create", node: input.node, roles: input.roles });
+    const grantable = await deps.access.checkGrantable({
+      access,
+      actor,
+      permission: "core.device.create",
+      node: input.node,
+      roles: input.roles,
+    });
     if (!grantable.ok) return grantable;
     const now = deps.clock.now();
     const code = generateActivationCode(deps.randomBytes);
@@ -54,7 +60,16 @@ export const makeCreateDeviceActivation =
     await deps.unitOfWork.run(async (tx) => {
       deps.activations.create(tx, { activation, codeHash: hashActivationCode(code) });
       await deps.audit.record(
-        { log: "tenant", tenantId, action: "DEVICE_ACTIVATION_CREATED", actor: auditActor, target: { type: "device-activation", id: activation.id }, node: input.node, outcome: "success", requestId },
+        {
+          log: "tenant",
+          tenantId,
+          action: "DEVICE_ACTIVATION_CREATED",
+          actor: auditActor,
+          target: { type: "device-activation", id: activation.id },
+          node: input.node,
+          outcome: "success",
+          requestId,
+        },
         tx,
       );
     });

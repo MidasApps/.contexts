@@ -1,11 +1,11 @@
 "use client";
 
 import type { Me } from "@core/contracts";
+import { useUpdateMe } from "#/entities/session/index.ts";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { SchemaForm } from "#/shared/ui/organisms/SchemaForm/SchemaForm.tsx";
 import type { SchemaFormResult } from "#/shared/ui/organisms/SchemaForm/server-errors.ts";
-import { ProfileFormContract, type ProfileForm } from "../model/profile-form.contract.ts";
-import { useUpdateMe } from "#/entities/session/index.ts";
+import { type ProfileForm, ProfileFormContract } from "../model/profile-form.contract.ts";
 
 /**
  * Display name (`PATCH /v1/me`, SP2 spec §8 profile/account). Saving an unchanged name sends
@@ -23,5 +23,12 @@ export function UpdateProfileForm({ me }: { me: Me }) {
       throw error;
     }
   };
-  return <SchemaForm contract={ProfileFormContract} defaultValues={{ displayName: me.displayName }} onSubmit={submit} requireChanges />;
+  return (
+    <SchemaForm
+      contract={ProfileFormContract}
+      defaultValues={{ displayName: me.displayName }}
+      onSubmit={submit}
+      requireChanges
+    />
+  );
 }

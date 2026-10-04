@@ -2,7 +2,13 @@ import { type AnyExportedSpan, SpanType, TracingEventType } from "@mastra/core/o
 import { SensitiveDataFilter } from "@mastra/observability";
 import { describe, expect, it } from "vitest";
 import { createFakeUsagePort } from "../testing/index.ts";
-import { buildExporters, DEFAULT_SENSITIVE_FIELDS, EXTRA_SENSITIVE_FIELDS, SENSITIVE_FIELDS, SPAN_CONTEXT_KEYS } from "./create-observability.ts";
+import {
+  buildExporters,
+  DEFAULT_SENSITIVE_FIELDS,
+  EXTRA_SENSITIVE_FIELDS,
+  SENSITIVE_FIELDS,
+  SPAN_CONTEXT_KEYS,
+} from "./create-observability.ts";
 import { hashResourceId, isTraceSampled } from "./span-export-policy.ts";
 
 const ENDPOINT = "https://otel-collector.internal:4318/v1/traces";
@@ -25,7 +31,10 @@ const capturingSpanExporter = () => {
 };
 
 // A trace id kept by the remote 20 % sampler, so the remote export is observable.
-const SAMPLED_TRACE_ID = Array.from({ length: 100 }, (_, index) => index.toString(16).padStart(32, "4")).find((id) => isTraceSampled(id, 0.2)) ?? "";
+const SAMPLED_TRACE_ID =
+  Array.from({ length: 100 }, (_, index) => index.toString(16).padStart(32, "4")).find((id) =>
+    isTraceSampled(id, 0.2),
+  ) ?? "";
 
 const rootSpan = (): AnyExportedSpan =>
   ({
@@ -48,21 +57,30 @@ const rootSpan = (): AnyExportedSpan =>
 describe("buildExporters", () => {
   it("exports to storage and the usage ledger, and to OTLP only when the endpoint is set", () => {
     const usage = createFakeUsagePort();
-    expect(buildExporters({ serviceName: "mastra", env: { APP_ENV: "local" }, usage }).map((exporter) => exporter.name)).toEqual([
-      "mastra-storage-exporter",
-      "usage-ledger",
-    ]);
-    expect(buildExporters({ serviceName: "mastra", env: { APP_ENV: "prod", OTEL_EXPORTER_OTLP_ENDPOINT: ENDPOINT }, usage }).map((exporter) => exporter.name)).toEqual([
-      "mastra-storage-exporter",
-      "opentelemetry",
-      "usage-ledger",
-    ]);
+    expect(
+      buildExporters({ serviceName: "mastra", env: { APP_ENV: "local" }, usage }).map((exporter) => exporter.name),
+    ).toEqual(["mastra-storage-exporter", "usage-ledger"]);
+    expect(
+      buildExporters({
+        serviceName: "mastra",
+        env: { APP_ENV: "prod", OTEL_EXPORTER_OTLP_ENDPOINT: ENDPOINT },
+        usage,
+      }).map((exporter) => exporter.name),
+    ).toEqual(["mastra-storage-exporter", "opentelemetry", "usage-ledger"]);
   });
 
   it("sends OTLP spans without the uid, the permissions or the prompt outside local/dev", async () => {
     const { spans, exporter } = capturingSpanExporter();
-    const [, otlp] = buildExporters({ serviceName: "mastra", env: { APP_ENV: "local", OTEL_EXPORTER_OTLP_ENDPOINT: ENDPOINT }, otlpSpanExporter: exporter });
-    const [, remoteOtlp] = buildExporters({ serviceName: "mastra", env: { APP_ENV: "prod", OTEL_EXPORTER_OTLP_ENDPOINT: ENDPOINT }, otlpSpanExporter: exporter });
+    const [, otlp] = buildExporters({
+      serviceName: "mastra",
+      env: { APP_ENV: "local", OTEL_EXPORTER_OTLP_ENDPOINT: ENDPOINT },
+      otlpSpanExporter: exporter,
+    });
+    const [, remoteOtlp] = buildExporters({
+      serviceName: "mastra",
+      env: { APP_ENV: "prod", OTEL_EXPORTER_OTLP_ENDPOINT: ENDPOINT },
+      otlpSpanExporter: exporter,
+    });
     for (const target of [otlp, remoteOtlp]) {
       await target?.exportTracingEvent({ type: TracingEventType.SPAN_ENDED, exportedSpan: rootSpan() });
       await target?.flush();
@@ -91,9 +109,18 @@ describe("sensitive data filter", () => {
 
   it("redacts both default and extra fields", () => {
     const filter = new SensitiveDataFilter({ sensitiveFields: [...SENSITIVE_FIELDS] });
-    const span = { traceId: "t", attributes: { password: "p", idToken: "i", cookie: "c", "X-Serverless-Authorization": "s", model: "m" } };
+    const span = {
+      traceId: "t",
+      attributes: { password: "p", idToken: "i", cookie: "c", "X-Serverless-Authorization": "s", model: "m" },
+    };
     const filtered = filter.process(span as never) as unknown as typeof span;
-    expect(filtered.attributes).toEqual({ password: "[REDACTED]", idToken: "[REDACTED]", cookie: "[REDACTED]", "X-Serverless-Authorization": "[REDACTED]", model: "m" });
+    expect(filtered.attributes).toEqual({
+      password: "[REDACTED]",
+      idToken: "[REDACTED]",
+      cookie: "[REDACTED]",
+      "X-Serverless-Authorization": "[REDACTED]",
+      model: "m",
+    });
   });
 
   it("copies the tenant and conversation keys into span metadata", () => {

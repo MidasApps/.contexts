@@ -38,16 +38,25 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 
 // Structural check (not `instanceof`): the module resolves zod through its own node_modules link.
 const isContractDefinition = (value: unknown): value is ContractDefinition =>
-  isRecord(value) && typeof value["id"] === "string" && isRecord(value["meta"]) && isRecord(value["schema"]) && typeof value["schema"]["safeParse"] === "function";
+  isRecord(value) &&
+  typeof value["id"] === "string" &&
+  isRecord(value["meta"]) &&
+  isRecord(value["schema"]) &&
+  typeof value["schema"]["safeParse"] === "function";
 
 const isEndpointDefinition = (value: unknown): value is EndpointDefinition =>
-  isRecord(value) && typeof value["id"] === "string" && typeof value["path"] === "string" && typeof value["method"] === "string" && isRecord(value["responses"]);
+  isRecord(value) &&
+  typeof value["id"] === "string" &&
+  typeof value["path"] === "string" &&
+  typeof value["method"] === "string" &&
+  isRecord(value["responses"]);
 
 const problemsOfEndpoints = (moduleId: string, endpoints: unknown): string[] => {
   if (endpoints === undefined) return [];
   if (!Array.isArray(endpoints)) return [`${moduleId} endpoints must be an array`];
   return endpoints.flatMap((endpoint: unknown, position) => {
-    if (!isEndpointDefinition(endpoint)) return [`${moduleId} endpoints[${String(position)}] is not a defineEndpoint() result`];
+    if (!isEndpointDefinition(endpoint))
+      return [`${moduleId} endpoints[${String(position)}] is not a defineEndpoint() result`];
     return endpoint.id.startsWith(`${moduleId}.`) ? [] : [`${endpoint.id} must start with ${moduleId}.`];
   });
 };
@@ -58,7 +67,8 @@ const problemsOfModule = (entry: unknown, index: number): string[] => {
   }
   const { moduleId, contracts } = entry as { moduleId: string; contracts: unknown[] };
   const contractProblems = contracts.flatMap((contract, position) => {
-    if (!isContractDefinition(contract)) return [`${moduleId} contracts[${String(position)}] is not a defineContract() result`];
+    if (!isContractDefinition(contract))
+      return [`${moduleId} contracts[${String(position)}] is not a defineContract() result`];
     return contract.id.startsWith(`${moduleId}.`) ? [] : [`${contract.id} must start with ${moduleId}.`];
   });
   return [...contractProblems, ...problemsOfEndpoints(moduleId, entry["endpoints"])];

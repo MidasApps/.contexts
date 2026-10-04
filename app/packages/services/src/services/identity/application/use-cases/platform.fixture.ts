@@ -9,12 +9,19 @@ import { makeRecordAudit } from "../../../audit/application/use-cases/record-aud
 import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
 import { createLogger, type LogRecord } from "../../../shared/observability/logger.ts";
 import { createFakeFirebaseAuth } from "../../adapters/driven/fake-firebase-auth.ts";
-import { createInMemoryImpersonationSessionRepository, createInMemoryPlatformStaffRepository } from "../../adapters/driven/in-memory-platform-repositories.ts";
+import {
+  createInMemoryImpersonationSessionRepository,
+  createInMemoryPlatformStaffRepository,
+} from "../../adapters/driven/in-memory-platform-repositories.ts";
 import { createPlatformServices } from "../../platform-composition.ts";
 
 export const PLATFORM_NOW = "2026-09-30T12:00:00.000Z";
 
-export const staffPrincipal = (uid: string, mfa = true): UserPrincipal => ({ type: "user", uid: UserIdSchema.parse(uid), mfa });
+export const staffPrincipal = (uid: string, mfa = true): UserPrincipal => ({
+  type: "user",
+  uid: UserIdSchema.parse(uid),
+  mfa,
+});
 
 export const buildPlatformWorld = async () => {
   let now = new Date(PLATFORM_NOW);
@@ -25,11 +32,16 @@ export const buildPlatformWorld = async () => {
   world.store.putUser("staff");
   world.store.putUser("support-2");
   world.writes.putUser("staff");
-  const core = createAccessCore({ readers: { ...world.store, grants: world.writes.grantReader, roles: world.writes.roleReader }, clock });
+  const core = createAccessCore({
+    readers: { ...world.store, grants: world.writes.grantReader, roles: world.writes.roleReader },
+    clock,
+  });
   const writer = createInMemoryAuditLogWriter();
   const logs: LogRecord[] = [];
   const staff = createInMemoryPlatformStaffRepository({ onWrite: (row) => world.store.putPlatformStaff(row.uid, row) });
-  const impersonations = createInMemoryImpersonationSessionRepository({ onWrite: (row) => world.store.putImpersonationSession(row.id, row) });
+  const impersonations = createInMemoryImpersonationSessionRepository({
+    onWrite: (row) => world.store.putImpersonationSession(row.id, row),
+  });
   const auth = createFakeFirebaseAuth();
   const platform = createPlatformServices({
     staff,
@@ -50,7 +62,8 @@ export const buildPlatformWorld = async () => {
     logs,
     access: () => core.forRequest(),
     entries: (log: "tenant" | "platform") => (log === "tenant" ? writer.entries("tenant") : writer.entries("platform")),
-    actions: (log: "tenant" | "platform") => (log === "tenant" ? writer.entries("tenant") : writer.entries("platform")).map((entry) => entry.action),
+    actions: (log: "tenant" | "platform") =>
+      (log === "tenant" ? writer.entries("tenant") : writer.entries("platform")).map((entry) => entry.action),
     setNow: (iso: string) => {
       now = new Date(iso);
     },

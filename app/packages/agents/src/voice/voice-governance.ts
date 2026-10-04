@@ -17,9 +17,16 @@ import type { VoiceModelRef } from "./create-voice.ts";
 export type VoiceCallKind = "transcription" | "speech";
 
 /** The verified caller of a voice route, from the context middleware on `/voice/*`. */
-export type VoiceCaller = { readonly tenantId: string; readonly principal: AccessPrincipal; readonly requestId: string };
+export type VoiceCaller = {
+  readonly tenantId: string;
+  readonly principal: AccessPrincipal;
+  readonly requestId: string;
+};
 
-export type VoiceRefusal = { readonly status: 403 | 429 | 503; readonly code: "FORBIDDEN" | "BUDGET_EXCEEDED" | "FEATURE_UNAVAILABLE" };
+export type VoiceRefusal = {
+  readonly status: 403 | 429 | 503;
+  readonly code: "FORBIDDEN" | "BUDGET_EXCEEDED" | "FEATURE_UNAVAILABLE";
+};
 
 /** Which voice feature a call needs: `voice` (flag `chat.voice`) or also `realtime` (`chat.voice.realtime`). */
 export type VoiceFeature = "voice" | "realtime";
@@ -29,17 +36,35 @@ export type VoiceGovernance = {
    * The caller, or why the call may not start (no context, feature off for the tenant, budget).
    * `realtime` also needs the realtime flag.
    */
-  readonly admit: (requestContext: RequestContext<unknown> | undefined, options?: { readonly realtime?: boolean }) => Promise<{ readonly ok: true; readonly caller: VoiceCaller } | { readonly ok: false; readonly refusal: VoiceRefusal }>;
+  readonly admit: (
+    requestContext: RequestContext<unknown> | undefined,
+    options?: { readonly realtime?: boolean },
+  ) => Promise<
+    { readonly ok: true; readonly caller: VoiceCaller } | { readonly ok: false; readonly refusal: VoiceRefusal }
+  >;
   /** Ledger row and audit entry of a finished provider call; failures are logged, never thrown. */
-  readonly record: (input: { readonly caller: VoiceCaller; readonly kind: VoiceCallKind; readonly model: VoiceModelRef | null; readonly latencyMs: number }) => Promise<void>;
+  readonly record: (input: {
+    readonly caller: VoiceCaller;
+    readonly kind: VoiceCallKind;
+    readonly model: VoiceModelRef | null;
+    readonly latencyMs: number;
+  }) => Promise<void>;
 };
 
 const AGENT_IDS: Record<VoiceCallKind, string> = { transcription: "voice-transcription", speech: "voice-speech" };
-const AUDIT_ACTIONS: Record<VoiceCallKind, string> = { transcription: "VOICE_TRANSCRIBED", speech: "VOICE_SYNTHESIZED" };
+const AUDIT_ACTIONS: Record<VoiceCallKind, string> = {
+  transcription: "VOICE_TRANSCRIBED",
+  speech: "VOICE_SYNTHESIZED",
+};
 
-const userIdOf = (principal: AccessPrincipal): string | null => (principal.type === "user" ? principal.uid : principal.type === "service" ? principal.ownerUid : null);
+const userIdOf = (principal: AccessPrincipal): string | null =>
+  principal.type === "user" ? principal.uid : principal.type === "service" ? principal.ownerUid : null;
 
-const ledgerRowOf = (input: Parameters<VoiceGovernance["record"]>[0], now: Date, newId: () => string): LlmCall | null => {
+const ledgerRowOf = (
+  input: Parameters<VoiceGovernance["record"]>[0],
+  now: Date,
+  newId: () => string,
+): LlmCall | null => {
   const parsed = LlmCallSchema.safeParse({
     id: newId(),
     requestId: input.caller.requestId.slice(0, 64),
@@ -65,7 +90,8 @@ type AdmitDeps = { readonly isEnabled: VoiceFeatureGate; readonly usage: Pick<Us
 const UNAVAILABLE = { ok: false, refusal: { status: 503, code: "FEATURE_UNAVAILABLE" } } as const;
 
 const featuresOn = async (deps: AdmitDeps, tenantId: string, realtime: boolean): Promise<boolean> =>
-  (await deps.isEnabled({ tenantId, feature: "voice" })) && (!realtime || (await deps.isEnabled({ tenantId, feature: "realtime" })));
+  (await deps.isEnabled({ tenantId, feature: "voice" })) &&
+  (!realtime || (await deps.isEnabled({ tenantId, feature: "realtime" })));
 
 const admitCaller = async (
   deps: AdmitDeps,
@@ -74,7 +100,11 @@ const admitCaller = async (
 ): ReturnType<VoiceGovernance["admit"]> => {
   const read = requestContext === undefined ? null : readAgentContext(requestContext);
   if (read === null || !read.ok) return { ok: false, refusal: { status: 403, code: "FORBIDDEN" } };
-  const caller = { tenantId: read.data.context.tenantId, principal: read.data.principal, requestId: read.data.context.requestId };
+  const caller = {
+    tenantId: read.data.context.tenantId,
+    principal: read.data.principal,
+    requestId: read.data.context.requestId,
+  };
   if (!(await featuresOn(deps, caller.tenantId, options.realtime === true))) return UNAVAILABLE;
   try {
     const budget = await deps.usage.checkTenantBudget({ tenantId: caller.tenantId });
@@ -89,7 +119,10 @@ const admitCaller = async (
  * Per-tenant voice flags (decision 0039: `chat.voice`, `chat.voice.realtime`, read through the flag
  * reader; `AI_VOICE_ENABLED` only seeds the environment default, decision 0034 amendment).
  */
-export type VoiceFeatureGate = (input: { readonly tenantId: string; readonly feature: VoiceFeature }) => Promise<boolean>;
+export type VoiceFeatureGate = (input: {
+  readonly tenantId: string;
+  readonly feature: VoiceFeature;
+}) => Promise<boolean>;
 
 export const createVoiceGovernance = (deps: {
   readonly isEnabled: VoiceFeatureGate;
@@ -104,7 +137,8 @@ export const createVoiceGovernance = (deps: {
     const row = ledgerRowOf(input, (deps.now ?? (() => new Date()))(), deps.newId ?? uuidv7);
     const { caller } = input;
     try {
-      if (row === null) deps.logger.error("voice_ledger_row_invalid", { requestId: caller.requestId, kind: input.kind });
+      if (row === null)
+        deps.logger.error("voice_ledger_row_invalid", { requestId: caller.requestId, kind: input.kind });
       else await deps.usage.recordLlmCalls([row]);
     } catch (error: unknown) {
       deps.logger.error("voice_ledger_write_failed", { requestId: caller.requestId, kind: input.kind, err: error });

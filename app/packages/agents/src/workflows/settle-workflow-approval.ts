@@ -1,4 +1,9 @@
-import { type HumanApprovalDecision, type HumanApprovalResume, WORKFLOW_RESUME_ACTION_KIND, WorkflowResumeActionInputSchema } from "@core/contracts";
+import {
+  type HumanApprovalDecision,
+  type HumanApprovalResume,
+  WORKFLOW_RESUME_ACTION_KIND,
+  WorkflowResumeActionInputSchema,
+} from "@core/contracts";
 import type { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
 import type { WorkflowApprovalPort, WorkflowApprovalRecord } from "../runtime/runtime-ports.ts";
@@ -7,7 +12,12 @@ import type { WorkflowApprovalPort, WorkflowApprovalRecord } from "../runtime/ru
 export type SettleSkipReason = "NOT_SETTLED" | "NOT_SUSPENDED";
 
 export type SettleWorkflowApprovalResult =
-  | { readonly ok: true; readonly data: { readonly settled: true; readonly runStatus: string } | { readonly settled: false; readonly reason: SettleSkipReason } }
+  | {
+      readonly ok: true;
+      readonly data:
+        | { readonly settled: true; readonly runStatus: string }
+        | { readonly settled: false; readonly reason: SettleSkipReason };
+    }
   | { readonly ok: false; readonly error: { readonly code: "NOT_FOUND" } };
 
 // Stored status → the decision the run resumes with; pending and failed requests settle nothing.
@@ -35,7 +45,9 @@ const isNotSuspended = (error: unknown): boolean => {
   return NOT_SUSPENDED_MESSAGES.some((pattern) => pattern.test(message));
 };
 
-const ok = (data: { settled: true; runStatus: string } | { settled: false; reason: SettleSkipReason }): SettleWorkflowApprovalResult => ({ ok: true, data });
+const ok = (
+  data: { settled: true; runStatus: string } | { settled: false; reason: SettleSkipReason },
+): SettleWorkflowApprovalResult => ({ ok: true, data });
 const NOT_FOUND: SettleWorkflowApprovalResult = { ok: false, error: { code: "NOT_FOUND" } };
 
 const workflowOf = (mastra: Pick<Mastra, "getWorkflow">, workflowId: string) => {
@@ -69,7 +81,11 @@ export const settleWorkflowApproval = async (args: {
   if (workflow === undefined) return NOT_FOUND;
   const run = await workflow.createRun({ runId: action.data.runId });
   try {
-    const result = await run.resume({ step: action.data.stepId, resumeData: resumeDataOf(record, decision), requestContext: new RequestContext() });
+    const result = await run.resume({
+      step: action.data.stepId,
+      resumeData: resumeDataOf(record, decision),
+      requestContext: new RequestContext(),
+    });
     return ok({ settled: true, runStatus: result.status });
   } catch (error: unknown) {
     if (isNotSuspended(error)) return ok({ settled: false, reason: "NOT_SUSPENDED" });

@@ -1,5 +1,5 @@
-import { AuditLogEntryContract, type AuditLogEntry } from "@core/contracts";
-import { FieldPath, Timestamp, type Firestore } from "firebase-admin/firestore";
+import { type AuditLogEntry, AuditLogEntryContract } from "@core/contracts";
+import { FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
 import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
 import type { AuditLogReader } from "../../application/ports/driven/audit-log-reader.ts";
@@ -16,7 +16,10 @@ const at = (iso: string): Timestamp => Timestamp.fromDate(new Date(iso));
  */
 export const createFirestoreAuditLogReader = (deps: { firestore: Firestore }): AuditLogReader => ({
   list: async ({ tenantId, filters, page }) => {
-    let query = deps.firestore.collection(AUDIT_LOG_COLLECTIONS.tenant).withConverter(converter).where("tenantId", "==", tenantId);
+    let query = deps.firestore
+      .collection(AUDIT_LOG_COLLECTIONS.tenant)
+      .withConverter(converter)
+      .where("tenantId", "==", tenantId);
     if (filters.action !== undefined) query = query.where("action", "==", filters.action);
     if (filters.actorId !== undefined) query = query.where("actor.id", "==", filters.actorId);
     if (filters.occurredAfter !== undefined) query = query.where("occurredAt", ">", at(filters.occurredAfter));
@@ -24,6 +27,10 @@ export const createFirestoreAuditLogReader = (deps: { firestore: Firestore }): A
     query = query.orderBy("occurredAt", "desc").orderBy(FieldPath.documentId(), "desc");
     if (page.after !== undefined) query = query.startAfter(at(page.after[0]), page.after[1]);
     const fetched = (await query.limit(page.limit + 1).get()).docs.map((doc) => doc.data());
-    return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (entry: AuditLogEntry) => [entry.occurredAt, entry.id] });
+    return pageFromOverfetch({
+      fetched,
+      limit: page.limit,
+      positionOf: (entry: AuditLogEntry) => [entry.occurredAt, entry.id],
+    });
   },
 });

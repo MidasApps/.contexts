@@ -1,8 +1,8 @@
 "use client";
 
 import type { ComponentProps } from "react";
-import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import type { SettingsSection } from "#/shared/lib/router/route-paths.ts";
+import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { useCarriedSearch } from "#/shared/lib/router/use-route-search.ts";
 
 export type SettingsSectionLinkProps = Omit<ComponentProps<typeof RouteLink>, "to"> & {
@@ -18,5 +18,10 @@ export type SettingsSectionLinkProps = Omit<ComponentProps<typeof RouteLink>, "t
  */
 export function SettingsSectionLink({ organizationId, section, rest, ...props }: SettingsSectionLinkProps) {
   const search = useCarriedSearch();
-  return <RouteLink to={{ id: "settings", organizationId, section, ...(rest === undefined ? {} : { rest }), search }} {...props} />;
+  return (
+    <RouteLink
+      to={{ id: "settings", organizationId, section, ...(rest === undefined ? {} : { rest }), search }}
+      {...props}
+    />
+  );
 }

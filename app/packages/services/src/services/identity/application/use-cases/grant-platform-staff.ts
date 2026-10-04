@@ -2,7 +2,11 @@ import type { PlatformRole, PlatformStaff, UserId } from "@core/contracts";
 import { SYSTEM_ACTOR } from "../../../shared/firestore/audit-fields.ts";
 import type { PlatformDeps } from "../platform-deps.ts";
 
-export type GrantPlatformStaff = (command: { uid: UserId; role: PlatformRole; requestId: string }) => Promise<PlatformStaff>;
+export type GrantPlatformStaff = (command: {
+  uid: UserId;
+  role: PlatformRole;
+  requestId: string;
+}) => Promise<PlatformStaff>;
 
 /**
  * Makes a user active platform staff with `role` (SP1 spec §3.4). Only operator tooling
@@ -19,7 +23,14 @@ export const makeGrantPlatformStaff =
       const next: PlatformStaff = { uid, role, isActive: true, createdAt: existing?.createdAt ?? now, updatedAt: now };
       deps.staff.put(tx, { staff: next, actorId: SYSTEM_ACTOR });
       await deps.audit.record(
-        { log: "platform", action: "PLATFORM_STAFF_GRANTED", actor: { type: "system", id: SYSTEM_ACTOR }, target: { type: "user", id: uid }, outcome: "success", requestId },
+        {
+          log: "platform",
+          action: "PLATFORM_STAFF_GRANTED",
+          actor: { type: "system", id: SYSTEM_ACTOR },
+          target: { type: "user", id: uid },
+          outcome: "success",
+          requestId,
+        },
         tx,
       );
       return next;

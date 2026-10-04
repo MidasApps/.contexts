@@ -5,10 +5,10 @@ import { useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { AdminUserRef } from "#/entities/admin-user/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
-import { PROMPT_ROWS_PER_PAGE, useLocalPages } from "../model/use-local-pages.ts";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
+import { PROMPT_ROWS_PER_PAGE, useLocalPages } from "../model/use-local-pages.ts";
 
 const column = dataTableColumnHelper<PromptActivation>();
 
@@ -50,11 +50,27 @@ export function PromptActivationHistory({
   }, [t, versions]);
   const columns = useMemo(
     () => [
-      column.display({ id: "version", header: () => t("columns.version"), cell: ({ row }) => <span className="font-mono tabular-nums">{versionLabel(row.original)}</span> }),
-      column.accessor("activatedAt", { header: () => t("columns.when"), cell: ({ getValue }) => formatDateTime(getValue()) }),
-      column.accessor("activatedBy", { header: () => t("columns.who"), cell: ({ getValue }) => <AdminUserRef id={getValue()} label={userLabel(getValue())} /> }),
-      column.accessor("forced", { header: () => t("columns.kind"), cell: ({ getValue }) => <Kind forced={getValue()} /> }),
-      column.accessor("reason", { header: () => t("columns.reason"), cell: ({ getValue }) => getValue() ?? <span className="text-muted-foreground">{t("noReason")}</span> }),
+      column.display({
+        id: "version",
+        header: () => t("columns.version"),
+        cell: ({ row }) => <span className="font-mono tabular-nums">{versionLabel(row.original)}</span>,
+      }),
+      column.accessor("activatedAt", {
+        header: () => t("columns.when"),
+        cell: ({ getValue }) => formatDateTime(getValue()),
+      }),
+      column.accessor("activatedBy", {
+        header: () => t("columns.who"),
+        cell: ({ getValue }) => <AdminUserRef id={getValue()} label={userLabel(getValue())} />,
+      }),
+      column.accessor("forced", {
+        header: () => t("columns.kind"),
+        cell: ({ getValue }) => <Kind forced={getValue()} />,
+      }),
+      column.accessor("reason", {
+        header: () => t("columns.reason"),
+        cell: ({ getValue }) => getValue() ?? <span className="text-muted-foreground">{t("noReason")}</span>,
+      }),
     ],
     [formatDateTime, t, userLabel, versionLabel],
   );
@@ -75,7 +91,9 @@ export function PromptActivationHistory({
             <span className="font-mono font-medium tabular-nums">{versionLabel(activation)}</span>
             <Kind forced={activation.forced} />
           </span>
-          <span className="text-xs text-muted-foreground">{t("cardMeta", { who: userLabel(activation.activatedBy), date: formatDateTime(activation.activatedAt) })}</span>
+          <span className="text-xs text-muted-foreground">
+            {t("cardMeta", { who: userLabel(activation.activatedBy), date: formatDateTime(activation.activatedAt) })}
+          </span>
           {activation.reason === null ? null : <span className="text-body">{activation.reason}</span>}
         </div>
       )}

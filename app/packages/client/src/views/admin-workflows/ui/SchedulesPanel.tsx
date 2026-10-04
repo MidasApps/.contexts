@@ -4,7 +4,11 @@ import type { AdminSchedule } from "@core/contracts";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAdminSchedules } from "#/entities/schedule/index.ts";
-import { RunScheduleNowDialog, ScheduleStateDialog, type ScheduleStateRequest } from "#/features/admin-schedule-actions/index.ts";
+import {
+  RunScheduleNowDialog,
+  ScheduleStateDialog,
+  type ScheduleStateRequest,
+} from "#/features/admin-schedule-actions/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
@@ -48,9 +52,31 @@ export function SchedulesPanel({ organizationId, onOrganizationChange, organizat
             onRunNow={setRunning}
             empty={
               organizationId === undefined ? (
-                <EmptyState frame="plain" headingLevel={2} icon="calendar" title={t("emptyTitle")} description={t("emptyDescription")} action={<Button variant="secondary" onClick={() => void schedules.refetch()}>{t("reload")}</Button>} />
+                <EmptyState
+                  frame="plain"
+                  headingLevel={2}
+                  icon="calendar"
+                  title={t("emptyTitle")}
+                  description={t("emptyDescription")}
+                  action={
+                    <Button variant="secondary" onClick={() => void schedules.refetch()}>
+                      {t("reload")}
+                    </Button>
+                  }
+                />
               ) : (
-                <EmptyState frame="plain" headingLevel={2} icon="calendar" title={t("noMatchTitle")} description={t("noMatchDescription")} action={<Button variant="secondary" onClick={() => onOrganizationChange(undefined)}>{t("seeAll")}</Button>} />
+                <EmptyState
+                  frame="plain"
+                  headingLevel={2}
+                  icon="calendar"
+                  title={t("noMatchTitle")}
+                  description={t("noMatchDescription")}
+                  action={
+                    <Button variant="secondary" onClick={() => onOrganizationChange(undefined)}>
+                      {t("seeAll")}
+                    </Button>
+                  }
+                />
               )
             }
           />

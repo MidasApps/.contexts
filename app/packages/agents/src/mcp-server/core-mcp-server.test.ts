@@ -26,7 +26,13 @@ beforeAll(async () => {
   http = createServer((req, res) => {
     const token = /^Bearer (\S+)$/.exec(req.headers.authorization ?? "")?.[1] ?? "";
     const permissions = CONTEXTS[token];
-    if (permissions !== undefined) setMcpRequestAuth(req, new RequestContext<unknown>(buildAgentContextEntries({ permissions: [...permissions], conversationId: "McpConv0000000000001" })));
+    if (permissions !== undefined)
+      setMcpRequestAuth(
+        req,
+        new RequestContext<unknown>(
+          buildAgentContextEntries({ permissions: [...permissions], conversationId: "McpConv0000000000001" }),
+        ),
+      );
     void server?.startHTTP({ url: new URL(req.url ?? "/", "http://127.0.0.1"), httpPath: "/mcp", req, res });
   });
   await new Promise<void>((resolve) => http.listen(0, "127.0.0.1", resolve));
@@ -41,7 +47,13 @@ afterAll(async () => {
 const clientAs = (token: string | null) =>
   new MCPClient({
     id: `core-test-${token ?? "anonymous"}-${Math.random()}`,
-    servers: { core: { url: new URL(`${origin}/mcp`), requestInit: { headers: token === null ? {} : { authorization: `Bearer ${token}` } }, timeout: 20_000 } },
+    servers: {
+      core: {
+        url: new URL(`${origin}/mcp`),
+        requestInit: { headers: token === null ? {} : { authorization: `Bearer ${token}` } },
+        timeout: 20_000,
+      },
+    },
   });
 
 const withClient = async <T>(token: string | null, run: (client: MCPClient) => Promise<T>): Promise<T> => {
@@ -58,7 +70,13 @@ type ExecutableTool = { execute: (input: unknown, context?: unknown) => Promise<
 describe("core MCP server", () => {
   it("lists the read tools and ask_assistant, and no mutation tool", async () => {
     const names = await withClient("member-token", async (client) => Object.keys(await client.listTools()).sort());
-    expect(names).toEqual(["core_ask_assistant", "core_describeEntity", "core_listEntities", "core_querySemanticSql", "core_searchKnowledge"]);
+    expect(names).toEqual([
+      "core_ask_assistant",
+      "core_describeEntity",
+      "core_listEntities",
+      "core_querySemanticSql",
+      "core_searchKnowledge",
+    ]);
   }, 30_000);
 
   it("runs listEntities with the caller's tenant and permissions", async () => {
@@ -80,7 +98,10 @@ describe("core MCP server", () => {
 
   it("lists only the catalog resources the caller may read", async () => {
     const member = await withClient("member-token", async (client) => (await client.resources.list()).core ?? []);
-    const restricted = await withClient("no-catalog-token", async (client) => (await client.resources.list()).core ?? []);
+    const restricted = await withClient(
+      "no-catalog-token",
+      async (client) => (await client.resources.list()).core ?? [],
+    );
     expect(member.length).toBeGreaterThan(0);
     expect(member.every((resource) => resource.uri.startsWith("catalog://"))).toBe(true);
     expect(restricted.length).toBeLessThan(member.length);

@@ -32,7 +32,9 @@ function FactorRow({ factor, onRemove }: { factor: EnrolledFactor; onRemove: () 
         <span className="text-xs text-muted-foreground">
           {kind}
           {factor.phoneNumber === null ? null : <span className="font-mono tabular-nums"> · {factor.phoneNumber}</span>}
-          {factor.enrolledAt === null ? null : <> · {t("enrolledAt", { date: formatDateTime(factor.enrolledAt, "date") })}</>}
+          {factor.enrolledAt === null ? null : (
+            <> · {t("enrolledAt", { date: formatDateTime(factor.enrolledAt, "date") })}</>
+          )}
         </span>
       </span>
       <Button variant="outline" size="sm" onClick={onRemove} aria-label={t("removeNamed", { name })}>
@@ -92,7 +94,10 @@ export function MfaFactorsSection() {
         </Button>
       ) : null}
       {offered.includes("phone") ? (
-        <Button variant={factors.length === 0 && !offered.includes("totp") ? "default" : "outline"} onClick={() => setEnrolling("phone")}>
+        <Button
+          variant={factors.length === 0 && !offered.includes("totp") ? "default" : "outline"}
+          onClick={() => setEnrolling("phone")}
+        >
           <Icon name="plus" />
           {t("addSms")}
         </Button>
@@ -102,12 +107,21 @@ export function MfaFactorsSection() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <StatusPill tone={factors.length > 0 ? "emerald" : "amber"} icon={factors.length > 0 ? "circle-check" : "alert-triangle"}>
+        <StatusPill
+          tone={factors.length > 0 ? "emerald" : "amber"}
+          icon={factors.length > 0 ? "circle-check" : "alert-triangle"}
+        >
           {factors.length > 0 ? t("statusOn") : t("statusOff")}
         </StatusPill>
       </div>
       {factors.length === 0 ? (
-        <EmptyState icon="shield" headingLevel={3} title={t("emptyTitle")} description={offered.length === 0 ? t("unavailable") : t("emptyDescription")} action={offered.length === 0 ? undefined : actions} />
+        <EmptyState
+          icon="shield"
+          headingLevel={3}
+          title={t("emptyTitle")}
+          description={offered.length === 0 ? t("unavailable") : t("emptyDescription")}
+          action={offered.length === 0 ? undefined : actions}
+        />
       ) : (
         <>
           <ul aria-label={t("listLabel")} className="divide-y divide-border rounded-lg border border-border">
@@ -118,8 +132,16 @@ export function MfaFactorsSection() {
           {offered.length === 0 ? null : actions}
         </>
       )}
-      <EnrollTotpDialog open={enrolling === "totp"} onOpenChange={(open) => setEnrolling(open ? "totp" : null)} onEnrolled={enrolled} />
-      <EnrollSmsDialog open={enrolling === "phone"} onOpenChange={(open) => setEnrolling(open ? "phone" : null)} onEnrolled={enrolled} />
+      <EnrollTotpDialog
+        open={enrolling === "totp"}
+        onOpenChange={(open) => setEnrolling(open ? "totp" : null)}
+        onEnrolled={enrolled}
+      />
+      <EnrollSmsDialog
+        open={enrolling === "phone"}
+        onOpenChange={(open) => setEnrolling(open ? "phone" : null)}
+        onEnrolled={enrolled}
+      />
       <ConfirmDialog
         open={removal.target !== null}
         onOpenChange={(open) => !open && removal.open(null)}

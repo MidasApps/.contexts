@@ -14,7 +14,8 @@ describe("activation code", () => {
 
   it("gives every byte pattern a distinct code (no truncation of entropy)", () => {
     const codes = new Set<string>();
-    for (let value = 0; value < 256; value += 1) codes.add(generateActivationCode(() => new Uint8Array([value, 0, 0, 0, value])));
+    for (let value = 0; value < 256; value += 1)
+      codes.add(generateActivationCode(() => new Uint8Array([value, 0, 0, 0, value])));
     expect(codes.size).toBe(256);
   });
 

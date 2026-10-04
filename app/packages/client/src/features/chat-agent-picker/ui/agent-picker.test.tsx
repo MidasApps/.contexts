@@ -7,11 +7,18 @@ import { renderWithClient } from "#/shared/testing/render-client.tsx";
 import { AgentPicker } from "./agent-picker.tsx";
 
 const ASSISTANT = { id: "assistant", name: "Assistant", description: "Plans the work.", source: "core" };
-const GUIDE = { id: "Ag4sK2lPq0WnR5tYu3bV", name: "Onboarding guide", description: "Answers new members.", source: "custom" };
+const GUIDE = {
+  id: "Ag4sK2lPq0WnR5tYu3bV",
+  name: "Onboarding guide",
+  description: "Answers new members.",
+  source: "custom",
+};
 
 const setup = (routes: Parameters<typeof createFakeApi>[0], value = "assistant") => {
   const onChange = vi.fn();
-  const view = renderWithClient(<AgentPicker organizationId={IDS.organization} value={value} onChange={onChange} />, { api: createFakeApi(routes) });
+  const view = renderWithClient(<AgentPicker organizationId={IDS.organization} value={value} onChange={onChange} />, {
+    api: createFakeApi(routes),
+  });
   return { ...view, onChange };
 };
 
@@ -25,7 +32,9 @@ describe("AgentPicker", () => {
     await user.click(trigger);
     await user.click(await screen.findByRole("option", { name: "Onboarding guide" }));
     expect(onChange).toHaveBeenCalledWith(GUIDE.id);
-    expect(api.calls.find((call) => call.path === "/v1/chat-agents")?.query).toBe(`?organizationId=${IDS.organization}`);
+    expect(api.calls.find((call) => call.path === "/v1/chat-agents")?.query).toBe(
+      `?organizationId=${IDS.organization}`,
+    );
   });
 
   it("says that only the assistant is available when the organization has no agent, or the member may not list them", async () => {
@@ -39,7 +48,9 @@ describe("AgentPicker", () => {
 
   it("says that the list failed, keeps the assistant and retries", async () => {
     let failing = true;
-    const { user } = setup({ "GET /v1/chat-agents": () => (failing ? apiError(500, "INTERNAL_ERROR") : ok([ASSISTANT, GUIDE])) });
+    const { user } = setup({
+      "GET /v1/chat-agents": () => (failing ? apiError(500, "INTERNAL_ERROR") : ok([ASSISTANT, GUIDE])),
+    });
     expect(await screen.findByText("Não foi possível carregar os agentes.", {}, { timeout: 5000 })).toBeTruthy();
     expect(screen.getByRole("combobox", { name: "Agente" }).textContent).toContain("Assistente");
     failing = false;

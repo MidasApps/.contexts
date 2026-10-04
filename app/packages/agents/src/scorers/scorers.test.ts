@@ -24,7 +24,10 @@ const run = (args: { text?: string; tools?: Invocation[]; pending?: boolean }) =
     content: {
       format: 2,
       parts: [
-        ...(args.tools ?? []).map((tool) => ({ type: "tool-invocation", toolInvocation: { state: "result", toolCallId: "c1", args: {}, ...tool } })),
+        ...(args.tools ?? []).map((tool) => ({
+          type: "tool-invocation",
+          toolInvocation: { state: "result", toolCallId: "c1", args: {}, ...tool },
+        })),
         ...(args.text === undefined ? [] : [{ type: "text", text: args.text }]),
       ],
       ...(args.pending === true ? { metadata: { pendingToolApprovals: { c1: { type: "approval" } } } } : {}),
@@ -33,14 +36,22 @@ const run = (args: { text?: string; tools?: Invocation[]; pending?: boolean }) =
 ];
 
 const searchResult = (...ids: string[]) => ({ results: ids.map((citationId) => ({ citationId, snippet: "passage" })) });
-const delegation = (agent: string, nested: Invocation[], text = "") => ({ toolName: `agent-${agent}`, result: { text, subAgentToolResults: nested } });
+const delegation = (agent: string, nested: Invocation[], text = "") => ({
+  toolName: `agent-${agent}`,
+  result: { text, subAgentToolResults: nested },
+});
 const truth = (value: unknown) => readGroundTruth(value);
 const view = (args: Parameters<typeof run>[0]) => viewAgentRun(run(args));
 
 describe("tool-routing", () => {
   it("scores the share of expected tools called, nested subagent calls included", () => {
-    const answered = view({ text: "ok", tools: [delegation("knowledge", [{ toolName: "knowledge_searchKnowledge", result: {} }])] });
-    expect(scoreToolRouting(answered, truth({ expectedTools: ["agent-knowledge", "knowledge.searchKnowledge"] }))).toBe(1);
+    const answered = view({
+      text: "ok",
+      tools: [delegation("knowledge", [{ toolName: "knowledge_searchKnowledge", result: {} }])],
+    });
+    expect(scoreToolRouting(answered, truth({ expectedTools: ["agent-knowledge", "knowledge.searchKnowledge"] }))).toBe(
+      1,
+    );
     expect(scoreToolRouting(answered, truth({ expectedTools: ["agent-knowledge", "agent-data"] }))).toBe(0.5);
   });
 
@@ -54,8 +65,17 @@ describe("tool-routing", () => {
       {
         role: "assistant",
         content: {
-          parts: [{ type: "tool-invocation", toolInvocation: { state: "call", toolCallId: "c9", toolName: "agent-action", args: {} } }],
-          metadata: { suspendedTools: { c9: { toolName: "agent-action", suspendPayload: { toolName: "command_tenancy_CreateProjectInput" } } } },
+          parts: [
+            {
+              type: "tool-invocation",
+              toolInvocation: { state: "call", toolCallId: "c9", toolName: "agent-action", args: {} },
+            },
+          ],
+          metadata: {
+            suspendedTools: {
+              c9: { toolName: "agent-action", suspendPayload: { toolName: "command_tenancy_CreateProjectInput" } },
+            },
+          },
         },
       },
     ];
@@ -78,7 +98,10 @@ describe("tool-routing", () => {
 
 describe("citations-grounded", () => {
   it("is 1 when every cited passage was retrieved by the run", () => {
-    const grounded = view({ text: `Owners approve [${KB_A}].`, tools: [{ toolName: "knowledge_searchKnowledge", result: searchResult(KB_A) }] });
+    const grounded = view({
+      text: `Owners approve [${KB_A}].`,
+      tools: [{ toolName: "knowledge_searchKnowledge", result: searchResult(KB_A) }],
+    });
     expect(scoreCitationsGrounded(grounded, truth({ expectCitations: true }))).toBe(1);
   });
 
@@ -86,7 +109,10 @@ describe("citations-grounded", () => {
     const text = `Owners approve [${KB_A}] and [${KB_B}].`;
     const onlyText = view({ text, tools: [delegation("knowledge", [], `x [${KB_A}] [${KB_B}]`)] });
     expect(scoreCitationsGrounded(onlyText, truth({}))).toBe(0);
-    const nested = view({ text, tools: [delegation("knowledge", [{ toolName: "knowledge_searchKnowledge", result: searchResult(KB_A) }])] });
+    const nested = view({
+      text,
+      tools: [delegation("knowledge", [{ toolName: "knowledge_searchKnowledge", result: searchResult(KB_A) }])],
+    });
     expect(scoreCitationsGrounded(nested, truth({}))).toBe(0.5);
   });
 
@@ -99,7 +125,13 @@ describe("citations-grounded", () => {
 describe("tenant-leak", () => {
   it("is 0 when another tenant's marker reaches the answer or a tool result", () => {
     expect(scoreTenantLeak(view({ text: "Budget is OTHER-TENANT-7" }), truth({}), ["other-tenant-7"])).toBe(0);
-    expect(scoreTenantLeak(view({ tools: [{ toolName: "x", result: { snippet: "other-tenant-7" } }], text: "ok" }), truth({}), ["OTHER-TENANT-7"])).toBe(0);
+    expect(
+      scoreTenantLeak(
+        view({ tools: [{ toolName: "x", result: { snippet: "other-tenant-7" } }], text: "ok" }),
+        truth({}),
+        ["OTHER-TENANT-7"],
+      ),
+    ).toBe(0);
     expect(scoreTenantLeak(view({ text: "Our own policy." }), truth({ foreignMarkers: ["OTHER-TENANT-7"] }))).toBe(1);
   });
 
@@ -132,7 +164,10 @@ describe("faithfulness-judge", () => {
     // A scripted judge: the fake model does not grade (decision 0028, real mode only).
     const prompts: string[] = [];
     const verdict = JSON.stringify({ claims: 2, supported: 1 });
-    const usage = { inputTokens: { total: 1, noCache: 1, cacheRead: 0, cacheWrite: 0 }, outputTokens: { total: 1, text: 1, reasoning: 0 } };
+    const usage = {
+      inputTokens: { total: 1, noCache: 1, cacheRead: 0, cacheWrite: 0 },
+      outputTokens: { total: 1, text: 1, reasoning: 0 },
+    };
     const model = new MockLanguageModelV4({
       doStream: (options) => {
         prompts.push(JSON.stringify(options.prompt));
@@ -149,7 +184,10 @@ describe("faithfulness-judge", () => {
         });
       },
     });
-    const output = run({ text: "Owners approve invitations.", tools: [{ toolName: "knowledge_searchKnowledge", result: searchResult(KB_A) }] });
+    const output = run({
+      text: "Owners approve invitations.",
+      tools: [{ toolName: "knowledge_searchKnowledge", result: searchResult(KB_A) }],
+    });
     const result = await createFaithfulnessJudgeScorer({ model }).run({ output: output as never });
     expect(result.score).toBe(0.5);
     expect(prompts.join("")).toContain("Owners approve invitations.");
@@ -164,7 +202,12 @@ describe("faithfulness-judge", () => {
 
 describe("createCoreScorers", () => {
   it("registers the deterministic scorers, and the judge only with a judge model", () => {
-    expect(Object.keys(createCoreScorers())).toEqual(["tool-routing", "citations-grounded", "tenant-leak", "format-compliance"]);
+    expect(Object.keys(createCoreScorers())).toEqual([
+      "tool-routing",
+      "citations-grounded",
+      "tenant-leak",
+      "format-compliance",
+    ]);
     const model = createFakeLanguageModel({ modelId: "fake-judge", registry: createFakeScenarioRegistry() });
     expect(Object.keys(createCoreScorers({ judgeModel: model }))).toContain("faithfulness-judge");
   });

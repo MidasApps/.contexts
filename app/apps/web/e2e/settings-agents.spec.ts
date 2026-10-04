@@ -22,10 +22,14 @@ test.describe("platform agents", () => {
     await expect(toast(page, "Knowledge desativado.")).toBeVisible();
     await expect(toggle).not.toBeChecked();
     await page.reload();
-    await expect(page.getByRole("article", { name: "Knowledge" }).getByRole("switch", { name: "Ativar Knowledge" })).not.toBeChecked();
+    await expect(
+      page.getByRole("article", { name: "Knowledge" }).getByRole("switch", { name: "Ativar Knowledge" }),
+    ).not.toBeChecked();
     await page.getByRole("article", { name: "Knowledge" }).getByRole("switch", { name: "Ativar Knowledge" }).click();
     await expect(toast(page, "Knowledge ativado.")).toBeVisible();
-    await expect(page.getByRole("article", { name: "Knowledge" }).getByRole("switch", { name: "Ativar Knowledge" })).toBeChecked();
+    await expect(
+      page.getByRole("article", { name: "Knowledge" }).getByRole("switch", { name: "Ativar Knowledge" }),
+    ).toBeChecked();
   });
 
   test("writes organization instructions for the assistant, evaluates and activates them", async ({ page, sp5Org }) => {
@@ -36,7 +40,9 @@ test.describe("platform agents", () => {
     await assistant.getByRole("button", { name: "Ver detalhes de Assistente" }).click();
     await assistant.getByRole("button", { name: "Escrever instruções para Assistente" }).click();
     const editor = dialog(page, "Instruções para Assistente");
-    await editor.getByRole("textbox", { name: /^Instruções/ }).fill("Responda sempre em frases curtas e cite a política interna quando houver.");
+    await editor
+      .getByRole("textbox", { name: /^Instruções/ })
+      .fill("Responda sempre em frases curtas e cite a política interna quando houver.");
     await editor.getByRole("textbox", { name: /^Nota/ }).fill("e2e");
     await editor.getByRole("button", { name: "Salvar versão" }).click();
     await expect(toast(page, "Versão 1 salva. Avalie para poder ativar.")).toBeVisible();
@@ -50,7 +56,10 @@ test.describe("platform agents", () => {
     await expect(versions.getByRole("row", { name: /Versão 1/ })).toContainText("Aprovada");
     await versions.getByRole("button", { name: "Ativar a versão 1 de Assistente" }).click();
     // Activation changes every conversation of the organization: it asks first.
-    await page.getByRole("alertdialog", { name: "Ativar a versão 1 de Assistente?" }).getByRole("button", { name: "Ativar" }).click();
+    await page
+      .getByRole("alertdialog", { name: "Ativar a versão 1 de Assistente?" })
+      .getByRole("button", { name: "Ativar" })
+      .click();
     await expect(toast(page, "A versão 1 está ativa.")).toBeVisible();
     await expect(assistant.getByText("Versão 1 ativa")).toBeVisible();
   });
@@ -70,16 +79,24 @@ test.describe("organization skills and agents", () => {
     await skillEditor.getByRole("button", { name: "Criar habilidade" }).click();
     await expect(skillEditor.getByText(/Use letras minúsculas, números e hífens/)).toBeVisible();
     await skillEditor.getByRole("textbox", { name: /^Nome/ }).fill(skill);
-    await skillEditor.getByRole("textbox", { name: /^Descrição/ }).fill("How the organization answers support tickets.");
-    await skillEditor.getByRole("textbox", { name: /^Instruções/ }).fill("1. Greet the person.\n2. Restate the problem.\n3. Offer one next step.");
+    await skillEditor
+      .getByRole("textbox", { name: /^Descrição/ })
+      .fill("How the organization answers support tickets.");
+    await skillEditor
+      .getByRole("textbox", { name: /^Instruções/ })
+      .fill("1. Greet the person.\n2. Restate the problem.\n3. Offer one next step.");
     await skillEditor.getByRole("button", { name: "Criar habilidade" }).click();
     await expect(toast(page, `Habilidade ${skill} criada.`)).toBeVisible();
     await expect(rowOf(page, skill)).toContainText("Ativada");
     await expect(page.getByText("1 de 10 habilidades do plano em uso.")).toBeVisible();
 
-    await rowOf(page, skill).getByRole("button", { name: `Editar ${skill}` }).click();
+    await rowOf(page, skill)
+      .getByRole("button", { name: `Editar ${skill}` })
+      .click();
     const skillEdit = dialog(page, `Editar ${skill}`);
-    await skillEdit.getByRole("textbox", { name: /^Descrição/ }).fill("How the organization answers support tickets, briefly.");
+    await skillEdit
+      .getByRole("textbox", { name: /^Descrição/ })
+      .fill("How the organization answers support tickets, briefly.");
     await skillEdit.getByRole("button", { name: "Salvar" }).click();
     await expect(toast(page, `Habilidade ${skill} salva.`)).toBeVisible();
 
@@ -89,7 +106,10 @@ test.describe("organization skills and agents", () => {
     await agentEditor.getByRole("textbox", { name: /^Nome/ }).fill(agent);
     await agentEditor.getByRole("textbox", { name: /^Descrição/ }).fill("Answers support questions.");
     await agentEditor.getByRole("textbox", { name: /^Instruções/ }).fill("You help the support team. Be brief.");
-    await agentEditor.getByRole("group", { name: "Habilidades da organização" }).getByRole("checkbox", { name: new RegExp(skill) }).check();
+    await agentEditor
+      .getByRole("group", { name: "Habilidades da organização" })
+      .getByRole("checkbox", { name: new RegExp(skill) })
+      .check();
     await agentEditor.getByRole("button", { name: "Criar agente" }).click();
     await expect(toast(page, `Agente ${agent} criado.`)).toBeVisible();
     const custom = page.getByRole("region", { name: "Agentes da organização" });
@@ -98,7 +118,11 @@ test.describe("organization skills and agents", () => {
 
     await custom.getByRole("button", { name: `Editar ${agent}` }).click();
     const agentEdit = dialog(page, `Editar ${agent}`);
-    await expect(agentEdit.getByRole("group", { name: "Habilidades da organização" }).getByRole("checkbox", { name: new RegExp(skill) })).toBeChecked();
+    await expect(
+      agentEdit
+        .getByRole("group", { name: "Habilidades da organização" })
+        .getByRole("checkbox", { name: new RegExp(skill) }),
+    ).toBeChecked();
     await agentEdit.getByRole("textbox", { name: /^Descrição/ }).fill("Answers support questions, briefly.");
     await agentEdit.getByRole("button", { name: "Salvar" }).click();
     await expect(toast(page, `Agente ${agent} salvo.`)).toBeVisible();
@@ -113,7 +137,9 @@ test.describe("organization skills and agents", () => {
     await expect(custom.getByRole("heading", { name: "Nenhum agente da organização" })).toBeVisible();
 
     await page.goto(settingsPath(sp5Org.id, "skills"));
-    await rowOf(page, skill).getByRole("button", { name: `Excluir ${skill}` }).click();
+    await rowOf(page, skill)
+      .getByRole("button", { name: `Excluir ${skill}` })
+      .click();
     await confirmDialog(page, `Excluir ${skill}?`).getByRole("button", { name: "Excluir habilidade" }).click();
     await expect(toast(page, `Habilidade ${skill} excluída.`)).toBeVisible();
     await expect(page.getByRole("heading", { name: "Nenhuma habilidade da organização" })).toBeVisible();
@@ -135,7 +161,10 @@ test.describe("custom agent validation", () => {
     const payload = (await response.json()) as { error: { code: string; details: { field: string; issue: string }[] } };
     expect(payload.error.code).toBe("VALIDATION_FAILED");
     expect(payload.error.details).toEqual(
-      expect.arrayContaining([expect.objectContaining({ field: "tools.0" }), expect.objectContaining({ field: "coreSkills.0" })]),
+      expect.arrayContaining([
+        expect.objectContaining({ field: "tools.0" }),
+        expect.objectContaining({ field: "coreSkills.0" }),
+      ]),
     );
     const list = await ownerApi.get<{ name: string }[]>(`/v1/agents?organizationId=${sp5Org.id}`);
     expect(list.map((agent) => agent.name)).not.toContain(body.name);

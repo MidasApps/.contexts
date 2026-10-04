@@ -1,7 +1,7 @@
 "use client";
 
 import type { EvalExperimentSummary } from "@core/contracts";
-import { useQueries, type UseQueryOptions } from "@tanstack/react-query";
+import { type UseQueryOptions, useQueries } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
@@ -51,12 +51,20 @@ type ReadOne = (callEndpoint: CallEndpoint, experimentId: string) => UseQueryOpt
  * Resolves the chosen ids: an experiment of the shown page is used as is; any other is read by id,
  * so a comparison can span list pages (decision 0049).
  */
-const useExperimentPair = (ids: readonly string[], onPage: readonly EvalExperimentSummary[], readOne: ReadOne, enabled: boolean): ExperimentPairState => {
+const useExperimentPair = (
+  ids: readonly string[],
+  onPage: readonly EvalExperimentSummary[],
+  readOne: ReadOne,
+  enabled: boolean,
+): ExperimentPairState => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
   const known = ids.map((id) => onPage.find((experiment) => experiment.experimentId === id));
   const reads = useQueries({
-    queries: ids.map((id, index) => ({ ...readOne(callEndpoint, id), enabled: signedIn && enabled && known[index] === undefined })),
+    queries: ids.map((id, index) => ({
+      ...readOne(callEndpoint, id),
+      enabled: signedIn && enabled && known[index] === undefined,
+    })),
   });
   const chosen = ids.map((_id, index): ChosenExperiment => {
     const page = known[index];
@@ -74,9 +82,20 @@ const useExperimentPair = (ids: readonly string[], onPage: readonly EvalExperime
 };
 
 /** Staff comparison: experiments of any source and tenant. */
-export const useAdminExperimentPair = (ids: readonly string[], onPage: readonly EvalExperimentSummary[]): ExperimentPairState =>
-  useExperimentPair(ids, onPage, adminExperimentQuery, true);
+export const useAdminExperimentPair = (
+  ids: readonly string[],
+  onPage: readonly EvalExperimentSummary[],
+): ExperimentPairState => useExperimentPair(ids, onPage, adminExperimentQuery, true);
 
 /** An organization's comparison: its own experiments only. */
-export const useTenantExperimentPair = (organizationId: string, ids: readonly string[], onPage: readonly EvalExperimentSummary[]): ExperimentPairState =>
-  useExperimentPair(ids, onPage, (callEndpoint, id) => tenantExperimentQuery(callEndpoint, organizationId, id), organizationId !== "");
+export const useTenantExperimentPair = (
+  organizationId: string,
+  ids: readonly string[],
+  onPage: readonly EvalExperimentSummary[],
+): ExperimentPairState =>
+  useExperimentPair(
+    ids,
+    onPage,
+    (callEndpoint, id) => tenantExperimentQuery(callEndpoint, organizationId, id),
+    organizationId !== "",
+  );

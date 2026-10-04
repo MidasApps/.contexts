@@ -1,4 +1,4 @@
-import { routeHref, type Route } from "#/shared/lib/router/route-paths.ts";
+import { type Route, routeHref } from "#/shared/lib/router/route-paths.ts";
 
 const pathOf = (route: Route): string => routeHref(route).split(/[?#]/u)[0] ?? "";
 

@@ -9,9 +9,15 @@ const idOf = (index: number): string => `Org${String(index).padStart(17, "0")}`;
 // Two matches: one inside the first read budget and one beyond it.
 const setup = () => {
   const total = ORGANIZATION_SCAN_BUDGET + 500;
-  const organizations = Array.from({ length: total }, (_, index) => ({ id: idOf(index), name: index === 10 || index === total - 1 ? "Needle" : "Hay" }));
+  const organizations = Array.from({ length: total }, (_, index) => ({
+    id: idOf(index),
+    name: index === 10 || index === total - 1 ? "Needle" : "Hay",
+  }));
   const memory = createInMemoryConsoleStores({ organizations });
-  return { list: makeListOrganizationsAdmin({ ...memory.stores, clock: fixedClock("2026-10-01T12:00:00.000Z") }), total };
+  return {
+    list: makeListOrganizationsAdmin({ ...memory.stores, clock: fixedClock("2026-10-01T12:00:00.000Z") }),
+    total,
+  };
 };
 
 describe("listOrganizationsAdmin with a filter", () => {

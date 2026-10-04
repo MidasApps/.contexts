@@ -29,7 +29,10 @@ export function NotificationPreferencesForm({ me }: { me: Me }) {
         notify.success(next ? t("productUpdates.enabled") : t("productUpdates.disabled"));
       } catch (error: unknown) {
         const described = describe(error);
-        notify.error(t("saveFailed"), described.requestId === undefined ? {} : { description: t("reference", { requestId: described.requestId }) });
+        notify.error(
+          t("saveFailed"),
+          described.requestId === undefined ? {} : { description: t("reference", { requestId: described.requestId }) },
+        );
       }
     });
   };
@@ -43,7 +46,12 @@ export function NotificationPreferencesForm({ me }: { me: Me }) {
         </FieldContent>
         <FieldControl>
           {/* Locked while saving: overlapping PATCHes could settle out of order (and toast twice). */}
-          <Switch checked={productUpdates} onCheckedChange={toggle} disabled={pending} aria-busy={pending || undefined} />
+          <Switch
+            checked={productUpdates}
+            onCheckedChange={toggle}
+            disabled={pending}
+            aria-busy={pending || undefined}
+          />
         </FieldControl>
       </Field>
       <Field orientation="horizontal" className="p-4" data-disabled="true">

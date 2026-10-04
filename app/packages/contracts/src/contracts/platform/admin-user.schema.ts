@@ -26,8 +26,17 @@ export type AdminUserSummary = z.infer<typeof AdminUserSummarySchema>;
 export const AdminUserSummaryContract = defineContract(AdminUserSummarySchema, {
   id: "platform.AdminUserSummary",
   kind: "view",
-  description: "A user for staff: id, email, name and status, as the user search and the batched name lookup return it.",
-  examples: [{ id: EXAMPLE_IDS.user, email: "ana@example.com", displayName: "Ana Souza", status: "active", createdAt: EXAMPLE_TIMES.created }],
+  description:
+    "A user for staff: id, email, name and status, as the user search and the batched name lookup return it.",
+  examples: [
+    {
+      id: EXAMPLE_IDS.user,
+      email: "ana@example.com",
+      displayName: "Ana Souza",
+      status: "active",
+      createdAt: EXAMPLE_TIMES.created,
+    },
+  ],
   pii: "personal",
   tenancyScope: "platform",
   relations: [],

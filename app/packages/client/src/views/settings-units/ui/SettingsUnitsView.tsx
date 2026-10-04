@@ -3,11 +3,11 @@
 import type { AccessContext, Project } from "@core/contracts";
 import { useId } from "react";
 import { useTranslations } from "use-intl";
-import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { useProjects } from "#/entities/project/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { UnitTreeEditor } from "#/features/manage-units/index.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
+import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
@@ -19,7 +19,15 @@ import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 
-function ProjectPicker({ projects, value, onChange }: { projects: readonly Project[]; value: string; onChange: (projectId: string) => void }) {
+function ProjectPicker({
+  projects,
+  value,
+  onChange,
+}: {
+  projects: readonly Project[];
+  value: string;
+  onChange: (projectId: string) => void;
+}) {
   const t = useTranslations("settings.units");
   const id = useId();
   return (
@@ -50,7 +58,10 @@ function UnitsByProject({ context }: { context: AccessContext }) {
   const chosen = search.values.project;
   const setChosen = (next: string): void => search.set({ project: next });
   if (projects.isPending) return <LoadingState label={t("loadingProjects")} rows={3} />;
-  if (projects.isError) return <ApiErrorState error={projects.error} onRetry={() => void projects.refetch()} retrying={projects.isFetching} />;
+  if (projects.isError)
+    return (
+      <ApiErrorState error={projects.error} onRetry={() => void projects.refetch()} retrying={projects.isFetching} />
+    );
   const list = projects.data;
   const project = list.find((candidate) => candidate.id === chosen) ?? list[0];
   if (project === undefined) {
@@ -67,7 +78,8 @@ function UnitsByProject({ context }: { context: AccessContext }) {
       />
     );
   }
-  const can = (permission: "core.unit.create" | "core.unit.update" | "core.unit.delete"): boolean => context.permissions.includes(permission);
+  const can = (permission: "core.unit.create" | "core.unit.update" | "core.unit.delete"): boolean =>
+    context.permissions.includes(permission);
   return (
     <div className="flex flex-col gap-4">
       {list.length > 1 ? <ProjectPicker projects={list} value={project.id} onChange={setChosen} /> : null}
@@ -97,7 +109,13 @@ export function SettingsUnitsView() {
         <SettingsPageFrame
           organizationId={data.organization.id}
           allowed={data.permissions.includes("core.unit.read")}
-          header={<PageHeader eyebrow={t("eyebrow", { organization: data.organization.name })} title={t("title")} description={t("description")} />}
+          header={
+            <PageHeader
+              eyebrow={t("eyebrow", { organization: data.organization.name })}
+              title={t("title")}
+              description={t("description")}
+            />
+          }
         >
           <UnitsByProject context={data} />
         </SettingsPageFrame>

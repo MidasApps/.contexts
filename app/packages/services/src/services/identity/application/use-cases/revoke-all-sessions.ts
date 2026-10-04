@@ -3,7 +3,10 @@ import type { AccessDeniedError } from "../../../access/domain/errors/access-den
 import { ok, type Result } from "../../../shared/result/result.ts";
 import { recordSessionAudit, refuseImpersonation, type SessionDeps } from "../session-deps.ts";
 
-export type RevokeAllSessions = (command: { actor: UserPrincipal; requestId: string }) => Promise<Result<number, AccessDeniedError>>;
+export type RevokeAllSessions = (command: {
+  actor: UserPrincipal;
+  requestId: string;
+}) => Promise<Result<number, AccessDeniedError>>;
 
 /**
  * "Sign out everywhere" (`POST /v1/me/sessions/revoke-all`, SP1 spec §3.3 step 5):

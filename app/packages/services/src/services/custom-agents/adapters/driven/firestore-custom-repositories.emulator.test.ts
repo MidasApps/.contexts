@@ -1,16 +1,25 @@
-import { type CustomAgent, CustomAgentSchema, type CustomSkill, CustomSkillSchema, TenantIdSchema } from "@core/contracts";
+import {
+  type CustomAgent,
+  CustomAgentSchema,
+  type CustomSkill,
+  CustomSkillSchema,
+  TenantIdSchema,
+} from "@core/contracts";
 import { Timestamp } from "firebase-admin/firestore";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createFirebaseAdmin } from "../../../shared/firebase/firebase-admin.ts";
 import { createFirestoreUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
 import {
-  createFirestoreCustomAgentRepository,
-  createFirestoreCustomSkillRepository,
   CUSTOM_AGENTS_COLLECTION,
   CUSTOM_SKILLS_COLLECTION,
+  createFirestoreCustomAgentRepository,
+  createFirestoreCustomSkillRepository,
 } from "./firestore-custom-repositories.ts";
 
-const { firestore } = createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: process.env });
+const { firestore } = createFirebaseAdmin({
+  env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" },
+  processEnv: process.env,
+});
 const agents = createFirestoreCustomAgentRepository({ firestore });
 const skills = createFirestoreCustomSkillRepository({ firestore });
 const unitOfWork = createFirestoreUnitOfWork({ firestore });
@@ -38,7 +47,17 @@ const agentOf = (tenantId: string, createdAt: string, enabled = true): CustomAge
   });
 
 const skillOf = (tenantId: string, name: string, createdAt: string): CustomSkill =>
-  CustomSkillSchema.parse({ id: skills.newId(), tenantId, name, description: "How.", instructions: "Steps.", enabled: true, createdBy: "alice", createdAt, updatedAt: createdAt });
+  CustomSkillSchema.parse({
+    id: skills.newId(),
+    tenantId,
+    name,
+    description: "How.",
+    instructions: "Steps.",
+    enabled: true,
+    createdBy: "alice",
+    createdAt,
+    updatedAt: createdAt,
+  });
 
 const clear = async () => {
   for (const collection of [CUSTOM_AGENTS_COLLECTION, CUSTOM_SKILLS_COLLECTION]) {

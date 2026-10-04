@@ -32,9 +32,14 @@ export const AgentSettingsSchema = z.strictObject({
     })
     .meta(none("Monthly caps enforced by the tenant budget guard; alerts fire at 80 %.")),
   ownBudget: BudgetCapsSchema.nullable().meta(
-    none("The organization's own lower cap as it set it; null when it set none and the plan's (or staff override's) caps apply."),
+    none(
+      "The organization's own lower cap as it set it; null when it set none and the plan's (or staff override's) caps apply.",
+    ),
   ),
-  updatedBy: UserIdSchema.nullable().meta({ description: "Uid of the last editor; null for defaults.", pii: "personal" }),
+  updatedBy: UserIdSchema.nullable().meta({
+    description: "Uid of the last editor; null for defaults.",
+    pii: "personal",
+  }),
   createdAt: IsoDateTimeSchema.meta(none("When the settings were created (UTC).")),
   updatedAt: IsoDateTimeSchema.meta(none("When the settings last changed (UTC).")),
 });
@@ -43,7 +48,8 @@ export type AgentSettings = z.infer<typeof AgentSettingsSchema>;
 export const AgentSettingsContract = defineContract(AgentSettingsSchema, {
   id: "agents.AgentSettings",
   kind: "settings",
-  description: "Per-organization configuration of the agent runtime: enabled subagents, web tools, PII guardrail and budget caps.",
+  description:
+    "Per-organization configuration of the agent runtime: enabled subagents, web tools, PII guardrail and budget caps.",
   examples: [
     {
       tenantId: "Jd8sK2lPq0WnR5tYu3bV",

@@ -5,7 +5,7 @@ import type { RequestContext } from "@mastra/core/request-context";
 import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
 import { createUIMessageStreamResponse, type UIMessage } from "ai";
 import { handleAbort } from "./abort-route.ts";
-import { callerOf, chatError, type ChatRouteDeps, durableIdOf, readCappedJson } from "./chat-http.ts";
+import { type ChatRouteDeps, callerOf, chatError, durableIdOf, readCappedJson } from "./chat-http.ts";
 import { type ChatRouteBody, ChatRouteBodySchema } from "./chat-request.schema.ts";
 import { approvalRunIdsOf, type PendingUserMessage } from "./chat-run-owners.ts";
 import { handleMessages, handleSummary, MESSAGES_ROUTE_PATH, SUMMARY_ROUTE_PATH } from "./history-routes.ts";
@@ -13,8 +13,8 @@ import { handleObserve } from "./observe-route.ts";
 import { createChatStreamTap } from "./tool-preview.ts";
 
 export { handleAbort } from "./abort-route.ts";
-export { handleObserve } from "./observe-route.ts";
 export { handleMessages, handleSummary, MESSAGES_ROUTE_PATH, SUMMARY_ROUTE_PATH } from "./history-routes.ts";
+export { handleObserve } from "./observe-route.ts";
 
 /** Custom routes live outside the Mastra API prefix; `/v1/chat` reaches them through the gateway. */
 export const CHAT_ROUTE_PATH = "/chat/:agentId";
@@ -30,7 +30,12 @@ export const CHAT_HEARTBEAT_MS = 15_000;
  */
 export const MAX_CHAT_BODY_BYTES = 140 * 1024 * 1024;
 
-export type ChatPostInput = { readonly request: Request; readonly agentId: string; readonly requestContext: RequestContext<unknown>; readonly mastra: Mastra };
+export type ChatPostInput = {
+  readonly request: Request;
+  readonly agentId: string;
+  readonly requestContext: RequestContext<unknown>;
+  readonly mastra: Mastra;
+};
 
 type Caller = { readonly resourceId: string; readonly threadId: string };
 type RunIdResult = { readonly runId: string } | { readonly refusal: "invalid" | "forbidden" };
@@ -57,11 +62,17 @@ const runIdOf = (body: ChatRouteBody, caller: Caller, deps: ChatRouteDeps): RunI
 /** The text of the member's message, kept while its run answers (the attachments stay out of memory). */
 const pendingMessageOf = (message: ChatRouteBody["messages"][number]): PendingUserMessage | undefined => {
   const parts = message.parts as readonly { readonly type?: unknown; readonly text?: unknown }[];
-  const text = parts.flatMap((part) => (part.type === "text" && typeof part.text === "string" ? [part.text] : [])).join("\n");
+  const text = parts
+    .flatMap((part) => (part.type === "text" && typeof part.text === "string" ? [part.text] : []))
+    .join("\n");
   return typeof message.id === "string" && text !== "" ? { id: message.id, text } : undefined;
 };
 
-const streamRun = async (input: ChatPostInput, deps: ChatRouteDeps, args: { durableId: string; body: ChatRouteBody; caller: Caller; runId: string }) => {
+const streamRun = async (
+  input: ChatPostInput,
+  deps: ChatRouteDeps,
+  args: { durableId: string; body: ChatRouteBody; caller: Caller; runId: string },
+) => {
   const { body, caller, runId } = args;
   const stream = await handleChatStream({
     mastra: input.mastra,
@@ -81,7 +92,11 @@ const streamRun = async (input: ChatPostInput, deps: ChatRouteDeps, args: { dura
     // `closeOnSuspend` ends the stream at a tool approval so `useChat` reaches `ready`.
     defaultOptions: CHAT_RUN_OPTIONS,
   });
-  const tap = createChatStreamTap({ previewer: deps.previewer, requestContext: input.requestContext, onState: (state) => deps.owners.markState(runId, state) });
+  const tap = createChatStreamTap({
+    previewer: deps.previewer,
+    requestContext: input.requestContext,
+    onState: (state) => deps.owners.markState(runId, state),
+  });
   return stream.pipeThrough(tap);
 };
 
@@ -96,7 +111,8 @@ export const handleChatPost = async (input: ChatPostInput, deps: ChatRouteDeps):
   if (durableId === undefined) return chatError("NOT_FOUND", requestContext);
   const { resourceId, threadId } = callerOf(requestContext);
   if (resourceId === undefined) return chatError("FORBIDDEN", requestContext);
-  if (threadId === undefined) return chatError("VALIDATION_FAILED", requestContext, [{ field: "x-conversation-id", issue: "REQUIRED" }]);
+  if (threadId === undefined)
+    return chatError("VALIDATION_FAILED", requestContext, [{ field: "x-conversation-id", issue: "REQUIRED" }]);
   const raw = await readCappedJson(input.request, MAX_CHAT_BODY_BYTES);
   if (raw === "too-large") return chatError("PAYLOAD_TOO_LARGE", requestContext);
   const parsed = ChatRouteBodySchema.safeParse(raw);
@@ -110,7 +126,8 @@ export const handleChatPost = async (input: ChatPostInput, deps: ChatRouteDeps):
   }
   const { runId } = resolved;
   const first = parsed.data.messages[0];
-  if (first?.role === "user") deps.owners.record(runId, { ...caller, agentId: input.agentId, userMessage: pendingMessageOf(first) });
+  if (first?.role === "user")
+    deps.owners.record(runId, { ...caller, agentId: input.agentId, userMessage: pendingMessageOf(first) });
   try {
     const stream = await streamRun(input, deps, { durableId, body: parsed.data, caller, runId });
     const response = createUIMessageStreamResponse({ stream, headers: { "x-run-id": runId } });
@@ -132,12 +149,17 @@ export const createChatRoutes = (deps: ChatRouteDeps): ApiRoute[] => [
   registerApiRoute(CHAT_ROUTE_PATH, {
     method: "POST",
     requiresAuth: true,
-    handler: (context) => handleChatPost({ ...inputsOf(context), request: context.req.raw, agentId: context.req.param("agentId") }, deps),
+    handler: (context) =>
+      handleChatPost({ ...inputsOf(context), request: context.req.raw, agentId: context.req.param("agentId") }, deps),
   }),
   registerApiRoute(OBSERVE_ROUTE_PATH, {
     method: "GET",
     requiresAuth: true,
-    handler: (context) => handleObserve({ ...inputsOf(context), agentId: context.req.param("agentId"), runId: context.req.param("runId") }, deps),
+    handler: (context) =>
+      handleObserve(
+        { ...inputsOf(context), agentId: context.req.param("agentId"), runId: context.req.param("runId") },
+        deps,
+      ),
   }),
   registerApiRoute(ABORT_ROUTE_PATH, {
     method: "POST",
@@ -147,11 +169,19 @@ export const createChatRoutes = (deps: ChatRouteDeps): ApiRoute[] => [
   registerApiRoute(MESSAGES_ROUTE_PATH, {
     method: "GET",
     requiresAuth: true,
-    handler: (context) => handleMessages({ ...inputsOf(context), agentId: context.req.param("agentId"), url: new URL(context.req.url) }, deps),
+    handler: (context) =>
+      handleMessages(
+        { ...inputsOf(context), agentId: context.req.param("agentId"), url: new URL(context.req.url) },
+        deps,
+      ),
   }),
   registerApiRoute(SUMMARY_ROUTE_PATH, {
     method: "POST",
     requiresAuth: true,
-    handler: (context) => handleSummary({ ...inputsOf(context), agentId: context.req.param("agentId"), url: new URL(context.req.url) }, deps),
+    handler: (context) =>
+      handleSummary(
+        { ...inputsOf(context), agentId: context.req.param("agentId"), url: new URL(context.req.url) },
+        deps,
+      ),
   }),
 ];

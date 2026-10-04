@@ -13,8 +13,7 @@ const makeHandler = () => {
   return { GET: makeHealthRouteHandler({ logger }), records };
 };
 
-const healthRequest = () =>
-  new Request("http://localhost/v1/health", { headers: { "x-request-id": VALID_ULID } });
+const healthRequest = () => new Request("http://localhost/v1/health", { headers: { "x-request-id": VALID_ULID } });
 
 describe("GET /v1/health", () => {
   it("returns 200 with status ok and echoes the request id", async () => {

@@ -7,7 +7,9 @@ import { ErrorState } from "./ErrorState.tsx";
 describe("ErrorState", () => {
   it("alerts with default copy, the request reference and a retry", async () => {
     const onRetry = vi.fn();
-    const { user, container } = renderWithProviders(<ErrorState requestId="01J8Z3K4M5N6P7Q8R9S0T1V2W3" onRetry={onRetry} />);
+    const { user, container } = renderWithProviders(
+      <ErrorState requestId="01J8Z3K4M5N6P7Q8R9S0T1V2W3" onRetry={onRetry} />,
+    );
     const alert = screen.getByRole("alert");
     expect(alert.textContent).toContain("Não foi possível carregar");
     expect(screen.getByText("Referência: 01J8Z3K4M5N6P7Q8R9S0T1V2W3").className).toContain("font-mono");

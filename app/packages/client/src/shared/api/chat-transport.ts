@@ -1,11 +1,15 @@
 import { ErrorEnvelopeSchema } from "@core/contracts";
-import { DefaultChatTransport, type ChatTransport, type UIMessage } from "ai";
+import { type ChatTransport, DefaultChatTransport, type UIMessage } from "ai";
 import { ulid } from "ulid";
 import { ApiError } from "./api-error.ts";
 import type { FetchLike, GetIdToken } from "./http-client.ts";
 
 /** Where a new conversation starts (SP4 spec §4.1); an existing one keeps its own scope. */
-export type ChatScope = { readonly organizationId: string; readonly projectId?: string | undefined; readonly agentId?: string | undefined };
+export type ChatScope = {
+  readonly organizationId: string;
+  readonly projectId?: string | undefined;
+  readonly agentId?: string | undefined;
+};
 
 export type ChatTransportOptions = {
   /** API origin; `""` on web (same origin), `VITE_API_URL` on desktop. */
@@ -28,8 +32,10 @@ type ChatRequestMessage = { id: string; role: "user" | "assistant"; parts: Recor
 
 const CONVERSATION_HEADER = "x-conversation-id";
 
-const isText = (part: LoosePart): boolean => part.type === "text" && typeof part["text"] === "string" && part["text"].trim() !== "";
-const isAnsweredApproval = (part: LoosePart): boolean => part["state"] === "approval-responded" && typeof part["approval"] === "object" && part["approval"] !== null;
+const isText = (part: LoosePart): boolean =>
+  part.type === "text" && typeof part["text"] === "string" && part["text"].trim() !== "";
+const isAnsweredApproval = (part: LoosePart): boolean =>
+  part["state"] === "approval-responded" && typeof part["approval"] === "object" && part["approval"] !== null;
 
 /** The fields `ToolApprovalResponsePartSchema` accepts, nothing else (it is strict). */
 const toApprovalPart = (part: LoosePart): Record<string, unknown> => {
@@ -78,8 +84,14 @@ const fileIdsOf = (attachments: unknown): string[] | undefined => {
  * File ids of the turn: from the send options, or from the message's own metadata when the turn
  * is sent again (retry, regenerate), so its attachments are not lost.
  */
-const attachmentsOf = (body: Record<string, unknown> | undefined, messages: readonly UIMessage[], messageId: string): string[] | undefined => {
-  const metadata = messages.find((message) => message.id === messageId)?.metadata as { attachments?: unknown } | undefined;
+const attachmentsOf = (
+  body: Record<string, unknown> | undefined,
+  messages: readonly UIMessage[],
+  messageId: string,
+): string[] | undefined => {
+  const metadata = messages.find((message) => message.id === messageId)?.metadata as
+    | { attachments?: unknown }
+    | undefined;
   return fileIdsOf(body?.["attachments"]) ?? fileIdsOf(metadata?.attachments);
 };
 
@@ -90,7 +102,12 @@ const toApiError = async (response: Response, requestId: string): Promise<ApiErr
     const { code, message, details, requestId: bodyRequestId } = envelope.data.error;
     return new ApiError({ status: response.status, code, message, details, requestId: bodyRequestId });
   }
-  return new ApiError({ status: response.status, code: "INVALID_RESPONSE", message: "Unexpected error response.", requestId });
+  return new ApiError({
+    status: response.status,
+    code: "INVALID_RESPONSE",
+    message: "Unexpected error response.",
+    requestId,
+  });
 };
 
 const urlOf = (input: RequestInfo | URL): string => {
@@ -106,7 +123,11 @@ const urlOf = (input: RequestInfo | URL): string => {
  */
 const createChatFetch = (options: ChatTransportOptions) => {
   const newRequestId = options.newRequestId ?? ulid;
-  const attempt = async (url: string, init: RequestInit, forceRefresh: boolean): Promise<{ response: Response; requestId: string }> => {
+  const attempt = async (
+    url: string,
+    init: RequestInit,
+    forceRefresh: boolean,
+  ): Promise<{ response: Response; requestId: string }> => {
     const requestId = newRequestId();
     const token = await options.getIdToken({ forceRefresh });
     const headers = new Headers(init.headers);
@@ -116,7 +137,10 @@ const createChatFetch = (options: ChatTransportOptions) => {
       return { response: await options.fetch(url, { ...init, headers, credentials: "omit" }), requestId };
     } catch (error: unknown) {
       if (init.signal?.aborted === true) throw error;
-      throw new ApiError({ status: 0, code: "NETWORK_ERROR", message: "Network request failed.", requestId }, { cause: error });
+      throw new ApiError(
+        { status: 0, code: "NETWORK_ERROR", message: "Network request failed.", requestId },
+        { cause: error },
+      );
     }
   };
   return async (input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> => {
@@ -160,7 +184,8 @@ export const createChatTransport = (options: ChatTransportOptions): ChatTranspor
       fetch: createChatFetch(options),
       prepareSendMessagesRequest: ({ messages, trigger, body }) => {
         const message = lastMessageOf(messages);
-        if (message === undefined) throw new ApiError({ status: 0, code: "VALIDATION_FAILED", message: "No message to send." });
+        if (message === undefined)
+          throw new ApiError({ status: 0, code: "VALIDATION_FAILED", message: "No message to send." });
         const conversationId = options.getConversationId();
         const scope = options.getScope();
         const start = {
@@ -169,9 +194,18 @@ export const createChatTransport = (options: ChatTransportOptions): ChatTranspor
           ...(scope.agentId === undefined ? {} : { agentId: scope.agentId }),
         };
         const attachments = message.role === "user" ? attachmentsOf(body, messages, message.id) : undefined;
-        return { body: { ...(conversationId === undefined ? start : { conversationId }), message, trigger, ...(attachments === undefined ? {} : { attachments }) } };
+        return {
+          body: {
+            ...(conversationId === undefined ? start : { conversationId }),
+            message,
+            trigger,
+            ...(attachments === undefined ? {} : { attachments }),
+          },
+        };
       },
-      prepareReconnectToStreamRequest: () => ({ api: `${api}/${encodeURIComponent(options.getConversationId() ?? "")}/stream` }),
+      prepareReconnectToStreamRequest: () => ({
+        api: `${api}/${encodeURIComponent(options.getConversationId() ?? "")}/stream`,
+      }),
     },
     options.getConversationId,
   );

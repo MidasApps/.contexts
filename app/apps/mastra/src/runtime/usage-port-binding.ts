@@ -18,7 +18,9 @@ export class UsageRowsRejectedError extends Error {
  * (model calls, and agent runs since decision 0066) from the exporter and the budget check of the tenant budget guard. A rejected
  * batch rejects (field names only), so the exporter keeps the rows and logs.
  */
-export const bindUsagePort = (usage: Pick<UsageServices, "recordLlmCalls" | "recordAgentRuns" | "checkTenantBudget">): UsagePort => ({
+export const bindUsagePort = (
+  usage: Pick<UsageServices, "recordLlmCalls" | "recordAgentRuns" | "checkTenantBudget">,
+): UsagePort => ({
   recordLlmCalls: async (calls) => {
     const result = await usage.recordLlmCalls(calls);
     if (!result.ok) throw new UsageRowsRejectedError(result.error.details.map((detail) => detail.field));

@@ -8,7 +8,7 @@ import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { FAKE_REQUEST_ID } from "#/shared/testing/fake-api.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { ExperimentCompare } from "./ExperimentCompare.tsx";
-import { ExperimentComparisonPanel, type ExperimentComparisonCopy } from "./ExperimentComparisonPanel.tsx";
+import { type ExperimentComparisonCopy, ExperimentComparisonPanel } from "./ExperimentComparisonPanel.tsx";
 
 const A = EvalExperimentSummarySchema.parse(
   buildExperiment({
@@ -34,7 +34,11 @@ const B = EvalExperimentSummarySchema.parse(
 );
 
 const outcomes = (): Record<string, string> =>
-  Object.fromEntries(within(screen.getByRole("list", { name: "Resultado por avaliador" })).getAllByRole("listitem").map((item) => [item.dataset["outcome"] ?? "", item.textContent ?? ""]));
+  Object.fromEntries(
+    within(screen.getByRole("list", { name: "Resultado por avaliador" }))
+      .getAllByRole("listitem")
+      .map((item) => [item.dataset["outcome"] ?? "", item.textContent ?? ""]),
+  );
 
 describe("ExperimentCompare", () => {
   it("says per scorer whether B is better, worse or the same, with the difference in points", async () => {
@@ -49,7 +53,9 @@ describe("ExperimentCompare", () => {
   });
 
   it("names the experiments in the chart with the caller's names", () => {
-    renderWithProviders(<ExperimentCompare a={A} b={B} nameOf={(experiment) => `Experimento ${experiment.experimentId.slice(-1)}`} />);
+    renderWithProviders(
+      <ExperimentCompare a={A} b={B} nameOf={(experiment) => `Experimento ${experiment.experimentId.slice(-1)}`} />,
+    );
     expect(screen.getByText("A é Experimento A; B é Experimento B.")).toBeDefined();
   });
 });
@@ -89,7 +95,12 @@ describe("ExperimentComparisonPanel", () => {
 
   it("shows a failed read with its reference and retries it", async () => {
     const retry = vi.fn();
-    const error = new ApiError({ status: 503, code: "UPSTREAM_UNAVAILABLE", message: "Fake failure.", requestId: FAKE_REQUEST_ID });
+    const error = new ApiError({
+      status: 503,
+      code: "UPSTREAM_UNAVAILABLE",
+      message: "Fake failure.",
+      requestId: FAKE_REQUEST_ID,
+    });
     const { user } = panel(["exp_A", "exp_B"], { status: "error", error, retry, retrying: false });
     expect(screen.getByText(new RegExp(FAKE_REQUEST_ID, "u"))).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Tentar novamente" }));

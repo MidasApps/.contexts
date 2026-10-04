@@ -28,12 +28,18 @@ const ROUTABLE_SLOTS: ReadonlySet<NavSlot> = new Set(["project", "settings", "ad
 const checkNavigation = (manifest: ModuleManifest, pageKeys: readonly string[]): string[] =>
   (manifest.navigation ?? []).flatMap((item) => [
     ...(isIconName(item.icon) ? [] : [`navigation ${item.id}: unknown icon ${item.icon}`]),
-    ...(item.slot === "project" && !pageKeys.includes(item.path) ? [`navigation ${item.id}: no page matches path ${item.path}`] : []),
-    ...(ROUTABLE_SLOTS.has(item.slot) ? [] : [`navigation ${item.id}: modules cannot add items to the ${item.slot} slot (no module route there)`]),
+    ...(item.slot === "project" && !pageKeys.includes(item.path)
+      ? [`navigation ${item.id}: no page matches path ${item.path}`]
+      : []),
+    ...(ROUTABLE_SLOTS.has(item.slot)
+      ? []
+      : [`navigation ${item.id}: modules cannot add items to the ${item.slot} slot (no module route there)`]),
   ]);
 
 const checkContracts = (manifest: ModuleManifest, contracts: readonly ContractDefinition[]): string[] =>
-  contracts.filter((contract) => !contract.id.startsWith(`${manifest.id}.`)).map((contract) => `contract ${contract.id} must start with ${manifest.id}.`);
+  contracts
+    .filter((contract) => !contract.id.startsWith(`${manifest.id}.`))
+    .map((contract) => `contract ${contract.id} must start with ${manifest.id}.`);
 
 /**
  * Pairs a `defineModule()` manifest with its lazily loaded pages (decision 0015 §3). Pages are
@@ -52,7 +58,9 @@ export const defineClientModule = (args: {
   const contracts = args.contracts ?? [];
   const pageKeys = Object.keys(args.pages);
   const problems = [
-    ...pageKeys.filter((key) => !PAGE_KEY.test(key)).map((key) => `page key ${key} must be a relative path of segments or :params`),
+    ...pageKeys
+      .filter((key) => !PAGE_KEY.test(key))
+      .map((key) => `page key ${key} must be a relative path of segments or :params`),
     ...checkNavigation(args.manifest, pageKeys),
     ...checkContracts(args.manifest, contracts),
   ];

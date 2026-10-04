@@ -10,8 +10,5 @@ const isCanonicalLocale = (tag: string): boolean => {
 };
 
 /** BCP 47 language tag in canonical form (`pt-BR`, not `pt-br`), so stored values compare equal. */
-export const LocaleSchema = z
-  .string()
-  .min(1)
-  .refine(isCanonicalLocale, { error: "Expected a canonical BCP 47 tag." });
+export const LocaleSchema = z.string().min(1).refine(isCanonicalLocale, { error: "Expected a canonical BCP 47 tag." });
 export type Locale = z.infer<typeof LocaleSchema>;

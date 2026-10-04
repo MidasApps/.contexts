@@ -1,4 +1,4 @@
-import { withRouteBoundary, type RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { type RouteHandler, withRouteBoundary } from "../../../shared/http/route-boundary.ts";
 import type { Logger } from "../../../shared/observability/logger.ts";
 import { processLogger } from "../../../shared/observability/process-logger.ts";
 

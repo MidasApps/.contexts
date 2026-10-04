@@ -1,11 +1,11 @@
 "use client";
 
 import type { AdminWorkflowRun } from "@core/contracts";
-import { createContext, use, useMemo, type ReactNode } from "react";
+import { createContext, type ReactNode, use, useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { isRunCancelable, RunStatusPill } from "#/entities/workflow-run/index.ts";
-import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import type { CursorPagination } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -54,11 +54,18 @@ function Origin({ run }: { run: AdminWorkflowRun }) {
   const { userLabel, scheduleLabel } = useRunsState();
   const schedule = run.scheduleId === null ? undefined : scheduleLabel(run.scheduleId);
   const bySchedule = schedule === undefined ? t("byAnySchedule") : t("bySchedule", { schedule });
-  const origin = run.scheduleId !== null ? bySchedule : run.startedBy !== null ? t("byUser", { user: userLabel(run.startedBy) }) : t("byPlatform");
+  const origin =
+    run.scheduleId !== null
+      ? bySchedule
+      : run.startedBy !== null
+        ? t("byUser", { user: userLabel(run.startedBy) })
+        : t("byPlatform");
   return (
     <span className="flex min-w-0 flex-col">
       <span className="break-all">{origin}</span>
-      {run.approvalRequestId === null ? null : <span className="text-caption break-all text-muted-foreground">{t("waitsApproval")}</span>}
+      {run.approvalRequestId === null ? null : (
+        <span className="text-caption break-all text-muted-foreground">{t("waitsApproval")}</span>
+      )}
     </span>
   );
 }
@@ -74,11 +81,22 @@ function RunActions({ run }: { run: AdminWorkflowRun }) {
   const workflow = useWorkflowLabel().name(run.workflowId);
   return (
     <span className="flex flex-wrap justify-end gap-2">
-      <Button variant="outline" size="sm" onClick={() => onDetails(run)} aria-label={t("detailsNamed", { workflow, id: run.runId })}>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onDetails(run)}
+        aria-label={t("detailsNamed", { workflow, id: run.runId })}
+      >
         {t("details")}
       </Button>
       {isRunCancelable(run.status) ? (
-        <Button variant="outline" size="sm" disabled={!online} onClick={() => onCancel(run)} aria-label={t("cancelNamed", { workflow, id: run.runId })}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!online}
+          onClick={() => onCancel(run)}
+          aria-label={t("cancelNamed", { workflow, id: run.runId })}
+        >
           {t("cancel")}
         </Button>
       ) : null}
@@ -91,18 +109,44 @@ const useColumns = () => {
   return useMemo(
     () => [
       column.display({ id: "run", header: () => t("columns.run"), cell: ({ row }) => <RunName run={row.original} /> }),
-      column.display({ id: "organization", header: () => t("columns.organization"), cell: ({ row }) => <Organization run={row.original} /> }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <RunStatusPill status={getValue()} /> }),
-      column.display({ id: "origin", header: () => t("columns.origin"), cell: ({ row }) => <Origin run={row.original} /> }),
-      column.accessor("createdAt", { header: () => t("columns.createdAt"), cell: ({ getValue }) => <When iso={getValue()} /> }),
-      column.accessor("updatedAt", { header: () => t("columns.updatedAt"), cell: ({ getValue }) => <When iso={getValue()} /> }),
-      column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <RunActions run={row.original} /> }),
+      column.display({
+        id: "organization",
+        header: () => t("columns.organization"),
+        cell: ({ row }) => <Organization run={row.original} />,
+      }),
+      column.accessor("status", {
+        header: () => t("columns.status"),
+        cell: ({ getValue }) => <RunStatusPill status={getValue()} />,
+      }),
+      column.display({
+        id: "origin",
+        header: () => t("columns.origin"),
+        cell: ({ row }) => <Origin run={row.original} />,
+      }),
+      column.accessor("createdAt", {
+        header: () => t("columns.createdAt"),
+        cell: ({ getValue }) => <When iso={getValue()} />,
+      }),
+      column.accessor("updatedAt", {
+        header: () => t("columns.updatedAt"),
+        cell: ({ getValue }) => <When iso={getValue()} />,
+      }),
+      column.display({
+        id: "actions",
+        header: () => t("columns.actions"),
+        meta: { headerHidden: true },
+        cell: ({ row }) => <RunActions run={row.original} />,
+      }),
     ],
     [t],
   );
 };
 
-export type RunsTableProps = RunsTableState & { runs: readonly AdminWorkflowRun[]; pagination: CursorPagination | undefined; empty: ReactNode };
+export type RunsTableProps = RunsTableState & {
+  runs: readonly AdminWorkflowRun[];
+  pagination: CursorPagination | undefined;
+  empty: ReactNode;
+};
 
 /** Runs of every organization and of the platform, with details and cancel per row; cards on phones. */
 export function RunsTable({ runs, pagination, empty, ...state }: RunsTableProps) {

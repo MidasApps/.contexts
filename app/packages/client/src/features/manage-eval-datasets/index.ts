@@ -2,4 +2,7 @@
 export { datasetRefusal, itemBody, validateDatasetName, validateItemDraft } from "./model/dataset-drafts.ts";
 export { AddEvalDatasetItemDialog, type AddEvalDatasetItemDialogProps } from "./ui/AddEvalDatasetItemDialog.tsx";
 export { CreateEvalDatasetDialog, type CreateEvalDatasetDialogProps } from "./ui/CreateEvalDatasetDialog.tsx";
-export { DeleteEvalDatasetItemDialog, type DeleteEvalDatasetItemDialogProps } from "./ui/DeleteEvalDatasetItemDialog.tsx";
+export {
+  DeleteEvalDatasetItemDialog,
+  type DeleteEvalDatasetItemDialogProps,
+} from "./ui/DeleteEvalDatasetItemDialog.tsx";

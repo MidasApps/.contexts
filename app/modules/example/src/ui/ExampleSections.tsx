@@ -1,7 +1,7 @@
 "use client";
 
-import { useCan } from "@core/client/entities/permission";
 import { useModuleSettings } from "@core/client/entities/module-settings";
+import { useCan } from "@core/client/entities/permission";
 import { useFormatDateTime, useFormatMoney } from "@core/client/shared/lib/format";
 import { RouteLink } from "@core/client/shared/lib/router";
 import { Button } from "@core/client/shared/ui/atoms/Button/Button";
@@ -11,7 +11,7 @@ import { QuerySection } from "@core/client/widgets/page-state";
 import type { AccessContext } from "@core/contracts";
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
-import { ExampleSettingsSchema, type ExampleSettings } from "../contracts/example-settings.schema.ts";
+import { type ExampleSettings, ExampleSettingsSchema } from "../contracts/example-settings.schema.ts";
 
 function Term({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -87,7 +87,11 @@ export function ExampleSettingsCard({ organizationId, moduleId }: { organization
       <QuerySection query={query} loadingLabel={t("settingsLoading")}>
         {(stored) => {
           const parsed = ExampleSettingsSchema.safeParse(stored.values);
-          return parsed.success ? <ConfiguredSettings settings={parsed.data} /> : <NotConfigured organizationId={organizationId} moduleId={moduleId} />;
+          return parsed.success ? (
+            <ConfiguredSettings settings={parsed.data} />
+          ) : (
+            <NotConfigured organizationId={organizationId} moduleId={moduleId} />
+          );
         }}
       </QuerySection>
     </SectionCard>

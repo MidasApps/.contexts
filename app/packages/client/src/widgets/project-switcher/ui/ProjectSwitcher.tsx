@@ -37,7 +37,12 @@ function ProjectItems({ organizationId, currentId }: { organizationId: string; c
   }
   if (projects.isError) {
     return (
-      <DropdownMenuItem onSelect={(event) => { event.preventDefault(); void projects.refetch(); }}>
+      <DropdownMenuItem
+        onSelect={(event) => {
+          event.preventDefault();
+          void projects.refetch();
+        }}
+      >
         <Icon name="refresh" />
         {t("projectsFailed")}
       </DropdownMenuItem>
@@ -45,7 +50,10 @@ function ProjectItems({ organizationId, currentId }: { organizationId: string; c
   }
   if (projects.data.length === 0) return <DropdownMenuItem disabled>{t("noProjects")}</DropdownMenuItem>;
   return (
-    <DropdownMenuRadioGroup value={currentId ?? ""} onValueChange={(projectId) => router.navigate({ id: "project", organizationId, projectId })}>
+    <DropdownMenuRadioGroup
+      value={currentId ?? ""}
+      onValueChange={(projectId) => router.navigate({ id: "project", organizationId, projectId })}
+    >
       {projects.data.map((project) => (
         <DropdownMenuRadioItem key={project.id} value={project.id}>
           <span className="truncate">{project.name}</span>
@@ -75,9 +83,17 @@ export function ProjectSwitcher() {
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton tooltip={name} aria-label={t("projectTrigger", { name })} className="data-[state=open]:bg-sidebar-accent">
+            <SidebarMenuButton
+              tooltip={name}
+              aria-label={t("projectTrigger", { name })}
+              className="data-[state=open]:bg-sidebar-accent"
+            >
               <Icon name="folder" />
-              {node.projectId !== undefined && context.isPending ? <Skeleton className="h-4 w-24" /> : <span className="truncate">{name}</span>}
+              {node.projectId !== undefined && context.isPending ? (
+                <Skeleton className="h-4 w-24" />
+              ) : (
+                <span className="truncate">{name}</span>
+              )}
               <Icon name="chevron-down" className="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>

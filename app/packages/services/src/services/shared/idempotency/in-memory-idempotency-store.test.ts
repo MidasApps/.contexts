@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { fixedClock, type Clock } from "../clock/clock.ts";
+import { type Clock, fixedClock } from "../clock/clock.ts";
 import { IN_FLIGHT_LEASE_MS } from "./idempotency-decision.ts";
 import { createInMemoryIdempotencyStore } from "./in-memory-idempotency-store.ts";
 
 const clock = fixedClock("2026-09-29T12:00:00.000Z");
 
 const attemptOf = (begin: { kind: string; attemptId?: string }): string => {
-  if (begin.kind !== "new" || begin.attemptId === undefined) throw new Error(`expected a new attempt, got ${begin.kind}`);
+  if (begin.kind !== "new" || begin.attemptId === undefined)
+    throw new Error(`expected a new attempt, got ${begin.kind}`);
   return begin.attemptId;
 };
 
@@ -16,7 +17,10 @@ describe("in-memory idempotency store", () => {
     const attempt = attemptOf(await store.begin("scope-1", "hash-a"));
     expect(await store.begin("scope-1", "hash-a")).toEqual({ kind: "in-flight" });
     await store.complete("scope-1", attempt, { status: 201, body: '{"data":{"id":"1"}}' });
-    expect(await store.begin("scope-1", "hash-a")).toEqual({ kind: "replay", response: { status: 201, body: '{"data":{"id":"1"}}' } });
+    expect(await store.begin("scope-1", "hash-a")).toEqual({
+      kind: "replay",
+      response: { status: 201, body: '{"data":{"id":"1"}}' },
+    });
     expect(await store.begin("scope-1", "hash-b")).toEqual({ kind: "conflict" });
   });
 

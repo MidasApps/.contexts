@@ -1,9 +1,9 @@
 import {
   CORE_PERMISSIONS,
   OWNER_ONLY_PERMISSION,
-  PermissionDefinitionSchema,
   type Permission,
   type PermissionDefinition,
+  PermissionDefinitionSchema,
   type PlatformRole,
   type SystemRoleKey,
 } from "@core/contracts";
@@ -62,13 +62,15 @@ const validateDefinition = (source: PermissionSource, definition: PermissionDefi
   const context = { permissionId: definition.id, moduleId: source.moduleId };
   const parsed = PermissionDefinitionSchema.safeParse(definition);
   if (!parsed.success) throw new PermissionRegistryError({ code: "INVALID_PERMISSION_DEFINITION", ...context });
-  if (!isInsideModule(source.moduleId, parsed.data.id)) throw new PermissionRegistryError({ code: "PERMISSION_OUTSIDE_MODULE", ...context });
+  if (!isInsideModule(source.moduleId, parsed.data.id))
+    throw new PermissionRegistryError({ code: "PERMISSION_OUTSIDE_MODULE", ...context });
   return parsed.data;
 };
 
 // Only the core catalog object may use a reserved id: a module named `core` could otherwise mint `core.*` permissions.
 const validateSource = (source: PermissionSource): void => {
-  if (!MODULE_ID_PATTERN.test(source.moduleId)) throw new PermissionRegistryError({ code: "INVALID_MODULE_ID", moduleId: source.moduleId });
+  if (!MODULE_ID_PATTERN.test(source.moduleId))
+    throw new PermissionRegistryError({ code: "INVALID_MODULE_ID", moduleId: source.moduleId });
   if (RESERVED_MODULE_IDS.has(source.moduleId) && source !== CORE_PERMISSION_SOURCE) {
     throw new PermissionRegistryError({ code: "RESERVED_MODULE_ID", moduleId: source.moduleId });
   }
@@ -81,7 +83,11 @@ const indexSources = (sources: readonly PermissionSource[]): Map<string, Permiss
     for (const definition of source.permissions) {
       const valid = validateDefinition(source, definition);
       if (byId.has(valid.id)) {
-        throw new PermissionRegistryError({ code: "DUPLICATE_PERMISSION", permissionId: valid.id, moduleId: source.moduleId });
+        throw new PermissionRegistryError({
+          code: "DUPLICATE_PERMISSION",
+          permissionId: valid.id,
+          moduleId: source.moduleId,
+        });
       }
       byId.set(valid.id, valid);
     }
@@ -89,12 +95,16 @@ const indexSources = (sources: readonly PermissionSource[]): Map<string, Permiss
   return byId;
 };
 
-const idsWhere = (definitions: readonly PermissionDefinition[], keep: (definition: PermissionDefinition) => boolean): ReadonlySet<Permission> =>
-  new Set(definitions.filter(keep).map((definition) => definition.id));
+const idsWhere = (
+  definitions: readonly PermissionDefinition[],
+  keep: (definition: PermissionDefinition) => boolean,
+): ReadonlySet<Permission> => new Set(definitions.filter(keep).map((definition) => definition.id));
 
 // Owner holds every tenant permission and admin all but one by rule (SP1 spec §5.1);
 // the other roles hold what each definition lists.
-const buildSystemRoleSets = (tenant: readonly PermissionDefinition[]): ReadonlyMap<SystemRoleKey, ReadonlySet<Permission>> => {
+const buildSystemRoleSets = (
+  tenant: readonly PermissionDefinition[],
+): ReadonlyMap<SystemRoleKey, ReadonlySet<Permission>> => {
   const listed = (key: SystemRoleKey) => idsWhere(tenant, (definition) => definition.defaultRoles.includes(key));
   return new Map<SystemRoleKey, ReadonlySet<Permission>>([
     ["owner", idsWhere(tenant, () => true)],
@@ -105,7 +115,9 @@ const buildSystemRoleSets = (tenant: readonly PermissionDefinition[]): ReadonlyM
   ]);
 };
 
-const buildPlatformRoleSets = (platform: readonly PermissionDefinition[]): ReadonlyMap<PlatformRole, ReadonlySet<Permission>> =>
+const buildPlatformRoleSets = (
+  platform: readonly PermissionDefinition[],
+): ReadonlyMap<PlatformRole, ReadonlySet<Permission>> =>
   new Map<PlatformRole, ReadonlySet<Permission>>([
     ["platform-admin", idsWhere(platform, () => true)],
     ["platform-support", idsWhere(platform, (definition) => definition.defaultRoles.includes("platform-support"))],

@@ -5,7 +5,10 @@ import { AGENT_PRINCIPAL_KEY, nodeOfContext, readAgentContext } from "./agent-re
 describe("readAgentContext", () => {
   it("reads a complete context and the verified principal", () => {
     const result = readAgentContext(new Map(buildAgentContextEntries()));
-    expect(result).toMatchObject({ ok: true, data: { context: { tenantId: TEST_TENANT }, principal: { type: "user" } } });
+    expect(result).toMatchObject({
+      ok: true,
+      data: { context: { tenantId: TEST_TENANT }, principal: { type: "user" } },
+    });
   });
 
   it("reports missing keys instead of defaulting a tenant", () => {
@@ -42,7 +45,11 @@ describe("nodeOfContext", () => {
       return nodeOfContext(result.data.context);
     };
     expect(read({})).toEqual({ level: "organization", tenantId: TEST_TENANT });
-    expect(read({ projectId: "project-1" })).toEqual({ level: "project", tenantId: TEST_TENANT, projectId: "project-1" });
+    expect(read({ projectId: "project-1" })).toEqual({
+      level: "project",
+      tenantId: TEST_TENANT,
+      projectId: "project-1",
+    });
     expect(read({ projectId: "project-1", unitId: "unit-1" })).toMatchObject({ level: "unit", unitId: "unit-1" });
   });
 });

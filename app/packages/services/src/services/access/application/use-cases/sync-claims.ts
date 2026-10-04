@@ -1,4 +1,4 @@
-import { UserIdSchema, type UserId } from "@core/contracts";
+import { type UserId, UserIdSchema } from "@core/contracts";
 import type { Logger } from "../../../shared/observability/logger.ts";
 import type { AccessProjectionStore } from "../ports/driven/access-projection-writer.ts";
 import type { ClaimsWriter, CoreClaims } from "../ports/driven/claims-writer.ts";
@@ -35,13 +35,15 @@ export const computeCoreClaims = async (deps: Omit<SyncClaimsDeps, "claims">, ui
 };
 
 /** Builds `syncClaims(uid)`: compute from the source, write, log failures. */
-export const makeSyncClaims = (deps: SyncClaimsDeps & { readonly logger: Logger }): SyncClaims => async (uid) => {
-  try {
-    await deps.claims.writeClaims(UserIdSchema.parse(uid), await computeCoreClaims(deps, uid));
-    return true;
-  } catch (e: unknown) {
-    // Claims are a projection; POST /v1/me/claims/sync heals a failed sync (SP1 spec §5.4).
-    deps.logger.error("claims_sync_failed", { userId: uid, err: e });
-    return false;
-  }
-};
+export const makeSyncClaims =
+  (deps: SyncClaimsDeps & { readonly logger: Logger }): SyncClaims =>
+  async (uid) => {
+    try {
+      await deps.claims.writeClaims(UserIdSchema.parse(uid), await computeCoreClaims(deps, uid));
+      return true;
+    } catch (e: unknown) {
+      // Claims are a projection; POST /v1/me/claims/sync heals a failed sync (SP1 spec §5.4).
+      deps.logger.error("claims_sync_failed", { userId: uid, err: e });
+      return false;
+    }
+  };

@@ -20,7 +20,16 @@ export const EvalDatasetContract = defineContract(EvalDatasetSchema, {
   id: "observability.EvalDataset",
   kind: "view",
   description: "An eval dataset: platform eval sets per agent, or an organization's own (feedback, manual items).",
-  examples: [{ id: "ds_01J8Z3K4M5", name: "feedback", tenantId: EXAMPLE_IDS.organization, version: 3, targetIds: ["assistant"], createdAt: "2026-09-30T12:00:00.000Z" }],
+  examples: [
+    {
+      id: "ds_01J8Z3K4M5",
+      name: "feedback",
+      tenantId: EXAMPLE_IDS.organization,
+      version: 3,
+      targetIds: ["assistant"],
+      createdAt: "2026-09-30T12:00:00.000Z",
+    },
+  ],
   pii: "none",
   tenancyScope: "organization",
   relations: [],
@@ -30,7 +39,10 @@ export const EvalDatasetContract = defineContract(EvalDatasetSchema, {
 /** `POST /v1/evals/experiments`: run an enabled agent on one of the organization's datasets. */
 export const StartEvalExperimentInputSchema = z.strictObject({
   datasetId: z.string().min(1).max(128).meta(none("The organization's dataset.")),
-  agentId: z.string().regex(/^[a-z][a-z0-9-]*$/).meta(none("Agent to evaluate; must be enabled for the organization.")),
+  agentId: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]*$/)
+    .meta(none("Agent to evaluate; must be enabled for the organization.")),
 });
 export type StartEvalExperimentInput = z.infer<typeof StartEvalExperimentInputSchema>;
 

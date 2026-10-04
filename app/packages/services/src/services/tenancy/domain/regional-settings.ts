@@ -17,7 +17,8 @@ export const resolveRegionalSettings = (args: {
   user?: Pick<UserPreferences, "locale" | "timeZone" | "currency"> | undefined;
 }): RegionalSettings => {
   const nearestFirst = [...(args.units ?? [])].reverse().concat(args.project === undefined ? [] : [args.project]);
-  const pick = <Key extends keyof NodeRegionalOverrides>(key: Key) => nearestFirst.find((node) => node.settings[key] !== undefined)?.settings[key];
+  const pick = <Key extends keyof NodeRegionalOverrides>(key: Key) =>
+    nearestFirst.find((node) => node.settings[key] !== undefined)?.settings[key];
   const nodeTimeZone = pick("timeZone") ?? args.organization.defaults.timeZone;
   return {
     locale: args.user?.locale ?? args.organization.defaults.locale,

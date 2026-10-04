@@ -21,7 +21,10 @@ export const signInHref = (locale: SupportedLocale, requestPath: string | null):
 };
 
 /** User area (decision 0012 §5): a valid web session, else sign in and come back. */
-export const enforceWebSession = (result: WebSessionGuardResult, outcomes: GuardOutcomes): Extract<WebSessionGuardResult, { kind: "session" }> => {
+export const enforceWebSession = (
+  result: WebSessionGuardResult,
+  outcomes: GuardOutcomes,
+): Extract<WebSessionGuardResult, { kind: "session" }> => {
   if (result.kind === "session") return result;
   return outcomes.redirect(signInHref(outcomes.locale, outcomes.requestPath));
 };
@@ -31,7 +34,10 @@ export const enforceWebSession = (result: WebSessionGuardResult, outcomes: Guard
  * staff (or lacks MFA) gets 404, not 403, so the surface does not reveal itself; without any
  * session the guard asks for a sign-in like the user area.
  */
-export const enforceStaffSession = (result: StaffSessionGuardResult, outcomes: GuardOutcomes): Extract<StaffSessionGuardResult, { kind: "staff" }> => {
+export const enforceStaffSession = (
+  result: StaffSessionGuardResult,
+  outcomes: GuardOutcomes,
+): Extract<StaffSessionGuardResult, { kind: "staff" }> => {
   if (result.kind === "staff") return result;
   if (result.kind === "not-found") return outcomes.notFound();
   return outcomes.redirect(signInHref(outcomes.locale, outcomes.requestPath));

@@ -3,7 +3,9 @@ import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { FileRepository } from "../ports/file-ports.ts";
 import { canReadFile, type FilesCaller } from "./file-access.ts";
 
-export type GetFile = (input: FilesCaller & { readonly fileId: string }) => Promise<Result<StoredFile, { readonly code: "FILE_NOT_FOUND" }>>;
+export type GetFile = (
+  input: FilesCaller & { readonly fileId: string },
+) => Promise<Result<StoredFile, { readonly code: "FILE_NOT_FOUND" }>>;
 
 /**
  * `GET /v1/files/{fileId}`: the record, if the caller may read it. A file the

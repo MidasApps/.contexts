@@ -1,10 +1,10 @@
 import { SessionIdSchema } from "@core/contracts";
-import { FieldPath, Timestamp, type Firestore } from "firebase-admin/firestore";
+import { FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
 import type { SessionRepository } from "../../application/ports/driven/session-repository.ts";
-import { SessionRecordSchema, type SessionRecord } from "../../domain/session-record.schema.ts";
+import { type SessionRecord, SessionRecordSchema } from "../../domain/session-record.schema.ts";
 
 const contract = { schema: SessionRecordSchema };
 const converter = createContractConverter(contract);
@@ -23,7 +23,14 @@ export const createFirestoreSessionRepository = (deps: { firestore: Firestore })
   return {
     newId: () => SessionIdSchema.parse(raw().doc().id),
     create: async (record) => {
-      await raw().doc(record.id).create({ ...converter.toFirestore(record), createdBy: record.uid, updatedBy: record.uid, schemaVersion: CORE_SCHEMA_VERSION });
+      await raw()
+        .doc(record.id)
+        .create({
+          ...converter.toFirestore(record),
+          createdBy: record.uid,
+          updatedBy: record.uid,
+          schemaVersion: CORE_SCHEMA_VERSION,
+        });
     },
     get: async (tx, id) => {
       const ref = typed().doc(id);
@@ -33,10 +40,19 @@ export const createFirestoreSessionRepository = (deps: { firestore: Firestore })
     findBySecretHash: (hash) => first("secretHash", "==", hash),
     findByPreviousSecretHash: (hash) => first("previousSecretHashes", "array-contains", hash),
     listOpen: async ({ uid, page }) => {
-      let query = typed().where("uid", "==", uid).where("revokedAt", "==", null).orderBy("createdAt", "desc").orderBy(FieldPath.documentId(), "desc");
-      if (page.after !== undefined) query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
+      let query = typed()
+        .where("uid", "==", uid)
+        .where("revokedAt", "==", null)
+        .orderBy("createdAt", "desc")
+        .orderBy(FieldPath.documentId(), "desc");
+      if (page.after !== undefined)
+        query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
       const fetched = (await query.limit(page.limit + 1).get()).docs.map((doc) => doc.data());
-      return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (record: SessionRecord) => [record.createdAt, record.id] });
+      return pageFromOverfetch({
+        fetched,
+        limit: page.limit,
+        positionOf: (record: SessionRecord) => [record.createdAt, record.id],
+      });
     },
     touch: async ({ id, lastSeenAt }) => {
       await raw().doc(id).update(update({ lastSeenAt }));
@@ -44,7 +60,8 @@ export const createFirestoreSessionRepository = (deps: { firestore: Firestore })
     setImpersonation: async ({ id, impersonationSessionId }) => {
       await raw().doc(id).update(update({ impersonationSessionId }));
     },
-    rotate: (tx, { id, ...patch }) => void tx.update(raw().doc(id), update({ ...patch, previousSecretHashes: [...patch.previousSecretHashes] })),
+    rotate: (tx, { id, ...patch }) =>
+      void tx.update(raw().doc(id), update({ ...patch, previousSecretHashes: [...patch.previousSecretHashes] })),
     revoke: async (tx, { id, revokedAt }) => {
       const ref = raw().doc(id);
       if (tx === undefined) await ref.update(update({ revokedAt }));

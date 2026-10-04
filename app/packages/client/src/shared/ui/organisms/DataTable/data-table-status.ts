@@ -26,6 +26,7 @@ export type DataTableQuery = {
  */
 export const dataTableStatusOf = (query: DataTableQuery): DataTableStatus => {
   if (query.isPending) return { kind: "loading" };
-  if (query.isError) return { kind: "error", error: query.error, onRetry: () => void query.refetch(), retrying: query.isFetching };
+  if (query.isError)
+    return { kind: "error", error: query.error, onRetry: () => void query.refetch(), retrying: query.isFetching };
   return { kind: "ready" };
 };

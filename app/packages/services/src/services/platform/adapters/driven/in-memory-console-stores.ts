@@ -1,8 +1,15 @@
 import type { BudgetCaps, OrganizationStatus, Plan } from "@core/contracts";
 import { PlanIdSchema } from "@core/contracts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
-import type { UsageBucket } from "../../application/ports/console-ports.ts";
-import type { AgentSettingsRepository, ConsoleUsage, OrganizationAdminStore, OrganizationPlan, PlanRepository, StoredAgentSettings } from "../../application/ports/console-ports.ts";
+import type {
+  AgentSettingsRepository,
+  ConsoleUsage,
+  OrganizationAdminStore,
+  OrganizationPlan,
+  PlanRepository,
+  StoredAgentSettings,
+  UsageBucket,
+} from "../../application/ports/console-ports.ts";
 
 /** In-memory console stores for unit tests; every map is inspectable. */
 export const createInMemoryConsoleStores = (
@@ -13,7 +20,12 @@ export const createInMemoryConsoleStores = (
   } = {},
 ) => {
   const plans = new Map<string, Plan>();
-  const organizations = new Map(seed.organizations?.map((org) => [org.id, { id: org.id, name: org.name ?? org.id, status: org.status ?? "active" }]) ?? []);
+  const organizations = new Map(
+    seed.organizations?.map((org) => [
+      org.id,
+      { id: org.id, name: org.name ?? org.id, status: org.status ?? "active" },
+    ]) ?? [],
+  );
   const assignments = new Map<string, OrganizationPlan>();
   const settings = new Map<string, StoredAgentSettings>();
   const budgets = new Map<string, BudgetCaps>();
@@ -28,7 +40,13 @@ export const createInMemoryConsoleStores = (
     get: (planId) => Promise.resolve(plans.get(planId) ?? null),
     create: ({ name, limits, at }) => {
       sequence += 1;
-      const plan: Plan = { id: PlanIdSchema.parse(`plan${String(sequence).padStart(16, "0")}`), name, limits, createdAt: at, updatedAt: at };
+      const plan: Plan = {
+        id: PlanIdSchema.parse(`plan${String(sequence).padStart(16, "0")}`),
+        name,
+        limits,
+        createdAt: at,
+        updatedAt: at,
+      };
       plans.set(plan.id, plan);
       return Promise.resolve(plan);
     },
@@ -42,8 +60,12 @@ export const createInMemoryConsoleStores = (
   };
   const organizationStore: OrganizationAdminStore = {
     listLive: ({ after, limit }) => {
-      const sorted = [...organizations.values()].sort((a, b) => (a.id < b.id ? -1 : 1)).filter((org) => after === undefined || org.id > after[1]);
-      return Promise.resolve(pageFromOverfetch({ fetched: sorted.slice(0, limit + 1), limit, positionOf: (org) => [org.id, org.id] }));
+      const sorted = [...organizations.values()]
+        .sort((a, b) => (a.id < b.id ? -1 : 1))
+        .filter((org) => after === undefined || org.id > after[1]);
+      return Promise.resolve(
+        pageFromOverfetch({ fetched: sorted.slice(0, limit + 1), limit, positionOf: (org) => [org.id, org.id] }),
+      );
     },
     getLive: (tenantId) => Promise.resolve(organizations.get(tenantId) ?? null),
     setStatus: ({ tenantId, status }) => {
@@ -52,13 +74,15 @@ export const createInMemoryConsoleStores = (
       organizations.set(tenantId, { ...org, status });
       return Promise.resolve(true);
     },
-    getPlan: (tenantId) => Promise.resolve(assignments.get(tenantId) ?? { tenantId, planId: null, budgetOverride: null }),
+    getPlan: (tenantId) =>
+      Promise.resolve(assignments.get(tenantId) ?? { tenantId, planId: null, budgetOverride: null }),
     setPlan: ({ tenantId, planId, budgetOverride }) => {
       assignments.set(tenantId, { tenantId, planId, budgetOverride });
       return Promise.resolve();
     },
     countMembers: (tenantId) => Promise.resolve(new Set(seed.members?.[tenantId] ?? []).size),
-    tenantsOnPlan: (planId) => Promise.resolve([...assignments.values()].filter((row) => row.planId === planId).map((row) => row.tenantId)),
+    tenantsOnPlan: (planId) =>
+      Promise.resolve([...assignments.values()].filter((row) => row.planId === planId).map((row) => row.tenantId)),
   };
   const settingsRepository: AgentSettingsRepository = {
     get: (tenantId) => Promise.resolve(settings.get(tenantId) ?? null),
@@ -76,14 +100,44 @@ export const createInMemoryConsoleStores = (
     usageBuckets: ({ tenantId, from, to }) =>
       Promise.resolve(
         usageRows
-          .filter((row) => row.tenantId === tenantId && row.day >= from.toISOString().slice(0, 10) && new Date(`${row.day}T00:00:00.000Z`) < to)
-          .map((row): UsageBucket => ({ day: row.day, provider: row.provider, model: row.model, calls: row.calls, inputTokens: row.inputTokens, outputTokens: row.outputTokens, costMicroUsd: row.costMicroUsd, unpricedCalls: row.unpricedCalls })),
+          .filter(
+            (row) =>
+              row.tenantId === tenantId &&
+              row.day >= from.toISOString().slice(0, 10) &&
+              new Date(`${row.day}T00:00:00.000Z`) < to,
+          )
+          .map(
+            (row): UsageBucket => ({
+              day: row.day,
+              provider: row.provider,
+              model: row.model,
+              calls: row.calls,
+              inputTokens: row.inputTokens,
+              outputTokens: row.outputTokens,
+              costMicroUsd: row.costMicroUsd,
+              unpricedCalls: row.unpricedCalls,
+            }),
+          ),
       ),
-    activeUserIds: ({ tenantId, since }) => Promise.resolve([...new Set(activity.filter((row) => row.tenantId === tenantId && row.at >= since).map((row) => row.userId))]),
+    activeUserIds: ({ tenantId, since }) =>
+      Promise.resolve([
+        ...new Set(activity.filter((row) => row.tenantId === tenantId && row.at >= since).map((row) => row.userId)),
+      ]),
     agentRunCounts: ({ tenantId, since }) => {
       const runs = agentRuns.filter((row) => row.tenantId === tenantId && row.at >= since);
       return Promise.resolve({ runs: runs.length, stopped: runs.filter((row) => row.stoppedBy !== null).length });
     },
   };
-  return { stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage }, plans, organizations, assignments, settings, budgets, costs, activity, agentRuns, usageRows };
+  return {
+    stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage },
+    plans,
+    organizations,
+    assignments,
+    settings,
+    budgets,
+    costs,
+    activity,
+    agentRuns,
+    usageRows,
+  };
 };

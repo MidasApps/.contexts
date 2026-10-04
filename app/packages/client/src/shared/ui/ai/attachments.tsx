@@ -9,14 +9,22 @@ export type AttachmentsProps = Omit<ComponentProps<"ul">, "aria-label"> & { labe
 
 /** AI Elements `attachments`: the files of a message or of the composer, as a labelled list. */
 export function Attachments({ label, className, ...props }: AttachmentsProps) {
-  return <ul data-slot="attachments" aria-label={label} className={cn("flex list-none flex-wrap gap-2", className)} {...props} />;
+  return (
+    <ul
+      data-slot="attachments"
+      aria-label={label}
+      className={cn("flex list-none flex-wrap gap-2", className)}
+      {...props}
+    />
+  );
 }
 
 const iconOf = (mediaType: string): ReactNode => {
   if (mediaType.startsWith("image/")) return <ImageIcon aria-hidden="true" className="size-4" />;
   if (mediaType.startsWith("video/")) return <VideoIcon aria-hidden="true" className="size-4" />;
   if (mediaType.startsWith("audio/")) return <MusicIcon aria-hidden="true" className="size-4" />;
-  if (mediaType === "application/pdf" || mediaType.startsWith("text/")) return <FileTextIcon aria-hidden="true" className="size-4" />;
+  if (mediaType === "application/pdf" || mediaType.startsWith("text/"))
+    return <FileTextIcon aria-hidden="true" className="size-4" />;
   return <FileIcon aria-hidden="true" className="size-4" />;
 };
 
@@ -32,18 +40,37 @@ export type AttachmentProps = Omit<ComponentProps<"li">, "children"> & {
   tone?: "default" | "error";
 };
 
-export function Attachment({ name, mediaType, detail, preview, action, tone = "default", className, ...props }: AttachmentProps) {
+export function Attachment({
+  name,
+  mediaType,
+  detail,
+  preview,
+  action,
+  tone = "default",
+  className,
+  ...props
+}: AttachmentProps) {
   return (
     <li
       data-slot="attachment"
       data-tone={tone}
-      className={cn("flex max-w-full items-center gap-2 rounded-sm border bg-card py-1.5 pr-1.5 pl-2 text-body-sm", tone === "error" ? "border-destructive/40" : "border-border", className)}
+      className={cn(
+        "flex max-w-full items-center gap-2 rounded-sm border bg-card py-1.5 pr-1.5 pl-2 text-body-sm",
+        tone === "error" ? "border-destructive/40" : "border-border",
+        className,
+      )}
       {...props}
     >
-      <span className="grid size-7 shrink-0 place-items-center overflow-hidden rounded-xs bg-muted text-muted-foreground">{preview ?? iconOf(mediaType)}</span>
+      <span className="grid size-7 shrink-0 place-items-center overflow-hidden rounded-xs bg-muted text-muted-foreground">
+        {preview ?? iconOf(mediaType)}
+      </span>
       <span className="min-w-0">
         <span className="block truncate font-medium text-foreground">{name}</span>
-        {detail === undefined ? null : <span className={cn("block truncate", tone === "error" ? "text-destructive-text" : "text-muted-foreground")}>{detail}</span>}
+        {detail === undefined ? null : (
+          <span className={cn("block truncate", tone === "error" ? "text-destructive-text" : "text-muted-foreground")}>
+            {detail}
+          </span>
+        )}
       </span>
       {action}
     </li>

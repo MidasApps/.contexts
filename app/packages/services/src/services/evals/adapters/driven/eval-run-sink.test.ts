@@ -29,7 +29,10 @@ describe("eval run sink", () => {
     expect(await sink.exportSummaries([summary])).toBe(2);
     const [[rows, options]] = inserts as [Parameters<EvalRunsTableLike["insert"]>];
     expect(options).toEqual({ raw: true, skipInvalidRows: false, ignoreUnknownValues: false });
-    expect(rows.map((row) => row.insertId)).toEqual([`${summary.experimentId}:tool-routing:${summary.finishedAt ?? ""}`, `${summary.experimentId}:faithfulness:${summary.finishedAt ?? ""}`]);
+    expect(rows.map((row) => row.insertId)).toEqual([
+      `${summary.experimentId}:tool-routing:${summary.finishedAt ?? ""}`,
+      `${summary.experimentId}:faithfulness:${summary.finishedAt ?? ""}`,
+    ]);
     expect(rows[0]?.json).toEqual({
       experiment_id: summary.experimentId,
       dataset_id: summary.datasetId,
@@ -53,7 +56,11 @@ describe("eval run sink", () => {
     expect(await createBigQueryEvalRunSink({ table }).exportSummaries([{ ...summary, scores: [] }])).toBe(0);
     expect(inserts).toEqual([]);
     const lines: unknown[] = [];
-    expect(await createNoopEvalRunSink({ info: (message, fields) => lines.push([message, fields]) }).exportSummaries([summary])).toBe(0);
+    expect(
+      await createNoopEvalRunSink({ info: (message, fields) => lines.push([message, fields]) }).exportSummaries([
+        summary,
+      ]),
+    ).toBe(0);
     expect(lines).toEqual([["eval_export_skipped", { experimentCount: 1, sink: "none", table: "eval_runs" }]]);
   });
 });

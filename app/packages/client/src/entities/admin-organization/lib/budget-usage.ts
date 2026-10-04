@@ -15,7 +15,9 @@ export type BudgetUsage = {
  * How far an organization is into its monthly spend cap: `alert` from 80 %, `over` from 100 %. A
  * zero cap with any cost is `over` (the budget guard refuses every run).
  */
-export const budgetUsage = (organization: Pick<OrganizationAdminSummary, "budget" | "costMtdMicroUsd">): BudgetUsage => {
+export const budgetUsage = (
+  organization: Pick<OrganizationAdminSummary, "budget" | "costMtdMicroUsd">,
+): BudgetUsage => {
   const cap = organization.budget.caps.monthlyMicroUsd;
   if (cap === 0) return { ratio: null, level: organization.costMtdMicroUsd > 0 ? "over" : "ok" };
   const ratio = organization.costMtdMicroUsd / cap;

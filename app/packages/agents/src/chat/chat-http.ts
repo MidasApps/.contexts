@@ -1,7 +1,7 @@
 import { type Logger, resolveRequestId } from "@core/services";
+import type { Agent } from "@mastra/core/agent";
 import { MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY, type RequestContext } from "@mastra/core/request-context";
 import type { RequestContextReader } from "../context/agent-request-context.ts";
-import type { Agent } from "@mastra/core/agent";
 import type { ChatRunOwners } from "./chat-run-owners.ts";
 import type { ToolPreviewer } from "./tool-preview.ts";
 
@@ -18,7 +18,10 @@ export type ChatRuntime = {
    * durable id that runs it, after loading the caller's tenant's enabled record and naming it in
    * the request context. `undefined` when there is no such agent for the caller.
    */
-  readonly resolveCustomAgent?: (agentId: string, requestContext: RequestContext<unknown>) => Promise<string | undefined>;
+  readonly resolveCustomAgent?: (
+    agentId: string,
+    requestContext: RequestContext<unknown>,
+  ) => Promise<string | undefined>;
   /**
    * Durable id every custom agent run uses. A run recorded for an agent outside `chatAgents` is a
    * custom agent's, so its owner can still stop it after the agent was disabled or deleted.
@@ -31,7 +34,8 @@ export const durableIdOf = async (
   deps: Pick<ChatRuntime, "chatAgents" | "resolveCustomAgent">,
   agentId: string,
   requestContext: RequestContext<unknown>,
-): Promise<string | undefined> => deps.chatAgents[agentId] ?? (await deps.resolveCustomAgent?.(agentId, requestContext));
+): Promise<string | undefined> =>
+  deps.chatAgents[agentId] ?? (await deps.resolveCustomAgent?.(agentId, requestContext));
 
 export type ChatRouteDeps = ChatRuntime & {
   readonly logger: Logger;
@@ -53,9 +57,20 @@ const ERRORS: Record<ErrorCode, { status: number; message: string }> = {
 };
 
 /** Envelope of contracts/api.md §6 (errors before a stream starts). */
-export const chatError = (code: ErrorCode, requestContext: RequestContextReader, details?: readonly { field: string; issue: string }[]): Response =>
+export const chatError = (
+  code: ErrorCode,
+  requestContext: RequestContextReader,
+  details?: readonly { field: string; issue: string }[],
+): Response =>
   Response.json(
-    { error: { code, message: ERRORS[code].message, ...(details === undefined ? {} : { details }), requestId: requestIdOf(requestContext) } },
+    {
+      error: {
+        code,
+        message: ERRORS[code].message,
+        ...(details === undefined ? {} : { details }),
+        requestId: requestIdOf(requestContext),
+      },
+    },
     { status: ERRORS[code].status },
   );
 

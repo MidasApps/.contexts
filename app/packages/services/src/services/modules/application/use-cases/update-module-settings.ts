@@ -6,13 +6,16 @@ import { InvalidModuleSettingsError, type UnknownModuleError } from "../../domai
 import {
   issuesToDetails,
   loadAuthorizedDefinition,
-  toModuleSettings,
   type ModuleSettingsCommand,
   type ModuleSettingsDeps,
+  toModuleSettings,
 } from "../module-settings-deps.ts";
 import type { StoredModuleSettings } from "../ports/driven/module-settings-repository.ts";
 
-export type UpdateModuleSettingsCommand = ModuleSettingsCommand & { readonly values: ModuleSettingsValues; readonly requestId: string };
+export type UpdateModuleSettingsCommand = ModuleSettingsCommand & {
+  readonly values: ModuleSettingsValues;
+  readonly requestId: string;
+};
 
 export type UpdateModuleSettings = (
   command: UpdateModuleSettingsCommand,

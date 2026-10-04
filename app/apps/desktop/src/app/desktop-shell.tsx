@@ -1,9 +1,9 @@
 import { AppLayout } from "@core/client/app-shell";
 import { ENTRY_ROUTE_IDS, parseRoute, useRouter } from "@core/client/shared/lib/router";
-import { useSession, type SessionState } from "@core/client/shared/lib/session";
+import { type SessionState, useSession } from "@core/client/shared/lib/session";
 import { AppShellSkeleton } from "@core/client/shared/ui/templates/AppShellSkeleton/AppShellSkeleton";
 import { useRouterState } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useTranslations } from "use-intl";
 import type { DesktopApp } from "@/router-context.ts";
 

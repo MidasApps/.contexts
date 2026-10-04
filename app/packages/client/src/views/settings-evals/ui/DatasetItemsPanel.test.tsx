@@ -5,15 +5,33 @@ import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildDataset, numberedPage } from "#/shared/testing/admin-observability-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, noContent, ok, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import {
+  apiError,
+  FAKE_REQUEST_ID,
+  type FakeRequest,
+  type FakeRoutes,
+  noContent,
+  ok,
+} from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsEvalsView } from "./SettingsEvalsView.tsx";
 
 const READER: Permission[] = ["core.organization.read", "core.project.read", "core.eval.read"];
 const WRITER: Permission[] = [...READER, "core.eval.write"];
 
-const REFUNDS = buildDataset({ id: "ds_refunds", name: "refunds", tenantId: IDS.organization, targetIds: ["assistant"] });
-const ITEM = { id: "item_1", datasetId: "ds_refunds", input: "Qual é a política de reembolso?", expectedOutput: "30 dias.", createdAt: "2026-10-01T12:00:00.000Z" };
+const REFUNDS = buildDataset({
+  id: "ds_refunds",
+  name: "refunds",
+  tenantId: IDS.organization,
+  targetIds: ["assistant"],
+});
+const ITEM = {
+  id: "item_1",
+  datasetId: "ds_refunds",
+  input: "Qual é a política de reembolso?",
+  expectedOutput: "30 dias.",
+  createdAt: "2026-10-01T12:00:00.000Z",
+};
 const NO_ANSWER = { ...ITEM, id: "item_2", input: "Oi", expectedOutput: null };
 
 const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] = WRITER, search = "?tab=datasets") =>
@@ -100,13 +118,19 @@ describe("dataset items in the evals page (decision 0062)", () => {
   });
 
   it("creates a dataset, tells a name already in use on its field, and opens the new dataset", async () => {
-    const { user, api } = renderView({ "POST /v1/evals/datasets": apiError(409, "CONFLICT"), "GET /v1/evals/datasets/:datasetId/items": numberedPage([]) });
+    const { user, api } = renderView({
+      "POST /v1/evals/datasets": apiError(409, "CONFLICT"),
+      "GET /v1/evals/datasets/:datasetId/items": numberedPage([]),
+    });
     await user.click(await screen.findByRole("button", { name: "Novo conjunto de dados" }));
     const dialog = await screen.findByRole("dialog", { name: "Novo conjunto de dados" });
     await user.type(within(dialog).getByRole("textbox", { name: "Nome" }), "refunds");
     await user.click(within(dialog).getByRole("button", { name: "Criar" }));
     expect(await within(dialog).findByText("Esta organização já tem um conjunto com esse nome.")).toBeDefined();
-    api.route("POST /v1/evals/datasets", ok(buildDataset({ id: "ds_new", name: "trocas", tenantId: IDS.organization }), 201));
+    api.route(
+      "POST /v1/evals/datasets",
+      ok(buildDataset({ id: "ds_new", name: "trocas", tenantId: IDS.organization }), 201),
+    );
     await user.clear(within(dialog).getByRole("textbox", { name: "Nome" }));
     await user.type(within(dialog).getByRole("textbox", { name: "Nome" }), "trocas");
     await user.click(within(dialog).getByRole("button", { name: "Criar" }));
@@ -123,7 +147,11 @@ describe("dataset items in the evals page (decision 0062)", () => {
   });
 
   it("shows the items error with its reference", async () => {
-    renderView({ "GET /v1/evals/datasets/:datasetId/items": apiError(404, "NOT_FOUND") }, WRITER, "?tab=datasets&dataset=ds_gone");
+    renderView(
+      { "GET /v1/evals/datasets/:datasetId/items": apiError(404, "NOT_FOUND") },
+      WRITER,
+      "?tab=datasets&dataset=ds_gone",
+    );
     expect(await screen.findByText(`Referência: ${FAKE_REQUEST_ID}`)).toBeDefined();
   });
 });

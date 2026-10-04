@@ -4,7 +4,11 @@ import type { TokenVerifier } from "../../application/ports/driven/token-verifie
 // firebase-admin reports token problems (malformed, expired, revoked, user disabled…) as
 // `auth/*` codes; anything else (network, key fetch) is an infrastructure failure.
 const isTokenRejection = (err: unknown): boolean =>
-  typeof err === "object" && err !== null && "code" in err && typeof err.code === "string" && err.code.startsWith("auth/");
+  typeof err === "object" &&
+  err !== null &&
+  "code" in err &&
+  typeof err.code === "string" &&
+  err.code.startsWith("auth/");
 
 /** Firebase Admin `TokenVerifier`: rejected tokens resolve to null (401), other errors rethrow (500). */
 export const createFirebaseTokenVerifier = (deps: { auth: Pick<Auth, "verifyIdToken"> }): TokenVerifier => ({

@@ -26,17 +26,25 @@ export const UpdateAgentSettingsInputSchema = z
       .meta(none("Web tool opt-ins (the platform flag ai.web-tools must also be on).")),
     guardrails: z
       .strictObject({ pii: z.enum(["warn", "redact"]).meta(none("`warn` or `redact`.")) })
-      .optional().meta(none("PII detector mode for user input.")),
-    budget: BudgetCapsSchema.nullable().optional().meta(none("The organization's own lower monthly cap; null removes it.")),
+      .optional()
+      .meta(none("PII detector mode for user input.")),
+    budget: BudgetCapsSchema.nullable()
+      .optional()
+      .meta(none("The organization's own lower monthly cap; null removes it.")),
   })
-  .refine((input) => Object.values(input).some((value) => value !== undefined), { error: "Change at least one setting." });
+  .refine((input) => Object.values(input).some((value) => value !== undefined), {
+    error: "Change at least one setting.",
+  });
 export type UpdateAgentSettingsInput = z.infer<typeof UpdateAgentSettingsInputSchema>;
 
 export const UpdateAgentSettingsInputContract = defineContract(UpdateAgentSettingsInputSchema, {
   id: "agents.UpdateAgentSettingsInput",
   kind: "command",
   description: "Changes enabled agents, web opt-ins, the PII mode or the organization's own lower budget cap.",
-  examples: [{ enabledAgents: ["knowledge", "data"] }, { guardrails: { pii: "redact" }, budget: { monthlyMicroUsd: 20_000_000, monthlyTokens: 10_000_000 } }],
+  examples: [
+    { enabledAgents: ["knowledge", "data"] },
+    { guardrails: { pii: "redact" }, budget: { monthlyMicroUsd: 20_000_000, monthlyTokens: 10_000_000 } },
+  ],
   pii: "none",
   tenancyScope: "organization",
   relations: [],

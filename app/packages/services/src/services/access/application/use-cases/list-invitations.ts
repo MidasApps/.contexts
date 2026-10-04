@@ -29,10 +29,16 @@ export const makeListInvitations =
   (deps: Pick<MemberDeps, "invitations" | "clock">): ListInvitations =>
   async (command) => {
     const { tenantId, status, page } = command;
-    const allowed = await requirePermission({ ...command, permission: "core.member.read", node: { level: "organization", tenantId } });
+    const allowed = await requirePermission({
+      ...command,
+      permission: "core.member.read",
+      node: { level: "organization", tenantId },
+    });
     if (!allowed.ok) return allowed;
     const stored = await deps.invitations.list({ tenantId, statuses: storedStatusesFor(status), page });
     const now = deps.clock.now();
-    const items = stored.items.map((invitation) => invitationView(invitation, now)).filter((invitation) => status === undefined || invitation.status === status);
+    const items = stored.items
+      .map((invitation) => invitationView(invitation, now))
+      .filter((invitation) => status === undefined || invitation.status === status);
     return ok({ items, nextCursor: stored.nextCursor });
   };

@@ -20,7 +20,9 @@ describe("platformRoleCan", () => {
 
 describe("usePlatformPermissions", () => {
   it("answers from the staff role in GET /v1/me", async () => {
-    const api = createFakeApi({ "GET /v1/me": ok(buildMe({ isPlatformStaff: true, platformRole: "platform-support" })) });
+    const api = createFakeApi({
+      "GET /v1/me": ok(buildMe({ isPlatformStaff: true, platformRole: "platform-support" })),
+    });
     const { result } = renderClientHook(() => usePlatformPermissions(), { api });
 
     await waitFor(() => expect(result.current.status).toBe("success"));

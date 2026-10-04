@@ -1,6 +1,6 @@
 "use client";
 
-import { adminListWorkflowRunsEndpoint, type AdminWorkflowRun, type WorkflowRunStatus } from "@core/contracts";
+import { type AdminWorkflowRun, adminListWorkflowRunsEndpoint, type WorkflowRunStatus } from "@core/contracts";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";

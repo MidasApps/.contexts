@@ -8,7 +8,12 @@ const setup = (props: Partial<ChatInputProps> = {}) => {
   const onSend = vi.fn();
   const onStop = vi.fn();
   const view = renderWithProviders(<ChatInput status="ready" onSend={onSend} onStop={onStop} {...props} />);
-  return { ...view, onSend, onStop, field: () => screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Mensagem" }) };
+  return {
+    ...view,
+    onSend,
+    onStop,
+    field: () => screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Mensagem" }),
+  };
 };
 
 describe("ChatInput", () => {
@@ -23,7 +28,9 @@ describe("ChatInput", () => {
   it("invites a question instead of repeating the send button, and keeps the keyboard hint off touch screens", () => {
     const { field } = setup();
     expect(field().getAttribute("placeholder")).toBe("Pergunte ou peça algo…");
-    expect(field().getAttribute("placeholder")).not.toBe(screen.getByRole("button", { name: "Enviar mensagem" }).getAttribute("aria-label"));
+    expect(field().getAttribute("placeholder")).not.toBe(
+      screen.getByRole("button", { name: "Enviar mensagem" }).getAttribute("aria-label"),
+    );
     const hint = screen.getByText(/Enter envia/u);
     // Still part of the field description; only hidden visually on a coarse pointer (no keyboard).
     expect(field().getAttribute("aria-describedby")).toContain(hint.id);

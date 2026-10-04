@@ -1,7 +1,7 @@
 import { MembershipIdSchema, OrganizationIdSchema, ProjectIdSchema, RoleIdSchema, type RoleRef } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import type { CustomRoleRecord, GrantRecord } from "./grant.ts";
 import { computeEffectivePermissions } from "./effective-permissions.ts";
+import type { CustomRoleRecord, GrantRecord } from "./grant.ts";
 import type { NodeChain } from "./node-chain.ts";
 import { CORE_PERMISSION_SOURCE, createPermissionRegistry } from "./permission-registry.ts";
 
@@ -23,7 +23,11 @@ const grant = (nodeId: string, roles: readonly RoleRef[], overrides: Partial<Gra
   ...overrides,
 });
 
-const customRole = (id: string, permissions: readonly string[], overrides: Partial<CustomRoleRecord> = {}): CustomRoleRecord => ({
+const customRole = (
+  id: string,
+  permissions: readonly string[],
+  overrides: Partial<CustomRoleRecord> = {},
+): CustomRoleRecord => ({
   id: RoleIdSchema.parse(id),
   tenantId,
   permissions,
@@ -42,11 +46,18 @@ describe("computeEffectivePermissions", () => {
       customRoles: [customRole("editor", ["core.project.update"])],
       registry,
     });
-    expect([...result.permissions].sort()).toEqual(["core.organization.read", "core.project.read", "core.project.update", "core.unit.read"]);
+    expect([...result.permissions].sort()).toEqual([
+      "core.organization.read",
+      "core.project.read",
+      "core.project.update",
+      "core.unit.read",
+    ]);
     expect(result.sources.get("core.project.update")).toEqual([
       { kind: "membership", membershipId: "m-proj-1", nodeId: "proj-1", roles: [custom("editor")] },
     ]);
-    expect(result.sources.get("core.project.read")?.map((source) => (source.kind === "membership" ? source.nodeId : ""))).toEqual(["org-1"]);
+    expect(
+      result.sources.get("core.project.read")?.map((source) => (source.kind === "membership" ? source.nodeId : "")),
+    ).toEqual(["org-1"]);
   });
 
   it("ignores deleted grants, grants off the chain and grants of another tenant", () => {

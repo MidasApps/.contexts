@@ -1,7 +1,7 @@
 "use client";
 
 import { getConversationEndpoint, listConversationMessagesEndpoint } from "@core/contracts";
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -23,7 +23,12 @@ export type ConversationThread = {
 const PAGE = 50;
 
 /** One page of stored messages, oldest first, and the cursor of the page before it. */
-export const fetchMessagePage = async (callEndpoint: CallEndpoint, conversationId: string, cursor: string | undefined, signal?: AbortSignal): Promise<{ messages: UIMessage[]; olderCursor: string | undefined }> => {
+export const fetchMessagePage = async (
+  callEndpoint: CallEndpoint,
+  conversationId: string,
+  cursor: string | undefined,
+  signal?: AbortSignal,
+): Promise<{ messages: UIMessage[]; olderCursor: string | undefined }> => {
   const page = await callEndpoint(listConversationMessagesEndpoint, {
     params: { conversationId },
     query: { limit: PAGE, ...(cursor === undefined ? {} : { cursor }) },
@@ -50,11 +55,21 @@ export const withoutAnswerInFlight = (messages: UIMessage[]): UIMessage[] => {
  * result seeds `useChat` once; it is never refetched under a live thread — `attempt` asks for a
  * fresh load (recovering a lost stream).
  */
-export const useConversationThread = (args: { organizationId: string; conversationId: string | undefined; attempt: number }): UseQueryResult<ConversationThread | null> => {
+export const useConversationThread = (args: {
+  organizationId: string;
+  conversationId: string | undefined;
+  attempt: number;
+}): UseQueryResult<ConversationThread | null> => {
   const callEndpoint = useCallEndpoint();
   const conversationId = args.conversationId ?? "";
   return useQuery({
-    queryKey: queryKeys.organizationScoped(args.organizationId, "conversations", conversationId, "thread", args.attempt),
+    queryKey: queryKeys.organizationScoped(
+      args.organizationId,
+      "conversations",
+      conversationId,
+      "thread",
+      args.attempt,
+    ),
     enabled: conversationId !== "",
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: 0,
@@ -67,7 +82,12 @@ export const useConversationThread = (args: { organizationId: string; conversati
           fetchMessagePage(callEndpoint, conversationId, undefined, signal),
         ]);
         const resume = conversation.data.activeRunId !== null;
-        return { ...page, messages: resume ? withoutAnswerInFlight(page.messages) : page.messages, resume, agentId: conversation.data.agentId };
+        return {
+          ...page,
+          messages: resume ? withoutAnswerInFlight(page.messages) : page.messages,
+          resume,
+          agentId: conversation.data.agentId,
+        };
       }),
   });
 };

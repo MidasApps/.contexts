@@ -4,7 +4,7 @@ import type { Mastra } from "@mastra/core/mastra";
 import type { RequestContext } from "@mastra/core/request-context";
 import { safeValidateUIMessages, type UIMessage } from "ai";
 import { withAnswerConfidence } from "./answer-confidence.ts";
-import { callerOf, chatError, type ChatRouteDeps, durableIdOf } from "./chat-http.ts";
+import { type ChatRouteDeps, callerOf, chatError, durableIdOf } from "./chat-http.ts";
 
 /** `GET /chat/:agentId/messages?page&perPage` and `POST /chat/:agentId/summary` (SP4 Task 6). */
 export const MESSAGES_ROUTE_PATH = "/chat/:agentId/messages";
@@ -15,7 +15,12 @@ export const SUMMARY_MESSAGE_WINDOW = 100;
 const MAX_TRANSCRIPT_CHARS = 60_000;
 const MAX_SUMMARY_CHARS = 2000;
 
-export type HistoryInput = { readonly agentId: string; readonly requestContext: RequestContext<unknown>; readonly mastra: Mastra; readonly url: URL };
+export type HistoryInput = {
+  readonly agentId: string;
+  readonly requestContext: RequestContext<unknown>;
+  readonly mastra: Mastra;
+  readonly url: URL;
+};
 
 const pageParam = (url: URL, name: string, fallback: number, max: number): number | null => {
   const raw = url.searchParams.get(name);
@@ -30,7 +35,14 @@ const readWindow = async (input: HistoryInput, page: number, perPage: number) =>
   if (resourceId === undefined || threadId === undefined) return null;
   const memory = await input.mastra.getStorage()?.getStore("memory");
   if (memory === undefined) return null;
-  const listed = await memory.listMessages({ threadId, resourceId, page, perPage, orderBy: { field: "createdAt", direction: "DESC" }, includeTotal: false });
+  const listed = await memory.listMessages({
+    threadId,
+    resourceId,
+    page,
+    perPage,
+    orderBy: { field: "createdAt", direction: "DESC" },
+    includeTotal: false,
+  });
   // Chronological inside the page, as `useChat` renders them.
   return { messages: [...listed.messages].reverse(), hasMore: listed.hasMore };
 };
@@ -62,15 +74,23 @@ const withPendingMessage = (messages: UIMessage[], input: HistoryInput, owners: 
  * the newest page. Messages that fail `validateUIMessages` make the page empty rather than reach
  * the client malformed.
  */
-export const handleMessages = async (input: HistoryInput, deps: Pick<ChatRouteDeps, "chatAgents" | "resolveCustomAgent" | "logger"> & { readonly owners: PendingMessages }): Promise<Response> => {
-  if ((await durableIdOf(deps, input.agentId, input.requestContext)) === undefined) return chatError("NOT_FOUND", input.requestContext);
+export const handleMessages = async (
+  input: HistoryInput,
+  deps: Pick<ChatRouteDeps, "chatAgents" | "resolveCustomAgent" | "logger"> & { readonly owners: PendingMessages },
+): Promise<Response> => {
+  if ((await durableIdOf(deps, input.agentId, input.requestContext)) === undefined)
+    return chatError("NOT_FOUND", input.requestContext);
   const page = pageParam(input.url, "page", 0, 100_000);
   const perPage = pageParam(input.url, "perPage", 50, MAX_MESSAGES_PER_PAGE);
-  if (page === null || perPage === null || perPage === 0) return chatError("VALIDATION_FAILED", input.requestContext, [{ field: "page", issue: "INVALID" }]);
+  if (page === null || perPage === null || perPage === 0)
+    return chatError("VALIDATION_FAILED", input.requestContext, [{ field: "page", issue: "INVALID" }]);
   const window = await readWindow(input, page, perPage);
   if (window === null) return chatError("FORBIDDEN", input.requestContext);
   const messages = await toUiMessages(window.messages);
-  return Response.json({ data: page === 0 ? withPendingMessage(messages, input, deps.owners) : messages, meta: { hasMore: window.hasMore } });
+  return Response.json({
+    data: page === 0 ? withPendingMessage(messages, input, deps.owners) : messages,
+    meta: { hasMore: window.hasMore },
+  });
 };
 
 const transcriptOf = (messages: readonly UIMessage[]): string =>
@@ -88,8 +108,12 @@ const transcriptOf = (messages: readonly UIMessage[]): string =>
  * agent without tools or memory, guarded by the tenant budget, so the call is traced, billed in
  * the usage ledger and capped like any other model call. 409 when there is nothing to summarize.
  */
-export const handleSummary = async (input: HistoryInput, deps: Pick<ChatRouteDeps, "chatAgents" | "resolveCustomAgent" | "logger"> & { readonly summarizer: Agent }): Promise<Response> => {
-  if ((await durableIdOf(deps, input.agentId, input.requestContext)) === undefined) return chatError("NOT_FOUND", input.requestContext);
+export const handleSummary = async (
+  input: HistoryInput,
+  deps: Pick<ChatRouteDeps, "chatAgents" | "resolveCustomAgent" | "logger"> & { readonly summarizer: Agent },
+): Promise<Response> => {
+  if ((await durableIdOf(deps, input.agentId, input.requestContext)) === undefined)
+    return chatError("NOT_FOUND", input.requestContext);
   const window = await readWindow(input, 0, SUMMARY_MESSAGE_WINDOW);
   if (window === null) return chatError("FORBIDDEN", input.requestContext);
   const transcript = transcriptOf(await toUiMessages(window.messages));
@@ -97,6 +121,9 @@ export const handleSummary = async (input: HistoryInput, deps: Pick<ChatRouteDep
   const result = await deps.summarizer.generate(transcript, { requestContext: input.requestContext });
   const summary = result.text.trim().slice(0, MAX_SUMMARY_CHARS);
   if (summary === "") return chatError("CONFLICT", input.requestContext);
-  deps.logger.info("conversation_summarized", { requestId: input.requestContext.get("requestId"), messageCount: window.messages.length });
+  deps.logger.info("conversation_summarized", {
+    requestId: input.requestContext.get("requestId"),
+    messageCount: window.messages.length,
+  });
   return Response.json({ data: { summary } });
 };

@@ -14,14 +14,18 @@ const conversationParams = z.object({ conversationId: ConversationIdSchema.meta(
  * `200` of the chat routes: the AI SDK UI message stream (SSE `data:` lines, header
  * `x-vercel-ai-ui-message-stream: v1`), a documented deviation from `api.md` §14 (decision 0031).
  */
-export const ChatStreamSchema = z.string().meta(personal("AI SDK UI message stream (text/event-stream) of the assistant's answer."));
+export const ChatStreamSchema = z
+  .string()
+  .meta(personal("AI SDK UI message stream (text/event-stream) of the assistant's answer."));
 
 /** A stored chat message as `useChat` reads it (AI SDK v7 `UIMessage`). */
 export const ChatUiMessageSchema = z
   .looseObject({
     id: z.string().min(1).meta(none("Message id.")),
     role: z.enum(["user", "assistant", "system"]).meta(none("Author role.")),
-    parts: z.array(z.looseObject({ type: z.string().min(1).meta(none("Part type.")) }).meta(personal("A message part."))).meta(personal("Message parts.")),
+    parts: z
+      .array(z.looseObject({ type: z.string().min(1).meta(none("Part type.")) }).meta(personal("A message part.")))
+      .meta(personal("Message parts.")),
   })
   .meta(personal("A chat message in AI SDK UI message form."));
 
@@ -37,7 +41,13 @@ const booleanQuery = (description: string) =>
 export const ListConversationsQuerySchema = z.object({
   organizationId: OrganizationIdSchema.meta(none("Organization whose conversations to list.")),
   cursor: z.string().min(1).max(500).optional().meta(none("Cursor returned by the previous page.")),
-  limit: z.coerce.number().int().min(1).max(MAX_CONVERSATION_PAGE).default(20).meta(none("Page size, 1-50 (default 20).")),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_CONVERSATION_PAGE)
+    .default(20)
+    .meta(none("Page size, 1-50 (default 20).")),
   archived: booleanQuery("true lists archived conversations only (default false)."),
   pinned: booleanQuery("Only pinned (true) or unpinned (false) conversations."),
   q: z.string().trim().min(1).max(200).optional().meta(personal("Search words matched against title and summary.")),
@@ -129,7 +139,11 @@ export const listConversationMessagesEndpoint = defineEndpoint({
   auth: "user",
   params: conversationParams,
   query: z.object({
-    cursor: z.string().regex(/^\d{1,6}$/).optional().meta(none("Cursor returned by the previous page (older messages).")),
+    cursor: z
+      .string()
+      .regex(/^\d{1,6}$/)
+      .optional()
+      .meta(none("Cursor returned by the previous page (older messages).")),
     limit: z.coerce.number().int().min(1).max(100).default(50).meta(none("Page size, 1-100 (default 50).")),
   }),
   responses: { 200: listEnvelope(ChatUiMessageSchema) },

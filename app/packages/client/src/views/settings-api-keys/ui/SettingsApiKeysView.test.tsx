@@ -4,12 +4,19 @@ import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildApiKey, PERMISSION_REGISTRY } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsApiKeysView } from "./SettingsApiKeysView.tsx";
 
-const KEY_ADMIN: Permission[] = ["core.organization.read", "core.project.read", "core.unit.read", "core.api-key.read", "core.api-key.create", "core.api-key.revoke"];
+const KEY_ADMIN: Permission[] = [
+  "core.organization.read",
+  "core.project.read",
+  "core.unit.read",
+  "core.api-key.read",
+  "core.api-key.create",
+  "core.api-key.revoke",
+];
 const SECRET = "core_K7QX2M4PZ6AB_q1W2e3R4t5Y6u7I8o9P0a1S2d3F4g5H6j7K8l9Z0x1C";
 
 const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] = KEY_ADMIN) =>
@@ -19,7 +26,11 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     </main>,
     {
       path: `/o/${IDS.organization}/settings/api-keys`,
-      routes: shellRoutes(permissions, { "GET /v1/organizations/:organizationId/api-keys": page([buildApiKey()]), "GET /v1/permissions": page(PERMISSION_REGISTRY), ...routes }),
+      routes: shellRoutes(permissions, {
+        "GET /v1/organizations/:organizationId/api-keys": page([buildApiKey()]),
+        "GET /v1/permissions": page(PERMISSION_REGISTRY),
+        ...routes,
+      }),
     },
   );
 
@@ -106,8 +117,12 @@ describe("SettingsApiKeysView", () => {
     let listCalls = 0;
     const { user } = renderView({
       // The refresh after the creation never answers: the secret is on screen meanwhile.
-      "GET /v1/organizations/:organizationId/api-keys": () => (++listCalls === 1 ? page([buildApiKey()]) : new Promise(() => undefined)),
-      "POST /v1/organizations/:organizationId/api-keys": ok({ apiKey: buildApiKey({ id: "AkNew000000000000000", name: "Sync" }), secret: SECRET }, 201),
+      "GET /v1/organizations/:organizationId/api-keys": () =>
+        ++listCalls === 1 ? page([buildApiKey()]) : new Promise(() => undefined),
+      "POST /v1/organizations/:organizationId/api-keys": ok(
+        { apiKey: buildApiKey({ id: "AkNew000000000000000", name: "Sync" }), secret: SECRET },
+        201,
+      ),
     });
     await user.click(await screen.findByRole("button", { name: "Nova chave" }));
     const dialog = await screen.findByRole("dialog", { name: "Nova chave de API" });
@@ -160,7 +175,10 @@ describe("SettingsApiKeysView", () => {
     expect(screen.getByRole("table", { hidden: true }).textContent).toContain("Ativa");
 
     api.route("DELETE /v1/api-keys/:apiKeyId", noContent());
-    api.route("GET /v1/organizations/:organizationId/api-keys", page([buildApiKey({ status: "revoked", revokedReason: "revoked" })]));
+    api.route(
+      "GET /v1/organizations/:organizationId/api-keys",
+      page([buildApiKey({ status: "revoked", revokedReason: "revoked" })]),
+    );
     await user.click(within(confirm).getByRole("button", { name: "Revogar chave" }));
     expect(await screen.findByText("Chave Reporting export revogada.")).toBeDefined();
     await waitFor(() => expect(screen.getByRole("table").textContent).toContain("Revogada"));

@@ -44,13 +44,28 @@ export type GrantCheckError = AccessDeniedError | EscalationForbiddenError | Unk
  */
 export const requireWithinActor = async (
   deps: Pick<AccessWriteDeps, "registry" | "roleReader">,
-  args: { access: RequestAccess; actor: Principal; grants: readonly { readonly node: TenantNodeRef; readonly roles: readonly RoleRef[] }[] },
+  args: {
+    access: RequestAccess;
+    actor: Principal;
+    grants: readonly { readonly node: TenantNodeRef; readonly roles: readonly RoleRef[] }[];
+  },
 ): Promise<Result<void, AccessDeniedError | EscalationForbiddenError>> => {
   for (const grant of args.grants) {
     const roleIds = customRoleIdsOf(grant.roles);
-    const customRoles = roleIds.length === 0 ? [] : await deps.roleReader.getRoles({ tenantId: grant.node.tenantId, roleIds });
-    const held = resolveRolePermissions({ roles: grant.roles, customRoles, tenantId: grant.node.tenantId, registry: deps.registry });
-    const within = await requireNoEscalation({ access: args.access, actor: args.actor, node: grant.node, requested: held.permissions });
+    const customRoles =
+      roleIds.length === 0 ? [] : await deps.roleReader.getRoles({ tenantId: grant.node.tenantId, roleIds });
+    const held = resolveRolePermissions({
+      roles: grant.roles,
+      customRoles,
+      tenantId: grant.node.tenantId,
+      registry: deps.registry,
+    });
+    const within = await requireNoEscalation({
+      access: args.access,
+      actor: args.actor,
+      node: grant.node,
+      requested: held.permissions,
+    });
     if (!within.ok) return within;
   }
   return ok(undefined);
@@ -62,13 +77,25 @@ export const requireWithinActor = async (
  */
 export const checkGrantable = async (
   deps: Pick<AccessWriteDeps, "registry" | "roleReader">,
-  args: { access: RequestAccess; actor: Principal; permission: Permission; node: TenantNodeRef; roles: readonly RoleRef[] },
+  args: {
+    access: RequestAccess;
+    actor: Principal;
+    permission: Permission;
+    node: TenantNodeRef;
+    roles: readonly RoleRef[];
+  },
 ): Promise<Result<void, GrantCheckError>> => {
   const allowed = await requirePermission(args);
   if (!allowed.ok) return allowed;
   const roleIds = customRoleIdsOf(args.roles);
-  const customRoles = roleIds.length === 0 ? [] : await deps.roleReader.getRoles({ tenantId: args.node.tenantId, roleIds });
-  const resolved = resolveRolePermissions({ roles: args.roles, customRoles, tenantId: args.node.tenantId, registry: deps.registry });
+  const customRoles =
+    roleIds.length === 0 ? [] : await deps.roleReader.getRoles({ tenantId: args.node.tenantId, roleIds });
+  const resolved = resolveRolePermissions({
+    roles: args.roles,
+    customRoles,
+    tenantId: args.node.tenantId,
+    registry: deps.registry,
+  });
   if (resolved.unknownRoleIds.length > 0) return err(new UnknownRoleError(resolved.unknownRoleIds));
   return requireNoEscalation({ ...args, requested: resolved.permissions });
 };

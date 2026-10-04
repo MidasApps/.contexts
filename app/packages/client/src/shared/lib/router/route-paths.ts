@@ -24,7 +24,11 @@ export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
  * Sections with pages below them, addressed by the `rest` tail of the settings route:
  * `approvals/{approvalRequestId}`, `traces/{traceId}`, `workflows/runs/{runId}`.
  */
-export const SETTINGS_DETAIL_SECTIONS = ["approvals", "traces", "workflows"] as const satisfies readonly SettingsSection[];
+export const SETTINGS_DETAIL_SECTIONS = [
+  "approvals",
+  "traces",
+  "workflows",
+] as const satisfies readonly SettingsSection[];
 
 /** Sections of `/profile/:section` (SP2 spec §8). */
 export const PROFILE_SECTIONS = ["account", "preferences", "security", "sessions", "notifications"] as const;
@@ -48,10 +52,29 @@ export type Route =
   | { id: "organizations" }
   | { id: "organization"; organizationId: string }
   | { id: "project"; organizationId: string; projectId: string; unit?: string | undefined }
-  | { id: "module"; organizationId: string; projectId: string; moduleId: string; rest: string; unit?: string | undefined }
+  | {
+      id: "module";
+      organizationId: string;
+      projectId: string;
+      moduleId: string;
+      rest: string;
+      unit?: string | undefined;
+    }
   /** The chat of a project (SP4): a new conversation, or the stored one named in the path. */
-  | { id: "chat"; organizationId: string; projectId: string; conversationId?: string | undefined; unit?: string | undefined }
-  | { id: "settings"; organizationId: string; section: SettingsSection; rest?: string | undefined; search?: Readonly<Record<string, string>> | undefined }
+  | {
+      id: "chat";
+      organizationId: string;
+      projectId: string;
+      conversationId?: string | undefined;
+      unit?: string | undefined;
+    }
+  | {
+      id: "settings";
+      organizationId: string;
+      section: SettingsSection;
+      rest?: string | undefined;
+      search?: Readonly<Record<string, string>> | undefined;
+    }
   /** `/o/:organizationId/settings` without a section: opens the first section the viewer can read. */
   | { id: "settings-index"; organizationId: string }
   | { id: "settings-module"; organizationId: string; moduleId: string }
@@ -104,7 +127,9 @@ export const routeHref = (route: Route): string => {
     case "sign-in":
       return withSearch("/sign-in", { next: route.next });
     case "invite":
-      return route.token === undefined ? "/invite" : `/invite#${new URLSearchParams({ token: route.token }).toString()}`;
+      return route.token === undefined
+        ? "/invite"
+        : `/invite#${new URLSearchParams({ token: route.token }).toString()}`;
     case "sign-up":
       return withSearch("/sign-up", { next: route.next });
     case "reset-password":
@@ -126,7 +151,10 @@ export const routeHref = (route: Route): string => {
       return withSearch(base, { unit: route.unit });
     }
     case "settings":
-      return withSearch(`${organizationPath(route.organizationId)}/settings/${route.section}${tail(route.rest ?? "")}`, route.search ?? {});
+      return withSearch(
+        `${organizationPath(route.organizationId)}/settings/${route.section}${tail(route.rest ?? "")}`,
+        route.search ?? {},
+      );
     case "settings-index":
       return `${organizationPath(route.organizationId)}/settings`;
     case "settings-module":

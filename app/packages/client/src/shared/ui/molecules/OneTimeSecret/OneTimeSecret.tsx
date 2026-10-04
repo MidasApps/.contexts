@@ -27,7 +27,16 @@ export type OneTimeSecretProps = {
  * never shown again, and "Done" enabled once the user confirms they stored it. Until then, closing the
  * dialog any other way (Esc, outside click, X) asks first.
  */
-export function OneTimeSecret({ title, warning, label, secret, hint, acknowledge, doneLabel, onDone }: OneTimeSecretProps) {
+export function OneTimeSecret({
+  title,
+  warning,
+  label,
+  secret,
+  hint,
+  acknowledge,
+  doneLabel,
+  onDone,
+}: OneTimeSecretProps) {
   const t = useTranslations("common.oneTimeSecret");
   const id = useId();
   const [stored, setStored] = useState(false);
@@ -40,7 +49,12 @@ export function OneTimeSecret({ title, warning, label, secret, hint, acknowledge
       </Alert>
       <CopyField label={label} value={secret} sensitive description={hint} />
       <div className="flex items-start gap-2.5">
-        <Checkbox id={`${id}-stored`} className="mt-0.5" checked={stored} onCheckedChange={(next) => setStored(next === true)} />
+        <Checkbox
+          id={`${id}-stored`}
+          className="mt-0.5"
+          checked={stored}
+          onCheckedChange={(next) => setStored(next === true)}
+        />
         <Label htmlFor={`${id}-stored`} className="font-normal">
           {acknowledge}
         </Label>

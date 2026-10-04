@@ -5,5 +5,9 @@ import type { MessageFeedback } from "@core/contracts";
  * rating replaces the first (`createdAt` kept, `updatedAt` moved).
  */
 export type MessageFeedbackStore = {
-  readonly upsert: (input: { readonly key: string; readonly feedback: Omit<MessageFeedback, "createdAt" | "updatedAt">; readonly at: string }) => Promise<MessageFeedback>;
+  readonly upsert: (input: {
+    readonly key: string;
+    readonly feedback: Omit<MessageFeedback, "createdAt" | "updatedAt">;
+    readonly at: string;
+  }) => Promise<MessageFeedback>;
 };

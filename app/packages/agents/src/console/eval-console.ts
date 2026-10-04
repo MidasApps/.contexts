@@ -21,8 +21,14 @@ export type ExperimentStore = {
   readonly listExperiments: (args: {
     readonly filters?: { readonly organizationId?: string };
     readonly pagination: { readonly page: number; readonly perPage: number };
-  }) => Promise<{ readonly experiments: readonly StoredExperiment[]; readonly pagination: { readonly hasMore: boolean } }>;
-  readonly getExperimentById: (args: { readonly id: string; readonly filters?: { readonly organizationId?: string } }) => Promise<StoredExperiment | null>;
+  }) => Promise<{
+    readonly experiments: readonly StoredExperiment[];
+    readonly pagination: { readonly hasMore: boolean };
+  }>;
+  readonly getExperimentById: (args: {
+    readonly id: string;
+    readonly filters?: { readonly organizationId?: string };
+  }) => Promise<StoredExperiment | null>;
   readonly createExperiment: (input: {
     readonly name: string;
     readonly datasetId: null;
@@ -33,10 +39,19 @@ export type ExperimentStore = {
     readonly metadata: Record<string, unknown>;
     readonly organizationId: string | null;
   }) => Promise<{ readonly id: string }>;
-  readonly updateExperiment: (input: { readonly id: string; readonly status: "completed"; readonly startedAt: Date; readonly completedAt: Date }) => Promise<unknown>;
+  readonly updateExperiment: (input: {
+    readonly id: string;
+    readonly status: "completed";
+    readonly startedAt: Date;
+    readonly completedAt: Date;
+  }) => Promise<unknown>;
 };
 
-const ScoreSchema = z.strictObject({ scorer: z.string().min(1), mean: z.number().min(0).max(1), baseline: z.number().min(0).max(1).nullable() });
+const ScoreSchema = z.strictObject({
+  scorer: z.string().min(1),
+  mean: z.number().min(0).max(1),
+  baseline: z.number().min(0).max(1).nullable(),
+});
 
 /** What an eval run records on its experiment (CI publish, prompt evals; decision 0040). */
 export const EvalRunRecordSchema = z.strictObject({
@@ -48,7 +63,10 @@ export const EvalRunRecordSchema = z.strictObject({
   verdict: z.enum(["passed", "failed"]),
   source: z.enum(["ci", "prompt-eval"]),
   promptVersionId: z.uuid().nullable(),
-  gitSha: z.string().regex(/^[0-9a-f]{7,40}$/).nullable(),
+  gitSha: z
+    .string()
+    .regex(/^[0-9a-f]{7,40}$/)
+    .nullable(),
   startedAt: z.iso.datetime(),
   finishedAt: z.iso.datetime(),
 });
@@ -87,7 +105,11 @@ export const summarizeExperiment = (experiment: StoredExperiment): EvalExperimen
  * read one store. Tenant prompt evals carry the tenant as `organizationId`.
  * @returns the experiment id.
  */
-export const recordEvalRun = async (store: ExperimentStore, run: EvalRunRecord, organizationId: string | null): Promise<string> => {
+export const recordEvalRun = async (
+  store: ExperimentStore,
+  run: EvalRunRecord,
+  organizationId: string | null,
+): Promise<string> => {
   const created = await store.createExperiment({
     name: `${run.source}:${run.agentId}`,
     datasetId: null,
@@ -98,7 +120,12 @@ export const recordEvalRun = async (store: ExperimentStore, run: EvalRunRecord, 
     metadata: { ...run },
     organizationId,
   });
-  await store.updateExperiment({ id: created.id, status: "completed", startedAt: new Date(run.startedAt), completedAt: new Date(run.finishedAt) });
+  await store.updateExperiment({
+    id: created.id,
+    status: "completed",
+    startedAt: new Date(run.startedAt),
+    completedAt: new Date(run.finishedAt),
+  });
   return created.id;
 };
 
@@ -111,8 +138,13 @@ export const listExperimentSummaries = async (
     ...(query.tenantId === null ? {} : { filters: { organizationId: query.tenantId } }),
     pagination: { page: query.page, perPage: query.perPage },
   });
-  const own = listed.experiments.filter((experiment) => query.tenantId === null || experiment.organizationId === query.tenantId);
-  return { experiments: own.map(summarizeExperiment).filter((summary): summary is EvalExperimentSummary => summary !== null), hasMore: listed.pagination.hasMore };
+  const own = listed.experiments.filter(
+    (experiment) => query.tenantId === null || experiment.organizationId === query.tenantId,
+  );
+  return {
+    experiments: own.map(summarizeExperiment).filter((summary): summary is EvalExperimentSummary => summary !== null),
+    hasMore: listed.pagination.hasMore,
+  };
 };
 
 /**
@@ -124,19 +156,30 @@ export const getExperimentSummary = async (
   store: Pick<ExperimentStore, "getExperimentById">,
   query: { readonly experimentId: string; readonly tenantId: string | null },
 ): Promise<EvalExperimentSummary | null> => {
-  const stored = await store.getExperimentById({ id: query.experimentId, ...(query.tenantId === null ? {} : { filters: { organizationId: query.tenantId } }) });
+  const stored = await store.getExperimentById({
+    id: query.experimentId,
+    ...(query.tenantId === null ? {} : { filters: { organizationId: query.tenantId } }),
+  });
   if (stored === null || (query.tenantId !== null && stored.organizationId !== query.tenantId)) return null;
   return summarizeExperiment(stored);
 };
 
 /** Finished experiments since an instant (the `eval-export` workflow's source, decision 0040). */
-export const listFinishedSince = async (store: Pick<ExperimentStore, "listExperiments">, since: string): Promise<EvalExperimentSummary[]> => {
+export const listFinishedSince = async (
+  store: Pick<ExperimentStore, "listExperiments">,
+  since: string,
+): Promise<EvalExperimentSummary[]> => {
   const cutoff = Date.parse(since);
   const found: EvalExperimentSummary[] = [];
   for (let page = 0; page < 20; page += 1) {
     const listed = await store.listExperiments({ pagination: { page, perPage: 100 } });
     for (const experiment of listed.experiments) {
-      const summary = experiment.status === "completed" && experiment.completedAt !== null && experiment.completedAt.getTime() >= cutoff ? summarizeExperiment(experiment) : null;
+      const summary =
+        experiment.status === "completed" &&
+        experiment.completedAt !== null &&
+        experiment.completedAt.getTime() >= cutoff
+          ? summarizeExperiment(experiment)
+          : null;
       if (summary !== null) found.push(summary);
     }
     if (!listed.pagination.hasMore) break;

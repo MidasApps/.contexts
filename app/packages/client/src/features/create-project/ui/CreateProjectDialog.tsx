@@ -9,11 +9,17 @@ import { projectKeys } from "#/entities/project/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { SchemaForm } from "#/shared/ui/organisms/SchemaForm/SchemaForm.tsx";
 import type { SchemaFormResult } from "#/shared/ui/organisms/SchemaForm/server-errors.ts";
-import { CreateProjectFormContract, type CreateProjectForm } from "../model/create-project-form.contract.ts";
+import { type CreateProjectForm, CreateProjectFormContract } from "../model/create-project-form.contract.ts";
 
 export type CreateProjectDialogProps = {
   organizationId: string;
@@ -49,10 +55,19 @@ export function CreateProjectDialog({ organizationId, open, onOpenChange, return
   const returnFocus = useRef<HTMLElement | null>(null);
 
   const submit = async (values: CreateProjectForm): Promise<SchemaFormResult> => {
-    const body = { name: values.name, ...(values.description === undefined || values.description === "" ? {} : { description: values.description }) };
+    const body = {
+      name: values.name,
+      ...(values.description === undefined || values.description === "" ? {} : { description: values.description }),
+    };
     let project: Project;
     try {
-      project = (await callEndpoint(createProjectEndpoint, { params: { organizationId }, body, idempotencyKey: keyFor(attempt, body) })).data;
+      project = (
+        await callEndpoint(createProjectEndpoint, {
+          params: { organizationId },
+          body,
+          idempotencyKey: keyFor(attempt, body),
+        })
+      ).data;
     } catch (error: unknown) {
       if (error instanceof ApiError) return { ok: false, error };
       throw error;
@@ -69,7 +84,8 @@ export function CreateProjectDialog({ organizationId, open, onOpenChange, return
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         onOpenAutoFocus={() => {
-          returnFocus.current = returnFocusTo?.() ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+          returnFocus.current =
+            returnFocusTo?.() ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
         }}
         onCloseAutoFocus={(event) => {
           if (returnFocus.current === null || !returnFocus.current.isConnected) return;
@@ -81,7 +97,13 @@ export function CreateProjectDialog({ organizationId, open, onOpenChange, return
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
-        <SchemaForm contract={CreateProjectFormContract} defaultValues={{ name: "" }} onSubmit={submit} submitLabelKey="shell.projects.create.submit" successMessageKey="shell.projects.create.createdStatus" />
+        <SchemaForm
+          contract={CreateProjectFormContract}
+          defaultValues={{ name: "" }}
+          onSubmit={submit}
+          submitLabelKey="shell.projects.create.submit"
+          successMessageKey="shell.projects.create.createdStatus"
+        />
       </DialogContent>
     </Dialog>
   );

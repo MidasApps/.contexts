@@ -6,7 +6,7 @@ import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildSchedule } from "#/entities/schedule/schedule.fixture.ts";
 import { buildWorkflowCatalogEntry, buildWorkflowRun } from "#/entities/workflow-run/workflow-run.fixture.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildMember } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsWorkflowsView } from "./SettingsWorkflowsView.tsx";
@@ -17,11 +17,23 @@ configure({ asyncUtilTimeout: 8000 });
 
 const BASE: Permission[] = ["core.organization.read", "core.project.read", "core.unit.read"];
 const MEMBER: Permission[] = [...BASE, "core.workflow-run.read", "core.workflow-run.start"];
-const ADMIN: Permission[] = [...MEMBER, "core.workflow-run.cancel", "core.schedule.read", "core.schedule.write", "core.approval.read"];
+const ADMIN: Permission[] = [
+  ...MEMBER,
+  "core.workflow-run.cancel",
+  "core.schedule.read",
+  "core.schedule.write",
+  "core.approval.read",
+];
 
 const CATALOG = [
   buildWorkflowCatalogEntry(),
-  buildWorkflowCatalogEntry({ id: "usage-report", description: "Aggregates usage.", startable: false, schedulable: true, inputSchema: null }),
+  buildWorkflowCatalogEntry({
+    id: "usage-report",
+    description: "Aggregates usage.",
+    startable: false,
+    schedulable: true,
+    inputSchema: null,
+  }),
 ];
 
 const SETTINGS_PATH = `/o/${IDS.organization}/settings/workflows`;
@@ -34,7 +46,16 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     {
       path,
       routes: shellRoutes(permissions, {
-        "GET /v1/workflows/runs": page([buildWorkflowRun(), buildWorkflowRun({ runId: "run-2", workflowId: "usage-report", status: "success", startedBy: null, scheduleId: "schedule_3fa9c0e1b2d4a6f8-daily-usage" })]),
+        "GET /v1/workflows/runs": page([
+          buildWorkflowRun(),
+          buildWorkflowRun({
+            runId: "run-2",
+            workflowId: "usage-report",
+            status: "success",
+            startedBy: null,
+            scheduleId: "schedule_3fa9c0e1b2d4a6f8-daily-usage",
+          }),
+        ]),
         "GET /v1/workflows": ok(CATALOG),
         "GET /v1/schedules": ok([buildSchedule()]),
         "POST /v1/schedules/preview": ok({ nextFireTimes: ["2026-10-02T12:00:00.000Z"] }),
@@ -43,8 +64,11 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     },
   );
 
-const lastCall = (api: { calls: { method: string; path: string; query: string; body: unknown }[] }, method: string, path: string) =>
-  api.calls.findLast((call) => call.method === method && call.path === path);
+const lastCall = (
+  api: { calls: { method: string; path: string; query: string; body: unknown }[] },
+  method: string,
+  path: string,
+) => api.calls.findLast((call) => call.method === method && call.path === path);
 
 describe("SettingsWorkflowsView: runs", () => {
   it("lists the organization's runs with status and a link to each run page", async () => {
@@ -53,17 +77,32 @@ describe("SettingsWorkflowsView: runs", () => {
     expect(within(table).getByText("run-1")).toBeDefined();
     expect(within(table).getByText("Em execução")).toBeDefined();
     expect(within(table).getByText("Concluída")).toBeDefined();
-    expect(within(table).getByRole("link", { name: "Abrir a execução run-1 de Demonstração de aprovação" }).getAttribute("href")).toBe(`${SETTINGS_PATH}/runs/run-1`);
+    expect(
+      within(table)
+        .getByRole("link", { name: "Abrir a execução run-1 de Demonstração de aprovação" })
+        .getAttribute("href"),
+    ).toBe(`${SETTINGS_PATH}/runs/run-1`);
     // Workflows and schedules read as names, never as their ids.
     expect(within(table).getByText("Relatório de uso")).toBeDefined();
-    expect(await within(table).findByText("Por um agendamento: Todos os dias às 09:00 (America/Sao_Paulo)")).toBeDefined();
+    expect(
+      await within(table).findByText("Por um agendamento: Todos os dias às 09:00 (America/Sao_Paulo)"),
+    ).toBeDefined();
     expect(within(table).queryByText(/schedule_3fa9c0e1b2d4a6f8/u)).toBeNull();
-    expect(new URLSearchParams(lastCall(api, "GET", "/v1/workflows/runs")?.query).get("organizationId")).toBe(IDS.organization);
+    expect(new URLSearchParams(lastCall(api, "GET", "/v1/workflows/runs")?.query).get("organizationId")).toBe(
+      IDS.organization,
+    );
     await expectNoAxeViolations(container);
   });
 
   it("names the member who started a run instead of the user id", async () => {
-    renderView({ [`GET /v1/organizations/${IDS.organization}/members`]: page([buildMember({ uid: IDS.user, displayName: "Ana Souza" })]) }, [...ADMIN, "core.member.read"]);
+    renderView(
+      {
+        [`GET /v1/organizations/${IDS.organization}/members`]: page([
+          buildMember({ uid: IDS.user, displayName: "Ana Souza" }),
+        ]),
+      },
+      [...ADMIN, "core.member.read"],
+    );
     const table = await screen.findByRole("table", { name: "Execuções de fluxos de Northwind" });
     expect(await within(table).findByText("Pelo usuário Ana Souza")).toBeDefined();
     expect(within(table).queryByText(`Pelo usuário ${IDS.user}`)).toBeNull();
@@ -86,7 +125,9 @@ describe("SettingsWorkflowsView: runs", () => {
     const { user, router } = renderView(
       {
         "GET /v1/workflows/runs": (request) =>
-          request.query.get("cursor") === "c2" ? page([buildWorkflowRun({ runId: "run-b0" })], { limit: 20 }) : page(firstPage, { cursor: "c2", limit: 20 }),
+          request.query.get("cursor") === "c2"
+            ? page([buildWorkflowRun({ runId: "run-b0" })], { limit: 20 })
+            : page(firstPage, { cursor: "c2", limit: 20 }),
       },
       ADMIN,
       `${SETTINGS_PATH}?status=running&page=2`,
@@ -94,7 +135,11 @@ describe("SettingsWorkflowsView: runs", () => {
     const table = await screen.findByRole("table", { name: "Execuções de fluxos de Northwind" });
     expect(await within(table).findByText("run-b0")).toBeDefined();
     expect(within(table).queryByText("run-a0")).toBeNull();
-    await user.click(within(screen.getByRole("navigation", { name: "Páginas de execuções" })).getByRole("button", { name: /Anterior/u }));
+    await user.click(
+      within(screen.getByRole("navigation", { name: "Páginas de execuções" })).getByRole("button", {
+        name: /Anterior/u,
+      }),
+    );
     await waitFor(() => expect(router.current()).toBe(`${SETTINGS_PATH}?status=running`));
     expect(await within(table).findByText("run-a0")).toBeDefined();
   });
@@ -181,7 +226,9 @@ describe("SettingsWorkflowsView: runs", () => {
 
   it("puts the server's field refusals next to the field", async () => {
     const { user } = renderView({
-      "POST /v1/workflows/:workflowId/runs": apiError(400, "VALIDATION_FAILED", [{ field: "inputData.title", issue: "INVALID" }]),
+      "POST /v1/workflows/:workflowId/runs": apiError(400, "VALIDATION_FAILED", [
+        { field: "inputData.title", issue: "INVALID" },
+      ]),
     });
     await user.click(await screen.findByRole("button", { name: "Iniciar fluxo" }));
     const dialog = await screen.findByRole("dialog", { name: "Iniciar fluxo" });
@@ -202,7 +249,9 @@ describe("SettingsWorkflowsView: runs", () => {
     await user.click(await screen.findByRole("option", { name: /Demonstração de aprovação/u }));
     await user.type(within(dialog).getByRole("textbox", { name: /Título/u }), "Follow-up");
     await user.click(within(dialog).getByRole("button", { name: "Iniciar" }));
-    expect((await within(dialog).findByRole("alert")).textContent).toContain("Este fluxo não pode ser iniciado manualmente.");
+    expect((await within(dialog).findByRole("alert")).textContent).toContain(
+      "Este fluxo não pode ser iniciado manualmente.",
+    );
   });
 
   it("cancels a live run after confirmation", async () => {
@@ -213,9 +262,13 @@ describe("SettingsWorkflowsView: runs", () => {
         return noContent();
       },
     });
-    await user.click(await screen.findByRole("button", { name: "Cancelar a execução run-1 de Demonstração de aprovação" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Cancelar a execução run-1 de Demonstração de aprovação" }),
+    );
     expect(screen.queryByRole("button", { name: "Cancelar a execução run-2 de Relatório de uso" })).toBeNull();
-    const confirm = await screen.findByRole("alertdialog", { name: "Cancelar a execução de Demonstração de aprovação?" });
+    const confirm = await screen.findByRole("alertdialog", {
+      name: "Cancelar a execução de Demonstração de aprovação?",
+    });
     await user.click(within(confirm).getByRole("button", { name: "Cancelar execução" }));
     expect(await screen.findByText("Execução de Demonstração de aprovação cancelada.")).toBeDefined();
     expect(requests[0]?.params["runId"]).toBe("run-1");
@@ -281,7 +334,13 @@ describe("SettingsWorkflowsView: schedules", () => {
     await user.click(within(dialog).getByRole("button", { name: "Criar agendamento" }));
     expect(await screen.findByText("Agendamento de Relatório de uso criado.")).toBeDefined();
     expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
-    expect(requests[0]?.body).toEqual({ workflowId: "usage-report", slug: "weekdays", cron: "0 9 * * 1-5", timezone: "America/Sao_Paulo", inputData: {} });
+    expect(requests[0]?.body).toEqual({
+      workflowId: "usage-report",
+      slug: "weekdays",
+      cron: "0 9 * * 1-5",
+      timezone: "America/Sao_Paulo",
+      inputData: {},
+    });
     // A workflow that declares no input asks for none.
     expect(within(dialog).queryByRole("group", { name: /Dados de entrada/u })).toBeNull();
   });
@@ -312,8 +371,12 @@ describe("SettingsWorkflowsView: schedules", () => {
         return ok(buildSchedule({ workflowId: "approval-demo" }));
       },
     });
-    await user.click(screen.getByRole("button", { name: "Mais ações do agendamento daily-usage de Demonstração de aprovação" }));
-    await user.click(await screen.findByRole("menuitem", { name: "Editar o agendamento daily-usage de Demonstração de aprovação" }));
+    await user.click(
+      screen.getByRole("button", { name: "Mais ações do agendamento daily-usage de Demonstração de aprovação" }),
+    );
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Editar o agendamento daily-usage de Demonstração de aprovação" }),
+    );
     const dialog = await screen.findByRole("dialog", { name: "Editar agendamento de Demonstração de aprovação" });
     const title = within(dialog).getByRole("textbox", { name: /Título/u });
     expect((title as HTMLInputElement).value).toBe("Daily");
@@ -322,7 +385,13 @@ describe("SettingsWorkflowsView: schedules", () => {
     expect(within(dialog).getByText("Preencha este campo.")).toBeDefined();
     await user.type(title, "Weekly");
     await user.click(within(dialog).getByRole("button", { name: "Salvar agendamento" }));
-    await waitFor(() => expect(requests[0]?.body).toEqual({ cron: "0 9 * * *", timezone: "America/Sao_Paulo", inputData: { title: "Weekly" } }));
+    await waitFor(() =>
+      expect(requests[0]?.body).toEqual({
+        cron: "0 9 * * *",
+        timezone: "America/Sao_Paulo",
+        inputData: { title: "Weekly" },
+      }),
+    );
   });
 
   it("explains the server's refusals: interval too short and slug taken", async () => {
@@ -343,10 +412,16 @@ describe("SettingsWorkflowsView: schedules", () => {
     await user.click(cron);
     await user.paste("* * * * *");
     await user.click(within(dialog).getByRole("button", { name: "Criar agendamento" }));
-    expect((await within(dialog).findByRole("alert")).textContent).toContain("O intervalo entre disparos é curto demais. Use pelo menos 15 minutos.");
+    expect((await within(dialog).findByRole("alert")).textContent).toContain(
+      "O intervalo entre disparos é curto demais. Use pelo menos 15 minutos.",
+    );
     api.route("POST /v1/schedules", apiError(409, "CONFLICT"));
     await user.click(within(dialog).getByRole("button", { name: "Criar agendamento" }));
-    await waitFor(() => expect(within(dialog).getByRole("alert").textContent).toContain("Já existe um agendamento com este nome curto. Escolha outro."));
+    await waitFor(() =>
+      expect(within(dialog).getByRole("alert").textContent).toContain(
+        "Já existe um agendamento com este nome curto. Escolha outro.",
+      ),
+    );
   });
 
   it("previews the next five fires of the cron being edited, in the schedule's zone and the viewer's", async () => {
@@ -355,11 +430,21 @@ describe("SettingsWorkflowsView: schedules", () => {
       "GET /v1/schedules": ok([buildSchedule({ timezone: "Asia/Tokyo" })]),
       "POST /v1/schedules/preview": (request) => {
         previews.push(request);
-        return ok({ nextFireTimes: ["2026-10-01T00:00:00.000Z", "2026-10-02T00:00:00.000Z", "2026-10-03T00:00:00.000Z", "2026-10-04T00:00:00.000Z", "2026-10-05T00:00:00.000Z"] });
+        return ok({
+          nextFireTimes: [
+            "2026-10-01T00:00:00.000Z",
+            "2026-10-02T00:00:00.000Z",
+            "2026-10-03T00:00:00.000Z",
+            "2026-10-04T00:00:00.000Z",
+            "2026-10-05T00:00:00.000Z",
+          ],
+        });
       },
     });
     await user.click(screen.getByRole("button", { name: "Mais ações do agendamento daily-usage de Relatório de uso" }));
-    await user.click(await screen.findByRole("menuitem", { name: "Editar o agendamento daily-usage de Relatório de uso" }));
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Editar o agendamento daily-usage de Relatório de uso" }),
+    );
     const dialog = await screen.findByRole("dialog", { name: "Editar agendamento de Relatório de uso" });
     const fires = await within(dialog).findByRole("list", { name: "Próximos 5 disparos" });
     expect(within(fires).getAllByRole("listitem")).toHaveLength(5);
@@ -391,7 +476,9 @@ describe("SettingsWorkflowsView: schedules", () => {
       },
     });
     await user.click(screen.getByRole("button", { name: "Mais ações do agendamento daily-usage de Relatório de uso" }));
-    await user.click(await screen.findByRole("menuitem", { name: "Editar o agendamento daily-usage de Relatório de uso" }));
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Editar o agendamento daily-usage de Relatório de uso" }),
+    );
     const dialog = await screen.findByRole("dialog", { name: "Editar agendamento de Relatório de uso" });
     expect(within(dialog).queryByRole("textbox", { name: /Nome curto/u })).toBeNull();
     expect(within(dialog).getByText("Expressão: 0 9 * * *")).toBeDefined();
@@ -414,8 +501,14 @@ describe("SettingsWorkflowsView: schedules", () => {
       return response;
     };
     const { user } = await openSchedules({
-      "POST /v1/schedules/:scheduleId/pause": record("pause", ok(buildSchedule({ status: "paused", nextFireAt: null }))),
-      "POST /v1/schedules/:scheduleId/run": record("run", ok({ scheduleId: "schedule_3fa9c0e1b2d4a6f8-daily-usage" }, 202)),
+      "POST /v1/schedules/:scheduleId/pause": record(
+        "pause",
+        ok(buildSchedule({ status: "paused", nextFireAt: null })),
+      ),
+      "POST /v1/schedules/:scheduleId/run": record(
+        "run",
+        ok({ scheduleId: "schedule_3fa9c0e1b2d4a6f8-daily-usage" }, 202),
+      ),
       "DELETE /v1/schedules/:scheduleId": record("delete", noContent()),
     });
     const id = "schedule_3fa9c0e1b2d4a6f8-daily-usage";
@@ -425,17 +518,25 @@ describe("SettingsWorkflowsView: schedules", () => {
     await user.click(within(pause).getByRole("button", { name: "Pausar agendamento" }));
     expect(await screen.findByText("Agendamento de Relatório de uso pausado.")).toBeDefined();
 
-    await user.click(screen.getByRole("button", { name: `Executar agora o agendamento daily-usage de Relatório de uso` }));
+    await user.click(
+      screen.getByRole("button", { name: `Executar agora o agendamento daily-usage de Relatório de uso` }),
+    );
     const run = await screen.findByRole("alertdialog", { name: "Executar Relatório de uso agora?" });
     await user.click(within(run).getByRole("button", { name: "Executar agora" }));
     expect(await screen.findByText("Execução de Relatório de uso iniciada.")).toBeDefined();
 
     await user.click(screen.getByRole("button", { name: "Mais ações do agendamento daily-usage de Relatório de uso" }));
-    await user.click(await screen.findByRole("menuitem", { name: `Excluir o agendamento daily-usage de Relatório de uso` }));
+    await user.click(
+      await screen.findByRole("menuitem", { name: `Excluir o agendamento daily-usage de Relatório de uso` }),
+    );
     const remove = await screen.findByRole("alertdialog", { name: "Excluir o agendamento de Relatório de uso?" });
     await user.click(within(remove).getByRole("button", { name: "Excluir agendamento" }));
     expect(await screen.findByText("Agendamento de Relatório de uso excluído.")).toBeDefined();
-    expect(calls).toEqual([`pause ${id} ${IDS.organization}`, `run ${id} ${IDS.organization}`, `delete ${id} ${IDS.organization}`]);
+    expect(calls).toEqual([
+      `pause ${id} ${IDS.organization}`,
+      `run ${id} ${IDS.organization}`,
+      `delete ${id} ${IDS.organization}`,
+    ]);
   });
 
   it("resumes a paused schedule at once and names its workflow in the toast", async () => {
@@ -469,21 +570,35 @@ describe("SettingsWorkflowsView: run page", () => {
 
   it("shows a suspended run with its timeline and a link to the approvals inbox", async () => {
     const { container, api } = renderView(
-      { "GET /v1/workflows/runs/:runId": ok(buildWorkflowRun({ status: "suspended", approvalRequestId: "Ap3rQ9vLr3TnB7pWc1aZ" })) },
+      {
+        "GET /v1/workflows/runs/:runId": ok(
+          buildWorkflowRun({ status: "suspended", approvalRequestId: "Ap3rQ9vLr3TnB7pWc1aZ" }),
+        ),
+      },
       ADMIN,
       runPath("run-1"),
     );
-    expect(await screen.findByRole("heading", { level: 1, name: "Execução de Demonstração de aprovação" })).toBeDefined();
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Execução de Demonstração de aprovação" }),
+    ).toBeDefined();
     const timeline = screen.getByRole("list", { name: "Linha do tempo da execução run-1" });
     expect(within(timeline).getByText("Suspensa")).toBeDefined();
-    expect(within(timeline).getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals/Ap3rQ9vLr3TnB7pWc1aZ`);
+    expect(within(timeline).getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe(
+      `/o/${IDS.organization}/settings/approvals/Ap3rQ9vLr3TnB7pWc1aZ`,
+    );
     expect(screen.getByText("Esta página se atualiza sozinha enquanto a execução está em andamento.")).toBeDefined();
-    expect(new URLSearchParams(lastCall(api, "GET", "/v1/workflows/runs/run-1")?.query).get("organizationId")).toBe(IDS.organization);
+    expect(new URLSearchParams(lastCall(api, "GET", "/v1/workflows/runs/run-1")?.query).get("organizationId")).toBe(
+      IDS.organization,
+    );
     await expectNoAxeViolations(container);
   });
 
   it("offers no cancel for a finished run and says it settled", async () => {
-    renderView({ "GET /v1/workflows/runs/:runId": ok(buildWorkflowRun({ status: "success" })) }, ADMIN, runPath("run-1"));
+    renderView(
+      { "GET /v1/workflows/runs/:runId": ok(buildWorkflowRun({ status: "success" })) },
+      ADMIN,
+      runPath("run-1"),
+    );
     expect(await screen.findByText("A execução terminou. O estado não muda mais.")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Cancelar execução" })).toBeNull();
   });
@@ -493,7 +608,11 @@ describe("SettingsWorkflowsView: run page", () => {
     const { user, router, container } = renderView(
       {
         "GET /v1/workflows/runs/:runId": (request) =>
-          ok(request.params["runId"] === "run-new" ? buildWorkflowRun({ runId: "run-new" }) : buildWorkflowRun({ status: "failed", failure: { code: "STEP_FAILED", stepId: "apply-note" } })),
+          ok(
+            request.params["runId"] === "run-new"
+              ? buildWorkflowRun({ runId: "run-new" })
+              : buildWorkflowRun({ status: "failed", failure: { code: "STEP_FAILED", stepId: "apply-note" } }),
+          ),
         "POST /v1/workflows/:workflowId/runs": (request) => {
           requests.push(request);
           return ok({ runId: "run-new" }, 202);
@@ -518,7 +637,11 @@ describe("SettingsWorkflowsView: run page", () => {
 
   it("names a guardrail stop, and offers no rerun without the start permission", async () => {
     renderView(
-      { "GET /v1/workflows/runs/:runId": ok(buildWorkflowRun({ status: "tripwire", failure: { code: "TRIPWIRE", stepId: null } })) },
+      {
+        "GET /v1/workflows/runs/:runId": ok(
+          buildWorkflowRun({ status: "tripwire", failure: { code: "TRIPWIRE", stepId: null } }),
+        ),
+      },
       [...BASE, "core.workflow-run.read"],
       runPath("run-1"),
     );
@@ -533,7 +656,9 @@ describe("SettingsWorkflowsView: run page", () => {
     expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Cancelar execução" })).toBeNull();
-    expect(screen.getAllByRole("link", { name: "Voltar às execuções" }).at(-1)?.getAttribute("href")).toBe(SETTINGS_PATH);
+    expect(screen.getAllByRole("link", { name: "Voltar às execuções" }).at(-1)?.getAttribute("href")).toBe(
+      SETTINGS_PATH,
+    );
     await expectNoAxeViolations(first.container);
     first.unmount();
     renderView({}, ADMIN, `${SETTINGS_PATH}/nope`);

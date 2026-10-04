@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { defineContract } from "../contract.ts";
 import { none } from "../field-docs.ts";
-import { PermissionSchema } from "../primitives/catalog-meta.schema.ts";
 import { PLATFORM_ROLES, PlatformRoleSchema } from "../identity/platform-staff.schema.ts";
+import { PermissionSchema } from "../primitives/catalog-meta.schema.ts";
 import { SystemRoleKeySchema } from "./system-roles.ts";
 
 export const PermissionKindSchema = z.enum(["read", "write"]);
@@ -31,11 +31,19 @@ type PermissionDefinitionFields = z.infer<typeof PermissionDefinitionFieldsSchem
 const checkScope = (definition: PermissionDefinitionFields, ctx: z.RefinementCtx): void => {
   const isPlatform = definition.scope === "platform";
   if (definition.id.startsWith(PLATFORM_PREFIX) !== isPlatform) {
-    ctx.addIssue({ code: "custom", path: ["id"], message: "Only platform-scoped permissions use the `platform.` prefix." });
+    ctx.addIssue({
+      code: "custom",
+      path: ["id"],
+      message: "Only platform-scoped permissions use the `platform.` prefix.",
+    });
   }
   const mismatched = definition.defaultRoles.filter((role) => PLATFORM_ROLE_SET.has(role) !== isPlatform);
   if (mismatched.length > 0) {
-    ctx.addIssue({ code: "custom", path: ["defaultRoles"], message: `Roles do not match the ${definition.scope} scope.` });
+    ctx.addIssue({
+      code: "custom",
+      path: ["defaultRoles"],
+      message: `Roles do not match the ${definition.scope} scope.`,
+    });
   }
 };
 

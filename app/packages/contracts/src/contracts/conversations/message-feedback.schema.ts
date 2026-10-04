@@ -24,7 +24,14 @@ export const MessageFeedbackInputContract = defineContract(MessageFeedbackInputS
   id: "conversations.MessageFeedbackInput",
   kind: "command",
   description: "Rates an assistant message with thumbs up or down and an optional comment.",
-  examples: [{ messageId: "msg_01J8Z3K4M5", rating: "down", comment: "The answer cited the wrong document.", addToDataset: true }],
+  examples: [
+    {
+      messageId: "msg_01J8Z3K4M5",
+      rating: "down",
+      comment: "The answer cited the wrong document.",
+      addToDataset: true,
+    },
+  ],
   pii: "personal",
   tenancyScope: "organization",
   relations: [],

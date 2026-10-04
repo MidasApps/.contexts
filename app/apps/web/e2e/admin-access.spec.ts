@@ -3,14 +3,22 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { V1RequestError } from "@core/e2e/api";
 import { signInThroughUi } from "@core/e2e/sign-in";
-import { authFile } from "./web-test.ts";
 import { expect, openAs, test } from "./sp5-test.ts";
+import { authFile } from "./web-test.ts";
 
 // SP5 Task 16: who is refused by `/admin`. Non-staff get the not-found page on every area and a
 // 403 from `/v1/admin/*`. Staff whose session has no second factor are refused the same way: the
 // admin layout requires staff + MFA on the session (SP1 spec §3.4) and the API answers MFA_REQUIRED.
 
-const AREAS = ["admin/organizations", "admin/users", "admin/traces", "admin/costs", "admin/workflows", "admin/flags", "admin/logs"];
+const AREAS = [
+  "admin/organizations",
+  "admin/users",
+  "admin/traces",
+  "admin/costs",
+  "admin/workflows",
+  "admin/flags",
+  "admin/logs",
+];
 const APP_ROOT = path.resolve(import.meta.dirname, "../../..");
 const run = promisify(execFile);
 
@@ -28,7 +36,13 @@ test.describe("a user who is not platform staff", () => {
   }
 
   test("the admin API answers 403 to an organization owner", async ({ ownerApi }) => {
-    for (const path of ["/v1/admin/overview", "/v1/admin/organizations", "/v1/admin/users?query=a", "/v1/admin/usage", "/v1/admin/flags"]) {
+    for (const path of [
+      "/v1/admin/overview",
+      "/v1/admin/organizations",
+      "/v1/admin/users?query=a",
+      "/v1/admin/usage",
+      "/v1/admin/flags",
+    ]) {
       const refused = await ownerApi.get(path).then(
         () => undefined,
         (error: unknown) => error,
@@ -46,10 +60,24 @@ test.describe("platform staff without a second factor", () => {
     test.setTimeout(180_000);
     const user = await createUser({ label: "Staff without MFA" });
     const project = env.E2E_PROJECT_ID;
-    await run(process.execPath, [path.join(APP_ROOT, "scripts", "grant-platform-staff.ts"), "--project", project, "--email", user.email, "--role", "platform-admin", "--confirm", project], {
-      cwd: APP_ROOT,
-      env: { ...process.env, APP_ENV: "local" },
-    });
+    await run(
+      process.execPath,
+      [
+        path.join(APP_ROOT, "scripts", "grant-platform-staff.ts"),
+        "--project",
+        project,
+        "--email",
+        user.email,
+        "--role",
+        "platform-admin",
+        "--confirm",
+        project,
+      ],
+      {
+        cwd: APP_ROOT,
+        env: { ...process.env, APP_ENV: "local" },
+      },
+    );
     await signInThroughUi(page, user);
     for (const area of ["admin", "admin/organizations"]) {
       await page.goto(area);

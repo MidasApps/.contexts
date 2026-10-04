@@ -2,7 +2,7 @@
 
 import type { Organization } from "@core/contracts";
 import { useTranslations } from "use-intl";
-import { orderByLastUsed, OrganizationAvatar } from "#/entities/organization/index.ts";
+import { OrganizationAvatar, orderByLastUsed } from "#/entities/organization/index.ts";
 import { useAccessContext, useCurrentNode, useMe, useMyOrganizations } from "#/entities/session/index.ts";
 import { useIsSwitchingOrganization, useSwitchOrganization } from "#/features/switch-organization/index.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
@@ -38,7 +38,12 @@ function OrganizationItems({ currentId }: { currentId: string | undefined }) {
   }
   if (organizations.isError) {
     return (
-      <DropdownMenuItem onSelect={(event) => { event.preventDefault(); void organizations.refetch(); }}>
+      <DropdownMenuItem
+        onSelect={(event) => {
+          event.preventDefault();
+          void organizations.refetch();
+        }}
+      >
         <Icon name="refresh" />
         {t("organizationsFailed")}
       </DropdownMenuItem>
@@ -46,7 +51,9 @@ function OrganizationItems({ currentId }: { currentId: string | undefined }) {
   }
   const ordered = orderByLastUsed(organizations.data, me.data?.lastContext.organizationId);
   return (
-    <DropdownMenuRadioGroup value={currentId ?? ""} onValueChange={(organizationId) => {
+    <DropdownMenuRadioGroup
+      value={currentId ?? ""}
+      onValueChange={(organizationId) => {
         // One switch at a time: a second one would refetch every query twice.
         if (organizationId !== currentId && !switching) switchOrganization.mutate(organizationId);
       }}
@@ -85,7 +92,13 @@ export function OrganizationSwitcher() {
         <SidebarMenuItem>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <SidebarMenuButton size="lg" tooltip={name} aria-label={t("organizationTrigger", { name })} aria-busy={switching || undefined} className="data-[state=open]:bg-sidebar-accent">
+              <SidebarMenuButton
+                size="lg"
+                tooltip={name}
+                aria-label={t("organizationTrigger", { name })}
+                aria-busy={switching || undefined}
+                className="data-[state=open]:bg-sidebar-accent"
+              >
                 {current === undefined ? (
                   <span className="grid size-8 shrink-0 place-items-center rounded-xs bg-muted text-muted-foreground">
                     <Icon name="building" />
@@ -94,13 +107,26 @@ export function OrganizationSwitcher() {
                   <OrganizationAvatar name={current.name} size="md" decorative className="size-8" />
                 )}
                 <span className="grid min-w-0 flex-1 text-left leading-tight">
-                  {loadingName ? <Skeleton className="h-4 w-24" /> : <span className="truncate text-body font-medium">{name}</span>}
+                  {loadingName ? (
+                    <Skeleton className="h-4 w-24" />
+                  ) : (
+                    <span className="truncate text-body font-medium">{name}</span>
+                  )}
                   <span className="truncate text-caption text-muted-foreground">{t("organizationLabel")}</span>
                 </span>
-                {switching ? <Spinner decorative className="ml-auto" /> : <Icon name="chevron-down" className="ml-auto size-4" />}
+                {switching ? (
+                  <Spinner decorative className="ml-auto" />
+                ) : (
+                  <Icon name="chevron-down" className="ml-auto size-4" />
+                )}
               </SidebarMenuButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent side={isMobile ? "bottom" : "right"} align="start" sideOffset={4} className="w-(--radix-dropdown-menu-trigger-width) min-w-60">
+            <DropdownMenuContent
+              side={isMobile ? "bottom" : "right"}
+              align="start"
+              sideOffset={4}
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-60"
+            >
               <DropdownMenuLabel>{t("organizations")}</DropdownMenuLabel>
               <OrganizationItems currentId={node?.organizationId} />
               <DropdownMenuSeparator />

@@ -1,15 +1,16 @@
 "use client";
 
-import { listChatAgentsEndpoint, type ChatAgentOption } from "@core/contracts";
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { type ChatAgentOption, listChatAgentsEndpoint } from "@core/contracts";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { isApiErrorStatus } from "#/shared/api/cursor-list.ts";
-import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
+import { type QueryKey, queryKeys } from "#/shared/api/query-keys.ts";
 
 /** The id of the platform's assistant, the default agent of a new conversation. */
 export const ASSISTANT_AGENT_ID = "assistant";
 
-export const chatAgentsKey = (organizationId: string): QueryKey => queryKeys.organizationScoped(organizationId, "chat-agents");
+export const chatAgentsKey = (organizationId: string): QueryKey =>
+  queryKeys.organizationScoped(organizationId, "chat-agents");
 
 /**
  * `GET /v1/chat-agents` (decision 0046): the agents the member can start a conversation with —

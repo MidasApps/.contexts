@@ -20,7 +20,10 @@ const startApprovalDemo = async (page: Page, title: string): Promise<void> => {
 };
 
 test.describe("workflow runs", () => {
-  test("starts approval-demo, follows its run page until it waits for approval, and cancels it", async ({ page, sp5Org }) => {
+  test("starts approval-demo, follows its run page until it waits for approval, and cancels it", async ({
+    page,
+    sp5Org,
+  }) => {
     test.setTimeout(240_000);
     await page.goto(settingsPath(sp5Org.id, "workflows"));
     await expect(page.getByRole("heading", { level: 1, name: "Fluxos e agendamentos" })).toBeVisible();
@@ -42,12 +45,23 @@ test.describe("workflow runs", () => {
     await startApprovalDemo(page, unique("Run to cancel"));
     // Starting opens the run page, which follows the run's events.
     await expect(page.getByRole("heading", { level: 1, name: `Execução de ${APPROVAL_DEMO}` })).toBeVisible();
-    await expect(page.getByText("Esta página se atualiza sozinha enquanto a execução está em andamento.")).toBeVisible();
+    await expect(
+      page.getByText("Esta página se atualiza sozinha enquanto a execução está em andamento."),
+    ).toBeVisible();
     const steps = page.getByRole("list", { name: "Eventos das etapas da execução" });
-    await expect(steps.getByRole("listitem").filter({ hasText: "Etapa concluída" }).filter({ hasText: "collect-input" })).toBeVisible({ timeout: 90_000 });
-    await expect(steps.getByRole("listitem").filter({ hasText: "Etapa suspensa" }).filter({ hasText: "request-human-approval" })).toBeVisible({ timeout: 90_000 });
-    await expect(page.getByRole("link", { name: "Abrir aprovações" })).toHaveAttribute("href", new RegExp(`/settings/approvals/[^/]+$`));
-    const approvalPath = ((await page.getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")) ?? "").replace(/^\/pt-BR\//, "");
+    await expect(
+      steps.getByRole("listitem").filter({ hasText: "Etapa concluída" }).filter({ hasText: "collect-input" }),
+    ).toBeVisible({ timeout: 90_000 });
+    await expect(
+      steps.getByRole("listitem").filter({ hasText: "Etapa suspensa" }).filter({ hasText: "request-human-approval" }),
+    ).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByRole("link", { name: "Abrir aprovações" })).toHaveAttribute(
+      "href",
+      new RegExp(`/settings/approvals/[^/]+$`),
+    );
+    const approvalPath = (
+      (await page.getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")) ?? ""
+    ).replace(/^\/pt-BR\//, "");
 
     await page.getByRole("link", { name: "Voltar às execuções" }).click();
     const runs = page.getByRole("table", { name: `Execuções de fluxos de ${sp5Org.name}` });
@@ -113,7 +127,10 @@ test.describe("schedules", () => {
     await expect(row).toContainText("*/30 * * * *");
 
     await row.getByRole("button", { name: /^Pausar o agendamento/ }).click();
-    await page.getByRole("alertdialog", { name: /Pausar o agendamento de/ }).getByRole("button", { name: "Pausar agendamento" }).click();
+    await page
+      .getByRole("alertdialog", { name: /Pausar o agendamento de/ })
+      .getByRole("button", { name: "Pausar agendamento" })
+      .click();
     await expect(toast(page, `Agendamento de ${USAGE_REPORT} pausado.`)).toBeVisible();
     await expect(row).toContainText("Pausado");
     await row.getByRole("button", { name: /^Retomar o agendamento/ }).click();
@@ -123,7 +140,10 @@ test.describe("schedules", () => {
     await expect(row).toContainText("Ativo");
 
     await row.getByRole("button", { name: /^Executar agora o agendamento/ }).click();
-    await page.getByRole("alertdialog", { name: `Executar ${USAGE_REPORT} agora?` }).getByRole("button", { name: "Executar agora" }).click();
+    await page
+      .getByRole("alertdialog", { name: `Executar ${USAGE_REPORT} agora?` })
+      .getByRole("button", { name: "Executar agora" })
+      .click();
     await expect(toast(page, `Execução de ${USAGE_REPORT} iniciada.`)).toBeVisible();
     // Scoped to each panel: the schedule's row also names the workflow, so an unscoped row matched
     // it before the tab had changed.
@@ -135,7 +155,10 @@ test.describe("schedules", () => {
     await expect(page.getByRole("tab", { name: "Agendamentos" })).toHaveAttribute("aria-selected", "true");
     await row.getByRole("button", { name: /^Mais ações do agendamento/ }).click();
     await page.getByRole("menuitem", { name: /^Excluir o agendamento/ }).click();
-    await page.getByRole("alertdialog", { name: /Excluir o agendamento de/ }).getByRole("button", { name: "Excluir agendamento" }).click();
+    await page
+      .getByRole("alertdialog", { name: /Excluir o agendamento de/ })
+      .getByRole("button", { name: "Excluir agendamento" })
+      .click();
     await expect(toast(page, `Agendamento de ${USAGE_REPORT} excluído.`)).toBeVisible();
     await expect(panel.getByRole("heading", { name: "Nenhum agendamento" })).toBeVisible();
   });

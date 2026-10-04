@@ -4,10 +4,10 @@
 import {
   OrganizationIdSchema,
   ProjectIdSchema,
-  UnitIdSchema,
-  UserIdSchema,
   type RoleRef,
   type TenantNodeRef,
+  UnitIdSchema,
+  UserIdSchema,
   type UserPrincipal,
 } from "@core/contracts";
 import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
@@ -31,7 +31,12 @@ export const nodes = {
   orgA: { level: "organization", tenantId } as TenantNodeRef,
   orgB: { level: "organization", tenantId: OrganizationIdSchema.parse("org-b") } as TenantNodeRef,
   p1: { level: "project", tenantId, projectId: ProjectIdSchema.parse("p1") } as TenantNodeRef,
-  u1: { level: "unit", tenantId, projectId: ProjectIdSchema.parse("p1"), unitId: UnitIdSchema.parse("u1") } as TenantNodeRef,
+  u1: {
+    level: "unit",
+    tenantId,
+    projectId: ProjectIdSchema.parse("p1"),
+    unitId: UnitIdSchema.parse("u1"),
+  } as TenantNodeRef,
 };
 
 export const user = (uid: string): UserPrincipal => ({ type: "user", uid: UserIdSchema.parse(uid), mfa: false });
@@ -51,7 +56,13 @@ export const makeAccessWriteWorld = () => {
   const auditLog = createInMemoryAuditLogWriter();
   const logs: LogRecord[] = [];
   const logger = createLogger({ context: { service: "test", env: "local" }, sink: (record) => logs.push(record) });
-  const syncClaims = makeSyncClaims({ users: writes.users, projections: writes.projections, principals: store.principals, claims: writes.claims, logger });
+  const syncClaims = makeSyncClaims({
+    users: writes.users,
+    projections: writes.projections,
+    principals: store.principals,
+    claims: writes.claims,
+    logger,
+  });
   const deps: AccessWriteDeps = {
     registry: core.registry,
     memberships: writes.memberships,
@@ -91,5 +102,15 @@ export const makeAccessWriteWorld = () => {
     });
     return membership;
   };
-  return { store, writes, core, deps, services: createAccessServices(deps), auditLog, logs, grant, access: () => core.forRequest() };
+  return {
+    store,
+    writes,
+    core,
+    deps,
+    services: createAccessServices(deps),
+    auditLog,
+    logs,
+    grant,
+    access: () => core.forRequest(),
+  };
 };

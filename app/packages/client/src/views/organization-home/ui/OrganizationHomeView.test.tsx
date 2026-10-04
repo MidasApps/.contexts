@@ -21,13 +21,17 @@ describe("OrganizationHomeView", () => {
     const { container } = renderView();
     expect(await screen.findByRole("heading", { level: 1, name: "Northwind" })).toBeDefined();
     const list = await screen.findByRole("list", { name: "Projetos" });
-    expect(within(list).getByRole("link", { name: /Beta/u }).getAttribute("href")).toBe(`/o/${IDS.organization}/p/${IDS.otherProject}`);
+    expect(within(list).getByRole("link", { name: /Beta/u }).getAttribute("href")).toBe(
+      `/o/${IDS.organization}/p/${IDS.otherProject}`,
+    );
     expect(screen.getByRole("button", { name: "Novo projeto" })).toBeDefined();
     await expectNoAxeViolations(container);
   });
 
   it("shows the empty state with the create action, or without it when not allowed", async () => {
-    const allowed = renderView(shellRoutes(MEMBER_PERMISSIONS, { "GET /v1/organizations/:organizationId/projects": page([]) }));
+    const allowed = renderView(
+      shellRoutes(MEMBER_PERMISSIONS, { "GET /v1/organizations/:organizationId/projects": page([]) }),
+    );
     expect(await screen.findByRole("heading", { name: "Nenhum projeto ainda" })).toBeDefined();
     expect(screen.getAllByRole("button", { name: "Novo projeto" })).toHaveLength(2);
     await expectNoAxeViolations(allowed.container);
@@ -51,7 +55,10 @@ describe("OrganizationHomeView", () => {
 
   it("renders not-found when the organization context is hidden and no project is visible", async () => {
     const { container } = renderView(
-      shellRoutes(MEMBER_PERMISSIONS, { "GET /v1/me/context": apiError(404, "NOT_FOUND"), "GET /v1/organizations/:organizationId/projects": page([]) }),
+      shellRoutes(MEMBER_PERMISSIONS, {
+        "GET /v1/me/context": apiError(404, "NOT_FOUND"),
+        "GET /v1/organizations/:organizationId/projects": page([]),
+      }),
     );
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
     await expectNoAxeViolations(container);
@@ -59,13 +66,18 @@ describe("OrganizationHomeView", () => {
 
   it("renders not-found for a hidden organization and an error with retry for the list", async () => {
     const hidden = renderView(
-      shellRoutes(MEMBER_PERMISSIONS, { "GET /v1/me/context": apiError(404, "NOT_FOUND"), "GET /v1/organizations/:organizationId/projects": apiError(404, "NOT_FOUND") }),
+      shellRoutes(MEMBER_PERMISSIONS, {
+        "GET /v1/me/context": apiError(404, "NOT_FOUND"),
+        "GET /v1/organizations/:organizationId/projects": apiError(404, "NOT_FOUND"),
+      }),
     );
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
     await expectNoAxeViolations(hidden.container);
     hidden.unmount();
 
-    const failing = renderView(shellRoutes(MEMBER_PERMISSIONS, { "GET /v1/organizations/:organizationId/projects": apiError(403, "FORBIDDEN") }));
+    const failing = renderView(
+      shellRoutes(MEMBER_PERMISSIONS, { "GET /v1/organizations/:organizationId/projects": apiError(403, "FORBIDDEN") }),
+    );
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("Referência:");
     await waitFor(() => expect(within(alert).getByRole("button", { name: "Tentar novamente" })).toBeDefined());

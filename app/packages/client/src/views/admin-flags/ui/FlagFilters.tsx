@@ -23,11 +23,21 @@ export const filterFlags = (flags: readonly FeatureFlag[], filter: FlagFilter, l
   return flags.filter(
     (flag) =>
       (!filter.expiredOnly || flag.expired) &&
-      (query === "" || flag.key.toLocaleLowerCase().includes(query) || label.name(flag.key).toLocaleLowerCase().includes(query)),
+      (query === "" ||
+        flag.key.toLocaleLowerCase().includes(query) ||
+        label.name(flag.key).toLocaleLowerCase().includes(query)),
   );
 };
 
-export function ExpiredAlert({ flags, expiredOnly, onExpiredOnlyChange }: { flags: readonly FeatureFlag[]; expiredOnly: boolean; onExpiredOnlyChange: (next: boolean) => void }) {
+export function ExpiredAlert({
+  flags,
+  expiredOnly,
+  onExpiredOnlyChange,
+}: {
+  flags: readonly FeatureFlag[];
+  expiredOnly: boolean;
+  onExpiredOnlyChange: (next: boolean) => void;
+}) {
   const t = useTranslations("admin.flags");
   const expired = flags.filter((flag) => flag.expired);
   if (expired.length === 0) return null;
@@ -50,7 +60,12 @@ export function ExpiredAlert({ flags, expiredOnly, onExpiredOnlyChange }: { flag
           </ul>
           {hidden > 0 ? <span className="text-xs">{t("expiredMore", { count: hidden })}</span> : null}
         </span>
-        <Button variant={expiredOnly ? "default" : "outline"} size="sm" aria-pressed={expiredOnly} onClick={() => onExpiredOnlyChange(!expiredOnly)}>
+        <Button
+          variant={expiredOnly ? "default" : "outline"}
+          size="sm"
+          aria-pressed={expiredOnly}
+          onClick={() => onExpiredOnlyChange(!expiredOnly)}
+        >
           {t("expiredOnly")}
         </Button>
       </AlertDescription>

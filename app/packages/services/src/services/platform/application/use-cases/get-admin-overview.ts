@@ -24,8 +24,14 @@ const allLiveOrganizations = async (deps: Pick<ConsoleDeps, "organizations">): P
 };
 
 // One read per organization under its row level security; a user active in two organizations counts once.
-const activeUsersOf = async (deps: OverviewDeps, organizations: readonly OrganizationListItem[], since: Date): Promise<number> => {
-  const perTenant = await Promise.all(organizations.map((org) => deps.usage.activeUserIds({ tenantId: org.id, since })));
+const activeUsersOf = async (
+  deps: OverviewDeps,
+  organizations: readonly OrganizationListItem[],
+  since: Date,
+): Promise<number> => {
+  const perTenant = await Promise.all(
+    organizations.map((org) => deps.usage.activeUserIds({ tenantId: org.id, since })),
+  );
   return new Set(perTenant.flat()).size;
 };
 
@@ -36,7 +42,11 @@ const approvalRateOf = async (deps: OverviewDeps, since: Date): Promise<number> 
 };
 
 // Agent runs stopped by a guardrail over every agent run of the window (decision 0066); 0 without runs.
-const tripwireRateOf = async (deps: OverviewDeps, organizations: readonly OrganizationListItem[], since: Date): Promise<number> => {
+const tripwireRateOf = async (
+  deps: OverviewDeps,
+  organizations: readonly OrganizationListItem[],
+  since: Date,
+): Promise<number> => {
   const counts = await Promise.all(organizations.map((org) => deps.usage.agentRunCounts({ tenantId: org.id, since })));
   const runs = counts.reduce((sum, count) => sum + count.runs, 0);
   const stopped = counts.reduce((sum, count) => sum + count.stopped, 0);
@@ -47,7 +57,9 @@ const tripwireRateOf = async (deps: OverviewDeps, organizations: readonly Organi
 // the runtime being unreachable is `unknown`, never a failed overview.
 const evalStatusOf = async (deps: OverviewDeps): Promise<AdminOverview["evalStatus"]> => {
   if (deps.evals === undefined) return "unknown";
-  const listed = await deps.evals.listExperiments({ tenantId: null, page: 0, perPage: EXPERIMENTS_READ }).catch(() => null);
+  const listed = await deps.evals
+    .listExperiments({ tenantId: null, page: 0, perPage: EXPERIMENTS_READ })
+    .catch(() => null);
   if (listed === null || !listed.ok) return "unknown";
   const finished = listed.data.experiments.filter((experiment) => experiment.verdict !== "pending");
   const endOf = (experiment: (typeof finished)[number]) => experiment.finishedAt ?? experiment.startedAt;
@@ -73,7 +85,9 @@ export const makeGetAdminOverview =
     const since = new Date(now.getTime() - WINDOW_MS);
     const organizations = (await allLiveOrganizations(deps)).filter((org) => org.status === "active");
     const [costs, activeUsers7d, approvalRate, evalStatus, tripwireRate] = await Promise.all([
-      Promise.all(organizations.map((org) => deps.usage.monthCostMicroUsd({ tenantId: org.id, monthStart: utcMonthStart(now) }))),
+      Promise.all(
+        organizations.map((org) => deps.usage.monthCostMicroUsd({ tenantId: org.id, monthStart: utcMonthStart(now) })),
+      ),
       activeUsersOf(deps, organizations, since),
       approvalRateOf(deps, since),
       evalStatusOf(deps),

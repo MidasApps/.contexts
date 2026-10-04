@@ -1,24 +1,43 @@
 "use client";
 
-import { setConnectorSecretEndpoint, type Connector } from "@core/contracts";
+import { type Connector, setConnectorSecretEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useTranslations } from "use-intl";
 import { tenantConnectorKeys } from "#/entities/connector/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 
-export type ConnectorSecretDialogProps = { organizationId: string; connector: Connector | null; onOpenChange: (open: boolean) => void };
+export type ConnectorSecretDialogProps = {
+  organizationId: string;
+  connector: Connector | null;
+  onOpenChange: (open: boolean) => void;
+};
 
 /** The contract's bound (`SetConnectorSecretInputSchema`). */
 const MAX_SECRET_LENGTH = 8192;
 
-function SecretBody({ organizationId, connector, onOpenChange }: { organizationId: string; connector: Connector; onOpenChange: (open: boolean) => void }) {
+function SecretBody({
+  organizationId,
+  connector,
+  onOpenChange,
+}: {
+  organizationId: string;
+  connector: Connector;
+  onOpenChange: (open: boolean) => void;
+}) {
   const t = useTranslations("settings.connectors.secret");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
@@ -37,7 +56,10 @@ function SecretBody({ organizationId, connector, onOpenChange }: { organizationI
     if (value === "") return;
     setPending(true);
     try {
-      await callEndpoint(setConnectorSecretEndpoint, { params: { organizationId, connectorId: connector.id }, body: { value } });
+      await callEndpoint(setConnectorSecretEndpoint, {
+        params: { organizationId, connectorId: connector.id },
+        body: { value },
+      });
       setValue("");
       await queryClient.invalidateQueries({ queryKey: tenantConnectorKeys.all(organizationId) });
       notify.success(t("done", { name: connector.name }));
@@ -61,7 +83,14 @@ function SecretBody({ organizationId, connector, onOpenChange }: { organizationI
           <FieldLabel>{t(`label.${connector.type}`)}</FieldLabel>
           <FieldControl>
             {/* No show/hide toggle and no autofill: the value is write-only from the first keystroke. */}
-            <Input type="password" required autoComplete="off" maxLength={MAX_SECRET_LENGTH} value={value} onChange={(event) => setValue(event.target.value)} />
+            <Input
+              type="password"
+              required
+              autoComplete="off"
+              maxLength={MAX_SECRET_LENGTH}
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+            />
           </FieldControl>
           <FieldDescription>{t("hint")}</FieldDescription>
           <FieldError errors={[missing ? t("required") : undefined]} />
@@ -87,7 +116,16 @@ function SecretBody({ organizationId, connector, onOpenChange }: { organizationI
 export function ConnectorSecretDialog({ organizationId, connector, onOpenChange }: ConnectorSecretDialogProps) {
   return (
     <Dialog open={connector !== null} onOpenChange={onOpenChange}>
-      <DialogContent>{connector === null ? null : <SecretBody key={connector.id} organizationId={organizationId} connector={connector} onOpenChange={onOpenChange} />}</DialogContent>
+      <DialogContent>
+        {connector === null ? null : (
+          <SecretBody
+            key={connector.id}
+            organizationId={organizationId}
+            connector={connector}
+            onOpenChange={onOpenChange}
+          />
+        )}
+      </DialogContent>
     </Dialog>
   );
 }

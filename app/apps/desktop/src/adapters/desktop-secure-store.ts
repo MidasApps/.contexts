@@ -9,5 +9,8 @@ export const isTauriShell = (scope: object): boolean => "__TAURI_INTERNALS__" in
  * factory is `createTauriSecureStore` (the `secure_store_*` commands); without it, or outside Tauri,
  * the record lives in memory, which only means the session does not survive a restart.
  */
-export const selectSecureStore = (args: { scope: object; native?: (() => SecureStorePort) | undefined }): SecureStorePort =>
+export const selectSecureStore = (args: {
+  scope: object;
+  native?: (() => SecureStorePort) | undefined;
+}): SecureStorePort =>
   isTauriShell(args.scope) && args.native !== undefined ? args.native() : createMemorySecureStore();

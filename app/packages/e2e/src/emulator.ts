@@ -37,10 +37,17 @@ const errorCode = (payload: unknown): string => {
 export const createEmulatorAuth = (env: E2eEnv) => {
   const project = `${env.E2E_AUTH_EMULATOR_ORIGIN}/identitytoolkit.googleapis.com/v1/projects/${env.E2E_PROJECT_ID}`;
 
-  const call = async (operation: string, url: string, init: { method?: string; body?: unknown; admin?: boolean }): Promise<unknown> => {
+  const call = async (
+    operation: string,
+    url: string,
+    init: { method?: string; body?: unknown; admin?: boolean },
+  ): Promise<unknown> => {
     const response = await fetch(url, {
       method: init.method ?? "POST",
-      headers: { "content-type": "application/json", ...(init.admin === false ? {} : { authorization: "Bearer owner" }) },
+      headers: {
+        "content-type": "application/json",
+        ...(init.admin === false ? {} : { authorization: "Bearer owner" }),
+      },
       ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
@@ -50,7 +57,8 @@ export const createEmulatorAuth = (env: E2eEnv) => {
   };
 
   const findUid = async (email: string): Promise<string | undefined> =>
-    LookupSchema.parse(await call("lookup", `${project}/accounts:lookup`, { body: { email: [email] } })).users?.[0]?.localId;
+    LookupSchema.parse(await call("lookup", `${project}/accounts:lookup`, { body: { email: [email] } })).users?.[0]
+      ?.localId;
 
   /** Creates the user, or resets password/name on a re-run; the email is always verified. */
   const upsertUser = async (input: AuthUserInput): Promise<AuthUser> => {
@@ -67,13 +75,18 @@ export const createEmulatorAuth = (env: E2eEnv) => {
   /** Password sign-in (no second factor) → ID token for `/v1` Bearer calls. */
   const signIn = async (email: string, password: string): Promise<string> => {
     const url = `${env.E2E_AUTH_EMULATOR_ORIGIN}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${EMULATOR_API_KEY}`;
-    return SignInSchema.parse(await call("signIn", url, { body: { email, password, returnSecureToken: true }, admin: false })).idToken;
+    return SignInSchema.parse(
+      await call("signIn", url, { body: { email, password, returnSecureToken: true }, admin: false }),
+    ).idToken;
   };
 
   /** Enrolls one SMS second factor (replacing any other), as a user would from Security. */
   const enrollPhone = async (uid: string, phoneNumber: string): Promise<void> => {
     await call("enrollPhone", `${project}/accounts:update`, {
-      body: { localId: uid, mfa: { enrollments: [{ mfaEnrollmentId: "e2e-phone", phoneInfo: phoneNumber, displayName: "E2E phone" }] } },
+      body: {
+        localId: uid,
+        mfa: { enrollments: [{ mfaEnrollmentId: "e2e-phone", phoneInfo: phoneNumber, displayName: "E2E phone" }] },
+      },
     });
   };
 

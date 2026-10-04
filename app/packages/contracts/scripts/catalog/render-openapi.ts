@@ -2,7 +2,7 @@ import { stringify } from "yaml";
 import type { EndpointDefinition } from "../../src/contracts/http/endpoint.ts";
 import type { RegisteredContract } from "../../src/contracts/registry.ts";
 import { buildOpenApiPaths } from "./openapi-paths.ts";
-import { sortKeysDeep, type JsonRecord } from "./stable-json.ts";
+import { type JsonRecord, sortKeysDeep } from "./stable-json.ts";
 
 export { findDanglingRefs } from "./openapi-paths.ts";
 

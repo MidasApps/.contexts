@@ -24,7 +24,10 @@ export const createV1Client = (args: { origin: string; idToken: string }) => {
   const request = async <T>(method: string, path: string, body?: unknown): Promise<T> => {
     const response = await fetch(`${args.origin}${path}`, {
       method,
-      headers: { authorization: `Bearer ${args.idToken}`, ...(body === undefined ? {} : { "content-type": "application/json" }) },
+      headers: {
+        authorization: `Bearer ${args.idToken}`,
+        ...(body === undefined ? {} : { "content-type": "application/json" }),
+      },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
@@ -37,7 +40,10 @@ export const createV1Client = (args: { origin: string; idToken: string }) => {
   const raw = (method: string, path: string, body?: unknown): Promise<Response> =>
     fetch(`${args.origin}${path}`, {
       method,
-      headers: { authorization: `Bearer ${args.idToken}`, ...(body === undefined ? {} : { "content-type": "application/json" }) },
+      headers: {
+        authorization: `Bearer ${args.idToken}`,
+        ...(body === undefined ? {} : { "content-type": "application/json" }),
+      },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });

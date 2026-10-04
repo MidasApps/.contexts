@@ -1,6 +1,6 @@
 // Test world of the members and invitations vertical: the access write world plus
 // in-memory invitations, a settable clock, a fake directory and a fake key revoker.
-import { UserIdSchema, type UserId } from "@core/contracts";
+import { type UserId, UserIdSchema } from "@core/contracts";
 import type { Clock } from "../../../shared/clock/clock.ts";
 import { createLogger } from "../../../shared/observability/logger.ts";
 import { createInMemoryInvitationRepository } from "../../adapters/driven/in-memory-invitation-repository.ts";
@@ -39,12 +39,26 @@ export const makeMemberWorld = () => {
     },
     directory: {
       getMany: (uids) =>
-        Promise.resolve(new Map(uids.flatMap((uid) => (accounts.has(uid) ? [[uid, { displayName: accounts.get(uid)?.displayName ?? "", email: accounts.get(uid)?.email ?? "" }] as const] : [])))),
+        Promise.resolve(
+          new Map(
+            uids.flatMap((uid) =>
+              accounts.has(uid)
+                ? [
+                    [
+                      uid,
+                      { displayName: accounts.get(uid)?.displayName ?? "", email: accounts.get(uid)?.email ?? "" },
+                    ] as const,
+                  ]
+                : [],
+            ),
+          ),
+        ),
       getAccount: (uid) => Promise.resolve(accounts.get(uid) ?? null),
       getPreferredLocale: (uid) => Promise.resolve(userLocales.get(uid)),
     },
     organizations: {
-      getName: (tenantId) => Promise.resolve(tenantId === "org-a" || tenantId === "org-b" ? `Name of ${tenantId}` : null),
+      getName: (tenantId) =>
+        Promise.resolve(tenantId === "org-a" || tenantId === "org-b" ? `Name of ${tenantId}` : null),
       getDefaultLocale: (tenantId) => Promise.resolve(organizationLocales.get(tenantId) ?? null),
     },
     apiKeys: {
@@ -66,5 +80,18 @@ export const makeMemberWorld = () => {
   const organizationLocale = (tenantId: string, tag: string) => void organizationLocales.set(tenantId, tag);
   const tokenOf = (acceptUrl: string): string => acceptUrl.split("#token=")[1] ?? "";
   const uid = (value: string): UserId => UserIdSchema.parse(value);
-  return { ...world, clock, invitations, deps, members: createMemberServices(deps), account, locale, organizationLocale, revoked, notified, tokenOf, uid };
+  return {
+    ...world,
+    clock,
+    invitations,
+    deps,
+    members: createMemberServices(deps),
+    account,
+    locale,
+    organizationLocale,
+    revoked,
+    notified,
+    tokenOf,
+    uid,
+  };
 };

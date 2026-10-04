@@ -1,12 +1,17 @@
 "use client";
 
 import type { ApprovalRequest, ApprovalStatus } from "@core/contracts";
-import { useInfiniteQuery, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
+import { type UseQueryResult, useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CollectedPages } from "#/shared/api/cursor-list.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
-import { approvalHistoryQuery, approvalRequestKeys, approvalRequestQuery, approvalRequestsQuery } from "../api/approval-request-queries.ts";
+import {
+  approvalHistoryQuery,
+  approvalRequestKeys,
+  approvalRequestQuery,
+  approvalRequestsQuery,
+} from "../api/approval-request-queries.ts";
 
 /** Refetch period when no live listener is allowed (SP5 spec §3.4). */
 export const APPROVALS_POLL_MS = 15_000;
@@ -16,7 +21,10 @@ export const APPROVALS_POLL_MS = 15_000;
  * approvers read them). `onDenied` reports a refused listener; the hook then polls.
  * @returns the unsubscribe function.
  */
-export type ApprovalChangeSource = (handlers: { readonly onChange: () => void; readonly onDenied: () => void }) => () => void;
+export type ApprovalChangeSource = (handlers: {
+  readonly onChange: () => void;
+  readonly onDenied: () => void;
+}) => () => void;
 
 export type UseApprovalRequestsArgs = {
   /** `null` disables the query (no organization in the URL). */
@@ -43,7 +51,12 @@ export const waitingForDecision = (requests: readonly ApprovalRequest[], viewerU
  * list refetches on each change notice; without one, or once the listener is denied, it refetches
  * every 15 s and when the window regains focus.
  */
-export const useApprovalRequests = ({ organizationId, status, live, enabled = true }: UseApprovalRequestsArgs): UseApprovalRequestsResult => {
+export const useApprovalRequests = ({
+  organizationId,
+  status,
+  live,
+  enabled = true,
+}: UseApprovalRequestsArgs): UseApprovalRequestsResult => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
   const queryClient = useQueryClient();
@@ -63,7 +76,12 @@ export const useApprovalRequests = ({ organizationId, status, live, enabled = tr
     refetchInterval: listening ? false : APPROVALS_POLL_MS,
     refetchOnWindowFocus: !listening,
   });
-  return { query, requests: query.data?.items ?? [], truncated: query.data?.truncated ?? false, mode: listening ? "listener" : "polling" };
+  return {
+    query,
+    requests: query.data?.items ?? [],
+    truncated: query.data?.truncated ?? false,
+    mode: listening ? "listener" : "polling",
+  };
 };
 
 /**
@@ -73,7 +91,10 @@ export const useApprovalRequests = ({ organizationId, status, live, enabled = tr
 export const useApprovalHistory = (organizationId: string, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useInfiniteQuery({ ...approvalHistoryQuery(callEndpoint, organizationId), enabled: signedIn && organizationId !== "" && options.enabled !== false });
+  return useInfiniteQuery({
+    ...approvalHistoryQuery(callEndpoint, organizationId),
+    enabled: signedIn && organizationId !== "" && options.enabled !== false,
+  });
 };
 
 /** One request by id (the detail page); polls like the inbox while it is pending. */

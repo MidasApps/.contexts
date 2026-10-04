@@ -12,14 +12,18 @@ export type LabelledSchedule = { readonly id: string; readonly cron: string; rea
  * rows that carry only the id (a run started by a schedule); `undefined` for a schedule not in the
  * list (deleted, or not readable by the viewer), so the caller says "a schedule" instead.
  */
-export const useScheduleLabels = (schedules: readonly LabelledSchedule[] | undefined): ((scheduleId: string) => string | undefined) => {
+export const useScheduleLabels = (
+  schedules: readonly LabelledSchedule[] | undefined,
+): ((scheduleId: string) => string | undefined) => {
   const t = useTranslations("common.cron");
   const describe = useDescribeCron();
   return useMemo(() => {
     const byId = new Map((schedules ?? []).map((schedule) => [schedule.id, schedule] as const));
     return (scheduleId: string) => {
       const schedule = byId.get(scheduleId);
-      return schedule === undefined ? undefined : t("withZone", { description: describe(schedule.cron) ?? schedule.cron, zone: schedule.timezone });
+      return schedule === undefined
+        ? undefined
+        : t("withZone", { description: describe(schedule.cron) ?? schedule.cron, zone: schedule.timezone });
     };
   }, [schedules, t, describe]);
 };

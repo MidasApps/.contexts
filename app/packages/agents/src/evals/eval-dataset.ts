@@ -29,16 +29,27 @@ export const resolveEvalsDir = (candidates: readonly string[]): string => {
  * `public/evals`, served next to the bundle, like the instructions and skills), then the package
  * folder `packages/agents/evals` (tests, `mastra dev`, CI).
  */
-export const EVALS_DIR = resolveEvalsDir([path.join(import.meta.dirname, "evals"), path.resolve(import.meta.dirname, "../../evals")]);
+export const EVALS_DIR = resolveEvalsDir([
+  path.join(import.meta.dirname, "evals"),
+  path.resolve(import.meta.dirname, "../../evals"),
+]);
 
 export const EvalCaseSchema = EvalGroundTruthSchema.extend({
   id: z.string().regex(/^[a-z0-9][a-z0-9-]{0,63}$/),
   /** The user message; fake directives (`[[fake:…]]`) only where no keyword rule applies. */
   input: z.string().min(1).max(4000),
-  tags: z.array(z.string().regex(/^[a-z][a-z-]{0,31}$/)).max(5).default([]),
+  tags: z
+    .array(z.string().regex(/^[a-z][a-z-]{0,31}$/))
+    .max(5)
+    .default([]),
 });
 
-export type EvalCase = { readonly id: string; readonly input: string; readonly tags: readonly string[]; readonly groundTruth: EvalGroundTruth };
+export type EvalCase = {
+  readonly id: string;
+  readonly input: string;
+  readonly tags: readonly string[];
+  readonly groundTruth: EvalGroundTruth;
+};
 
 export type EvalDataset = {
   readonly agentId: string;
@@ -50,7 +61,8 @@ export type EvalDataset = {
   readonly cases: readonly EvalCase[];
 };
 
-export const datasetFileOf = (agentId: string, version: number): string => path.join(EVALS_DIR, "datasets", `${agentId}.v${version}.jsonl`);
+export const datasetFileOf = (agentId: string, version: number): string =>
+  path.join(EVALS_DIR, "datasets", `${agentId}.v${version}.jsonl`);
 
 const toCase = (line: string, lineNumber: number): EvalCase => {
   let json: unknown;
@@ -69,8 +81,14 @@ const toCase = (line: string, lineNumber: number): EvalCase => {
  * Parses a JSONL eval set.
  * @throws {Error} naming the first invalid line (a broken dataset fails the gate loudly).
  */
-export const parseEvalDataset = (args: { readonly agentId: string; readonly version: number; readonly text: string }): EvalDataset => {
-  const cases = args.text.split(/\r?\n/).flatMap((line, index) => (line.trim() === "" ? [] : [toCase(line, index + 1)]));
+export const parseEvalDataset = (args: {
+  readonly agentId: string;
+  readonly version: number;
+  readonly text: string;
+}): EvalDataset => {
+  const cases = args.text
+    .split(/\r?\n/)
+    .flatMap((line, index) => (line.trim() === "" ? [] : [toCase(line, index + 1)]));
   return {
     agentId: args.agentId,
     version: args.version,

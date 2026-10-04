@@ -9,11 +9,20 @@ const setup = async () => {
   const world = makeTenancyWorld();
   const organization = await world.organizationOf("owner");
   const project = async (name: string): Promise<Project> => {
-    const created = await world.tenancy.createProject({ ...world.command("owner"), tenantId: organization.id, input: { name } });
+    const created = await world.tenancy.createProject({
+      ...world.command("owner"),
+      tenantId: organization.id,
+      input: { name },
+    });
     if (!created.ok) throw created.error;
     return created.data;
   };
-  const unit = async (projectId: string, name: string, type: string, parentUnitId: string | null = null): Promise<Unit> => {
+  const unit = async (
+    projectId: string,
+    name: string,
+    type: string,
+    parentUnitId: string | null = null,
+  ): Promise<Unit> => {
     const created = await world.tenancy.createUnit({
       ...world.command("owner"),
       projectId: ids.project(projectId),
@@ -26,36 +35,65 @@ const setup = async () => {
   return { ...world, organization, project, unit, grantAt };
 };
 
-const projectRef = (organization: Organization, project: Project): TenantNodeRef => ({ level: "project", tenantId: organization.id, projectId: project.id });
-const unitRef = (unit: Unit): TenantNodeRef => ({ level: "unit", tenantId: unit.tenantId, projectId: unit.projectId, unitId: unit.id });
+const projectRef = (organization: Organization, project: Project): TenantNodeRef => ({
+  level: "project",
+  tenantId: organization.id,
+  projectId: project.id,
+});
+const unitRef = (unit: Unit): TenantNodeRef => ({
+  level: "unit",
+  tenantId: unit.tenantId,
+  projectId: unit.projectId,
+  unitId: unit.id,
+});
 
 describe("projects", () => {
   it("lists every project to an organization-wide reader and only granted ones to project members", async () => {
     const world = await setup();
     const alpha = await world.project("Alpha");
     await world.project("Beta");
-    expect((await world.tenancy.listProjects({ ...world.command("owner"), tenantId: world.organization.id, page }))).toMatchObject({ ok: true, data: { items: [{ name: "Alpha" }, { name: "Beta" }] } });
+    expect(
+      await world.tenancy.listProjects({ ...world.command("owner"), tenantId: world.organization.id, page }),
+    ).toMatchObject({ ok: true, data: { items: [{ name: "Alpha" }, { name: "Beta" }] } });
 
     await world.grantAt("u2", projectRef(world.organization, alpha));
     const visible = await world.tenancy.listProjects({ ...world.command("u2"), tenantId: world.organization.id, page });
     expect(visible).toMatchObject({ ok: true, data: { items: [{ name: "Alpha" }], nextCursor: null } });
 
     world.store.putUser("stranger");
-    const hidden = await world.tenancy.listProjects({ ...world.command("stranger"), tenantId: world.organization.id, page });
+    const hidden = await world.tenancy.listProjects({
+      ...world.command("stranger"),
+      tenantId: world.organization.id,
+      page,
+    });
     expect(hidden).toMatchObject({ ok: false, error: { reason: "NOT_A_MEMBER" } });
   });
 
   it("updates settings (null clears an override) and soft-deletes", async () => {
     const world = await setup();
     const alpha = await world.project("Alpha");
-    const updated = await world.tenancy.updateProject({ ...world.command("owner"), projectId: alpha.id, input: { settings: { timeZone: "America/Manaus" }, description: "Rollout" } });
-    expect(updated).toMatchObject({ ok: true, data: { settings: { timeZone: "America/Manaus" }, description: "Rollout" } });
-    const cleared = await world.tenancy.updateProject({ ...world.command("owner"), projectId: alpha.id, input: { settings: { timeZone: null }, description: null } });
+    const updated = await world.tenancy.updateProject({
+      ...world.command("owner"),
+      projectId: alpha.id,
+      input: { settings: { timeZone: "America/Manaus" }, description: "Rollout" },
+    });
+    expect(updated).toMatchObject({
+      ok: true,
+      data: { settings: { timeZone: "America/Manaus" }, description: "Rollout" },
+    });
+    const cleared = await world.tenancy.updateProject({
+      ...world.command("owner"),
+      projectId: alpha.id,
+      input: { settings: { timeZone: null }, description: null },
+    });
     expect(cleared.ok && cleared.data).toMatchObject({ settings: {} });
     expect(cleared.ok && "description" in cleared.data).toBe(false);
 
     expect((await world.tenancy.deleteProject({ ...world.command("owner"), projectId: alpha.id })).ok).toBe(true);
-    expect(await world.tenancy.getProject({ ...world.command("owner"), projectId: alpha.id })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await world.tenancy.getProject({ ...world.command("owner"), projectId: alpha.id })).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND" },
+    });
   });
 
   it("soft-deletes every unit of a deleted project, so no unit outlives it", async () => {
@@ -81,13 +119,25 @@ describe("units", () => {
     const site = await world.unit(project.id, "Site", "sample.site");
     expect(site).toMatchObject({ parentUnitId: null, ancestorIds: [], depth: 0 });
 
-    const wrongParent = await world.tenancy.createUnit({ ...world.command("owner"), projectId: project.id, input: { name: "R", type: "sample.room", parentUnitId: null } });
-    expect(wrongParent).toMatchObject({ ok: false, error: { code: "INVALID_UNIT_PARENT", reason: "TYPE_NOT_ALLOWED" } });
+    const wrongParent = await world.tenancy.createUnit({
+      ...world.command("owner"),
+      projectId: project.id,
+      input: { name: "R", type: "sample.room", parentUnitId: null },
+    });
+    expect(wrongParent).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_UNIT_PARENT", reason: "TYPE_NOT_ALLOWED" },
+    });
 
     let parent = site;
-    for (let depth = 1; depth <= 6; depth += 1) parent = await world.unit(project.id, `Room ${depth}`, "sample.room", parent.id);
+    for (let depth = 1; depth <= 6; depth += 1)
+      parent = await world.unit(project.id, `Room ${depth}`, "sample.room", parent.id);
     expect(parent.depth).toBe(6);
-    const tooDeep = await world.tenancy.createUnit({ ...world.command("owner"), projectId: project.id, input: { name: "R7", type: "sample.room", parentUnitId: parent.id } });
+    const tooDeep = await world.tenancy.createUnit({
+      ...world.command("owner"),
+      projectId: project.id,
+      input: { name: "R7", type: "sample.room", parentUnitId: parent.id },
+    });
     expect(tooDeep).toMatchObject({ ok: false, error: { reason: "TOO_DEEP" } });
   });
 
@@ -99,12 +149,20 @@ describe("units", () => {
     const room = await world.unit(project.id, "Room", "sample.room", siteA.id);
     const inner = await world.unit(project.id, "Inner", "sample.room", room.id);
 
-    const moved = await world.tenancy.updateUnit({ ...world.command("owner"), unitId: room.id, input: { parentUnitId: siteB.id } });
+    const moved = await world.tenancy.updateUnit({
+      ...world.command("owner"),
+      unitId: room.id,
+      input: { parentUnitId: siteB.id },
+    });
     expect(moved).toMatchObject({ ok: true, data: { parentUnitId: siteB.id, ancestorIds: [siteB.id], depth: 1 } });
     expect(world.tenancyStore.unitRow(inner.id)).toMatchObject({ ancestorIds: [siteB.id, room.id], depth: 2 });
     expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "UNIT_MOVED", changes: ["parentUnitId"] });
 
-    const cycle = await world.tenancy.updateUnit({ ...world.command("owner"), unitId: room.id, input: { parentUnitId: inner.id } });
+    const cycle = await world.tenancy.updateUnit({
+      ...world.command("owner"),
+      unitId: room.id,
+      input: { parentUnitId: inner.id },
+    });
     expect(cycle).toMatchObject({ ok: false, error: { reason: "CYCLE" } });
   });
 
@@ -115,9 +173,17 @@ describe("units", () => {
     const siteB = await world.unit(project.id, "B", "sample.site");
     await world.grantAt("u2", unitRef(siteA));
 
-    const listed = await world.tenancy.listUnits({ ...world.command("u2"), projectId: project.id, parentUnitId: null, page });
+    const listed = await world.tenancy.listUnits({
+      ...world.command("u2"),
+      projectId: project.id,
+      parentUnitId: null,
+      page,
+    });
     expect(listed).toMatchObject({ ok: true, data: { items: [{ id: siteA.id }] } });
-    expect(await world.tenancy.getUnit({ ...world.command("u2"), unitId: siteB.id })).toMatchObject({ ok: false, error: { reason: "NOT_A_MEMBER" } });
+    expect(await world.tenancy.getUnit({ ...world.command("u2"), unitId: siteB.id })).toMatchObject({
+      ok: false,
+      error: { reason: "NOT_A_MEMBER" },
+    });
   });
 
   it("soft-deletes a unit with its subtree", async () => {
@@ -133,17 +199,37 @@ describe("units", () => {
   it("resolves regional settings along the node chain", async () => {
     const world = await setup();
     const project = await world.project("Alpha");
-    await world.tenancy.updateProject({ ...world.command("owner"), projectId: project.id, input: { settings: { currency: "USD" } } });
+    await world.tenancy.updateProject({
+      ...world.command("owner"),
+      projectId: project.id,
+      input: { settings: { currency: "USD" } },
+    });
     const site = await world.unit(project.id, "A", "sample.site");
-    await world.tenancy.updateUnit({ ...world.command("owner"), unitId: site.id, input: { settings: { timeZone: "America/Manaus" } } });
+    await world.tenancy.updateUnit({
+      ...world.command("owner"),
+      unitId: site.id,
+      input: { settings: { timeZone: "America/Manaus" } },
+    });
     const room = await world.unit(project.id, "Room", "sample.room", site.id);
-    const settings = await world.tenancy.resolveRegionalSettings({ node: unitRef(room), preferences: { locale: "en-US" } });
-    expect(settings).toEqual({ locale: "en-US", displayTimeZone: "America/Manaus", nodeTimeZone: "America/Manaus", currency: "USD" });
+    const settings = await world.tenancy.resolveRegionalSettings({
+      node: unitRef(room),
+      preferences: { locale: "en-US" },
+    });
+    expect(settings).toEqual({
+      locale: "en-US",
+      displayTimeZone: "America/Manaus",
+      nodeTimeZone: "America/Manaus",
+      currency: "USD",
+    });
   });
 
   it("lists the core unit type and the modules' ones", async () => {
     const world = await setup();
-    expect(world.tenancy.listUnitTypes(page).items.map((type) => type.id)).toEqual(["core.unit", "sample.room", "sample.site"]);
+    expect(world.tenancy.listUnitTypes(page).items.map((type) => type.id)).toEqual([
+      "core.unit",
+      "sample.room",
+      "sample.site",
+    ]);
   });
 
   it("creates and moves units of the core type without any module type (follow-up #21)", async () => {
@@ -153,10 +239,21 @@ describe("units", () => {
     const second = await world.unit(project.id, "Second", "core.unit");
     const child = await world.unit(project.id, "Child", "core.unit", first.id);
 
-    const moved = await world.tenancy.updateUnit({ ...world.command("owner"), unitId: child.id, input: { parentUnitId: second.id } });
-    expect(moved).toMatchObject({ ok: true, data: { type: "core.unit", parentUnitId: second.id, ancestorIds: [second.id], depth: 1 } });
+    const moved = await world.tenancy.updateUnit({
+      ...world.command("owner"),
+      unitId: child.id,
+      input: { parentUnitId: second.id },
+    });
+    expect(moved).toMatchObject({
+      ok: true,
+      data: { type: "core.unit", parentUnitId: second.id, ancestorIds: [second.id], depth: 1 },
+    });
     const underSite = await world.unit(project.id, "Site", "sample.site");
-    const refused = await world.tenancy.updateUnit({ ...world.command("owner"), unitId: child.id, input: { parentUnitId: underSite.id } });
+    const refused = await world.tenancy.updateUnit({
+      ...world.command("owner"),
+      unitId: child.id,
+      input: { parentUnitId: underSite.id },
+    });
     expect(refused.ok).toBe(false);
   });
 });

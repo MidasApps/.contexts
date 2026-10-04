@@ -15,15 +15,25 @@ describe("resolveRegionalSettings (SP1 spec §4)", () => {
 
   it("takes currency and node time zone from the project over the organization", () => {
     const project = { settings: { timeZone: "America/Manaus", currency: "USD" } } as const;
-    expect(resolveRegionalSettings({ organization, project })).toMatchObject({ nodeTimeZone: "America/Manaus", currency: "USD", displayTimeZone: "America/Manaus" });
+    expect(resolveRegionalSettings({ organization, project })).toMatchObject({
+      nodeTimeZone: "America/Manaus",
+      currency: "USD",
+      displayTimeZone: "America/Manaus",
+    });
   });
 
   it("takes them from the unit over the project, and from the nearest unit of the chain", () => {
     const project = { settings: { timeZone: "America/Manaus", currency: "USD" } } as const;
     const root = { settings: { timeZone: "Europe/Lisbon", currency: "EUR" } } as const;
     const leaf = { settings: { currency: "GBP" } } as const;
-    expect(resolveRegionalSettings({ organization, project, units: [root, leaf] })).toMatchObject({ nodeTimeZone: "Europe/Lisbon", currency: "GBP" });
-    expect(resolveRegionalSettings({ organization, project, units: [{ settings: {} }] })).toMatchObject({ nodeTimeZone: "America/Manaus", currency: "USD" });
+    expect(resolveRegionalSettings({ organization, project, units: [root, leaf] })).toMatchObject({
+      nodeTimeZone: "Europe/Lisbon",
+      currency: "GBP",
+    });
+    expect(resolveRegionalSettings({ organization, project, units: [{ settings: {} }] })).toMatchObject({
+      nodeTimeZone: "America/Manaus",
+      currency: "USD",
+    });
   });
 
   it("displays in the user's time zone, else the node's", () => {
@@ -35,6 +45,9 @@ describe("resolveRegionalSettings (SP1 spec §4)", () => {
   });
 
   it("uses the user's locale, else the organization's; a user currency preference never changes the node currency", () => {
-    expect(resolveRegionalSettings({ organization, user: { locale: "en-US", currency: "JPY" } })).toMatchObject({ locale: "en-US", currency: "BRL" });
+    expect(resolveRegionalSettings({ organization, user: { locale: "en-US", currency: "JPY" } })).toMatchObject({
+      locale: "en-US",
+      currency: "BRL",
+    });
   });
 });

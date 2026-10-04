@@ -6,7 +6,11 @@ export type FlagReader = {
    * @param fallback the value when the store fails and nothing is cached yet (the kill-switch
    * passes `true`: fail closed; a rollout passes its safe default).
    */
-  readonly isEnabled: (input: { readonly key: string; readonly tenantId: string | null; readonly fallback: boolean }) => Promise<boolean>;
+  readonly isEnabled: (input: {
+    readonly key: string;
+    readonly tenantId: string | null;
+    readonly fallback: boolean;
+  }) => Promise<boolean>;
 };
 
 export const FLAG_CACHE_TTL_MS = 30_000;
@@ -18,7 +22,10 @@ type Entry = { readonly values: Readonly<Record<string, boolean>>; readonly at: 
  * last values (a store blip never flips a flag); with nothing cached the reader answers the
  * caller's fallback. A key the registry does not know reads as the fallback.
  */
-export const createFlagReader = (port: FlagsPort, options: { readonly ttlMs?: number; readonly now?: () => number } = {}): FlagReader => {
+export const createFlagReader = (
+  port: FlagsPort,
+  options: { readonly ttlMs?: number; readonly now?: () => number } = {},
+): FlagReader => {
   const ttl = options.ttlMs ?? FLAG_CACHE_TTL_MS;
   const now = options.now ?? (() => Date.now());
   const cache = new Map<string, Entry>();

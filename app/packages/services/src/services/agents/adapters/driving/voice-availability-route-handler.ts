@@ -12,7 +12,11 @@ export const VOICE_REALTIME_FLAG_KEY = "chat.voice.realtime";
 
 const OFF: VoiceAvailability = { voice: false, realtime: false };
 
-const readAvailability = async (deps: VoiceRoutesDeps, tenantId: TenantId, requestId: string): Promise<VoiceAvailability> => {
+const readAvailability = async (
+  deps: VoiceRoutesDeps,
+  tenantId: TenantId,
+  requestId: string,
+): Promise<VoiceAvailability> => {
   if (deps.readFlags === undefined) return OFF;
   try {
     const flags = await deps.readFlags(tenantId);
@@ -32,12 +36,20 @@ const readAvailability = async (deps: VoiceRoutesDeps, tenantId: TenantId, reque
  * when it says so; the voice routes check the same flags again on every call.
  */
 export const buildVoiceAvailabilityRoute = (deps: VoiceRoutesDeps): Record<string, RouteHandler> => ({
-  [getVoiceAvailabilityEndpoint.id]: withApiRoute(getVoiceAvailabilityEndpoint, deps.pipeline, async ({ principal, input, authorize, requestId }) => {
-    const tenantId = input.query.organizationId;
-    const decision = await authorize({ principal, permission: VOICE_USE_PERMISSION, node: { level: "organization", tenantId } });
-    if (!decision.allowed) return deniedResponse(decision.reason, requestId);
-    const response = dataResponse({ data: await readAvailability(deps, tenantId, requestId) });
-    response.headers.set("cache-control", "no-store");
-    return response;
-  }),
+  [getVoiceAvailabilityEndpoint.id]: withApiRoute(
+    getVoiceAvailabilityEndpoint,
+    deps.pipeline,
+    async ({ principal, input, authorize, requestId }) => {
+      const tenantId = input.query.organizationId;
+      const decision = await authorize({
+        principal,
+        permission: VOICE_USE_PERMISSION,
+        node: { level: "organization", tenantId },
+      });
+      if (!decision.allowed) return deniedResponse(decision.reason, requestId);
+      const response = dataResponse({ data: await readAvailability(deps, tenantId, requestId) });
+      response.headers.set("cache-control", "no-store");
+      return response;
+    },
+  ),
 });

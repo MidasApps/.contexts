@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
-import { useRouteSearch, type RouteSearch } from "#/shared/lib/router/use-route-search.ts";
+import { type RouteSearch, useRouteSearch } from "#/shared/lib/router/use-route-search.ts";
 
 export type AdminSearch<K extends string> = RouteSearch<K>;
 
@@ -16,7 +16,11 @@ export const useAdminSearch = <K extends string>(keys: readonly K[]): AdminSearc
 };
 
 /** `DataTable` paging for lists paged by number (`page`/`perPage` + `meta.hasMore`, decision 0040). */
-export const numberedPagination = (search: { page: number; setPage: (page: number) => void }, state: { hasMore: boolean; pending: boolean }, label?: string) =>
+export const numberedPagination = (
+  search: { page: number; setPage: (page: number) => void },
+  state: { hasMore: boolean; pending: boolean },
+  label?: string,
+) =>
   search.page === 1 && !state.hasMore
     ? undefined
     : {

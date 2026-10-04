@@ -19,7 +19,9 @@ describe("role entity", () => {
   it("reads every page of custom roles under the organization's key", async () => {
     const api = createFakeApi({
       [`GET /v1/organizations/${IDS.organization}/roles`]: (request) =>
-        request.query.get("cursor") === "r2" ? page([role("Rl2", "Auditor")]) : page([role("Rl1", "Editor")], { cursor: "r2" }),
+        request.query.get("cursor") === "r2"
+          ? page([role("Rl2", "Auditor")])
+          : page([role("Rl1", "Editor")], { cursor: "r2" }),
     });
     const { result, queryClient } = renderClientHook(() => useRoles(IDS.organization), { api });
     await waitFor(() => expect(result.current.data?.map((item) => item.name)).toEqual(["Editor", "Auditor"]));
@@ -29,7 +31,15 @@ describe("role entity", () => {
 
   it("reads the permission registry as a platform catalog", async () => {
     const api = createFakeApi({
-      "GET /v1/permissions": page([{ id: "core.organization.read", descriptionKey: "core.permissions.organizationRead", kind: "read", scope: "tenant", defaultRoles: ["viewer"] }]),
+      "GET /v1/permissions": page([
+        {
+          id: "core.organization.read",
+          descriptionKey: "core.permissions.organizationRead",
+          kind: "read",
+          scope: "tenant",
+          defaultRoles: ["viewer"],
+        },
+      ]),
     });
     const { result, queryClient } = renderClientHook(() => usePermissionsCatalog(), { api });
     await waitFor(() => expect(result.current.data?.[0]?.id).toBe("core.organization.read"));

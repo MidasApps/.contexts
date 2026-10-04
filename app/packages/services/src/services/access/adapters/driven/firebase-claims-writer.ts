@@ -1,5 +1,5 @@
 import type { Auth } from "firebase-admin/auth";
-import { CORE_CLAIM_KEYS, type ClaimsWriter } from "../../application/ports/driven/claims-writer.ts";
+import { type ClaimsWriter, CORE_CLAIM_KEYS } from "../../application/ports/driven/claims-writer.ts";
 
 /** Firebase caps the serialized custom claims at 1000 bytes. */
 export const MAX_CLAIMS_BYTES = 1000;
@@ -24,7 +24,9 @@ const OWNED: ReadonlySet<string> = new Set(CORE_CLAIM_KEYS);
  * core keys are replaced, and an absent optional key is removed.
  * @throws {ClaimsTooLargeError} when the result would reach 1000 bytes.
  */
-export const createFirebaseClaimsWriter = (deps: { auth: Pick<Auth, "getUser" | "setCustomUserClaims"> }): ClaimsWriter => ({
+export const createFirebaseClaimsWriter = (deps: {
+  auth: Pick<Auth, "getUser" | "setCustomUserClaims">;
+}): ClaimsWriter => ({
   writeClaims: async (uid, claims) => {
     const current = (await deps.auth.getUser(uid)).customClaims ?? {};
     const kept = Object.fromEntries(Object.entries(current).filter(([key]) => !OWNED.has(key)));

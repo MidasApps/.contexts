@@ -11,7 +11,7 @@ import { createLogger, type LogRecord } from "../observability/logger.ts";
 import { createInMemoryRateLimiter } from "../rate-limit/in-memory-rate-limiter.ts";
 import type { RateLimitPolicy } from "../rate-limit/rate-limit-policies.ts";
 import { dataResponse, noContentResponse } from "./api-errors.ts";
-import { withApiRoute, type ApiRouteDeps } from "./api-route.ts";
+import { type ApiRouteDeps, withApiRoute } from "./api-route.ts";
 import type { ErrorEnvelope } from "./error-envelope.ts";
 
 const errorOf = async (response: Response) => ((await response.json()) as ErrorEnvelope).error;
@@ -108,7 +108,11 @@ const setup = () => {
 };
 
 const call = (url: string, init: { method?: string; headers?: Record<string, string>; body?: string } = {}) =>
-  new Request(`http://localhost${url}`, { method: init.method ?? "GET", headers: init.headers ?? {}, body: init.body ?? null });
+  new Request(`http://localhost${url}`, {
+    method: init.method ?? "GET",
+    headers: init.headers ?? {},
+    body: init.body ?? null,
+  });
 
 const bearer = (token = "user-token") => ({ authorization: `Bearer ${token}` });
 const json = { "content-type": "application/json" };
@@ -142,11 +146,22 @@ describe("withApiRoute: authentication", () => {
     const { deps } = setup();
     let seen: unknown;
     const route = withApiRoute(getThing, deps, async (context) => {
-      const decision = await context.authorize({ principal: context.principal, permission: "core.project.read", node: { level: "platform" } });
-      seen = { principal: context.principal, input: context.input, requestId: context.requestId, allowed: decision.allowed };
+      const decision = await context.authorize({
+        principal: context.principal,
+        permission: "core.project.read",
+        node: { level: "platform" },
+      });
+      seen = {
+        principal: context.principal,
+        input: context.input,
+        requestId: context.requestId,
+        allowed: decision.allowed,
+      };
       return dataResponse({ data: { thingId: context.input.params.thingId } });
     });
-    const response = await route(call("/v1/things/t%201?limit=5", { headers: { ...bearer(), "x-request-id": REQUEST_ID } }));
+    const response = await route(
+      call("/v1/things/t%201?limit=5", { headers: { ...bearer(), "x-request-id": REQUEST_ID } }),
+    );
     expect(response.status).toBe(200);
     expect(response.headers.get("x-request-id")).toBe(REQUEST_ID);
     expect(seen).toEqual({
@@ -161,14 +176,25 @@ describe("withApiRoute: authentication", () => {
 describe("withApiRoute: validation", () => {
   it("answers 400 VALIDATION_FAILED listing every issue at once, including the Idempotency-Key", async () => {
     const { deps } = setup();
-    const route = withApiRoute(createThing, deps, () => Promise.resolve(dataResponse({ data: { id: "1" } }, { status: 201 })));
+    const route = withApiRoute(createThing, deps, () =>
+      Promise.resolve(dataResponse({ data: { id: "1" } }, { status: 201 })),
+    );
     const response = await route(
-      call("/v1/things", { method: "POST", headers: { ...bearer(), ...json, "idempotency-key": "not-a-ulid" }, body: '{"count":"2","extra":1}' }),
+      call("/v1/things", {
+        method: "POST",
+        headers: { ...bearer(), ...json, "idempotency-key": "not-a-ulid" },
+        body: '{"count":"2","extra":1}',
+      }),
     );
     expect(response.status).toBe(400);
     const error = await errorOf(response);
     expect(error.code).toBe("VALIDATION_FAILED");
-    expect((error.details ?? []).map((detail: { field: string }) => detail.field).sort()).toEqual(["(body)", "Idempotency-Key", "count", "name"]);
+    expect((error.details ?? []).map((detail: { field: string }) => detail.field).sort()).toEqual([
+      "(body)",
+      "Idempotency-Key",
+      "count",
+      "name",
+    ]);
   });
 
   it("answers 400 for a body that is not JSON", async () => {
@@ -196,7 +222,9 @@ describe("withApiRoute: idempotency", () => {
     let runs = 0;
     const route = withApiRoute(createThing, deps, () => {
       runs += 1;
-      return Promise.resolve(dataResponse({ data: { id: `thing-${runs}` } }, { status: 201, location: `/v1/things/thing-${runs}` }));
+      return Promise.resolve(
+        dataResponse({ data: { id: `thing-${runs}` } }, { status: 201, location: `/v1/things/thing-${runs}` }),
+      );
     });
     const first = await route(post('{"name":"a","count":1}'));
     const replay = await route(post('{"count":1,"name":"a"}'));
@@ -209,7 +237,9 @@ describe("withApiRoute: idempotency", () => {
 
   it("answers 409 IDEMPOTENCY_KEY_REUSED for another body and 409 IN_PROGRESS while in flight", async () => {
     const { deps, idempotency } = setup();
-    const route = withApiRoute(createThing, deps, () => Promise.resolve(dataResponse({ data: { id: "1" } }, { status: 201 })));
+    const route = withApiRoute(createThing, deps, () =>
+      Promise.resolve(dataResponse({ data: { id: "1" } }, { status: 201 })),
+    );
     await route(post('{"name":"a","count":1}'));
     const reused = await route(post('{"name":"b","count":1}'));
     expect(reused.status).toBe(409);
@@ -234,7 +264,9 @@ describe("withApiRoute: idempotency", () => {
     let runs = 0;
     const route = withApiRoute(createThing, { ...deps, oneTimeSecretEndpoints: new Set(["test.createThing"]) }, () => {
       runs += 1;
-      return Promise.resolve(dataResponse({ data: { id: "k1", secret: "s3cr3t" } }, { status: 201, location: "/v1/things/k1" }));
+      return Promise.resolve(
+        dataResponse({ data: { id: "k1", secret: "s3cr3t" } }, { status: 201, location: "/v1/things/k1" }),
+      );
     });
     expect((await route(post('{"name":"a","count":1}'))).status).toBe(201);
     const replay = await route(post('{"name":"a","count":1}'));
@@ -250,10 +282,24 @@ describe("withApiRoute: idempotency", () => {
   it("replays a stored error with the replaying request's id", async () => {
     const { deps } = setup();
     const route = withApiRoute(createThing, deps, ({ requestId }) =>
-      Promise.resolve(Response.json({ error: { code: "UNKNOWN_PERMISSION", message: "x", requestId } }, { status: 422 })),
+      Promise.resolve(
+        Response.json({ error: { code: "UNKNOWN_PERMISSION", message: "x", requestId } }, { status: 422 }),
+      ),
     );
-    await route(call("/v1/things", { method: "POST", headers: { ...bearer(), ...json, "idempotency-key": KEY_A, "x-request-id": "01K6B000000000000000000RQ1" }, body: '{"name":"a","count":1}' }));
-    const replay = await route(call("/v1/things", { method: "POST", headers: { ...bearer(), ...json, "idempotency-key": KEY_A, "x-request-id": "01K6B000000000000000000RQ2" }, body: '{"name":"a","count":1}' }));
+    await route(
+      call("/v1/things", {
+        method: "POST",
+        headers: { ...bearer(), ...json, "idempotency-key": KEY_A, "x-request-id": "01K6B000000000000000000RQ1" },
+        body: '{"name":"a","count":1}',
+      }),
+    );
+    const replay = await route(
+      call("/v1/things", {
+        method: "POST",
+        headers: { ...bearer(), ...json, "idempotency-key": KEY_A, "x-request-id": "01K6B000000000000000000RQ2" },
+        body: '{"name":"a","count":1}',
+      }),
+    );
     expect(replay.status).toBe(422);
     expect((await errorOf(replay)).requestId).toBe("01K6B000000000000000000RQ2");
   });
@@ -295,11 +341,20 @@ describe("withApiRoute: rate limits", () => {
       return Promise.resolve(
         context.input.body.code === "good"
           ? noContentResponse()
-          : Response.json({ error: { code: "UNAUTHORIZED", message: "x", requestId: context.requestId } }, { status: 401 }),
+          : Response.json(
+              { error: { code: "UNAUTHORIZED", message: "x", requestId: context.requestId } },
+              { status: 401 },
+            ),
       );
     });
     const redeem = (code: string, ip = "203.0.113.7") =>
-      route(call("/v1/redeem", { method: "POST", headers: { ...json, "x-forwarded-for": `10.9.9.9, ${ip}` }, body: JSON.stringify({ code }) }));
+      route(
+        call("/v1/redeem", {
+          method: "POST",
+          headers: { ...json, "x-forwarded-for": `10.9.9.9, ${ip}` },
+          body: JSON.stringify({ code }),
+        }),
+      );
     expect((await redeem("good")).status).toBe(204);
     expect((await redeem("bad")).status).toBe(401);
     expect((await redeem("bad")).status).toBe(401);
@@ -316,9 +371,19 @@ describe("withApiRoute: rate limits", () => {
     const route = withApiRoute(redeemThing, deps, async (context) => {
       runs += 1;
       await gate;
-      return Response.json({ error: { code: "UNAUTHORIZED", message: "x", requestId: context.requestId } }, { status: 401 });
+      return Response.json(
+        { error: { code: "UNAUTHORIZED", message: "x", requestId: context.requestId } },
+        { status: 401 },
+      );
     });
-    const redeem = () => route(call("/v1/redeem", { method: "POST", headers: { ...json, "x-forwarded-for": "203.0.113.8" }, body: '{"code":"bad"}' }));
+    const redeem = () =>
+      route(
+        call("/v1/redeem", {
+          method: "POST",
+          headers: { ...json, "x-forwarded-for": "203.0.113.8" },
+          body: '{"code":"bad"}',
+        }),
+      );
     const burst = Array.from({ length: 6 }, () => redeem());
     await new Promise((resolve) => setTimeout(resolve, 20));
     release();
@@ -330,7 +395,14 @@ describe("withApiRoute: rate limits", () => {
   it("gives the reserved slot back when the work succeeds", async () => {
     const { deps } = setup();
     const route = withApiRoute(redeemThing, deps, () => Promise.resolve(noContentResponse()));
-    const redeem = () => route(call("/v1/redeem", { method: "POST", headers: { ...json, "x-forwarded-for": "203.0.113.10" }, body: '{"code":"good"}' }));
+    const redeem = () =>
+      route(
+        call("/v1/redeem", {
+          method: "POST",
+          headers: { ...json, "x-forwarded-for": "203.0.113.10" },
+          body: '{"code":"good"}',
+        }),
+      );
     for (let attempt = 0; attempt < 5; attempt += 1) expect((await redeem()).status).toBe(204);
     expect((await redeem()).headers.get("x-ratelimit-remaining")).toBe("2");
   });
@@ -339,8 +411,16 @@ describe("withApiRoute: rate limits", () => {
     const { deps, bearerCalls } = setup();
     const route = withApiRoute(createThing, deps, () => Promise.resolve(noContentResponse()));
     const attempt = () =>
-      route(call("/v1/things", { method: "POST", headers: { ...json, authorization: "Bearer core_PUB_bad", "x-forwarded-for": "203.0.113.11" }, body: '{"name":"a","count":1}' }));
-    const statuses = (await Promise.all(Array.from({ length: 5 }, () => attempt()))).map((response) => response.status).sort();
+      route(
+        call("/v1/things", {
+          method: "POST",
+          headers: { ...json, authorization: "Bearer core_PUB_bad", "x-forwarded-for": "203.0.113.11" },
+          body: '{"name":"a","count":1}',
+        }),
+      );
+    const statuses = (await Promise.all(Array.from({ length: 5 }, () => attempt())))
+      .map((response) => response.status)
+      .sort();
     expect(statuses).toEqual([401, 401, 429, 429, 429]);
     expect(bearerCalls).toHaveLength(2);
   });
@@ -349,7 +429,13 @@ describe("withApiRoute: rate limits", () => {
     const { deps, bearerCalls } = setup();
     const route = withApiRoute(createThing, deps, () => Promise.resolve(noContentResponse()));
     const attempt = () =>
-      route(call("/v1/things", { method: "POST", headers: { ...json, authorization: "Bearer core_PUB_bad", "x-forwarded-for": "203.0.113.9" }, body: '{"name":"a","count":1}' }));
+      route(
+        call("/v1/things", {
+          method: "POST",
+          headers: { ...json, authorization: "Bearer core_PUB_bad", "x-forwarded-for": "203.0.113.9" },
+          body: '{"name":"a","count":1}',
+        }),
+      );
     expect((await attempt()).status).toBe(401);
     expect((await attempt()).status).toBe(401);
     expect((await attempt()).status).toBe(429);
@@ -369,7 +455,12 @@ describe("withApiRoute: boundary", () => {
 });
 
 describe("withApiRoute: denials and impersonation", () => {
-  const IMPERSONATED = { type: "user", uid: "user-1", mfa: false, impersonation: { sessionId: "imp-1", staffUid: "staff-1" } } as Principal;
+  const IMPERSONATED = {
+    type: "user",
+    uid: "user-1",
+    mfa: false,
+    impersonation: { sessionId: "imp-1", staffUid: "staff-1" },
+  } as Principal;
   const organization = { level: "organization", tenantId: OrganizationIdSchema.parse("org-a") } as const;
 
   it("logs the deny reason of a refused request, never in the response", async () => {
@@ -380,7 +471,10 @@ describe("withApiRoute: denials and impersonation", () => {
     });
     const response = await route(call("/v1/things/t1", { headers: bearer() }));
     expect(response.status).toBe(403);
-    expect(records.find((record) => record.message === "access_denied")).toMatchObject({ endpointId: "test.getThing", reason: "NODE_NOT_FOUND" });
+    expect(records.find((record) => record.message === "access_denied")).toMatchObject({
+      endpointId: "test.getThing",
+      reason: "NODE_NOT_FOUND",
+    });
   });
 
   it("reports every request of an impersonated principal with its status and deny reason", async () => {
@@ -397,6 +491,14 @@ describe("withApiRoute: denials and impersonation", () => {
     });
     expect((await route(call("/v1/things/t1", { headers: bearer("imp-token") }))).status).toBe(404);
     expect((await route(call("/v1/things/t1", { headers: bearer() }))).status).toBe(404);
-    expect(reported).toMatchObject([{ principal: IMPERSONATED, endpointId: "test.getThing", method: "GET", status: 404, denyReason: "NODE_NOT_FOUND" }]);
+    expect(reported).toMatchObject([
+      {
+        principal: IMPERSONATED,
+        endpointId: "test.getThing",
+        method: "GET",
+        status: 404,
+        denyReason: "NODE_NOT_FOUND",
+      },
+    ]);
   });
 });

@@ -1,8 +1,14 @@
-import { type AgentApprovalRequest, type ApprovalRequest, type Principal, TenantIdSchema, type UserPrincipal } from "@core/contracts";
+import {
+  type AgentApprovalRequest,
+  type ApprovalRequest,
+  type Principal,
+  TenantIdSchema,
+  type UserPrincipal,
+} from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import type { RequestAccess } from "../../../access/composition.ts";
 import { createApprovalHandlerRegistry } from "../../../access/application/approval-handler-registry.ts";
+import type { RequestAccess } from "../../../access/composition.ts";
 import { createInMemoryIdempotencyStore } from "../../../shared/idempotency/in-memory-idempotency-store.ts";
 import { AGENT_COMMAND_HANDLER_KIND, createAgentCommandApprovalHandler } from "./agent-command-approval-handler.ts";
 import { agentCommandExecutors, defineAgentCommandExecutor } from "./agent-command-executor.ts";
@@ -53,7 +59,11 @@ const setup = (options: { allowed?: boolean } = {}) => {
     forRequest: (): RequestAccess => ({
       authorize: (request) => {
         authorizeCalls.push({ principal: request.principal, permission: request.permission });
-        return Promise.resolve(options.allowed === false ? { allowed: false, reason: "NOT_A_MEMBER" as const } : { allowed: true as const, requiresApproval: true, grantedVia: [] });
+        return Promise.resolve(
+          options.allowed === false
+            ? { allowed: false, reason: "NOT_A_MEMBER" as const }
+            : { allowed: true as const, requiresApproval: true, grantedVia: [] },
+        );
       },
       getEffectivePermissions: () => Promise.reject(new Error("unused")),
     }),
@@ -121,14 +131,20 @@ describe("createAgentCommandApprovalHandler", () => {
 
   it("refuses an action whose tenant or permission differs from the approval request", async () => {
     const { runs, run } = setup();
-    await expect(run(ACTION, { request: approvalRequest({ tenantId: TenantIdSchema.parse("Other00000000000000") }) })).rejects.toMatchObject({ code: "TENANT_MISMATCH" });
-    await expect(run(ACTION, { request: approvalRequest({ permission: "sample.note.read" }) })).rejects.toMatchObject({ code: "PERMISSION_MISMATCH" });
+    await expect(
+      run(ACTION, { request: approvalRequest({ tenantId: TenantIdSchema.parse("Other00000000000000") }) }),
+    ).rejects.toMatchObject({ code: "TENANT_MISMATCH" });
+    await expect(run(ACTION, { request: approvalRequest({ permission: "sample.note.read" }) })).rejects.toMatchObject({
+      code: "PERMISSION_MISMATCH",
+    });
     expect(runs).toEqual([]);
   });
 
   it("refuses an unknown command and an input the command schema rejects", async () => {
     const { runs, run } = setup();
-    await expect(run({ ...ACTION, commandId: "sample.Missing", toolId: "command.sample.Missing" })).rejects.toMatchObject({ code: "UNKNOWN_COMMAND" });
+    await expect(
+      run({ ...ACTION, commandId: "sample.Missing", toolId: "command.sample.Missing" }),
+    ).rejects.toMatchObject({ code: "UNKNOWN_COMMAND" });
     await expect(run({ ...ACTION, input: { noteId: "" } })).rejects.toMatchObject({ code: "COMMAND_INPUT_INVALID" });
     expect(runs).toEqual([]);
   });

@@ -15,14 +15,36 @@ export type ActivePrompts = {
  */
 export type PromptRepository = {
   /** Next version of the key (1, 2, ...); a concurrent writer of the same key makes one retry. */
-  readonly insertVersion: (input: PromptKey & { readonly body: string; readonly bodySha256: string; readonly note: string | null; readonly createdBy: string }) => Promise<PromptVersion>;
+  readonly insertVersion: (
+    input: PromptKey & {
+      readonly body: string;
+      readonly bodySha256: string;
+      readonly note: string | null;
+      readonly createdBy: string;
+    },
+  ) => Promise<PromptVersion>;
   /** Newest first. */
   readonly listVersions: (key: PromptKey) => Promise<readonly PromptVersion[]>;
   /** A version visible under `tenantId` (null = platform rows only). */
-  readonly getVersion: (input: { readonly versionId: string; readonly tenantId: string | null }) => Promise<PromptVersion | null>;
+  readonly getVersion: (input: {
+    readonly versionId: string;
+    readonly tenantId: string | null;
+  }) => Promise<PromptVersion | null>;
   /** Records the eval of a version (the only columns the runtime role may update). */
-  readonly recordEval: (input: { readonly versionId: string; readonly tenantId: string | null; readonly experimentId: string; readonly verdict: "passed" | "failed" }) => Promise<void>;
-  readonly insertActivation: (input: PromptKey & { readonly versionId: string; readonly forced: boolean; readonly reason: string | null; readonly activatedBy: string }) => Promise<PromptActivation>;
+  readonly recordEval: (input: {
+    readonly versionId: string;
+    readonly tenantId: string | null;
+    readonly experimentId: string;
+    readonly verdict: "passed" | "failed";
+  }) => Promise<void>;
+  readonly insertActivation: (
+    input: PromptKey & {
+      readonly versionId: string;
+      readonly forced: boolean;
+      readonly reason: string | null;
+      readonly activatedBy: string;
+    },
+  ) => Promise<PromptActivation>;
   /** Newest first; the first one is active. */
   readonly listActivations: (key: PromptKey) => Promise<readonly PromptActivation[]>;
   readonly getActive: (input: { readonly agentId: string; readonly tenantId: string | null }) => Promise<ActivePrompts>;

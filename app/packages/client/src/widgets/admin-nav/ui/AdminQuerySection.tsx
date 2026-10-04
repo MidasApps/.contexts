@@ -56,12 +56,19 @@ export function AdminMfaRequired() {
  * skeleton, the second-factor notice for 403 `MFA_REQUIRED`, no-access for any other 403, an error
  * with the request reference and a retry, else the content.
  */
-export function AdminQuerySection<T>({ query, loadingLabel, rows = 5, noAccessDescription, children }: AdminQuerySectionProps<T>) {
+export function AdminQuerySection<T>({
+  query,
+  loadingLabel,
+  rows = 5,
+  noAccessDescription,
+  children,
+}: AdminQuerySectionProps<T>) {
   const t = useTranslations("admin.states");
   if (query.status === "pending") return <LoadingState label={loadingLabel} rows={rows} />;
   if (query.status === "error" || query.data === undefined || query.data === null) {
     if (isMfaRequired(query.error)) return <AdminMfaRequired />;
-    if (isApiErrorStatus(query.error, 403)) return <NoAccessState description={noAccessDescription ?? t("noAccessDescription")} />;
+    if (isApiErrorStatus(query.error, 403))
+      return <NoAccessState description={noAccessDescription ?? t("noAccessDescription")} />;
     return <ApiErrorState error={query.error} onRetry={() => void query.refetch()} retrying={query.isFetching} />;
   }
   return children(query.data);

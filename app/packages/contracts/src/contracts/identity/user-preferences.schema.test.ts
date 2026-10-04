@@ -31,10 +31,14 @@ describe("UserPreferencesSchema", () => {
   });
 
   it("never lets security alerts be turned off", () => {
-    expect(UserPreferencesSchema.safeParse({ ...valid, notifications: { productUpdates: true, securityAlerts: false } }).success).toBe(false);
+    expect(
+      UserPreferencesSchema.safeParse({ ...valid, notifications: { productUpdates: true, securityAlerts: false } })
+        .success,
+    ).toBe(false);
   });
 
   it("parses its catalog examples", () => {
-    for (const example of UserPreferencesContract.meta.examples) expect(UserPreferencesSchema.safeParse(example).success).toBe(true);
+    for (const example of UserPreferencesContract.meta.examples)
+      expect(UserPreferencesSchema.safeParse(example).success).toBe(true);
   });
 });

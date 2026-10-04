@@ -12,7 +12,8 @@ test.describe("agent catalog", () => {
     const catalog = staffPage.getByRole("list", { name: "Agentes registrados" });
     const assistant = catalog.getByRole("listitem").filter({ hasText: "Assistente" }).first();
     await expect(assistant).toContainText("Supervisor");
-    for (const subagent of ["knowledge", "data", "action", "web"]) await expect(assistant.getByRole("definition").getByText(subagent, { exact: true })).toBeVisible();
+    for (const subagent of ["knowledge", "data", "action", "web"])
+      await expect(assistant.getByRole("definition").getByText(subagent, { exact: true })).toBeVisible();
     const knowledge = catalog.getByRole("listitem").filter({ hasText: "Conhecimento" }).first();
     await expect(knowledge.getByText("knowledge.searchKnowledge")).toBeVisible();
     await expect(knowledge.getByText("knowledge-citations")).toBeVisible();
@@ -25,7 +26,11 @@ test.describe("agent catalog", () => {
     await staffPage.goto("admin/agents");
     const perOrganization = staffPage.getByRole("region", { name: "Agentes por organização" });
     await expect(perOrganization.getByRole("heading", { name: "Escolha uma organização" })).toBeVisible();
-    await chooseOrganization(staffPage, perOrganization.getByRole("combobox", { name: "Organização", exact: true }), sp5Org.name);
+    await chooseOrganization(
+      staffPage,
+      perOrganization.getByRole("combobox", { name: "Organização", exact: true }),
+      sp5Org.name,
+    );
     await expect(staffPage).toHaveURL(new RegExp(`organizationId=${sp5Org.id}`));
     await expect(perOrganization.getByRole("heading", { name: "Agentes habilitados" })).toBeVisible();
     await expect(perOrganization.getByRole("heading", { name: "Ferramentas web" })).toBeVisible();
@@ -44,7 +49,8 @@ const createVersion = async (page: Page, agent: { id: string; name: string }, no
   // import of `pnpm seed:local`) it starts empty and the first version is written in full.
   await expect(body).toBeEditable();
   const active = await body.inputValue();
-  const base = active === "" ? `You are the ${agent.id} agent of the assistant. Answer briefly and cite your sources.` : active;
+  const base =
+    active === "" ? `You are the ${agent.id} agent of the assistant. Answer briefly and cite your sources.` : active;
   await body.fill(`${base}
 
 ${note}.`);
@@ -59,7 +65,9 @@ ${note}.`);
 };
 
 test.describe("platform prompts", () => {
-  test("evaluates a version, then activates it (forced with a reason when the eval does not pass)", async ({ staffPage }) => {
+  test("evaluates a version, then activates it (forced with a reason when the eval does not pass)", async ({
+    staffPage,
+  }) => {
     test.setTimeout(300_000);
     const note = unique("E2E prompt change");
     const version = await createVersion(staffPage, { id: "data", name: "Dados" }, note);
@@ -86,7 +94,9 @@ test.describe("platform prompts", () => {
       await confirm.getByRole("button", { name: "Forçar ativação" }).click();
       await expect(toast(staffPage, `Versão ${version} de Dados ativada sem avaliação aprovada.`)).toBeVisible();
     }
-    await expect(staffPage.getByRole("region", { name: "Versões", exact: true })).toContainText(`A versão ${version} está em produção.`);
+    await expect(staffPage.getByRole("region", { name: "Versões", exact: true })).toContainText(
+      `A versão ${version} está em produção.`,
+    );
     const history = staffPage.getByRole("table", { name: "Ativações do prompt de Dados" });
     await expect(history.getByRole("row").nth(1)).toContainText(`v${version}`);
   });

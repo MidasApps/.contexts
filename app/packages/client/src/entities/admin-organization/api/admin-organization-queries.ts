@@ -10,21 +10,37 @@ import {
 import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
-import { COLLECT_PAGE_LIMIT, type CollectedPages, collectPages, cursorListQuery, nullOnNotFound, pageQuery } from "#/shared/api/cursor-list.ts";
+import {
+  COLLECT_PAGE_LIMIT,
+  type CollectedPages,
+  collectPages,
+  cursorListQuery,
+  nullOnNotFound,
+  pageQuery,
+} from "#/shared/api/cursor-list.ts";
 import type { QueryKey } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 
 export const ADMIN_ORGANIZATIONS_PAGE_LIMIT = 20;
 
 /** Text (words of the name or id) and status the list is narrowed by; both absent lists everything. */
-export type AdminOrganizationFilter = { readonly query?: string | undefined; readonly status?: OrganizationStatus | undefined };
+export type AdminOrganizationFilter = {
+  readonly query?: string | undefined;
+  readonly status?: OrganizationStatus | undefined;
+};
 
 /** Platform data lives under `["admin", …]`: staff mutations invalidate `all`. */
 export const adminOrganizationKeys = {
   all: (): QueryKey => ["admin", "organizations"],
   whole: (): QueryKey => ["admin", "organizations", "whole"],
   searches: (): QueryKey => ["admin", "organizations", "search"],
-  search: (filter: AdminOrganizationFilter): QueryKey => ["admin", "organizations", "search", filter.status ?? "any", filter.query ?? ""],
+  search: (filter: AdminOrganizationFilter): QueryKey => [
+    "admin",
+    "organizations",
+    "search",
+    filter.status ?? "any",
+    filter.query ?? "",
+  ],
   detail: (organizationId: string): QueryKey => ["admin", "organizations", "detail", organizationId],
 };
 
@@ -39,7 +55,11 @@ export const allAdminOrganizationsQuery = (callEndpoint: CallEndpoint) =>
     queryKey: adminOrganizationKeys.whole(),
     queryFn: ({ signal }): Promise<CollectedPages<OrganizationAdminSummary>> =>
       collectPages<OrganizationAdminSummary>(
-        (cursor, pageSignal) => callEndpoint(listOrganizationsAdminEndpoint, { query: pageQuery(cursor, COLLECT_PAGE_LIMIT), signal: pageSignal }),
+        (cursor, pageSignal) =>
+          callEndpoint(listOrganizationsAdminEndpoint, {
+            query: pageQuery(cursor, COLLECT_PAGE_LIMIT),
+            signal: pageSignal,
+          }),
         signal,
       ),
   });
@@ -50,7 +70,11 @@ const itemsOf = (collected: CollectedPages<OrganizationAdminSummary>): Organizat
 export const useAllAdminOrganizations = (options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...allAdminOrganizationsQuery(callEndpoint), select: itemsOf, enabled: signedIn && options.enabled !== false });
+  return useQuery({
+    ...allAdminOrganizationsQuery(callEndpoint),
+    select: itemsOf,
+    enabled: signedIn && options.enabled !== false,
+  });
 };
 
 /** The organizations with `truncated`, for views that count or total them and must say when the list was cut. */
@@ -82,7 +106,10 @@ export const adminOrganizationSearchQuery = (callEndpoint: CallEndpoint, filter:
 export const useAdminOrganizationSearch = (filter: AdminOrganizationFilter, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useInfiniteQuery({ ...adminOrganizationSearchQuery(callEndpoint, filter), enabled: signedIn && options.enabled !== false });
+  return useInfiniteQuery({
+    ...adminOrganizationSearchQuery(callEndpoint, filter),
+    enabled: signedIn && options.enabled !== false,
+  });
 };
 
 /** `GET /v1/admin/organizations/{id}`: one organization with its member count; `null` when it is not found. */
@@ -90,11 +117,16 @@ export const adminOrganizationQuery = (callEndpoint: CallEndpoint, organizationI
   queryOptions({
     queryKey: adminOrganizationKeys.detail(organizationId),
     queryFn: ({ signal }): Promise<OrganizationAdminDetail | null> =>
-      nullOnNotFound(async () => (await callEndpoint(getOrganizationAdminEndpoint, { params: { organizationId }, signal })).data),
+      nullOnNotFound(
+        async () => (await callEndpoint(getOrganizationAdminEndpoint, { params: { organizationId }, signal })).data,
+      ),
   });
 
 export const useAdminOrganization = (organizationId: string, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...adminOrganizationQuery(callEndpoint, organizationId), enabled: signedIn && organizationId !== "" && options.enabled !== false });
+  return useQuery({
+    ...adminOrganizationQuery(callEndpoint, organizationId),
+    enabled: signedIn && organizationId !== "" && options.enabled !== false,
+  });
 };

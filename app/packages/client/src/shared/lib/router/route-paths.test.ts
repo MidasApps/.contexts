@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { parseRoute } from "./parse-route.ts";
-import { ROUTE_IDS, routeHref, type Route, type RouteId } from "./route-paths.ts";
+import { ROUTE_IDS, type Route, type RouteId, routeHref } from "./route-paths.ts";
 
 /** One or more sample routes per id, including awkward characters. */
 const SAMPLES: Record<RouteId, Route[]> = {
-  "sign-in": [{ id: "sign-in", next: undefined }, { id: "sign-in", next: "/o/a b/p/c?unit=d" }],
-  invite: [{ id: "invite", token: undefined }, { id: "invite", token: "tok+/=en" }],
-  "sign-up": [{ id: "sign-up", next: undefined }, { id: "sign-up", next: "/organizations" }],
+  "sign-in": [
+    { id: "sign-in", next: undefined },
+    { id: "sign-in", next: "/o/a b/p/c?unit=d" },
+  ],
+  invite: [
+    { id: "invite", token: undefined },
+    { id: "invite", token: "tok+/=en" },
+  ],
+  "sign-up": [
+    { id: "sign-up", next: undefined },
+    { id: "sign-up", next: "/organizations" },
+  ],
   "reset-password": [{ id: "reset-password" }],
   home: [{ id: "home" }],
   organizations: [{ id: "organizations" }],
@@ -46,14 +55,26 @@ describe("route paths", () => {
 
   it("builds the SP2 spec §4 paths", () => {
     expect(routeHref({ id: "project", organizationId: "a", projectId: "b", unit: "c" })).toBe("/o/a/p/b?unit=c");
-    expect(routeHref({ id: "module", organizationId: "a", projectId: "b", moduleId: "example", rest: "items/1" })).toBe("/o/a/p/b/m/example/items/1");
-    expect(routeHref({ id: "settings-module", organizationId: "a", moduleId: "example" })).toBe("/o/a/settings/m/example");
+    expect(routeHref({ id: "module", organizationId: "a", projectId: "b", moduleId: "example", rest: "items/1" })).toBe(
+      "/o/a/p/b/m/example/items/1",
+    );
+    expect(routeHref({ id: "settings-module", organizationId: "a", moduleId: "example" })).toBe(
+      "/o/a/settings/m/example",
+    );
     expect(routeHref({ id: "settings-index", organizationId: "a" })).toBe("/o/a/settings");
-    expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", rest: "ap1" })).toBe("/o/a/settings/approvals/ap1");
-    expect(routeHref({ id: "settings", organizationId: "a", section: "workflows", rest: "runs/r1" })).toBe("/o/a/settings/workflows/runs/r1");
-    expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", search: { tab: "history" } })).toBe("/o/a/settings/approvals?tab=history");
+    expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", rest: "ap1" })).toBe(
+      "/o/a/settings/approvals/ap1",
+    );
+    expect(routeHref({ id: "settings", organizationId: "a", section: "workflows", rest: "runs/r1" })).toBe(
+      "/o/a/settings/workflows/runs/r1",
+    );
+    expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", search: { tab: "history" } })).toBe(
+      "/o/a/settings/approvals?tab=history",
+    );
     expect(routeHref({ id: "chat", organizationId: "a", projectId: "b" })).toBe("/o/a/p/b/chat");
-    expect(routeHref({ id: "chat", organizationId: "a", projectId: "b", conversationId: "c1" })).toBe("/o/a/p/b/chat/c1");
+    expect(routeHref({ id: "chat", organizationId: "a", projectId: "b", conversationId: "c1" })).toBe(
+      "/o/a/p/b/chat/c1",
+    );
     expect(routeHref({ id: "sign-in", next: "/organizations" })).toBe("/sign-in?next=%2Forganizations");
     expect(routeHref({ id: "invite", token: "t1" })).toBe("/invite#token=t1");
     expect(routeHref({ id: "sign-up", next: "/organizations" })).toBe("/sign-up?next=%2Forganizations");

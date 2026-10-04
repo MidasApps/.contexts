@@ -1,5 +1,5 @@
 import type { Permission, Principal, TenantNodeRef, UserId } from "@core/contracts";
-import { isAtOrBefore, type Clock } from "../../shared/clock/clock.ts";
+import { type Clock, isAtOrBefore } from "../../shared/clock/clock.ts";
 import type { DenyReason } from "../domain/authorization.ts";
 import { isNodeWithin, type NodeChain } from "../domain/node-chain.ts";
 import type { PermissionRegistry } from "../domain/permission-registry.ts";
@@ -17,9 +17,17 @@ export type TenantSubject = {
   readonly readOnly: boolean;
 };
 
-export type SubjectResult = { readonly ok: true; readonly subject: TenantSubject } | { readonly ok: false; readonly reason: DenyReason };
+export type SubjectResult =
+  | { readonly ok: true; readonly subject: TenantSubject }
+  | { readonly ok: false; readonly reason: DenyReason };
 
-type SubjectArgs = { node: TenantNodeRef; chain: NodeChain; readers: AccessReaders; clock: Clock; registry: PermissionRegistry };
+type SubjectArgs = {
+  node: TenantNodeRef;
+  chain: NodeChain;
+  readers: AccessReaders;
+  clock: Clock;
+  registry: PermissionRegistry;
+};
 
 const IMPERSONATE_PERMISSION: Permission = "platform.user.impersonate";
 
@@ -41,7 +49,11 @@ const canStaffImpersonate = async (args: SubjectArgs, staffUid: UserId): Promise
 
 // One reason for every unusable session: expired, ended, unknown, issued for another user or
 // tenant, or held by staff who lost the right to impersonate.
-const isImpersonationUsable = async (targetUid: UserId, impersonation: Impersonation, args: SubjectArgs): Promise<boolean> => {
+const isImpersonationUsable = async (
+  targetUid: UserId,
+  impersonation: Impersonation,
+  args: SubjectArgs,
+): Promise<boolean> => {
   const session = await args.readers.principals.getImpersonationSession(impersonation.sessionId);
   const sessionOpen =
     session !== null &&
@@ -53,25 +65,38 @@ const isImpersonationUsable = async (targetUid: UserId, impersonation: Impersona
   return sessionOpen && (await canStaffImpersonate(args, impersonation.staffUid));
 };
 
-const resolveUser = async (principal: Extract<Principal, { type: "user" }>, args: SubjectArgs): Promise<SubjectResult> => {
+const resolveUser = async (
+  principal: Extract<Principal, { type: "user" }>,
+  args: SubjectArgs,
+): Promise<SubjectResult> => {
   if (!(await isUserActive(args.readers, principal.uid))) return denied("PRINCIPAL_INACTIVE");
-  if (principal.impersonation === undefined) return { ok: true, subject: { principalId: principal.uid, readOnly: false } };
+  if (principal.impersonation === undefined)
+    return { ok: true, subject: { principalId: principal.uid, readOnly: false } };
   return (await isImpersonationUsable(principal.uid, principal.impersonation, args))
     ? { ok: true, subject: { principalId: principal.uid, readOnly: true } }
     : denied("IMPERSONATION_EXPIRED");
 };
 
-const resolveDevice = async (principal: Extract<Principal, { type: "device" }>, args: SubjectArgs): Promise<SubjectResult> => {
+const resolveDevice = async (
+  principal: Extract<Principal, { type: "device" }>,
+  args: SubjectArgs,
+): Promise<SubjectResult> => {
   const device = await args.readers.principals.getDevice(principal.deviceId);
   if (device?.status !== "active" || device.tenantId !== principal.tenantId) return denied("PRINCIPAL_INACTIVE");
   if (principal.tenantId !== args.node.tenantId) return denied("NOT_A_MEMBER");
   return { ok: true, subject: { principalId: principal.deviceId, readOnly: false } };
 };
 
-const matchesKey = (principal: Extract<Principal, { type: "service" }>, key: ApiKeyStatusRecord | null): key is ApiKeyStatusRecord =>
+const matchesKey = (
+  principal: Extract<Principal, { type: "service" }>,
+  key: ApiKeyStatusRecord | null,
+): key is ApiKeyStatusRecord =>
   key?.status === "active" && key.tenantId === principal.tenantId && key.ownerUid === principal.ownerUid;
 
-const resolveService = async (principal: Extract<Principal, { type: "service" }>, args: SubjectArgs): Promise<SubjectResult> => {
+const resolveService = async (
+  principal: Extract<Principal, { type: "service" }>,
+  args: SubjectArgs,
+): Promise<SubjectResult> => {
   const key = await args.readers.principals.getApiKey(principal.apiKeyId);
   if (!matchesKey(principal, key)) return denied("PRINCIPAL_INACTIVE");
   if (isAtOrBefore(key.expiresAt, args.clock.now())) return denied("KEY_EXPIRED");

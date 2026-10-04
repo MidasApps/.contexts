@@ -4,7 +4,7 @@ import { useTranslations } from "use-intl";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
-import { CRON_PRESET_KINDS, cronOfDraft, type CronDraft, type CronPresetKind } from "../model/cron-presets.ts";
+import { CRON_PRESET_KINDS, type CronDraft, type CronPresetKind, cronOfDraft } from "../model/cron-presets.ts";
 
 const WEEKDAYS = ["0", "1", "2", "3", "4", "5", "6"] as const;
 const isKind = (value: string): value is CronPresetKind => (CRON_PRESET_KINDS as readonly string[]).includes(value);
@@ -14,21 +14,33 @@ type Props = { draft: CronDraft; onChange: (draft: CronDraft) => void; invalid: 
 
 function PresetDetail({ draft, onChange }: Omit<Props, "invalid">) {
   const t = useTranslations("settings.workflows.editor");
-  const timed = draft.kind === "daily" || draft.kind === "weekdays" || draft.kind === "weekly" || draft.kind === "monthly";
+  const timed =
+    draft.kind === "daily" || draft.kind === "weekdays" || draft.kind === "weekly" || draft.kind === "monthly";
   return (
     <>
       {draft.kind === "hourly" ? (
         <Field>
           <FieldLabel>{t("minute")}</FieldLabel>
           <FieldControl>
-            <Input type="number" inputMode="numeric" min={0} max={59} className="w-full sm:w-32" value={Number.isNaN(draft.minute) ? "" : draft.minute} onChange={(event) => onChange({ ...draft, minute: numberOf(event.target.value) })} />
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={59}
+              className="w-full sm:w-32"
+              value={Number.isNaN(draft.minute) ? "" : draft.minute}
+              onChange={(event) => onChange({ ...draft, minute: numberOf(event.target.value) })}
+            />
           </FieldControl>
         </Field>
       ) : null}
       {draft.kind === "weekly" ? (
         <Field>
           <FieldLabel>{t("weekday")}</FieldLabel>
-          <Select value={String(draft.weekday)} onValueChange={(value) => onChange({ ...draft, weekday: Number(value) })}>
+          <Select
+            value={String(draft.weekday)}
+            onValueChange={(value) => onChange({ ...draft, weekday: Number(value) })}
+          >
             <FieldControl>
               <SelectTrigger className="w-full sm:w-64">
                 <SelectValue />
@@ -48,7 +60,15 @@ function PresetDetail({ draft, onChange }: Omit<Props, "invalid">) {
         <Field>
           <FieldLabel>{t("monthDay")}</FieldLabel>
           <FieldControl>
-            <Input type="number" inputMode="numeric" min={1} max={28} className="w-full sm:w-32" value={Number.isNaN(draft.monthDay) ? "" : draft.monthDay} onChange={(event) => onChange({ ...draft, monthDay: numberOf(event.target.value) })} />
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={28}
+              className="w-full sm:w-32"
+              value={Number.isNaN(draft.monthDay) ? "" : draft.monthDay}
+              onChange={(event) => onChange({ ...draft, monthDay: numberOf(event.target.value) })}
+            />
           </FieldControl>
           <FieldDescription>{t("monthDayHint")}</FieldDescription>
         </Field>
@@ -57,7 +77,12 @@ function PresetDetail({ draft, onChange }: Omit<Props, "invalid">) {
         <Field>
           <FieldLabel>{t("time")}</FieldLabel>
           <FieldControl>
-            <Input type="time" className="w-full sm:w-40" value={draft.time} onChange={(event) => onChange({ ...draft, time: event.target.value })} />
+            <Input
+              type="time"
+              className="w-full sm:w-40"
+              value={draft.time}
+              onChange={(event) => onChange({ ...draft, time: event.target.value })}
+            />
           </FieldControl>
         </Field>
       ) : null}
@@ -65,7 +90,14 @@ function PresetDetail({ draft, onChange }: Omit<Props, "invalid">) {
         <Field>
           <FieldLabel>{t("custom")}</FieldLabel>
           <FieldControl>
-            <Input className="font-mono" spellCheck={false} autoCapitalize="none" maxLength={120} value={draft.custom} onChange={(event) => onChange({ ...draft, custom: event.target.value })} />
+            <Input
+              className="font-mono"
+              spellCheck={false}
+              autoCapitalize="none"
+              maxLength={120}
+              value={draft.custom}
+              onChange={(event) => onChange({ ...draft, custom: event.target.value })}
+            />
           </FieldControl>
           <FieldDescription>{t("customHint")}</FieldDescription>
         </Field>

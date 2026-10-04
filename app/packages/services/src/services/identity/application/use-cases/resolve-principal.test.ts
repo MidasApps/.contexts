@@ -3,7 +3,13 @@ import { describe, expect, it } from "vitest";
 import { createFakeTokenVerifier } from "../../adapters/driven/fake-token-verifier.ts";
 import type { ApiKeyAuthenticator } from "../ports/driven/api-key-authenticator.ts";
 import type { VerifiedToken } from "../ports/driven/token-verifier.ts";
-import { isApiKeyCredential, makeResolvePrincipal, makeVerifyBearer, parseBearer, requiresRevocationCheck } from "./resolve-principal.ts";
+import {
+  isApiKeyCredential,
+  makeResolvePrincipal,
+  makeVerifyBearer,
+  parseBearer,
+  requiresRevocationCheck,
+} from "./resolve-principal.ts";
 
 const token = (overrides: Partial<VerifiedToken> = {}): VerifiedToken => ({
   uid: "user-1",
@@ -13,7 +19,12 @@ const token = (overrides: Partial<VerifiedToken> = {}): VerifiedToken => ({
   ...overrides,
 });
 
-const serviceKey = { type: "service", apiKeyId: "key-1", tenantId: "org-a", ownerUid: "owner-a" } as unknown as ServicePrincipal;
+const serviceKey = {
+  type: "service",
+  apiKeyId: "key-1",
+  tenantId: "org-a",
+  ownerUid: "owner-a",
+} as unknown as ServicePrincipal;
 
 const setup = (tokens: Record<string, VerifiedToken>) => {
   const verifier = createFakeTokenVerifier({ tokens });
@@ -51,13 +62,18 @@ describe("requiresRevocationCheck (follow-up #12e)", () => {
 describe("resolvePrincipal", () => {
   it("passes checkRevoked false for GET and true for every mutation", async () => {
     const { verifier, resolvePrincipal } = setup({ t1: token() });
-    for (const method of ["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE"]) await resolvePrincipal({ authorization: "Bearer t1", method });
+    for (const method of ["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE"])
+      await resolvePrincipal({ authorization: "Bearer t1", method });
     expect(verifier.calls().map((call) => call.checkRevoked)).toEqual([false, false, true, true, true, true]);
   });
 
   it("maps a plain token to a user without MFA", async () => {
     const { resolvePrincipal } = setup({ t1: token() });
-    expect(await resolvePrincipal({ authorization: "Bearer t1", method: "GET" })).toEqual({ type: "user", uid: "user-1", mfa: false });
+    expect(await resolvePrincipal({ authorization: "Bearer t1", method: "GET" })).toEqual({
+      type: "user",
+      uid: "user-1",
+      mfa: false,
+    });
   });
 
   it("returns null for a missing header, an unknown token or a revoked token on a mutation", async () => {
@@ -80,13 +96,28 @@ describe("verifyBearer: claims", () => {
       c: token({ signInProvider: "custom", claims: { sessionId: "sess-1", smfa: true } }),
       p: token({ signInProvider: "password", claims: { sessionId: "sess-1" } }),
     });
-    expect(await verifyBearer({ token: "c", checkRevoked: false })).toEqual({ type: "user", uid: "user-1", mfa: true, sessionId: "sess-1" });
-    expect(await verifyBearer({ token: "p", checkRevoked: false })).toEqual({ type: "user", uid: "user-1", mfa: false });
+    expect(await verifyBearer({ token: "c", checkRevoked: false })).toEqual({
+      type: "user",
+      uid: "user-1",
+      mfa: true,
+      sessionId: "sess-1",
+    });
+    expect(await verifyBearer({ token: "p", checkRevoked: false })).toEqual({
+      type: "user",
+      uid: "user-1",
+      mfa: false,
+    });
   });
 
   it("maps the device claim to a device principal of its tenant", async () => {
-    const { verifyBearer } = setup({ d: token({ uid: "dev-1", signInProvider: "custom", claims: { principalType: "device", tenantId: "org-a" } }) });
-    expect(await verifyBearer({ token: "d", checkRevoked: false })).toEqual({ type: "device", deviceId: "dev-1", tenantId: "org-a" });
+    const { verifyBearer } = setup({
+      d: token({ uid: "dev-1", signInProvider: "custom", claims: { principalType: "device", tenantId: "org-a" } }),
+    });
+    expect(await verifyBearer({ token: "d", checkRevoked: false })).toEqual({
+      type: "device",
+      deviceId: "dev-1",
+      tenantId: "org-a",
+    });
   });
 
   it("rejects a device claim without a tenant and an unknown principal type", async () => {
@@ -120,14 +151,15 @@ describe("verifyBearer: claims", () => {
       forged: token({ signInProvider: "password", claims: { smfa: true } }),
       odd: token({ secondFactor: "email" }),
     });
-    const mfaOf = async (name: string) => ((await verifyBearer({ token: name, checkRevoked: false })) as { mfa: boolean }).mfa;
-    expect([await mfaOf("totp"), await mfaOf("phone"), await mfaOf("custom"), await mfaOf("forged"), await mfaOf("odd")]).toEqual([
-      true,
-      true,
-      true,
-      false,
-      false,
-    ]);
+    const mfaOf = async (name: string) =>
+      ((await verifyBearer({ token: name, checkRevoked: false })) as { mfa: boolean }).mfa;
+    expect([
+      await mfaOf("totp"),
+      await mfaOf("phone"),
+      await mfaOf("custom"),
+      await mfaOf("forged"),
+      await mfaOf("odd"),
+    ]).toEqual([true, true, true, false, false]);
   });
 });
 

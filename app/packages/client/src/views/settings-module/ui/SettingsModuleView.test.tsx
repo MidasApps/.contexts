@@ -6,13 +6,27 @@ import { defineClientModule } from "#/app-shell/modules/define-client-module.ts"
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, ok } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsModuleView } from "./SettingsModuleView.tsx";
 
 const SettingsContract = defineContract(
-  z.object({ greeting: z.string().min(1).max(40).meta({ description: "Greeting.", pii: "none", ui: { labelKey: "sample.settings.greeting", order: 1 } }) }),
-  { id: "sample.SampleSettings", kind: "settings", description: "Sample settings.", examples: [{ greeting: "Oi" }], pii: "none", tenancyScope: "organization", relations: [] },
+  z.object({
+    greeting: z
+      .string()
+      .min(1)
+      .max(40)
+      .meta({ description: "Greeting.", pii: "none", ui: { labelKey: "sample.settings.greeting", order: 1 } }),
+  }),
+  {
+    id: "sample.SampleSettings",
+    kind: "settings",
+    description: "Sample settings.",
+    examples: [{ greeting: "Oi" }],
+    pii: "none",
+    tenancyScope: "organization",
+    relations: [],
+  },
 );
 
 const sampleModule = defineClientModule({
@@ -20,16 +34,45 @@ const sampleModule = defineClientModule({
     id: "sample",
     labelKey: "sample.module.name",
     permissions: [
-      { id: "sample.settings.read", descriptionKey: "sample.permissions.read", kind: "read", scope: "tenant", defaultRoles: ["member"] },
-      { id: "sample.settings.update", descriptionKey: "sample.permissions.update", kind: "write", scope: "tenant", defaultRoles: ["admin"] },
+      {
+        id: "sample.settings.read",
+        descriptionKey: "sample.permissions.read",
+        kind: "read",
+        scope: "tenant",
+        defaultRoles: ["member"],
+      },
+      {
+        id: "sample.settings.update",
+        descriptionKey: "sample.permissions.update",
+        kind: "write",
+        scope: "tenant",
+        defaultRoles: ["admin"],
+      },
     ],
-    settings: { contract: SettingsContract, readPermission: "sample.settings.read", updatePermission: "sample.settings.update" },
-    messages: { "pt-BR": { module: { name: "Amostras" }, settings: { greeting: "Saudação" }, permissions: { read: "Ler", update: "Alterar" } } },
+    settings: {
+      contract: SettingsContract,
+      readPermission: "sample.settings.read",
+      updatePermission: "sample.settings.update",
+    },
+    messages: {
+      "pt-BR": {
+        module: { name: "Amostras" },
+        settings: { greeting: "Saudação" },
+        permissions: { read: "Ler", update: "Alterar" },
+      },
+    },
   }),
   pages: { "": () => Promise.resolve({ default: () => <p>page</p> }) },
 });
 
-const stored = (values: Record<string, unknown> | null) => ok({ tenantId: IDS.organization, moduleId: "sample", values, updatedAt: values === null ? null : "2026-09-29T15:00:00.000Z", updatedBy: values === null ? null : IDS.user });
+const stored = (values: Record<string, unknown> | null) =>
+  ok({
+    tenantId: IDS.organization,
+    moduleId: "sample",
+    values,
+    updatedAt: values === null ? null : "2026-09-29T15:00:00.000Z",
+    updatedBy: values === null ? null : IDS.user,
+  });
 
 const renderView = (permissions: string[], routes: FakeRoutes = {}, moduleId = "sample") =>
   renderApp(
@@ -39,7 +82,10 @@ const renderView = (permissions: string[], routes: FakeRoutes = {}, moduleId = "
     {
       path: `/o/${IDS.organization}/settings/m/${moduleId}`,
       modules: [sampleModule],
-      routes: shellRoutes(["core.organization.read", ...permissions] as never, { "GET /v1/organizations/:organizationId/module-settings/:moduleId": stored({ greeting: "Oi" }), ...routes }),
+      routes: shellRoutes(["core.organization.read", ...permissions] as never, {
+        "GET /v1/organizations/:organizationId/module-settings/:moduleId": stored({ greeting: "Oi" }),
+        ...routes,
+      }),
     },
   );
 
@@ -80,7 +126,9 @@ describe("SettingsModuleView", () => {
   });
 
   it("shows the error with a retry when the settings fail to load", async () => {
-    renderView(["sample.settings.read"], { "GET /v1/organizations/:organizationId/module-settings/:moduleId": apiError(400, "VALIDATION_FAILED") });
+    renderView(["sample.settings.read"], {
+      "GET /v1/organizations/:organizationId/module-settings/:moduleId": apiError(400, "VALIDATION_FAILED"),
+    });
     expect(await screen.findByRole("button", { name: "Tentar novamente" })).toBeDefined();
   });
 });

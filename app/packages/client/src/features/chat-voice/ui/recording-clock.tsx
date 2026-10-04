@@ -8,7 +8,8 @@ const MAX_SECONDS = MAX_RECORDING_MS / 1000;
 /** Seconds left when the end of the recording is announced (once). */
 export const ENDS_SOON_SECONDS = 10;
 
-const clock = (seconds: number): string => `${String(Math.floor(seconds / 60))}:${String(seconds % 60).padStart(2, "0")}`;
+const clock = (seconds: number): string =>
+  `${String(Math.floor(seconds / 60))}:${String(seconds % 60).padStart(2, "0")}`;
 
 /** Seconds since the recording started, counted by a 1 s tick (no wall clock: tests stay deterministic). */
 const useElapsedSeconds = (): number => {
@@ -32,7 +33,15 @@ export function RecordingClock() {
   const endsSoon = MAX_SECONDS - elapsed <= ENDS_SOON_SECONDS;
   return (
     <>
-      <span aria-hidden="true" data-slot="recording-clock" className={endsSoon ? "font-mono text-xs text-amber-foreground tabular-nums" : "font-mono text-xs text-muted-foreground tabular-nums"}>
+      <span
+        aria-hidden="true"
+        data-slot="recording-clock"
+        className={
+          endsSoon
+            ? "font-mono text-xs text-amber-foreground tabular-nums"
+            : "font-mono text-xs text-muted-foreground tabular-nums"
+        }
+      >
         {`${clock(elapsed)} / ${clock(MAX_SECONDS)}`}
       </span>
       <span role="status" className="sr-only">

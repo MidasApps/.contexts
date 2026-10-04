@@ -2,7 +2,7 @@
 
 import { createApiKeyEndpoint, type Permission } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRef, useState, type FormEvent, type RefObject } from "react";
+import { type FormEvent, type RefObject, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { apiKeyKeys } from "#/entities/api-key/index.ts";
 import { usePermissions } from "#/entities/permission/index.ts";
@@ -14,12 +14,34 @@ import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { OneTimeSecret } from "#/shared/ui/molecules/OneTimeSecret/OneTimeSecret.tsx";
-import { EXPIRY_OPTIONS_DAYS, emptyApiKeyDraft, expiryFrom, validateApiKeyDraft, type ApiKeyDraft, type ApiKeyDraftProblems, type ExpiryDays } from "../model/api-key-draft.ts";
+import {
+  type ApiKeyDraft,
+  type ApiKeyDraftProblems,
+  EXPIRY_OPTIONS_DAYS,
+  type ExpiryDays,
+  emptyApiKeyDraft,
+  expiryFrom,
+  validateApiKeyDraft,
+} from "../model/api-key-draft.ts";
 
 export type CreateApiKeyDialogProps = {
   organization: { id: string; name: string };
@@ -34,9 +56,27 @@ const systemNow = (): Date => new Date();
 const nodeParams = (draft: ApiKeyDraft) =>
   draft.node.level === "organization"
     ? { organizationId: draft.node.tenantId }
-    : { organizationId: draft.node.tenantId, projectId: draft.node.projectId, unitId: draft.node.level === "unit" ? draft.node.unitId : undefined };
+    : {
+        organizationId: draft.node.tenantId,
+        projectId: draft.node.projectId,
+        unitId: draft.node.level === "unit" ? draft.node.unitId : undefined,
+      };
 
-function ApiKeyFields({ organization, draft, setDraft, problems, nameInput, now }: { organization: CreateApiKeyDialogProps["organization"]; draft: ApiKeyDraft; setDraft: (draft: ApiKeyDraft) => void; problems: ApiKeyDraftProblems; nameInput: RefObject<HTMLInputElement | null>; now: () => Date }) {
+function ApiKeyFields({
+  organization,
+  draft,
+  setDraft,
+  problems,
+  nameInput,
+  now,
+}: {
+  organization: CreateApiKeyDialogProps["organization"];
+  draft: ApiKeyDraft;
+  setDraft: (draft: ApiKeyDraft) => void;
+  problems: ApiKeyDraftProblems;
+  nameInput: RefObject<HTMLInputElement | null>;
+  now: () => Date;
+}) {
   const t = useTranslations("settings.apiKeys.createDialog");
   const formatDateTime = useFormatDateTime();
   // Scopes are limited to what the actor holds at the chosen node (no escalation, SP1 spec §5.3).
@@ -46,7 +86,13 @@ function ApiKeyFields({ organization, draft, setDraft, problems, nameInput, now 
       <Field>
         <FieldLabel>{t("name")}</FieldLabel>
         <FieldControl>
-          <Input ref={nameInput} required maxLength={120} value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} />
+          <Input
+            ref={nameInput}
+            required
+            maxLength={120}
+            value={draft.name}
+            onChange={(event) => setDraft({ ...draft, name: event.target.value })}
+          />
         </FieldControl>
         <FieldDescription>{t("nameHint")}</FieldDescription>
         <FieldError errors={[problems.name === undefined ? undefined : t(`errors.${problems.name}`)]} />
@@ -54,13 +100,20 @@ function ApiKeyFields({ organization, draft, setDraft, problems, nameInput, now 
       <Field>
         <FieldLabel>{t("node")}</FieldLabel>
         <FieldControl>
-          <NodeSelect organization={organization} value={draft.node} onValueChange={(node) => setDraft({ ...draft, node, scopes: [] })} />
+          <NodeSelect
+            organization={organization}
+            value={draft.node}
+            onValueChange={(node) => setDraft({ ...draft, node, scopes: [] })}
+          />
         </FieldControl>
         <FieldDescription>{t("nodeHint")}</FieldDescription>
       </Field>
       <Field>
         <FieldLabel>{t("expiry")}</FieldLabel>
-        <Select value={String(draft.expiryDays)} onValueChange={(value) => setDraft({ ...draft, expiryDays: Number(value) as ExpiryDays })}>
+        <Select
+          value={String(draft.expiryDays)}
+          onValueChange={(value) => setDraft({ ...draft, expiryDays: Number(value) as ExpiryDays })}
+        >
           <FieldControl>
             <SelectTrigger className="w-full sm:w-64">
               <SelectValue />
@@ -74,7 +127,9 @@ function ApiKeyFields({ organization, draft, setDraft, problems, nameInput, now 
             ))}
           </SelectContent>
         </Select>
-        <FieldDescription>{t("expiresOn", { date: formatDateTime(expiryFrom(now(), draft.expiryDays), "date") })}</FieldDescription>
+        <FieldDescription>
+          {t("expiresOn", { date: formatDateTime(expiryFrom(now(), draft.expiryDays), "date") })}
+        </FieldDescription>
       </Field>
       <PermissionCatalogField
         legend={t("scopes")}
@@ -116,10 +171,19 @@ function CreateApiKeyDialogBody({ organization, onOpenChange, now = systemNow }:
     setFailure(null);
     if (found.name !== undefined) return nameInput.current?.focus();
     if (found.scopes === true) return;
-    const body = { name: draft.name.trim(), node: draft.node, scopes: draft.scopes, expiresAt: expiryFrom(now(), draft.expiryDays) };
+    const body = {
+      name: draft.name.trim(),
+      node: draft.node,
+      scopes: draft.scopes,
+      expiresAt: expiryFrom(now(), draft.expiryDays),
+    };
     setPending(true);
     try {
-      const { data } = await callEndpoint(createApiKeyEndpoint, { params: { organizationId: organization.id }, body, idempotencyKey: idempotency.keyFor({ ...body, expiresAt: draft.expiryDays }) });
+      const { data } = await callEndpoint(createApiKeyEndpoint, {
+        params: { organizationId: organization.id },
+        body,
+        idempotencyKey: idempotency.keyFor({ ...body, expiresAt: draft.expiryDays }),
+      });
       idempotency.reset();
       setSecret({ name: data.apiKey.name, value: data.secret });
     } catch (error: unknown) {
@@ -133,26 +197,42 @@ function CreateApiKeyDialogBody({ organization, onOpenChange, now = systemNow }:
 
   return (
     <>
-        <DialogHeader>
-          <DialogTitle>{secret === null ? t("title") : t("createdTitle", { name: secret.name })}</DialogTitle>
-          <DialogDescription>{secret === null ? t("description") : t("createdDescription")}</DialogDescription>
-        </DialogHeader>
-        {secret !== null ? (
-          <OneTimeSecret title={t("secretTitle")} warning={t("secretWarning")} label={t("secretLabel")} secret={secret.value} hint={t("secretHint")} acknowledge={t("stored")} doneLabel={t("done")} onDone={() => onOpenChange(false)} />
-        ) : (
-          <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
-            {failure === null ? null : <ApiErrorAlert error={failure} />}
-            <ApiKeyFields organization={organization} draft={draft} setDraft={setDraft} problems={problems} nameInput={nameInput} now={now} />
-            <DialogFooter>
-              <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
-                {t("cancel")}
-              </Button>
-              <Button type="submit" pending={pending} disabled={!catalogReady}>
-                {t("submit")}
-              </Button>
-            </DialogFooter>
-          </form>
-        )}
+      <DialogHeader>
+        <DialogTitle>{secret === null ? t("title") : t("createdTitle", { name: secret.name })}</DialogTitle>
+        <DialogDescription>{secret === null ? t("description") : t("createdDescription")}</DialogDescription>
+      </DialogHeader>
+      {secret !== null ? (
+        <OneTimeSecret
+          title={t("secretTitle")}
+          warning={t("secretWarning")}
+          label={t("secretLabel")}
+          secret={secret.value}
+          hint={t("secretHint")}
+          acknowledge={t("stored")}
+          doneLabel={t("done")}
+          onDone={() => onOpenChange(false)}
+        />
+      ) : (
+        <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
+          {failure === null ? null : <ApiErrorAlert error={failure} />}
+          <ApiKeyFields
+            organization={organization}
+            draft={draft}
+            setDraft={setDraft}
+            problems={problems}
+            nameInput={nameInput}
+            now={now}
+          />
+          <DialogFooter>
+            <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
+              {t("cancel")}
+            </Button>
+            <Button type="submit" pending={pending} disabled={!catalogReady}>
+              {t("submit")}
+            </Button>
+          </DialogFooter>
+        </form>
+      )}
     </>
   );
 }

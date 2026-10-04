@@ -31,7 +31,12 @@ export const createGcsUrlSigner = (bucket: StorageBucket): FileUrlSigner => ({
       contentType,
       extensionHeaders: { [CONTENT_LENGTH_RANGE]: range },
     });
-    return { method: "PUT", url, headers: { "content-type": contentType, [CONTENT_LENGTH_RANGE]: range }, expiresAt: expiresAt.toISOString() };
+    return {
+      method: "PUT",
+      url,
+      headers: { "content-type": contentType, [CONTENT_LENGTH_RANGE]: range },
+      expiresAt: expiresAt.toISOString(),
+    };
   },
   signRead: async ({ path, contentType, fileName, disposition, expiresAt }) => {
     const [url] = await bucket.file(path).getSignedUrl({

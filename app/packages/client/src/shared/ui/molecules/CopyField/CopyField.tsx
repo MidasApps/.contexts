@@ -30,7 +30,14 @@ const defaultWriteText = (text: string): Promise<void> => navigator.clipboard.wr
  * failure). `sensitive` masks the value with a reveal toggle (`aria-pressed`). Mono, as values and
  * IDs are in DESIGN.md.
  */
-export function CopyField({ label, value, sensitive = false, description, className, writeText = defaultWriteText }: CopyFieldProps) {
+export function CopyField({
+  label,
+  value,
+  sensitive = false,
+  description,
+  className,
+  writeText = defaultWriteText,
+}: CopyFieldProps) {
   const t = useTranslations("common.copy");
   const id = useId();
   const [revealed, setRevealed] = useState(!sensitive);
@@ -67,7 +74,12 @@ export function CopyField({ label, value, sensitive = false, description, classN
           onFocus={(event) => revealed && event.currentTarget.select()}
         />
         {sensitive ? (
-          <Button variant="secondary" size="icon" aria-pressed={revealed} onClick={() => setRevealed((current) => !current)}>
+          <Button
+            variant="secondary"
+            size="icon"
+            aria-pressed={revealed}
+            onClick={() => setRevealed((current) => !current)}
+          >
             {revealed ? <EyeOffIcon aria-hidden="true" /> : <EyeIcon aria-hidden="true" />}
             <span className="sr-only">{revealed ? t("hide") : t("reveal")}</span>
           </Button>

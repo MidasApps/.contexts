@@ -3,8 +3,18 @@ import { AgentCommandError, defineContractCommand } from "@core/services";
 import { RequestContext } from "@mastra/core/request-context";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { buildAgentContextEntries, TEST_REQUEST_ID, TEST_TENANT, TEST_UID } from "../../testing/agent-context-fixture.ts";
-import { createFakeAccessPort, createFakeApprovalPort, createFakeAuditPort, createFakeCommandIdempotency } from "../../testing/fake-ports.ts";
+import {
+  buildAgentContextEntries,
+  TEST_REQUEST_ID,
+  TEST_TENANT,
+  TEST_UID,
+} from "../../testing/agent-context-fixture.ts";
+import {
+  createFakeAccessPort,
+  createFakeApprovalPort,
+  createFakeAuditPort,
+  createFakeCommandIdempotency,
+} from "../../testing/fake-ports.ts";
 import { runCoreTool } from "../core-tool-pipeline.ts";
 import type { ToolCallInfo } from "../define-core-tool.ts";
 import { CoreToolError } from "../tool-errors.ts";
@@ -27,7 +37,10 @@ const registryCommand = (calls: unknown[] = [], refuse = false) =>
   });
 
 const setup = (approvalPermissions: string[] = []) => {
-  const access = createFakeAccessPort({ memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions: ["core.chat.use", PERMISSION] }], approvalPermissions });
+  const access = createFakeAccessPort({
+    memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions: ["core.chat.use", PERMISSION] }],
+    approvalPermissions,
+  });
   const audit = createFakeAuditPort();
   const approvals = createFakeApprovalPort();
   return { audit, approvals, deps: { access, audit, approvals, commands: createFakeCommandIdempotency() } };
@@ -42,7 +55,12 @@ const call = (toolCallId = "call_1"): ToolCallInfo => ({
 describe("commandToolOf", () => {
   it("derives a mutation tool with the contract's id, schema and permission", () => {
     const { tool, targetContractId } = commandToolOf(registryCommand());
-    expect(tool).toMatchObject({ id: "command.tenancy.CreateProjectInput", kind: "mutation", permission: PERMISSION, commandId: "tenancy.CreateProjectInput" });
+    expect(tool).toMatchObject({
+      id: "command.tenancy.CreateProjectInput",
+      kind: "mutation",
+      permission: PERMISSION,
+      commandId: "tenancy.CreateProjectInput",
+    });
     expect(tool.inputSchema).toBe(CreateProjectInputContract.schema);
     expect(tool.description).toContain(CreateProjectInputContract.meta.description);
     expect(targetContractId).toBe("tenancy.Project");
@@ -63,7 +81,10 @@ describe("commandToolOf", () => {
         input: { name: "Launch" },
       },
     ]);
-    expect(audit.entries[0]).toMatchObject({ action: "AGENT_TOOL_EXECUTED", metadata: { toolId: "command.tenancy.CreateProjectInput", outcome: "succeeded" } });
+    expect(audit.entries[0]).toMatchObject({
+      action: "AGENT_TOOL_EXECUTED",
+      metadata: { toolId: "command.tenancy.CreateProjectInput", outcome: "succeeded" },
+    });
   });
 
   it("returns the first result for a second call with the same key and runs the command once", async () => {
@@ -102,11 +123,15 @@ describe("commandToolOf", () => {
   it("refuses an input outside the contract before anything runs", async () => {
     const calls: unknown[] = [];
     const { deps } = setup();
-    await expect(runCoreTool(commandToolOf(registryCommand(calls)).tool, deps, { name: "Launch", tenantId: "other" }, call())).rejects.toMatchObject({ code: "TOOL_INPUT_INVALID" });
+    await expect(
+      runCoreTool(commandToolOf(registryCommand(calls)).tool, deps, { name: "Launch", tenantId: "other" }, call()),
+    ).rejects.toMatchObject({ code: "TOOL_INPUT_INVALID" });
     expect(calls).toEqual([]);
   });
 
   it("keeps the registry order", () => {
-    expect(commandToolsOf([registryCommand()]).map(({ tool }) => tool.id)).toEqual(["command.tenancy.CreateProjectInput"]);
+    expect(commandToolsOf([registryCommand()]).map(({ tool }) => tool.id)).toEqual([
+      "command.tenancy.CreateProjectInput",
+    ]);
   });
 });

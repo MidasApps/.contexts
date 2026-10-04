@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { loadMemoryDataset, type MemoryConfigResult, recommendObservational, scoreRecall } from "./memory-comparison.ts";
+import {
+  loadMemoryDataset,
+  type MemoryConfigResult,
+  recommendObservational,
+  scoreRecall,
+} from "./memory-comparison.ts";
 
 const result = (meanScore: number, costMicroUsd: number | null): MemoryConfigResult => ({
   configId: "A-semantic-recall",

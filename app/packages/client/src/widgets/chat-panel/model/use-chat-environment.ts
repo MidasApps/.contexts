@@ -3,7 +3,7 @@
 import type { ContractDefinition } from "@core/contracts";
 import { useCallback, useMemo } from "react";
 import { approvalRequestRoute } from "#/entities/approval-request/index.ts";
-import { usePermissions, type PermissionsState } from "#/entities/permission/index.ts";
+import { type PermissionsState, usePermissions } from "#/entities/permission/index.ts";
 import { useAccessContext } from "#/entities/session/index.ts";
 import type { NodeParams } from "#/shared/api/core-queries.ts";
 import { parseRoute } from "#/shared/lib/router/parse-route.ts";
@@ -20,8 +20,11 @@ export const CHAT_PERMISSION = "core.conversation.send";
  * `/o/{organizationId}/settings/approvals/{approvalRequestId}`), built by the router port so the
  * web adds its locale prefix.
  */
-export const approvalRequestHref = (router: Pick<RouterPort, "href">, organizationId: string, approvalId: string): string =>
-  router.href(approvalRequestRoute(organizationId, approvalId));
+export const approvalRequestHref = (
+  router: Pick<RouterPort, "href">,
+  organizationId: string,
+  approvalId: string,
+): string => router.href(approvalRequestRoute(organizationId, approvalId));
 
 export type ChatEnvironment = {
   readonly status: PermissionsState["status"];
@@ -43,8 +46,17 @@ export const useChatEnvironment = (node: NodeParams): ChatEnvironment => {
   const context = useAccessContext(node);
   const contracts = useMemo(() => modules.contracts(), [modules]);
   const { organizationId } = node;
-  const approvalHref = useCallback((approvalId: string) => approvalRequestHref(router, organizationId, approvalId), [router, organizationId]);
-  return { status: permissions.status, can: permissions.can, contracts, defaultCurrency: context.data?.regional.currency, approvalHref };
+  const approvalHref = useCallback(
+    (approvalId: string) => approvalRequestHref(router, organizationId, approvalId),
+    [router, organizationId],
+  );
+  return {
+    status: permissions.status,
+    can: permissions.can,
+    contracts,
+    defaultCurrency: context.data?.regional.currency,
+    approvalHref,
+  };
 };
 
 /**

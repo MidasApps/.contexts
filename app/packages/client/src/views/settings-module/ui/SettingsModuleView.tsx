@@ -42,7 +42,13 @@ function SettingsModule({ context, module }: { context: AccessContext; module: M
     <SettingsPageFrame
       organizationId={context.organization.id}
       allowed={context.permissions.includes(module.settings.readPermission)}
-      header={<PageHeader eyebrow={t("settings.module.eyebrow", { organization: context.organization.name })} title={name} description={t("settings.module.description", { module: name })} />}
+      header={
+        <PageHeader
+          eyebrow={t("settings.module.eyebrow", { organization: context.organization.name })}
+          title={name}
+          description={t("settings.module.description", { module: name })}
+        />
+      }
     >
       <ModuleSettingsContent context={context} module={module} />
     </SettingsPageFrame>

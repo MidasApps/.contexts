@@ -1,5 +1,12 @@
 import type { RouterPort } from "@core/client/shared/lib/router";
-import { createMemoryHistory, createRootRoute, createRoute, createRouter, Outlet, RouterProvider } from "@tanstack/react-router";
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRoute,
+  createRouter,
+  Outlet,
+  RouterProvider,
+} from "@tanstack/react-router";
 import { act, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -24,8 +31,16 @@ const setup = (initialHref: string) => {
     );
   }
   const root = createRootRoute({ component: Outlet });
-  const tree = root.addChildren([createRoute({ getParentRoute: () => root, path: "/", component: Probe }), createRoute({ getParentRoute: () => root, path: "$", component: Probe })]);
-  const router = createRouter({ routeTree: tree, history: createMemoryHistory({ initialEntries: [initialHref] }), parseSearch: parsePlainSearch, stringifySearch: stringifyPlainSearch });
+  const tree = root.addChildren([
+    createRoute({ getParentRoute: () => root, path: "/", component: Probe }),
+    createRoute({ getParentRoute: () => root, path: "$", component: Probe }),
+  ]);
+  const router = createRouter({
+    routeTree: tree,
+    history: createMemoryHistory({ initialEntries: [initialHref] }),
+    parseSearch: parsePlainSearch,
+    stringifySearch: stringifyPlainSearch,
+  });
   const port = createDesktopRouterAdapter({ navigate: (args) => router.navigate(args), switchLocale, reportError });
   holder.port = port;
   render(<RouterProvider router={router} />);
@@ -44,7 +59,15 @@ describe("createDesktopRouterAdapter", () => {
     setup("/o/org-1/p/proj-1/m/example/items/42?unit=123");
 
     expect((await screen.findByTestId("path")).textContent).toBe("/o/org-1/p/proj-1/m/example/items/42");
-    expect(screen.getByTestId("params").textContent).toBe(JSON.stringify({ organizationId: "org-1", projectId: "proj-1", moduleId: "example", rest: "items/42", unit: "123" }));
+    expect(screen.getByTestId("params").textContent).toBe(
+      JSON.stringify({
+        organizationId: "org-1",
+        projectId: "proj-1",
+        moduleId: "example",
+        rest: "items/42",
+        unit: "123",
+      }),
+    );
     expect(screen.getByTestId("unit").textContent).toBe("123");
   });
 
@@ -87,7 +110,11 @@ describe("createDesktopRouterAdapter", () => {
   it("reports a failed navigation instead of leaving a floating rejection", async () => {
     const reportError = vi.fn();
     const failure = new Error("navigation failed");
-    const port = createDesktopRouterAdapter({ navigate: () => Promise.reject(failure), switchLocale: vi.fn(), reportError });
+    const port = createDesktopRouterAdapter({
+      navigate: () => Promise.reject(failure),
+      switchLocale: vi.fn(),
+      reportError,
+    });
 
     port.navigate({ id: "home" });
 

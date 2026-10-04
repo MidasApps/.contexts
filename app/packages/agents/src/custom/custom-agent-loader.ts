@@ -38,7 +38,10 @@ const customAgentIdOf = (requestContext: RequestContextReader | undefined): stri
  * (tenant, agent). A failed read is not cached. The tenant always comes from the verified context
  * or the caller's argument, never from the record.
  */
-export const createCustomAgentLoader = (port: CustomAgentsPort, options: { readonly ttlMs?: number; readonly now?: () => number } = {}): CustomAgentLoader => {
+export const createCustomAgentLoader = (
+  port: CustomAgentsPort,
+  options: { readonly ttlMs?: number; readonly now?: () => number } = {},
+): CustomAgentLoader => {
   const ttl = options.ttlMs ?? CUSTOM_AGENT_CACHE_TTL_MS;
   const now = options.now ?? (() => Date.now());
   const cache = new Map<string, Entry>();
@@ -48,7 +51,9 @@ export const createCustomAgentLoader = (port: CustomAgentsPort, options: { reado
     if (agent === null || agent.tenantId !== tenantId || !agent.enabled) return null;
     if (agent.customSkills.length === 0) return { agent, skills: [] };
     const selected = new Set<string>(agent.customSkills);
-    const skills = (await port.listSkills({ tenantId })).filter((skill) => skill.tenantId === tenantId && skill.enabled && selected.has(skill.id));
+    const skills = (await port.listSkills({ tenantId })).filter(
+      (skill) => skill.tenantId === tenantId && skill.enabled && selected.has(skill.id),
+    );
     return { agent, skills };
   };
   const load: CustomAgentLoader["load"] = ({ tenantId, agentId }) => {

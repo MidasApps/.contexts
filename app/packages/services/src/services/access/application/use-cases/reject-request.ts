@@ -1,7 +1,7 @@
 import type { ApprovalRequest } from "@core/contracts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import type { Result } from "../../../shared/result/result.ts";
-import { decidePending, loadDecidable, type DecideCommand, type DecisionError } from "../approval-decision.ts";
+import { type DecideCommand, type DecisionError, decidePending, loadDecidable } from "../approval-decision.ts";
 import type { ApprovalDeps } from "../approval-deps.ts";
 
 export type RejectRequest = (command: DecideCommand) => Promise<Result<ApprovalRequest, DecisionError>>;
@@ -18,12 +18,28 @@ export const makeRejectRequest =
     if (!decidable.ok) return decidable;
     const auditActor = auditActorOf(command.actor);
     return deps.unitOfWork.run(async (tx) => {
-      const decided = await decidePending(tx, deps, { id: command.approvalRequestId, transition: "reject", decidedBy: command.actor.uid, reason: command.reason ?? null, actorId: auditActor.id });
+      const decided = await decidePending(tx, deps, {
+        id: command.approvalRequestId,
+        transition: "reject",
+        decidedBy: command.actor.uid,
+        reason: command.reason ?? null,
+        actorId: auditActor.id,
+      });
       if (!decided.ok) return decided;
       const { tenantId, node, id } = decided.data;
       const reason = command.reason === undefined ? {} : { reason: command.reason };
       await deps.audit.record(
-        { log: "tenant", tenantId, action: "APPROVAL_REJECTED", actor: auditActor, target: { type: "approval-request", id }, node, outcome: "success", requestId: command.requestId, ...reason },
+        {
+          log: "tenant",
+          tenantId,
+          action: "APPROVAL_REJECTED",
+          actor: auditActor,
+          target: { type: "approval-request", id },
+          node,
+          outcome: "success",
+          requestId: command.requestId,
+          ...reason,
+        },
         tx,
       );
       return decided;

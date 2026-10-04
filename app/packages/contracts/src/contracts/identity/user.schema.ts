@@ -25,9 +25,14 @@ export const USER_FIELDS = {
   email: z.email().meta(personal("Email address of the Firebase Auth account.")),
   displayName: DisplayNameSchema.meta(personal("Name shown to other members; may be empty.")),
   photoUrl: z.url().optional().meta(personal("Profile photo URL.")),
-  preferences: z.object(UserPreferencesSchema.shape).meta(personal("Locale, time zone, currency, theme, notifications.")),
+  preferences: z
+    .object(UserPreferencesSchema.shape)
+    .meta(personal("Locale, time zone, currency, theme, notifications.")),
   lastContext: z.object(LastContextSchema.shape).meta(none("Last organization, project and unit used.")),
-  accessVersion: z.int().min(0).meta(none("Bumped on every grant change; a newer value than the token's means stale claims.")),
+  accessVersion: z
+    .int()
+    .min(0)
+    .meta(none("Bumped on every grant change; a newer value than the token's means stale claims.")),
 };
 
 export const UserSchema = z.object({

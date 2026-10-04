@@ -1,15 +1,28 @@
 "use client";
 
-import { isSupportedLocale, SOURCE_LOCALE, utcToZonedWallTime, zonedWallTimeToUtc, type MoneyValue } from "@core/i18n";
+import { isSupportedLocale, type MoneyValue, SOURCE_LOCALE, utcToZonedWallTime, zonedWallTimeToUtc } from "@core/i18n";
 import type { ReactElement, ReactNode } from "react";
-import { Controller, useFormContext, type ControllerRenderProps, type FieldValues, type RefCallBack } from "react-hook-form";
+import {
+  Controller,
+  type ControllerRenderProps,
+  type FieldValues,
+  type RefCallBack,
+  useFormContext,
+} from "react-hook-form";
 import { useTimeZone, useTranslations } from "use-intl";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Switch } from "#/shared/ui/atoms/Switch/Switch.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
 import { CurrencySelect } from "#/shared/ui/molecules/CurrencySelect/CurrencySelect.tsx";
-import { Field, FieldContent, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldContent,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { LocaleSelect } from "#/shared/ui/molecules/LocaleSelect/LocaleSelect.tsx";
 import { MoneyInput } from "#/shared/ui/molecules/MoneyInput/MoneyInput.tsx";
 import { TimeZoneSelect } from "#/shared/ui/molecules/TimeZoneSelect/TimeZoneSelect.tsx";
@@ -47,11 +60,28 @@ const useDisplayTimeZone = (): string => useTimeZone() ?? Intl.DateTimeFormat().
 function RegisteredInput({ plan, aria }: { plan: FieldPlan; aria: ControlAria }) {
   const { register } = useFormContext();
   const { widget, name, required, integer } = plan;
-  if (widget === "textarea") return <Textarea {...aria} required={required} {...register(name, { setValueAs: emptyToUndefined })} />;
+  if (widget === "textarea")
+    return <Textarea {...aria} required={required} {...register(name, { setValueAs: emptyToUndefined })} />;
   if (widget === "number") {
-    return <Input {...aria} type="number" inputMode={integer ? "numeric" : "decimal"} step={integer ? 1 : "any"} required={required} {...register(name, { setValueAs: toNumber })} />;
+    return (
+      <Input
+        {...aria}
+        type="number"
+        inputMode={integer ? "numeric" : "decimal"}
+        step={integer ? 1 : "any"}
+        required={required}
+        {...register(name, { setValueAs: toNumber })}
+      />
+    );
   }
-  return <Input {...aria} type={widget === "date" ? "date" : "text"} required={required} {...register(name, { setValueAs: emptyToUndefined })} />;
+  return (
+    <Input
+      {...aria}
+      type={widget === "date" ? "date" : "text"}
+      required={required}
+      {...register(name, { setValueAs: emptyToUndefined })}
+    />
+  );
 }
 
 function DateTimeInput({ field, controlRef, required, aria }: Bind & { required: boolean; aria: ControlAria }) {
@@ -66,7 +96,9 @@ function DateTimeInput({ field, controlRef, required, aria }: Bind & { required:
       required={required}
       value={value}
       onBlur={field.onBlur}
-      onChange={(event) => field.onChange(event.target.value === "" ? undefined : zonedWallTimeToUtc(event.target.value, timeZone))}
+      onChange={(event) =>
+        field.onChange(event.target.value === "" ? undefined : zonedWallTimeToUtc(event.target.value, timeZone))
+      }
     />
   );
 }
@@ -74,7 +106,12 @@ function DateTimeInput({ field, controlRef, required, aria }: Bind & { required:
 function EnumSelect({ field, controlRef, plan, aria }: Bind & { plan: FieldPlan; aria: ControlAria }) {
   const t = useTranslations();
   return (
-    <Select value={typeof field.value === "string" ? field.value : ""} onValueChange={field.onChange} required={plan.required} name={field.name}>
+    <Select
+      value={typeof field.value === "string" ? field.value : ""}
+      onValueChange={field.onChange}
+      required={plan.required}
+      name={field.name}
+    >
       <SelectTrigger {...aria} ref={controlRef} onBlur={field.onBlur} className="w-full">
         <SelectValue placeholder={t("common.form.selectPlaceholder")} />
       </SelectTrigger>
@@ -89,7 +126,14 @@ function EnumSelect({ field, controlRef, plan, aria }: Bind & { plan: FieldPlan;
   );
 }
 
-function MoneyWidget({ field, controlRef, plan, aria, defaultCurrency, onMoneyParse }: Bind & { plan: FieldPlan; aria: ControlAria } & Omit<SchemaFormFieldProps, "plan">) {
+function MoneyWidget({
+  field,
+  controlRef,
+  plan,
+  aria,
+  defaultCurrency,
+  onMoneyParse,
+}: Bind & { plan: FieldPlan; aria: ControlAria } & Omit<SchemaFormFieldProps, "plan">) {
   const value = (field.value as MoneyValue | undefined) ?? null;
   const currency = value?.currency ?? defaultCurrency;
   // A money field without a currency is a caller bug: SchemaForm needs `defaultCurrency`.
@@ -110,22 +154,70 @@ function MoneyWidget({ field, controlRef, plan, aria, defaultCurrency, onMoneyPa
 }
 
 /** The control for one plan, bound to the form (register for native inputs, Controller else). */
-function ControlFor({ plan, defaultCurrency, onMoneyParse, ...aria }: SchemaFormFieldProps & ControlAria): ReactElement {
+function ControlFor({
+  plan,
+  defaultCurrency,
+  onMoneyParse,
+  ...aria
+}: SchemaFormFieldProps & ControlAria): ReactElement {
   const { control } = useFormContext();
   if (plan.widget === "text" || plan.widget === "textarea" || plan.widget === "number" || plan.widget === "date") {
     return <RegisteredInput plan={plan} aria={aria} />;
   }
-  const render = ({ field: { ref: controlRef, ...field } }: { field: ControllerRenderProps<FieldValues, string> }): ReactElement => {
-    if (plan.widget === "datetime") return <DateTimeInput field={field} controlRef={controlRef} required={plan.required} aria={aria} />;
+  const render = ({
+    field: { ref: controlRef, ...field },
+  }: {
+    field: ControllerRenderProps<FieldValues, string>;
+  }): ReactElement => {
+    if (plan.widget === "datetime")
+      return <DateTimeInput field={field} controlRef={controlRef} required={plan.required} aria={aria} />;
     if (plan.widget === "select") return <EnumSelect field={field} controlRef={controlRef} plan={plan} aria={aria} />;
-    if (plan.widget === "money") return <MoneyWidget field={field} controlRef={controlRef} plan={plan} aria={aria} defaultCurrency={defaultCurrency} onMoneyParse={onMoneyParse} />;
-    if (plan.widget === "switch") return <Switch {...aria} ref={controlRef} name={field.name} checked={field.value === true} onCheckedChange={field.onChange} onBlur={field.onBlur} />;
+    if (plan.widget === "money")
+      return (
+        <MoneyWidget
+          field={field}
+          controlRef={controlRef}
+          plan={plan}
+          aria={aria}
+          defaultCurrency={defaultCurrency}
+          onMoneyParse={onMoneyParse}
+        />
+      );
+    if (plan.widget === "switch")
+      return (
+        <Switch
+          {...aria}
+          ref={controlRef}
+          name={field.name}
+          checked={field.value === true}
+          onCheckedChange={field.onChange}
+          onBlur={field.onBlur}
+        />
+      );
     if (plan.widget === "locale") {
       const value = typeof field.value === "string" && isSupportedLocale(field.value) ? field.value : SOURCE_LOCALE;
-      return <LocaleSelect {...aria} ref={controlRef} className="w-full" value={value} onValueChange={field.onChange} onBlur={field.onBlur} />;
+      return (
+        <LocaleSelect
+          {...aria}
+          ref={controlRef}
+          className="w-full"
+          value={value}
+          onValueChange={field.onChange}
+          onBlur={field.onBlur}
+        />
+      );
     }
     const Picker = plan.widget === "timeZone" ? TimeZoneSelect : CurrencySelect;
-    return <Picker {...aria} ref={controlRef} className="w-full" value={field.value as string | undefined} onValueChange={field.onChange} onBlur={field.onBlur} />;
+    return (
+      <Picker
+        {...aria}
+        ref={controlRef}
+        className="w-full"
+        value={field.value as string | undefined}
+        onValueChange={field.onChange}
+        onBlur={field.onBlur}
+      />
+    );
   };
   return <Controller name={plan.name} control={control} render={render} />;
 }

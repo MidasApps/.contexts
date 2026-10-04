@@ -43,7 +43,9 @@ export type GatewayError = {
   readonly retryAfterSeconds?: number;
 };
 
-export type GatewayResult<T> = { readonly ok: true; readonly data: T } | { readonly ok: false; readonly error: GatewayError };
+export type GatewayResult<T> =
+  | { readonly ok: true; readonly data: T }
+  | { readonly ok: false; readonly error: GatewayError };
 
 /** An upstream stream handed to `/v1` as is (SSE or chunked JSON). */
 export type GatewayStream = {
@@ -121,8 +123,12 @@ export type AgentRuntimeGateway = {
   readonly generate: (input: AgentRunInput) => Promise<GatewayResult<unknown>>;
   readonly stream: (input: AgentRunInput) => Promise<GatewayResult<GatewayStream>>;
   readonly approveToolCall: (input: ToolCallDecisionInput) => Promise<GatewayResult<GatewayStream>>;
-  readonly declineToolCall: (input: ToolCallDecisionInput & { readonly reason?: string }) => Promise<GatewayResult<GatewayStream>>;
-  readonly startWorkflow: (input: WorkflowStartInput) => Promise<GatewayResult<{ readonly runId: string; readonly result: unknown }>>;
+  readonly declineToolCall: (
+    input: ToolCallDecisionInput & { readonly reason?: string },
+  ) => Promise<GatewayResult<GatewayStream>>;
+  readonly startWorkflow: (
+    input: WorkflowStartInput,
+  ) => Promise<GatewayResult<{ readonly runId: string; readonly result: unknown }>>;
   /** Starts a run without waiting for it (`202` routes such as `POST .../knowledge/sources`). */
   readonly launchWorkflow: (input: WorkflowStartInput) => Promise<GatewayResult<{ readonly runId: string }>>;
   readonly resumeWorkflow: (input: WorkflowResumeInput) => Promise<GatewayResult<unknown>>;

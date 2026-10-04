@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { defineContract } from "../contract.ts";
-import { buildConnectorToolPolicySchema } from "./connector-tool-policy.schema.ts";
 import { ConnectorSchema } from "./connector.schema.ts";
+import { buildConnectorToolPolicySchema } from "./connector-tool-policy.schema.ts";
 
 const none = (description: string) => ({ description, pii: "none" as const });
 
@@ -21,7 +21,8 @@ export type CreateConnectorInput = z.infer<typeof CreateConnectorInputSchema>;
 export const CreateConnectorInputContract = defineContract(CreateConnectorInputSchema, {
   id: "connectors.CreateConnectorInput",
   kind: "command",
-  description: "Registers an OpenAPI, MCP, Postgres or browser connector for the organization; its secret is set separately.",
+  description:
+    "Registers an OpenAPI, MCP, Postgres or browser connector for the organization; its secret is set separately.",
   examples: [
     {
       name: "docs-mcp",
@@ -47,7 +48,9 @@ export const UpdateConnectorInputSchema = z
     toolPolicy: buildConnectorToolPolicySchema().optional().meta(none("New tool allowlist.")),
     config: z.record(z.string(), z.unknown()).optional().meta(none("New config for the connector's type.")),
   })
-  .refine((input) => Object.values(input).some((value) => value !== undefined), { error: "Change at least one field." });
+  .refine((input) => Object.values(input).some((value) => value !== undefined), {
+    error: "Change at least one field.",
+  });
 export type UpdateConnectorInput = z.infer<typeof UpdateConnectorInputSchema>;
 
 export const UpdateConnectorInputContract = defineContract(UpdateConnectorInputSchema, {
@@ -63,7 +66,11 @@ export const UpdateConnectorInputContract = defineContract(UpdateConnectorInputS
 
 /** Body of `PUT .../connectors/{connectorId}/secret`: write-only, never returned or logged. */
 export const SetConnectorSecretInputSchema = z.strictObject({
-  value: z.string().min(1).max(8192).meta({ description: "Bearer token, API key or DSN of the connector.", pii: "sensitive" }),
+  value: z
+    .string()
+    .min(1)
+    .max(8192)
+    .meta({ description: "Bearer token, API key or DSN of the connector.", pii: "sensitive" }),
 });
 export type SetConnectorSecretInput = z.infer<typeof SetConnectorSecretInputSchema>;
 

@@ -1,20 +1,31 @@
-import { screen, waitFor } from "@testing-library/react";
 import { useQuery } from "@tanstack/react-query";
+import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
-import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { plansQuery } from "#/entities/plan/index.ts";
+import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { buildOrganizationSummary, buildPlan } from "#/shared/testing/admin-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, FAKE_REQUEST_ID, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
-import { AdminOrganizationFilter, AdminPageFrame, AdminQuerySection, numberedPagination, useAdminSearch } from "./index.ts";
+import {
+  AdminOrganizationFilter,
+  AdminPageFrame,
+  AdminQuerySection,
+  numberedPagination,
+  useAdminSearch,
+} from "./index.ts";
 
 function Plans() {
   const callEndpoint = useCallEndpoint();
   const plans = useQuery(plansQuery(callEndpoint));
   return (
-    <AdminPageFrame permission="platform.plan.manage" title="Planos" description="Catálogo." actions={<button type="button">Novo</button>}>
+    <AdminPageFrame
+      permission="platform.plan.manage"
+      title="Planos"
+      description="Catálogo."
+      actions={<button type="button">Novo</button>}
+    >
       <AdminQuerySection query={plans} loadingLabel="Carregando planos…">
         {(data) => <p>{data.map((plan) => plan.name).join(", ")}</p>}
       </AdminQuerySection>
@@ -47,14 +58,20 @@ function Filters() {
       <button type="button" onClick={pagination?.onNext}>
         próxima
       </button>
-      <AdminOrganizationFilter value={search.values.organizationId} onValueChange={(organizationId) => search.set({ organizationId })} />
+      <AdminOrganizationFilter
+        value={search.values.organizationId}
+        onValueChange={(organizationId) => search.set({ organizationId })}
+      />
     </>
   );
 }
 
 describe("AdminPageFrame and AdminQuerySection", () => {
   it("shows the page with its data and actions to a role that holds the permission", async () => {
-    const { container } = renderAdmin(<Plans />, { path: "/admin/plans", routes: { "GET /v1/admin/plans": ok([buildPlan()]) } });
+    const { container } = renderAdmin(<Plans />, {
+      path: "/admin/plans",
+      routes: { "GET /v1/admin/plans": ok([buildPlan()]) },
+    });
     expect(screen.getByRole("heading", { level: 1, name: "Planos" })).toBeDefined();
     expect(await screen.findByText("Standard")).toBeDefined();
     expect(screen.getByRole("button", { name: "Novo" })).toBeDefined();
@@ -84,13 +101,19 @@ describe("AdminPageFrame and AdminQuerySection", () => {
 
   it("asks for the second factor when the API answers MFA_REQUIRED", async () => {
     const { container } = renderAdmin(<Plans />, { routes: { "GET /v1/admin/plans": apiError(403, "MFA_REQUIRED") } });
-    expect(await screen.findByRole("heading", { level: 2, name: "Confirme a verificação em duas etapas" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Abrir segurança da conta" }).getAttribute("href")).toBe("/profile/security");
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "Confirme a verificação em duas etapas" }),
+    ).toBeDefined();
+    expect(screen.getByRole("link", { name: "Abrir segurança da conta" }).getAttribute("href")).toBe(
+      "/profile/security",
+    );
     await expectNoAxeViolations(container);
   });
 
   it("shows an error with the request reference and retries", async () => {
-    const { user, api, container } = renderAdmin(<Plans />, { routes: { "GET /v1/admin/plans": apiError(409, "CONFLICT") } });
+    const { user, api, container } = renderAdmin(<Plans />, {
+      routes: { "GET /v1/admin/plans": apiError(409, "CONFLICT") },
+    });
     expect(await screen.findByRole("alert")).toBeDefined();
     expect(screen.getByText(new RegExp(FAKE_REQUEST_ID, "u"))).toBeDefined();
     await expectNoAxeViolations(container);
@@ -101,7 +124,12 @@ describe("AdminPageFrame and AdminQuerySection", () => {
 });
 
 describe("useAdminSearch and AdminOrganizationFilter", () => {
-  const routes = { "GET /v1/admin/organizations": page([buildOrganizationSummary(), buildOrganizationSummary({ id: IDS.otherOrganization, name: "Contoso" })]) };
+  const routes = {
+    "GET /v1/admin/organizations": page([
+      buildOrganizationSummary(),
+      buildOrganizationSummary({ id: IDS.otherOrganization, name: "Contoso" }),
+    ]),
+  };
   const state = (): unknown => JSON.parse(screen.getByTestId("state").textContent ?? "{}");
 
   it("reads filters and the page from the URL", async () => {

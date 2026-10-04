@@ -10,7 +10,11 @@ export const createFirebaseUserAccountReader = (deps: { auth: Pick<Auth, "getUse
     try {
       const record = await deps.auth.getUser(uid);
       if (record.email === undefined) return null;
-      return { email: record.email, displayName: record.displayName ?? "", ...(record.photoURL === undefined ? {} : { photoUrl: record.photoURL }) };
+      return {
+        email: record.email,
+        displayName: record.displayName ?? "",
+        ...(record.photoURL === undefined ? {} : { photoUrl: record.photoURL }),
+      };
     } catch (e: unknown) {
       if (isUserNotFound(e)) return null;
       throw e;

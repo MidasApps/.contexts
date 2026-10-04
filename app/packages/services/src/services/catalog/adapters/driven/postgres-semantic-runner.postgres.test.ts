@@ -51,17 +51,32 @@ const views = createSemanticViewRegistry([
   { view: "test_runner_slow", contractId: "example.Slow", permission: "example.note.read" },
 ]);
 const permissions = new Set(["example.note.read"]);
-const run = makeRunSemanticQuery({ views, guard: guardSemanticSql, runner: createPostgresSemanticRunner(sql, { statementTimeoutMs: 100 }) });
+const run = makeRunSemanticQuery({
+  views,
+  guard: guardSemanticSql,
+  runner: createPostgresSemanticRunner(sql, { statementTimeoutMs: 100 }),
+});
 const runner = createPostgresSemanticRunner(sql);
 
 describe("postgres semantic runner", () => {
   it("shows a tenant only its own rows", async () => {
-    const result = await run({ principal: { tenantId: "tenantB", nodeIds: [], permissions }, sql: "SELECT id, body FROM semantic.test_runner_notes" });
-    expect(result).toMatchObject({ ok: true, data: { columns: ["id", "body"], rows: [{ id: "b-1", body: "secret of B" }], rowCount: 1 } });
+    const result = await run({
+      principal: { tenantId: "tenantB", nodeIds: [], permissions },
+      sql: "SELECT id, body FROM semantic.test_runner_notes",
+    });
+    expect(result).toMatchObject({
+      ok: true,
+      data: { columns: ["id", "body"], rows: [{ id: "b-1", body: "secret of B" }], rowCount: 1 },
+    });
   });
 
   it("returns zero rows when the tenant setting is missing", async () => {
-    const result = await runner.run({ scope: { tenantId: "no-such-tenant", nodeIds: [] }, sql: "SELECT id FROM semantic.test_runner_notes", params: [], limit: 10 });
+    const result = await runner.run({
+      scope: { tenantId: "no-such-tenant", nodeIds: [] },
+      sql: "SELECT id FROM semantic.test_runner_notes",
+      params: [],
+      limit: 10,
+    });
     expect(result).toEqual({ ok: true, data: { columns: ["id"], rows: [], truncated: false } });
   });
 
@@ -95,22 +110,40 @@ describe("postgres semantic runner", () => {
   });
 
   it("stops a statement that exceeds the timeout with QUERY_TIMEOUT", async () => {
-    const result = await run({ principal: { tenantId: "tenantA", nodeIds: [], permissions }, sql: "SELECT slept FROM semantic.test_runner_slow" });
+    const result = await run({
+      principal: { tenantId: "tenantA", nodeIds: [], permissions },
+      sql: "SELECT slept FROM semantic.test_runner_slow",
+    });
     expect(result).toEqual({ ok: false, error: { code: "QUERY_TIMEOUT" } });
   });
 
   it("runs as semantic_reader in a read-only transaction", async () => {
-    const result = await runner.run({ scope: { tenantId: "tenantA", nodeIds: [] }, sql: "SELECT id FROM semantic.test_runner_notes WHERE id = 'a-1'", params: [], limit: 1 });
+    const result = await runner.run({
+      scope: { tenantId: "tenantA", nodeIds: [] },
+      sql: "SELECT id FROM semantic.test_runner_notes WHERE id = 'a-1'",
+      params: [],
+      limit: 1,
+    });
     expect(result.ok).toBe(true);
     // A direct base-table read as semantic_reader is denied: only views are granted.
-    const denied = await runner.run({ scope: { tenantId: "tenantA", nodeIds: [] }, sql: "SELECT id FROM test_runner_base.notes", params: [], limit: 1 });
+    const denied = await runner.run({
+      scope: { tenantId: "tenantA", nodeIds: [] },
+      sql: "SELECT id FROM test_runner_base.notes",
+      params: [],
+      limit: 1,
+    });
     expect(denied).toEqual({ ok: false, error: { code: "QUERY_FAILED" } });
   });
 });
 
 describe("bigquery semantic runner", () => {
   it("is fail-closed", async () => {
-    const result = await createBigQuerySemanticRunner().run({ scope: { tenantId: "tenantA", nodeIds: [] }, sql: "SELECT 1", params: [], limit: 1 });
+    const result = await createBigQuerySemanticRunner().run({
+      scope: { tenantId: "tenantA", nodeIds: [] },
+      sql: "SELECT 1",
+      params: [],
+      limit: 1,
+    });
     expect(result).toEqual({ ok: false, error: { code: "CONNECTOR_DISABLED" } });
   });
 });

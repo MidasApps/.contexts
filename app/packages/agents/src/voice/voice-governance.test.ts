@@ -10,9 +10,13 @@ import { handleRealtimeSession, handleSpeech, handleTranscription } from "./voic
 
 const REQUEST_ID = "01J8Z3K4M5N6P7Q8R9S0T1V2W3";
 const silentLogger = { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined };
-const voice = createVoice({ models: { transcription: () => createFakeTranscriptionModel(), speech: () => createFakeSpeechModel() } });
+const voice = createVoice({
+  models: { transcription: () => createFakeTranscriptionModel(), speech: () => createFakeSpeechModel() },
+});
 
-const setup = (options: { enabled?: boolean; realtime?: boolean; offFor?: string; budget?: BudgetCheck | "fails" } = {}) => {
+const setup = (
+  options: { enabled?: boolean; realtime?: boolean; offFor?: string; budget?: BudgetCheck | "fails" } = {},
+) => {
   const rows: LlmCall[] = [];
   const audits: AuditEntry[] = [];
   const usage = {
@@ -26,7 +30,9 @@ const setup = (options: { enabled?: boolean; realtime?: boolean; offFor?: string
   const audit = { record: (entry: AuditEntry) => Promise.resolve(void audits.push(entry)) };
   const governance = createVoiceGovernance({
     isEnabled: ({ tenantId, feature }) =>
-      Promise.resolve(tenantId !== options.offFor && (feature === "voice" ? (options.enabled ?? true) : (options.realtime ?? true))),
+      Promise.resolve(
+        tenantId !== options.offFor && (feature === "voice" ? (options.enabled ?? true) : (options.realtime ?? true)),
+      ),
     usage,
     audit,
     logger: silentLogger,
@@ -37,9 +43,18 @@ const setup = (options: { enabled?: boolean; realtime?: boolean; offFor?: string
 };
 
 const memberContext = () => new RequestContext<unknown>(buildAgentContextEntries({ permissions: ["core.chat.use"] }));
-const audio = () => new Request("http://mastra.local/voice/transcriptions", { method: "POST", headers: { "content-type": "audio/webm", "x-request-id": REQUEST_ID }, body: new Uint8Array(8) });
+const audio = () =>
+  new Request("http://mastra.local/voice/transcriptions", {
+    method: "POST",
+    headers: { "content-type": "audio/webm", "x-request-id": REQUEST_ID },
+    body: new Uint8Array(8),
+  });
 const speech = () =>
-  new Request("http://mastra.local/voice/speech", { method: "POST", headers: { "content-type": "application/json", "x-request-id": REQUEST_ID }, body: JSON.stringify({ text: "Hello" }) });
+  new Request("http://mastra.local/voice/speech", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-request-id": REQUEST_ID },
+    body: JSON.stringify({ text: "Hello" }),
+  });
 const codeOf = async (response: Response) => ((await response.json()) as { error: { code: string } }).error.code;
 
 describe("voice governance (SP3 follow-ups #29 and #30)", () => {
@@ -47,7 +62,17 @@ describe("voice governance (SP3 follow-ups #29 and #30)", () => {
     const { rows, audits, deps } = setup();
     expect((await handleTranscription(audio(), deps, memberContext())).status).toBe(200);
     expect((await handleSpeech(speech(), deps, memberContext())).status).toBe(200);
-    expect(rows.map((row) => [row.agentId, row.provider, row.model, row.tenantId, row.userId, row.costMicroUsd, row.inputTokens])).toEqual([
+    expect(
+      rows.map((row) => [
+        row.agentId,
+        row.provider,
+        row.model,
+        row.tenantId,
+        row.userId,
+        row.costMicroUsd,
+        row.inputTokens,
+      ]),
+    ).toEqual([
       ["voice-transcription", "fake", "fake-transcription", TEST_TENANT, TEST_UID, null, 0],
       ["voice-speech", "fake", "fake-speech", TEST_TENANT, TEST_UID, null, 0],
     ]);
@@ -64,13 +89,22 @@ describe("voice governance (SP3 follow-ups #29 and #30)", () => {
     expect(response.status).toBe(503);
     expect(await codeOf(response)).toBe("FEATURE_UNAVAILABLE");
     expect(rows).toEqual([]);
-    expect((await handleSpeech(speech(), setup({ offFor: "OtherTenantaaaaaaaaaa" }).deps, memberContext())).status).toBe(200);
+    expect(
+      (await handleSpeech(speech(), setup({ offFor: "OtherTenantaaaaaaaaaa" }).deps, memberContext())).status,
+    ).toBe(200);
   });
 
   it("refuses a realtime session while chat.voice.realtime is off, even with a minter", async () => {
-    const realtime = { mint: () => Promise.resolve({ clientSecret: "ek_test", expiresAt: "2026-09-30T12:01:00.000Z", model: "gpt-realtime-2.1" }) };
+    const realtime = {
+      mint: () =>
+        Promise.resolve({ clientSecret: "ek_test", expiresAt: "2026-09-30T12:01:00.000Z", model: "gpt-realtime-2.1" }),
+    };
     const { deps } = setup({ realtime: false });
-    const response = await handleRealtimeSession(new Request("http://mastra.local/voice/realtime-sessions", { method: "POST" }), { ...deps, realtime }, memberContext());
+    const response = await handleRealtimeSession(
+      new Request("http://mastra.local/voice/realtime-sessions", { method: "POST" }),
+      { ...deps, realtime },
+      memberContext(),
+    );
     expect(response.status).toBe(503);
   });
 
@@ -95,16 +129,29 @@ describe("voice governance (SP3 follow-ups #29 and #30)", () => {
   });
 
   it("keeps realtime off without a minter (flag off, fake mode or no key)", async () => {
-    const response = await handleRealtimeSession(new Request("http://mastra.local/voice/realtime-sessions", { method: "POST" }), setup().deps, memberContext());
+    const response = await handleRealtimeSession(
+      new Request("http://mastra.local/voice/realtime-sessions", { method: "POST" }),
+      setup().deps,
+      memberContext(),
+    );
     expect(response.status).toBe(503);
   });
 
   it("mints a realtime session through the minter after the budget check", async () => {
     const { deps } = setup();
-    const realtime = { mint: () => Promise.resolve({ clientSecret: "ek_test", expiresAt: "2026-09-30T12:01:00.000Z", model: "gpt-realtime-2.1" }) };
-    const response = await handleRealtimeSession(new Request("http://mastra.local/voice/realtime-sessions", { method: "POST" }), { ...deps, realtime }, memberContext());
+    const realtime = {
+      mint: () =>
+        Promise.resolve({ clientSecret: "ek_test", expiresAt: "2026-09-30T12:01:00.000Z", model: "gpt-realtime-2.1" }),
+    };
+    const response = await handleRealtimeSession(
+      new Request("http://mastra.local/voice/realtime-sessions", { method: "POST" }),
+      { ...deps, realtime },
+      memberContext(),
+    );
     expect(response.status).toBe(201);
     expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(await response.json()).toEqual({ data: { clientSecret: "ek_test", expiresAt: "2026-09-30T12:01:00.000Z", model: "gpt-realtime-2.1" } });
+    expect(await response.json()).toEqual({
+      data: { clientSecret: "ek_test", expiresAt: "2026-09-30T12:01:00.000Z", model: "gpt-realtime-2.1" },
+    });
   });
 });

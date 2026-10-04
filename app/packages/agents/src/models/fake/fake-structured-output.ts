@@ -48,7 +48,9 @@ export const minimalValueFor = (rawSchema: unknown): unknown => {
   const types = typesOf(schema);
   if (types.includes("null")) return null;
   if (types.includes("object") || schema.properties !== undefined) {
-    return Object.fromEntries(Object.entries(schema.properties ?? {}).map(([key, value]) => [key, minimalValueFor(value)]));
+    return Object.fromEntries(
+      Object.entries(schema.properties ?? {}).map(([key, value]) => [key, minimalValueFor(value)]),
+    );
   }
   const empty = types.map((type) => EMPTY_BY_TYPE[type]).find((build) => build !== undefined);
   return empty === undefined ? null : empty();
@@ -76,11 +78,20 @@ const detectorVerdict = (keys: ReadonlySet<string>, text: string): Record<string
   if (keys.has("categories") && keys.has("detections")) {
     if (!hasDirective(text, "pii")) return undefined;
     const start = Math.max(0, detectedContentOf(text).indexOf("[[fake:pii]]"));
-    const detection = { type: "email", value: "[[fake:pii]]", confidence: 1, start, end: start + 12, redacted_value: "[EMAIL]" };
+    const detection = {
+      type: "email",
+      value: "[[fake:pii]]",
+      confidence: 1,
+      start,
+      end: start + 12,
+      redacted_value: "[EMAIL]",
+    };
     return { categories: [{ type: "email", score: 1 }], detections: [detection] };
   }
   if (keys.has("categories")) {
-    return hasDirective(text, "injection") ? { categories: [{ type: "injection", score: 1 }], reason: "fake injection directive" } : undefined;
+    return hasDirective(text, "injection")
+      ? { categories: [{ type: "injection", score: 1 }], reason: "fake injection directive" }
+      : undefined;
   }
   return undefined;
 };
@@ -96,6 +107,7 @@ export const buildFakeJsonAnswer = (schema: unknown, text: string): string => {
   const base = minimalValueFor(schema);
   const keys = new Set(Object.keys(asSchema(schema).properties ?? {}));
   const verdict = detectorVerdict(keys, text);
-  const merged = verdict === undefined || typeof base !== "object" || base === null ? (verdict ?? base) : { ...base, ...verdict };
+  const merged =
+    verdict === undefined || typeof base !== "object" || base === null ? (verdict ?? base) : { ...base, ...verdict };
   return JSON.stringify(merged);
 };

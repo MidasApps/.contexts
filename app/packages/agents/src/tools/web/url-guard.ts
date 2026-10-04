@@ -34,19 +34,41 @@ export class UrlGuardError extends Error {
 export type ResolveHost = (host: string) => Promise<readonly string[]>;
 
 /** System DNS (`dns.lookup`, all addresses). */
-export const resolveWithDns: ResolveHost = async (host) => (await lookup(host, { all: true, verbatim: true })).map((entry) => entry.address);
+export const resolveWithDns: ResolveHost = async (host) =>
+  (await lookup(host, { all: true, verbatim: true })).map((entry) => entry.address);
 
 // Everything that is not the public internet (IANA special-purpose registries).
 const NON_PUBLIC = new BlockList();
 for (const [network, prefix] of [
-  ["0.0.0.0", 8], ["10.0.0.0", 8], ["100.64.0.0", 10], ["127.0.0.0", 8], ["169.254.0.0", 16], ["172.16.0.0", 12],
-  ["192.0.0.0", 24], ["192.0.2.0", 24], ["192.88.99.0", 24], ["192.168.0.0", 16], ["198.18.0.0", 15], ["198.51.100.0", 24],
-  ["203.0.113.0", 24], ["224.0.0.0", 4], ["240.0.0.0", 4],
-] as const) NON_PUBLIC.addSubnet(network, prefix, "ipv4");
+  ["0.0.0.0", 8],
+  ["10.0.0.0", 8],
+  ["100.64.0.0", 10],
+  ["127.0.0.0", 8],
+  ["169.254.0.0", 16],
+  ["172.16.0.0", 12],
+  ["192.0.0.0", 24],
+  ["192.0.2.0", 24],
+  ["192.88.99.0", 24],
+  ["192.168.0.0", 16],
+  ["198.18.0.0", 15],
+  ["198.51.100.0", 24],
+  ["203.0.113.0", 24],
+  ["224.0.0.0", 4],
+  ["240.0.0.0", 4],
+] as const)
+  NON_PUBLIC.addSubnet(network, prefix, "ipv4");
 for (const [network, prefix] of [
-  ["::", 128], ["::1", 128], ["64:ff9b::", 96], ["100::", 64], ["2001::", 23], ["2001:db8::", 32],
-  ["fc00::", 7], ["fe80::", 10], ["ff00::", 8],
-] as const) NON_PUBLIC.addSubnet(network, prefix, "ipv6");
+  ["::", 128],
+  ["::1", 128],
+  ["64:ff9b::", 96],
+  ["100::", 64],
+  ["2001::", 23],
+  ["2001:db8::", 32],
+  ["fc00::", 7],
+  ["fe80::", 10],
+  ["ff00::", 8],
+] as const)
+  NON_PUBLIC.addSubnet(network, prefix, "ipv6");
 
 /** True for loopback, private, link-local (incl. `169.254.169.254`), CGNAT, multicast and other non-public addresses. */
 export const isNonPublicAddress = (address: string): boolean => {
@@ -72,7 +94,8 @@ const checkShape = (url: URL, allowedHosts: readonly string[] | undefined): stri
   if (url.username !== "" || url.password !== "") throw new UrlGuardError("CREDENTIALS_IN_URL");
   const host = stripBrackets(url.hostname).toLowerCase();
   if (isIP(host) !== 0) throw new UrlGuardError("IP_LITERAL");
-  if (!host.includes(".") || host.endsWith(".localhost") || host.endsWith(".internal")) throw new UrlGuardError("SINGLE_LABEL_HOST");
+  if (!host.includes(".") || host.endsWith(".localhost") || host.endsWith(".internal"))
+    throw new UrlGuardError("SINGLE_LABEL_HOST");
   if (allowedHosts !== undefined && !allowedHosts.includes(host)) throw new UrlGuardError("HOST_NOT_ALLOWED");
   return host;
 };

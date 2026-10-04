@@ -25,7 +25,12 @@ const isLocaleOf = (locales: readonly SupportedLocale[], value: string): value i
  * language in its own language with a matching `lang` attribute, no flags (a flag is a country,
  * not a language). Label it from outside (`FieldLabel`/`Label` → trigger id).
  */
-export function LocaleSelect({ value, onValueChange, locales = SUPPORTED_LOCALES, ...triggerProps }: LocaleSelectProps) {
+export function LocaleSelect({
+  value,
+  onValueChange,
+  locales = SUPPORTED_LOCALES,
+  ...triggerProps
+}: LocaleSelectProps) {
   const t = useTranslations("common.pickers.locale");
   return (
     <Select value={value} onValueChange={(next) => isLocaleOf(locales, next) && onValueChange(next)}>

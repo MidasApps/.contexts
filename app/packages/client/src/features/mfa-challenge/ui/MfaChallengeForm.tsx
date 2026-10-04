@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleAlertIcon } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent, type RefObject } from "react";
+import { type FormEvent, type RefObject, useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { authErrorCode } from "#/shared/lib/auth/auth-error-code.ts";
@@ -12,11 +12,27 @@ import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
 import { RadioGroup, RadioGroupItem } from "#/shared/ui/atoms/RadioGroup/RadioGroup.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 
 const CODE_PATTERN = /^\d{6}$/u;
 
-function FactorChoice({ hints, value, onChange }: { hints: readonly MfaHint[]; value: string; onChange: (uid: string) => void }) {
+function FactorChoice({
+  hints,
+  value,
+  onChange,
+}: {
+  hints: readonly MfaHint[];
+  value: string;
+  onChange: (uid: string) => void;
+}) {
   const t = useTranslations("auth.mfa");
   return (
     <FieldSet>
@@ -26,7 +42,11 @@ function FactorChoice({ hints, value, onChange }: { hints: readonly MfaHint[]; v
           <div key={hint.uid} className="flex items-center gap-2.5">
             <RadioGroupItem id={`mfa-hint-${hint.uid}`} value={hint.uid} />
             <Label htmlFor={`mfa-hint-${hint.uid}`} className="font-normal">
-              {hint.factor === "totp" ? t("factorTotp") : hint.phoneNumber === null ? t("factorPhoneUnknown") : t("factorPhone", { phone: hint.phoneNumber })}
+              {hint.factor === "totp"
+                ? t("factorTotp")
+                : hint.phoneNumber === null
+                  ? t("factorPhoneUnknown")
+                  : t("factorPhone", { phone: hint.phoneNumber })}
             </Label>
           </div>
         ))}
@@ -50,7 +70,11 @@ function FailureAlert({ code }: { code: AuthErrorCode }) {
 type Step = { readonly hintUid: string; readonly verificationId: string | undefined };
 
 /** The SMS step: send (or resend) the code through Firebase's invisible reCAPTCHA. */
-const useSmsCode = (challenge: MfaChallenge, recaptcha: RefObject<HTMLDivElement | null>, onFailure: (code: AuthErrorCode) => void) => {
+const useSmsCode = (
+  challenge: MfaChallenge,
+  recaptcha: RefObject<HTMLDivElement | null>,
+  onFailure: (code: AuthErrorCode) => void,
+) => {
   const auth = useAuth();
   const [sending, setSending] = useState(false);
   const send = async (hintUid: string): Promise<string | undefined> => {
@@ -120,7 +144,11 @@ export function MfaChallengeForm({ challenge, onResolved, onCancel, cancelLabel 
     setCodeError(undefined);
     setPending(true);
     try {
-      await auth.resolveMfa(challenge, { hintUid: step.hintUid, code, ...(step.verificationId === undefined ? {} : { verificationId: step.verificationId }) });
+      await auth.resolveMfa(challenge, {
+        hintUid: step.hintUid,
+        code,
+        ...(step.verificationId === undefined ? {} : { verificationId: step.verificationId }),
+      });
       await (onResolved ?? session.completeSignIn)();
     } catch (error: unknown) {
       const failed = authErrorCode(error);
@@ -138,14 +166,23 @@ export function MfaChallengeForm({ challenge, onResolved, onCancel, cancelLabel 
     <form noValidate onSubmit={(event) => void verify(event)} className="flex flex-col gap-5">
       {failure === null ? null : <FailureAlert code={failure} />}
       {challenge.hints.length > 1 ? (
-        <FactorChoice hints={challenge.hints} value={step.hintUid} onChange={(hintUid) => setStep({ hintUid, verificationId: undefined })} />
+        <FactorChoice
+          hints={challenge.hints}
+          value={step.hintUid}
+          onChange={(hintUid) => setStep({ hintUid, verificationId: undefined })}
+        />
       ) : null}
       {hint?.factor === "phone" ? (
         <div className="flex flex-col gap-2">
           <p role="status" className="text-sm text-muted-foreground empty:hidden">
             {step.verificationId === undefined ? "" : t("mfa.codeSent", { phone: hint.phoneNumber ?? "" })}
           </p>
-          <Button type="button" variant={needsSms ? "default" : "outline"} pending={sms.sending} onClick={() => void sendCode()}>
+          <Button
+            type="button"
+            variant={needsSms ? "default" : "outline"}
+            pending={sms.sending}
+            onClick={() => void sendCode()}
+          >
             {needsSms ? t("mfa.sendCode") : t("mfa.resendCode")}
           </Button>
         </div>
@@ -155,7 +192,17 @@ export function MfaChallengeForm({ challenge, onResolved, onCancel, cancelLabel 
           <FieldLabel>{t("mfa.code")}</FieldLabel>
           <FieldDescription>{hint?.factor === "totp" ? t("mfa.codeHintTotp") : t("mfa.codeHintSms")}</FieldDescription>
           <FieldControl>
-            <Input ref={codeInput} name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} required value={code} onChange={(event) => setCode(event.target.value.replace(/\D/gu, ""))} className="font-mono tracking-[0.3em]" />
+            <Input
+              ref={codeInput}
+              name="code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              required
+              value={code}
+              onChange={(event) => setCode(event.target.value.replace(/\D/gu, ""))}
+              className="font-mono tracking-[0.3em]"
+            />
           </FieldControl>
           <FieldError errors={[codeError]} />
         </Field>

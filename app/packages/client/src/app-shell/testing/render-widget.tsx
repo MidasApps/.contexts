@@ -3,7 +3,7 @@
 import type { Permission } from "@core/contracts";
 import type { ReactElement } from "react";
 import { SidebarProvider } from "#/shared/ui/organisms/Sidebar/sidebar-context.tsx";
-import { renderApp, type RenderAppOptions, type RenderAppResult } from "./render-app.tsx";
+import { type RenderAppOptions, type RenderAppResult, renderApp } from "./render-app.tsx";
 import { MEMBER_PERMISSIONS, shellRoutes } from "./shell-routes.ts";
 
 export const renderWidget = (

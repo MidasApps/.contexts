@@ -1,34 +1,43 @@
 // Composition root of the access context: builds the permission registry once and a
 // fresh request scope per request (reads memoized per request, never across).
-import { systemClock, type Clock } from "../shared/clock/clock.ts";
-import { CORE_PERMISSION_SOURCE, createPermissionRegistry, type PermissionRegistry, type PermissionSource } from "./domain/permission-registry.ts";
+
+import type { MyGrant, Permission, Principal, RoleRef, TenantId, TenantNodeRef, UserPrincipal } from "@core/contracts";
+import type { Transaction } from "firebase-admin/firestore";
+import { type Clock, systemClock } from "../shared/clock/clock.ts";
+import type { Result } from "../shared/result/result.ts";
+import type { AccessWriteDeps } from "./application/access-write-deps.ts";
+import { checkGrantable, type GrantCheckError } from "./application/grant-checks.ts";
+import { type PrepareGrantArgs, prepareGrant, prepareRevokeAllGrants } from "./application/membership-writes.ts";
+import { listLiveGrantNodes, requireOrganizationMember } from "./application/organization-membership.ts";
+import type { AccessProjectionStore } from "./application/ports/driven/access-projection-writer.ts";
 import type { AccessReaders } from "./application/ports/driven/access-readers.ts";
 import type { Authorize, GetEffectivePermissions } from "./application/ports/driving/authorize.ts";
 import { createRequestScope } from "./application/request-scope.ts";
 import { makeAuthorize } from "./application/use-cases/authorize.ts";
+import { type CreateRole, makeCreateRole } from "./application/use-cases/create-role.ts";
+import { type DeleteRole, makeDeleteRole } from "./application/use-cases/delete-role.ts";
 import { makeGetEffectivePermissions } from "./application/use-cases/get-effective-permissions.ts";
-import type { Transaction } from "firebase-admin/firestore";
-import type { AccessWriteDeps } from "./application/access-write-deps.ts";
-import { prepareGrant, prepareRevokeAllGrants, type PrepareGrantArgs } from "./application/membership-writes.ts";
-import { checkGrantable, type GrantCheckError } from "./application/grant-checks.ts";
-import { listLiveGrantNodes, requireOrganizationMember } from "./application/organization-membership.ts";
-import type { AccessDeniedError } from "./domain/errors/access-denied-error.ts";
-import type { MyGrant, Permission, Principal, RoleRef, TenantId, TenantNodeRef, UserPrincipal } from "@core/contracts";
-import type { Result } from "../shared/result/result.ts";
-import type { ProjectionPrincipal } from "./domain/access-projection.ts";
-import type { AccessProjectionStore } from "./application/ports/driven/access-projection-writer.ts";
-import { makeCreateRole, type CreateRole } from "./application/use-cases/create-role.ts";
-import { makeDeleteRole, type DeleteRole } from "./application/use-cases/delete-role.ts";
-import { makeGetRole, type GetRole } from "./application/use-cases/get-role.ts";
-import { makeGrantMembership, type GrantMembership } from "./application/use-cases/grant-membership.ts";
-import { makeListRoles, type ListRoles } from "./application/use-cases/list-roles.ts";
+import { type GetRole, makeGetRole } from "./application/use-cases/get-role.ts";
+import { type GrantMembership, makeGrantMembership } from "./application/use-cases/grant-membership.ts";
+import { type ListRoles, makeListRoles } from "./application/use-cases/list-roles.ts";
 import { makeRevokeMembership, type RevokeMembership } from "./application/use-cases/revoke-membership.ts";
 import type { SyncClaims } from "./application/use-cases/sync-claims.ts";
 import { makeUpdateMembership, type UpdateMembership } from "./application/use-cases/update-membership.ts";
 import { makeUpdateRole, type UpdateRole } from "./application/use-cases/update-role.ts";
+import type { ProjectionPrincipal } from "./domain/access-projection.ts";
+import type { AccessDeniedError } from "./domain/errors/access-denied-error.ts";
+import {
+  CORE_PERMISSION_SOURCE,
+  createPermissionRegistry,
+  type PermissionRegistry,
+  type PermissionSource,
+} from "./domain/permission-registry.ts";
 
 /** Access use cases bound to one request's memoized reads. */
-export type RequestAccess = { readonly authorize: Authorize; readonly getEffectivePermissions: GetEffectivePermissions };
+export type RequestAccess = {
+  readonly authorize: Authorize;
+  readonly getEffectivePermissions: GetEffectivePermissions;
+};
 
 export type AccessCore = {
   readonly registry: PermissionRegistry;
@@ -75,13 +84,30 @@ export type AccessServices = {
   /** Grant inside another context's transaction (`createOrganization`'s owner grant). */
   readonly prepareGrant: (tx: Transaction, args: PrepareGrantArgs) => ReturnType<typeof prepareGrant>;
   /** Revoke every grant of a principal inside another context's transaction (device revocation). */
-  readonly prepareRevokeAllGrants: (tx: Transaction, args: { tenantId: TenantId; principal: ProjectionPrincipal; actorId: string }) => ReturnType<typeof prepareRevokeAllGrants>;
+  readonly prepareRevokeAllGrants: (
+    tx: Transaction,
+    args: { tenantId: TenantId; principal: ProjectionPrincipal; actorId: string },
+  ) => ReturnType<typeof prepareRevokeAllGrants>;
   /** Grant checks for other contexts (device activations): permission at the node, live roles, no escalation. */
-  readonly checkGrantable: (args: { access: RequestAccess; actor: Principal; permission: Permission; node: TenantNodeRef; roles: readonly RoleRef[] }) => Promise<Result<void, GrantCheckError>>;
+  readonly checkGrantable: (args: {
+    access: RequestAccess;
+    actor: Principal;
+    permission: Permission;
+    node: TenantNodeRef;
+    roles: readonly RoleRef[];
+  }) => Promise<Result<void, GrantCheckError>>;
   /** Live member anywhere in the organization's tree, from the grants (`PUT /v1/me/active-organization`, decision 0030 A5). */
-  readonly requireOrganizationMember: (args: { access: RequestAccess; actor: UserPrincipal; tenantId: TenantId }) => Promise<Result<void, AccessDeniedError>>;
+  readonly requireOrganizationMember: (args: {
+    access: RequestAccess;
+    actor: UserPrincipal;
+    tenantId: TenantId;
+  }) => Promise<Result<void, AccessDeniedError>>;
   /** The caller's live grant nodes in an organization, widest first (`GET /v1/me/grants`, decision 0030 A7). */
-  readonly listLiveGrantNodes: (args: { access: RequestAccess; actor: UserPrincipal; tenantId: TenantId }) => Promise<Result<MyGrant[], AccessDeniedError>>;
+  readonly listLiveGrantNodes: (args: {
+    access: RequestAccess;
+    actor: UserPrincipal;
+    tenantId: TenantId;
+  }) => Promise<Result<MyGrant[], AccessDeniedError>>;
   /** The projection read model (tenancy lists visible projects and revokes on organization delete). */
   readonly projections: AccessProjectionStore;
   readonly registry: PermissionRegistry;

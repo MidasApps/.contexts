@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildSilentWav, createFakeSpeechModel, createFakeTranscriptionModel } from "../models/fake/fake-voice-models.ts";
-import { createVoice, type CoreVoice } from "./create-voice.ts";
+import {
+  buildSilentWav,
+  createFakeSpeechModel,
+  createFakeTranscriptionModel,
+} from "../models/fake/fake-voice-models.ts";
+import { type CoreVoice, createVoice } from "./create-voice.ts";
 import {
   createVoiceRoutes,
   handleSpeech,
@@ -13,7 +17,10 @@ import {
 } from "./voice-routes.ts";
 
 const REQUEST_ID = "01J8Z3K4M5N6P7Q8R9S0T1V2W3";
-const fakeVoice = (): CoreVoice | null => createVoice({ models: { transcription: () => createFakeTranscriptionModel(), speech: () => createFakeSpeechModel() } });
+const fakeVoice = (): CoreVoice | null =>
+  createVoice({
+    models: { transcription: () => createFakeTranscriptionModel(), speech: () => createFakeSpeechModel() },
+  });
 const silentLogger = { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined };
 const deps = (voice: CoreVoice | null = fakeVoice()) => ({ voice, logger: silentLogger });
 
@@ -31,7 +38,8 @@ const speechRequest = (body: unknown) =>
     body: JSON.stringify(body),
   });
 
-const errorOf = async (response: Response) => ((await response.json()) as { error: { code: string; requestId: string } }).error;
+const errorOf = async (response: Response) =>
+  ((await response.json()) as { error: { code: string; requestId: string } }).error;
 
 describe("voice routes", () => {
   it("registers the voice routes as authenticated POST routes outside the API prefix", () => {
@@ -47,7 +55,9 @@ describe("voice routes", () => {
     it("answers the deterministic fake transcript", async () => {
       const response = await handleTranscription(audioRequest(new Uint8Array(42)), deps());
       expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({ data: { text: "fake transcript 42 bytes", language: "en", durationInSeconds: 0 } });
+      expect(await response.json()).toEqual({
+        data: { text: "fake transcript 42 bytes", language: "en", durationInSeconds: 0 },
+      });
     });
 
     it("accepts a codec parameter on the media type", async () => {
@@ -88,14 +98,18 @@ describe("voice routes", () => {
 
     it("refuses a transcript whose reported duration exceeds 60 s", async () => {
       const voice = fakeVoice();
-      const long = voice === null ? null : { ...voice, transcribe: () => Promise.resolve({ text: "x", language: "en", durationInSeconds: 61 }) };
+      const long =
+        voice === null
+          ? null
+          : { ...voice, transcribe: () => Promise.resolve({ text: "x", language: "en", durationInSeconds: 61 }) };
       const response = await handleTranscription(audioRequest(new Uint8Array(4)), deps(long));
       expect(response.status).toBe(422);
     });
 
     it("maps a provider failure to 502 without leaking the message", async () => {
       const voice = fakeVoice();
-      const broken = voice === null ? null : { ...voice, transcribe: () => Promise.reject(new Error("provider said secret-thing")) };
+      const broken =
+        voice === null ? null : { ...voice, transcribe: () => Promise.reject(new Error("provider said secret-thing")) };
       const response = await handleTranscription(audioRequest(new Uint8Array(4)), deps(broken));
       expect(response.status).toBe(502);
       const body = JSON.stringify(await response.json());
@@ -121,7 +135,9 @@ describe("voice routes", () => {
     });
 
     it("answers 503 when only transcription is configured", async () => {
-      const onlyStt = createVoice({ models: { transcription: () => createFakeTranscriptionModel(), speech: () => null } });
+      const onlyStt = createVoice({
+        models: { transcription: () => createFakeTranscriptionModel(), speech: () => null },
+      });
       const response = await handleSpeech(speechRequest({ text: "Hello" }), deps(onlyStt));
       expect(response.status).toBe(503);
     });
@@ -141,7 +157,11 @@ describe("voice routes", () => {
     });
 
     it("refuses a body that is not JSON with 400", async () => {
-      const request = new Request(`http://mastra.local${SPEECH_ROUTE_PATH}`, { method: "POST", headers: { "content-type": "application/json" }, body: "{" });
+      const request = new Request(`http://mastra.local${SPEECH_ROUTE_PATH}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{",
+      });
       const response = await handleSpeech(request, deps());
       expect(response.status).toBe(400);
     });

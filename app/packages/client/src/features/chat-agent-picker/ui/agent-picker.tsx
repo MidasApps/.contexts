@@ -29,14 +29,25 @@ export function AgentPicker({ organizationId, value, onChange, disabled = false 
   const custom = (agents.data ?? []).filter((agent) => agent.id !== ASSISTANT_AGENT_ID);
   const known = value === ASSISTANT_AGENT_ID || custom.some((agent) => agent.id === value);
   const selected = known ? value : ASSISTANT_AGENT_ID;
-  const hint = agents.isPending ? t("loading") : agents.isError ? t("error") : custom.length === 0 ? t("onlyAssistant") : undefined;
+  const hint = agents.isPending
+    ? t("loading")
+    : agents.isError
+      ? t("error")
+      : custom.length === 0
+        ? t("onlyAssistant")
+        : undefined;
   return (
     <div data-slot="agent-picker" className="flex min-w-0 items-center gap-2">
       <Label htmlFor={id} className="shrink-0 text-body-sm text-muted-foreground">
         {t("label")}
       </Label>
       <Select value={selected} onValueChange={onChange} disabled={disabled || custom.length === 0}>
-        <SelectTrigger id={id} size="sm" className="max-w-[14rem] min-w-0" aria-describedby={hint === undefined ? undefined : hintId}>
+        <SelectTrigger
+          id={id}
+          size="sm"
+          className="max-w-[14rem] min-w-0"
+          aria-describedby={hint === undefined ? undefined : hintId}
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -49,7 +60,11 @@ export function AgentPicker({ organizationId, value, onChange, disabled = false 
         </SelectContent>
       </Select>
       {agents.isPending ? <Spinner decorative className="size-3.5" /> : null}
-      <span id={hintId} role="status" className={hint === undefined || agents.isPending ? "sr-only" : "truncate text-xs text-muted-foreground"}>
+      <span
+        id={hintId}
+        role="status"
+        className={hint === undefined || agents.isPending ? "sr-only" : "truncate text-xs text-muted-foreground"}
+      >
         {hint ?? ""}
       </span>
       {agents.isError ? (

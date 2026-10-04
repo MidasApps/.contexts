@@ -5,13 +5,28 @@ import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
 export type PlanRepository = {
   readonly list: () => Promise<readonly Plan[]>;
   readonly get: (planId: string) => Promise<Plan | null>;
-  readonly create: (input: { readonly name: string; readonly limits: PlanLimits; readonly at: string; readonly actorId: string }) => Promise<Plan>;
+  readonly create: (input: {
+    readonly name: string;
+    readonly limits: PlanLimits;
+    readonly at: string;
+    readonly actorId: string;
+  }) => Promise<Plan>;
   /** @returns null when the plan does not exist. */
-  readonly replace: (input: { readonly id: string; readonly name: string; readonly limits: PlanLimits; readonly at: string; readonly actorId: string }) => Promise<Plan | null>;
+  readonly replace: (input: {
+    readonly id: string;
+    readonly name: string;
+    readonly limits: PlanLimits;
+    readonly at: string;
+    readonly actorId: string;
+  }) => Promise<Plan | null>;
 };
 
 /** An organization's commercial assignment (Firestore `organization-plans/{tenantId}`). */
-export type OrganizationPlan = { readonly tenantId: string; readonly planId: string | null; readonly budgetOverride: BudgetCaps | null };
+export type OrganizationPlan = {
+  readonly tenantId: string;
+  readonly planId: string | null;
+  readonly budgetOverride: BudgetCaps | null;
+};
 
 export type OrganizationListItem = { readonly id: string; readonly name: string; readonly status: OrganizationStatus };
 
@@ -21,7 +36,12 @@ export type OrganizationAdminStore = {
   readonly listLive: (page: PageRequest) => Promise<Page<OrganizationListItem>>;
   readonly getLive: (tenantId: string) => Promise<OrganizationListItem | null>;
   /** Sets `status` on a live organization; false when it does not exist or is deleted. */
-  readonly setStatus: (input: { readonly tenantId: string; readonly status: OrganizationStatus; readonly at: string; readonly actorId: string }) => Promise<boolean>;
+  readonly setStatus: (input: {
+    readonly tenantId: string;
+    readonly status: OrganizationStatus;
+    readonly at: string;
+    readonly actorId: string;
+  }) => Promise<boolean>;
   readonly getPlan: (tenantId: string) => Promise<OrganizationPlan>;
   readonly setPlan: (input: OrganizationPlan & { readonly at: string; readonly actorId: string }) => Promise<void>;
   /**
@@ -40,7 +60,10 @@ export type AgentSettingsFields = Omit<AgentSettings, "ownBudget">;
 export type StoredAgentSettings = { readonly settings: AgentSettingsFields; readonly selfCap: BudgetCaps | null };
 
 /** The read model of stored settings: the own cap is read back as `ownBudget` (decision 0060). */
-export const agentSettingsOf = (stored: StoredAgentSettings): AgentSettings => ({ ...stored.settings, ownBudget: stored.selfCap === null ? null : { ...stored.selfCap } });
+export const agentSettingsOf = (stored: StoredAgentSettings): AgentSettings => ({
+  ...stored.settings,
+  ownBudget: stored.selfCap === null ? null : { ...stored.selfCap },
+});
 
 /** Firestore `agent-settings/{tenantId}` (the contract names the tenant id as the document id). */
 export type AgentSettingsRepository = {
@@ -68,9 +91,16 @@ export type ConsoleUsage = {
   /** Distinct users of the tenant's ledger rows since an instant (the overview's active users). */
   readonly activeUserIds: (input: { readonly tenantId: string; readonly since: Date }) => Promise<readonly string[]>;
   /** The tenant's agent runs since an instant and how many a guardrail stopped (the overview's tripwire rate, decision 0066). */
-  readonly agentRunCounts: (input: { readonly tenantId: string; readonly since: Date }) => Promise<{ readonly runs: number; readonly stopped: number }>;
+  readonly agentRunCounts: (input: {
+    readonly tenantId: string;
+    readonly since: Date;
+  }) => Promise<{ readonly runs: number; readonly stopped: number }>;
   /** The tenant's calls in `[from, to)` grouped by UTC day, provider and model (`/v1/admin/usage`). */
-  readonly usageBuckets: (input: { readonly tenantId: string; readonly from: Date; readonly to: Date }) => Promise<readonly UsageBucket[]>;
+  readonly usageBuckets: (input: {
+    readonly tenantId: string;
+    readonly from: Date;
+    readonly to: Date;
+  }) => Promise<readonly UsageBucket[]>;
 };
 
 /** Settled approval requests since an instant, across tenants (the overview's approval rate). */

@@ -1,6 +1,6 @@
 "use client";
 
-import { getOrganizationAgentSettingsEndpoint, type AgentSettings } from "@core/contracts";
+import { type AgentSettings, getOrganizationAgentSettingsEndpoint } from "@core/contracts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -19,20 +19,25 @@ export const adminAgentSettingsKeys = {
 export const adminAgentSettingsQuery = (callEndpoint: CallEndpoint, organizationId: string) =>
   queryOptions({
     queryKey: adminAgentSettingsKeys.one(organizationId),
-    queryFn: async ({ signal }): Promise<AgentSettings> => (await callEndpoint(getOrganizationAgentSettingsEndpoint, { params: { organizationId }, signal })).data,
+    queryFn: async ({ signal }): Promise<AgentSettings> =>
+      (await callEndpoint(getOrganizationAgentSettingsEndpoint, { params: { organizationId }, signal })).data,
   });
 
 /** One organization's agent settings as staff read them; idle until an organization is chosen. */
 export const useAdminAgentSettings = (organizationId: string | undefined) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...adminAgentSettingsQuery(callEndpoint, organizationId ?? ""), enabled: signedIn && organizationId !== undefined && organizationId !== "" });
+  return useQuery({
+    ...adminAgentSettingsQuery(callEndpoint, organizationId ?? ""),
+    enabled: signedIn && organizationId !== undefined && organizationId !== "",
+  });
 };
 
 /**
  * Agents the console lists for an organization: the core subagents, then the other registered
  * subagents (when the catalog is known), then any other one the organization has enabled.
  */
-export const listedAgentKeys = (settings: Pick<AgentSettings, "enabledAgents">, registered: readonly string[] = []): string[] => [
-  ...new Set([...CORE_SUBAGENT_KEYS, ...registered, ...settings.enabledAgents]),
-];
+export const listedAgentKeys = (
+  settings: Pick<AgentSettings, "enabledAgents">,
+  registered: readonly string[] = [],
+): string[] => [...new Set([...CORE_SUBAGENT_KEYS, ...registered, ...settings.enabledAgents])];

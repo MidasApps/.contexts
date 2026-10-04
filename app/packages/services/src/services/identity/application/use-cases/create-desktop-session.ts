@@ -5,7 +5,10 @@ import { generateSessionSecret, hashSessionSecret } from "../../domain/session-s
 import { summarizeUserAgent } from "../../domain/user-agent.ts";
 import { DAY_MS, refuseImpersonation, type SessionDeps } from "../session-deps.ts";
 
-export type CreateDesktopSession = (command: { actor: UserPrincipal; userAgent: string | null }) => Promise<Result<CreateDesktopSessionResponse, AccessDeniedError>>;
+export type CreateDesktopSession = (command: {
+  actor: UserPrincipal;
+  userAgent: string | null;
+}) => Promise<Result<CreateDesktopSessionResponse, AccessDeniedError>>;
 
 /**
  * `POST /v1/me/desktop-sessions` (SP1 spec §3.5): a 256-bit secret returned once (the

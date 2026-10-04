@@ -13,12 +13,17 @@ import { getRateLimitPolicy, type RateLimitPolicy } from "../rate-limit/rate-lim
 import type { RateLimiter } from "../rate-limit/rate-limiter.ts";
 import { apiError } from "./api-errors.ts";
 import type { ApiHandler, EndpointPrincipal } from "./api-handler-context.ts";
-import { beginIdempotentAttempt, ONE_TIME_SECRET_ENDPOINT_IDS, principalKey, replayResponse } from "./api-idempotency.ts";
+import {
+  beginIdempotentAttempt,
+  ONE_TIME_SECRET_ENDPOINT_IDS,
+  principalKey,
+  replayResponse,
+} from "./api-idempotency.ts";
 import { createRateLimitGate, isCallerFailure, type RateLimitGate } from "./api-rate-limit.ts";
 import { authenticateRequest } from "./authenticate-request.ts";
 import { clientIpOf, DEFAULT_TRUSTED_PROXY_HOPS } from "./client-ip.ts";
 import { readRequestInput } from "./request-input.ts";
-import { withRouteBoundary, type RouteHandler } from "./route-boundary.ts";
+import { type RouteHandler, withRouteBoundary } from "./route-boundary.ts";
 
 /** Everything the `/v1` pipeline needs; built once by `createCoreServer`. */
 export type ApiRouteDeps = {
@@ -58,7 +63,11 @@ export const operationName = (endpointId: string): string =>
   endpointId.replace(".", "_").replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
 const withHeaders = (response: Response, headers: Record<string, string>): Response => {
-  const copy = new Response(response.body, { status: response.status, statusText: response.statusText, headers: response.headers });
+  const copy = new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
   for (const [name, value] of Object.entries(headers)) copy.headers.set(name, value);
   return copy;
 };
@@ -66,10 +75,20 @@ const withHeaders = (response: Response, headers: Record<string, string>): Respo
 const authenticate = async <E extends EndpointDefinition>(run: Pipeline<E>): Promise<Step<Principal | undefined>> => {
   const { endpoint, deps, request, requestId } = run;
   if (endpoint.auth === "none") return { ok: true, value: undefined };
-  const result = await authenticateRequest({ ...deps, request, clientIp: run.clientIp, policies: deps.rateLimitPolicies });
-  if (result.kind === "rate-limited") return { ok: false, response: rateLimitedResponse({ decision: result.decision, now: deps.clock.now(), requestId }) };
+  const result = await authenticateRequest({
+    ...deps,
+    request,
+    clientIp: run.clientIp,
+    policies: deps.rateLimitPolicies,
+  });
+  if (result.kind === "rate-limited")
+    return {
+      ok: false,
+      response: rateLimitedResponse({ decision: result.decision, now: deps.clock.now(), requestId }),
+    };
   if (result.kind === "unauthenticated") return { ok: false, response: apiError(401, "UNAUTHORIZED", requestId) };
-  if (endpoint.auth === "user" && result.principal.type !== "user") return { ok: false, response: apiError(403, "FORBIDDEN", requestId) };
+  if (endpoint.auth === "user" && result.principal.type !== "user")
+    return { ok: false, response: apiError(403, "FORBIDDEN", requestId) };
   return { ok: true, value: result.principal };
 };
 
@@ -83,7 +102,11 @@ const tracedScope = (scope: RequestAccess, trace: { denial: DenyReason | undefin
   },
 });
 
-const callHandler = <E extends EndpointDefinition>(run: Pipeline<E>, principal: Principal | undefined, input: InferEndpointInput<E>) => {
+const callHandler = <E extends EndpointDefinition>(
+  run: Pipeline<E>,
+  principal: Principal | undefined,
+  input: InferEndpointInput<E>,
+) => {
   const scope = tracedScope(run.deps.access.forRequest(), run.trace);
   return run.handler({
     principal: principal as EndpointPrincipal<E>,
@@ -102,7 +125,10 @@ const inProgressResponse = (requestId: string): Response =>
   withHeaders(apiError(409, "IDEMPOTENCY_REQUEST_IN_PROGRESS", requestId), { "retry-after": "1" });
 
 // Validate → idempotency → handler. A throw frees the idempotency key and reaches the boundary (500).
-const validateAndHandle = async <E extends EndpointDefinition>(run: Pipeline<E>, principal: Principal | undefined): Promise<Response> => {
+const validateAndHandle = async <E extends EndpointDefinition>(
+  run: Pipeline<E>,
+  principal: Principal | undefined,
+): Promise<Response> => {
   const parsed = await readRequestInput(run.endpoint, run.request);
   if (!parsed.ok) return apiError(400, "VALIDATION_FAILED", run.requestId, parsed.details);
   if (parsed.idempotencyKey === undefined) return callHandler(run, principal, parsed.input);
@@ -127,31 +153,60 @@ const validateAndHandle = async <E extends EndpointDefinition>(run: Pipeline<E>,
   }
 };
 
-const gateFor = <E extends EndpointDefinition>(run: Pipeline<E>, subjectKind: "ip" | "principal", subject: string): RateLimitGate | undefined => {
+const gateFor = <E extends EndpointDefinition>(
+  run: Pipeline<E>,
+  subjectKind: "ip" | "principal",
+  subject: string,
+): RateLimitGate | undefined => {
   if (run.endpoint.rateLimit === undefined) return undefined;
   const policy = getRateLimitPolicy(run.endpoint.rateLimit, run.deps.rateLimitPolicies);
-  return policy.subject === subjectKind ? createRateLimitGate({ limiter: run.deps.rateLimiter, policy, subject }) : undefined;
+  return policy.subject === subjectKind
+    ? createRateLimitGate({ limiter: run.deps.rateLimiter, policy, subject })
+    : undefined;
 };
 
 // Deny reasons go to logs only (the response says 403/404); impersonated requests are audited.
-const reportRequest = async <E extends EndpointDefinition>(run: Pipeline<E>, principal: Principal | undefined, status: number): Promise<void> => {
+const reportRequest = async <E extends EndpointDefinition>(
+  run: Pipeline<E>,
+  principal: Principal | undefined,
+  status: number,
+): Promise<void> => {
   const denyReason = status >= 400 ? run.trace.denial : undefined;
-  if (denyReason !== undefined) run.deps.logger.info("access_denied", { requestId: run.requestId, endpointId: run.endpoint.id, reason: denyReason });
-  if (principal?.type !== "user" || principal.impersonation === undefined || run.deps.onImpersonatedRequest === undefined) return;
+  if (denyReason !== undefined)
+    run.deps.logger.info("access_denied", {
+      requestId: run.requestId,
+      endpointId: run.endpoint.id,
+      reason: denyReason,
+    });
+  if (
+    principal?.type !== "user" ||
+    principal.impersonation === undefined ||
+    run.deps.onImpersonatedRequest === undefined
+  )
+    return;
   const { impersonation } = principal;
-  const request = { principal: { ...principal, impersonation }, endpointId: run.endpoint.id, method: run.request.method, status, denyReason, requestId: run.requestId };
+  const request = {
+    principal: { ...principal, impersonation },
+    endpointId: run.endpoint.id,
+    method: run.request.method,
+    status,
+    denyReason,
+    requestId: run.requestId,
+  };
   await run.deps.onImpersonatedRequest(request);
 };
 
-const runPipeline =async <E extends EndpointDefinition>(run: Pipeline<E>): Promise<Response> => {
-  const refused = (decision: RateLimitDecision) => rateLimitedResponse({ decision, now: run.deps.clock.now(), requestId: run.requestId });
+const runPipeline = async <E extends EndpointDefinition>(run: Pipeline<E>): Promise<Response> => {
+  const refused = (decision: RateLimitDecision) =>
+    rateLimitedResponse({ decision, now: run.deps.clock.now(), requestId: run.requestId });
   // IP policies run before authentication (public endpoints), principal policies right after it.
   const ipGate = gateFor(run, "ip", run.clientIp);
   let decision = await ipGate?.before();
   if (decision?.allowed === false) return refused(decision);
   const principal = await authenticate(run);
   if (!principal.ok) return principal.response;
-  const principalGate = ipGate === undefined ? gateFor(run, "principal", principalKey(principal.value, run.clientIp)) : undefined;
+  const principalGate =
+    ipGate === undefined ? gateFor(run, "principal", principalKey(principal.value, run.clientIp)) : undefined;
   decision = (await principalGate?.before()) ?? decision;
   if (decision?.allowed === false) return refused(decision);
   const response = await validateAndHandle(run, principal.value);
@@ -167,7 +222,19 @@ const runPipeline =async <E extends EndpointDefinition>(run: Pipeline<E>): Promi
  * (400 with every issue) → idempotency (409 reuse / in progress, replay) → handler.
  * @example export const POST = withApiRoute(createProjectEndpoint, deps, async ({ principal, input, authorize }) => { ... });
  */
-export const withApiRoute = <E extends EndpointDefinition>(endpoint: E, deps: ApiRouteDeps, handler: ApiHandler<E>): RouteHandler =>
+export const withApiRoute = <E extends EndpointDefinition>(
+  endpoint: E,
+  deps: ApiRouteDeps,
+  handler: ApiHandler<E>,
+): RouteHandler =>
   withRouteBoundary({ operation: operationName(endpoint.id), logger: deps.logger }, (request, { requestId }) =>
-    runPipeline({ endpoint, deps, handler, request, requestId, trace: { denial: undefined }, clientIp: clientIpOf(request, { trustedProxyHops: deps.trustedProxyHops ?? DEFAULT_TRUSTED_PROXY_HOPS }) }),
+    runPipeline({
+      endpoint,
+      deps,
+      handler,
+      request,
+      requestId,
+      trace: { denial: undefined },
+      clientIp: clientIpOf(request, { trustedProxyHops: deps.trustedProxyHops ?? DEFAULT_TRUSTED_PROXY_HOPS }),
+    }),
   );

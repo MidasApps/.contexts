@@ -9,17 +9,8 @@
     "checkJs": true,
     "incremental": true,
     "tsBuildInfoFile": ".tscache/tsbuildinfo",
-    "lib": [
-      "ES2025",
-      "ESNext.Disposable",
-      "DOM"
-    ]
+    "lib": ["ES2025", "ESNext.Disposable", "DOM"]
   },
-  "include": [
-    "src/**/*.ts",
-    "*.js"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*.ts", "*.js"],
+  "exclude": ["node_modules"]
 }

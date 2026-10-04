@@ -4,15 +4,21 @@ export { createMemoryRouter, type MemoryRouter } from "./memory-router.tsx";
 export { parseRoute } from "./parse-route.ts";
 export {
   PROFILE_SECTIONS,
-  ROUTE_IDS,
-  routeHref,
-  SETTINGS_SECTIONS,
-  WEB_ONLY_ROUTE_IDS,
   type ProfileSection,
+  ROUTE_IDS,
   type Route,
   type RouteId,
+  routeHref,
+  SETTINGS_SECTIONS,
   type SettingsSection,
+  WEB_ONLY_ROUTE_IDS,
 } from "./route-paths.ts";
 export { RouteLink, RouterProvider, useRouter } from "./router-context.tsx";
 export type { RouterLinkProps, RouterPort } from "./router-port.ts";
-export { searchOption, useCarriedSearch, useRouteSearch, useSettingsSearch, type RouteSearch } from "./use-route-search.ts";
+export {
+  type RouteSearch,
+  searchOption,
+  useCarriedSearch,
+  useRouteSearch,
+  useSettingsSearch,
+} from "./use-route-search.ts";

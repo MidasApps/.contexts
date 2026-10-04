@@ -5,15 +5,27 @@ import { RequestContext } from "@mastra/core/request-context";
 import { createSkill } from "@mastra/core/skills";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
+import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import type { ConnectorToolsResolver } from "../connectors/connector-registry.ts";
 import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
-import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
-import { createFakeAccessPort, createFakeApprovalPort, createFakeAuditPort, createFakeCustomAgentsPort, createFakeSettingsPort } from "../testing/fake-ports.ts";
+import {
+  createFakeAccessPort,
+  createFakeApprovalPort,
+  createFakeAuditPort,
+  createFakeCustomAgentsPort,
+  createFakeSettingsPort,
+} from "../testing/fake-ports.ts";
 import { defineCoreTool } from "../tools/define-core-tool.ts";
 import { createToolRegistry } from "../tools/tool-registry.ts";
 import { buildCustomAgent, buildCustomSkill, CUSTOM_AGENT_TEST_ID, OTHER_TENANT } from "./custom-agent.fixture.ts";
 import { createCustomAgentLoader } from "./custom-agent-loader.ts";
-import { createCustomAgentRoutes, customCatalogEntriesOf, type CustomAgentRouteDeps, handleCustomAgentOptions, handleInvalidateCustomAgents } from "./custom-agent-routes.ts";
+import {
+  type CustomAgentRouteDeps,
+  createCustomAgentRoutes,
+  customCatalogEntriesOf,
+  handleCustomAgentOptions,
+  handleInvalidateCustomAgents,
+} from "./custom-agent-routes.ts";
 
 const tool = (id: string, permission: string, kind: "read" | "mutation" = "read") =>
   defineCoreTool({
@@ -27,7 +39,11 @@ const tool = (id: string, permission: string, kind: "read" | "mutation" = "read"
   });
 
 const registryOf = () => {
-  const registry = createToolRegistry({ access: createFakeAccessPort({}), audit: createFakeAuditPort(), approvals: createFakeApprovalPort() });
+  const registry = createToolRegistry({
+    access: createFakeAccessPort({}),
+    audit: createFakeAuditPort(),
+    approvals: createFakeApprovalPort(),
+  });
   for (const definition of [
     tool("catalog.listEntities", "core.catalog.read"),
     tool("knowledge.searchKnowledge", "core.knowledge.read"),
@@ -39,11 +55,22 @@ const registryOf = () => {
   return registry;
 };
 
-const coreSkills = { "knowledge-citations": createSkill({ name: "knowledge-citations", description: "How to cite.", instructions: "Cite." }) };
-const noConnectors = Object.assign(() => Promise.resolve({}), { close: () => Promise.resolve() }) as ConnectorToolsResolver;
+const coreSkills = {
+  "knowledge-citations": createSkill({
+    name: "knowledge-citations",
+    description: "How to cite.",
+    instructions: "Cite.",
+  }),
+};
+const noConnectors = Object.assign(() => Promise.resolve({}), {
+  close: () => Promise.resolve(),
+}) as ConnectorToolsResolver;
 const silentLogger = { info: () => undefined, error: () => undefined };
 
-const setup = (permissions: readonly string[], enabledAgents: readonly string[] = ["knowledge", "data", "action", "example"]) => {
+const setup = (
+  permissions: readonly string[],
+  enabledAgents: readonly string[] = ["knowledge", "data", "action", "example"],
+) => {
   const port = createFakeCustomAgentsPort({ agents: [buildCustomAgent()] });
   const loader = createCustomAgentLoader(port);
   const deps: CustomAgentRouteDeps = {
@@ -58,7 +85,10 @@ const setup = (permissions: readonly string[], enabledAgents: readonly string[] 
   return { deps, port, loader };
 };
 
-const inputs = (permissions: readonly string[]) => ({ mastra: {} as Mastra, requestContext: new RequestContext<unknown>(buildAgentContextEntries({ permissions })) });
+const inputs = (permissions: readonly string[]) => ({
+  mastra: {} as Mastra,
+  requestContext: new RequestContext<unknown>(buildAgentContextEntries({ permissions })),
+});
 
 describe("custom agent runtime routes", () => {
   it("registers both routes as authenticated routes under the tenant catalog", () => {
@@ -93,7 +123,10 @@ describe("custom agent runtime routes", () => {
   it("answers 403 for the options without the read permission and 401 without a context", async () => {
     const { deps } = setup(["core.chat.use"]);
     expect((await handleCustomAgentOptions(deps)(inputs(["core.chat.use"]))).status).toBe(403);
-    expect((await handleCustomAgentOptions(deps)({ mastra: {} as Mastra, requestContext: new RequestContext<unknown>() })).status).toBe(401);
+    expect(
+      (await handleCustomAgentOptions(deps)({ mastra: {} as Mastra, requestContext: new RequestContext<unknown>() }))
+        .status,
+    ).toBe(401);
   });
 
   it("drops the caller's tenant's cached records on invalidate, with the update permission only", async () => {
@@ -109,7 +142,11 @@ describe("custom agent runtime routes", () => {
 });
 
 describe("custom agents in the tenant catalog", () => {
-  const catalogDeps = (agents = [buildCustomAgent()], skills = [buildCustomSkill()], connectorTools = noConnectors) => ({
+  const catalogDeps = (
+    agents = [buildCustomAgent()],
+    skills = [buildCustomSkill()],
+    connectorTools = noConnectors,
+  ) => ({
     customAgents: createFakeCustomAgentsPort({ agents, skills }),
     registry: registryOf(),
     moduleIds: ["example"],
@@ -122,7 +159,12 @@ describe("custom agents in the tenant catalog", () => {
     const skill = buildCustomSkill();
     const off = buildCustomSkill({ id: "Sk000000000000000002" as never, name: "off", enabled: false });
     const agents = [
-      buildCustomAgent({ tools: ["catalog.listEntities", "missing.tool", "web.search"], coreSkills: ["knowledge-citations", "nope"], customSkills: [skill.id, off.id], knowledgeScope: "organization" }),
+      buildCustomAgent({
+        tools: ["catalog.listEntities", "missing.tool", "web.search"],
+        coreSkills: ["knowledge-citations", "nope"],
+        customSkills: [skill.id, off.id],
+        knowledgeScope: "organization",
+      }),
       buildCustomAgent({ id: "Ag000000000000000002" as never, name: "Second", enabled: false }),
       buildCustomAgent({ id: "Ag000000000000000003" as never, tenantId: OTHER_TENANT as never }),
     ];
@@ -143,8 +185,14 @@ describe("custom agents in the tenant catalog", () => {
   });
 
   it("adds the read-only connector tools only to agents that opted in", async () => {
-    const connectorTools = Object.assign(() => Promise.resolve({ issues_listIssues: { id: "issues-api.listIssues" } }), { close: () => Promise.resolve() }) as unknown as ConnectorToolsResolver;
-    const agents = [buildCustomAgent({ connectorTools: true }), buildCustomAgent({ id: "Ag000000000000000002" as never })];
+    const connectorTools = Object.assign(
+      () => Promise.resolve({ issues_listIssues: { id: "issues-api.listIssues" } }),
+      { close: () => Promise.resolve() },
+    ) as unknown as ConnectorToolsResolver;
+    const agents = [
+      buildCustomAgent({ connectorTools: true }),
+      buildCustomAgent({ id: "Ag000000000000000002" as never }),
+    ];
     const entries: AgentCatalogEntry[] = await customCatalogEntriesOf(catalogDeps(agents, [], connectorTools), input);
     expect(entries[0]?.tools).toEqual([{ id: "issues-api.listIssues", kind: "read", source: "connector" }]);
     expect(entries[1]?.tools).toEqual([]);

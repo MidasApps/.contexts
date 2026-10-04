@@ -55,7 +55,15 @@ describe("planSchemaForm", () => {
         tags: z.array(z.string()).meta({ description: "Tags.", pii: "none" }),
         name: z.string().meta({ description: "Name.", pii: "none", ui: { labelKey: "x.name" } }),
       }),
-      { id: "fixture.Tags", kind: "command", description: "d", examples: [{}], pii: "none", tenancyScope: "user", relations: [] },
+      {
+        id: "fixture.Tags",
+        kind: "command",
+        description: "d",
+        examples: [{}],
+        pii: "none",
+        tenancyScope: "user",
+        relations: [],
+      },
     );
     const plan = planSchemaForm(contract, { can: allowAll });
     expect(plan.carried).toEqual(["tags"]);
@@ -63,14 +71,23 @@ describe("planSchemaForm", () => {
   });
 
   it("rejects a rendered field without labelKey and a widget that does not fit the type", () => {
-    const meta = { kind: "command", description: "d", examples: [{}], pii: "none", tenancyScope: "user", relations: [] };
+    const meta = {
+      kind: "command",
+      description: "d",
+      examples: [{}],
+      pii: "none",
+      tenancyScope: "user",
+      relations: [],
+    };
     const unlabeled = defineContract(z.object({ name: z.string().meta({ description: "Name.", pii: "none" }) }), {
       ...meta,
       id: "fixture.Unlabeled",
     });
     expect(() => planSchemaForm(unlabeled, { can: allowAll })).toThrow(SchemaFormDefinitionError);
     const mismatch = defineContract(
-      z.object({ name: z.string().meta({ description: "Name.", pii: "none", ui: { widget: "select", labelKey: "x.name" } }) }),
+      z.object({
+        name: z.string().meta({ description: "Name.", pii: "none", ui: { widget: "select", labelKey: "x.name" } }),
+      }),
       { ...meta, id: "fixture.Mismatch" },
     );
     expect(() => planSchemaForm(mismatch, { can: allowAll })).toThrow(/select/);

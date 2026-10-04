@@ -62,7 +62,11 @@ describe("trace costs over usage.llm_calls (Postgres)", () => {
       call({ traceId: TRACE_3, costMicroUsd: 9 }),
       call({ traceId: null, costMicroUsd: 7 }),
     ]);
-    const found = await costs.costByTrace({ tenantId: TENANT_A, traceIds: [TRACE_1, TRACE_2, "f".repeat(32)], ...RANGE });
+    const found = await costs.costByTrace({
+      tenantId: TENANT_A,
+      traceIds: [TRACE_1, TRACE_2, "f".repeat(32)],
+      ...RANGE,
+    });
     expect(Object.fromEntries(found)).toEqual({
       [TRACE_1]: { costMicroUsd: 1000, unpricedCalls: 0 },
       [TRACE_2]: { costMicroUsd: 50, unpricedCalls: 1 },
@@ -70,9 +74,17 @@ describe("trace costs over usage.llm_calls (Postgres)", () => {
   });
 
   it("never reads another tenant's calls and keeps to the time range", async () => {
-    await repository.insertCalls([call({ tenantId: TENANT_B, costMicroUsd: 999 }), call({ occurredAt: "2026-09-20T10:00:00.000Z", costMicroUsd: 5 }), call({ costMicroUsd: 1 })]);
-    expect(Object.fromEntries(await costs.costByTrace({ tenantId: TENANT_A, traceIds: [TRACE_1], ...RANGE }))).toEqual({ [TRACE_1]: { costMicroUsd: 1, unpricedCalls: 0 } });
-    expect((await costs.costByTrace({ tenantId: TENANT_B, traceIds: [TRACE_1], ...RANGE })).get(TRACE_1)?.costMicroUsd).toBe(999);
+    await repository.insertCalls([
+      call({ tenantId: TENANT_B, costMicroUsd: 999 }),
+      call({ occurredAt: "2026-09-20T10:00:00.000Z", costMicroUsd: 5 }),
+      call({ costMicroUsd: 1 }),
+    ]);
+    expect(Object.fromEntries(await costs.costByTrace({ tenantId: TENANT_A, traceIds: [TRACE_1], ...RANGE }))).toEqual({
+      [TRACE_1]: { costMicroUsd: 1, unpricedCalls: 0 },
+    });
+    expect(
+      (await costs.costByTrace({ tenantId: TENANT_B, traceIds: [TRACE_1], ...RANGE })).get(TRACE_1)?.costMicroUsd,
+    ).toBe(999);
     expect((await costs.costByTrace({ tenantId: TENANT_A, traceIds: [], ...RANGE })).size).toBe(0);
   });
 });

@@ -5,19 +5,19 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useRef } from "react";
 import { ulid } from "ulid";
 import { useLocale, useTranslations } from "use-intl";
+import { useMe } from "#/entities/session/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
-import { useMe } from "#/entities/session/index.ts";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
+import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { SchemaForm } from "#/shared/ui/organisms/SchemaForm/SchemaForm.tsx";
 import type { SchemaFormResult } from "#/shared/ui/organisms/SchemaForm/server-errors.ts";
-import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import {
   CreateOrganizationFormContract,
+  type CreateOrganizationForm as FormValues,
   organizationFormDefaults,
   toCreateOrganizationInput,
-  type CreateOrganizationForm as FormValues,
 } from "../model/create-organization-form.contract.ts";
 
 /** Same body as the failed attempt → same key (a retry); anything changed → a new operation. */
@@ -43,7 +43,10 @@ export function CreateOrganizationForm({ className }: { className?: string }) {
   const attempt = useRef<{ key: string; body: string } | null>(null);
   const me = useMe();
   const preferences = me.data?.preferences;
-  const defaults = useMemo(() => ({ name: "", ...organizationFormDefaults({ locale, preferences }) }), [locale, preferences]);
+  const defaults = useMemo(
+    () => ({ name: "", ...organizationFormDefaults({ locale, preferences }) }),
+    [locale, preferences],
+  );
 
   const submit = async (values: FormValues): Promise<SchemaFormResult> => {
     const body = toCreateOrganizationInput(values);

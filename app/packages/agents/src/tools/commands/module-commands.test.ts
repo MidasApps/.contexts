@@ -8,7 +8,10 @@ const renderNoteForm = async (enabledAgents: string[]): Promise<unknown> => {
   const harness = buildSupervisorHarness({ settings: { enabledAgents } });
   const renderForm = harness.runtime.tools.toMastraTools(["catalog.renderForm"])["catalog.renderForm"];
   try {
-    return await renderForm?.execute?.(FORM_INPUT, { requestContext: memberContext(), agent: { agentId: "data", toolCallId: "call_1" } } as never);
+    return await renderForm?.execute?.(FORM_INPUT, {
+      requestContext: memberContext(),
+      agent: { agentId: "data", toolCallId: "call_1" },
+    } as never);
   } catch (error: unknown) {
     return error;
   }

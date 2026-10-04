@@ -26,8 +26,13 @@ describe("OrganizationsView", () => {
   });
 
   it("shows the empty state and an error state with the request reference and retry", async () => {
-    const empty = renderApp(<OrganizationsView />, { path: "/organizations", routes: { "GET /v1/me/organizations": page([]) } });
-    expect(await screen.findByRole("heading", { name: "Você ainda não participa de nenhuma organização" })).toBeDefined();
+    const empty = renderApp(<OrganizationsView />, {
+      path: "/organizations",
+      routes: { "GET /v1/me/organizations": page([]) },
+    });
+    expect(
+      await screen.findByRole("heading", { name: "Você ainda não participa de nenhuma organização" }),
+    ).toBeDefined();
     await expectNoAxeViolations(empty.container);
     empty.unmount();
 
@@ -68,7 +73,17 @@ describe("OrganizationsView", () => {
     const { user, api, router } = renderApp(<OrganizationsView />, {
       path: "/organizations",
       routes: {
-        "GET /v1/me": ok(buildMe({ preferences: { locale: "pt-BR", timeZone: "America/Manaus", currency: "BRL", theme: "system", notifications: { productUpdates: false, securityAlerts: true } } })),
+        "GET /v1/me": ok(
+          buildMe({
+            preferences: {
+              locale: "pt-BR",
+              timeZone: "America/Manaus",
+              currency: "BRL",
+              theme: "system",
+              notifications: { productUpdates: false, securityAlerts: true },
+            },
+          }),
+        ),
         "GET /v1/me/organizations": page([]),
         "POST /v1/organizations": ok(created, 201),
       },
@@ -78,7 +93,10 @@ describe("OrganizationsView", () => {
     await user.click(within(form).getByRole("button", { name: "Criar organização" }));
     await waitFor(() => expect(router.current()).toBe("/o/NewOrg0000000000000a"));
     const call = api.calls.find((candidate) => candidate.method === "POST" && candidate.path === "/v1/organizations");
-    expect(call?.body).toEqual({ name: "Fabrikam", defaults: { locale: "pt-BR", timeZone: "America/Manaus", currency: "BRL" } });
+    expect(call?.body).toEqual({
+      name: "Fabrikam",
+      defaults: { locale: "pt-BR", timeZone: "America/Manaus", currency: "BRL" },
+    });
     expect(call?.headers.get("idempotency-key")).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/u);
   });
 });

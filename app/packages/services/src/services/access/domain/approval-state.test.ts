@@ -1,8 +1,16 @@
 import type { ApprovalStatus } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { effectiveApprovalStatus, nextApprovalStatus, type ApprovalTransition } from "./approval-state.ts";
+import { type ApprovalTransition, effectiveApprovalStatus, nextApprovalStatus } from "./approval-state.ts";
 
-const ALL: readonly ApprovalStatus[] = ["pending", "approved", "rejected", "cancelled", "expired", "executed", "failed"];
+const ALL: readonly ApprovalStatus[] = [
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+  "expired",
+  "executed",
+  "failed",
+];
 const TRANSITIONS: readonly ApprovalTransition[] = ["approve", "reject", "cancel", "expire", "execute", "fail"];
 
 describe("nextApprovalStatus", () => {
@@ -34,6 +42,8 @@ describe("effectiveApprovalStatus", () => {
   it("reports a pending request past its expiry as expired, and nothing else", () => {
     expect(effectiveApprovalStatus({ status: "pending", expiresAt: "2026-09-30T12:00:00.000Z" }, now)).toBe("expired");
     expect(effectiveApprovalStatus({ status: "pending", expiresAt: "2026-09-30T12:00:01.000Z" }, now)).toBe("pending");
-    expect(effectiveApprovalStatus({ status: "approved", expiresAt: "2026-09-01T00:00:00.000Z" }, now)).toBe("approved");
+    expect(effectiveApprovalStatus({ status: "approved", expiresAt: "2026-09-01T00:00:00.000Z" }, now)).toBe(
+      "approved",
+    );
   });
 });

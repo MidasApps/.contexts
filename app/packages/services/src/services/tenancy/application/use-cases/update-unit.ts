@@ -9,7 +9,7 @@ import { TenancyNotFoundError } from "../../domain/errors/tenancy-not-found-erro
 import type { UnitTreeBusyError } from "../../domain/errors/unit-tree-busy-error.ts";
 import { MAX_SUBTREE_REWRITE, planMove, type TreeRewrite } from "../../domain/unit-tree.ts";
 import type { TreeLock } from "../ports/driven/unit-tree-lock-store.ts";
-import { changedKeys, recordTenancyAudit, unitNode, type TenancyCommand, type TenancyDeps } from "../tenancy-deps.ts";
+import { changedKeys, recordTenancyAudit, type TenancyCommand, type TenancyDeps, unitNode } from "../tenancy-deps.ts";
 import { acquireTreeLock, commitTreeChange, releaseTreeLock } from "../unit-tree-lock.ts";
 import { loadAuthorizedUnit, loadTreeParent, type UnitError } from "./unit-access.ts";
 
@@ -32,17 +32,35 @@ const applyFields = (unit: Unit, input: UpdateUnitInput, now: string): Unit => {
 type Move = { readonly placed: Unit; readonly descendants: readonly TreeRewrite[] };
 
 // Checks the destination and plans the subtree rewrite (SP1 spec §6.1).
-const planUnitMove = async (deps: TenancyDeps, command: UpdateUnitCommand, unit: Unit, parentUnitId: UnitId | null): Promise<Result<Move, UpdateUnitError>> => {
+const planUnitMove = async (
+  deps: TenancyDeps,
+  command: UpdateUnitCommand,
+  unit: Unit,
+  parentUnitId: UnitId | null,
+): Promise<Result<Move, UpdateUnitError>> => {
   const parent = await loadTreeParent(deps, { projectId: unit.projectId, parentUnitId });
   if (!parent.ok) return err(new InvalidUnitParentError("PARENT_NOT_FOUND"));
   const allowed = await requirePermission({ ...command, permission: "core.unit.update", node: parent.data.node });
   if (!allowed.ok) return allowed;
-  if (!deps.unitTypes.allowsParent({ type: unit.type, parent: parent.data.unit?.type ?? "project" })) return err(new InvalidUnitParentError("TYPE_NOT_ALLOWED"));
-  const descendants = await deps.units.listDescendants({ tenantId: unit.tenantId, unitId: unit.id, limit: MAX_SUBTREE_REWRITE });
+  if (!deps.unitTypes.allowsParent({ type: unit.type, parent: parent.data.unit?.type ?? "project" }))
+    return err(new InvalidUnitParentError("TYPE_NOT_ALLOWED"));
+  const descendants = await deps.units.listDescendants({
+    tenantId: unit.tenantId,
+    unitId: unit.id,
+    limit: MAX_SUBTREE_REWRITE,
+  });
   const plan = planMove({ unit, newParent: parent.data.unit, descendants });
-  if (!plan.ok) return err(plan.reason === "TOO_LARGE" ? new SubtreeTooLargeError(MAX_SUBTREE_REWRITE) : new InvalidUnitParentError(plan.reason));
+  if (!plan.ok)
+    return err(
+      plan.reason === "TOO_LARGE"
+        ? new SubtreeTooLargeError(MAX_SUBTREE_REWRITE)
+        : new InvalidUnitParentError(plan.reason),
+    );
   const own = plan.rewrites.find((rewrite) => rewrite.id === unit.id);
-  const placed = own === undefined ? unit : { ...unit, parentUnitId: own.parentUnitId, ancestorIds: [...own.ancestorIds], depth: own.depth };
+  const placed =
+    own === undefined
+      ? unit
+      : { ...unit, parentUnitId: own.parentUnitId, ancestorIds: [...own.ancestorIds], depth: own.depth };
   return ok({ placed, descendants: plan.rewrites.filter((rewrite) => rewrite.id !== unit.id) });
 };
 
@@ -70,14 +88,21 @@ const renameUnit = (deps: TenancyDeps, command: UpdateUnitCommand, now: string) 
 // Under the project's tree lock (decision 0030 §4): plan from the unit as read after the
 // lock, rewrite descendants in batches, then commit the unit only if the lock is still ours.
 // A throw keeps the lock; its lease expires and the next tree change finishes the move.
-const moveUnit = async (deps: TenancyDeps, command: UpdateUnitCommand, lock: TreeLock, parentUnitId: UnitId | null, now: string): Promise<Result<Unit, UpdateUnitError>> => {
+const moveUnit = async (
+  deps: TenancyDeps,
+  command: UpdateUnitCommand,
+  lock: TreeLock,
+  parentUnitId: UnitId | null,
+  now: string,
+): Promise<Result<Unit, UpdateUnitError>> => {
   const fresh = await deps.units.get(undefined, command.unitId);
   if (fresh === null) return err(new TenancyNotFoundError("unit"));
   const move = await planUnitMove(deps, command, fresh, parentUnitId);
   if (!move.ok) return move;
   const next = applyFields(move.data.placed, command.input, now);
   const actorId = auditActorOf(command.actor).id;
-  if (move.data.descendants.length > 0) await deps.units.rewriteTree({ rewrites: move.data.descendants, updatedAt: now, actorId });
+  if (move.data.descendants.length > 0)
+    await deps.units.rewriteTree({ rewrites: move.data.descendants, updatedAt: now, actorId });
   const committed = await commitTreeChange(deps, {
     lock,
     expected: fresh,

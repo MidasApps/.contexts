@@ -1,7 +1,7 @@
 "use client";
 
 import type { AgentCatalogEntry, AgentCatalogTool } from "@core/contracts";
-import { useId, useState, type ReactNode } from "react";
+import { type ReactNode, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { isPromptAgentId } from "#/entities/prompt-version/index.ts";
 import { AgentInstructions } from "#/features/tenant-prompt-addendum/index.ts";
@@ -39,7 +39,9 @@ function ToolList({ tools }: { tools: readonly AgentCatalogTool[] }) {
                 <li key={tool.id} className="flex flex-wrap items-center gap-2 text-sm">
                   <ToolName id={tool.id} label={toolLabel(tool.id)} />
                   {/* The kind is written out: color alone never tells a mutation from a read. */}
-                  <Badge variant={tool.kind === "mutation" ? "default" : "secondary"}>{tool.kind === "mutation" ? t("toolMutation") : t("toolRead")}</Badge>
+                  <Badge variant={tool.kind === "mutation" ? "default" : "secondary"}>
+                    {tool.kind === "mutation" ? t("toolMutation") : t("toolRead")}
+                  </Badge>
                 </li>
               ))}
             </ul>
@@ -81,7 +83,12 @@ function AgentDetails({ organizationId, agent, prompt }: Omit<AgentCardProps, "s
     <div className="flex flex-col gap-4 pt-2">
       {prompt.canRead ? (
         isPromptAgentId(agent.key) ? (
-          <AgentInstructions organizationId={organizationId} agentId={agent.key} agentName={agent.name} canWrite={prompt.canWrite} />
+          <AgentInstructions
+            organizationId={organizationId}
+            agentId={agent.key}
+            agentName={agent.name}
+            canWrite={prompt.canWrite}
+          />
         ) : (
           <p className="text-sm text-muted-foreground">{t("instructions.unsupported")}</p>
         )
@@ -120,7 +127,11 @@ export function AgentCard({ organizationId, agent, status, prompt }: AgentCardPr
   const headingId = useId();
   const [open, setOpen] = useState(false);
   return (
-    <article aria-labelledby={headingId} data-slot="agent-card" className="flex flex-col gap-2 rounded-lg border border-border p-4">
+    <article
+      aria-labelledby={headingId}
+      data-slot="agent-card"
+      className="flex flex-col gap-2 rounded-lg border border-border p-4"
+    >
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
           <h3 id={headingId} className="text-title font-semibold">
@@ -141,12 +152,19 @@ export function AgentCard({ organizationId, agent, status, prompt }: AgentCardPr
       </header>
       <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm" className="-ml-2 self-start" aria-label={t(open ? "catalog.hideDetailsNamed" : "catalog.showDetailsNamed", { name: agent.name })}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-ml-2 self-start"
+            aria-label={t(open ? "catalog.hideDetailsNamed" : "catalog.showDetailsNamed", { name: agent.name })}
+          >
             <Icon name="chevron-down" className={open ? "rotate-180 transition-transform" : "transition-transform"} />
             {t(open ? "catalog.hideDetails" : "catalog.showDetails")}
           </Button>
         </CollapsibleTrigger>
-        <CollapsibleContent>{open ? <AgentDetails organizationId={organizationId} agent={agent} prompt={prompt} /> : null}</CollapsibleContent>
+        <CollapsibleContent>
+          {open ? <AgentDetails organizationId={organizationId} agent={agent} prompt={prompt} /> : null}
+        </CollapsibleContent>
       </Collapsible>
     </article>
   );

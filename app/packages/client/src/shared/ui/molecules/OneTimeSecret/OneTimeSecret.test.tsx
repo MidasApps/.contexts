@@ -9,7 +9,16 @@ describe("OneTimeSecret", () => {
     const onDone = vi.fn();
     const { user, container } = renderWithProviders(
       <div role="dialog" aria-label="Segredo">
-        <OneTimeSecret title="Só agora" warning="Não será mostrado de novo." label="Chave" secret="s3cr3t" hint="Use no cabeçalho." acknowledge="Guardei" doneLabel="Concluir" onDone={onDone} />
+        <OneTimeSecret
+          title="Só agora"
+          warning="Não será mostrado de novo."
+          label="Chave"
+          secret="s3cr3t"
+          hint="Use no cabeçalho."
+          acknowledge="Guardei"
+          doneLabel="Concluir"
+          onDone={onDone}
+        />
       </div>,
     );
     expect(screen.getByRole<HTMLInputElement>("textbox", { name: "Chave" }).value).not.toBe("s3cr3t");

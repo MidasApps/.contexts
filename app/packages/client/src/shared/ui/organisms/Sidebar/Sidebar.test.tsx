@@ -39,7 +39,8 @@ const Shell = ({ persistState }: { persistState: (open: boolean) => void }) => (
   </SidebarProvider>
 );
 
-const sidebarState = (): string | null => document.querySelector("[data-slot=sidebar]")?.getAttribute("data-state") ?? null;
+const sidebarState = (): string | null =>
+  document.querySelector("[data-slot=sidebar]")?.getAttribute("data-state") ?? null;
 
 describe("Sidebar", () => {
   it("collapses with the trigger and persists through the injected callback", async () => {

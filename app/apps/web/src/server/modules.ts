@@ -21,4 +21,6 @@ export const createModuleCommands = (deps: ExampleServerDeps): ContractCommand[]
 export const MODULE_ENDPOINT_IDS: readonly string[] = EXAMPLE_ENDPOINTS.map((endpoint) => endpoint.id);
 
 /** The installed modules' `/v1` handlers, served next to the core routes (`src/server/runtime-routes.ts`). */
-export const createModuleRoutes = (deps: ExampleServerDeps & { readonly pipeline: ApiRouteDeps }): CoreRoutes => ({ ...createExampleRoutes(deps) });
+export const createModuleRoutes = (deps: ExampleServerDeps & { readonly pipeline: ApiRouteDeps }): CoreRoutes => ({
+  ...createExampleRoutes(deps),
+});

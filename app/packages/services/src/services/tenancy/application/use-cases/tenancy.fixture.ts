@@ -1,8 +1,16 @@
 // Test world of the tenancy use cases: the access write world (in-memory grants and
 // projections) plus in-memory tenancy repositories mirrored into its access store.
-import { OrganizationIdSchema, ProjectIdSchema, UnitIdSchema, UserIdSchema, type TenantId, type UnitTypeDefinition, type UserPrincipal } from "@core/contracts";
-import type { Clock } from "../../../shared/clock/clock.ts";
+import {
+  OrganizationIdSchema,
+  ProjectIdSchema,
+  type TenantId,
+  UnitIdSchema,
+  type UnitTypeDefinition,
+  UserIdSchema,
+  type UserPrincipal,
+} from "@core/contracts";
 import { makeAccessWriteWorld, REQUEST_ID } from "../../../access/application/use-cases/access-write.fixture.ts";
+import type { Clock } from "../../../shared/clock/clock.ts";
 import { createInMemoryTenancyStore } from "../../adapters/driven/in-memory-tenancy-store.ts";
 import { createTenancyServices } from "../../composition.ts";
 

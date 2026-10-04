@@ -2,8 +2,8 @@
 
 import type { Permission } from "@core/contracts";
 import type { ReactNode } from "react";
-import type { NodeParams } from "#/shared/api/core-queries.ts";
 import { usePermissions } from "#/entities/permission/model/use-can.ts";
+import type { NodeParams } from "#/shared/api/core-queries.ts";
 
 export type CanProps = {
   permission: Permission;

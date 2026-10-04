@@ -1,6 +1,6 @@
 import { useMe } from "@core/client/entities/session";
-import { useEffect, type ReactNode } from "react";
-import { resolveDesktopLocale, useLocale, type LocaleStore } from "@/adapters/desktop-locale.ts";
+import { type ReactNode, useEffect } from "react";
+import { type LocaleStore, resolveDesktopLocale, useLocale } from "@/adapters/desktop-locale.ts";
 import type { DesktopApp } from "@/router-context.ts";
 import { DesktopShell } from "./desktop-shell.tsx";
 

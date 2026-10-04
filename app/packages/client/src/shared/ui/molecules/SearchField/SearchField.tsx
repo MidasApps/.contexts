@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchIcon, XIcon } from "lucide-react";
-import { useRef, type ComponentProps } from "react";
+import { type ComponentProps, useRef } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { textControlClasses } from "#/shared/ui/atoms/Input/input-styles.ts";

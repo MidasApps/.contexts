@@ -7,7 +7,7 @@ import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import { makeRecordToolDecisions } from "../../application/use-cases/record-tool-decision.ts";
 import { makeResolveAttachments } from "../../application/use-cases/resolve-attachments.ts";
 import { makeSendChatMessage, type SendChatError } from "../../application/use-cases/send-chat-message.ts";
-import { chatScopeOf, type ChatRoutesDeps, chatStreamResponse, endRunOnClose } from "./chat-http.ts";
+import { type ChatRoutesDeps, chatScopeOf, chatStreamResponse, endRunOnClose } from "./chat-http.ts";
 import { buildChatStopRoute } from "./chat-stop-route-handler.ts";
 import { buildChatStreamRoute } from "./chat-stream-route-handler.ts";
 
@@ -45,21 +45,31 @@ export const sendChatErrorResponse = (error: SendChatError, requestId: string): 
  * message stream unchanged with `x-conversation-id`; `activeRunId` is cleared when it closes.
  */
 const buildSendRoute = (deps: ChatRoutesDeps): RouteHandler =>
-  withApiRoute(sendChatMessageEndpoint, deps.pipeline, async ({ principal, input, authorize, requestId, request, audit, logger }) => {
-    const send = makeSendChatMessage({
-      conversations: deps.conversations,
-      gateway: deps.chat,
-      resolveAttachments: makeResolveAttachments(deps.files),
-      recordToolDecisions: makeRecordToolDecisions({ audit }),
-      ...(deps.isChatAgentEnabled === undefined ? {} : { isChatAgentEnabled: deps.isChatAgentEnabled }),
-    });
-    const scopeOf = (conversation: Parameters<typeof chatScopeOf>[0]["conversation"]) => chatScopeOf({ deps, principal, conversation, request, requestId });
-    const sent = await send({ principal, request: input.body, requestId, authorize, scopeOf });
-    if (!sent.ok) return sendChatErrorResponse(sent.error, requestId);
-    const { conversation, stream, runId, scope } = sent.data;
-    logger.info("chat_turn_started", { requestId, conversationId: conversation.id, runId, role: input.body.message.role });
-    return chatStreamResponse(stream, conversation.id, endRunOnClose({ deps, logger, scope, conversation, runId }));
-  });
+  withApiRoute(
+    sendChatMessageEndpoint,
+    deps.pipeline,
+    async ({ principal, input, authorize, requestId, request, audit, logger }) => {
+      const send = makeSendChatMessage({
+        conversations: deps.conversations,
+        gateway: deps.chat,
+        resolveAttachments: makeResolveAttachments(deps.files),
+        recordToolDecisions: makeRecordToolDecisions({ audit }),
+        ...(deps.isChatAgentEnabled === undefined ? {} : { isChatAgentEnabled: deps.isChatAgentEnabled }),
+      });
+      const scopeOf = (conversation: Parameters<typeof chatScopeOf>[0]["conversation"]) =>
+        chatScopeOf({ deps, principal, conversation, request, requestId });
+      const sent = await send({ principal, request: input.body, requestId, authorize, scopeOf });
+      if (!sent.ok) return sendChatErrorResponse(sent.error, requestId);
+      const { conversation, stream, runId, scope } = sent.data;
+      logger.info("chat_turn_started", {
+        requestId,
+        conversationId: conversation.id,
+        runId,
+        role: input.body.message.role,
+      });
+      return chatStreamResponse(stream, conversation.id, endRunOnClose({ deps, logger, scope, conversation, runId }));
+    },
+  );
 
 /** The `/v1/chat` routes: send, resume (`GET …/stream`) and stop. Path B approvals are not built (decision 0032). */
 export const buildChatRoutes = (deps: ChatRoutesDeps): Record<string, RouteHandler> => ({

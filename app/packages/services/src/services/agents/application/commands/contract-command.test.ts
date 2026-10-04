@@ -1,11 +1,23 @@
-import { CreateProjectInputContract, OrganizationContract, PrincipalSchema, TenantIdSchema, defineContract } from "@core/contracts";
+import {
+  CreateProjectInputContract,
+  defineContract,
+  OrganizationContract,
+  PrincipalSchema,
+  TenantIdSchema,
+} from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { CommandContractError, defineContractCommand } from "./contract-command.ts";
 
 const TENANT = TenantIdSchema.parse("Jd8sK2lPq0WnR5tYu3bV");
 const principal = PrincipalSchema.parse({ type: "user", uid: "uA1b2C3d4E5f6G7h8I9j", mfa: false });
-const execution = { principal, tenantId: TENANT, node: { level: "organization", tenantId: TENANT }, requestId: "req-1", idempotencyKey: "run-1:call-1" } as const;
+const execution = {
+  principal,
+  tenantId: TENANT,
+  node: { level: "organization", tenantId: TENANT },
+  requestId: "req-1",
+  idempotencyKey: "run-1:call-1",
+} as const;
 
 const define = (executed: unknown[] = []) =>
   defineContractCommand({
@@ -50,21 +62,34 @@ describe("defineContractCommand", () => {
   });
 
   it("fails at boot for a contract that is not a command", () => {
-    const spec = { targetContractId: "tenancy.Organization", outputSchema: z.strictObject({}), execute: () => Promise.resolve({}) };
+    const spec = {
+      targetContractId: "tenancy.Organization",
+      outputSchema: z.strictObject({}),
+      execute: () => Promise.resolve({}),
+    };
     expect(() => defineContractCommand({ ...spec, contract: OrganizationContract })).toThrow(CommandContractError);
   });
 
   it("fails at boot for a command contract without a permission", () => {
-    const contract = defineContract(z.strictObject({ title: z.string().meta({ description: "Title.", pii: "none" }) }), {
-      id: "sample.RenameThing",
-      kind: "command",
-      description: "Renames a thing.",
-      examples: [{ title: "x" }],
-      pii: "none",
-      tenancyScope: "organization",
-      relations: [],
-    });
-    const define = () => defineContractCommand({ contract, targetContractId: "sample.Thing", outputSchema: z.strictObject({}), execute: () => Promise.resolve({}) });
+    const contract = defineContract(
+      z.strictObject({ title: z.string().meta({ description: "Title.", pii: "none" }) }),
+      {
+        id: "sample.RenameThing",
+        kind: "command",
+        description: "Renames a thing.",
+        examples: [{ title: "x" }],
+        pii: "none",
+        tenancyScope: "organization",
+        relations: [],
+      },
+    );
+    const define = () =>
+      defineContractCommand({
+        contract,
+        targetContractId: "sample.Thing",
+        outputSchema: z.strictObject({}),
+        execute: () => Promise.resolve({}),
+      });
     expect(define).toThrow(/COMMAND_PERMISSION_MISSING/);
   });
 });

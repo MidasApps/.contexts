@@ -48,7 +48,9 @@ export const createDescribeEntityTool = (deps: { readonly catalog: AiCatalogRead
     execute: (input, ctx) => {
       const description = deps.catalog.describe({ id: input.id, permissions: new Set(ctx.agent.permissions) });
       if (description === undefined) {
-        return Promise.reject(toolFailure(TOOL_ID, "ENTITY_NOT_FOUND", "No contract with this id is available to the user."));
+        return Promise.reject(
+          toolFailure(TOOL_ID, "ENTITY_NOT_FOUND", "No contract with this id is available to the user."),
+        );
       }
       return Promise.resolve(description);
     },

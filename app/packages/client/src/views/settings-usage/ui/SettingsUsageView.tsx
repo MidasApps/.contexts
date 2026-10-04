@@ -23,12 +23,21 @@ const MONTHS_SHOWN = 12;
 
 const systemNow = (): Date => new Date();
 
-function MonthPicker({ months, value, onChange }: { months: readonly string[]; value: string; onChange: (month: string) => void }) {
+function MonthPicker({
+  months,
+  value,
+  onChange,
+}: {
+  months: readonly string[];
+  value: string;
+  onChange: (month: string) => void;
+}) {
   const t = useTranslations("settings.usage");
   const format = useFormatter();
   const id = useId();
   // The ledger buckets by UTC month, so the label is the UTC month too.
-  const label = (month: string): string => format.dateTime(new Date(`${month}-01T00:00:00.000Z`), { month: "long", year: "numeric", timeZone: "UTC" });
+  const label = (month: string): string =>
+    format.dateTime(new Date(`${month}-01T00:00:00.000Z`), { month: "long", year: "numeric", timeZone: "UTC" });
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{t("month")}</Label>
@@ -77,13 +86,23 @@ function SettingsUsage({ context, now }: { context: AccessContext; now: () => Da
   const [month, setMonth] = useState(months[0] ?? "");
   const allowed = permissions.includes("core.usage.read");
   const summary = useUsageSummary(organization.id, month, { enabled: allowed });
-  const canSetCap = permissions.includes("core.agent-settings.read") && permissions.includes("core.agent-settings.update");
-  const memberName = useMemberNames({ organizationId: organization.id, canReadMembers: allowed && permissions.includes("core.member.read") });
+  const canSetCap =
+    permissions.includes("core.agent-settings.read") && permissions.includes("core.agent-settings.update");
+  const memberName = useMemberNames({
+    organizationId: organization.id,
+    canReadMembers: allowed && permissions.includes("core.member.read"),
+  });
   return (
     <SettingsPageFrame
       organizationId={organization.id}
       allowed={allowed}
-      header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} description={t("description")} />}
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow", { organization: organization.name })}
+          title={t("title")}
+          description={t("description")}
+        />
+      }
     >
       {online ? null : <OfflineNotice />}
       <MonthPicker months={months} value={month} onChange={setMonth} />

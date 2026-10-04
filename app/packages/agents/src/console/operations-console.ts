@@ -1,7 +1,7 @@
 import { type AdminSchedule, type AdminWorkflowRun, type PageMeta, WorkflowRunStatusSchema } from "@core/contracts";
 import type { Mastra } from "@mastra/core/mastra";
 import { z } from "zod";
-import { cancelStoredRun, type CancelStoredRunOptions } from "../workflows/runs/cancel-stored-run.ts";
+import { type CancelStoredRunOptions, cancelStoredRun } from "../workflows/runs/cancel-stored-run.ts";
 import { isTenantRun, type StoredRun, toAdminWorkflowRunView } from "../workflows/runs/workflow-run-view.ts";
 import { type StoredSchedule, toAdminScheduleView } from "../workflows/schedules/tenant-schedule-view.ts";
 
@@ -19,13 +19,21 @@ export const AdminRunsQuerySchema = z.object({
   tenantId: z.string().min(1).max(128).optional(),
   workflowId: z.string().min(1).max(100).optional(),
   status: WorkflowRunStatusSchema.optional(),
-  cursor: z.string().regex(/^\d{1,6}$/).optional(),
+  cursor: z
+    .string()
+    .regex(/^\d{1,6}$/)
+    .optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 export type AdminRunsQuery = z.infer<typeof AdminRunsQuerySchema>;
 
 type WorkflowsStore = {
-  readonly listWorkflowRuns: (args: { workflowName?: string; status?: string; perPage?: number; page?: number }) => Promise<{ runs: StoredRun[] }>;
+  readonly listWorkflowRuns: (args: {
+    workflowName?: string;
+    status?: string;
+    perPage?: number;
+    page?: number;
+  }) => Promise<{ runs: StoredRun[] }>;
   readonly getWorkflowRunById: (args: { runId: string }) => Promise<StoredRun | null>;
 };
 
@@ -36,7 +44,10 @@ const storeOf = async (mastra: Mastra): Promise<WorkflowsStore> => {
 };
 
 /** Runs of every tenant and of the platform (or of one tenant), newest first; the cursor is an offset. */
-export const listAdminRuns = async (mastra: Mastra, query: AdminRunsQuery): Promise<{ runs: AdminWorkflowRun[]; page: PageMeta }> => {
+export const listAdminRuns = async (
+  mastra: Mastra,
+  query: AdminRunsQuery,
+): Promise<{ runs: AdminWorkflowRun[]; page: PageMeta }> => {
   const store = await storeOf(mastra);
   const offset = Number(query.cursor ?? "0");
   const matches: StoredRun[] = [];
@@ -63,7 +74,11 @@ export const listAdminRuns = async (mastra: Mastra, query: AdminRunsQuery): Prom
  * Cancels any run, and the approval request it waits for (follow-up 82).
  * @returns the run as stored before the cancel (its tenant feeds the audit), or `null` when unknown.
  */
-export const cancelAdminRun = async (mastra: Mastra, runId: string, options: CancelStoredRunOptions): Promise<AdminWorkflowRun | null> => {
+export const cancelAdminRun = async (
+  mastra: Mastra,
+  runId: string,
+  options: CancelStoredRunOptions,
+): Promise<AdminWorkflowRun | null> => {
   if (!/^[A-Za-z0-9_-]{1,128}$/.test(runId)) return null;
   const run = await (await storeOf(mastra)).getWorkflowRunById({ runId });
   const view = run === null ? null : toAdminWorkflowRunView(run);
@@ -89,7 +104,11 @@ export type AdminScheduleAction = (typeof SCHEDULE_ACTIONS)[number];
  * context, and its first step re-authorizes that creator (decision 0037).
  * @returns the row after the action, or `null` when unknown.
  */
-export const actOnAdminSchedule = async (mastra: Mastra, scheduleId: string, action: AdminScheduleAction): Promise<AdminSchedule | null> => {
+export const actOnAdminSchedule = async (
+  mastra: Mastra,
+  scheduleId: string,
+  action: AdminScheduleAction,
+): Promise<AdminSchedule | null> => {
   if (!/^schedule_[a-z0-9-]{1,120}$/.test(scheduleId)) return null;
   const schedules = mastra.schedules as SchedulesApi;
   const current = (await schedules.get(scheduleId)) as StoredSchedule | null;
@@ -98,6 +117,8 @@ export const actOnAdminSchedule = async (mastra: Mastra, scheduleId: string, act
     await schedules.run(scheduleId);
     return toAdminScheduleView(current);
   }
-  const updated = (action === "pause" ? await schedules.pause(scheduleId) : await schedules.resume(scheduleId)) as StoredSchedule;
+  const updated = (
+    action === "pause" ? await schedules.pause(scheduleId) : await schedules.resume(scheduleId)
+  ) as StoredSchedule;
   return toAdminScheduleView(updated);
 };

@@ -18,7 +18,8 @@ export const makeFakeSeedCore = () => {
   const active = new Map<string, string>();
   const staff = new Map<string, string>();
   const phones = new Map<string, string>();
-  const nodeKey = (principalUid: string, node: SeedGrantNode) => `${principalUid}@${node.level === "organization" ? node.organizationId : node.projectId}`;
+  const nodeKey = (principalUid: string, node: SeedGrantNode) =>
+    `${principalUid}@${node.level === "organization" ? node.organizationId : node.projectId}`;
   const core: SeedCore = {
     ensureProfile: (uid) => Promise.resolve(void profiles.add(uid)),
     listOrganizations: (uid) => Promise.resolve(organizations.filter((organization) => organization.ownerUid === uid)),
@@ -27,13 +28,15 @@ export const makeFakeSeedCore = () => {
       organizations.push(organization);
       return Promise.resolve(organization);
     },
-    listProjects: ({ organizationId }) => Promise.resolve(projects.filter((project) => project.organizationId === organizationId)),
+    listProjects: ({ organizationId }) =>
+      Promise.resolve(projects.filter((project) => project.organizationId === organizationId)),
     createProject: ({ organizationId, name }) => {
       const project = { id: id("project"), name, organizationId };
       projects.push(project);
       return Promise.resolve(project);
     },
-    listUnits: ({ projectId, parentUnitId }) => Promise.resolve(units.filter((unit) => unit.projectId === projectId && unit.parentUnitId === parentUnitId)),
+    listUnits: ({ projectId, parentUnitId }) =>
+      Promise.resolve(units.filter((unit) => unit.projectId === projectId && unit.parentUnitId === parentUnitId)),
     createUnit: ({ projectId, parentUnitId, name }) => {
       const unit = { id: id("unit"), name, projectId, parentUnitId };
       units.push(unit);
@@ -78,4 +81,9 @@ export const makeFakeAuthAdmin = (): AuthAdmin & { users: Map<string, AuthUser> 
 };
 
 export const localSeedTarget = (): SeedTarget =>
-  resolveSeedTarget({ APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core", FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099", FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080" });
+  resolveSeedTarget({
+    APP_ENV: "local",
+    FIREBASE_PROJECT_ID: "demo-core",
+    FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099",
+    FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080",
+  });

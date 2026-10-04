@@ -20,18 +20,33 @@ export type TraceTimeRange = { readonly startedAfter?: string; readonly startedB
  * tenant other than the caller's organization.
  */
 export type ConsoleGateway = {
-  readonly listTraces: (query: TenantFilter & PageNumber & TraceTimeRange & { readonly agentId?: string; readonly status?: "ok" | "error" }) => Promise<ConsoleResult<{ readonly traces: TraceSummary[]; readonly hasMore: boolean }>>;
+  readonly listTraces: (
+    query: TenantFilter & PageNumber & TraceTimeRange & { readonly agentId?: string; readonly status?: "ok" | "error" },
+  ) => Promise<ConsoleResult<{ readonly traces: TraceSummary[]; readonly hasMore: boolean }>>;
   readonly getTrace: (query: TenantFilter & { readonly traceId: string }) => Promise<ConsoleResult<TraceDetail>>;
-  readonly listExperiments: (query: TenantFilter & PageNumber) => Promise<ConsoleResult<{ readonly experiments: EvalExperimentSummary[]; readonly hasMore: boolean }>>;
+  readonly listExperiments: (
+    query: TenantFilter & PageNumber,
+  ) => Promise<ConsoleResult<{ readonly experiments: EvalExperimentSummary[]; readonly hasMore: boolean }>>;
   /** One experiment; another tenant's is `NOT_FOUND` like a missing one. */
-  readonly getExperiment: (query: TenantFilter & { readonly experimentId: string }) => Promise<ConsoleResult<EvalExperimentSummary>>;
+  readonly getExperiment: (
+    query: TenantFilter & { readonly experimentId: string },
+  ) => Promise<ConsoleResult<EvalExperimentSummary>>;
   readonly listDatasets: (query: TenantFilter) => Promise<ConsoleResult<EvalDataset[]>>;
   /** Tenant-only (follow-up 66): another tenant's or a platform dataset is `NOT_FOUND`. */
-  readonly listDatasetItems: (query: TenantDataset & PageNumber) => Promise<ConsoleResult<{ readonly items: EvalDatasetItem[]; readonly hasMore: boolean }>>;
-  readonly addDatasetItem: (input: TenantDataset & { readonly input: string; readonly expectedOutput?: string }) => Promise<ConsoleResult<EvalDatasetItem>>;
-  readonly deleteDatasetItem: (input: TenantDataset & { readonly itemId: string }) => Promise<ConsoleResult<{ readonly itemId: string }>>;
+  readonly listDatasetItems: (
+    query: TenantDataset & PageNumber,
+  ) => Promise<ConsoleResult<{ readonly items: EvalDatasetItem[]; readonly hasMore: boolean }>>;
+  readonly addDatasetItem: (
+    input: TenantDataset & { readonly input: string; readonly expectedOutput?: string },
+  ) => Promise<ConsoleResult<EvalDatasetItem>>;
+  readonly deleteDatasetItem: (
+    input: TenantDataset & { readonly itemId: string },
+  ) => Promise<ConsoleResult<{ readonly itemId: string }>>;
   /** A name the tenant already uses is `CONFLICT`. */
-  readonly createDataset: (input: { readonly tenantId: string; readonly name: string }) => Promise<ConsoleResult<EvalDataset>>;
+  readonly createDataset: (input: {
+    readonly tenantId: string;
+    readonly name: string;
+  }) => Promise<ConsoleResult<EvalDataset>>;
   readonly startExperiment: (input: {
     readonly tenantId: string;
     readonly userId: string;

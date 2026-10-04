@@ -2,12 +2,12 @@ import type { UsageReportPort } from "@core/agents";
 import {
   type AuditWriter,
   type createPostgresClient,
-  type FirebaseAdmin,
   createPostgresUsageReportRepository,
   createPostgresUsageRepository,
   createUsageSink,
-  listLiveOrganizationIds,
+  type FirebaseAdmin,
   type Logger,
+  listLiveOrganizationIds,
   makeReportTenantUsage,
   systemClock,
 } from "@core/services";
@@ -30,7 +30,12 @@ export const bindUsageReportPort = (deps: {
   readonly audit: AuditWriter;
   readonly logger: Logger;
 }): UsageReportPort => {
-  const sink = createUsageSink({ kind: deps.env.USAGE_SINK, dataset: deps.env.BIGQUERY_DATASET_AI_OBSERVABILITY, projectId: deps.env.FIREBASE_PROJECT_ID, logger: deps.logger });
+  const sink = createUsageSink({
+    kind: deps.env.USAGE_SINK,
+    dataset: deps.env.BIGQUERY_DATASET_AI_OBSERVABILITY,
+    projectId: deps.env.FIREBASE_PROJECT_ID,
+    logger: deps.logger,
+  });
   const report = makeReportTenantUsage({
     repository: createPostgresUsageRepository(deps.sql),
     reports: createPostgresUsageReportRepository(deps.sql),

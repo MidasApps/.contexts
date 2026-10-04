@@ -78,4 +78,5 @@ export const buildAgentPrincipal = (args: {
 export const UNSCOPED_RESOURCE_PREFIX = "unscoped";
 
 /** Memory resource of a principal: `tenantId:uid` (decision 0020), so memory never crosses tenants. */
-export const resourceIdOf = (principal: Pick<AgentPrincipal, "tenantId" | "uid">): string => `${principal.tenantId ?? UNSCOPED_RESOURCE_PREFIX}:${principal.uid}`;
+export const resourceIdOf = (principal: Pick<AgentPrincipal, "tenantId" | "uid">): string =>
+  `${principal.tenantId ?? UNSCOPED_RESOURCE_PREFIX}:${principal.uid}`;

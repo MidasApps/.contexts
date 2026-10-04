@@ -1,4 +1,13 @@
-import { buildAccessContext, expectNoAxeViolations, IDS, MEMBER_PERMISSIONS, ok, renderApp, shellRoutes, type FakeRequest } from "@core/client/testing";
+import {
+  buildAccessContext,
+  expectNoAxeViolations,
+  type FakeRequest,
+  IDS,
+  MEMBER_PERMISSIONS,
+  ok,
+  renderApp,
+  shellRoutes,
+} from "@core/client/testing";
 import { SettingsModuleView } from "@core/client/views/settings-module";
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -13,7 +22,13 @@ const contextInUsd = () => {
   return ok({ ...context, regional: { ...(context["regional"] as Record<string, unknown>), currency: "USD" } });
 };
 
-const neverSaved = ok({ tenantId: IDS.organization, moduleId: "example", values: null, updatedAt: null, updatedBy: null });
+const neverSaved = ok({
+  tenantId: IDS.organization,
+  moduleId: "example",
+  values: null,
+  updatedAt: null,
+  updatedBy: null,
+});
 
 describe("example module settings", () => {
   it("renders ExampleSettings with SchemaForm, money defaulting to the regional currency, and saves it", async () => {
@@ -30,7 +45,13 @@ describe("example module settings", () => {
           [`GET ${SETTINGS_ROUTE}`]: neverSaved,
           [`PUT ${SETTINGS_ROUTE}`]: (request: FakeRequest) => {
             bodies.push(request.body);
-            return ok({ tenantId: IDS.organization, moduleId: "example", values: request.body, updatedAt: "2026-09-30T15:00:00.000Z", updatedBy: IDS.user });
+            return ok({
+              tenantId: IDS.organization,
+              moduleId: "example",
+              values: request.body,
+              updatedAt: "2026-09-30T15:00:00.000Z",
+              updatedBy: IDS.user,
+            });
           },
         }),
       },

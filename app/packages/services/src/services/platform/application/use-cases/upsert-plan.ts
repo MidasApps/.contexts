@@ -7,9 +7,16 @@ import { syncTenantBudget, tightenTenantBudget } from "./sync-tenant-budget.ts";
 type StaffCommand = { readonly actor: UserPrincipal; readonly requestId: string; readonly input: UpsertPlanInput };
 
 export type CreatePlan = (command: StaffCommand) => Promise<Plan>;
-export type UpdatePlan = (command: StaffCommand & { readonly planId: string }) => Promise<Result<Plan, { readonly code: "NOT_FOUND" }>>;
+export type UpdatePlan = (
+  command: StaffCommand & { readonly planId: string },
+) => Promise<Result<Plan, { readonly code: "NOT_FOUND" }>>;
 
-const audit = (deps: Pick<ConsoleDeps, "audit">, command: StaffCommand, action: "PLAN_CREATED" | "PLAN_UPDATED", planId: string) =>
+const audit = (
+  deps: Pick<ConsoleDeps, "audit">,
+  command: StaffCommand,
+  action: "PLAN_CREATED" | "PLAN_UPDATED",
+  planId: string,
+) =>
   deps.audit.record({
     log: "platform",
     action,
@@ -24,7 +31,11 @@ const audit = (deps: Pick<ConsoleDeps, "audit">, command: StaffCommand, action: 
 export const makeCreatePlan =
   (deps: Pick<ConsoleDeps, "plans" | "audit" | "clock">): CreatePlan =>
   async (command) => {
-    const plan = await deps.plans.create({ ...command.input, at: deps.clock.now().toISOString(), actorId: command.actor.uid });
+    const plan = await deps.plans.create({
+      ...command.input,
+      at: deps.clock.now().toISOString(),
+      actorId: command.actor.uid,
+    });
     await audit(deps, command, "PLAN_CREATED", plan.id);
     return plan;
   };
@@ -40,9 +51,18 @@ export const makeUpdatePlan =
   async (command) => {
     if ((await deps.plans.get(command.planId)) === null) return err({ code: "NOT_FOUND" });
     const tenants = await deps.organizations.tenantsOnPlan(command.planId);
-    const limits = { monthlyMicroUsd: command.input.limits.monthlyMicroUsd, monthlyTokens: command.input.limits.monthlyTokens };
-    for (const tenantId of tenants) await tightenTenantBudget(deps, tenantId, (inputs) => ({ ...inputs, plan: limits }));
-    const plan = await deps.plans.replace({ id: command.planId, ...command.input, at: deps.clock.now().toISOString(), actorId: command.actor.uid });
+    const limits = {
+      monthlyMicroUsd: command.input.limits.monthlyMicroUsd,
+      monthlyTokens: command.input.limits.monthlyTokens,
+    };
+    for (const tenantId of tenants)
+      await tightenTenantBudget(deps, tenantId, (inputs) => ({ ...inputs, plan: limits }));
+    const plan = await deps.plans.replace({
+      id: command.planId,
+      ...command.input,
+      at: deps.clock.now().toISOString(),
+      actorId: command.actor.uid,
+    });
     if (plan === null) return err({ code: "NOT_FOUND" });
     await audit(deps, command, "PLAN_UPDATED", plan.id);
     for (const tenantId of tenants) await syncTenantBudget(deps, tenantId);

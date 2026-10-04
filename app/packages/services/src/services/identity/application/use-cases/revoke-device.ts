@@ -7,7 +7,12 @@ import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { DeviceDeps } from "../device-deps.ts";
 
-export type RevokeDevice = (command: { actor: UserPrincipal; access: RequestAccess; deviceId: DeviceId; requestId: string }) => Promise<Result<void, AccessDeniedError | AccessNotFoundError>>;
+export type RevokeDevice = (command: {
+  actor: UserPrincipal;
+  access: RequestAccess;
+  deviceId: DeviceId;
+  requestId: string;
+}) => Promise<Result<void, AccessDeniedError | AccessNotFoundError>>;
 
 /**
  * `DELETE /v1/devices/{deviceId}` (SP1 spec §6.4; `core.device.revoke` at the device's node):
@@ -26,11 +31,24 @@ export const makeRevokeDevice =
     const auditActor = auditActorOf(actor);
     if (device.status === "active") {
       await deps.unitOfWork.run(async (tx) => {
-        const plan = await deps.access.prepareRevokeAllGrants(tx, { tenantId: device.tenantId, principal: { type: "device", id: deviceId }, actorId: auditActor.id });
+        const plan = await deps.access.prepareRevokeAllGrants(tx, {
+          tenantId: device.tenantId,
+          principal: { type: "device", id: deviceId },
+          actorId: auditActor.id,
+        });
         deps.devices.revoke(tx, { id: deviceId, updatedAt: deps.clock.now().toISOString(), actorId: auditActor.id });
         plan.commit();
         await deps.audit.record(
-          { log: "tenant", tenantId: device.tenantId, action: "DEVICE_REVOKED", actor: auditActor, target: { type: "device", id: deviceId }, node: device.node, outcome: "success", requestId },
+          {
+            log: "tenant",
+            tenantId: device.tenantId,
+            action: "DEVICE_REVOKED",
+            actor: auditActor,
+            target: { type: "device", id: deviceId },
+            node: device.node,
+            outcome: "success",
+            requestId,
+          },
           tx,
         );
       });

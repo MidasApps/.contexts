@@ -25,7 +25,12 @@ import { createAgentRuntime } from "../runtime/create-agent-runtime.ts";
 // trigger performs. Decision 0030 A3: a stale `approved` request becomes `failed`, its run stays
 // suspended (decision 0036).
 const TENANT = "EmuTenantExpirySweep";
-const REGIONAL: RegionalSettings = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" };
+const REGIONAL: RegionalSettings = {
+  locale: "pt-BR",
+  displayTimeZone: "America/Sao_Paulo",
+  nodeTimeZone: "America/Sao_Paulo",
+  currency: "BRL",
+};
 
 const env = loadMastraEnv({
   APP_ENV: "local",
@@ -42,7 +47,11 @@ const signUp = async (label: string): Promise<{ uid: string; idToken: string }> 
   const response = await fetch(`http://${host}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ email: `${label}-${Date.now()}@example.test`, password: "secret-password", returnSecureToken: true }),
+    body: JSON.stringify({
+      email: `${label}-${Date.now()}@example.test`,
+      password: "secret-password",
+      returnSecureToken: true,
+    }),
   });
   const body = (await response.json()) as { localId: string; idToken: string };
   return { uid: body.localId, idToken: body.idToken };
@@ -82,14 +91,28 @@ beforeAll(async () => {
   const readers = createInMemoryAccessStore();
   readers.putOrganization({ id: TENANT });
   for (const uid of [member.uid, admin.uid]) readers.putUser(uid);
-  readers.putGrant({ tenantId: TENANT, principalId: admin.uid, nodeId: TENANT, roles: [{ kind: "system", key: "admin" }] });
-  readers.putGrant({ tenantId: TENANT, principalId: member.uid, nodeId: TENANT, roles: [{ kind: "system", key: "member" }] });
+  readers.putGrant({
+    tenantId: TENANT,
+    principalId: admin.uid,
+    nodeId: TENANT,
+    roles: [{ kind: "system", key: "admin" }],
+  });
+  readers.putGrant({
+    tenantId: TENANT,
+    principalId: member.uid,
+    nodeId: TENANT,
+    roles: [{ kind: "system", key: "member" }],
+  });
   firebase = createFirebaseAdmin({ env, processEnv: process.env });
   const runtime = createAgentRuntime({
     env,
     processEnv: process.env,
     modules: APP_MODULES,
-    overrides: { firebase, storage: new InMemoryStore(), adapters: { accessReaders: readers, resolveAccessContext: resolveFromReaders(readers) } },
+    overrides: {
+      firebase,
+      storage: new InMemoryStore(),
+      adapters: { accessReaders: readers, resolveAccessContext: resolveFromReaders(readers) },
+    },
   });
   const port = await freePort();
   mastra = new Mastra({
@@ -97,12 +120,23 @@ beforeAll(async () => {
     workflows: runtime.workflows,
     storage: runtime.storage,
     observability: runtime.observability,
-    server: { port, host: "127.0.0.1", auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes },
+    server: {
+      port,
+      host: "127.0.0.1",
+      auth: runtime.auth,
+      middleware: runtime.middleware,
+      apiRoutes: runtime.apiRoutes,
+    },
   });
   const server = await createNodeServer(mastra, { tools: {} });
   baseUrl = `http://127.0.0.1:${port}`;
   closeServer = () => new Promise((resolve) => server.close(() => resolve()));
-  core = createCoreServer({ env: { API_KEY_PREFIX: "core_test" }, firebase, logger: processLogger, adapters: { accessReaders: readers } });
+  core = createCoreServer({
+    env: { API_KEY_PREFIX: "core_test" },
+    firebase,
+    logger: processLogger,
+    adapters: { accessReaders: readers },
+  });
 }, 60_000);
 
 afterAll(async () => {
@@ -110,7 +144,12 @@ afterAll(async () => {
   await mastra?.shutdown();
 });
 
-const scope = () => ({ bearer: member.idToken, tenantId: TENANT, regional: REGIONAL, requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" });
+const scope = () => ({
+  bearer: member.idToken,
+  tenantId: TENANT,
+  regional: REGIONAL,
+  requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+});
 
 /** Starts `approval-demo` as the member and waits for its suspension on the SP1 request. */
 const startSuspended = async (title: string) => {
@@ -120,7 +159,10 @@ const startSuspended = async (title: string) => {
   for (let attempt = 0; attempt < 50; attempt += 1) {
     const run = await gateway.getRun(scope(), started.data.runId);
     if (run.ok && run.data.status === "suspended" && run.data.approvalRequestId !== null) {
-      return { runId: started.data.runId, approvalRequestId: ApprovalRequestIdSchema.parse(run.data.approvalRequestId) };
+      return {
+        runId: started.data.runId,
+        approvalRequestId: ApprovalRequestIdSchema.parse(run.data.approvalRequestId),
+      };
     }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
@@ -142,19 +184,36 @@ describe("approval-expiry-sweep (Auth + Firestore emulators, real Mastra server)
     await requestDoc(approvalRequestId).update({ expiresAt: new Date(Date.now() - 60_000) });
     expect(await sweep()).toMatchObject({ status: "done", code: null });
     expect(await core.approvals.getApprovalRequest(approvalRequestId)).toMatchObject({ status: "expired" });
-    const audit = await firebase.firestore.collection("audit-logs").where("tenantId", "==", TENANT).where("action", "==", "APPROVAL_EXPIRED").get();
-    expect(audit.docs.map((doc) => doc.get("target") as unknown)).toContainEqual({ type: "approval-request", id: approvalRequestId });
-    const settled = await createMastraWorkflowApprovalSettler({ baseUrl, serverlessToken: null }).settle({ approvalRequestId, requestId: "evt" });
+    const audit = await firebase.firestore
+      .collection("audit-logs")
+      .where("tenantId", "==", TENANT)
+      .where("action", "==", "APPROVAL_EXPIRED")
+      .get();
+    expect(audit.docs.map((doc) => doc.get("target") as unknown)).toContainEqual({
+      type: "approval-request",
+      id: approvalRequestId,
+    });
+    const settled = await createMastraWorkflowApprovalSettler({ baseUrl, serverlessToken: null }).settle({
+      approvalRequestId,
+      requestId: "evt",
+    });
     expect(settled).toEqual({ ok: true, data: { settled: true, runStatus: "success" } });
     expect((await runState(runId))?.result).toMatchObject({ outcome: "expired" });
   }, 60_000);
 
   it("fails a request left approved for 15 minutes and leaves its run suspended (0030 A3, 0036)", async () => {
     const { runId, approvalRequestId } = await startSuspended("Interrupted");
-    await requestDoc(approvalRequestId).update({ status: "approved", decidedBy: admin.uid, updatedAt: new Date(Date.now() - 20 * 60_000) });
+    await requestDoc(approvalRequestId).update({
+      status: "approved",
+      decidedBy: admin.uid,
+      updatedAt: new Date(Date.now() - 20 * 60_000),
+    });
     expect(await sweep()).toMatchObject({ status: "done" });
     expect(await core.approvals.getApprovalRequest(approvalRequestId)).toMatchObject({ status: "failed" });
-    const settled = await createMastraWorkflowApprovalSettler({ baseUrl, serverlessToken: null }).settle({ approvalRequestId, requestId: "evt" });
+    const settled = await createMastraWorkflowApprovalSettler({ baseUrl, serverlessToken: null }).settle({
+      approvalRequestId,
+      requestId: "evt",
+    });
     expect(settled).toEqual({ ok: true, data: { settled: false, reason: "NOT_SETTLED" } });
     expect((await runState(runId))?.status).toBe("suspended");
   }, 60_000);

@@ -22,7 +22,11 @@ describe("RequestPasswordResetForm", () => {
 
   it("sends the link in the UI language and confirms in neutral words, whether or not the account exists", async () => {
     const auth = createFakeAuth(TEST_USER);
-    const { user, container } = renderWithClient(<RequestPasswordResetForm />, { auth, session: signedOut(), locale: "en-US" });
+    const { user, container } = renderWithClient(<RequestPasswordResetForm />, {
+      auth,
+      session: signedOut(),
+      locale: "en-US",
+    });
     await user.type(screen.getByLabelText("Email"), " ghost@example.com ");
     await user.click(screen.getByRole("button", { name: "Send link" }));
     const heading = await screen.findByRole("heading", { name: "Check your email" });

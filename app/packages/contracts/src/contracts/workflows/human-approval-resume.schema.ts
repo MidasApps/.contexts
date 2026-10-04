@@ -13,7 +13,9 @@ export const HumanApprovalDecisionSchema = z.enum(HUMAN_APPROVAL_DECISIONS);
 export type HumanApprovalDecision = z.infer<typeof HumanApprovalDecisionSchema>;
 
 /** Workflow and step ids: kebab-case, as Mastra ids of the core. */
-export const WorkflowIdSchema = z.string().regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/, { error: "Expected a kebab-case workflow id." });
+export const WorkflowIdSchema = z
+  .string()
+  .regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/, { error: "Expected a kebab-case workflow id." });
 
 /**
  * `resumeSchema` of the `requestHumanApproval` step. The step never trusts it: it re-reads the
@@ -30,7 +32,11 @@ export const HumanApprovalResumeContract = defineContract(HumanApprovalResumeSch
   id: "workflows.HumanApprovalResume",
   kind: "command",
   description: "Data a suspended human-approval step resumes with; checked against the stored approval request.",
-  examples: [{ decision: "approved", decidedBy: EXAMPLE_IDS.user }, { decision: "rejected", decidedBy: EXAMPLE_IDS.user, reason: "Wrong project." }, { decision: "expired" }],
+  examples: [
+    { decision: "approved", decidedBy: EXAMPLE_IDS.user },
+    { decision: "rejected", decidedBy: EXAMPLE_IDS.user, reason: "Wrong project." },
+    { decision: "expired" },
+  ],
   pii: "personal",
   tenancyScope: "organization",
   relations: [],

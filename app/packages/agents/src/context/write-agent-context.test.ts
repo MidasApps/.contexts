@@ -1,10 +1,15 @@
 import { MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY, RequestContext } from "@mastra/core/request-context";
 import { describe, expect, it } from "vitest";
 import type { AgentPrincipal } from "../auth/agent-principal.ts";
-import { FAKE_REGIONAL } from "../testing/fake-ports.ts";
 import { TEST_REQUEST_ID, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
+import { FAKE_REGIONAL } from "../testing/fake-ports.ts";
 import { AGENT_CONTEXT_KEYS, AGENT_PRINCIPAL_KEY, readAgentContext } from "./agent-request-context.ts";
-import { AgentRuntimeContextSchema, buildAgentRequestContext, clearAgentContext, writeAgentContext } from "./write-agent-context.ts";
+import {
+  AgentRuntimeContextSchema,
+  buildAgentRequestContext,
+  clearAgentContext,
+  writeAgentContext,
+} from "./write-agent-context.ts";
 
 const CONVERSATION = "Cv3sK2lPq0WnR5tYu3bV";
 
@@ -23,7 +28,12 @@ const member = (overrides: Partial<AgentPrincipal> = {}): AgentPrincipal => ({
 const scoped = (): AgentPrincipal => member({ projectId: "Pq8sK2lPq0WnR5tYu3bV", activeScreen: "notes.list" });
 
 const build = (principal: AgentPrincipal, conversationId?: string) =>
-  buildAgentRequestContext({ principal, requestId: TEST_REQUEST_ID, aiMode: "fake", ...(conversationId === undefined ? {} : { conversationId }) });
+  buildAgentRequestContext({
+    principal,
+    requestId: TEST_REQUEST_ID,
+    aiMode: "fake",
+    ...(conversationId === undefined ? {} : { conversationId }),
+  });
 
 describe("buildAgentRequestContext", () => {
   it("builds every key from the verified principal (organizationId = tenantId, sorted permissions)", () => {
@@ -82,7 +92,8 @@ describe("writeAgentContext", () => {
     const context = build(principal);
     if (context === null) throw new Error("expected a context");
     writeAgentContext(store, { context, principal: principal.principal });
-    for (const key of ["projectId", "unitId", "conversationId", "activeScreen", MASTRA_THREAD_ID_KEY]) expect(store.has(key)).toBe(false);
+    for (const key of ["projectId", "unitId", "conversationId", "activeScreen", MASTRA_THREAD_ID_KEY])
+      expect(store.has(key)).toBe(false);
   });
 });
 
@@ -105,9 +116,16 @@ describe("AgentRuntimeContextSchema", () => {
     const principal = member();
     const context = build(principal);
     if (context === null) throw new Error("expected a context");
-    const values = { ...context, [AGENT_PRINCIPAL_KEY]: principal.principal, user: principal, [MASTRA_RESOURCE_ID_KEY]: "x" };
+    const values = {
+      ...context,
+      [AGENT_PRINCIPAL_KEY]: principal.principal,
+      user: principal,
+      [MASTRA_RESOURCE_ID_KEY]: "x",
+    };
     expect(AgentRuntimeContextSchema.safeParse(values).success).toBe(true);
     expect(AgentRuntimeContextSchema.safeParse({ ...context }).success).toBe(false);
-    expect(AgentRuntimeContextSchema.safeParse({ ...values, organizationId: "Other000000000000000" }).success).toBe(false);
+    expect(AgentRuntimeContextSchema.safeParse({ ...values, organizationId: "Other000000000000000" }).success).toBe(
+      false,
+    );
   });
 });

@@ -7,53 +7,53 @@ import {
   buildAdminPlatformRoutes,
   buildAdminUsersRoutes,
   buildAgentSettingsRoutes,
-  buildFeedbackRoutes,
-  buildObservabilityRoutes,
-  buildPromptRoutes,
   buildChatRoutes,
-  buildFlagsRoutes,
   buildConnectorsRoutes,
+  buildConversationsRoutes,
   buildCustomAgentsRoutes,
   buildCustomSkillsRoutes,
-  buildConversationsRoutes,
+  buildFeedbackRoutes,
   buildFilesRoutes,
+  buildFlagsRoutes,
   buildKnowledgeDocumentsRoutes,
   buildKnowledgeSourcesRoutes,
   buildMcpRoutes,
+  buildObservabilityRoutes,
+  buildPromptRoutes,
   buildSchedulesRoutes,
   buildTenantCatalogRoutes,
   buildUsageRoutes,
   buildVoiceRoutes,
-  buildWorkflowRunsRoutes,
   buildWorkflowRunStreamRoutes,
+  buildWorkflowRunsRoutes,
   createCoreAgentCommandExecutors,
   createFirebaseAdmin,
-  createFirestoreAdminUserDirectory,
   createFirebaseConnectorsServices,
+  createFirebaseConsoleServices,
   createFirebaseCustomAgentsServices,
   createFirebaseFilesServices,
-  createFirebaseConsoleServices,
   createFirebaseFlagsServices,
-  createFirestoreMessageFeedbackStore,
-  createMastraConsoleGateway,
+  createFirestoreAdminUserDirectory,
   createFirestoreConnectorRepository,
+  createFirestoreConversationsServices,
+  createFirestoreMessageFeedbackStore,
+  createKnowledgeServices,
+  createMastraChatGateway,
+  createMastraConsoleGateway,
+  createMastraGateway,
   createMastraOperationsGateway,
+  createMastraVoiceGateway,
+  createMastraWorkflowApprovalSettler,
+  createMastraWorkflowGateway,
   createObservabilityServices,
+  createPostgresClient,
+  createPostgresKnowledgeRepository,
   createPostgresPromptServices,
   createPostgresTraceCosts,
   createPostgresUsageRepository,
+  createServerlessIdTokenSource,
   createUsageServices,
   flagEnvironmentDefaults,
-  createFirestoreConversationsServices,
-  createKnowledgeServices,
-  createMastraChatGateway,
-  createMastraGateway,
-  createMastraVoiceGateway,
-  createMastraWorkflowGateway,
-  createMastraWorkflowApprovalSettler,
-  createPostgresClient,
-  createPostgresKnowledgeRepository,
-  createServerlessIdTokenSource,
   processLogger,
   readProcessLogBuffer,
   registerAgentCommandApprovals,
@@ -83,13 +83,20 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
   // The command registry: core commands plus the installed modules' (SP3 Task 19).
   registerAgentCommandApprovals({
     approvals: core.approvals,
-    executors: [...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }), ...createModuleCommands(moduleDeps)],
+    executors: [
+      ...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
+      ...createModuleCommands(moduleDeps),
+    ],
     access: core.access,
     idempotency: core.pipeline.idempotency,
   });
   const files = createFirebaseFilesServices({
     firebase,
-    env: { APP_ENV: env.APP_ENV, FILES_BUCKET: env.FILES_BUCKET, FIREBASE_STORAGE_EMULATOR_HOST: env.FIREBASE_STORAGE_EMULATOR_HOST },
+    env: {
+      APP_ENV: env.APP_ENV,
+      FILES_BUCKET: env.FILES_BUCKET,
+      FIREBASE_STORAGE_EMULATOR_HOST: env.FIREBASE_STORAGE_EMULATOR_HOST,
+    },
     logger: processLogger,
   });
   // postgres.js connects lazily; the web login role may SET ROLE knowledge_runtime (migration 0005).
@@ -98,9 +105,15 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     repository: createPostgresKnowledgeRepository(sql),
     embeddingModel: UNUSED_SEARCH_MODEL,
   });
-  const serverlessToken = env.APP_ENV === "local" || env.MASTRA_AUDIENCE === undefined ? null : createServerlessIdTokenSource({ audience: env.MASTRA_AUDIENCE });
+  const serverlessToken =
+    env.APP_ENV === "local" || env.MASTRA_AUDIENCE === undefined
+      ? null
+      : createServerlessIdTokenSource({ audience: env.MASTRA_AUDIENCE });
   const gateway = createMastraGateway({ baseUrl: env.MASTRA_URL, serverlessToken });
-  registerWorkflowApprovals({ approvals: core.approvals, settler: createMastraWorkflowApprovalSettler({ baseUrl: env.MASTRA_URL, serverlessToken }) });
+  registerWorkflowApprovals({
+    approvals: core.approvals,
+    settler: createMastraWorkflowApprovalSettler({ baseUrl: env.MASTRA_URL, serverlessToken }),
+  });
   const gatewayOptions = { baseUrl: env.MASTRA_URL, serverlessToken };
   const connectors = createFirebaseConnectorsServices({
     firebase,
@@ -110,23 +123,45 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
   });
   // SP5 workflow runs and tenant schedules (decisions 0037, 0040): custom Mastra routes with the caller's Bearer.
   const workflowGateway = createMastraWorkflowGateway({ baseUrl: env.MASTRA_URL, serverlessToken });
-  const workflowDeps = { pipeline: core.pipeline, gateway: workflowGateway, resolveAccessContext: core.resolveAccessContext };
+  const workflowDeps = {
+    pipeline: core.pipeline,
+    gateway: workflowGateway,
+    resolveAccessContext: core.resolveAccessContext,
+  };
   // Tenant-defined agents and skills (decision 0046): Firestore records, limits from the plan of the organization.
   const customAgents = createFirebaseCustomAgentsServices({ firebase, audit: core.audit, clock: core.pipeline.clock });
   const customAgentsDeps = { ...workflowDeps, customAgents };
   const flagsDeps = {
     pipeline: core.pipeline,
-    flags: createFirebaseFlagsServices({ firebase, appEnv: env.APP_ENV, audit: core.audit, clock: core.pipeline.clock, environmentDefaults: flagEnvironmentDefaults(env) }),
+    flags: createFirebaseFlagsServices({
+      firebase,
+      appEnv: env.APP_ENV,
+      audit: core.audit,
+      clock: core.pipeline.clock,
+      environmentDefaults: flagEnvironmentDefaults(env),
+    }),
   };
   // SP5 console (decision 0040): the runtime's traces and experiments; the overview reads its eval status there.
   const runtimeConsole = createMastraConsoleGateway(gatewayOptions);
-  const consoleDeps = { pipeline: core.pipeline, console: createFirebaseConsoleServices({ firebase, sql, audit: core.audit, clock: core.pipeline.clock, evals: runtimeConsole }) };
+  const consoleDeps = {
+    pipeline: core.pipeline,
+    console: createFirebaseConsoleServices({
+      firebase,
+      sql,
+      audit: core.audit,
+      clock: core.pipeline.clock,
+      evals: runtimeConsole,
+    }),
+  };
   const observabilityDeps = {
     pipeline: core.pipeline,
     observability: createObservabilityServices({
       console: runtimeConsole,
       getAgentSettings: consoleDeps.console.getAgentSettings,
-      getConversation: createFirestoreConversationsServices({ firestore: firebase.firestore, clock: core.pipeline.clock }).getConversation,
+      getConversation: createFirestoreConversationsServices({
+        firestore: firebase.firestore,
+        clock: core.pipeline.clock,
+      }).getConversation,
       feedback: createFirestoreMessageFeedbackStore({ firestore: firebase.firestore }),
       clock: core.pipeline.clock,
       logger: processLogger,
@@ -148,7 +183,12 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     ...buildConnectorsRoutes({ pipeline: core.pipeline, connectors }),
     ...buildFilesRoutes({ pipeline: core.pipeline, files }),
     ...buildKnowledgeDocumentsRoutes({ pipeline: core.pipeline, knowledge }),
-    ...buildKnowledgeSourcesRoutes({ pipeline: core.pipeline, gateway, getReadyFile: files.getReadyFile, resolveAccessContext: core.resolveAccessContext }),
+    ...buildKnowledgeSourcesRoutes({
+      pipeline: core.pipeline,
+      gateway,
+      getReadyFile: files.getReadyFile,
+      resolveAccessContext: core.resolveAccessContext,
+    }),
     ...buildMcpRoutes({ pipeline: core.pipeline, gateway, resolveAccessContext: core.resolveAccessContext }),
     ...buildWorkflowRunsRoutes(workflowDeps),
     ...buildWorkflowRunStreamRoutes(workflowDeps),
@@ -157,7 +197,13 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     ...buildTenantCatalogRoutes(workflowDeps),
     ...buildCustomAgentsRoutes(customAgentsDeps),
     ...buildCustomSkillsRoutes(customAgentsDeps),
-    ...buildUsageRoutes({ pipeline: core.pipeline, getUsageSummary: createUsageServices({ repository: createPostgresUsageRepository(sql), clock: core.pipeline.clock }).getUsageSummary }),
+    ...buildUsageRoutes({
+      pipeline: core.pipeline,
+      getUsageSummary: createUsageServices({
+        repository: createPostgresUsageRepository(sql),
+        clock: core.pipeline.clock,
+      }).getUsageSummary,
+    }),
     // SP4 chat (decisions 0031-0033): conversation metadata in Firestore, the stream from Mastra.
     ...buildChatRoutes(chatDeps),
     ...buildConversationsRoutes(chatDeps),
@@ -176,7 +222,10 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     ...buildAdminPlatformRoutes(consoleDeps),
     ...buildAgentSettingsRoutes(consoleDeps),
     // SP5 prompt store (decision 0038): append-only versions, eval-gated activation through the Mastra eval route.
-    ...buildPromptRoutes({ pipeline: core.pipeline, prompts: createPostgresPromptServices({ sql, audit: core.audit, mastraUrl: env.MASTRA_URL, serverlessToken }) }),
+    ...buildPromptRoutes({
+      pipeline: core.pipeline,
+      prompts: createPostgresPromptServices({ sql, audit: core.audit, mastraUrl: env.MASTRA_URL, serverlessToken }),
+    }),
     // SP5 traces, evals and feedback (decision 0040): the runtime's console routes, tenant-filtered there.
     ...buildObservabilityRoutes(observabilityDeps),
     ...buildFeedbackRoutes(observabilityDeps),
@@ -191,6 +240,9 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     // SP5 admin gaps (decision 0044): staff user search and the batched name lookup over `users/{uid}`.
     // SP5 admin gaps (decision 0044): every staff member's impersonation sessions, and ending any of them.
     ...buildAdminImpersonationRoutes({ pipeline: core.pipeline, platform: core.platform }),
-    ...buildAdminUsersRoutes({ pipeline: core.pipeline, users: createFirestoreAdminUserDirectory({ firestore: firebase.firestore }) }),
+    ...buildAdminUsersRoutes({
+      pipeline: core.pipeline,
+      users: createFirestoreAdminUserDirectory({ firestore: firebase.firestore }),
+    }),
   };
 };

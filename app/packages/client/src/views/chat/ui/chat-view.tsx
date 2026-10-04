@@ -15,7 +15,11 @@ import { ChatHistorySidebar } from "#/widgets/chat-history-sidebar/index.ts";
 import { CHAT_PERMISSION, ProjectChatPanel } from "#/widgets/chat-panel/index.ts";
 import { PageError, PageForbidden, PageNotFound } from "#/widgets/page-state/index.ts";
 
-type ChatPlace = { readonly organizationId: string; readonly projectId: string; readonly conversationId: string | undefined };
+type ChatPlace = {
+  readonly organizationId: string;
+  readonly projectId: string;
+  readonly conversationId: string | undefined;
+};
 
 function ChatWorkspace({ place }: { place: ChatPlace }) {
   const t = useTranslations("chat.view");
@@ -32,7 +36,10 @@ function ChatWorkspace({ place }: { place: ChatPlace }) {
   // the conversation is the same page under its lasting address: the thread on screen is
   // streaming its first answer and must not be built again.
   const onConversationChange = (next: string | undefined) => {
-    router.navigate({ id: "chat", organizationId, projectId, conversationId: next }, next === undefined ? undefined : { replace: true, samePage: true });
+    router.navigate(
+      { id: "chat", organizationId, projectId, conversationId: next },
+      next === undefined ? undefined : { replace: true, samePage: true },
+    );
     refreshHistory();
   };
 
@@ -52,7 +59,10 @@ function ChatWorkspace({ place }: { place: ChatPlace }) {
   );
 
   return (
-    <div data-slot="chat-view" className="flex h-[calc(100svh-3.5rem-3rem)] min-h-[420px] flex-col lg:h-[calc(100svh-3.5rem-4rem)]">
+    <div
+      data-slot="chat-view"
+      className="flex h-[calc(100svh-3.5rem-3rem)] min-h-[420px] flex-col lg:h-[calc(100svh-3.5rem-4rem)]"
+    >
       <div className="mb-3 flex shrink-0 items-center justify-between gap-2">
         <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
         {compact ? (
@@ -64,7 +74,14 @@ function ChatWorkspace({ place }: { place: ChatPlace }) {
       </div>
       <div className="flex min-h-0 flex-1 overflow-hidden rounded-lg border border-border">
         {compact ? null : history}
-        <ProjectChatPanel organizationId={organizationId} projectId={projectId} conversationId={conversationId} onConversationChange={onConversationChange} onTurnSettled={refreshHistory} className="min-w-0 flex-1" />
+        <ProjectChatPanel
+          organizationId={organizationId}
+          projectId={projectId}
+          conversationId={conversationId}
+          onConversationChange={onConversationChange}
+          onTurnSettled={refreshHistory}
+          className="min-w-0 flex-1"
+        />
       </div>
       {compact ? (
         <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
@@ -98,5 +115,9 @@ export function ChatView() {
   if (permissions.status === "error") return <PageError error={permissions.error} onRetry={permissions.refetch} />;
   if (!permissions.can(CHAT_PERMISSION)) return <PageForbidden />;
   const conversationId = params["conversationId"];
-  return <ChatWorkspace place={{ organizationId, projectId, conversationId: conversationId === "" ? undefined : conversationId }} />;
+  return (
+    <ChatWorkspace
+      place={{ organizationId, projectId, conversationId: conversationId === "" ? undefined : conversationId }}
+    />
+  );
 }

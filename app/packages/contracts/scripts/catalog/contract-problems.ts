@@ -26,7 +26,10 @@ const findDanglingRelations = (contract: RegisteredContract, knownIds: ReadonlyS
 /** Defense in depth: re-checks what defineContract enforces, plus cross-contract relations. */
 export const findContractProblems = (contracts: readonly RegisteredContract[]): string[] => {
   const knownIds = new Set(contracts.map((contract) => contract.id));
-  return contracts.flatMap((contract) => [...findFieldMetaProblems(contract), ...findDanglingRelations(contract, knownIds)]);
+  return contracts.flatMap((contract) => [
+    ...findFieldMetaProblems(contract),
+    ...findDanglingRelations(contract, knownIds),
+  ]);
 };
 
 type CatalogFileShape = { contracts?: { id?: string; jsonSchema?: unknown }[] };
@@ -52,7 +55,9 @@ const schemaTreesOf = (artifact: CatalogArtifact): [string, unknown][] => {
 export const findDanglingRefsInArtifacts = (artifacts: readonly CatalogArtifact[]): string[] =>
   artifacts
     .filter((artifact) => artifact.path.endsWith(".yaml"))
-    .flatMap((artifact) => findDanglingRefs(parseYaml(artifact.content) as JsonRecord).map((problem) => `${artifact.path}: ${problem}`));
+    .flatMap((artifact) =>
+      findDanglingRefs(parseYaml(artifact.content) as JsonRecord).map((problem) => `${artifact.path}: ${problem}`),
+    );
 
 /** JSON Schema in any artifact must carry custom meta only as `x-*` keys. */
 export const findRawMetaInArtifacts = (artifacts: readonly CatalogArtifact[]): string[] =>

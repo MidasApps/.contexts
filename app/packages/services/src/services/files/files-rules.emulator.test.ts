@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { assertFails, initializeTestEnvironment, type RulesTestContext, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
+import {
+  assertFails,
+  initializeTestEnvironment,
+  type RulesTestContext,
+  type RulesTestEnvironment,
+} from "@firebase/rules-unit-testing";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 
 // Uploads go through `POST /v1/.../files` signed URLs and reads through `/v1` (umbrella §16.2):

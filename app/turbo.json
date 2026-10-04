@@ -48,14 +48,7 @@
     "evals:real": {
       "dependsOn": ["^build"],
       "cache": false,
-      "passThroughEnv": [
-        "AI_*",
-        "DATABASE_URL",
-        "GOOGLE_*",
-        "OPENAI_API_KEY",
-        "ANTHROPIC_API_KEY",
-        "GITHUB_SHA"
-      ]
+      "passThroughEnv": ["AI_*", "DATABASE_URL", "GOOGLE_*", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GITHUB_SHA"]
     },
     // Playwright on the e2e stack (root `pnpm test:e2e` = scripts/e2e.ts: emulators of
     // firebase.e2e.json + the e2e env, run with --env-mode=loose --concurrency=1 because

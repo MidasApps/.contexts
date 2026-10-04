@@ -1,4 +1,9 @@
-type UnitOptions = { style: "unit"; unit: "byte" | "kilobyte" | "megabyte"; unitDisplay: "short"; maximumFractionDigits?: number };
+type UnitOptions = {
+  style: "unit";
+  unit: "byte" | "kilobyte" | "megabyte";
+  unitDisplay: "short";
+  maximumFractionDigits?: number;
+};
 type NumberFormatter = (value: number, options: UnitOptions) => string;
 
 const KB = 1024;

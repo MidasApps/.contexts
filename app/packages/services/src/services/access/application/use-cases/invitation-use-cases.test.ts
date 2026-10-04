@@ -37,10 +37,18 @@ describe("createInvitation", () => {
     const { invitation, acceptUrl, token } = await invited(world);
 
     expect(acceptUrl).toBe(`${APP_URL}/pt-BR/invite#token=${token}`);
-    expect(invitation).toMatchObject({ email: "carla@example.com", status: "pending", invitedBy: "owner-1", expiresAt: "2026-10-07T12:00:00.000Z" });
+    expect(invitation).toMatchObject({
+      email: "carla@example.com",
+      status: "pending",
+      invitedBy: "owner-1",
+      expiresAt: "2026-10-07T12:00:00.000Z",
+    });
     expect(world.invitations.rowOf(invitation.id)?.tokenHash).toBe(hashInvitationToken(token));
     expect(JSON.stringify(world.invitations.rowOf(invitation.id)?.invitation)).not.toContain(token);
-    expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "INVITATION_CREATED", target: { type: "invitation", id: invitation.id } });
+    expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({
+      action: "INVITATION_CREATED",
+      target: { type: "invitation", id: invitation.id },
+    });
     expect(world.notified).toEqual([acceptUrl]);
   });
 
@@ -74,8 +82,13 @@ describe("createInvitation", () => {
   it("refuses a member without core.member.invite and a node outside the organization", async () => {
     const world = await setup();
     await world.grant("member-1", nodes.orgA, [system("member")]);
-    expect(await invite(world, { actor: user("member-1") })).toMatchObject({ ok: false, error: { reason: "PERMISSION_NOT_GRANTED" } });
-    const outside = await invite(world, { input: { email: "carla@example.com", node: nodes.orgB, roles: [system("member")] } });
+    expect(await invite(world, { actor: user("member-1") })).toMatchObject({
+      ok: false,
+      error: { reason: "PERMISSION_NOT_GRANTED" },
+    });
+    const outside = await invite(world, {
+      input: { email: "carla@example.com", node: nodes.orgB, roles: [system("member")] },
+    });
     expect(outside).toMatchObject({ ok: false, error: { reason: "NODE_NOT_FOUND" } });
   });
 });
@@ -89,16 +102,31 @@ describe("acceptInvitation", () => {
     const result = await accept(world, "carla", token);
 
     expect(result).toEqual({ ok: true, data: { organizationId: "org-a" } });
-    expect(world.writes.allMemberships().find((m) => m.principalId === "carla")).toMatchObject({ node: nodes.p1, grantedBy: "owner-1", deletedAt: null });
+    expect(world.writes.allMemberships().find((m) => m.principalId === "carla")).toMatchObject({
+      node: nodes.p1,
+      grantedBy: "owner-1",
+      deletedAt: null,
+    });
     expect(world.writes.projectionOf("org-a", "carla")).toMatchObject({ projectIds: ["p1"], isRevoked: false });
-    expect(world.writes.userOf("carla")).toMatchObject({ accessVersion: 1, activeOrganizationId: "org-a", profile: { email: "CARLA@example.com" } });
-    expect(world.auditLog.entries("tenant").map((entry) => entry.action).slice(-2)).toEqual(["MEMBERSHIP_GRANTED", "INVITATION_ACCEPTED"]);
+    expect(world.writes.userOf("carla")).toMatchObject({
+      accessVersion: 1,
+      activeOrganizationId: "org-a",
+      profile: { email: "CARLA@example.com" },
+    });
+    expect(
+      world.auditLog
+        .entries("tenant")
+        .map((entry) => entry.action)
+        .slice(-2),
+    ).toEqual(["MEMBERSHIP_GRANTED", "INVITATION_ACCEPTED"]);
     expect(world.writes.claims.claimsOf("carla")).toEqual({ accessVersion: 1, tenantId: "org-a" });
   });
 
   it("matches a decomposed email against the precomposed invitation", async () => {
     const world = await setup();
-    const created = await invite(world, { input: { email: "josé@example.com", node: nodes.orgA, roles: [system("viewer")] } });
+    const created = await invite(world, {
+      input: { email: "josé@example.com", node: nodes.orgA, roles: [system("viewer")] },
+    });
     if (!created.ok) throw created.error;
     world.account("jose", "JOSÉ@example.com");
     expect((await accept(world, "jose", world.tokenOf(created.data.acceptUrl))).ok).toBe(true);
@@ -110,7 +138,10 @@ describe("acceptInvitation", () => {
     world.account("mallory", "mallory@example.com");
     world.account("carla-unverified", "carla@example.com", { verified: false });
     expect(await accept(world, "mallory", token)).toMatchObject({ ok: false, error: { code: "EMAIL_MISMATCH" } });
-    expect(await accept(world, "carla-unverified", token)).toMatchObject({ ok: false, error: { code: "EMAIL_MISMATCH" } });
+    expect(await accept(world, "carla-unverified", token)).toMatchObject({
+      ok: false,
+      error: { code: "EMAIL_MISMATCH" },
+    });
     expect(world.writes.allMemberships().some((m) => m.principalId === "mallory")).toBe(false);
   });
 
@@ -119,17 +150,28 @@ describe("acceptInvitation", () => {
     world.account("carla", "carla@example.com");
     const first = await invited(world);
     await accept(world, "carla", first.token);
-    expect(await accept(world, "carla", first.token)).toMatchObject({ ok: false, error: { code: "INVITATION_ALREADY_USED" } });
+    expect(await accept(world, "carla", first.token)).toMatchObject({
+      ok: false,
+      error: { code: "INVITATION_ALREADY_USED" },
+    });
 
     const second = await invited(world);
-    const revoked = await world.members.revokeInvitation({ actor: user("owner-1"), access: world.access(), invitationId: second.invitation.id, requestId: REQUEST_ID });
+    const revoked = await world.members.revokeInvitation({
+      actor: user("owner-1"),
+      access: world.access(),
+      invitationId: second.invitation.id,
+      requestId: REQUEST_ID,
+    });
     expect(revoked.ok).toBe(true);
     expect(await accept(world, "carla", second.token)).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(await accept(world, "carla", "A".repeat(43))).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
 
     const third = await invited(world);
     world.clock.set("2026-10-07T12:00:00.000Z");
-    expect(await accept(world, "carla", third.token)).toMatchObject({ ok: false, error: { code: "INVITATION_EXPIRED" } });
+    expect(await accept(world, "carla", third.token)).toMatchObject({
+      ok: false,
+      error: { code: "INVITATION_EXPIRED" },
+    });
   });
 
   it("stops working once the inviter can no longer grant its roles", async () => {
@@ -137,17 +179,33 @@ describe("acceptInvitation", () => {
     const admin = await world.grant("admin-1", nodes.orgA, [system("admin")]);
     const created = await invite(world, { actor: user("admin-1") });
     if (!created.ok) throw created.error;
-    await world.services.revokeMembership({ actor: user("owner-1"), access: world.access(), membershipId: admin.id, requestId: REQUEST_ID });
+    await world.services.revokeMembership({
+      actor: user("owner-1"),
+      access: world.access(),
+      membershipId: admin.id,
+      requestId: REQUEST_ID,
+    });
     world.account("carla", "carla@example.com");
-    expect(await accept(world, "carla", world.tokenOf(created.data.acceptUrl))).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await accept(world, "carla", world.tokenOf(created.data.acceptUrl))).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND" },
+    });
   });
 
   it("refuses an impersonated caller (read-only)", async () => {
     const world = await setup();
     const { token } = await invited(world);
     world.account("carla", "carla@example.com");
-    const impersonated = { ...user("carla"), impersonation: { sessionId: "imp-1", staffUid: "staff-1" } } as unknown as ReturnType<typeof user>;
-    const result = await world.members.acceptInvitation({ actor: impersonated, access: world.access(), token, requestId: REQUEST_ID });
+    const impersonated = {
+      ...user("carla"),
+      impersonation: { sessionId: "imp-1", staffUid: "staff-1" },
+    } as unknown as ReturnType<typeof user>;
+    const result = await world.members.acceptInvitation({
+      actor: impersonated,
+      access: world.access(),
+      token,
+      requestId: REQUEST_ID,
+    });
     expect(result).toMatchObject({ ok: false, error: { reason: "IMPERSONATION_READ_ONLY" } });
   });
 });
@@ -158,7 +216,12 @@ describe("previewInvitation and listInvitations", () => {
     const { token } = await invited(world);
     expect(await world.members.previewInvitation({ token })).toEqual({
       ok: true,
-      data: { organizationName: "Name of org-a", inviterDisplayName: "Olivia Owner", maskedEmail: "c***@example.com", expiresAt: "2026-10-07T12:00:00.000Z" },
+      data: {
+        organizationName: "Name of org-a",
+        inviterDisplayName: "Olivia Owner",
+        maskedEmail: "c***@example.com",
+        expiresAt: "2026-10-07T12:00:00.000Z",
+      },
     });
   });
 
@@ -169,7 +232,13 @@ describe("previewInvitation and listInvitations", () => {
     const newer = await invited(world);
     world.clock.set("2026-10-07T13:00:00.000Z");
     const list = (status?: "pending" | "expired") =>
-      world.members.listInvitations({ actor: user("owner-1"), access: world.access(), tenantId: nodes.orgA.tenantId, status, page: { after: undefined, limit: 10 } });
+      world.members.listInvitations({
+        actor: user("owner-1"),
+        access: world.access(),
+        tenantId: nodes.orgA.tenantId,
+        status,
+        page: { after: undefined, limit: 10 },
+      });
 
     const all = await list();
     expect(all.ok ? all.data.items.map((i) => [i.id, i.status]) : []).toEqual([

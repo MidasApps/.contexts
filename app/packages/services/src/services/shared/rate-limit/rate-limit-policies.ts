@@ -52,7 +52,10 @@ export class UnknownRateLimitPolicyError extends Error {
  * Looks a policy up by id in `policies` (default: the core policies).
  * @throws {UnknownRateLimitPolicyError} when the id is not declared.
  */
-export const getRateLimitPolicy = (id: string, policies: readonly RateLimitPolicy[] = RATE_LIMIT_POLICIES): RateLimitPolicy => {
+export const getRateLimitPolicy = (
+  id: string,
+  policies: readonly RateLimitPolicy[] = RATE_LIMIT_POLICIES,
+): RateLimitPolicy => {
   const policy = policies.find((candidate) => candidate.id === id);
   if (policy === undefined) throw new UnknownRateLimitPolicyError(id);
   return policy;

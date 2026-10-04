@@ -4,8 +4,12 @@ import { none } from "../field-docs.ts";
 import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.schema.ts";
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
-import { CreateConnectorInputSchema, SetConnectorSecretInputSchema, UpdateConnectorInputSchema } from "./connector-input.schema.ts";
 import { ConnectorIdSchema, ConnectorSchema } from "./connector.schema.ts";
+import {
+  CreateConnectorInputSchema,
+  SetConnectorSecretInputSchema,
+  UpdateConnectorInputSchema,
+} from "./connector-input.schema.ts";
 
 const organizationId = OrganizationIdSchema.meta(none("Organization that owns the connectors."));
 const organizationParams = z.object({ organizationId });

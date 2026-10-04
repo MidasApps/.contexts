@@ -10,7 +10,11 @@ import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
-export type TenantClearFlagOverrideDialogProps = { organizationId: string; flag: FeatureFlag | null; onOpenChange: (open: boolean) => void };
+export type TenantClearFlagOverrideDialogProps = {
+  organizationId: string;
+  flag: FeatureFlag | null;
+  onOpenChange: (open: boolean) => void;
+};
 
 /**
  * Confirms and removes the organization's own override of a flag
@@ -18,7 +22,11 @@ export type TenantClearFlagOverrideDialogProps = { organizationId: string; flag:
  * organization follows the platform value again, on or off. A failure stays in the dialog with
  * the request reference.
  */
-export function TenantClearFlagOverrideDialog({ organizationId, flag, onOpenChange }: TenantClearFlagOverrideDialogProps) {
+export function TenantClearFlagOverrideDialog({
+  organizationId,
+  flag,
+  onOpenChange,
+}: TenantClearFlagOverrideDialogProps) {
   const t = useTranslations("settings.flags.clear");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();

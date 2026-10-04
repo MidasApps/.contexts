@@ -1,4 +1,4 @@
-import { OrganizationIdSchema, ProjectIdSchema, UnitIdSchema, type TenantNodeRef } from "@core/contracts";
+import { OrganizationIdSchema, ProjectIdSchema, type TenantNodeRef, UnitIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { buildAccessProjection, nodeIdOf } from "./access-projection.ts";
 
@@ -28,7 +28,11 @@ describe("buildAccessProjection", () => {
   });
 
   it("lists project grants, unit grants and every project with a grant inside, sorted and unique", () => {
-    const projection = buildAccessProjection({ tenantId, principal, grants: [unit("p2", "u9"), project("p1"), unit("p2", "u3"), unit("p1", "u3b")] });
+    const projection = buildAccessProjection({
+      tenantId,
+      principal,
+      grants: [unit("p2", "u9"), project("p1"), unit("p2", "u3"), unit("p1", "u3b")],
+    });
     expect(projection).toMatchObject({
       orgWide: false,
       projectIds: ["p1"],
@@ -47,12 +51,17 @@ describe("buildAccessProjection", () => {
   });
 
   it("is revoked when the organization is deleted, even with grants", () => {
-    expect(buildAccessProjection({ tenantId, principal, grants: [org], organizationDeleted: true }).isRevoked).toBe(true);
+    expect(buildAccessProjection({ tenantId, principal, grants: [org], organizationDeleted: true }).isRevoked).toBe(
+      true,
+    );
   });
 
   it("ignores grants of another tenant", () => {
     const foreign: TenantNodeRef = { level: "organization", tenantId: OrganizationIdSchema.parse("org-b") };
-    expect(buildAccessProjection({ tenantId, principal, grants: [foreign] })).toMatchObject({ orgWide: false, isRevoked: true });
+    expect(buildAccessProjection({ tenantId, principal, grants: [foreign] })).toMatchObject({
+      orgWide: false,
+      isRevoked: true,
+    });
   });
 });
 

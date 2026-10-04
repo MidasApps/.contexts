@@ -1,14 +1,19 @@
 // Composition root of the usage context (SP3 Task 16): use cases over one repository, and the sink.
 import type { Clock } from "../shared/clock/clock.ts";
 import type { Logger } from "../shared/observability/logger.ts";
+import {
+  type BigQueryDailyRollupRow,
+  createBigQueryLlmCallsTable,
+  createBigQueryUsageSink,
+  DAILY_ROLLUPS_TABLE,
+} from "./adapters/driven/bigquery-usage-sink.ts";
+import { createNoopUsageSink } from "./adapters/driven/noop-usage-sink.ts";
 import type { UsageRepository } from "./application/ports/usage-repository.ts";
 import type { UsageSink } from "./application/ports/usage-sink.ts";
 import { type CheckTenantBudget, makeCheckTenantBudget } from "./application/use-cases/check-tenant-budget.ts";
 import { type GetUsageSummary, makeGetUsageSummary } from "./application/use-cases/get-usage-summary.ts";
 import { makeRecordAgentRuns, type RecordAgentRuns } from "./application/use-cases/record-agent-runs.ts";
 import { makeRecordLlmCalls, type RecordLlmCalls } from "./application/use-cases/record-llm-calls.ts";
-import { type BigQueryDailyRollupRow, createBigQueryLlmCallsTable, createBigQueryUsageSink, DAILY_ROLLUPS_TABLE } from "./adapters/driven/bigquery-usage-sink.ts";
-import { createNoopUsageSink } from "./adapters/driven/noop-usage-sink.ts";
 
 export type UsageServices = {
   readonly recordLlmCalls: RecordLlmCalls;
@@ -17,7 +22,10 @@ export type UsageServices = {
   readonly getUsageSummary: GetUsageSummary;
 };
 
-export const createUsageServices = (deps: { readonly repository: UsageRepository; readonly clock: Clock }): UsageServices => ({
+export const createUsageServices = (deps: {
+  readonly repository: UsageRepository;
+  readonly clock: Clock;
+}): UsageServices => ({
   recordLlmCalls: makeRecordLlmCalls(deps),
   recordAgentRuns: makeRecordAgentRuns(deps),
   checkTenantBudget: makeCheckTenantBudget(deps),
@@ -36,7 +44,10 @@ export const createUsageSink = (config: {
 }): UsageSink =>
   config.kind === "bigquery"
     ? createBigQueryUsageSink({
-        table: createBigQueryLlmCallsTable({ dataset: config.dataset, ...(config.projectId === undefined ? {} : { projectId: config.projectId }) }),
+        table: createBigQueryLlmCallsTable({
+          dataset: config.dataset,
+          ...(config.projectId === undefined ? {} : { projectId: config.projectId }),
+        }),
         rollupsTable: createBigQueryLlmCallsTable<BigQueryDailyRollupRow>({
           dataset: config.dataset,
           table: DAILY_ROLLUPS_TABLE,

@@ -18,7 +18,8 @@ export type AdminImpersonationSession = z.infer<typeof AdminImpersonationSession
 export const AdminImpersonationSessionContract = defineContract(AdminImpersonationSessionSchema, {
   id: "platform.AdminImpersonationSession",
   kind: "view",
-  description: "A support access session for staff: who acted as whom, in which organization, why, and whether it is still open.",
+  description:
+    "A support access session for staff: who acted as whom, in which organization, why, and whether it is still open.",
   examples: [
     {
       id: EXAMPLE_IDS.impersonationSession,

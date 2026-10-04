@@ -8,23 +8,43 @@ import { MAX_AUDIO_UPLOAD_BYTES } from "./voice-transcriptions-route-handler.ts"
 
 const ORG = "OrgAaaaaaaaaaaaaaaaaa";
 const OTHER = "OrgBbbbbbbbbbbbbbbbbb";
-const REGIONAL = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" };
+const REGIONAL = {
+  locale: "pt-BR",
+  displayTimeZone: "America/Sao_Paulo",
+  nodeTimeZone: "America/Sao_Paulo",
+  currency: "BRL",
+};
 const WEBM = new Uint8Array([0x1a, 0x45, 0xdf, 0xa3, 0, 0, 0, 1]);
 
-type Script = { transcribe?: GatewayResult<unknown>; realtime?: GatewayResult<unknown>; flags?: Readonly<Record<string, boolean>> | "fail" | "absent" };
+type Script = {
+  transcribe?: GatewayResult<unknown>;
+  realtime?: GatewayResult<unknown>;
+  flags?: Readonly<Record<string, boolean>> | "fail" | "absent";
+};
 
 const setup = (script: Script = {}) => {
-  const { pipeline } = makeInMemoryPipeline({ now: "2026-09-30T12:00:00.000Z", members: [{ uid: "alice", tenantId: ORG, role: "member" }] });
+  const { pipeline } = makeInMemoryPipeline({
+    now: "2026-09-30T12:00:00.000Z",
+    members: [{ uid: "alice", tenantId: ORG, role: "member" }],
+  });
   const calls: { kind: string; scope: AgentCallScope; mediaType?: string; size?: number }[] = [];
   const flagReads: string[] = [];
   const voice: VoiceRuntimeGateway = {
     transcribe: ({ scope, audio, mediaType }) => {
       calls.push({ kind: "transcribe", scope, mediaType, size: audio.byteLength });
-      return Promise.resolve(script.transcribe ?? { ok: true, data: { data: { text: "fake transcript", language: "en", durationInSeconds: 1 } } });
+      return Promise.resolve(
+        script.transcribe ?? {
+          ok: true,
+          data: { data: { text: "fake transcript", language: "en", durationInSeconds: 1 } },
+        },
+      );
     },
     synthesize: ({ scope }) => {
       calls.push({ kind: "synthesize", scope });
-      return Promise.resolve({ ok: true, data: { body: new Blob([new Uint8Array([0x49, 0x44, 0x33])]).stream(), contentType: "audio/mpeg" } });
+      return Promise.resolve({
+        ok: true,
+        data: { body: new Blob([new Uint8Array([0x49, 0x44, 0x33])]).stream(), contentType: "audio/mpeg" },
+      });
     },
     createRealtimeSession: ({ scope }) => {
       calls.push({ kind: "realtime", scope });
@@ -35,21 +55,32 @@ const setup = (script: Script = {}) => {
     pipeline,
     voice,
     resolveAccessContext: ({ principal, node }) =>
-      Promise.resolve(node.level === "organization" && node.tenantId === ORG ? { tenantId: node.tenantId, principal: principal, permissions: [], regional: REGIONAL } : null),
+      Promise.resolve(
+        node.level === "organization" && node.tenantId === ORG
+          ? { tenantId: node.tenantId, principal: principal, permissions: [], regional: REGIONAL }
+          : null,
+      ),
     ...(script.flags === "absent"
       ? {}
       : {
           readFlags: (tenantId: string) => {
             flagReads.push(tenantId);
             const { flags } = script;
-            return flags === "fail" ? Promise.reject(new Error("flag store down")) : Promise.resolve(flags === undefined || flags === "absent" ? {} : flags);
+            return flags === "fail"
+              ? Promise.reject(new Error("flag store down"))
+              : Promise.resolve(flags === undefined || flags === "absent" ? {} : flags);
           },
         }),
   });
   return { routes, calls, flagReads };
 };
 
-const upload = (routes: ReturnType<typeof setup>["routes"], bytes: Uint8Array<ArrayBuffer>, org = ORG, as: string | null = "alice") => {
+const upload = (
+  routes: ReturnType<typeof setup>["routes"],
+  bytes: Uint8Array<ArrayBuffer>,
+  org = ORG,
+  as: string | null = "alice",
+) => {
   const form = new FormData();
   form.set("audio", new Blob([bytes], { type: "audio/webm" }), "clip.webm");
   const encoded = new Response(form);
@@ -57,7 +88,11 @@ const upload = (routes: ReturnType<typeof setup>["routes"], bytes: Uint8Array<Ar
     routes["voice.transcribe"]!(
       new Request(`http://localhost/v1/voice/transcriptions?organizationId=${org}`, {
         method: "POST",
-        headers: { "content-type": encoded.headers.get("content-type") ?? "", "content-length": String(body.byteLength), ...(as === null ? {} : { authorization: `Bearer ${as}-token` }) },
+        headers: {
+          "content-type": encoded.headers.get("content-type") ?? "",
+          "content-length": String(body.byteLength),
+          ...(as === null ? {} : { authorization: `Bearer ${as}-token` }),
+        },
         body,
       }),
     ),
@@ -72,7 +107,12 @@ describe("/v1/voice", () => {
     const response = await upload(routes, WEBM);
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ data: { text: "fake transcript", language: "en", durationInSeconds: 1 } });
-    expect(calls[0]).toMatchObject({ kind: "transcribe", mediaType: "audio/webm", size: WEBM.byteLength, scope: { tenantId: ORG, bearer: "alice-token" } });
+    expect(calls[0]).toMatchObject({
+      kind: "transcribe",
+      mediaType: "audio/webm",
+      size: WEBM.byteLength,
+      scope: { tenantId: ORG, bearer: "alice-token" },
+    });
   });
 
   it("rejects audio of another type, an oversized upload, a missing token and another organization", async () => {
@@ -119,16 +159,32 @@ describe("/v1/voice", () => {
 
   it("answers 503 for realtime sessions in fake mode or with the flag off, and 201 with a secret otherwise", async () => {
     const realtime = (routes: ReturnType<typeof setup>["routes"]) =>
-      routes["voice.createRealtimeSession"]!(new Request(`http://localhost/v1/voice/realtime-sessions?organizationId=${ORG}`, { method: "POST", headers: { authorization: "Bearer alice-token" } }));
+      routes["voice.createRealtimeSession"]!(
+        new Request(`http://localhost/v1/voice/realtime-sessions?organizationId=${ORG}`, {
+          method: "POST",
+          headers: { authorization: "Bearer alice-token" },
+        }),
+      );
     expect((await realtime(setup().routes)).status).toBe(503);
-    const minted = await realtime(setup({ realtime: { ok: true, data: { data: { clientSecret: "ek_1", expiresAt: "2026-09-30T12:01:00.000Z", model: "gpt-realtime-2.1" } } } }).routes);
+    const minted = await realtime(
+      setup({
+        realtime: {
+          ok: true,
+          data: { data: { clientSecret: "ek_1", expiresAt: "2026-09-30T12:01:00.000Z", model: "gpt-realtime-2.1" } },
+        },
+      }).routes,
+    );
     expect(minted.status).toBe(201);
     expect(minted.headers.get("cache-control")).toBe("no-store");
   });
 
   describe("availability", () => {
     const availability = (routes: ReturnType<typeof setup>["routes"], org = ORG, as: string | null = "alice") =>
-      routes["voice.getAvailability"]!(new Request(`http://localhost/v1/voice/availability?organizationId=${org}`, { headers: as === null ? {} : { authorization: `Bearer ${as}-token` } }));
+      routes["voice.getAvailability"]!(
+        new Request(`http://localhost/v1/voice/availability?organizationId=${org}`, {
+          headers: as === null ? {} : { authorization: `Bearer ${as}-token` },
+        }),
+      );
 
     it("reports the organization's voice flags to a member who may use voice, uncached", async () => {
       const { routes, flagReads, calls } = setup({ flags: { "chat.voice": true, "chat.voice.realtime": false } });
@@ -142,8 +198,14 @@ describe("/v1/voice", () => {
     });
 
     it("reports realtime only together with voice", async () => {
-      expect(await (await availability(setup({ flags: { "chat.voice": true, "chat.voice.realtime": true } }).routes)).json()).toEqual({ data: { voice: true, realtime: true } });
-      expect(await (await availability(setup({ flags: { "chat.voice": false, "chat.voice.realtime": true } }).routes)).json()).toEqual({ data: { voice: false, realtime: false } });
+      expect(
+        await (await availability(setup({ flags: { "chat.voice": true, "chat.voice.realtime": true } }).routes)).json(),
+      ).toEqual({ data: { voice: true, realtime: true } });
+      expect(
+        await (
+          await availability(setup({ flags: { "chat.voice": false, "chat.voice.realtime": true } }).routes)
+        ).json(),
+      ).toEqual({ data: { voice: false, realtime: false } });
     });
 
     it("fails closed: off when the flag is unset, the flag store fails or no reader is wired", async () => {

@@ -28,23 +28,41 @@ export type AdminUsageTotals = z.infer<typeof AdminUsageTotalsSchema>;
 export const AdminUsageSchema = z.strictObject({
   from: UsageDaySchema.meta(none("First UTC day of the range.")),
   to: UsageDaySchema.meta(none("Last UTC day of the range, included.")),
-  organizationId: OrganizationIdSchema.nullable().meta(none("Organization the numbers are of; null = every live organization.")),
+  organizationId: OrganizationIdSchema.nullable().meta(
+    none("Organization the numbers are of; null = every live organization."),
+  ),
   totals: AdminUsageTotalsSchema.meta(none("Totals of the range.")),
   byDay: z
     .array(z.strictObject({ day: UsageDaySchema.meta(none("UTC day.")), ...totalsShape }))
     .max(ADMIN_USAGE_MAX_DAYS)
     .meta(none("One row per day of the range, in order; days without calls are zero.")),
   byModel: z
-    .array(z.strictObject({ provider: z.string().min(1).meta(none("Model provider.")), model: z.string().min(1).meta(none("Model id.")), ...totalsShape }))
+    .array(
+      z.strictObject({
+        provider: z.string().min(1).meta(none("Model provider.")),
+        model: z.string().min(1).meta(none("Model id.")),
+        ...totalsShape,
+      }),
+    )
     .max(500)
     .meta(none("One row per provider and model, highest cost first.")),
   organizations: count("Organizations whose ledger was read."),
-  truncated: z.boolean().meta(none("True when there are more organizations than one answer reads; the totals then cover only the ones read.")),
+  truncated: z
+    .boolean()
+    .meta(
+      none("True when there are more organizations than one answer reads; the totals then cover only the ones read."),
+    ),
   generatedAt: IsoDateTimeSchema.meta(none("When the numbers were computed (UTC).")),
 });
 export type AdminUsage = z.infer<typeof AdminUsageSchema>;
 
-const ROW = { calls: 240, inputTokens: 310_000, outputTokens: 42_000, costMicroUsd: 1_250_000, unpricedCalls: 0 } as const;
+const ROW = {
+  calls: 240,
+  inputTokens: 310_000,
+  outputTokens: 42_000,
+  costMicroUsd: 1_250_000,
+  unpricedCalls: 0,
+} as const;
 
 export const AdminUsageContract = defineContract(AdminUsageSchema, {
   id: "platform.AdminUsage",

@@ -1,11 +1,11 @@
 "use client";
 
 import { listPermissionsEndpoint, listRolesEndpoint, type PermissionDefinition, type Role } from "@core/contracts";
-import { queryOptions, useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { queryOptions, type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import { COLLECT_PAGE_LIMIT, collectAllPages, pageQuery } from "#/shared/api/cursor-list.ts";
-import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
+import { type QueryKey, queryKeys } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 
 /** Custom role keys under the organization; the permission registry is a platform catalog. */
@@ -20,7 +20,12 @@ export const rolesQuery = (callEndpoint: CallEndpoint, organizationId: string) =
     queryKey: roleKeys.all(organizationId),
     queryFn: ({ signal }): Promise<Role[]> =>
       collectAllPages(
-        (cursor, pageSignal) => callEndpoint(listRolesEndpoint, { params: { organizationId }, query: pageQuery(cursor, COLLECT_PAGE_LIMIT), signal: pageSignal }),
+        (cursor, pageSignal) =>
+          callEndpoint(listRolesEndpoint, {
+            params: { organizationId },
+            query: pageQuery(cursor, COLLECT_PAGE_LIMIT),
+            signal: pageSignal,
+          }),
         signal,
       ),
   });
@@ -30,7 +35,11 @@ export const permissionsCatalogQuery = (callEndpoint: CallEndpoint) =>
   queryOptions({
     queryKey: roleKeys.permissionsCatalog(),
     queryFn: ({ signal }): Promise<PermissionDefinition[]> =>
-      collectAllPages((cursor, pageSignal) => callEndpoint(listPermissionsEndpoint, { query: pageQuery(cursor, COLLECT_PAGE_LIMIT), signal: pageSignal }), signal),
+      collectAllPages(
+        (cursor, pageSignal) =>
+          callEndpoint(listPermissionsEndpoint, { query: pageQuery(cursor, COLLECT_PAGE_LIMIT), signal: pageSignal }),
+        signal,
+      ),
     staleTime: 5 * 60_000,
   });
 
@@ -38,7 +47,10 @@ export const permissionsCatalogQuery = (callEndpoint: CallEndpoint) =>
 export const useRoles = (organizationId: string | undefined): UseQueryResult<Role[]> => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...rolesQuery(callEndpoint, organizationId ?? ""), enabled: signedIn && organizationId !== undefined && organizationId !== "" });
+  return useQuery({
+    ...rolesQuery(callEndpoint, organizationId ?? ""),
+    enabled: signedIn && organizationId !== undefined && organizationId !== "",
+  });
 };
 
 /** The permission registry, for the role editor's picker grouped by module. */

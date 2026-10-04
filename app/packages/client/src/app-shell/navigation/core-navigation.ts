@@ -1,7 +1,12 @@
 import type { Permission } from "@core/contracts";
-import { PROFILE_SECTIONS, SETTINGS_SECTIONS, type ProfileSection, type SettingsSection } from "#/shared/lib/router/route-paths.ts";
-import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
+import {
+  PROFILE_SECTIONS,
+  type ProfileSection,
+  SETTINGS_SECTIONS,
+  type SettingsSection,
+} from "#/shared/lib/router/route-paths.ts";
 import type { NavGroup } from "#/shared/lib/shell/shell-types.ts";
+import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
 import type { ShellNavItem } from "./navigation-registry.ts";
 
 // Read permission of each settings section (SP1 spec §7.3; SP3 spec §2.2 and SP5 spec §2.1 for the
@@ -53,11 +58,43 @@ const ADMIN: { name: string; icon: IconName; permission: Permission; group: NavG
 ];
 
 const HOMES: ShellNavItem[] = [
-  { id: "core.organization.home", slot: "organization", labelKey: "shell.nav.organizationHome", icon: "home", permission: "core.organization.read", order: 0, target: { kind: "organization-home" } },
-  { id: "core.organization.settings", slot: "organization", labelKey: "shell.nav.organizationSettings", icon: "settings", permission: "core.organization.read", order: 1000, target: { kind: "settings", section: "general" } },
+  {
+    id: "core.organization.home",
+    slot: "organization",
+    labelKey: "shell.nav.organizationHome",
+    icon: "home",
+    permission: "core.organization.read",
+    order: 0,
+    target: { kind: "organization-home" },
+  },
+  {
+    id: "core.organization.settings",
+    slot: "organization",
+    labelKey: "shell.nav.organizationSettings",
+    icon: "settings",
+    permission: "core.organization.read",
+    order: 1000,
+    target: { kind: "settings", section: "general" },
+  },
   // Modules add theirs between 1 and 999, after the chat (SP4 Task 13).
-  { id: "core.project.home", slot: "project", labelKey: "shell.nav.projectHome", icon: "layout-dashboard", permission: "core.project.read", order: 0, target: { kind: "project-home" } },
-  { id: "core.project.chat", slot: "project", labelKey: "shell.nav.chat", icon: "message", permission: "core.conversation.send", order: 1, target: { kind: "chat" } },
+  {
+    id: "core.project.home",
+    slot: "project",
+    labelKey: "shell.nav.projectHome",
+    icon: "layout-dashboard",
+    permission: "core.project.read",
+    order: 0,
+    target: { kind: "project-home" },
+  },
+  {
+    id: "core.project.chat",
+    slot: "project",
+    labelKey: "shell.nav.chat",
+    icon: "message",
+    permission: "core.conversation.send",
+    order: 1,
+    target: { kind: "chat" },
+  },
 ];
 
 /**
@@ -67,32 +104,38 @@ const HOMES: ShellNavItem[] = [
  */
 export const CORE_NAVIGATION: readonly ShellNavItem[] = [
   ...HOMES,
-  ...SETTINGS_SECTIONS.map((section, index): ShellNavItem => ({
-    id: `core.settings.${section}`,
-    slot: "settings",
-    labelKey: `shell.nav.settings.${section}`,
-    icon: SETTINGS[section].icon,
-    permission: SETTINGS[section].permission,
-    order: index * 10,
-    target: { kind: "settings", section },
-    group: SETTINGS[section].group,
-  })),
-  ...PROFILE_SECTIONS.map((section, index): ShellNavItem => ({
-    id: `core.profile.${section}`,
-    slot: "user-menu",
-    labelKey: `shell.nav.profile.${section}`,
-    icon: PROFILE_ICONS[section],
-    order: index * 10,
-    target: { kind: "profile", section },
-  })),
-  ...ADMIN.map(({ name, icon, permission, group }, index): ShellNavItem => ({
-    id: `core.admin.${name}`,
-    slot: "admin",
-    labelKey: `shell.nav.admin.${name}`,
-    icon,
-    permission,
-    order: index * 10,
-    target: { kind: "admin", rest: name },
-    group,
-  })),
+  ...SETTINGS_SECTIONS.map(
+    (section, index): ShellNavItem => ({
+      id: `core.settings.${section}`,
+      slot: "settings",
+      labelKey: `shell.nav.settings.${section}`,
+      icon: SETTINGS[section].icon,
+      permission: SETTINGS[section].permission,
+      order: index * 10,
+      target: { kind: "settings", section },
+      group: SETTINGS[section].group,
+    }),
+  ),
+  ...PROFILE_SECTIONS.map(
+    (section, index): ShellNavItem => ({
+      id: `core.profile.${section}`,
+      slot: "user-menu",
+      labelKey: `shell.nav.profile.${section}`,
+      icon: PROFILE_ICONS[section],
+      order: index * 10,
+      target: { kind: "profile", section },
+    }),
+  ),
+  ...ADMIN.map(
+    ({ name, icon, permission, group }, index): ShellNavItem => ({
+      id: `core.admin.${name}`,
+      slot: "admin",
+      labelKey: `shell.nav.admin.${name}`,
+      icon,
+      permission,
+      order: index * 10,
+      target: { kind: "admin", rest: name },
+      group,
+    }),
+  ),
 ];

@@ -10,13 +10,25 @@ export function ChainOfThought({ className, ...props }: ComponentProps<typeof Co
   return <Collapsible data-slot="chain-of-thought" className={cn("group/cot w-full", className)} {...props} />;
 }
 
-export type ChainOfThoughtHeaderProps = Omit<ComponentProps<typeof CollapsibleTrigger>, "children"> & { children: ReactNode };
+export type ChainOfThoughtHeaderProps = Omit<ComponentProps<typeof CollapsibleTrigger>, "children"> & {
+  children: ReactNode;
+};
 
 export function ChainOfThoughtHeader({ className, children, ...props }: ChainOfThoughtHeaderProps) {
   return (
-    <CollapsibleTrigger data-slot="chain-of-thought-header" className={cn("flex items-center gap-2 rounded-xs text-body text-muted-foreground hover:text-foreground", className)} {...props}>
+    <CollapsibleTrigger
+      data-slot="chain-of-thought-header"
+      className={cn(
+        "flex items-center gap-2 rounded-xs text-body text-muted-foreground hover:text-foreground",
+        className,
+      )}
+      {...props}
+    >
       <span>{children}</span>
-      <ChevronDownIcon aria-hidden="true" className="size-4 transition-transform group-data-[state=open]/cot:rotate-180" />
+      <ChevronDownIcon
+        aria-hidden="true"
+        className="size-4 transition-transform group-data-[state=open]/cot:rotate-180"
+      />
     </CollapsibleTrigger>
   );
 }
@@ -37,13 +49,25 @@ export type ChainOfThoughtStepProps = Omit<ComponentProps<"li">, "title"> & {
   status?: "complete" | "active" | "pending";
 };
 
-export function ChainOfThoughtStep({ title, description, icon, status = "complete", className, children, ...props }: ChainOfThoughtStepProps) {
+export function ChainOfThoughtStep({
+  title,
+  description,
+  icon,
+  status = "complete",
+  className,
+  children,
+  ...props
+}: ChainOfThoughtStepProps) {
   return (
     <li
       data-slot="chain-of-thought-step"
       data-status={status}
       aria-current={status === "active" ? "step" : undefined}
-      className={cn("flex gap-2 text-body", status === "pending" ? "text-muted-foreground" : "text-foreground", className)}
+      className={cn(
+        "flex gap-2 text-body",
+        status === "pending" ? "text-muted-foreground" : "text-foreground",
+        className,
+      )}
       {...props}
     >
       <span aria-hidden="true" className="mt-0.5 text-muted-foreground">

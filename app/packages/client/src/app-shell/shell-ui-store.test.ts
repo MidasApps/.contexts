@@ -4,7 +4,12 @@ import { createShellUiStore, MAX_RECENTS, SHELL_UI_STORAGE_KEY } from "./shell-u
 
 const memoryStorage = (): StateStorage & { data: Map<string, string> } => {
   const data = new Map<string, string>();
-  return { data, getItem: (key) => data.get(key) ?? null, setItem: (key, value) => void data.set(key, value), removeItem: (key) => void data.delete(key) };
+  return {
+    data,
+    getItem: (key) => data.get(key) ?? null,
+    setItem: (key, value) => void data.set(key, value),
+    removeItem: (key) => void data.delete(key),
+  };
 };
 
 describe("shell UI store", () => {
@@ -18,7 +23,10 @@ describe("shell UI store", () => {
   it("persists only the recents, versioned, and rehydrates them", async () => {
     const storage = memoryStorage();
     createShellUiStore(storage).getState().addRecent("open-profile");
-    expect(JSON.parse(storage.data.get(SHELL_UI_STORAGE_KEY) ?? "{}")).toEqual({ state: { recents: ["open-profile"] }, version: 1 });
+    expect(JSON.parse(storage.data.get(SHELL_UI_STORAGE_KEY) ?? "{}")).toEqual({
+      state: { recents: ["open-profile"] },
+      version: 1,
+    });
     const next = createShellUiStore(storage);
     expect(next.getState().recents).toEqual([]);
     await next.persist.rehydrate();

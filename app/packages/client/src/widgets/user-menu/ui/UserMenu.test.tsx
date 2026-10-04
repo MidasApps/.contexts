@@ -43,7 +43,13 @@ describe("UserMenu", () => {
         ]),
       },
     });
-    await user.click(await screen.findByRole("button", { name: "Ana Souza, menu da conta, 1 aprovação aguardando sua decisão" }, { timeout: 8000 }));
+    await user.click(
+      await screen.findByRole(
+        "button",
+        { name: "Ana Souza, menu da conta, 1 aprovação aguardando sua decisão" },
+        { timeout: 8000 },
+      ),
+    );
     const entry = await screen.findByRole("menuitem", { name: "Aprovações, 1 aguardando sua decisão" });
     expect(entry.getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals`);
     expect(api.calls.find((call) => call.path.endsWith("/approval-requests"))?.query).toContain("status=pending");

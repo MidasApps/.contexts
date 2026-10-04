@@ -11,7 +11,8 @@ export const SUPERVISOR_INSTRUCTIONS = "assistant.v1";
 export const SUPERVISOR_MAX_STEPS = 8;
 
 // Mastra fills the run's own ids in; anything else was written by the model.
-const sameOrAbsent = (requested: string | undefined, server: string | undefined): boolean => requested === undefined || requested === server;
+const sameOrAbsent = (requested: string | undefined, server: string | undefined): boolean =>
+  requested === undefined || requested === server;
 
 /**
  * `onDelegationStart` of the supervisor (spec §6, §14): the tenant's settings decide, on the
@@ -25,10 +26,19 @@ export const createDelegationGuard =
   async (context: DelegationStartContext): Promise<DelegationStartResult> => {
     const { enabledAgents } = await tenantSettings(context.requestContext);
     if (!enabledAgents.has(context.primitiveId)) {
-      return { proceed: false, rejectionReason: `The ${context.primitiveId} specialist is not enabled for this organization.` };
+      return {
+        proceed: false,
+        rejectionReason: `The ${context.primitiveId} specialist is not enabled for this organization.`,
+      };
     }
-    if (!sameOrAbsent(context.params.threadId, context.threadId) || !sameOrAbsent(context.params.resourceId, context.resourceId)) {
-      return { proceed: false, rejectionReason: "Delegate again without threadId or resourceId; the server assigns them." };
+    if (
+      !sameOrAbsent(context.params.threadId, context.threadId) ||
+      !sameOrAbsent(context.params.resourceId, context.resourceId)
+    ) {
+      return {
+        proceed: false,
+        rejectionReason: "Delegate again without threadId or resourceId; the server assigns them.",
+      };
     }
     return { proceed: true, modifiedInstructions: "" };
   };
@@ -57,8 +67,12 @@ export const createSupervisorAgent = (args: {
   return new Agent({
     id: SUPERVISOR_AGENT_ID,
     name: "Assistant",
-    description: "Answers the user, plans the work and delegates to the knowledge, data, action and web specialists the organization enabled.",
-    instructions: deps.instructions(SUPERVISOR_AGENT_ID, loadInstructions(SUPERVISOR_INSTRUCTIONS, args.instructionsDirs)),
+    description:
+      "Answers the user, plans the work and delegates to the knowledge, data, action and web specialists the organization enabled.",
+    instructions: deps.instructions(
+      SUPERVISOR_AGENT_ID,
+      loadInstructions(SUPERVISOR_INSTRUCTIONS, args.instructionsDirs),
+    ),
     model: deps.models.language("chat", { agentId: SUPERVISOR_AGENT_ID }),
     agents: enabledSubagentsOf(args.subagents, deps.tenantSettings),
     // Read-only connector tools answer questions directly; changes go through `agent-action`.

@@ -32,7 +32,12 @@ export const KnowledgeIngestResultSchema = z.strictObject({
 });
 export type KnowledgeIngestResult = z.infer<typeof KnowledgeIngestResultSchema>;
 
-const failed = (code: string): KnowledgeIngestResult => ({ status: "failed", documentId: null, chunkCount: null, code });
+const failed = (code: string): KnowledgeIngestResult => ({
+  status: "failed",
+  documentId: null,
+  chunkCount: null,
+  code,
+});
 
 const DescriptorSchema = z.strictObject({
   tenantId: z.string().min(1),
@@ -44,17 +49,31 @@ const DescriptorSchema = z.strictObject({
   title: z.string().nullable(),
   sourceUrl: z.string().nullable(),
   mimeType: z.string().nullable(),
-  fetch: z.discriminatedUnion("kind", [z.strictObject({ kind: z.literal("file"), fileId: z.string() }), z.strictObject({ kind: z.literal("url"), url: z.string() })]),
+  fetch: z.discriminatedUnion("kind", [
+    z.strictObject({ kind: z.literal("file"), fileId: z.string() }),
+    z.strictObject({ kind: z.literal("url"), url: z.string() }),
+  ]),
 });
 type Descriptor = z.infer<typeof DescriptorSchema>;
 
-const ExtractedSchema = DescriptorSchema.extend({ text: z.string(), format: z.enum(["markdown", "text"]), contentHash: z.string() });
+const ExtractedSchema = DescriptorSchema.extend({
+  text: z.string(),
+  format: z.enum(["markdown", "text"]),
+  contentHash: z.string(),
+});
 const ChunkedSchema = DescriptorSchema.extend({
   contentHash: z.string(),
   chunks: z.array(z.strictObject({ index: z.int(), text: z.string(), tokenCount: z.int() })),
 });
 const StoredSchema = ChunkedSchema.extend({ documentId: z.string(), unchanged: z.boolean() });
-const EmbeddedSchema = z.strictObject({ tenantId: z.string(), requestId: z.string().nullable(), source: z.enum(["upload", "url"]), documentId: z.string(), unchanged: z.boolean(), chunkCount: z.int().nullable() });
+const EmbeddedSchema = z.strictObject({
+  tenantId: z.string(),
+  requestId: z.string().nullable(),
+  source: z.enum(["upload", "url"]),
+  documentId: z.string(),
+  unchanged: z.boolean(),
+  chunkCount: z.int().nullable(),
+});
 
 /** Bug: a later step runs under another tenant than the one that resolved the source. */
 export class IngestTenantMismatchError extends Error {
@@ -71,20 +90,48 @@ const assertSameTenant = (requestContext: RequestContext<unknown>, tenantId: str
   if (!snapshot.ok || snapshot.data.context.tenantId !== tenantId) throw new IngestTenantMismatchError();
 };
 
-type Writer = { custom: (chunk: { type: `data-${string}`; data: unknown; transient?: boolean }) => Promise<void> } | undefined;
+type Writer =
+  | { custom: (chunk: { type: `data-${string}`; data: unknown; transient?: boolean }) => Promise<void> }
+  | undefined;
 
 const progress = async (writer: Writer, step: string, data: Record<string, unknown> = {}): Promise<void> => {
   await writer?.custom({ type: "data-ingest-progress", data: { step, ...data }, transient: true });
 };
 
-const describeSource = async (deps: KnowledgeWorkflowDeps, base: Omit<Descriptor, "source" | "sourceRef" | "title" | "sourceUrl" | "mimeType" | "fetch">, source: z.infer<typeof KnowledgeSourceSchema>) => {
+const describeSource = async (
+  deps: KnowledgeWorkflowDeps,
+  base: Omit<Descriptor, "source" | "sourceRef" | "title" | "sourceUrl" | "mimeType" | "fetch">,
+  source: z.infer<typeof KnowledgeSourceSchema>,
+) => {
   if (source.kind === "url") {
-    return { ok: true as const, data: { ...base, source: "url" as const, sourceRef: source.url, title: null, sourceUrl: source.url, mimeType: "text/markdown", fetch: source } };
+    return {
+      ok: true as const,
+      data: {
+        ...base,
+        source: "url" as const,
+        sourceRef: source.url,
+        title: null,
+        sourceUrl: source.url,
+        mimeType: "text/markdown",
+        fetch: source,
+      },
+    };
   }
   const file = await deps.files.getReadyFile({ tenantId: base.tenantId, fileId: source.fileId, purpose: "knowledge" });
   if (!file.ok) return { ok: false as const, code: file.error };
   const { fileName, contentType } = file.data;
-  return { ok: true as const, data: { ...base, source: "upload" as const, sourceRef: source.fileId, title: fileName, sourceUrl: null, mimeType: contentType, fetch: source } };
+  return {
+    ok: true as const,
+    data: {
+      ...base,
+      source: "upload" as const,
+      sourceRef: source.fileId,
+      title: fileName,
+      sourceUrl: null,
+      mimeType: contentType,
+      fetch: source,
+    },
+  };
 };
 
 const createResolveSourceStep = (deps: KnowledgeWorkflowDeps) =>
@@ -99,7 +146,11 @@ const createResolveSourceStep = (deps: KnowledgeWorkflowDeps) =>
       const snapshot = readAgentContext(requestContext);
       if (!snapshot.ok) return bail(failed("CONTEXT_MISSING"));
       const { context, principal } = snapshot.data;
-      const decision = await deps.access.authorize({ principal, permission: KNOWLEDGE_WRITE_PERMISSION, node: { level: "organization", tenantId: context.tenantId } });
+      const decision = await deps.access.authorize({
+        principal,
+        permission: KNOWLEDGE_WRITE_PERMISSION,
+        node: { level: "organization", tenantId: context.tenantId },
+      });
       if (!decision.allowed) return bail(failed("FORBIDDEN"));
       const namespace = context.projectId === undefined ? "tenant" : `project:${context.projectId}`;
       const base = { tenantId: context.tenantId, namespace, createdBy: context.userId, requestId: context.requestId };
@@ -121,14 +172,32 @@ const createExtractTextStep = (deps: KnowledgeWorkflowDeps) =>
       const bail = (result: KnowledgeIngestResult) => params.bail(result);
       assertSameTenant(requestContext, inputData.tenantId);
       if (inputData.fetch.kind === "url") {
-        const page = await deps.webContent.scrape({ url: inputData.fetch.url, tenantId: inputData.tenantId, abortSignal });
+        const page = await deps.webContent.scrape({
+          url: inputData.fetch.url,
+          tenantId: inputData.tenantId,
+          abortSignal,
+        });
         if (page.markdown.trim() === "") return bail(failed("EMPTY_CONTENT"));
         await progress(writer, "extract-text", { characters: page.markdown.length });
-        return { ...inputData, title: page.title, text: page.markdown, format: "markdown" as const, contentHash: contentHashOf(page.markdown) };
+        return {
+          ...inputData,
+          title: page.title,
+          text: page.markdown,
+          format: "markdown" as const,
+          contentHash: contentHashOf(page.markdown),
+        };
       }
-      const read = await deps.files.readFileBytes({ tenantId: inputData.tenantId, fileId: inputData.fetch.fileId, purpose: "knowledge" });
+      const read = await deps.files.readFileBytes({
+        tenantId: inputData.tenantId,
+        fileId: inputData.fetch.fileId,
+        purpose: "knowledge",
+      });
       if (!read.ok) return bail(failed(read.error));
-      const extracted = await extractText({ bytes: read.data.bytes, contentType: read.data.file.contentType, ...(deps.parsePdf === undefined ? {} : { parsePdf: deps.parsePdf }) });
+      const extracted = await extractText({
+        bytes: read.data.bytes,
+        contentType: read.data.file.contentType,
+        ...(deps.parsePdf === undefined ? {} : { parsePdf: deps.parsePdf }),
+      });
       if (!extracted.ok) return bail(failed(extracted.error.code));
       await progress(writer, "extract-text", { characters: extracted.data.text.length });
       return { ...inputData, ...extracted.data, contentHash: contentHashOf(extracted.data.text) };
@@ -187,7 +256,12 @@ const createEmbedStep = (deps: KnowledgeWorkflowDeps) =>
       assertSameTenant(requestContext, inputData.tenantId);
       const { tenantId, requestId, source, documentId, unchanged } = inputData;
       if (unchanged) return { tenantId, requestId, source, documentId, unchanged, chunkCount: null };
-      const chunkCount = await embedAndStoreChunks(deps, { tenantId, documentId, chunks: inputData.chunks, abortSignal });
+      const chunkCount = await embedAndStoreChunks(deps, {
+        tenantId,
+        documentId,
+        chunks: inputData.chunks,
+        abortSignal,
+      });
       await progress(writer, "embed", { chunkCount });
       return { tenantId, requestId, source, documentId, unchanged, chunkCount };
     },
@@ -202,7 +276,8 @@ const createEmitStep = (deps: KnowledgeWorkflowDeps) =>
     execute: async ({ inputData, requestContext }) => {
       assertSameTenant(requestContext, inputData.tenantId);
       const { tenantId, documentId, source, chunkCount, requestId } = inputData;
-      if (inputData.unchanged || chunkCount === null) return { status: "unchanged" as const, documentId, chunkCount: null, code: null };
+      if (inputData.unchanged || chunkCount === null)
+        return { status: "unchanged" as const, documentId, chunkCount: null, code: null };
       await deps.events.documentIndexed({ tenantId, documentId, source, chunkCount, requestId });
       return { status: "indexed" as const, documentId, chunkCount, code: null };
     },

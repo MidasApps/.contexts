@@ -18,7 +18,8 @@ const propertyNames = (schema: z.ZodType): string[] => {
     if (typeof node !== "object" || node === null) return;
     for (const [key, value] of Object.entries(node)) {
       const children: unknown = value;
-      if (key === "properties" && typeof children === "object" && children !== null) names.push(...Object.keys(children));
+      if (key === "properties" && typeof children === "object" && children !== null)
+        names.push(...Object.keys(children));
       walk(value);
     }
   };
@@ -41,7 +42,9 @@ describe("AuditLogEntrySchema", () => {
 
   it("lists changed field names only: changes is string[]", () => {
     expect(AuditLogEntrySchema.safeParse({ ...entry, changes: ["name", "defaults.timeZone"] }).success).toBe(true);
-    expect(AuditLogEntrySchema.safeParse({ ...entry, changes: [{ field: "name", from: "A", to: "B" }] }).success).toBe(false);
+    expect(AuditLogEntrySchema.safeParse({ ...entry, changes: [{ field: "name", from: "A", to: "B" }] }).success).toBe(
+      false,
+    );
     expect(AuditLogEntrySchema.safeParse({ ...entry, changes: ["name = Ana"] }).success).toBe(false);
   });
 
@@ -57,7 +60,12 @@ describe("AuditLogEntrySchema", () => {
   });
 
   it("accepts the knowledge and file actions SP3 audits (ingested, deleted, uploaded, rejected)", () => {
-    for (const action of ["KNOWLEDGE_DOCUMENT_INGESTED", "KNOWLEDGE_DOCUMENT_DELETED", "FILE_UPLOADED", "FILE_REJECTED"]) {
+    for (const action of [
+      "KNOWLEDGE_DOCUMENT_INGESTED",
+      "KNOWLEDGE_DOCUMENT_DELETED",
+      "FILE_UPLOADED",
+      "FILE_REJECTED",
+    ]) {
       expect(AuditLogEntrySchema.safeParse({ ...entry, action }).success).toBe(true);
     }
   });
@@ -70,14 +78,27 @@ describe("AuditLogEntrySchema", () => {
   });
 
   it("accepts metadata with allowlisted keys and safe values only", () => {
-    const metadata = { inputHash: "a".repeat(64), errorCode: "TOOL_TIMEOUT", fingerprint: "0f".repeat(16), toolId: "core.search", runId: "run_01K6B0", durationMs: 1250 };
+    const metadata = {
+      inputHash: "a".repeat(64),
+      errorCode: "TOOL_TIMEOUT",
+      fingerprint: "0f".repeat(16),
+      toolId: "core.search",
+      runId: "run_01K6B0",
+      durationMs: 1250,
+    };
     expect(AuditLogEntrySchema.parse({ ...entry, metadata }).metadata).toEqual(metadata);
-    expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { prompt: "summarize the contract" } }).success).toBe(false);
+    expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { prompt: "summarize the contract" } }).success).toBe(
+      false,
+    );
     expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { inputHash: "not a hash" } }).success).toBe(false);
     expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { errorCode: "free text error" } }).success).toBe(false);
     expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { durationMs: -1 } }).success).toBe(false);
-    expect(AuditLogEntrySchema.parse({ ...entry, metadata: { endpointId: "tenancy.getOrganization" } }).metadata).toEqual({ endpointId: "tenancy.getOrganization" });
-    expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { endpointId: "/v1/organizations/x" } }).success).toBe(false);
+    expect(
+      AuditLogEntrySchema.parse({ ...entry, metadata: { endpointId: "tenancy.getOrganization" } }).metadata,
+    ).toEqual({ endpointId: "tenancy.getOrganization" });
+    expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { endpointId: "/v1/organizations/x" } }).success).toBe(
+      false,
+    );
   });
 
   it("requires tenantId on tenant entries; platform entries carry targetTenantId instead", () => {
@@ -89,12 +110,18 @@ describe("AuditLogEntrySchema", () => {
 
 describe("AuditLogQuerySchema", () => {
   it("adds filters on top of the page query", () => {
-    expect(AuditLogQuerySchema.parse({ action: "ROLE_CREATED", limit: "50" })).toEqual({ action: "ROLE_CREATED", limit: 50 });
+    expect(AuditLogQuerySchema.parse({ action: "ROLE_CREATED", limit: "50" })).toEqual({
+      action: "ROLE_CREATED",
+      limit: 50,
+    });
   });
 
   it("rejects an inverted time window", () => {
     expect(
-      AuditLogQuerySchema.safeParse({ occurredAfter: "2026-09-30T00:00:00.000Z", occurredBefore: "2026-09-29T00:00:00.000Z" }).success,
+      AuditLogQuerySchema.safeParse({
+        occurredAfter: "2026-09-30T00:00:00.000Z",
+        occurredBefore: "2026-09-29T00:00:00.000Z",
+      }).success,
     ).toBe(false);
   });
 });

@@ -11,7 +11,13 @@ import { useMembers } from "../api/member-queries.ts";
 export const useMemberNames = (args: { organizationId: string; canReadMembers: boolean }) => {
   const members = useMembers(args.canReadMembers ? args.organizationId : undefined);
   const names = useMemo(
-    () => new Map<string, string>((members.data ?? []).map((member) => [member.uid, member.displayName.trim() === "" ? member.email : member.displayName])),
+    () =>
+      new Map<string, string>(
+        (members.data ?? []).map((member) => [
+          member.uid,
+          member.displayName.trim() === "" ? member.email : member.displayName,
+        ]),
+      ),
     [members.data],
   );
   return useCallback((uid: string | null): string | undefined => (uid === null ? undefined : names.get(uid)), [names]);

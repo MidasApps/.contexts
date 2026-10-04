@@ -17,7 +17,12 @@ const main = (): number => {
   let exitCode = 0;
   for (const step of buildE2eSteps({ appRoot: APP_ROOT, resolveBin: resolvePackageBin })) {
     print(`${step.label}: ${step.args.slice(1).join(" ")}`);
-    const result = spawnSync(process.execPath, [...step.args], { cwd: step.cwd, env: process.env, stdio: "inherit", windowsHide: true });
+    const result = spawnSync(process.execPath, [...step.args], {
+      cwd: step.cwd,
+      env: process.env,
+      stdio: "inherit",
+      windowsHide: true,
+    });
     if (result.error !== undefined) throw result.error;
     const status = result.status ?? 1;
     if (step.label === "build" && status !== 0) return status;

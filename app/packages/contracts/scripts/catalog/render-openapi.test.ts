@@ -3,10 +3,14 @@ import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import { defineContract } from "../../src/contracts/contract.ts";
 import { defineEndpoint } from "../../src/contracts/http/endpoint.ts";
-import { dataEnvelope, ErrorEnvelopeContract, listEnvelope, PageQuerySchema } from "../../src/contracts/http/envelopes.schema.ts";
+import {
+  dataEnvelope,
+  ErrorEnvelopeContract,
+  listEnvelope,
+  PageQuerySchema,
+} from "../../src/contracts/http/envelopes.schema.ts";
 import { createContractRegistry } from "../../src/contracts/registry.ts";
-import { findRawMetaKeys } from "./json-schema.ts";
-import { buildJsonSchemas } from "./json-schema.ts";
+import { buildJsonSchemas, findRawMetaKeys } from "./json-schema.ts";
 import { buildOpenApiDocument, findDanglingRefs, renderOpenApi } from "./render-openapi.ts";
 import type { JsonRecord } from "./stable-json.ts";
 
@@ -83,7 +87,10 @@ type Operation = {
   security: unknown[];
   parameters?: { name: string; in: string; required: boolean; schema: JsonRecord; description?: string }[];
   requestBody?: { required: boolean; content: Record<string, { schema: JsonRecord }> };
-  responses: Record<string, { description: string; headers?: Record<string, JsonRecord>; content?: Record<string, { schema: JsonRecord }> }>;
+  responses: Record<
+    string,
+    { description: string; headers?: Record<string, JsonRecord>; content?: Record<string, { schema: JsonRecord }> }
+  >;
 };
 
 const operation = (document: JsonRecord, path: string, method: string): Operation => {
@@ -104,8 +111,12 @@ describe("buildOpenApiDocument", () => {
       "/v1/me/claims/sync",
       "/v1/organizations/{organizationId}/projects",
     ]);
-    expect(operation(document, "/v1/organizations/{organizationId}/projects", "get").operationId).toBe("tenancy.listProjects");
-    expect(operation(document, "/v1/organizations/{organizationId}/projects", "post").operationId).toBe("tenancy.createProject");
+    expect(operation(document, "/v1/organizations/{organizationId}/projects", "get").operationId).toBe(
+      "tenancy.listProjects",
+    );
+    expect(operation(document, "/v1/organizations/{organizationId}/projects", "post").operationId).toBe(
+      "tenancy.createProject",
+    );
   });
 
   it("renders path and query parameters from the Zod schemas", () => {
@@ -129,14 +140,19 @@ describe("buildOpenApiDocument", () => {
       properties: { data: { type: "array", items: { $ref: "#/components/schemas/tenancy.Project" } } },
     });
     const create = operation(document, "/v1/organizations/{organizationId}/projects", "post");
-    expect(jsonSchemaOf(create.responses["201"])).toMatchObject({ properties: { data: { $ref: "#/components/schemas/tenancy.Project" } } });
+    expect(jsonSchemaOf(create.responses["201"])).toMatchObject({
+      properties: { data: { $ref: "#/components/schemas/tenancy.Project" } },
+    });
     expect(findDanglingRefs(document)).toEqual([]);
   });
 
   it("adds the request body, Idempotency-Key header and every error response", () => {
     const create = operation(buildFixture(), "/v1/organizations/{organizationId}/projects", "post");
     expect(create.requestBody?.required).toBe(true);
-    expect(create.parameters?.find((parameter) => parameter.in === "header")).toMatchObject({ name: "Idempotency-Key", required: true });
+    expect(create.parameters?.find((parameter) => parameter.in === "header")).toMatchObject({
+      name: "Idempotency-Key",
+      required: true,
+    });
     expect(Object.keys(create.responses)).toEqual(["201", "400", "401", "403", "409", "429", "500"]);
     expect(create.responses["403"]?.description).toBe("ESCALATION_FORBIDDEN, FORBIDDEN");
     expect(jsonSchemaOf(create.responses["403"])).toEqual({ $ref: "#/components/schemas/http.ErrorEnvelope" });
@@ -165,7 +181,9 @@ describe("buildOpenApiDocument", () => {
     expect(redeemOperation.security).toEqual([]);
     expect(redeemOperation.responses["204"]).toEqual({ description: "No Content" });
     expect(Object.keys(redeemOperation.responses)).toEqual(["204", "400", "500"]);
-    expect(operation(document, "/v1/organizations/{organizationId}/projects", "post").security).toEqual([{ bearerAuth: [] }]);
+    expect(operation(document, "/v1/organizations/{organizationId}/projects", "post").security).toEqual([
+      { bearerAuth: [] },
+    ]);
   });
 
   it("writes custom meta only as x-* keys in paths", () => {

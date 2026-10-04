@@ -4,7 +4,11 @@ import { connectionOf, type MastraGatewayOptions } from "./mastra-gateway.ts";
 import { callRawRoute, holdUpstreamBody } from "./mastra-request.ts";
 
 /** Paths of the Mastra voice routes (`@core/agents` `voice-routes.ts`). */
-export const VOICE_ROUTES = { transcriptions: "/voice/transcriptions", speech: "/voice/speech", realtimeSessions: "/voice/realtime-sessions" } as const;
+export const VOICE_ROUTES = {
+  transcriptions: "/voice/transcriptions",
+  speech: "/voice/speech",
+  realtimeSessions: "/voice/realtime-sessions",
+} as const;
 
 /**
  * Voice statuses Mastra answers itself (decision 0034): 503 is the feature gate (voice off for the
@@ -21,21 +25,45 @@ export const createMastraVoiceGateway = (options: MastraGatewayOptions): VoiceRu
   const connection = connectionOf(options);
   return {
     transcribe: async ({ scope, audio, mediaType }) => {
-      const call = { method: "POST", path: VOICE_ROUTES.transcriptions, body: audio, contentType: mediaType, accept: "application/json", mapStatus: mapVoiceStatus } as const;
+      const call = {
+        method: "POST",
+        path: VOICE_ROUTES.transcriptions,
+        body: audio,
+        contentType: mediaType,
+        accept: "application/json",
+        mapStatus: mapVoiceStatus,
+      } as const;
       const result = await callRawRoute({ connection, scope, call });
       return result.ok ? { ok: true, data: await result.data.json().catch(() => undefined) } : result;
     },
     synthesize: async ({ scope, text, voice }) => {
       const body = JSON.stringify({ text, ...(voice === undefined ? {} : { voice }) });
-      const call = { method: "POST", path: VOICE_ROUTES.speech, body, contentType: "application/json", mapStatus: mapVoiceStatus } as const;
+      const call = {
+        method: "POST",
+        path: VOICE_ROUTES.speech,
+        body,
+        contentType: "application/json",
+        mapStatus: mapVoiceStatus,
+      } as const;
       const result = await callRawRoute({ connection, scope, call });
       if (!result.ok) return result;
       const stream = result.data.body;
       if (stream === null) return { ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } };
-      return { ok: true, data: { body: holdUpstreamBody(stream), contentType: result.data.headers.get("content-type") ?? "application/octet-stream" } };
+      return {
+        ok: true,
+        data: {
+          body: holdUpstreamBody(stream),
+          contentType: result.data.headers.get("content-type") ?? "application/octet-stream",
+        },
+      };
     },
     createRealtimeSession: async ({ scope }) => {
-      const call = { method: "POST", path: VOICE_ROUTES.realtimeSessions, accept: "application/json", mapStatus: mapVoiceStatus } as const;
+      const call = {
+        method: "POST",
+        path: VOICE_ROUTES.realtimeSessions,
+        accept: "application/json",
+        mapStatus: mapVoiceStatus,
+      } as const;
       const result = await callRawRoute({ connection, scope, call });
       return result.ok ? { ok: true, data: await result.data.json().catch(() => undefined) } : result;
     },

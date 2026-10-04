@@ -8,7 +8,10 @@ import { CreateAccountForm } from "./CreateAccountForm.tsx";
 
 const signedOut = () => createRecordingSession({ status: "signed-out", reason: "none" });
 
-const fill = async (user: ReturnType<typeof renderWithClient>["user"], values: { name?: string; email?: string; password?: string }) => {
+const fill = async (
+  user: ReturnType<typeof renderWithClient>["user"],
+  values: { name?: string; email?: string; password?: string },
+) => {
   if (values.name !== undefined) await user.type(screen.getByLabelText(/Seu nome/u), values.name);
   if (values.email !== undefined) await user.type(screen.getByLabelText("E-mail"), values.email);
   if (values.password !== undefined) await user.type(screen.getByLabelText(/^Senha/u), values.password);
@@ -26,7 +29,11 @@ describe("CreateAccountForm", () => {
     expect(screen.getByText("Use pelo menos 8 caracteres.")).toBeDefined();
     expect(auth.createdAccounts()).toEqual([]);
     await expectNoAxeViolations(container);
-    expect(validateNewAccount({ name: " ", email: "", password: "" })).toEqual({ name: "nameRequired", email: "emailRequired", password: "passwordRequired" });
+    expect(validateNewAccount({ name: " ", email: "", password: "" })).toEqual({
+      name: "nameRequired",
+      email: "emailRequired",
+      password: "passwordRequired",
+    });
   });
 
   it("creates the account with the trimmed email and name, then completes the session", async () => {

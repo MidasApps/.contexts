@@ -37,7 +37,8 @@ export const embedChunks = async (input: {
       ...(input.abortSignal === undefined ? {} : { abortSignal: input.abortSignal }),
     });
     for (const vector of embeddings) {
-      if (vector.length !== EMBEDDING_DIMENSIONS || !vector.every(Number.isFinite)) throw new EmbeddingDimensionError(vector.length);
+      if (vector.length !== EMBEDDING_DIMENSIONS || !vector.every(Number.isFinite))
+        throw new EmbeddingDimensionError(vector.length);
       vectors.push(vector);
     }
   }

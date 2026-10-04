@@ -7,8 +7,8 @@ import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { useWorkflowCatalog } from "#/entities/workflow-run/index.ts";
 import { StartWorkflowRunDialog } from "#/features/start-workflow-run/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
-import { searchOption, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
+import { searchOption, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
@@ -42,7 +42,8 @@ function WorkflowsHome({ context }: { context: AccessContext }) {
   const openStart = canStart && online && startable ? () => setStarting(true) : null;
   const runs = <RunsSection context={context} workflows={workflows} onStart={openStart} online={online} />;
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={canRead}
       header={
@@ -69,7 +70,10 @@ function WorkflowsHome({ context }: { context: AccessContext }) {
           </Alert>
         ) : null}
         {canSeeSchedules ? (
-          <Tabs value={tab} onValueChange={(value) => search.set({ tab: value === "schedules" ? "schedules" : undefined })}>
+          <Tabs
+            value={tab}
+            onValueChange={(value) => search.set({ tab: value === "schedules" ? "schedules" : undefined })}
+          >
             <TabsList aria-label={t("tabsLabel")}>
               <TabsTrigger value="runs">{t("tabs.runs")}</TabsTrigger>
               <TabsTrigger value="schedules">{t("tabs.schedules")}</TabsTrigger>
@@ -89,7 +93,14 @@ function WorkflowsHome({ context }: { context: AccessContext }) {
           workflows={workflows}
           open={starting}
           onOpenChange={setStarting}
-          onStarted={(runId) => router.navigate({ id: "settings", organizationId: organization.id, section: "workflows", rest: `runs/${runId}` })}
+          onStarted={(runId) =>
+            router.navigate({
+              id: "settings",
+              organizationId: organization.id,
+              section: "workflows",
+              rest: `runs/${runId}`,
+            })
+          }
         />
       ) : null}
     </SettingsPageFrame>
@@ -100,7 +111,8 @@ function UnknownPage({ context }: { context: AccessContext }) {
   const t = useTranslations("settings.workflows");
   const { organization } = context;
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.workflow-run.read")}
       header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} />}
@@ -112,7 +124,9 @@ function UnknownPage({ context }: { context: AccessContext }) {
         description={t("notFoundDescription")}
         action={
           <Button variant="secondary" asChild>
-            <SettingsSectionLink organizationId={organization.id} section="workflows">{t("backToRuns")}</SettingsSectionLink>
+            <SettingsSectionLink organizationId={organization.id} section="workflows">
+              {t("backToRuns")}
+            </SettingsSectionLink>
           </Button>
         }
       />

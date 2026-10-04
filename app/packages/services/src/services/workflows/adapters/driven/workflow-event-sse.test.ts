@@ -3,14 +3,22 @@ import { encodeDone, encodeError, encodeWorkflowEvent, resumeIndexOf } from "./w
 
 describe("workflow event SSE encoding", () => {
   it("frames a data event with its index as the SSE id and one JSON line", () => {
-    const text = encodeWorkflowEvent({ index: 3, type: "workflow-step-start", stepId: "apply", status: "running", occurredAt: "2026-09-30T12:00:00.000Z" });
+    const text = encodeWorkflowEvent({
+      index: 3,
+      type: "workflow-step-start",
+      stepId: "apply",
+      status: "running",
+      occurredAt: "2026-09-30T12:00:00.000Z",
+    });
     expect(text).toBe(
       'id: 3\nevent: data\ndata: {"index":3,"type":"workflow-step-start","stepId":"apply","status":"running","occurredAt":"2026-09-30T12:00:00.000Z"}\n\n',
     );
   });
 
   it("closes with done or with the error envelope", () => {
-    expect(encodeDone({ requestId: "r1", status: "success" })).toBe('event: done\ndata: {"requestId":"r1","status":"success"}\n\n');
+    expect(encodeDone({ requestId: "r1", status: "success" })).toBe(
+      'event: done\ndata: {"requestId":"r1","status":"success"}\n\n',
+    );
     expect(encodeError({ code: "UPSTREAM_UNAVAILABLE", message: "Upstream unavailable.", requestId: "r1" })).toBe(
       'event: error\ndata: {"error":{"code":"UPSTREAM_UNAVAILABLE","message":"Upstream unavailable.","requestId":"r1"}}\n\n',
     );

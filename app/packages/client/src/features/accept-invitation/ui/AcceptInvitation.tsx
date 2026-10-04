@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleAlertIcon } from "lucide-react";
-import { useEffect, useRef, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { useTranslations } from "use-intl";
 import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
@@ -15,7 +15,13 @@ import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { useAcceptInvitation, useInvitationPreview } from "../model/use-accept-invitation.ts";
 
 // Failures the user cannot fix by retrying: the invitation is gone, used or not theirs.
-const FINAL_CODES = new Set(["NOT_FOUND", "INVITATION_EXPIRED", "INVITATION_ALREADY_USED", "EMAIL_MISMATCH", "VALIDATION_FAILED"]);
+const FINAL_CODES = new Set([
+  "NOT_FOUND",
+  "INVITATION_EXPIRED",
+  "INVITATION_ALREADY_USED",
+  "EMAIL_MISMATCH",
+  "VALIDATION_FAILED",
+]);
 
 export type AcceptInvitationProps = {
   /** From `useInvitationToken()` (already validated). */
@@ -57,7 +63,9 @@ function AcceptFailure({ error, mismatchAction }: { error: unknown; mismatchActi
       <AlertTitle>{t("auth.invite.acceptFailed")}</AlertTitle>
       <AlertDescription className="flex flex-col gap-2 text-inherit">
         <p>{described.message}</p>
-        {described.requestId === undefined ? null : <p className="font-mono text-xs">{t("common.errorState.reference", { requestId: described.requestId })}</p>}
+        {described.requestId === undefined ? null : (
+          <p className="font-mono text-xs">{t("common.errorState.reference", { requestId: described.requestId })}</p>
+        )}
         {described.code === "EMAIL_MISMATCH" && mismatchAction !== undefined ? <div>{mismatchAction}</div> : null}
       </AlertDescription>
     </Alert>
@@ -79,8 +87,16 @@ export function AcceptInvitation({ token, mismatchAction }: AcceptInvitationProp
   if (preview.isPending) return <LoadingState label={t("loading")} rows={4} />;
   if (preview.isError) {
     const code = (preview.error as { code?: unknown }).code;
-    if (typeof code === "string" && FINAL_CODES.has(code)) return <FinalProblem error={preview.error} mismatchAction={mismatchAction} />;
-    return <ApiErrorState error={preview.error} headingLevel={2} onRetry={() => void preview.refetch()} retrying={preview.isFetching} />;
+    if (typeof code === "string" && FINAL_CODES.has(code))
+      return <FinalProblem error={preview.error} mismatchAction={mismatchAction} />;
+    return (
+      <ApiErrorState
+        error={preview.error}
+        headingLevel={2}
+        onRetry={() => void preview.refetch()}
+        retrying={preview.isFetching}
+      />
+    );
   }
   const invitation = preview.data;
   const onAccept = () =>

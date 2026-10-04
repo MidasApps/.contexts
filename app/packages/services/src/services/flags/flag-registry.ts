@@ -36,7 +36,8 @@ export const CORE_FLAGS: readonly RegisteredFlag[] = [
   {
     key: "chat.voice",
     owner: OWNER,
-    reason: "Voice transcription and speech per environment and organization (sending audio needs compliance clearance).",
+    reason:
+      "Voice transcription and speech per environment and organization (sending audio needs compliance clearance).",
     kind: "rollout",
     default: false,
     createdAt: CREATED,
@@ -56,7 +57,8 @@ export const CORE_FLAGS: readonly RegisteredFlag[] = [
   {
     key: "ai.memory.observational",
     owner: OWNER,
-    reason: "Observational memory, off until the real-model comparison (follow-up #37). Boot-time: AI_MEMORY_OBSERVATIONAL decides when the runtime starts; a stored value does not change a running process.",
+    reason:
+      "Observational memory, off until the real-model comparison (follow-up #37). Boot-time: AI_MEMORY_OBSERVATIONAL decides when the runtime starts; a stored value does not change a running process.",
     kind: "rollout",
     default: false,
     createdAt: CREATED,
@@ -66,7 +68,8 @@ export const CORE_FLAGS: readonly RegisteredFlag[] = [
   {
     key: "workflows.schedules",
     owner: OWNER,
-    reason: "Schedule fires of workflows, tenant and platform; off holds every fire (rows and paused states kept, a missed fire runs once when back on).",
+    reason:
+      "Schedule fires of workflows, tenant and platform; off holds every fire (rows and paused states kept, a missed fire runs once when back on).",
     kind: "ops",
     default: true,
     createdAt: CREATED,
@@ -91,7 +94,8 @@ export const assertFlagRegistry = (flags: readonly RegisteredFlag[]): readonly R
   for (const flag of flags) {
     const { tenantOverridable, ...definition } = flag;
     void tenantOverridable;
-    if (!FeatureFlagDefinitionSchema.safeParse(definition).success) throw new InvalidFlagRegistryError(`invalid flag ${flag.key}`);
+    if (!FeatureFlagDefinitionSchema.safeParse(definition).success)
+      throw new InvalidFlagRegistryError(`invalid flag ${flag.key}`);
     if (keys.has(flag.key)) throw new InvalidFlagRegistryError(`duplicated flag ${flag.key}`);
     keys.add(flag.key);
   }
@@ -99,12 +103,15 @@ export const assertFlagRegistry = (flags: readonly RegisteredFlag[]): readonly R
 };
 
 /** True once `expiresAt` has passed: the console shows a warning (governance asks to remove or renew). */
-export const isFlagExpired = (flag: Pick<RegisteredFlag, "expiresAt">, now: Date): boolean => Date.parse(flag.expiresAt) <= now.getTime();
+export const isFlagExpired = (flag: Pick<RegisteredFlag, "expiresAt">, now: Date): boolean =>
+  Date.parse(flag.expiresAt) <= now.getTime();
 
 /** Expired flags of a registry, for the `/admin` warning. */
-export const expiredFlags = (flags: readonly RegisteredFlag[], now: Date): readonly RegisteredFlag[] => flags.filter((flag) => isFlagExpired(flag, now));
+export const expiredFlags = (flags: readonly RegisteredFlag[], now: Date): readonly RegisteredFlag[] =>
+  flags.filter((flag) => isFlagExpired(flag, now));
 
-export const findFlag = (flags: readonly RegisteredFlag[], key: string): RegisteredFlag | undefined => flags.find((flag) => flag.key === key);
+export const findFlag = (flags: readonly RegisteredFlag[], key: string): RegisteredFlag | undefined =>
+  flags.find((flag) => flag.key === key);
 
 /**
  * Environment defaults from boot env (decision 0034 amendment): `AI_VOICE_ENABLED` (unset = on in

@@ -40,7 +40,9 @@ describe("createWebSessionBridge", () => {
   });
 
   it("raises the action's error as an ApiError with its code and request id", async () => {
-    const bridge = createWebSessionBridge(actions({ createSession: () => Promise.resolve(failure("RECENT_SIGN_IN_REQUIRED")) }));
+    const bridge = createWebSessionBridge(
+      actions({ createSession: () => Promise.resolve(failure("RECENT_SIGN_IN_REQUIRED")) }),
+    );
 
     const error: unknown = await bridge.establish({ idToken: "old" }).catch((thrown: unknown) => thrown);
 
@@ -50,7 +52,11 @@ describe("createWebSessionBridge", () => {
 
   it("restores a custom token, or nothing when no session cookie survives", async () => {
     expect(await createWebSessionBridge(actions()).restore()).toEqual({ customToken: "custom-token" });
-    expect(await createWebSessionBridge(actions({ exchangeSession: () => Promise.resolve(failure("UNAUTHORIZED")) })).restore()).toBeNull();
+    expect(
+      await createWebSessionBridge(
+        actions({ exchangeSession: () => Promise.resolve(failure("UNAUTHORIZED")) }),
+      ).restore(),
+    ).toBeNull();
   });
 
   it("fails the restore for any other refusal (a misconfigured origin must be reported, not hidden)", async () => {
@@ -64,16 +70,22 @@ describe("createWebSessionBridge", () => {
     await createWebSessionBridge(fake).end();
     expect(fake.calls).toEqual([["signOut"]]);
 
-    await expect(createWebSessionBridge(actions({ signOut: () => Promise.resolve(failure("FORBIDDEN")) })).end()).rejects.toBeInstanceOf(ApiError);
+    await expect(
+      createWebSessionBridge(actions({ signOut: () => Promise.resolve(failure("FORBIDDEN")) })).end(),
+    ).rejects.toBeInstanceOf(ApiError);
   });
 
   it("enters and leaves an impersonation through the session actions (decision 0047)", async () => {
     const fake = actions();
     const bridge = createWebSessionBridge(fake);
-    expect(await bridge.enterImpersonation?.({ impersonationSessionId: "imp-1" })).toEqual({ customToken: "impersonated-token" });
+    expect(await bridge.enterImpersonation?.({ impersonationSessionId: "imp-1" })).toEqual({
+      customToken: "impersonated-token",
+    });
     expect(await bridge.leaveImpersonation?.()).toEqual({ customToken: "staff-token" });
     expect(fake.calls).toEqual([["enterImpersonation", { impersonationSessionId: "imp-1" }], ["leaveImpersonation"]]);
-    const refused = createWebSessionBridge(actions({ leaveImpersonation: () => Promise.resolve(failure("UNAUTHORIZED")) }));
+    const refused = createWebSessionBridge(
+      actions({ leaveImpersonation: () => Promise.resolve(failure("UNAUTHORIZED")) }),
+    );
     await expect(refused.leaveImpersonation?.()).rejects.toMatchObject({ code: "UNAUTHORIZED", status: 401 });
   });
 });

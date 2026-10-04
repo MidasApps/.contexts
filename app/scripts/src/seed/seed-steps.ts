@@ -1,7 +1,7 @@
-import type { AuthAdmin } from "./auth-admin.ts";
-import type { SeedCore, SeedState } from "./seed-core-port.ts";
 import { createPostgresClient, createPostgresPromptRepository, loadServicesEnv } from "@core/services";
+import type { AuthAdmin } from "./auth-admin.ts";
 import { importPromptSeeds } from "./import-prompt-seeds.ts";
+import type { SeedCore, SeedState } from "./seed-core-port.ts";
 import { createKnowledgeSeedDeps, seedKnowledgeBase } from "./seed-knowledge.ts";
 import { seedMembers } from "./seed-members.ts";
 import { upsertOwnerUser } from "./seed-owner-user.ts";
@@ -73,4 +73,11 @@ const promptSeedsStep: SeedStep = {
   },
 };
 
-export const LOCAL_SEED_STEPS: readonly SeedStep[] = [ownerUserStep, tenancyStep, membersStep, staffStep, knowledgeStep, promptSeedsStep];
+export const LOCAL_SEED_STEPS: readonly SeedStep[] = [
+  ownerUserStep,
+  tenancyStep,
+  membersStep,
+  staffStep,
+  knowledgeStep,
+  promptSeedsStep,
+];

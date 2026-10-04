@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { firestoreIdSchema, TenantIdSchema, type TenantId } from "../primitives/ids.schema.ts";
+import { firestoreIdSchema, type TenantId, TenantIdSchema } from "../primitives/ids.schema.ts";
 
 /** An organization is the tenant (decision 0006 §1): its id is the tenant id. */
 export const OrganizationIdSchema = TenantIdSchema;

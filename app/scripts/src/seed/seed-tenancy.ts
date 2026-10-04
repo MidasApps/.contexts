@@ -1,4 +1,4 @@
-import { findOrCreate, requireUid, type Named, type SeedCore, type SeedState } from "./seed-core-port.ts";
+import { findOrCreate, type Named, requireUid, type SeedCore, type SeedState } from "./seed-core-port.ts";
 
 /** Generic tenancy of the local seed (SP1 Task 20); names are the idempotency keys. */
 export const SEED_TENANCY = {
@@ -15,7 +15,10 @@ const count = (counter: Counter, created: boolean): void => {
   if (created) counter.created += 1;
 };
 
-const seedOrganization = async (core: SeedCore, args: { uid: string; name: string; projects: readonly string[]; counters: Counters }) => {
+const seedOrganization = async (
+  core: SeedCore,
+  args: { uid: string; name: string; projects: readonly string[]; counters: Counters },
+) => {
   const organization = await findOrCreate({
     existing: await core.listOrganizations(args.uid),
     name: args.name,
@@ -36,11 +39,18 @@ const seedOrganization = async (core: SeedCore, args: { uid: string; name: strin
 };
 
 // "Unit A" directly under the project, "Unit A.1" under it (two levels).
-const seedUnitTree = async (core: SeedCore, args: { uid: string; projectId: string; counter: Counter }): Promise<void> => {
+const seedUnitTree = async (
+  core: SeedCore,
+  args: { uid: string; projectId: string; counter: Counter },
+): Promise<void> => {
   let parentUnitId: string | null = null;
   for (const name of [SEED_TENANCY.units.root, SEED_TENANCY.units.child]) {
     const scope = { uid: args.uid, projectId: args.projectId, parentUnitId };
-    const unit = await findOrCreate({ existing: await core.listUnits(scope), name, create: () => core.createUnit({ ...scope, name }) });
+    const unit = await findOrCreate({
+      existing: await core.listUnits(scope),
+      name,
+      create: () => core.createUnit({ ...scope, name }),
+    });
     count(args.counter, unit.created);
     parentUnitId = unit.node.id;
   }
@@ -63,7 +73,11 @@ const summaryOf = (args: { counters: Counters; activeChanged: boolean; demoOrgan
  */
 export const seedTenancy = async (core: SeedCore, state: SeedState): Promise<string> => {
   const uid = requireUid(state, "owner");
-  const counters: Counters = { organizations: { created: 0, total: 0 }, projects: { created: 0, total: 0 }, units: { created: 0, total: 0 } };
+  const counters: Counters = {
+    organizations: { created: 0, total: 0 },
+    projects: { created: 0, total: 0 },
+    units: { created: 0, total: 0 },
+  };
   const demo = await seedOrganization(core, { uid, ...SEED_TENANCY.demo, counters });
   await seedOrganization(core, { uid, ...SEED_TENANCY.second, counters });
   const firstProject = demo.projects[0];

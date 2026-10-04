@@ -12,7 +12,12 @@ export const DATA_INSTRUCTIONS = "data.v1";
 /** Subagents run at most 6 steps (spec §6). */
 export const SUBAGENT_MAX_STEPS = 6;
 
-export const DATA_AGENT_TOOLS = ["catalog.listEntities", "catalog.describeEntity", "catalog.renderForm", "sql.querySemanticSql"] as const;
+export const DATA_AGENT_TOOLS = [
+  "catalog.listEntities",
+  "catalog.describeEntity",
+  "catalog.renderForm",
+  "sql.querySemanticSql",
+] as const;
 
 /**
  * `data` subagent (spec §6, §8.2, §8.3): explains the data catalog, runs read-only SQL
@@ -20,7 +25,9 @@ export const DATA_AGENT_TOOLS = ["catalog.listEntities", "catalog.describeEntity
  * `core.catalog.query` (renderForm checks the command permission itself). Reached only
  * through the supervisor, so it runs the `delegated` guardrail profile.
  */
-export const createDataAgentDefinition = (options: { readonly instructionsDirs?: readonly string[] } = {}): AgentDefinition => ({
+export const createDataAgentDefinition = (
+  options: { readonly instructionsDirs?: readonly string[] } = {},
+): AgentDefinition => ({
   id: DATA_AGENT_ID,
   role: "subagent",
   ceiling: ["core.chat.use", CATALOG_READ_PERMISSION, CATALOG_QUERY_PERMISSION],
@@ -35,7 +42,10 @@ export const createDataAgentDefinition = (options: { readonly instructionsDirs?:
       instructions: instructions(DATA_AGENT_ID, loadInstructions(DATA_INSTRUCTIONS, options.instructionsDirs)),
       model: models.language("chat", { agentId: DATA_AGENT_ID }),
       // Static data tools plus the tenant's Postgres connectors (resolved per run from the server context).
-      tools: async ({ requestContext }) => ({ ...tools.toMastraTools(DATA_AGENT_TOOLS), ...(await connectorTools(requestContext, "data")) }),
+      tools: async ({ requestContext }) => ({
+        ...tools.toMastraTools(DATA_AGENT_TOOLS),
+        ...(await connectorTools(requestContext, "data")),
+      }),
       skills: skills([CORE_SKILLS.dataCatalog]),
       // Old tool payloads (catalog dumps, query rows) leave the history; the current turn keeps them.
       inputProcessors: [...profile.inputProcessors, new ToolCallFilter()],

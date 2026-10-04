@@ -18,7 +18,8 @@ export const badgeVariants = cva(
         default: "rounded-full border-transparent bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground",
         secondary: "rounded-full border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground",
         outline: "rounded-full border-border px-2 py-0.5 text-xs font-medium text-foreground",
-        destructive: "rounded-full border-transparent bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground",
+        destructive:
+          "rounded-full border-transparent bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground",
         count:
           "min-w-5 rounded-full border-transparent bg-sidebar-primary px-1.5 font-mono text-tiny leading-[1.4] text-sidebar-primary-foreground tabular-nums",
         tag: "rounded-[4px] border-border px-1.5 font-mono text-micro tracking-[0.08em] text-muted-foreground uppercase",

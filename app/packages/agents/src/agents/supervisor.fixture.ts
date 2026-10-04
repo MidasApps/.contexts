@@ -61,12 +61,23 @@ export const noteModule = (executed: string[] = []): AgentModule =>
     ],
   });
 
-export type SupervisorHarness = { readonly mastra: Mastra; readonly runtime: RuntimeParts; readonly ports: AgentRuntimePorts };
+export type SupervisorHarness = {
+  readonly mastra: Mastra;
+  readonly runtime: RuntimeParts;
+  readonly ports: AgentRuntimePorts;
+};
 
 export const buildSupervisorHarness = (
-  args: { settings?: Partial<AgentSettings>; ports?: Partial<AgentRuntimePorts>; modules?: readonly AgentModule[]; webTools?: WebToolsRuntime } = {},
+  args: {
+    settings?: Partial<AgentSettings>;
+    ports?: Partial<AgentRuntimePorts>;
+    modules?: readonly AgentModule[];
+    webTools?: WebToolsRuntime;
+  } = {},
 ): SupervisorHarness => {
-  const access = createFakeAccessPort({ memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions: MEMBER_PERMISSIONS }] });
+  const access = createFakeAccessPort({
+    memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions: MEMBER_PERMISSIONS }],
+  });
   const ports = createFakeRuntimePorts({ access, settings: createFakeSettingsPort(args.settings), ...args.ports });
   const runtime = composeAgentRuntime({
     env: SUPERVISOR_TEST_ENV,
@@ -81,12 +92,19 @@ export const buildSupervisorHarness = (
   return { mastra, runtime, ports };
 };
 
-export const memberContext = (): RequestContext<unknown> => new RequestContext<unknown>(buildAgentContextEntries({ permissions: MEMBER_PERMISSIONS }));
+export const memberContext = (): RequestContext<unknown> =>
+  new RequestContext<unknown>(buildAgentContextEntries({ permissions: MEMBER_PERMISSIONS }));
 
-export type StreamChunk = { readonly type: string; readonly runId?: string; readonly payload?: Record<string, unknown> };
+export type StreamChunk = {
+  readonly type: string;
+  readonly runId?: string;
+  readonly payload?: Record<string, unknown>;
+};
 
 /** Reads a Mastra agent stream to the end. */
-export const collectChunks = async (stream: { fullStream: AsyncIterable<unknown> | ReadableStream<unknown> }): Promise<StreamChunk[]> => {
+export const collectChunks = async (stream: {
+  fullStream: AsyncIterable<unknown> | ReadableStream<unknown>;
+}): Promise<StreamChunk[]> => {
   const chunks: StreamChunk[] = [];
   for await (const chunk of stream.fullStream as AsyncIterable<StreamChunk>) chunks.push(chunk);
   return chunks;

@@ -5,7 +5,13 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { cn } from "#/shared/lib/cn.ts";
 
 /** Series colors come from the theme tokens (`--chart-1…5` = status accents, light and dark). */
-export const CHART_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"] as const;
+export const CHART_COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+] as const;
 
 export type BarChartSeries = {
   /** Key of the series in each row's `values`. */
@@ -33,7 +39,8 @@ export type BarChartFigureProps = {
   className?: string;
 };
 
-const colorOf = (series: BarChartSeries, index: number): string => series.color ?? CHART_COLORS[index % CHART_COLORS.length] ?? "var(--chart-1)";
+const colorOf = (series: BarChartSeries, index: number): string =>
+  series.color ?? CHART_COLORS[index % CHART_COLORS.length] ?? "var(--chart-1)";
 
 /** Heading-less legend: a swatch and the series name; the swatch is decorative. */
 function Legend({ series }: { series: readonly BarChartSeries[] }) {
@@ -55,11 +62,29 @@ function Legend({ series }: { series: readonly BarChartSeries[] }) {
  * The drawing is hidden from assistive technology; the same numbers follow in a real table
  * (visually hidden), so screen readers, tests and "no color only" all read the data itself.
  */
-export function BarChartFigure({ title, description, series, rows, rowHeader, formatValue, emptyValue = "—", className }: BarChartFigureProps) {
+export function BarChartFigure({
+  title,
+  description,
+  series,
+  rows,
+  rowHeader,
+  formatValue,
+  emptyValue = "—",
+  className,
+}: BarChartFigureProps) {
   const data = rows.map((row) => ({ label: row.label, ...row.values }));
-  const tooltipStyle: CSSProperties = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--popover-foreground)", fontSize: 12 };
+  const tooltipStyle: CSSProperties = {
+    background: "var(--popover)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    color: "var(--popover-foreground)",
+    fontSize: 12,
+  };
   return (
-    <figure data-slot="bar-chart" className={cn("flex flex-col gap-3 rounded-xl border border-border bg-card p-4", className)}>
+    <figure
+      data-slot="bar-chart"
+      className={cn("flex flex-col gap-3 rounded-xl border border-border bg-card p-4", className)}
+    >
       <figcaption className="flex flex-col gap-0.5">
         <span className="text-sm font-medium">{title}</span>
         {description === undefined ? null : <span className="text-xs text-muted-foreground">{description}</span>}
@@ -68,11 +93,34 @@ export function BarChartFigure({ title, description, series, rows, rowHeader, fo
         <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 640, height: 256 }}>
           <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 4 }} accessibilityLayer={false}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
-            <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)" }} interval="preserveStartEnd" />
-            <YAxis tickLine={false} axisLine={false} width={72} tick={{ fill: "var(--muted-foreground)" }} tickFormatter={(value: number) => formatValue(value)} />
-            <Tooltip cursor={{ fill: "var(--muted)" }} contentStyle={tooltipStyle} formatter={(value) => (typeof value === "number" ? formatValue(value) : String(value))} />
+            <XAxis
+              dataKey="label"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: "var(--muted-foreground)" }}
+              interval="preserveStartEnd"
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              width={72}
+              tick={{ fill: "var(--muted-foreground)" }}
+              tickFormatter={(value: number) => formatValue(value)}
+            />
+            <Tooltip
+              cursor={{ fill: "var(--muted)" }}
+              contentStyle={tooltipStyle}
+              formatter={(value) => (typeof value === "number" ? formatValue(value) : String(value))}
+            />
             {series.map((item, index) => (
-              <Bar key={item.key} dataKey={item.key} name={item.label} fill={colorOf(item, index)} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+              <Bar
+                key={item.key}
+                dataKey={item.key}
+                name={item.label}
+                fill={colorOf(item, index)}
+                radius={[4, 4, 0, 0]}
+                isAnimationActive={false}
+              />
             ))}
           </BarChart>
         </ResponsiveContainer>
@@ -96,7 +144,9 @@ export function BarChartFigure({ title, description, series, rows, rowHeader, fo
               <th scope="row">{row.label}</th>
               {series.map((item) => {
                 const value = row.values[item.key];
-                return <td key={item.key}>{value === null || value === undefined ? emptyValue : formatValue(value)}</td>;
+                return (
+                  <td key={item.key}>{value === null || value === undefined ? emptyValue : formatValue(value)}</td>
+                );
               })}
             </tr>
           ))}

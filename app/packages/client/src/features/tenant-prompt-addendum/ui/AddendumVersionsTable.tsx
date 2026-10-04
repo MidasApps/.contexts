@@ -5,7 +5,15 @@ import { useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/shared/ui/atoms/Table/Table.tsx";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "#/shared/ui/atoms/Table/Table.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 import type { AddendumActions } from "../model/use-addendum-actions.ts";
@@ -23,12 +31,30 @@ export type AddendumVersionsTableProps = {
 
 function Verdict({ verdict }: { verdict: PromptVersion["evalVerdict"] }) {
   const t = useTranslations("settings.agents.instructions.verdict");
-  if (verdict === "passed") return <StatusPill tone="emerald" icon="circle-check">{t("passed")}</StatusPill>;
-  if (verdict === "failed") return <StatusPill tone="danger" icon="circle-x">{t("failed")}</StatusPill>;
+  if (verdict === "passed")
+    return (
+      <StatusPill tone="emerald" icon="circle-check">
+        {t("passed")}
+      </StatusPill>
+    );
+  if (verdict === "failed")
+    return (
+      <StatusPill tone="danger" icon="circle-x">
+        {t("failed")}
+      </StatusPill>
+    );
   return <StatusPill tone="neutral">{t("none")}</StatusPill>;
 }
 
-type RowActionsProps = { version: PromptVersion; agentName: string; isActive: boolean; hasActive: boolean; actions: AddendumActions; disabled: boolean; onActivate: (version: PromptVersion) => void };
+type RowActionsProps = {
+  version: PromptVersion;
+  agentName: string;
+  isActive: boolean;
+  hasActive: boolean;
+  actions: AddendumActions;
+  disabled: boolean;
+  onActivate: (version: PromptVersion) => void;
+};
 
 function RowActions({ version, agentName, isActive, hasActive, actions, disabled, onActivate }: RowActionsProps) {
   const t = useTranslations("settings.agents.instructions");
@@ -46,7 +72,14 @@ function RowActions({ version, agentName, isActive, hasActive, actions, disabled
         </span>
       )}
       {version.evalVerdict === "passed" ? null : (
-        <Button variant="outline" size="sm" disabled={busy} pending={pendingHere === "evaluate"} onClick={() => void actions.evaluate(version)} aria-label={t("evaluateVersion", names)}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={busy}
+          pending={pendingHere === "evaluate"}
+          onClick={() => void actions.evaluate(version)}
+          aria-label={t("evaluateVersion", names)}
+        >
           {t("evaluate")}
         </Button>
       )}
@@ -73,12 +106,20 @@ function RowActions({ version, agentName, isActive, hasActive, actions, disabled
  * actions. Activating (or rolling back) changes how the agent answers for the whole organization,
  * so it asks first, naming the agent and the version.
  */
-export function AddendumVersionsTable({ agentName, versions, activeId, hasActive, actions, disabled }: AddendumVersionsTableProps) {
+export function AddendumVersionsTable({
+  agentName,
+  versions,
+  activeId,
+  hasActive,
+  actions,
+  disabled,
+}: AddendumVersionsTableProps) {
   const t = useTranslations("settings.agents.instructions");
   const formatDateTime = useFormatDateTime();
   const caption = t("versionsCaption", { agent: agentName });
   const [confirming, setConfirming] = useState<PromptVersion | null>(null);
-  const names = confirming === null ? { version: 0, agent: agentName } : { version: confirming.version, agent: agentName };
+  const names =
+    confirming === null ? { version: 0, agent: agentName } : { version: confirming.version, agent: agentName };
   return (
     <>
       <Table scrollLabel={caption}>
@@ -105,14 +146,24 @@ export function AddendumVersionsTable({ agentName, versions, activeId, hasActive
                   {version.id === activeId ? <StatusPill tone="blue">{t("active")}</StatusPill> : null}
                 </span>
               </TableHead>
-              <TableCell className={version.note === null ? "text-muted-foreground" : undefined}>{version.note ?? t("noNote")}</TableCell>
+              <TableCell className={version.note === null ? "text-muted-foreground" : undefined}>
+                {version.note ?? t("noNote")}
+              </TableCell>
               <TableCell>{formatDateTime(version.createdAt)}</TableCell>
               <TableCell>
                 <Verdict verdict={version.evalVerdict} />
               </TableCell>
               {actions === null ? null : (
                 <TableCell>
-                  <RowActions version={version} agentName={agentName} isActive={version.id === activeId} hasActive={hasActive} actions={actions} disabled={disabled} onActivate={setConfirming} />
+                  <RowActions
+                    version={version}
+                    agentName={agentName}
+                    isActive={version.id === activeId}
+                    hasActive={hasActive}
+                    actions={actions}
+                    disabled={disabled}
+                    onActivate={setConfirming}
+                  />
                 </TableCell>
               )}
             </TableRow>

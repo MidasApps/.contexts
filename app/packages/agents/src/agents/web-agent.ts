@@ -16,7 +16,10 @@ const webToolsOf = async (deps: AgentFactoryDeps, requestContext: RequestContext
   const settings = await deps.tenantSettings(requestContext);
   const browser = settings.webTools.browser ? await deps.connectorTools(requestContext, "web") : {};
   const read = readAgentContext(requestContext);
-  const hasFirecrawl = settings.webTools.firecrawl && read.ok && (await deps.webTools.clients.forTenant(read.data.context.tenantId)) !== null;
+  const hasFirecrawl =
+    settings.webTools.firecrawl &&
+    read.ok &&
+    (await deps.webTools.clients.forTenant(read.data.context.tenantId)) !== null;
   return { ...browser, ...(hasFirecrawl ? deps.tools.toMastraTools(FIRECRAWL_TOOL_IDS) : {}) };
 };
 
@@ -28,7 +31,9 @@ const webToolsOf = async (deps: AgentFactoryDeps, requestContext: RequestContext
  * `webTools.firecrawl` and a key (the tenant's own or the platform's); either tool set is
  * absent otherwise.
  */
-export const createWebAgentDefinition = (options: { readonly instructionsDirs?: readonly string[] } = {}): AgentDefinition => ({
+export const createWebAgentDefinition = (
+  options: { readonly instructionsDirs?: readonly string[] } = {},
+): AgentDefinition => ({
   id: WEB_AGENT_ID,
   role: "subagent",
   ceiling: ["core.chat.use", WEB_TOOLS_PERMISSION],
@@ -38,7 +43,8 @@ export const createWebAgentDefinition = (options: { readonly instructionsDirs?: 
     new Agent({
       id: WEB_AGENT_ID,
       name: "Web",
-      description: "Researches public web pages and summarizes them with their addresses; browser actions ask the user for approval.",
+      description:
+        "Researches public web pages and summarizes them with their addresses; browser actions ask the user for approval.",
       instructions: deps.instructions(WEB_AGENT_ID, loadInstructions(WEB_INSTRUCTIONS, options.instructionsDirs)),
       model: deps.models.language("chat", { agentId: WEB_AGENT_ID }),
       tools: ({ requestContext }) => webToolsOf(deps, requestContext),

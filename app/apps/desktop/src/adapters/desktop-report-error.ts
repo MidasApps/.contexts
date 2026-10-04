@@ -27,5 +27,13 @@ export const createDesktopErrorReporter =
   (args: { appEnv: string; sink: (entry: DesktopLogEntry) => void; now?: () => Date }): ReportError =>
   (error, context) => {
     const now = args.now ?? (() => new Date());
-    args.sink({ timestamp: now().toISOString(), level: "error", message: "desktop_client_error", service: "desktop", env: args.appEnv, operation: context.operation, err: describeError(error) });
+    args.sink({
+      timestamp: now().toISOString(),
+      level: "error",
+      message: "desktop_client_error",
+      service: "desktop",
+      env: args.appEnv,
+      operation: context.operation,
+      err: describeError(error),
+    });
   };

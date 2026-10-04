@@ -1,6 +1,6 @@
 "use client";
 
-import { setTenantFlagEndpoint, type FeatureFlag } from "@core/contracts";
+import { type FeatureFlag, setTenantFlagEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { tenantFlagKeys } from "#/entities/feature-flag/index.ts";
@@ -13,7 +13,11 @@ import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog
 /** `false` switches the feature off for the organization; `true` goes back to using it. */
 export type TenantFlagChange = { readonly flag: FeatureFlag; readonly value: boolean };
 
-export type TenantSetFlagDialogProps = { organizationId: string; change: TenantFlagChange | null; onOpenChange: (open: boolean) => void };
+export type TenantSetFlagDialogProps = {
+  organizationId: string;
+  change: TenantFlagChange | null;
+  onOpenChange: (open: boolean) => void;
+};
 
 /**
  * Confirms and sets the organization's override of a flag (`PUT /v1/flags/{flagKey}?organizationId=`,
@@ -29,7 +33,11 @@ export function TenantSetFlagDialog({ organizationId, change, onOpenChange }: Te
   const action = useConfirmedAction(
     async () => {
       if (change === null) return;
-      await callEndpoint(setTenantFlagEndpoint, { params: { flagKey: change.flag.key }, query: { organizationId }, body: { value: change.value } });
+      await callEndpoint(setTenantFlagEndpoint, {
+        params: { flagKey: change.flag.key },
+        query: { organizationId },
+        body: { value: change.value },
+      });
       await queryClient.invalidateQueries({ queryKey: tenantFlagKeys.list(organizationId) });
     },
     () => notify.success(t(change?.value === true ? "doneOn" : "doneOff", { key })),
@@ -43,7 +51,9 @@ export function TenantSetFlagDialog({ organizationId, change, onOpenChange }: Te
         onOpenChange(open);
       }}
       title={t(off ? "titleOff" : "titleOn", { key })}
-      description={t(off ? "descriptionOff" : "descriptionOn", { reason: change === null ? "" : label.description(change.flag.key, change.flag.reason) })}
+      description={t(off ? "descriptionOff" : "descriptionOn", {
+        reason: change === null ? "" : label.description(change.flag.key, change.flag.reason),
+      })}
       confirmLabel={t(off ? "confirmOff" : "confirmOn")}
       destructive={off}
       onConfirm={action.confirm}

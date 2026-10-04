@@ -4,7 +4,11 @@ import { MAX_APPROVAL_REASON_CHARS } from "@core/contracts";
 import { useState } from "react";
 
 /** The member's decision on a tool call, as `useChat.addToolApprovalResponse` takes it (decision 0032 path A). */
-export type ApprovalDecision = { readonly id: string; readonly approved: boolean; readonly reason?: string | undefined };
+export type ApprovalDecision = {
+  readonly id: string;
+  readonly approved: boolean;
+  readonly reason?: string | undefined;
+};
 
 export type ToolApproval = {
   /** `asking` shows the reason field before a decline is confirmed. */
@@ -26,7 +30,10 @@ export type ToolApproval = {
  * (it goes to the audit log, decision 0032). A decision is sent once — the card locks as soon
  * as one is on its way, so a double click cannot answer twice.
  */
-export const useToolApproval = (args: { approvalId: string; onRespond: (decision: ApprovalDecision) => void }): ToolApproval => {
+export const useToolApproval = (args: {
+  approvalId: string;
+  onRespond: (decision: ApprovalDecision) => void;
+}): ToolApproval => {
   const [stage, setStage] = useState<ToolApproval["stage"]>("idle");
   const [reason, setReasonText] = useState("");
   const [sent, setSent] = useState<ToolApproval["sent"]>(null);

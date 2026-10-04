@@ -31,7 +31,10 @@ export const makeDeleteRole =
     const { tenantId, id } = loaded.data;
     const actor = auditActorOf(command.actor);
     return deps.unitOfWork.run(async (tx): Promise<Result<void, DeleteRoleError>> => {
-      const [role, inUse] = await Promise.all([deps.roles.get(tx, id), deps.memberships.isRoleInUse(tx, { tenantId, roleId: id })]);
+      const [role, inUse] = await Promise.all([
+        deps.roles.get(tx, id),
+        deps.memberships.isRoleInUse(tx, { tenantId, roleId: id }),
+      ]);
       if (role === null) return err(new AccessNotFoundError("role"));
       if (inUse) return err(new RoleInUseError(id));
       deps.roles.softDelete(tx, { id, deletedAt: deps.clock.now().toISOString(), actorId: actor.id });

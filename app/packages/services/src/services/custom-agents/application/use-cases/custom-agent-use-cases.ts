@@ -1,21 +1,33 @@
-import { type CreateCustomAgentInput, type CustomAgent, type CustomAgentId, CustomAgentSchema, type CustomSkillId, type ErrorDetail, type UpdateCustomAgentInput } from "@core/contracts";
+import {
+  type CreateCustomAgentInput,
+  type CustomAgent,
+  type CustomAgentId,
+  CustomAgentSchema,
+  type CustomSkillId,
+  type ErrorDetail,
+  type UpdateCustomAgentInput,
+} from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
-import { CustomAgentNotFoundError, CustomLimitReachedError, InvalidCustomDefinitionError } from "../../domain/custom-agent-errors.ts";
+import {
+  CustomAgentNotFoundError,
+  CustomLimitReachedError,
+  InvalidCustomDefinitionError,
+} from "../../domain/custom-agent-errors.ts";
 import {
   authorizeCustomAgents,
-  changedFieldsOf,
   CUSTOM_AGENTS_READ_PERMISSION,
   CUSTOM_AGENTS_WRITE_PERMISSION,
   type CustomAgentsCommand,
   type CustomAgentsDeps,
+  changedFieldsOf,
   definedOf,
   instructionIssues,
   recordCustomAudit,
-  schemaIssuesOf,
   type SelectableAgentOptions,
+  schemaIssuesOf,
   selectionIssues,
 } from "../custom-agents-deps.ts";
 
@@ -24,20 +36,37 @@ type AgentKey = { readonly agentId: CustomAgentId };
 type Selection = { readonly selectable?: SelectableAgentOptions | undefined };
 
 export type CreateCustomAgentError = AccessDeniedError | CustomLimitReachedError | InvalidCustomDefinitionError;
-export type CreateCustomAgent = (command: CustomAgentsCommand & Selection & { readonly input: CreateCustomAgentInput }) => Promise<Result<CustomAgent, CreateCustomAgentError>>;
+export type CreateCustomAgent = (
+  command: CustomAgentsCommand & Selection & { readonly input: CreateCustomAgentInput },
+) => Promise<Result<CustomAgent, CreateCustomAgentError>>;
 
-export type GetCustomAgent = (command: Omit<CustomAgentsCommand, "requestId"> & AgentKey) => Promise<Result<CustomAgent, AccessDeniedError | CustomAgentNotFoundError>>;
+export type GetCustomAgent = (
+  command: Omit<CustomAgentsCommand, "requestId"> & AgentKey,
+) => Promise<Result<CustomAgent, AccessDeniedError | CustomAgentNotFoundError>>;
 
 export type UpdateCustomAgentError = AccessDeniedError | CustomAgentNotFoundError | InvalidCustomDefinitionError;
-export type UpdateCustomAgent = (command: CustomAgentsCommand & AgentKey & Selection & { readonly input: UpdateCustomAgentInput }) => Promise<Result<CustomAgent, UpdateCustomAgentError>>;
+export type UpdateCustomAgent = (
+  command: CustomAgentsCommand & AgentKey & Selection & { readonly input: UpdateCustomAgentInput },
+) => Promise<Result<CustomAgent, UpdateCustomAgentError>>;
 
-export type DeleteCustomAgent = (command: CustomAgentsCommand & AgentKey) => Promise<Result<void, AccessDeniedError | CustomAgentNotFoundError>>;
+export type DeleteCustomAgent = (
+  command: CustomAgentsCommand & AgentKey,
+) => Promise<Result<void, AccessDeniedError | CustomAgentNotFoundError>>;
 
 // Every selected skill must be a skill of the same organization (another tenant's reads as missing).
-const unknownSkillIssues = async (deps: Pick<CustomAgentsDeps, "skills">, tx: Transaction, command: CustomAgentsCommand, skillIds: readonly CustomSkillId[] | undefined): Promise<ErrorDetail[]> => {
+const unknownSkillIssues = async (
+  deps: Pick<CustomAgentsDeps, "skills">,
+  tx: Transaction,
+  command: CustomAgentsCommand,
+  skillIds: readonly CustomSkillId[] | undefined,
+): Promise<ErrorDetail[]> => {
   if (skillIds === undefined || skillIds.length === 0) return [];
-  const found = await Promise.all(skillIds.map((skillId) => deps.skills.get(tx, { tenantId: command.tenantId, skillId })));
-  return found.flatMap((skill, index) => (skill === null ? [{ field: `customSkills.${String(index)}`, issue: "NOT_FOUND" }] : []));
+  const found = await Promise.all(
+    skillIds.map((skillId) => deps.skills.get(tx, { tenantId: command.tenantId, skillId })),
+  );
+  return found.flatMap((skill, index) =>
+    skill === null ? [{ field: `customSkills.${String(index)}`, issue: "NOT_FOUND" }] : [],
+  );
 };
 
 /**
@@ -54,7 +83,8 @@ export const makeCreateCustomAgent =
     const limits = await deps.limits(command.tenantId);
     const tooLong = instructionIssues(command.input.instructions, limits.maxInstructionChars);
     if (tooLong.length > 0) return err(new InvalidCustomDefinitionError(tooLong));
-    if ((await deps.agents.count({ tenantId: command.tenantId })) >= limits.maxAgents) return err(new CustomLimitReachedError("agents", limits.maxAgents));
+    if ((await deps.agents.count({ tenantId: command.tenantId })) >= limits.maxAgents)
+      return err(new CustomLimitReachedError("agents", limits.maxAgents));
     const now = deps.clock.now().toISOString();
     const agent = CustomAgentSchema.parse({
       model: "chat",
@@ -72,10 +102,18 @@ export const makeCreateCustomAgent =
       updatedAt: now,
     });
     return deps.unitOfWork.run(async (tx): Promise<Result<CustomAgent, CreateCustomAgentError>> => {
-      const unknown = [...selectionIssues(agent, command.selectable), ...(await unknownSkillIssues(deps, tx, command, agent.customSkills))];
+      const unknown = [
+        ...selectionIssues(agent, command.selectable),
+        ...(await unknownSkillIssues(deps, tx, command, agent.customSkills)),
+      ];
       if (unknown.length > 0) return err(new InvalidCustomDefinitionError(unknown));
       deps.agents.create(tx, { agent });
-      await recordCustomAudit(deps, command, { action: "CUSTOM_AGENT_CREATED", target: { type: "custom-agent", id: agent.id } }, tx);
+      await recordCustomAudit(
+        deps,
+        command,
+        { action: "CUSTOM_AGENT_CREATED", target: { type: "custom-agent", id: agent.id } },
+        tx,
+      );
       return ok(agent);
     });
   };
@@ -105,10 +143,22 @@ export const makeUpdateCustomAgent =
       if (current === null) return err(new CustomAgentNotFoundError());
       const parsed = CustomAgentSchema.safeParse({ ...current, ...definedOf(command.input), updatedAt: now });
       if (!parsed.success) return err(new InvalidCustomDefinitionError(schemaIssuesOf(parsed.error)));
-      const unknown = [...selectionIssues(command.input, command.selectable), ...(await unknownSkillIssues(deps, tx, command, command.input.customSkills))];
+      const unknown = [
+        ...selectionIssues(command.input, command.selectable),
+        ...(await unknownSkillIssues(deps, tx, command, command.input.customSkills)),
+      ];
       if (unknown.length > 0) return err(new InvalidCustomDefinitionError(unknown));
       deps.agents.replace(tx, { agent: parsed.data, actorId: auditActorOf(command.actor).id });
-      await recordCustomAudit(deps, command, { action: "CUSTOM_AGENT_UPDATED", target: { type: "custom-agent", id: current.id }, changes: changedFieldsOf(command.input) }, tx);
+      await recordCustomAudit(
+        deps,
+        command,
+        {
+          action: "CUSTOM_AGENT_UPDATED",
+          target: { type: "custom-agent", id: current.id },
+          changes: changedFieldsOf(command.input),
+        },
+        tx,
+      );
       return ok(parsed.data);
     });
   };
@@ -123,7 +173,12 @@ export const makeDeleteCustomAgent =
       const current = await deps.agents.get(tx, { tenantId: command.tenantId, agentId: command.agentId });
       if (current === null) return err(new CustomAgentNotFoundError());
       deps.agents.delete(tx, { agentId: current.id });
-      await recordCustomAudit(deps, command, { action: "CUSTOM_AGENT_DELETED", target: { type: "custom-agent", id: current.id } }, tx);
+      await recordCustomAudit(
+        deps,
+        command,
+        { action: "CUSTOM_AGENT_DELETED", target: { type: "custom-agent", id: current.id } },
+        tx,
+      );
       return ok(undefined);
     });
   };

@@ -17,7 +17,14 @@ export type CronDraft = {
   readonly custom: string;
 };
 
-export const DEFAULT_CRON_DRAFT: CronDraft = { kind: "daily", minute: 0, time: "09:00", weekday: 1, monthDay: 1, custom: "" };
+export const DEFAULT_CRON_DRAFT: CronDraft = {
+  kind: "daily",
+  minute: 0,
+  time: "09:00",
+  weekday: 1,
+  monthDay: 1,
+  custom: "",
+};
 
 const TIME = /^([01]\d|2[0-3]):([0-5]\d)$/u;
 
@@ -26,7 +33,8 @@ const timeParts = (time: string): { hour: number; minute: number } | null => {
   return match === null ? null : { hour: Number(match[1]), minute: Number(match[2]) };
 };
 
-const inRange = (value: number, min: number, max: number): boolean => Number.isInteger(value) && value >= min && value <= max;
+const inRange = (value: number, min: number, max: number): boolean =>
+  Number.isInteger(value) && value >= min && value <= max;
 
 /**
  * The 5-field cron of a draft, or `null` when the draft is incomplete or invalid (a bad time, a
@@ -60,12 +68,15 @@ export const draftOfCron = (cron: string): CronDraft => {
   const custom: CronDraft = { ...DEFAULT_CRON_DRAFT, kind: "custom", custom: cron };
   const [minute = "", hour = "", monthDay = "", month = "", weekday = ""] = cron.trim().split(/\s+/u);
   if (!NUMBER.test(minute) || month !== "*" || !inRange(Number(minute), 0, 59)) return custom;
-  if (hour === "*" && monthDay === "*" && weekday === "*") return { ...DEFAULT_CRON_DRAFT, kind: "hourly", minute: Number(minute) };
+  if (hour === "*" && monthDay === "*" && weekday === "*")
+    return { ...DEFAULT_CRON_DRAFT, kind: "hourly", minute: Number(minute) };
   if (!NUMBER.test(hour) || !inRange(Number(hour), 0, 23)) return custom;
   const time = `${pad(Number(hour))}:${pad(Number(minute))}`;
   if (monthDay === "*" && weekday === "*") return { ...DEFAULT_CRON_DRAFT, kind: "daily", time };
   if (monthDay === "*" && weekday === "1-5") return { ...DEFAULT_CRON_DRAFT, kind: "weekdays", time };
-  if (monthDay === "*" && /^[0-6]$/u.test(weekday)) return { ...DEFAULT_CRON_DRAFT, kind: "weekly", time, weekday: Number(weekday) };
-  if (weekday === "*" && NUMBER.test(monthDay) && inRange(Number(monthDay), 1, 28)) return { ...DEFAULT_CRON_DRAFT, kind: "monthly", time, monthDay: Number(monthDay) };
+  if (monthDay === "*" && /^[0-6]$/u.test(weekday))
+    return { ...DEFAULT_CRON_DRAFT, kind: "weekly", time, weekday: Number(weekday) };
+  if (weekday === "*" && NUMBER.test(monthDay) && inRange(Number(monthDay), 1, 28))
+    return { ...DEFAULT_CRON_DRAFT, kind: "monthly", time, monthDay: Number(monthDay) };
   return custom;
 };

@@ -35,12 +35,14 @@ export class InvalidSemanticViewError extends Error {
 export const createSemanticViewRegistry = (views: readonly SemanticView[]): SemanticViewRegistry => {
   const byName = new Map<string, SemanticView>();
   for (const entry of views) {
-    if (!VIEW_NAME.test(entry.view)) throw new InvalidSemanticViewError(entry.view, "name must be a lower-case identifier");
+    if (!VIEW_NAME.test(entry.view))
+      throw new InvalidSemanticViewError(entry.view, "name must be a lower-case identifier");
     if (byName.has(entry.view)) throw new InvalidSemanticViewError(entry.view, "registered twice");
     byName.set(entry.view, entry);
   }
   return {
     list: () => [...byName.values()],
-    allowedFor: (permissions) => new Set([...byName.values()].filter((entry) => permissions.has(entry.permission)).map((entry) => entry.view)),
+    allowedFor: (permissions) =>
+      new Set([...byName.values()].filter((entry) => permissions.has(entry.permission)).map((entry) => entry.view)),
   };
 };

@@ -12,7 +12,12 @@ import { ChatPanel } from "./chat-panel.tsx";
 const SCOPE = { organizationId: IDS.organization, projectId: IDS.project };
 const CONVERSATION_ID = "Cv8sK2lPq0WnR5tYu3bV";
 const ASSISTANT = { id: "assistant", name: "Assistant", description: "Plans the work.", source: "core" };
-const GUIDE = { id: "Ag4sK2lPq0WnR5tYu3bV", name: "Onboarding guide", description: "Answers new members.", source: "custom" };
+const GUIDE = {
+  id: "Ag4sK2lPq0WnR5tYu3bV",
+  name: "Onboarding guide",
+  description: "Answers new members.",
+  source: "custom",
+};
 const stored: UIMessage[] = [
   { id: "u-0", role: "user", parts: [{ type: "text", text: "Por onde começo?" }] },
   { id: "a-0", role: "assistant", parts: [{ type: "text", text: "Pelo guia de boas-vindas." }] },
@@ -30,11 +35,17 @@ const render = (routes: Parameters<typeof createFakeApi>[0], conversationId?: st
 };
 
 const storedConversation = (agentId: string) => ({
-  [`GET /v1/conversations/${CONVERSATION_ID}`]: ok({ ...(ConversationContract.meta.examples[0] as object), id: CONVERSATION_ID, agentId, activeRunId: null }),
+  [`GET /v1/conversations/${CONVERSATION_ID}`]: ok({
+    ...(ConversationContract.meta.examples[0] as object),
+    id: CONVERSATION_ID,
+    agentId,
+    activeRunId: null,
+  }),
   [`GET /v1/conversations/${CONVERSATION_ID}/messages`]: page(stored),
 });
 
-const chatCall = (api: ReturnType<typeof render>["api"]) => api.calls.find((call) => call.method === "POST" && call.path === "/v1/chat");
+const chatCall = (api: ReturnType<typeof render>["api"]) =>
+  api.calls.find((call) => call.method === "POST" && call.path === "/v1/chat");
 
 describe("ChatPanel agents", () => {
   it("starts a new conversation with the picked agent", async () => {
@@ -46,7 +57,11 @@ describe("ChatPanel agents", () => {
     await user.click(await screen.findByRole("option", { name: "Onboarding guide" }));
     await user.type(screen.getByRole("textbox", { name: "Mensagem" }), "Olá{Enter}");
     await waitFor(() => expect(chatCall(api)).toBeDefined());
-    expect(chatCall(api)?.body).toMatchObject({ organizationId: IDS.organization, projectId: IDS.project, agentId: GUIDE.id });
+    expect(chatCall(api)?.body).toMatchObject({
+      organizationId: IDS.organization,
+      projectId: IDS.project,
+      agentId: GUIDE.id,
+    });
   });
 
   it("sends no agent for the assistant, so the default of the server applies", async () => {
@@ -61,7 +76,9 @@ describe("ChatPanel agents", () => {
     expect(await screen.findByText("Pelo guia de boas-vindas.")).toBeTruthy();
     expect(await screen.findByText("Agente: Onboarding guide")).toBeTruthy();
     expect(screen.queryByRole("combobox", { name: "Agente" })).toBeNull();
-    expect(screen.getByRole("article", { name: "Onboarding guide" }).textContent).toContain("Pelo guia de boas-vindas.");
+    expect(screen.getByRole("article", { name: "Onboarding guide" }).textContent).toContain(
+      "Pelo guia de boas-vindas.",
+    );
   });
 
   it("names an agent that is no longer listed generically", async () => {

@@ -30,7 +30,10 @@ export type EvalRunsTableLike = {
 };
 
 /** Experiment → one row per scorer; an experiment without scores exports nothing. */
-export const toEvalRunRows = (summary: EvalExperimentSummary, exportedAt: string): { insertId: string; json: BigQueryEvalRunRow }[] =>
+export const toEvalRunRows = (
+  summary: EvalExperimentSummary,
+  exportedAt: string,
+): { insertId: string; json: BigQueryEvalRunRow }[] =>
   summary.scores.map((score) => ({
     insertId: `${summary.experimentId}:${score.scorer}:${summary.finishedAt ?? "running"}`,
     json: {
@@ -51,12 +54,19 @@ export const toEvalRunRows = (summary: EvalExperimentSummary, exportedAt: string
   }));
 
 /** BigQuery `EvalRunSink`; an insert failure rejects (the daily run retries the window). */
-export const createBigQueryEvalRunSink = (deps: { readonly table: EvalRunsTableLike; readonly now?: () => Date }): EvalRunSink => ({
+export const createBigQueryEvalRunSink = (deps: {
+  readonly table: EvalRunsTableLike;
+  readonly now?: () => Date;
+}): EvalRunSink => ({
   exportSummaries: async (summaries) => {
     const exportedAt = (deps.now ?? (() => new Date()))().toISOString();
     const rows = summaries.flatMap((summary) => toEvalRunRows(summary, exportedAt));
     for (let start = 0; start < rows.length; start += INSERT_BATCH) {
-      await deps.table.insert(rows.slice(start, start + INSERT_BATCH), { raw: true, skipInvalidRows: false, ignoreUnknownValues: false });
+      await deps.table.insert(rows.slice(start, start + INSERT_BATCH), {
+        raw: true,
+        skipInvalidRows: false,
+        ignoreUnknownValues: false,
+      });
     }
     return rows.length;
   },

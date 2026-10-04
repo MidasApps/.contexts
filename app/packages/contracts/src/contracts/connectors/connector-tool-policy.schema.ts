@@ -4,7 +4,9 @@ import { defineContract } from "../contract.ts";
 const none = (description: string) => ({ description, pii: "none" as const });
 
 /** Tool name as the external system exposes it (operationId, MCP tool name). */
-export const ConnectorToolNameSchema = z.string().regex(/^[A-Za-z][A-Za-z0-9_.-]{0,127}$/, { error: "Expected a tool name." });
+export const ConnectorToolNameSchema = z
+  .string()
+  .regex(/^[A-Za-z][A-Za-z0-9_.-]{0,127}$/, { error: "Expected a tool name." });
 
 /**
  * Which tools of a connector agents may use (SP3 spec §9). Tools in `readOnly`

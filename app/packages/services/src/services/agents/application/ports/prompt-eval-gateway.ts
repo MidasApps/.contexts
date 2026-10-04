@@ -12,5 +12,9 @@ export type PromptEvalError =
  * version, so the verdict never comes from the web side.
  */
 export type PromptEvalGateway = {
-  readonly evaluate: (input: { readonly versionId: string; readonly tenantId: string | null; readonly requestId: string }) => Promise<Result<PromptEvalResult, PromptEvalError>>;
+  readonly evaluate: (input: {
+    readonly versionId: string;
+    readonly tenantId: string | null;
+    readonly requestId: string;
+  }) => Promise<Result<PromptEvalResult, PromptEvalError>>;
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { revokeDeviceEndpoint, type Device } from "@core/contracts";
+import { type Device, revokeDeviceEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { deviceKeys } from "#/entities/device/index.ts";
@@ -10,7 +10,11 @@ import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts"
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
-export type RevokeDeviceDialogProps = { organizationId: string; device: Device | null; onOpenChange: (open: boolean) => void };
+export type RevokeDeviceDialogProps = {
+  organizationId: string;
+  device: Device | null;
+  onOpenChange: (open: boolean) => void;
+};
 
 /**
  * Revokes a device (`DELETE /v1/devices/{id}`, core.device.revoke): its grants go, its tokens are

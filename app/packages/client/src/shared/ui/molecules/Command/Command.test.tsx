@@ -2,7 +2,15 @@ import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut } from "./Command.tsx";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from "./Command.tsx";
 
 describe("Command", () => {
   it("filters options as the user types and selects with Enter", async () => {
@@ -13,12 +21,18 @@ describe("Command", () => {
         <CommandList label="Comandos">
           <CommandEmpty>Nada encontrado.</CommandEmpty>
           <CommandGroup heading="Navegação">
-            <CommandItem onSelect={() => {
+            <CommandItem
+              onSelect={() => {
                 onSelect("profile");
-              }}>Perfil</CommandItem>
-            <CommandItem onSelect={() => {
+              }}
+            >
+              Perfil
+            </CommandItem>
+            <CommandItem
+              onSelect={() => {
                 onSelect("settings");
-              }}>
+              }}
+            >
               Configurações
               <CommandShortcut>⌘,</CommandShortcut>
             </CommandItem>

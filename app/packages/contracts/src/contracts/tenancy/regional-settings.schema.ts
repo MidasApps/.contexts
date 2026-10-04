@@ -18,7 +18,9 @@ export const RegionalSettingsContract = defineContract(RegionalSettingsSchema, {
   id: "tenancy.RegionalSettings",
   kind: "view",
   description: "Locale, display time zone, node time zone and currency resolved for a user at a node.",
-  examples: [{ locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Manaus", currency: "BRL" }],
+  examples: [
+    { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Manaus", currency: "BRL" },
+  ],
   pii: "none",
   tenancyScope: "user",
   relations: [],

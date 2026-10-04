@@ -40,9 +40,15 @@ export type UsageRepository = {
   /** Totals of the tenant's calls in the UTC month that starts at `monthStart` (view `usage.tenant_month_spend`). */
   readonly getMonthSpend: (input: { readonly tenantId: string; readonly monthStart: Date }) => Promise<UsageTotals>;
   /** The same month split by provider and model, largest cost first. */
-  readonly getMonthByModel: (input: { readonly tenantId: string; readonly monthStart: Date }) => Promise<readonly ModelTotals[]>;
+  readonly getMonthByModel: (input: {
+    readonly tenantId: string;
+    readonly monthStart: Date;
+  }) => Promise<readonly ModelTotals[]>;
   /** The same month split by UTC day, agent and user (SP5 spec §7, decision 0060). */
-  readonly getMonthBreakdowns: (input: { readonly tenantId: string; readonly monthStart: Date }) => Promise<UsageBreakdowns>;
+  readonly getMonthBreakdowns: (input: {
+    readonly tenantId: string;
+    readonly monthStart: Date;
+  }) => Promise<UsageBreakdowns>;
   /** Stored caps of the tenant (`usage.tenant_budgets`); `null` = plan default. */
   readonly getTenantBudget: (input: { readonly tenantId: string }) => Promise<StoredBudget | null>;
   /** Stores the caps in force (SP5: plan, staff override and self-cap resolved by `resolveTenantCaps`). */

@@ -8,7 +8,10 @@ import { useCallback, useState } from "react";
  * jsdom, where widths are 0), so callers fall back to a viewport rule.
  * @example const [ref, width] = useElementWidth<HTMLDivElement>(); <div ref={ref} />
  */
-export const useElementWidth = <E extends Element>(): [ref: (element: E | null) => (() => void) | undefined, width: number | undefined] => {
+export const useElementWidth = <E extends Element>(): [
+  ref: (element: E | null) => (() => void) | undefined,
+  width: number | undefined,
+] => {
   const [width, setWidth] = useState<number | undefined>(undefined);
   const ref = useCallback((element: E | null) => {
     if (element === null || typeof ResizeObserver === "undefined") return undefined;

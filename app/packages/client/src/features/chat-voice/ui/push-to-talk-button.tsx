@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { type KeyboardEvent, type MouseEvent, type PointerEvent, useEffect, useRef } from "react";
 import { useTranslations } from "use-intl";
 import { SpeechInput } from "#/shared/ui/ai/speech-input.tsx";
 import type { PushToTalkPhase } from "../model/push-to-talk.ts";
@@ -18,7 +18,8 @@ export type PushToTalkButtonProps = {
  * `Ctrl+Shift+Space` starts and stops a recording from anywhere in the page. Not `Ctrl+Space`
  * (spec §5.3 as first written): that is the input-method switch on Windows and macOS.
  */
-const isShortcut = (event: globalThis.KeyboardEvent): boolean => event.ctrlKey && event.shiftKey && !event.altKey && !event.metaKey && (event.code === "Space" || event.key === " ");
+const isShortcut = (event: globalThis.KeyboardEvent): boolean =>
+  event.ctrlKey && event.shiftKey && !event.altKey && !event.metaKey && (event.code === "Space" || event.key === " ");
 
 /**
  * The push-to-talk control (spec §5.3). With a pointer it records while held. With the keyboard

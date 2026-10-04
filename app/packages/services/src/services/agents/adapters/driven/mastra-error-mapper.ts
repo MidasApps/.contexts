@@ -1,7 +1,7 @@
 import { CoreErrorCodeSchema } from "@core/contracts";
 import { z } from "zod";
-import type { GatewayError } from "../../application/ports/agent-runtime-gateway.ts";
 import { apiError } from "../../../shared/http/api-errors.ts";
+import type { GatewayError } from "../../application/ports/agent-runtime-gateway.ts";
 
 const BY_STATUS: Readonly<Record<number, GatewayError>> = {
   400: { code: "VALIDATION_FAILED", status: 400 },
@@ -33,7 +33,6 @@ export const mapMastraStatus = (status: number, retryAfter?: string | null): Gat
 
 // Only the code of Mastra's api.md §6 envelope is read; message and details never reach /v1.
 const MastraErrorBodySchema = z.object({ error: z.object({ code: CoreErrorCodeSchema }) });
-
 
 /**
  * `/v1` error of a non-2xx Mastra answer: the envelope's `code` when it is a core code
@@ -67,7 +66,8 @@ export const errorBodyOf = async (response: Response): Promise<unknown> => {
 };
 
 /** Status and parsed body of an `@mastra/client-js` error (`MastraClientError`), duck-typed. */
-export const bodyOfClientError = (error: unknown): unknown => (typeof error === "object" && error !== null && "body" in error ? error.body : undefined);
+export const bodyOfClientError = (error: unknown): unknown =>
+  typeof error === "object" && error !== null && "body" in error ? error.body : undefined;
 
 /** Status of an `@mastra/client-js` error (`MastraClientError.status`), duck-typed so no SDK class crosses the boundary. */
 export const statusOfClientError = (error: unknown): number | undefined => {

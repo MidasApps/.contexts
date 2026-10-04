@@ -5,7 +5,8 @@ import { BASE_CONNECT_SRC, buildTauriApiConfigPatch, FIREBASE_AUTH_ORIGINS } fro
 
 type TauriConf = { app: { security: { csp: Record<string, string>; dangerousDisableAssetCspModification?: unknown } } };
 const TAURI_CONF = path.resolve(import.meta.dirname, "../src-tauri/tauri.conf.json");
-const FIREBASE = "https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://storage.googleapis.com";
+const FIREBASE =
+  "https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://storage.googleapis.com";
 
 describe("buildTauriApiConfigPatch", () => {
   it("allows the webview to connect only to itself, Tauri IPC, the API origin, Firebase Auth and the upload origin", () => {
@@ -21,31 +22,56 @@ describe("buildTauriApiConfigPatch", () => {
   });
 
   it("adds the Auth Emulator origin when the env declares one (local only, enforced by the env schema)", () => {
-    const patch = buildTauriApiConfigPatch({ apiUrl: "http://localhost:3100", authEmulatorUrl: "http://127.0.0.1:9099" });
+    const patch = buildTauriApiConfigPatch({
+      apiUrl: "http://localhost:3100",
+      authEmulatorUrl: "http://127.0.0.1:9099",
+    });
 
-    expect(patch.app.security.devCsp["connect-src"]).toBe(`'self' ipc: http://ipc.localhost ws://localhost:1420 http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099`);
-    expect(patch.app.security.csp["connect-src"]).toBe(`'self' ipc: http://ipc.localhost http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099`);
+    expect(patch.app.security.devCsp["connect-src"]).toBe(
+      `'self' ipc: http://ipc.localhost ws://localhost:1420 http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099`,
+    );
+    expect(patch.app.security.csp["connect-src"]).toBe(
+      `'self' ipc: http://ipc.localhost http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099`,
+    );
   });
 
   it("adds the Storage Emulator origin for local uploads when the env declares one", () => {
-    const patch = buildTauriApiConfigPatch({ apiUrl: "http://localhost:3100", authEmulatorUrl: "http://127.0.0.1:9099", storageEmulatorUrl: "http://127.0.0.1:9199/" });
+    const patch = buildTauriApiConfigPatch({
+      apiUrl: "http://localhost:3100",
+      authEmulatorUrl: "http://127.0.0.1:9099",
+      storageEmulatorUrl: "http://127.0.0.1:9199/",
+    });
 
-    expect(patch.app.security.csp["connect-src"]).toBe(`'self' ipc: http://ipc.localhost http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099 http://127.0.0.1:9199`);
-    expect(patch.app.security.devCsp["connect-src"]).toBe(`'self' ipc: http://ipc.localhost ws://localhost:1420 http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099 http://127.0.0.1:9199`);
+    expect(patch.app.security.csp["connect-src"]).toBe(
+      `'self' ipc: http://ipc.localhost http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099 http://127.0.0.1:9199`,
+    );
+    expect(patch.app.security.devCsp["connect-src"]).toBe(
+      `'self' ipc: http://ipc.localhost ws://localhost:1420 http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099 http://127.0.0.1:9199`,
+    );
   });
 
   it("opens no emulator origin for a remote build", () => {
-    expect(buildTauriApiConfigPatch({ apiUrl: "https://api.example.com" }).app.security.csp["connect-src"]).not.toMatch(/127\.0\.0\.1|:9\d{3}/);
+    expect(buildTauriApiConfigPatch({ apiUrl: "https://api.example.com" }).app.security.csp["connect-src"]).not.toMatch(
+      /127\.0\.0\.1|:9\d{3}/,
+    );
   });
 
   it("uses origins only, so a base path never widens or breaks the directive", () => {
-    const patch = buildTauriApiConfigPatch({ apiUrl: "http://localhost:3100/", authEmulatorUrl: "http://127.0.0.1:9099/" });
+    const patch = buildTauriApiConfigPatch({
+      apiUrl: "http://localhost:3100/",
+      authEmulatorUrl: "http://127.0.0.1:9099/",
+    });
 
-    expect(patch.app.security.csp["connect-src"]).toBe(`'self' ipc: http://ipc.localhost http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099`);
+    expect(patch.app.security.csp["connect-src"]).toBe(
+      `'self' ipc: http://ipc.localhost http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099`,
+    );
   });
 
   it("lists exactly the two Firebase Auth REST origins the JS SDK calls (decision 0017 §3)", () => {
-    expect(FIREBASE_AUTH_ORIGINS).toEqual(["https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com"]);
+    expect(FIREBASE_AUTH_ORIGINS).toEqual([
+      "https://identitytoolkit.googleapis.com",
+      "https://securetoken.googleapis.com",
+    ]);
   });
 
   it("keeps the base release CSP closed: no API origin until the patch adds one", () => {

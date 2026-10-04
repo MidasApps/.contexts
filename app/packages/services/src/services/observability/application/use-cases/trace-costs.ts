@@ -22,7 +22,11 @@ const groupByTenant = (traces: readonly TraceSummary[]): Map<string, TraceSummar
   return groups;
 };
 
-const costsOfTenant = async (reader: TraceCostReader, tenantId: string, traces: readonly TraceSummary[]): Promise<Map<string, number>> => {
+const costsOfTenant = async (
+  reader: TraceCostReader,
+  tenantId: string,
+  traces: readonly TraceSummary[],
+): Promise<Map<string, number>> => {
   const starts = traces.map((trace) => Date.parse(trace.startedAt));
   const found = await reader.costByTrace({
     tenantId,
@@ -31,7 +35,9 @@ const costsOfTenant = async (reader: TraceCostReader, tenantId: string, traces: 
     to: new Date(Math.max(...starts) + AFTER_MS),
   });
   // A trace with an unpriced call has an unknown cost (the contract's `null`), never a partial sum.
-  return new Map([...found].filter(([, cost]) => cost.unpricedCalls === 0).map(([traceId, cost]) => [traceId, cost.costMicroUsd]));
+  return new Map(
+    [...found].filter(([, cost]) => cost.unpricedCalls === 0).map(([traceId, cost]) => [traceId, cost.costMicroUsd]),
+  );
 };
 
 /**
@@ -40,11 +46,16 @@ const costsOfTenant = async (reader: TraceCostReader, tenantId: string, traces: 
  * traces with an unpriced call keep `null`. The ledger being unreachable never fails the trace
  * read: the costs stay `null` and the failure is logged once.
  */
-export const withLedgerCosts = async (deps: TraceCostDeps, traces: readonly TraceSummary[]): Promise<TraceSummary[]> => {
+export const withLedgerCosts = async (
+  deps: TraceCostDeps,
+  traces: readonly TraceSummary[],
+): Promise<TraceSummary[]> => {
   const reader = deps.costs;
   if (reader === undefined || traces.length === 0) return [...traces];
   try {
-    const perTenant = await Promise.all([...groupByTenant(traces)].map(([tenantId, own]) => costsOfTenant(reader, tenantId, own)));
+    const perTenant = await Promise.all(
+      [...groupByTenant(traces)].map(([tenantId, own]) => costsOfTenant(reader, tenantId, own)),
+    );
     const costs = new Map(perTenant.flatMap((map) => [...map]));
     return traces.map((trace) => ({ ...trace, costMicroUsd: costs.get(trace.traceId) ?? trace.costMicroUsd }));
   } catch (error: unknown) {

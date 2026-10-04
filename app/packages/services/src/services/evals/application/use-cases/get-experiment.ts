@@ -1,6 +1,9 @@
 import type { ConsoleGateway } from "../../../observability/application/ports/console-gateway.ts";
 
-export type GetExperiment = (query: { readonly experimentId: string; readonly tenantId: string | null }) => ReturnType<ConsoleGateway["getExperiment"]>;
+export type GetExperiment = (query: {
+  readonly experimentId: string;
+  readonly tenantId: string | null;
+}) => ReturnType<ConsoleGateway["getExperiment"]>;
 
 /**
  * One experiment by id (the comparison of two experiments on different list pages): an

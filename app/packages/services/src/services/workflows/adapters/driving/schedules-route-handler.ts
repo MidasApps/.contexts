@@ -11,9 +11,12 @@ import {
 } from "@core/contracts";
 import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
 import { dataResponse } from "../../../shared/http/api-errors.ts";
-import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
+import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
-import type { WorkflowGatewayResult, WorkflowRuntimeGateway } from "../../application/ports/workflow-runtime-gateway.ts";
+import type {
+  WorkflowGatewayResult,
+  WorkflowRuntimeGateway,
+} from "../../application/ports/workflow-runtime-gateway.ts";
 import { makeCreateSchedule } from "../../application/use-cases/create-schedule.ts";
 import { makeDeleteSchedule } from "../../application/use-cases/delete-schedule.ts";
 import { makeListSchedules } from "../../application/use-cases/list-schedules.ts";
@@ -34,7 +37,11 @@ export type SchedulesRouteDeps = {
 const answer = <T>(result: WorkflowGatewayResult<T>, requestId: string, status: 200 | 201 | 202 = 200): Response =>
   result.ok ? dataResponse({ data: result.data }, { status }) : workflowGatewayErrorResponse(result.error, requestId);
 
-type ScopeContext = Parameters<typeof workflowCallScope>[0]["ctx"] & { readonly input: { readonly query: { readonly organizationId?: Parameters<typeof workflowCallScope>[0]["organizationId"] } } };
+type ScopeContext = Parameters<typeof workflowCallScope>[0]["ctx"] & {
+  readonly input: {
+    readonly query: { readonly organizationId?: Parameters<typeof workflowCallScope>[0]["organizationId"] };
+  };
+};
 
 /**
  * `/v1/schedules` (SP5 spec §3.5, decision 0037): auth (pipeline) → validate (pipeline) → authorize
@@ -51,7 +58,12 @@ export const buildSchedulesRoutes = (deps: SchedulesRouteDeps): Record<string, R
   const runNow = makeRunScheduleNow(deps);
   const remove = makeDeleteSchedule(deps);
   const scopeOf = (ctx: ScopeContext, permission: string) =>
-    workflowCallScope({ ctx, organizationId: ctx.input.query.organizationId, permission, resolveAccessContext: deps.resolveAccessContext });
+    workflowCallScope({
+      ctx,
+      organizationId: ctx.input.query.organizationId,
+      permission,
+      resolveAccessContext: deps.resolveAccessContext,
+    });
   return {
     [listSchedulesEndpoint.id]: withApiRoute(listSchedulesEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.read);
@@ -59,11 +71,15 @@ export const buildSchedulesRoutes = (deps: SchedulesRouteDeps): Record<string, R
     }),
     [getScheduleEndpoint.id]: withApiRoute(getScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.read);
-      return scope instanceof Response ? scope : answer(await deps.gateway.getSchedule(scope, ctx.input.params.scheduleId), ctx.requestId);
+      return scope instanceof Response
+        ? scope
+        : answer(await deps.gateway.getSchedule(scope, ctx.input.params.scheduleId), ctx.requestId);
     }),
     [previewScheduleEndpoint.id]: withApiRoute(previewScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.read);
-      return scope instanceof Response ? scope : answer(await deps.gateway.previewSchedule(scope, ctx.input.body), ctx.requestId);
+      return scope instanceof Response
+        ? scope
+        : answer(await deps.gateway.previewSchedule(scope, ctx.input.body), ctx.requestId);
     }),
     [createScheduleEndpoint.id]: withApiRoute(createScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.write);
@@ -71,7 +87,9 @@ export const buildSchedulesRoutes = (deps: SchedulesRouteDeps): Record<string, R
     }),
     [updateScheduleEndpoint.id]: withApiRoute(updateScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.write);
-      return scope instanceof Response ? scope : answer(await update(scope, ctx.input.params.scheduleId, ctx.input.body), ctx.requestId);
+      return scope instanceof Response
+        ? scope
+        : answer(await update(scope, ctx.input.params.scheduleId, ctx.input.body), ctx.requestId);
     }),
     [pauseScheduleEndpoint.id]: withApiRoute(pauseScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.write);
@@ -79,17 +97,23 @@ export const buildSchedulesRoutes = (deps: SchedulesRouteDeps): Record<string, R
     }),
     [resumeScheduleEndpoint.id]: withApiRoute(resumeScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.write);
-      return scope instanceof Response ? scope : answer(await resume(scope, ctx.input.params.scheduleId), ctx.requestId);
+      return scope instanceof Response
+        ? scope
+        : answer(await resume(scope, ctx.input.params.scheduleId), ctx.requestId);
     }),
     [runScheduleNowEndpoint.id]: withApiRoute(runScheduleNowEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.write);
-      return scope instanceof Response ? scope : answer(await runNow(scope, ctx.input.params.scheduleId), ctx.requestId, 202);
+      return scope instanceof Response
+        ? scope
+        : answer(await runNow(scope, ctx.input.params.scheduleId), ctx.requestId, 202);
     }),
     [deleteScheduleEndpoint.id]: withApiRoute(deleteScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.write);
       if (scope instanceof Response) return scope;
       const result = await remove(scope, ctx.input.params.scheduleId);
-      return result.ok ? new Response(null, { status: 204 }) : workflowGatewayErrorResponse(result.error, ctx.requestId);
+      return result.ok
+        ? new Response(null, { status: 204 })
+        : workflowGatewayErrorResponse(result.error, ctx.requestId);
     }),
   };
 };

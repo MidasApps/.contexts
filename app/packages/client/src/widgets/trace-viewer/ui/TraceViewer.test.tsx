@@ -16,10 +16,16 @@ const spanCard = (name: string): HTMLElement => {
 
 describe("TraceViewer", () => {
   it("renders the span tree with type, status, model, tokens and cost per span", async () => {
-    const { container } = renderAdmin(<TraceViewer detail={detail()} logsRoute={{ id: "admin", rest: "logs", search: { traceId: OBS_IDS.trace } }} />);
+    const { container } = renderAdmin(
+      <TraceViewer detail={detail()} logsRoute={{ id: "admin", rest: "logs", search: { traceId: OBS_IDS.trace } }} />,
+    );
     expect(await screen.findByRole("heading", { level: 2, name: "3 spans" })).toBeDefined();
     const children = screen.getByRole("list", { name: "Spans de agent run: assistant" });
-    expect(within(children).getAllByRole("listitem").map((item) => item.querySelector(".font-medium")?.textContent)).toEqual(["llm: gemini", "tool: searchKnowledge"]);
+    expect(
+      within(children)
+        .getAllByRole("listitem")
+        .map((item) => item.querySelector(".font-medium")?.textContent),
+    ).toEqual(["llm: gemini", "tool: searchKnowledge"]);
     const model = spanCard("llm: gemini");
     expect(within(model).getByText("model_generation")).toBeDefined();
     expect(within(model).getByText("OK")).toBeDefined();
@@ -31,7 +37,9 @@ describe("TraceViewer", () => {
     expect(within(tool).getByText("Erro")).toBeDefined();
     expect(within(tool).getByText("Preço desconhecido")).toBeDefined();
     expect(plain(tool.textContent)).toContain("320 ms");
-    expect(screen.getByRole("link", { name: "Ver logs deste trace" }).getAttribute("href")).toBe(`/admin/logs?traceId=${OBS_IDS.trace}`);
+    expect(screen.getByRole("link", { name: "Ver logs deste trace" }).getAttribute("href")).toBe(
+      `/admin/logs?traceId=${OBS_IDS.trace}`,
+    );
     await expectNoAxeViolations(container);
   });
 

@@ -12,7 +12,13 @@ import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 import { ApprovalDetail } from "./ApprovalDetail.tsx";
 import { ApprovalsInbox } from "./ApprovalsInbox.tsx";
 
-function SettingsApprovals({ context, approvalRequestId }: { context: AccessContext; approvalRequestId: string | undefined }) {
+function SettingsApprovals({
+  context,
+  approvalRequestId,
+}: {
+  context: AccessContext;
+  approvalRequestId: string | undefined;
+}) {
   const t = useTranslations("settings.approvals");
   const online = useOnlineStatus();
   const me = useMe();
@@ -20,7 +26,8 @@ function SettingsApprovals({ context, approvalRequestId }: { context: AccessCont
   const { organization } = context;
   const detail = approvalRequestId !== undefined;
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.approval.read")}
       header={
@@ -33,7 +40,11 @@ function SettingsApprovals({ context, approvalRequestId }: { context: AccessCont
     >
       <div className="flex flex-col gap-4">
         {online ? null : <OfflineNotice />}
-        {detail ? <ApprovalDetail context={context} approvalRequestId={approvalRequestId} viewerUid={viewerUid} /> : <ApprovalsInbox context={context} viewerUid={viewerUid} />}
+        {detail ? (
+          <ApprovalDetail context={context} approvalRequestId={approvalRequestId} viewerUid={viewerUid} />
+        ) : (
+          <ApprovalsInbox context={context} viewerUid={viewerUid} />
+        )}
       </div>
     </SettingsPageFrame>
   );
@@ -51,7 +62,9 @@ export function SettingsApprovalsView() {
   const context = useAccessContext(node === null ? null : { organizationId: node.organizationId });
   return (
     <QueryPage query={context} loadingLabel={t("loading")}>
-      {(data) => <SettingsApprovals context={data} approvalRequestId={rest === undefined || rest === "" ? undefined : rest} />}
+      {(data) => (
+        <SettingsApprovals context={data} approvalRequestId={rest === undefined || rest === "" ? undefined : rest} />
+      )}
     </QueryPage>
   );
 }

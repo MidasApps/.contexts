@@ -4,10 +4,14 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildCatalogAgent } from "#/entities/agent-catalog/agent-catalog.fixture.ts";
-import { buildCustomAgent, buildCustomAgentOptions, CUSTOM_AGENT_ID } from "#/entities/custom-agent/custom-agent.fixture.ts";
+import {
+  buildCustomAgent,
+  buildCustomAgentOptions,
+  CUSTOM_AGENT_ID,
+} from "#/entities/custom-agent/custom-agent.fixture.ts";
 import { buildCustomSkill, CUSTOM_SKILL_ID } from "#/entities/custom-skill/custom-skill.fixture.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsAgentsView } from "./SettingsAgentsView.tsx";
 
@@ -60,7 +64,16 @@ const CATALOG = [
     ],
     skills: [],
   }),
-  buildCatalogAgent({ key: "example-notes", name: "Notes", description: "Takes notes.", source: "module", moduleId: "example", enabled: false, tools: [], skills: [] }),
+  buildCatalogAgent({
+    key: "example-notes",
+    name: "Notes",
+    description: "Takes notes.",
+    source: "module",
+    moduleId: "example",
+    enabled: false,
+    tools: [],
+    skills: [],
+  }),
 ];
 
 const GUIDE = buildCatalogAgent({
@@ -92,7 +105,8 @@ const renderView = (permissions: readonly Permission[] = ADMIN, routes: FakeRout
     },
   );
 
-const card = async (name: string) => (await screen.findByRole("heading", { level: 3, name })).closest("article") as HTMLElement;
+const card = async (name: string) =>
+  (await screen.findByRole("heading", { level: 3, name })).closest("article") as HTMLElement;
 type User = ReturnType<typeof renderView>["user"];
 /** The card with its details (instructions, tools, skills) opened: they load only then. */
 const expanded = async (user: User, name: string) => {
@@ -116,14 +130,18 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     expect(within(knowledge).getByText("knowledge.search")).toBeDefined();
     expect(within(knowledge).getByText("knowledge-citations")).toBeDefined();
     const action = await expanded(user, "Action");
-    expect(within(action).getByText("command.tenancy.CreateProjectInput").closest("li")?.textContent).toContain("altera dados");
+    expect(within(action).getByText("command.tenancy.CreateProjectInput").closest("li")?.textContent).toContain(
+      "altera dados",
+    );
     // Tools read as their labels (a command as its permission); connector tools keep their own names.
     expect(within(action).getByText("Criar projetos")).toBeDefined();
     expect(within(action).getByText("issues-api.listIssues")).toBeDefined();
     expect(within(action).getByText("De conectores")).toBeDefined();
     expect(within(await card("Notes")).getByText(/^Módulo example · /u)).toBeDefined();
     expect(screen.queryByText(/Não é possível criar um novo agente aqui\./u)).toBeNull();
-    expect(screen.getAllByText(/escolhido diretamente ao iniciar uma conversa; o assistente não delega/u).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(/escolhido diretamente ao iniciar uma conversa; o assistente não delega/u).length,
+    ).toBeGreaterThan(0);
     expect(await screen.findByRole("heading", { name: "Nenhum agente da organização" })).toBeDefined();
     expect(screen.getByText(/1 de 5 agentes do plano em uso\./u)).toBeDefined();
     expect(api.calls.find((call) => call.path === "/v1/agents")?.query).toContain(`organizationId=${IDS.organization}`);
@@ -140,9 +158,16 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     const toggle = within(knowledge).getByRole("button", { name: "Ver detalhes de Knowledge" });
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
     await user.click(toggle);
-    expect(within(knowledge).getByRole("button", { name: "Ocultar detalhes de Knowledge" }).getAttribute("aria-expanded")).toBe("true");
+    expect(
+      within(knowledge).getByRole("button", { name: "Ocultar detalhes de Knowledge" }).getAttribute("aria-expanded"),
+    ).toBe("true");
     expect(within(knowledge).getByText("knowledge.search")).toBeDefined();
-    await waitFor(() => expect(addendum().map((call) => call.path)).toEqual(["/v1/agents/knowledge/prompt-addendum/versions", "/v1/agents/knowledge/prompt-addendum/activations"]));
+    await waitFor(() =>
+      expect(addendum().map((call) => call.path)).toEqual([
+        "/v1/agents/knowledge/prompt-addendum/versions",
+        "/v1/agents/knowledge/prompt-addendum/activations",
+      ]),
+    );
     await expectNoAxeViolations(container);
   });
 
@@ -160,19 +185,26 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     await waitFor(() => expect(requests).toHaveLength(1));
     expect(requests[0]?.body).toEqual({ enabledAgents: ["knowledge", "action"] });
     expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
-    await waitFor(() => expect(screen.getByRole("switch", { name: "Ativar Action" }).getAttribute("aria-checked")).toBe("true"));
+    await waitFor(() =>
+      expect(screen.getByRole("switch", { name: "Ativar Action" }).getAttribute("aria-checked")).toBe("true"),
+    );
   });
 
   it("locks every agent switch while one change is saving, so a rollback cannot undo another", async () => {
     let finish: () => void = () => undefined;
     const { user } = renderView(ADMIN, {
-      "PATCH /v1/agent-settings": () => new Promise((resolve) => (finish = () => resolve(ok(settings({ enabledAgents: ["knowledge", "action"] }))))),
+      "PATCH /v1/agent-settings": () =>
+        new Promise((resolve) => (finish = () => resolve(ok(settings({ enabledAgents: ["knowledge", "action"] }))))),
     });
     await user.click(await screen.findByRole("switch", { name: "Ativar Action" }));
-    await waitFor(() => expect(screen.getByRole("switch", { name: "Ativar Notes" }).hasAttribute("disabled")).toBe(true));
+    await waitFor(() =>
+      expect(screen.getByRole("switch", { name: "Ativar Notes" }).hasAttribute("disabled")).toBe(true),
+    );
     expect(screen.getByRole("switch", { name: "Ativar Action" }).hasAttribute("disabled")).toBe(true);
     finish();
-    await waitFor(() => expect(screen.getByRole("switch", { name: "Ativar Notes" }).hasAttribute("disabled")).toBe(false));
+    await waitFor(() =>
+      expect(screen.getByRole("switch", { name: "Ativar Notes" }).hasAttribute("disabled")).toBe(false),
+    );
   });
 
   it("shows why a change was refused and puts the switch back", async () => {
@@ -203,88 +235,113 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     expect(screen.getByRole<HTMLButtonElement>("radio", { name: "Ocultar" }).disabled).toBe(true);
   });
 
-  it(
-    "writes, evaluates and activates the organization's instructions of an agent",
-    { timeout: 60_000 },
-    async () => {
-      let versions: PromptVersion[] = [];
-      let activations: unknown[] = [];
-      const posts: FakeRequest[] = [];
-      const forAgent = (request: FakeRequest, rows: unknown[]) => ok(request.params["agentId"] === "knowledge" ? rows : []);
-      const { user } = renderView(ADMIN, {
-        "GET /v1/agents/:agentId/prompt-addendum/versions": (request) => forAgent(request, versions),
-        "GET /v1/agents/:agentId/prompt-addendum/activations": (request) => forAgent(request, activations),
-        "POST /v1/agents/:agentId/prompt-addendum/versions": (request) => {
-          posts.push(request);
-          versions = [version({ id: NEW_VERSION_ID, body: "Answer formally.", note: null })];
-          return ok(versions[0], 201);
-        },
-        "POST /v1/agents/:agentId/prompt-addendum/versions/:versionId/eval": (request) => {
-          posts.push(request);
-          versions = [version({ id: NEW_VERSION_ID, note: null, evalVerdict: "passed", evalExperimentId: "exp_1" })];
-          return ok({ versionId: NEW_VERSION_ID, experimentId: "exp_1", verdict: "passed", scorers: [] });
-        },
-        "POST /v1/agents/:agentId/prompt-addendum/activations": (request) => {
-          posts.push(request);
-          const activation = { id: "01927f3d-1a2b-7c3d-8e4f-5a6b7c8d9e0f", agentId: "knowledge", scope: "tenant", tenantId: IDS.organization, versionId: NEW_VERSION_ID, forced: false, reason: null, activatedBy: IDS.user, activatedAt: "2026-09-29T15:00:00.000Z" };
-          activations = [activation];
-          return ok(activation, 201);
-        },
-      });
-      const knowledge = await expanded(user, "Knowledge");
-      expect(await within(knowledge).findByText(/Nenhuma instrução da organização está ativa/u)).toBeDefined();
-      await user.click(within(knowledge).getByRole("button", { name: "Escrever instruções para Knowledge" }));
-      const dialog = await screen.findByRole("dialog", { name: "Instruções para Knowledge" });
-      await user.type(within(dialog).getByRole("textbox", { name: /Instruções/u }), "Answer formally.");
-      await user.click(within(dialog).getByRole("button", { name: "Salvar versão" }));
-      await waitFor(() => expect(posts).toHaveLength(1));
-      expect(posts[0]?.body).toEqual({ body: "Answer formally." });
-      expect(posts[0]?.query.get("organizationId")).toBe(IDS.organization);
+  it("writes, evaluates and activates the organization's instructions of an agent", { timeout: 60_000 }, async () => {
+    let versions: PromptVersion[] = [];
+    let activations: unknown[] = [];
+    const posts: FakeRequest[] = [];
+    const forAgent = (request: FakeRequest, rows: unknown[]) =>
+      ok(request.params["agentId"] === "knowledge" ? rows : []);
+    const { user } = renderView(ADMIN, {
+      "GET /v1/agents/:agentId/prompt-addendum/versions": (request) => forAgent(request, versions),
+      "GET /v1/agents/:agentId/prompt-addendum/activations": (request) => forAgent(request, activations),
+      "POST /v1/agents/:agentId/prompt-addendum/versions": (request) => {
+        posts.push(request);
+        versions = [version({ id: NEW_VERSION_ID, body: "Answer formally.", note: null })];
+        return ok(versions[0], 201);
+      },
+      "POST /v1/agents/:agentId/prompt-addendum/versions/:versionId/eval": (request) => {
+        posts.push(request);
+        versions = [version({ id: NEW_VERSION_ID, note: null, evalVerdict: "passed", evalExperimentId: "exp_1" })];
+        return ok({ versionId: NEW_VERSION_ID, experimentId: "exp_1", verdict: "passed", scorers: [] });
+      },
+      "POST /v1/agents/:agentId/prompt-addendum/activations": (request) => {
+        posts.push(request);
+        const activation = {
+          id: "01927f3d-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
+          agentId: "knowledge",
+          scope: "tenant",
+          tenantId: IDS.organization,
+          versionId: NEW_VERSION_ID,
+          forced: false,
+          reason: null,
+          activatedBy: IDS.user,
+          activatedAt: "2026-09-29T15:00:00.000Z",
+        };
+        activations = [activation];
+        return ok(activation, 201);
+      },
+    });
+    const knowledge = await expanded(user, "Knowledge");
+    expect(await within(knowledge).findByText(/Nenhuma instrução da organização está ativa/u)).toBeDefined();
+    await user.click(within(knowledge).getByRole("button", { name: "Escrever instruções para Knowledge" }));
+    const dialog = await screen.findByRole("dialog", { name: "Instruções para Knowledge" });
+    await user.type(within(dialog).getByRole("textbox", { name: /Instruções/u }), "Answer formally.");
+    await user.click(within(dialog).getByRole("button", { name: "Salvar versão" }));
+    await waitFor(() => expect(posts).toHaveLength(1));
+    expect(posts[0]?.body).toEqual({ body: "Answer formally." });
+    expect(posts[0]?.query.get("organizationId")).toBe(IDS.organization);
 
-      const activate = await within(knowledge).findByRole("button", { name: "Ativar a versão 1 de Knowledge" });
-      expect(activate).toHaveProperty("disabled", true);
-      // The reason is written next to the button, not hidden in a tooltip.
-      expect(within(knowledge).getByText("Avalie a versão antes de ativar.").id).toBe(activate.getAttribute("aria-describedby"));
-      await user.click(within(knowledge).getByRole("button", { name: "Avaliar a versão 1 de Knowledge" }));
-      await waitFor(() => expect(posts).toHaveLength(2));
-      expect(posts[1]?.params["versionId"]).toBe(NEW_VERSION_ID);
-      await within(knowledge).findByText("Aprovada");
+    const activate = await within(knowledge).findByRole("button", { name: "Ativar a versão 1 de Knowledge" });
+    expect(activate).toHaveProperty("disabled", true);
+    // The reason is written next to the button, not hidden in a tooltip.
+    expect(within(knowledge).getByText("Avalie a versão antes de ativar.").id).toBe(
+      activate.getAttribute("aria-describedby"),
+    );
+    await user.click(within(knowledge).getByRole("button", { name: "Avaliar a versão 1 de Knowledge" }));
+    await waitFor(() => expect(posts).toHaveLength(2));
+    expect(posts[1]?.params["versionId"]).toBe(NEW_VERSION_ID);
+    await within(knowledge).findByText("Aprovada");
 
-      await waitFor(() => expect(within(knowledge).getByRole<HTMLButtonElement>("button", { name: "Ativar a versão 1 de Knowledge" }).disabled).toBe(false));
-      await user.click(within(knowledge).getByRole("button", { name: "Ativar a versão 1 de Knowledge" }));
-      const confirm = await screen.findByRole("alertdialog", { name: "Ativar a versão 1 de Knowledge?" });
-      expect(posts).toHaveLength(2);
-      await user.click(within(confirm).getByRole("button", { name: "Ativar" }));
-      await waitFor(() => expect(posts).toHaveLength(3));
-      expect(posts[2]?.body).toEqual({ versionId: NEW_VERSION_ID });
-      expect(posts[2]?.query.get("organizationId")).toBe(IDS.organization);
-      expect(await within(knowledge).findByText("Versão 1 ativa")).toBeDefined();
-    },
-  );
+    await waitFor(() =>
+      expect(
+        within(knowledge).getByRole<HTMLButtonElement>("button", { name: "Ativar a versão 1 de Knowledge" }).disabled,
+      ).toBe(false),
+    );
+    await user.click(within(knowledge).getByRole("button", { name: "Ativar a versão 1 de Knowledge" }));
+    const confirm = await screen.findByRole("alertdialog", { name: "Ativar a versão 1 de Knowledge?" });
+    expect(posts).toHaveLength(2);
+    await user.click(within(confirm).getByRole("button", { name: "Ativar" }));
+    await waitFor(() => expect(posts).toHaveLength(3));
+    expect(posts[2]?.body).toEqual({ versionId: NEW_VERSION_ID });
+    expect(posts[2]?.query.get("organizationId")).toBe(IDS.organization);
+    expect(await within(knowledge).findByText("Versão 1 ativa")).toBeDefined();
+  });
 
   it("explains a refused activation (the evaluation is required)", async () => {
     const { user } = renderView(ADMIN, {
-      "GET /v1/agents/:agentId/prompt-addendum/versions": (request) => ok(request.params["agentId"] === "knowledge" ? [version({ evalVerdict: "passed", evalExperimentId: "exp_1" })] : []),
+      "GET /v1/agents/:agentId/prompt-addendum/versions": (request) =>
+        ok(
+          request.params["agentId"] === "knowledge"
+            ? [version({ evalVerdict: "passed", evalExperimentId: "exp_1" })]
+            : [],
+        ),
       "POST /v1/agents/:agentId/prompt-addendum/activations": apiError(409, "EVAL_REQUIRED"),
     });
     const knowledge = await expanded(user, "Knowledge");
     await user.click(await within(knowledge).findByRole("button", { name: "Ativar a versão 1 de Knowledge" }));
     await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Ativar" }));
-    expect((await within(knowledge).findByRole("alert")).textContent).toContain("Execute uma avaliação aprovada antes de ativar esta versão.");
+    expect((await within(knowledge).findByRole("alert")).textContent).toContain(
+      "Execute uma avaliação aprovada antes de ativar esta versão.",
+    );
   });
 
   it("lets a prompt reader see the instructions without the write actions", async () => {
     const { user } = renderView([...READ, "core.prompt.read"], {
-      "GET /v1/agents/:agentId/prompt-addendum/versions": (request) => ok(request.params["agentId"] === "knowledge" ? [version()] : []),
+      "GET /v1/agents/:agentId/prompt-addendum/versions": (request) =>
+        ok(request.params["agentId"] === "knowledge" ? [version()] : []),
     });
     const knowledge = await expanded(user, "Knowledge");
     expect(await within(knowledge).findByText("First draft")).toBeDefined();
     expect(within(knowledge).queryByRole("button", { name: /Escrever instruções/u })).toBeNull();
     expect(within(knowledge).queryByRole("button", { name: /Avaliar/u })).toBeNull();
-    expect(within(await expanded(user, "Notes")).getByText("Este agente ainda não aceita instruções da organização.")).toBeDefined();
+    expect(
+      within(await expanded(user, "Notes")).getByText("Este agente ainda não aceita instruções da organização."),
+    ).toBeDefined();
   });
 
-  it("creates an agent of the organization with a model, tools, skills and a knowledge scope", { timeout: 60_000 }, async () => {
+  it("creates an agent of the organization with a model, tools, skills and a knowledge scope", {
+    timeout: 60_000,
+  }, async () => {
     const posts: FakeRequest[] = [];
     const { user } = renderView(ADMIN, {
       "POST /v1/agents": (request) => {
@@ -302,7 +359,11 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     await user.type(within(dialog).getByRole("textbox", { name: "Descrição" }), "Helps new members.");
     await user.type(within(dialog).getByRole("textbox", { name: "Instruções" }), "Be brief.");
     expect(within(dialog).getByText(/9 de 8000 caracteres\./u)).toBeDefined();
-    expect(within(dialog).getByRole("checkbox", { name: /Criar projetos/u }).closest("[data-slot=field]")?.textContent).toContain("altera dados");
+    expect(
+      within(dialog)
+        .getByRole("checkbox", { name: /Criar projetos/u })
+        .closest("[data-slot=field]")?.textContent,
+    ).toContain("altera dados");
     await user.click(within(dialog).getByRole("checkbox", { name: /Listar os dados do catálogo/u }));
     await user.click(within(dialog).getByRole("checkbox", { name: /knowledge-citations/u }));
     await user.click(within(dialog).getByRole("checkbox", { name: /weekly-report/u }));
@@ -329,7 +390,9 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     const patches: FakeRequest[] = [];
     const { user } = renderView(ADMIN, {
       "GET /v1/agents": ok([...CATALOG, GUIDE]),
-      "GET /v1/agents/:agentId": ok(buildCustomAgent({ tools: ["catalog.listEntities", "removed.tool"], knowledgeScope: "all" })),
+      "GET /v1/agents/:agentId": ok(
+        buildCustomAgent({ tools: ["catalog.listEntities", "removed.tool"], knowledgeScope: "all" }),
+      ),
       "PATCH /v1/agents/:agentId": (request) => {
         patches.push(request);
         return apiError(400, "VALIDATION_FAILED", [{ field: "instructions", issue: "TOO_BIG" }]);
@@ -343,11 +406,19 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     const dialog = await screen.findByRole("dialog", { name: "Editar Onboarding guide" });
     const instructions = await within(dialog).findByRole<HTMLTextAreaElement>("textbox", { name: "Instruções" });
     expect(instructions.value).toBe("Answer from the handbook.");
-    expect(within(dialog).getByRole("checkbox", { name: /removed\.tool/u }).getAttribute("aria-checked")).toBe("true");
+    expect(
+      within(dialog)
+        .getByRole("checkbox", { name: /removed\.tool/u })
+        .getAttribute("aria-checked"),
+    ).toBe("true");
     await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
     await waitFor(() => expect(patches).toHaveLength(1));
     expect(patches[0]?.params["agentId"]).toBe(CUSTOM_AGENT_ID);
-    expect(patches[0]?.body).toMatchObject({ name: "Onboarding guide", knowledgeScope: "all", tools: ["catalog.listEntities", "removed.tool"] });
+    expect(patches[0]?.body).toMatchObject({
+      name: "Onboarding guide",
+      knowledgeScope: "all",
+      tools: ["catalog.listEntities", "removed.tool"],
+    });
     expect(await within(dialog).findByText("Use no máximo 8000 caracteres.")).toBeDefined();
   });
 
@@ -365,19 +436,29 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
       },
     });
     await user.click(await screen.findByRole("button", { name: "Desativar Onboarding guide" }));
-    await user.click(within(await screen.findByRole("alertdialog", { name: "Desativar Onboarding guide?" })).getByRole("button", { name: "Desativar" }));
+    await user.click(
+      within(await screen.findByRole("alertdialog", { name: "Desativar Onboarding guide?" })).getByRole("button", {
+        name: "Desativar",
+      }),
+    );
     await waitFor(() => expect(requests).toHaveLength(1));
     expect(requests[0]?.body).toEqual({ enabled: false });
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     await user.click(screen.getByRole("button", { name: "Excluir Onboarding guide" }));
-    await user.click(within(await screen.findByRole("alertdialog", { name: "Excluir Onboarding guide?" })).getByRole("button", { name: "Excluir agente" }));
+    await user.click(
+      within(await screen.findByRole("alertdialog", { name: "Excluir Onboarding guide?" })).getByRole("button", {
+        name: "Excluir agente",
+      }),
+    );
     await waitFor(() => expect(requests).toHaveLength(2));
     expect(requests[1]?.method).toBe("DELETE");
     expect(requests[1]?.params["agentId"]).toBe(CUSTOM_AGENT_ID);
   });
 
   it("stops creation at the plan limit and shows the organization's agents read-only to a reader", async () => {
-    const capped = renderView(ADMIN, { "GET /v1/agent-options": ok(buildCustomAgentOptions({ usage: { agents: 5, skills: 0 } })) });
+    const capped = renderView(ADMIN, {
+      "GET /v1/agent-options": ok(buildCustomAgentOptions({ usage: { agents: 5, skills: 0 } })),
+    });
     expect(await screen.findByText(/O limite do plano foi atingido: exclua um agente/u)).toBeDefined();
     expect(screen.getByRole<HTMLButtonElement>("button", { name: "Novo agente" }).disabled).toBe(true);
     capped.unmount();

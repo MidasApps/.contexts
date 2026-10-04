@@ -16,7 +16,9 @@ describe("loadModuleContracts", () => {
   });
 
   it("rejects a contract outside the module namespace", async () => {
-    await expect(loadModuleContracts(fixture("wrong-prefix"))).rejects.toThrow(/tenancy\.Stray must start with sample\./u);
+    await expect(loadModuleContracts(fixture("wrong-prefix"))).rejects.toThrow(
+      /tenancy\.Stray must start with sample\./u,
+    );
   });
 
   it("rejects an entry that is not a defineContract() result", async () => {
@@ -36,6 +38,8 @@ describe("loadModuleEndpoints", () => {
   });
 
   it("rejects an endpoint outside the module namespace", async () => {
-    await expect(loadModuleEndpoints(fixture("wrong-prefix"))).rejects.toThrow(/tenancy\.stray must start with sample\./u);
+    await expect(loadModuleEndpoints(fixture("wrong-prefix"))).rejects.toThrow(
+      /tenancy\.stray must start with sample\./u,
+    );
   });
 });

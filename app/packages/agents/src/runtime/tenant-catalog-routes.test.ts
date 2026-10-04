@@ -6,12 +6,19 @@ import { z } from "zod";
 import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
 import { createFakeAccessPort } from "../testing/fake-ports.ts";
 import { createWorkflowCatalog, policyOf } from "../workflows/workflow-catalog.ts";
-import { handleListAgentCatalog, handleListWorkflowCatalog, type TenantCatalogRouteDeps } from "./tenant-catalog-routes.ts";
+import {
+  handleListAgentCatalog,
+  handleListWorkflowCatalog,
+  type TenantCatalogRouteDeps,
+} from "./tenant-catalog-routes.ts";
 
 type FakeTool = { id: string; requireApproval?: boolean };
 
 // `seen` records the context each agent was asked with: tools and skills are resolved for the caller's tenant.
-const fakeAgent = (args: { name: string; description: string; tools: FakeTool[]; skills?: { name: string; description: string }[] }, seen: unknown[]): Agent =>
+const fakeAgent = (
+  args: { name: string; description: string; tools: FakeTool[]; skills?: { name: string; description: string }[] },
+  seen: unknown[],
+): Agent =>
   ({
     name: args.name,
     getDescription: () => args.description,
@@ -53,7 +60,10 @@ const setup = (permissions: readonly string[], enabledAgents: string[] = ["knowl
         },
         seen,
       ),
-      "example-helper": fakeAgent({ name: "Helper", description: "A module agent.", tools: [{ id: "example.listNotes" }] }, seen),
+      "example-helper": fakeAgent(
+        { name: "Helper", description: "A module agent.", tools: [{ id: "example.listNotes" }] },
+        seen,
+      ),
     },
     moduleIds: ["example"],
     isRegisteredTool: (id) => !id.startsWith("issues-api"),
@@ -63,14 +73,19 @@ const setup = (permissions: readonly string[], enabledAgents: string[] = ["knowl
         return Promise.resolve({ enabledAgents } as never);
       },
     },
-    catalog: createWorkflowCatalog([policyOf("approval-demo", { startable: true }), policyOf("usage-report", { schedulable: true }), policyOf("catalog-reindex")]),
+    catalog: createWorkflowCatalog([
+      policyOf("approval-demo", { startable: true }),
+      policyOf("usage-report", { schedulable: true }),
+      policyOf("catalog-reindex"),
+    ]),
     logger: { info: () => undefined, error: () => undefined },
   };
   return { deps, seen, settingsReads };
 };
 
 const context = () => new RequestContext<unknown>(buildAgentContextEntries());
-const mastraWith = (workflows: Record<string, unknown>) => ({ getWorkflow: (id: string) => workflows[id] }) as unknown as Mastra;
+const mastraWith = (workflows: Record<string, unknown>) =>
+  ({ getWorkflow: (id: string) => workflows[id] }) as unknown as Mastra;
 const NO_MASTRA = mastraWith({});
 
 describe("tenant catalog routes", () => {
@@ -128,12 +143,24 @@ describe("tenant catalog routes", () => {
   it("lists the organization's own agents after the code-defined ones, for the caller's tenant", async () => {
     const { deps } = setup(["core.agent-settings.read"]);
     const asked: string[] = [];
-    const custom = { key: "Ag4sK2lPq0WnR5tYu3bV", name: "Guide", description: "Helps.", source: "custom" as const, moduleId: null, enabled: true, tools: [], skills: [] };
+    const custom = {
+      key: "Ag4sK2lPq0WnR5tYu3bV",
+      name: "Guide",
+      description: "Helps.",
+      source: "custom" as const,
+      moduleId: null,
+      enabled: true,
+      tools: [],
+      skills: [],
+    };
     const customEntries: TenantCatalogRouteDeps["customEntries"] = ({ tenantId }) => {
       asked.push(tenantId);
       return Promise.resolve([custom]);
     };
-    const response = await handleListAgentCatalog({ ...deps, customEntries })({ mastra: NO_MASTRA, requestContext: context() });
+    const response = await handleListAgentCatalog({ ...deps, customEntries })({
+      mastra: NO_MASTRA,
+      requestContext: context(),
+    });
     const body = (await response.json()) as { data: { key: string; source: string }[] };
     expect(body.data.map((entry) => [entry.key, entry.source])).toEqual([
       ["knowledge", "core"],
@@ -146,7 +173,10 @@ describe("tenant catalog routes", () => {
 
   it("still lists the code-defined agents when the custom agent store fails", async () => {
     const { deps } = setup(["core.agent-settings.read"]);
-    const response = await handleListAgentCatalog({ ...deps, customEntries: () => Promise.reject(new Error("store down")) })({ mastra: NO_MASTRA, requestContext: context() });
+    const response = await handleListAgentCatalog({
+      ...deps,
+      customEntries: () => Promise.reject(new Error("store down")),
+    })({ mastra: NO_MASTRA, requestContext: context() });
     expect(response.status).toBe(200);
     expect(((await response.json()) as { data: unknown[] }).data).toHaveLength(3);
   });
@@ -160,22 +190,39 @@ describe("tenant catalog routes", () => {
 
   it("keeps an agent whose tools cannot be resolved, with no tools, instead of failing the list", async () => {
     const { deps } = setup(["core.agent-settings.read"]);
-    const broken = { name: "Web", getDescription: () => "Browses.", listTools: () => Promise.reject(new Error("connector down")), listSkills: () => Promise.resolve([]) } as unknown as Agent;
-    const response = await handleListAgentCatalog({ ...deps, subagents: { web: broken } })({ mastra: NO_MASTRA, requestContext: context() });
+    const broken = {
+      name: "Web",
+      getDescription: () => "Browses.",
+      listTools: () => Promise.reject(new Error("connector down")),
+      listSkills: () => Promise.resolve([]),
+    } as unknown as Agent;
+    const response = await handleListAgentCatalog({ ...deps, subagents: { web: broken } })({
+      mastra: NO_MASTRA,
+      requestContext: context(),
+    });
     expect(await response.json()).toMatchObject({ data: [{ key: "web", enabled: false, tools: [], skills: [] }] });
   });
 
   it("lists the workflows a tenant may start or schedule, with the JSON Schema of their input", async () => {
     const { deps } = setup(["core.workflow-run.read"]);
     const mastra = mastraWith({
-      "approval-demo": { description: "Asks a second person to approve a note.", inputSchema: z.strictObject({ title: z.string().min(1) }) },
+      "approval-demo": {
+        description: "Asks a second person to approve a note.",
+        inputSchema: z.strictObject({ title: z.string().min(1) }),
+      },
       "usage-report": { description: undefined, inputSchema: undefined },
     });
     const response = await handleListWorkflowCatalog(deps)({ mastra, requestContext: context() });
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
       data: [
-        { id: "approval-demo", description: "Asks a second person to approve a note.", startable: true, schedulable: false, inputSchema: { type: "object", required: ["title"] } },
+        {
+          id: "approval-demo",
+          description: "Asks a second person to approve a note.",
+          startable: true,
+          schedulable: false,
+          inputSchema: { type: "object", required: ["title"] },
+        },
         { id: "usage-report", description: "", startable: false, schedulable: true, inputSchema: null },
       ],
     });

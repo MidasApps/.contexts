@@ -11,14 +11,20 @@ export const ACTION_AGENT_ID = "action";
 export const ACTION_INSTRUCTIONS = "action.v1";
 
 /** Ceiling of the action agent: the union of the permissions its commands declare. */
-export const actionCeilingOf = (commands: readonly AgentCommand[]): string[] => ["core.chat.use", ...new Set(commands.map(({ tool }) => tool.permission))];
+export const actionCeilingOf = (commands: readonly AgentCommand[]): string[] => [
+  "core.chat.use",
+  ...new Set(commands.map(({ tool }) => tool.permission)),
+];
 
 /**
  * The commands a tenant is offered: core commands always, a module's `command.<module>.*` only
  * when the tenant enabled the module (same rule as module skills, decision 0064).
  */
-export const offeredCommandsOf = (commands: readonly AgentCommand[], moduleIds: readonly string[], enabledAgents: ReadonlySet<string>): AgentCommand[] =>
-  commands.filter(({ tool }) => isCommandOffered(tool.id, moduleIds, enabledAgents));
+export const offeredCommandsOf = (
+  commands: readonly AgentCommand[],
+  moduleIds: readonly string[],
+  enabledAgents: ReadonlySet<string>,
+): AgentCommand[] => commands.filter(({ tool }) => isCommandOffered(tool.id, moduleIds, enabledAgents));
 
 /**
  * `action` subagent (spec §6, §8.4): runs command tools (`command.<contractId>`) after the
@@ -35,18 +41,26 @@ export const createActionAgentDefinition = (options: {
   id: ACTION_AGENT_ID,
   role: "subagent",
   ceiling: actionCeilingOf(options.commands),
-  catalog: { tools: options.commands.map(({ tool }) => tool.id), skills: [CORE_SKILLS.safeActions], perOrganizationTools: true },
+  catalog: {
+    tools: options.commands.map(({ tool }) => tool.id),
+    skills: [CORE_SKILLS.safeActions],
+    perOrganizationTools: true,
+  },
   create: ({ models, tools, guardrails, skills, connectorTools, instructions, tenantSettings }) =>
     new Agent({
       id: ACTION_AGENT_ID,
       name: "Action",
-      description: "Runs a command that creates or changes the organization's data after the user confirmed it; every command asks the user for approval first.",
+      description:
+        "Runs a command that creates or changes the organization's data after the user confirmed it; every command asks the user for approval first.",
       instructions: instructions(ACTION_AGENT_ID, loadInstructions(ACTION_INSTRUCTIONS, options.instructionsDirs)),
       model: models.language("reasoning", { agentId: ACTION_AGENT_ID }),
       tools: async ({ requestContext }) => {
         const { enabledAgents } = await tenantSettings(requestContext);
         const offered = offeredCommandsOf(options.commands, options.moduleIds, enabledAgents);
-        return { ...tools.toMastraTools(offered.map(({ tool }) => tool.id)), ...(await connectorTools(requestContext, "action")) };
+        return {
+          ...tools.toMastraTools(offered.map(({ tool }) => tool.id)),
+          ...(await connectorTools(requestContext, "action")),
+        };
       },
       skills: skills([CORE_SKILLS.safeActions]),
       defaultOptions: { maxSteps: SUBAGENT_MAX_STEPS },

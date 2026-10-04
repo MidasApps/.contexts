@@ -18,27 +18,40 @@ const setup = (runner?: PromptEvalRunner) => {
   const calls: Parameters<PromptEvalRunner>[0][] = [];
   const passing: PromptEvalRunner = (input) => {
     calls.push(input);
-    return Promise.resolve({ experimentId: "exp-1", verdict: "passed", scorers: [{ scorerId: "tool-routing", mean: 1, passed: true }] });
+    return Promise.resolve({
+      experimentId: "exp-1",
+      verdict: "passed",
+      scorers: [{ scorerId: "tool-routing", mean: 1, passed: true }],
+    });
   };
   return { prompts, calls, deps: { prompts, runner: runner ?? passing, logger: silent } };
 };
 
-const call = (deps: PromptEvalRouteDeps, versionId: string, tenantId: string | null) => handlePromptEval({ versionId, body: { tenantId }, requestId: "req", deps });
+const call = (deps: PromptEvalRouteDeps, versionId: string, tenantId: string | null) =>
+  handlePromptEval({ versionId, body: { tenantId }, requestId: "req", deps });
 
 describe("POST /prompt-evals/:versionId (decision 0038)", () => {
   it("runs a platform candidate alone and records the verdict on the version", async () => {
     const { deps, calls, prompts } = setup();
     const response = await call(deps, PLATFORM_V, null);
     expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ data: { versionId: PLATFORM_V, experimentId: "exp-1", verdict: "passed" } });
-    expect(calls).toEqual([{ agentId: "assistant", platform: { versionId: PLATFORM_V, body: "Candidate platform." }, addendum: null }]);
+    expect(await response.json()).toMatchObject({
+      data: { versionId: PLATFORM_V, experimentId: "exp-1", verdict: "passed" },
+    });
+    expect(calls).toEqual([
+      { agentId: "assistant", platform: { versionId: PLATFORM_V, body: "Candidate platform." }, addendum: null },
+    ]);
     expect(prompts.evals).toEqual([{ versionId: PLATFORM_V, experimentId: "exp-1", verdict: "passed" }]);
   });
 
   it("runs a tenant addendum on top of the active platform prompt", async () => {
     const { deps, calls } = setup();
     expect((await call(deps, ADDENDUM_V, TENANT)).status).toBe(200);
-    expect(calls[0]).toEqual({ agentId: "assistant", platform: { versionId: "active-platform", body: "Active platform." }, addendum: { versionId: ADDENDUM_V, body: "Candidate addendum." } });
+    expect(calls[0]).toEqual({
+      agentId: "assistant",
+      platform: { versionId: "active-platform", body: "Active platform." },
+      addendum: { versionId: ADDENDUM_V, body: "Candidate addendum." },
+    });
   });
 
   it("answers 404 for another tenant's addendum or an unknown version, 422 without an eval set, 503 without a runner", async () => {

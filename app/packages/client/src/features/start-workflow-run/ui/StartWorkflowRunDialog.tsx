@@ -2,7 +2,7 @@
 
 import { startWorkflowRunEndpoint, type WorkflowCatalogEntry } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useTranslations } from "use-intl";
 import { tenantWorkflowRunKeys } from "#/entities/workflow-run/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -10,10 +10,24 @@ import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { useWorkflowInputLabel, useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { JsonSchemaFields } from "#/shared/ui/organisms/JsonSchemaFields/JsonSchemaFields.tsx";
 import { useJsonSchemaInput } from "#/shared/ui/organisms/JsonSchemaFields/use-json-schema-input.ts";
@@ -34,7 +48,17 @@ export type StartWorkflowRunDialogProps = {
 
 const NO_INPUT: Readonly<Record<string, unknown>> = {};
 
-function WorkflowSelectField({ startable, workflowId, onChange, invalid }: { startable: readonly WorkflowCatalogEntry[]; workflowId: string | undefined; onChange: (id: string) => void; invalid: boolean }) {
+function WorkflowSelectField({
+  startable,
+  workflowId,
+  onChange,
+  invalid,
+}: {
+  startable: readonly WorkflowCatalogEntry[];
+  workflowId: string | undefined;
+  onChange: (id: string) => void;
+  invalid: boolean;
+}) {
   const t = useTranslations("settings.workflows.startDialog");
   const workflowLabel = useWorkflowLabel();
   const selected = startable.find((workflow) => workflow.id === workflowId);
@@ -62,13 +86,22 @@ function WorkflowSelectField({ startable, workflowId, onChange, invalid }: { sta
   );
 }
 
-function StartWorkflowRunForm({ organizationId, workflows, onOpenChange, onStarted, initialWorkflowId, initialInput = NO_INPUT }: StartWorkflowRunDialogProps) {
+function StartWorkflowRunForm({
+  organizationId,
+  workflows,
+  onOpenChange,
+  onStarted,
+  initialWorkflowId,
+  initialInput = NO_INPUT,
+}: StartWorkflowRunDialogProps) {
   const t = useTranslations("settings.workflows.startDialog");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const idempotency = useIdempotencyKey();
   const startable = workflows.filter((workflow) => workflow.startable);
-  const [workflowId, setWorkflowId] = useState<string | undefined>(() => (startable.some((workflow) => workflow.id === initialWorkflowId) ? initialWorkflowId : undefined));
+  const [workflowId, setWorkflowId] = useState<string | undefined>(() =>
+    startable.some((workflow) => workflow.id === initialWorkflowId) ? initialWorkflowId : undefined,
+  );
   // Typed work has no draft elsewhere: Esc, an outside click or the X ask before dropping it (decision 0048).
   const [dirty, setDirty] = useState(false);
   useDialogDismissGuard(dirty ? "confirmUnsaved" : "allow");

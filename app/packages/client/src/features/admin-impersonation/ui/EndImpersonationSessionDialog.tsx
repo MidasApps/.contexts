@@ -1,6 +1,6 @@
 "use client";
 
-import { adminEndImpersonationSessionEndpoint, type AdminImpersonationSession } from "@core/contracts";
+import { type AdminImpersonationSession, adminEndImpersonationSessionEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { impersonationSessionKeys } from "#/entities/impersonation-session/index.ts";
@@ -24,7 +24,12 @@ export type EndImpersonationSessionDialogProps = {
  * the platform and tenant logs). The access stops at once. When the session is the one this tab
  * started, the tab forgets it too. A failure stays in the dialog with the request reference.
  */
-export function EndImpersonationSessionDialog({ session, staffLabel, userLabel, onOpenChange }: EndImpersonationSessionDialogProps) {
+export function EndImpersonationSessionDialog({
+  session,
+  staffLabel,
+  userLabel,
+  onOpenChange,
+}: EndImpersonationSessionDialogProps) {
   const t = useTranslations("admin.impersonation.endAny");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();

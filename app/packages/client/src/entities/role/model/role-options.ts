@@ -1,6 +1,6 @@
 "use client";
 
-import { roleRefKey, SYSTEM_ROLE_KEYS, type Role, type RoleRef, type SystemRoleKey } from "@core/contracts";
+import { type Role, type RoleRef, roleRefKey, SYSTEM_ROLE_KEYS, type SystemRoleKey } from "@core/contracts";
 import { useCallback, useMemo } from "react";
 import { useTranslations } from "use-intl";
 
@@ -23,7 +23,10 @@ export const DEVICE_SYSTEM_ROLES: readonly SystemRoleKey[] = ["device"];
  * Role options: the given system roles (translated) followed by the organization's custom roles
  * (their own names, never translated).
  */
-export const useRoleOptions = (customRoles: readonly Role[] | undefined, systemRoles: readonly SystemRoleKey[] = PERSON_SYSTEM_ROLES): readonly RoleOption[] => {
+export const useRoleOptions = (
+  customRoles: readonly Role[] | undefined,
+  systemRoles: readonly SystemRoleKey[] = PERSON_SYSTEM_ROLES,
+): readonly RoleOption[] => {
   const t = useTranslations("settings.roles.system");
   return useMemo(() => {
     const system = systemRoles.map((key): RoleOption => {

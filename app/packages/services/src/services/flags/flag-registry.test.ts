@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { assertFlagRegistry, CORE_FLAGS, expiredFlags, flagEnvironmentDefaults, InvalidFlagRegistryError, isFlagExpired, type RegisteredFlag } from "./flag-registry.ts";
+import {
+  assertFlagRegistry,
+  CORE_FLAGS,
+  expiredFlags,
+  flagEnvironmentDefaults,
+  InvalidFlagRegistryError,
+  isFlagExpired,
+  type RegisteredFlag,
+} from "./flag-registry.ts";
 
 const flag = (overrides: Partial<RegisteredFlag> = {}): RegisteredFlag => ({
   key: "demo.flag",
@@ -23,14 +31,27 @@ describe("flag registry", () => {
       expect(Date.parse(entry.expiresAt)).toBeGreaterThan(Date.parse(entry.createdAt));
     }
     expect(CORE_FLAGS.map((entry) => entry.key)).toEqual(
-      expect.arrayContaining(["ai.kill-switch", "ai.web-tools", "chat.voice", "chat.voice.realtime", "ai.memory.observational", "workflows.schedules"]),
+      expect.arrayContaining([
+        "ai.kill-switch",
+        "ai.web-tools",
+        "chat.voice",
+        "chat.voice.realtime",
+        "ai.memory.observational",
+        "workflows.schedules",
+      ]),
     );
-    expect(CORE_FLAGS.find((entry) => entry.key === "ai.kill-switch")).toMatchObject({ kind: "kill-switch", default: false, tenantOverridable: false });
+    expect(CORE_FLAGS.find((entry) => entry.key === "ai.kill-switch")).toMatchObject({
+      kind: "kill-switch",
+      default: false,
+      tenantOverridable: false,
+    });
   });
 
   it("refuses a flag without owner, with an expiry before creation, or a duplicated key", () => {
     expect(() => assertFlagRegistry([flag({ owner: "" })])).toThrow(InvalidFlagRegistryError);
-    expect(() => assertFlagRegistry([flag({ expiresAt: "2025-12-31T00:00:00.000Z" })])).toThrow(InvalidFlagRegistryError);
+    expect(() => assertFlagRegistry([flag({ expiresAt: "2025-12-31T00:00:00.000Z" })])).toThrow(
+      InvalidFlagRegistryError,
+    );
     expect(() => assertFlagRegistry([flag(), flag()])).toThrow(/duplicated/);
   });
 
@@ -47,6 +68,8 @@ describe("flagEnvironmentDefaults", () => {
   it("turns voice on in local only unless AI_VOICE_ENABLED says otherwise", () => {
     expect(flagEnvironmentDefaults({ APP_ENV: "local" })["chat.voice"]).toBe(true);
     expect(flagEnvironmentDefaults({ APP_ENV: "prod" })["chat.voice"]).toBe(false);
-    expect(flagEnvironmentDefaults({ APP_ENV: "local", AI_VOICE_ENABLED: false, AI_VOICE_REALTIME_ENABLED: true })).toMatchObject({ "chat.voice": false, "chat.voice.realtime": true });
+    expect(
+      flagEnvironmentDefaults({ APP_ENV: "local", AI_VOICE_ENABLED: false, AI_VOICE_REALTIME_ENABLED: true }),
+    ).toMatchObject({ "chat.voice": false, "chat.voice.realtime": true });
   });
 });

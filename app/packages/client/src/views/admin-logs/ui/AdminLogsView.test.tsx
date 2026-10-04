@@ -3,12 +3,23 @@ import { describe, expect, it } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { buildLogLine, OPS_IDS } from "#/shared/testing/admin-operations-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, ok, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, FAKE_REQUEST_ID, type FakeRoutes, ok } from "#/shared/testing/fake-api.ts";
 import { AdminLogsView, cloudLoggingHref } from "./AdminLogsView.tsx";
 
-const ERROR_LINE = buildLogLine({ timestamp: "2026-09-30T12:00:05.000Z", level: "error", message: "get_order_failed", traceId: null, requestId: null, fields: {} });
-const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({ "GET /v1/admin/logs": ok([ERROR_LINE, buildLogLine()]), ...overrides });
-const render = (options: Parameters<typeof renderAdmin>[1] = {}) => renderAdmin(<AdminLogsView />, { path: "/admin/logs", routes: routes(), ...options });
+const ERROR_LINE = buildLogLine({
+  timestamp: "2026-09-30T12:00:05.000Z",
+  level: "error",
+  message: "get_order_failed",
+  traceId: null,
+  requestId: null,
+  fields: {},
+});
+const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
+  "GET /v1/admin/logs": ok([ERROR_LINE, buildLogLine()]),
+  ...overrides,
+});
+const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
+  renderAdmin(<AdminLogsView />, { path: "/admin/logs", routes: routes(), ...options });
 
 describe("AdminLogsView", () => {
   it("lists the lines newest first with level, message, references and collapsed fields", async () => {
@@ -24,7 +35,11 @@ describe("AdminLogsView", () => {
     expect(within(info).getByText("order_placed").className).toContain("font-mono");
     expect(within(info).getByText("web · local")).toBeDefined();
     expect(within(info).getByText(OPS_IDS.request)).toBeDefined();
-    expect(within(info).getByRole("link", { name: `Abrir o trace ${OPS_IDS.trace}` }).getAttribute("href")).toBe(`/admin/traces/${OPS_IDS.trace}`);
+    expect(
+      within(info)
+        .getByRole("link", { name: `Abrir o trace ${OPS_IDS.trace}` })
+        .getAttribute("href"),
+    ).toBe(`/admin/traces/${OPS_IDS.trace}`);
     expect(info.querySelector("time")?.getAttribute("datetime")).toBe("2026-09-30T12:00:00.000Z");
     const toggle = within(info).getByRole("button", { name: "2 campos" });
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
@@ -61,10 +76,17 @@ describe("AdminLogsView", () => {
   });
 
   it("points to Cloud Logging outside the local environment, with the trace of the filter", async () => {
-    const { container } = render({ path: `/admin/logs?traceId=${OPS_IDS.trace}`, routes: routes({ "GET /v1/admin/logs": apiError(404, "NOT_FOUND") }) });
-    expect(await screen.findByRole("heading", { level: 2, name: "Fora do ambiente local, os logs ficam no Cloud Logging" })).toBeDefined();
+    const { container } = render({
+      path: `/admin/logs?traceId=${OPS_IDS.trace}`,
+      routes: routes({ "GET /v1/admin/logs": apiError(404, "NOT_FOUND") }),
+    });
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "Fora do ambiente local, os logs ficam no Cloud Logging" }),
+    ).toBeDefined();
     const link = screen.getByRole("link", { name: /Abrir o Cloud Logging/u });
-    expect(link.getAttribute("href")).toBe(`https://console.cloud.google.com/logs/query;query=${encodeURIComponent(`jsonPayload.traceId="${OPS_IDS.trace}"`)}`);
+    expect(link.getAttribute("href")).toBe(
+      `https://console.cloud.google.com/logs/query;query=${encodeURIComponent(`jsonPayload.traceId="${OPS_IDS.trace}"`)}`,
+    );
     expect(link.getAttribute("rel")).toContain("noopener");
     expect(screen.getByText(/escolha o projeto deste ambiente/u)).toBeDefined();
     expect(screen.queryByRole("button", { name: "Atualizar" })).toBeNull();
@@ -73,7 +95,9 @@ describe("AdminLogsView", () => {
 
   it("builds the Cloud Logging link from the trace and the request", () => {
     expect(cloudLoggingHref({})).toBe("https://console.cloud.google.com/logs/query");
-    expect(decodeURIComponent(cloudLoggingHref({ traceId: "t1", requestId: "r1" }))).toBe('https://console.cloud.google.com/logs/query;query=jsonPayload.traceId="t1"\njsonPayload.requestId="r1"');
+    expect(decodeURIComponent(cloudLoggingHref({ traceId: "t1", requestId: "r1" }))).toBe(
+      'https://console.cloud.google.com/logs/query;query=jsonPayload.traceId="t1"\njsonPayload.requestId="r1"',
+    );
   });
 
   it("tells an empty buffer from filters that match nothing", async () => {

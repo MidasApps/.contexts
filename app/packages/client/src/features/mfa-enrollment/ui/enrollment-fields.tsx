@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleAlertIcon } from "lucide-react";
-import { useEffect, useRef, type Ref } from "react";
+import { type Ref, useEffect, useRef } from "react";
 import { useTranslations } from "use-intl";
 import type { AuthErrorCode } from "#/shared/lib/auth/auth-port.ts";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
@@ -24,7 +24,19 @@ export function EnrollmentAlert({ code }: { code: AuthErrorCode }) {
 }
 
 /** The 6-digit one-time code (authenticator app or SMS), numeric keypad on phones. */
-export function CodeField({ value, onChange, error, inputRef, hint }: { value: string; onChange: (value: string) => void; error: string | undefined; inputRef?: Ref<HTMLInputElement>; hint: string }) {
+export function CodeField({
+  value,
+  onChange,
+  error,
+  inputRef,
+  hint,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  error: string | undefined;
+  inputRef?: Ref<HTMLInputElement>;
+  hint: string;
+}) {
   const t = useTranslations("profile.security.mfa");
   return (
     <Field>

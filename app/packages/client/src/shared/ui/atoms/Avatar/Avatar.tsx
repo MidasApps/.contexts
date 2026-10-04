@@ -5,7 +5,7 @@ import { Avatar as AvatarPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
-import { avatarToneFor, initialsOf, type AvatarTone } from "./avatar-identity.ts";
+import { type AvatarTone, avatarToneFor, initialsOf } from "./avatar-identity.ts";
 
 const avatarVariants = cva("group/avatar relative flex shrink-0 rounded-full select-none", {
   variants: {
@@ -58,18 +58,40 @@ export type AvatarProps = Omit<ComponentProps<typeof AvatarPrimitive.Root>, "chi
  * is announced as text, never colour alone. The image is decorative when a name is shown next to
  * it; `alt` is the name otherwise.
  */
-export function Avatar({ className, size = "md", name, src, tone = "auto", presence, decorative = false, ...props }: AvatarProps) {
+export function Avatar({
+  className,
+  size = "md",
+  name,
+  src,
+  tone = "auto",
+  presence,
+  decorative = false,
+  ...props
+}: AvatarProps) {
   const t = useTranslations("common.presence");
   const resolvedTone = tone === "auto" ? avatarToneFor(name) : tone;
   const showPresence = presence !== undefined && size !== "xs" && size !== "sm";
   return (
-    <AvatarPrimitive.Root data-slot="avatar" aria-hidden={decorative || undefined} className={cn(avatarVariants({ size }), className)} {...props}>
+    <AvatarPrimitive.Root
+      data-slot="avatar"
+      aria-hidden={decorative || undefined}
+      className={cn(avatarVariants({ size }), className)}
+      {...props}
+    >
       {src === undefined ? null : (
-        <AvatarPrimitive.Image data-slot="avatar-image" src={src} alt={decorative ? "" : name} className="aspect-square size-full rounded-full object-cover" />
+        <AvatarPrimitive.Image
+          data-slot="avatar-image"
+          src={src}
+          alt={decorative ? "" : name}
+          className="aspect-square size-full rounded-full object-cover"
+        />
       )}
       <AvatarPrimitive.Fallback
         data-slot="avatar-fallback"
-        className={cn("flex size-full items-center justify-center rounded-full font-semibold", TONE_CLASSES[resolvedTone])}
+        className={cn(
+          "flex size-full items-center justify-center rounded-full font-semibold",
+          TONE_CLASSES[resolvedTone],
+        )}
       >
         <span aria-hidden="true">{initialsOf(name)}</span>
         {decorative ? null : <span className="sr-only">{name}</span>}

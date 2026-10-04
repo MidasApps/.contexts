@@ -1,3 +1,4 @@
+import type { SupportedLocale } from "../locales.ts";
 import enUSAdmin from "./en-US/admin.json" with { type: "json" };
 import enUSAuth from "./en-US/auth.json" with { type: "json" };
 import enUSChat from "./en-US/chat.json" with { type: "json" };
@@ -25,7 +26,6 @@ import ptBRPermissions from "./pt-BR/permissions.json" with { type: "json" };
 import ptBRProfile from "./pt-BR/profile.json" with { type: "json" };
 import ptBRSettings from "./pt-BR/settings.json" with { type: "json" };
 import ptBRShell from "./pt-BR/shell.json" with { type: "json" };
-import type { SupportedLocale } from "../locales.ts";
 
 /** A message tree: ICU strings at the leaves, nested by key segment. */
 export type MessageTree = { [key: string]: string | MessageTree };
@@ -48,7 +48,37 @@ export type CoreMessages = {
 
 /** Static imports keep the catalogs bundler-friendly (Next, Vite) and Node-loadable. */
 export const CORE_MESSAGES: Record<SupportedLocale, CoreMessages> = {
-  "pt-BR": { admin: ptBRAdmin, auth: ptBRAuth, chat: ptBRChat, common: ptBRCommon, errors: ptBRErrors, permissions: ptBRPermissions, profile: ptBRProfile, settings: ptBRSettings, shell: ptBRShell },
-  "en-US": { admin: enUSAdmin, auth: enUSAuth, chat: enUSChat, common: enUSCommon, errors: enUSErrors, permissions: enUSPermissions, profile: enUSProfile, settings: enUSSettings, shell: enUSShell },
-  "es-419": { admin: es419Admin, auth: es419Auth, chat: es419Chat, common: es419Common, errors: es419Errors, permissions: es419Permissions, profile: es419Profile, settings: es419Settings, shell: es419Shell },
+  "pt-BR": {
+    admin: ptBRAdmin,
+    auth: ptBRAuth,
+    chat: ptBRChat,
+    common: ptBRCommon,
+    errors: ptBRErrors,
+    permissions: ptBRPermissions,
+    profile: ptBRProfile,
+    settings: ptBRSettings,
+    shell: ptBRShell,
+  },
+  "en-US": {
+    admin: enUSAdmin,
+    auth: enUSAuth,
+    chat: enUSChat,
+    common: enUSCommon,
+    errors: enUSErrors,
+    permissions: enUSPermissions,
+    profile: enUSProfile,
+    settings: enUSSettings,
+    shell: enUSShell,
+  },
+  "es-419": {
+    admin: es419Admin,
+    auth: es419Auth,
+    chat: es419Chat,
+    common: es419Common,
+    errors: es419Errors,
+    permissions: es419Permissions,
+    profile: es419Profile,
+    settings: es419Settings,
+    shell: es419Shell,
+  },
 };

@@ -3,9 +3,20 @@ import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import type { ApprovalPort, AuditPort } from "../runtime/runtime-ports.ts";
 import { buildAgentContextEntries, TEST_REQUEST_ID, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
-import { createFakeAccessPort, createFakeApprovalPort, createFakeAuditPort, createFakeCommandIdempotency } from "../testing/fake-ports.ts";
+import {
+  createFakeAccessPort,
+  createFakeApprovalPort,
+  createFakeAuditPort,
+  createFakeCommandIdempotency,
+} from "../testing/fake-ports.ts";
 import { runCoreTool } from "./core-tool-pipeline.ts";
-import { type CoreToolContext, type CoreToolDeps, defineCoreTool, hashToolInput, type ToolCallInfo } from "./define-core-tool.ts";
+import {
+  type CoreToolContext,
+  type CoreToolDeps,
+  defineCoreTool,
+  hashToolInput,
+  type ToolCallInfo,
+} from "./define-core-tool.ts";
 import { CoreToolError } from "./tool-errors.ts";
 
 const NOTE_OUTPUT = z.strictObject({ noteId: z.string() });
@@ -45,8 +56,12 @@ const setup = (overrides: Partial<CoreToolDeps> = {}, approvalPermissions: strin
   return { access, audit, approvals, deps };
 };
 
-const call = (overrides: { permissions?: string[]; requestContext?: RequestContext; abortSignal?: AbortSignal } = {}): ToolCallInfo => ({
-  requestContext: overrides.requestContext ?? new RequestContext<unknown>(buildAgentContextEntries({ permissions: overrides.permissions ?? PERMISSIONS })),
+const call = (
+  overrides: { permissions?: string[]; requestContext?: RequestContext; abortSignal?: AbortSignal } = {},
+): ToolCallInfo => ({
+  requestContext:
+    overrides.requestContext ??
+    new RequestContext<unknown>(buildAgentContextEntries({ permissions: overrides.permissions ?? PERMISSIONS })),
   agentId: "action",
   toolCallId: "call_7",
   ...(overrides.abortSignal === undefined ? {} : { abortSignal: overrides.abortSignal }),
@@ -64,9 +79,9 @@ const rejection = async (promise: Promise<unknown>): Promise<CoreToolError> => {
 
 describe("defineCoreTool", () => {
   it("refuses a non-strict input schema at definition time", () => {
-    expect(() =>
-      defineCoreTool({ ...listNotes, inputSchema: z.object({ limit: z.int().describe("x") }) }),
-    ).toThrow(/strict/);
+    expect(() => defineCoreTool({ ...listNotes, inputSchema: z.object({ limit: z.int().describe("x") }) })).toThrow(
+      /strict/,
+    );
   });
 
   it("refuses an undocumented input field and a malformed permission", () => {
@@ -94,7 +109,14 @@ describe("runCoreTool", () => {
     const execute = vi.fn((input: { limit: number }, ctx: CoreToolContext) => listNotes.execute(input, ctx));
     const { deps, access } = setup();
     const entries = buildAgentContextEntries().filter(([key]) => key !== "tenantId");
-    const error = await rejection(runCoreTool({ ...listNotes, execute }, deps, { limit: 1 }, call({ requestContext: new RequestContext<unknown>(entries) })));
+    const error = await rejection(
+      runCoreTool(
+        { ...listNotes, execute },
+        deps,
+        { limit: 1 },
+        call({ requestContext: new RequestContext<unknown>(entries) }),
+      ),
+    );
     expect(error.code).toBe("CONTEXT_MISSING");
     expect(error.details).toMatchObject({ missing: ["tenantId"] });
     expect(execute).not.toHaveBeenCalled();
@@ -103,7 +125,9 @@ describe("runCoreTool", () => {
 
   it("returns FORBIDDEN when authorize denies, without executing", async () => {
     const execute = vi.fn((input: { limit: number }, ctx: CoreToolContext) => listNotes.execute(input, ctx));
-    const access = createFakeAccessPort({ memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions: ["core.chat.use"] }] });
+    const access = createFakeAccessPort({
+      memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions: ["core.chat.use"] }],
+    });
     const { deps } = setup({ access });
     const error = await rejection(runCoreTool({ ...listNotes, execute }, deps, { limit: 1 }, call()));
     expect(error.code).toBe("FORBIDDEN");
@@ -137,7 +161,10 @@ describe("runCoreTool", () => {
   });
 
   it("falls back to the static agent ceiling when the resolver has none for the run", async () => {
-    const { deps } = setup({ runCeilingOf: () => Promise.resolve(undefined), agentCeilings: { action: new Set(["example.note.read"]) } });
+    const { deps } = setup({
+      runCeilingOf: () => Promise.resolve(undefined),
+      agentCeilings: { action: new Set(["example.note.read"]) },
+    });
     await expect(runCoreTool(listNotes, deps, { limit: 1 }, call())).resolves.toEqual({ count: 1 });
   });
 
@@ -149,7 +176,9 @@ describe("runCoreTool", () => {
 
   it("fails closed when authorize itself fails", async () => {
     const base = setup();
-    const { deps } = setup({ access: { ...base.access, authorize: () => Promise.reject(new Error("firestore down: secret-detail")) } });
+    const { deps } = setup({
+      access: { ...base.access, authorize: () => Promise.reject(new Error("firestore down: secret-detail")) },
+    });
     const error = await rejection(runCoreTool(listNotes, deps, { limit: 1 }, call()));
     expect(error.code).toBe("AUTHORIZATION_UNAVAILABLE");
     expect(error.message).not.toMatch(/secret-detail/);
@@ -157,7 +186,9 @@ describe("runCoreTool", () => {
 
   it("executes a mutation and audits it with an input hash, never the raw input", async () => {
     const { deps, audit } = setup();
-    await expect(runCoreTool(createNote, deps, { text: "private words" }, call())).resolves.toEqual({ noteId: "note-13" });
+    await expect(runCoreTool(createNote, deps, { text: "private words" }, call())).resolves.toEqual({
+      noteId: "note-13",
+    });
     expect(audit.entries).toHaveLength(1);
     const [entry] = audit.entries;
     expect(entry).toMatchObject({
@@ -223,7 +254,10 @@ describe("runCoreTool", () => {
 
   it("hands execute an idempotency key derived from runId:toolCallId", async () => {
     const keys: string[] = [];
-    const recording = defineCoreTool({ ...createNote, execute: (input, ctx) => (keys.push(ctx.idempotencyKey), createNote.execute(input, ctx)) });
+    const recording = defineCoreTool({
+      ...createNote,
+      execute: (input, ctx) => (keys.push(ctx.idempotencyKey), createNote.execute(input, ctx)),
+    });
     const { deps } = setup();
     await runCoreTool(recording, deps, { text: "x" }, call());
     expect(keys).toEqual([`${TEST_REQUEST_ID}:call_7`]);
@@ -239,7 +273,14 @@ describe("runCoreTool", () => {
       expect(first).toEqual({ noteId: "note-5" });
       expect(second).toEqual({ noteId: "note-5" });
       expect(execute).toHaveBeenCalledTimes(1);
-      expect(commands.runs).toEqual([{ tenantId: TEST_TENANT, commandId: "example.CreateNoteCommand", idempotencyKey: `${TEST_REQUEST_ID}:call_7`, input: { text: "hello" } }]);
+      expect(commands.runs).toEqual([
+        {
+          tenantId: TEST_TENANT,
+          commandId: "example.CreateNoteCommand",
+          idempotencyKey: `${TEST_REQUEST_ID}:call_7`,
+          input: { text: "hello" },
+        },
+      ]);
       expect(audit.entries.map((entry) => entry.metadata.replayed)).toEqual([false, true]);
     });
 
@@ -251,10 +292,16 @@ describe("runCoreTool", () => {
     });
 
     it("keeps the store refusal code and fails closed when the store is down", async () => {
-      const inProgress = { runOnce: () => Promise.reject(Object.assign(new Error("busy"), { code: "COMMAND_IN_PROGRESS" })) };
-      expect((await rejection(runCoreTool(createNote, setup({ commands: inProgress }).deps, { text: "x" }, call()))).code).toBe("COMMAND_IN_PROGRESS");
+      const inProgress = {
+        runOnce: () => Promise.reject(Object.assign(new Error("busy"), { code: "COMMAND_IN_PROGRESS" })),
+      };
+      expect(
+        (await rejection(runCoreTool(createNote, setup({ commands: inProgress }).deps, { text: "x" }, call()))).code,
+      ).toBe("COMMAND_IN_PROGRESS");
       const down = { runOnce: () => Promise.reject(new Error("firestore unavailable")) };
-      expect((await rejection(runCoreTool(createNote, setup({ commands: down }).deps, { text: "x" }, call()))).code).toBe("IDEMPOTENCY_UNAVAILABLE");
+      expect(
+        (await rejection(runCoreTool(createNote, setup({ commands: down }).deps, { text: "x" }, call()))).code,
+      ).toBe("IDEMPOTENCY_UNAVAILABLE");
     });
   });
 
@@ -299,7 +346,10 @@ describe("runCoreTool", () => {
   });
 
   it("maps an unexpected execute error to TOOL_FAILED without its message and audits the failure", async () => {
-    const failing = defineCoreTool({ ...createNote, execute: () => Promise.reject(new Error("SQL: select * from secrets")) });
+    const failing = defineCoreTool({
+      ...createNote,
+      execute: () => Promise.reject(new Error("SQL: select * from secrets")),
+    });
     const { deps, audit } = setup();
     const error = await rejection(runCoreTool(failing, deps, { text: "x" }, call()));
     expect(error.code).toBe("TOOL_FAILED");
@@ -310,7 +360,10 @@ describe("runCoreTool", () => {
   it("keeps a typed failure thrown by execute", async () => {
     const failing = defineCoreTool({
       ...listNotes,
-      execute: () => Promise.reject(new CoreToolError({ code: "NOTE_NOT_FOUND", toolId: "example.listNotes", message: "Note not found." })),
+      execute: () =>
+        Promise.reject(
+          new CoreToolError({ code: "NOTE_NOT_FOUND", toolId: "example.listNotes", message: "Note not found." }),
+        ),
     });
     const { deps } = setup();
     expect((await rejection(runCoreTool(failing, deps, { limit: 1 }, call()))).code).toBe("NOTE_NOT_FOUND");
@@ -323,10 +376,16 @@ describe("runCoreTool", () => {
   });
 
   it("audits a read tool that opts in (for example SQL queries)", async () => {
-    const audited = defineCoreTool({ ...listNotes, audit: { action: "SEMANTIC_QUERY_EXECUTED", metadata: (output) => ({ count: String(output.count) }) } });
+    const audited = defineCoreTool({
+      ...listNotes,
+      audit: { action: "SEMANTIC_QUERY_EXECUTED", metadata: (output) => ({ count: String(output.count) }) },
+    });
     const { deps, audit } = setup();
     await runCoreTool(audited, deps, { limit: 2 }, call());
-    expect(audit.entries[0]).toMatchObject({ action: "SEMANTIC_QUERY_EXECUTED", metadata: { outcome: "succeeded", count: "2" } });
+    expect(audit.entries[0]).toMatchObject({
+      action: "SEMANTIC_QUERY_EXECUTED",
+      metadata: { outcome: "succeeded", count: "2" },
+    });
   });
 });
 

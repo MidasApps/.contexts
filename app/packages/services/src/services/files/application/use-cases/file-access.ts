@@ -12,7 +12,8 @@ export const uploaderIdOf = (principal: Principal): string =>
 export type FilesCaller = { readonly principal: Principal; readonly authorize: Authorize };
 
 const allows = async (caller: FilesCaller, permission: string, tenantId: TenantId): Promise<boolean> =>
-  (await caller.authorize({ principal: caller.principal, permission, node: { level: "organization", tenantId } })).allowed;
+  (await caller.authorize({ principal: caller.principal, permission, node: { level: "organization", tenantId } }))
+    .allowed;
 
 /**
  * Read access to a file record (SP3 Task 13): its uploader while they may still
@@ -21,9 +22,14 @@ const allows = async (caller: FilesCaller, permission: string, tenantId: TenantI
  * shares them through a conversation.
  */
 export const canReadFile = async (caller: FilesCaller, file: StoredFile): Promise<boolean> => {
-  if (file.createdBy === uploaderIdOf(caller.principal) && (await allows(caller, FILE_UPLOAD_PERMISSION, file.tenantId))) return true;
+  if (
+    file.createdBy === uploaderIdOf(caller.principal) &&
+    (await allows(caller, FILE_UPLOAD_PERMISSION, file.tenantId))
+  )
+    return true;
   return file.purpose === "knowledge" && (await allows(caller, KNOWLEDGE_READ_PERMISSION, file.tenantId));
 };
 
 /** Whether the caller may upload in the organization. */
-export const canUpload = (caller: FilesCaller, tenantId: TenantId): Promise<boolean> => allows(caller, FILE_UPLOAD_PERMISSION, tenantId);
+export const canUpload = (caller: FilesCaller, tenantId: TenantId): Promise<boolean> =>
+  allows(caller, FILE_UPLOAD_PERMISSION, tenantId);

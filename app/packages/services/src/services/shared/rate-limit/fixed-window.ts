@@ -29,7 +29,12 @@ export const applyFixedWindow = (args: {
   const underLimit = current.count < policy.limit;
   if (!args.consume || !underLimit) {
     return {
-      decision: { allowed: underLimit, limit: policy.limit, remaining: Math.max(0, policy.limit - current.count), resetAt },
+      decision: {
+        allowed: underLimit,
+        limit: policy.limit,
+        remaining: Math.max(0, policy.limit - current.count),
+        resetAt,
+      },
       next: null,
     };
   }
@@ -52,5 +57,8 @@ export const applyFixedWindowRefund = (args: {
   if (bucket === null || bucket.count === 0) return null;
   if (bucket.windowStart.getTime() + policy.windowMs !== consumed.resetAt.getTime()) return null;
   const next: BucketState = { count: bucket.count - 1, windowStart: bucket.windowStart };
-  return { decision: { allowed: true, limit: policy.limit, remaining: policy.limit - next.count, resetAt: consumed.resetAt }, next };
+  return {
+    decision: { allowed: true, limit: policy.limit, remaining: policy.limit - next.count, resetAt: consumed.resetAt },
+    next,
+  };
 };

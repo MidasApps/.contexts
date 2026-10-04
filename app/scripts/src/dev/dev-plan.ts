@@ -22,7 +22,11 @@ export const buildComposeUpArgs = (args: { envFile?: string }): string[] => [
  *
  * @throws {Error} when the project is not a `demo-*` project.
  */
-export const buildEmulatorStartArgs = (args: { projectId: string; dataDir: string; hasSavedData: boolean }): string[] => {
+export const buildEmulatorStartArgs = (args: {
+  projectId: string;
+  dataDir: string;
+  hasSavedData: boolean;
+}): string[] => {
   if (!args.projectId.startsWith(DEMO_PROJECT_PREFIX)) {
     throw new Error(`local emulators only run a ${DEMO_PROJECT_PREFIX}* project (FIREBASE_PROJECT_ID)`);
   }
@@ -45,7 +49,9 @@ export const buildEmulatorStartArgs = (args: { projectId: string; dataDir: strin
 export const FUNCTIONS_DISCOVERY_TIMEOUT_SECONDS = 180;
 
 /** Env of the emulator process: the shell's, plus the discovery timeout unless the shell set one. */
-export const buildEmulatorEnv = (env: Readonly<Record<string, string | undefined>>): Record<string, string | undefined> => {
+export const buildEmulatorEnv = (
+  env: Readonly<Record<string, string | undefined>>,
+): Record<string, string | undefined> => {
   const fromShell = env["FUNCTIONS_DISCOVERY_TIMEOUT"];
   const timeout = fromShell === undefined || fromShell === "" ? String(FUNCTIONS_DISCOVERY_TIMEOUT_SECONDS) : fromShell;
   return { ...env, FUNCTIONS_DISCOVERY_TIMEOUT: timeout };
@@ -67,7 +73,13 @@ export const buildEmulatorExportArgs = (args: { projectId: string; dataDir: stri
  * opt-in (`pnpm dev:desktop`): Rust builds take minutes. `--ui=stream` keeps
  * plain prefixed logs and lets Ctrl+C reach every task.
  */
-export const buildTurboDevArgs = (): string[] => ["run", "dev", "--ui=stream", "--filter=@core/web", "--filter=@core/mastra"];
+export const buildTurboDevArgs = (): string[] => [
+  "run",
+  "dev",
+  "--ui=stream",
+  "--filter=@core/web",
+  "--filter=@core/mastra",
+];
 
 /**
  * The Functions emulator's `healthz` (apps/functions, decision 0003). It answers
@@ -113,7 +125,9 @@ const parsePort = (name: string, raw: string | undefined, fallback: number): num
  *
  * @throws {Error} naming the variable when a port is not an integer in 1–65535.
  */
-export const readDevPorts = (env: Readonly<Record<string, string | undefined>>): { webPort: number; mastraPort: number } => ({
+export const readDevPorts = (
+  env: Readonly<Record<string, string | undefined>>,
+): { webPort: number; mastraPort: number } => ({
   webPort: parsePort("WEB_PORT", env["WEB_PORT"], 3000),
   mastraPort: parsePort("PORT", env["PORT"], 4111),
 });
@@ -124,4 +138,9 @@ export const readDevPorts = (env: Readonly<Record<string, string | undefined>>):
  * the readiness probe and look like our server.
  */
 export const describePortConflicts = (busy: readonly { name: string; port: number; variable: string }[]): string =>
-  busy.map((check) => `port ${String(check.port)} (${check.name}) is already in use; stop what holds it or set ${check.variable} to a free port`).join("\n");
+  busy
+    .map(
+      (check) =>
+        `port ${String(check.port)} (${check.name}) is already in use; stop what holds it or set ${check.variable} to a free port`,
+    )
+    .join("\n");

@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
-import { useId, useState, type ComponentProps } from "react";
+import { type ComponentProps, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { textControlClasses } from "#/shared/ui/atoms/Input/input-styles.ts";
@@ -33,7 +33,10 @@ export type ComboboxProps = Omit<ComponentProps<"button">, "value" | "onChange" 
 };
 
 const normalize = (text: string): string =>
-  text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("en-US");
+  text
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("en-US");
 
 /**
  * Substring filter (every typed word must appear in the value, label or keywords, accents and case
@@ -42,7 +45,12 @@ const normalize = (text: string): string =>
  */
 export const containsAllTerms = (value: string, search: string, keywords: string[] = []): number => {
   const haystack = normalize([value, ...keywords].join(" "));
-  return normalize(search).split(/\s+/u).filter(Boolean).every((term) => haystack.includes(term)) ? 1 : 0;
+  return normalize(search)
+    .split(/\s+/u)
+    .filter(Boolean)
+    .every((term) => haystack.includes(term))
+    ? 1
+    : 0;
 };
 
 /**

@@ -1,5 +1,10 @@
 import type { KnowledgeRepository, UpsertedDocument } from "../ports/knowledge-repository.ts";
-import { inputErrorOf, type KnowledgeInputError, type RegisterDocumentInput, RegisterDocumentInputSchema } from "./knowledge-input.schema.ts";
+import {
+  inputErrorOf,
+  type KnowledgeInputError,
+  type RegisterDocumentInput,
+  RegisterDocumentInputSchema,
+} from "./knowledge-input.schema.ts";
 
 export type RegisterDocument = (
   input: RegisterDocumentInput,

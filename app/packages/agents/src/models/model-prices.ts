@@ -41,7 +41,8 @@ export const FAKE_MODEL_PRICES: Readonly<Record<string, ModelPrice>> = {
 const FAKE_MODE_PRICES: Readonly<Record<string, ModelPrice>> = { ...MODEL_PRICES, ...FAKE_MODEL_PRICES };
 
 /** The table the ledger prices with: the verified prices, plus the fake ones in fake mode only. */
-export const priceTableFor = (aiMode: "fake" | "real"): Readonly<Record<string, ModelPrice>> => (aiMode === "fake" ? FAKE_MODE_PRICES : MODEL_PRICES);
+export const priceTableFor = (aiMode: "fake" | "real"): Readonly<Record<string, ModelPrice>> =>
+  aiMode === "fake" ? FAKE_MODE_PRICES : MODEL_PRICES;
 
 export type TokenUsage = { readonly inputTokens: number; readonly outputTokens: number };
 
@@ -53,9 +54,14 @@ const TOKENS_PER_PRICE_UNIT = 1_000_000;
  * @param prices the table to read (`priceTableFor`); the verified prices by default.
  * @returns `null` when the model has no price in the table.
  */
-export const estimateCostMicroUsd = (modelId: string, usage: TokenUsage, prices: Readonly<Record<string, ModelPrice>> = MODEL_PRICES): number | null => {
+export const estimateCostMicroUsd = (
+  modelId: string,
+  usage: TokenUsage,
+  prices: Readonly<Record<string, ModelPrice>> = MODEL_PRICES,
+): number | null => {
   const price = prices[modelId];
   if (price === undefined) return null;
-  const microUsdTimesMillion = usage.inputTokens * price.inputMicroUsdPerMTok + usage.outputTokens * price.outputMicroUsdPerMTok;
+  const microUsdTimesMillion =
+    usage.inputTokens * price.inputMicroUsdPerMTok + usage.outputTokens * price.outputMicroUsdPerMTok;
   return Math.ceil(microUsdTimesMillion / TOKENS_PER_PRICE_UNIT);
 };

@@ -28,7 +28,9 @@ export function AgentEnabledSwitch({ organizationId, agent, settings, canUpdate 
   const enabled = settings.enabledAgents.includes(agent.key);
 
   const toggle = (next: boolean): void => {
-    const enabledAgents = next ? [...settings.enabledAgents, agent.key] : settings.enabledAgents.filter((key) => key !== agent.key);
+    const enabledAgents = next
+      ? [...settings.enabledAgents, agent.key]
+      : settings.enabledAgents.filter((key) => key !== agent.key);
     const done = next ? t("enabledToast", { agent: agent.name }) : t("disabledToast", { agent: agent.name });
     void save(settings, { patch: { enabledAgents }, next: { ...settings, enabledAgents }, done });
   };
@@ -37,7 +39,14 @@ export function AgentEnabledSwitch({ organizationId, agent, settings, canUpdate 
     <div className="flex flex-col items-end gap-2">
       <span className="flex items-center gap-2">
         <StatusPill tone={enabled ? "emerald" : "neutral"}>{enabled ? t("enabled") : t("disabled")}</StatusPill>
-        {canUpdate ? <Switch checked={enabled} disabled={saving || !online} onCheckedChange={toggle} aria-label={t("enable", { agent: agent.name })} /> : null}
+        {canUpdate ? (
+          <Switch
+            checked={enabled}
+            disabled={saving || !online}
+            onCheckedChange={toggle}
+            aria-label={t("enable", { agent: agent.name })}
+          />
+        ) : null}
       </span>
       <SaveFailure failure={failure} />
     </div>

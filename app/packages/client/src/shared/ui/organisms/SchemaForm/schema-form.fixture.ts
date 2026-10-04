@@ -6,7 +6,10 @@ import { z } from "zod";
 const none = (description: string) => ({ description, pii: "none" as const });
 
 export const FixtureNoteSchema = z.object({
-  id: z.string().min(1).meta({ ...none("Automatic id."), ui: { widget: "hidden" } }),
+  id: z
+    .string()
+    .min(1)
+    .meta({ ...none("Automatic id."), ui: { widget: "hidden" } }),
   body: z
     .string()
     .max(500)
@@ -17,10 +20,14 @@ export const FixtureNoteSchema = z.object({
     .min(3)
     .max(60)
     .meta({ ...none("Short title."), ui: { widget: "text", labelKey: "fixture.note.title", order: 1 } }),
-  priority: z
-    .enum(["low", "normal", "high"])
-    .meta({ ...none("Priority."), ui: { labelKey: "fixture.note.priority", order: 3, group: "fixture.groups.details" } }),
-  budget: MoneySchema.meta({ ...none("Budget."), ui: { labelKey: "fixture.note.budget", order: 4, group: "fixture.groups.details" } }),
+  priority: z.enum(["low", "normal", "high"]).meta({
+    ...none("Priority."),
+    ui: { labelKey: "fixture.note.priority", order: 3, group: "fixture.groups.details" },
+  }),
+  budget: MoneySchema.meta({
+    ...none("Budget."),
+    ui: { labelKey: "fixture.note.budget", order: 4, group: "fixture.groups.details" },
+  }),
   copies: z
     .int()
     .min(1)
@@ -39,14 +46,19 @@ export const FixtureNoteSchema = z.object({
   internalCode: z
     .string()
     .optional()
-    .meta({ ...none("Admin-only code."), ui: { labelKey: "fixture.note.internalCode", order: 9, visibleWith: "fixture.note.admin" } }),
+    .meta({
+      ...none("Admin-only code."),
+      ui: { labelKey: "fixture.note.internalCode", order: 9, visibleWith: "fixture.note.admin" },
+    }),
 });
 
 export const FixtureNoteContract = defineContract(FixtureNoteSchema, {
   id: "fixture.Note",
   kind: "command",
   description: "SchemaForm test fixture.",
-  examples: [{ id: "a1", title: "Hello", priority: "normal", budget: { amountMinor: 100, currency: "BRL" }, pinned: false }],
+  examples: [
+    { id: "a1", title: "Hello", priority: "normal", budget: { amountMinor: 100, currency: "BRL" }, pinned: false },
+  ],
   pii: "none",
   tenancyScope: "organization",
   relations: [],

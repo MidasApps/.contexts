@@ -26,4 +26,6 @@ const getSampleThingEndpoint = defineEndpoint({
   summary: "Reads the fixture module's thing.",
 });
 
-export const CATALOG_MODULES = [{ moduleId: "sample", contracts: [SampleSettingsContract], endpoints: [getSampleThingEndpoint] }];
+export const CATALOG_MODULES = [
+  { moduleId: "sample", contracts: [SampleSettingsContract], endpoints: [getSampleThingEndpoint] },
+];

@@ -25,7 +25,9 @@ const FIREBASE_CODES: Record<string, AuthErrorCode> = {
 
 /** Firebase error `code` (`auth/...`), when the thrown value has one. */
 export const firebaseCodeOf = (thrown: unknown): string | undefined =>
-  typeof thrown === "object" && thrown !== null && "code" in thrown && typeof thrown.code === "string" ? thrown.code : undefined;
+  typeof thrown === "object" && thrown !== null && "code" in thrown && typeof thrown.code === "string"
+    ? thrown.code
+    : undefined;
 
 /** Maps an SDK failure to a stable `AuthError` (the SDK message is kept only as `cause`). */
 export const toAuthError = (thrown: unknown): AuthError =>

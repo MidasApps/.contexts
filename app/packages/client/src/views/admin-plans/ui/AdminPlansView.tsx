@@ -41,7 +41,13 @@ function Features({ plan }: { plan: Plan }) {
 function EditButton({ plan, onEdit, disabled }: { plan: Plan; onEdit: (plan: Plan) => void; disabled: boolean }) {
   const t = useTranslations("admin.plans");
   return (
-    <Button variant="outline" size="sm" onClick={() => onEdit(plan)} disabled={disabled} aria-label={t("editNamed", { name: plan.name })}>
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => onEdit(plan)}
+      disabled={disabled}
+      aria-label={t("editNamed", { name: plan.name })}
+    >
       {t("edit")}
     </Button>
   );
@@ -54,19 +60,59 @@ const useColumns = (onEdit: (plan: Plan) => void, online: boolean) => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.accessor("name", { header: () => t("columns.name"), cell: ({ getValue }) => <span className="font-medium">{getValue()}</span> }),
-      column.display({ id: "budget", header: () => t("columns.monthlyBudget"), meta: { numeric: true }, cell: ({ row }) => formatCost(row.original.limits.monthlyMicroUsd) }),
-      column.display({ id: "tokens", header: () => t("columns.monthlyTokens"), meta: { numeric: true }, cell: ({ row }) => format.number(row.original.limits.monthlyTokens) }),
-      column.display({ id: "connectors", header: () => t("columns.maxConnectors"), meta: { numeric: true }, cell: ({ row }) => format.number(row.original.limits.maxConnectors) }),
-      column.display({ id: "features", header: () => t("columns.features"), cell: ({ row }) => <Features plan={row.original} /> }),
-      column.accessor("updatedAt", { header: () => t("columns.updatedAt"), cell: ({ getValue }) => formatDateTime(getValue()) }),
-      column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <EditButton plan={row.original} onEdit={onEdit} disabled={!online} /> }),
+      column.accessor("name", {
+        header: () => t("columns.name"),
+        cell: ({ getValue }) => <span className="font-medium">{getValue()}</span>,
+      }),
+      column.display({
+        id: "budget",
+        header: () => t("columns.monthlyBudget"),
+        meta: { numeric: true },
+        cell: ({ row }) => formatCost(row.original.limits.monthlyMicroUsd),
+      }),
+      column.display({
+        id: "tokens",
+        header: () => t("columns.monthlyTokens"),
+        meta: { numeric: true },
+        cell: ({ row }) => format.number(row.original.limits.monthlyTokens),
+      }),
+      column.display({
+        id: "connectors",
+        header: () => t("columns.maxConnectors"),
+        meta: { numeric: true },
+        cell: ({ row }) => format.number(row.original.limits.maxConnectors),
+      }),
+      column.display({
+        id: "features",
+        header: () => t("columns.features"),
+        cell: ({ row }) => <Features plan={row.original} />,
+      }),
+      column.accessor("updatedAt", {
+        header: () => t("columns.updatedAt"),
+        cell: ({ getValue }) => formatDateTime(getValue()),
+      }),
+      column.display({
+        id: "actions",
+        header: () => t("columns.actions"),
+        meta: { headerHidden: true },
+        cell: ({ row }) => <EditButton plan={row.original} onEdit={onEdit} disabled={!online} />,
+      }),
     ],
     [format, formatCost, formatDateTime, onEdit, online, t],
   );
 };
 
-function PlansTable({ plans, onEdit, onCreate, online }: { plans: readonly Plan[]; onEdit: (plan: Plan) => void; onCreate: () => void; online: boolean }) {
+function PlansTable({
+  plans,
+  onEdit,
+  onCreate,
+  online,
+}: {
+  plans: readonly Plan[];
+  onEdit: (plan: Plan) => void;
+  onCreate: () => void;
+  online: boolean;
+}) {
   const t = useTranslations("admin.plans");
   const format = useFormatter();
   const formatCost = useFormatMicroUsd();
@@ -83,7 +129,11 @@ function PlansTable({ plans, onEdit, onCreate, online }: { plans: readonly Plan[
         <div className="flex flex-col gap-2">
           <span className="font-medium">{plan.name}</span>
           <span className="text-xs text-muted-foreground">
-            {t("cardLimits", { budget: formatCost(plan.limits.monthlyMicroUsd), tokens: format.number(plan.limits.monthlyTokens), connectors: plan.limits.maxConnectors })}
+            {t("cardLimits", {
+              budget: formatCost(plan.limits.monthlyMicroUsd),
+              tokens: format.number(plan.limits.monthlyTokens),
+              connectors: plan.limits.maxConnectors,
+            })}
           </span>
           <Features plan={plan} />
           <span className="self-start">
@@ -134,7 +184,11 @@ export function AdminPlansView() {
       <AdminQuerySection query={plans} loadingLabel={t("loading")}>
         {(data) => <PlansTable plans={data} onEdit={setEditing} onCreate={() => setEditing("new")} online={online} />}
       </AdminQuerySection>
-      <PlanFormDialog plan={editing === "new" ? null : editing} open={editing !== null} onOpenChange={(open) => !open && setEditing(null)} />
+      <PlanFormDialog
+        plan={editing === "new" ? null : editing}
+        open={editing !== null}
+        onOpenChange={(open) => !open && setEditing(null)}
+      />
     </AdminPageFrame>
   );
 }

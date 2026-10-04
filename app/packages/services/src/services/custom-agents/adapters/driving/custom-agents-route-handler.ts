@@ -12,12 +12,21 @@ import { AccessDeniedError } from "../../../access/domain/errors/access-denied-e
 import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
 import { apiError, dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
 import { deniedResponse } from "../../../shared/http/api-list.ts";
-import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
+import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import type { Logger } from "../../../shared/observability/logger.ts";
-import { runtimeCallScope, tenantOfCall, workflowCallScope, workflowGatewayErrorResponse } from "../../../workflows/adapters/driving/workflow-call-scope.ts";
+import {
+  runtimeCallScope,
+  tenantOfCall,
+  workflowCallScope,
+  workflowGatewayErrorResponse,
+} from "../../../workflows/adapters/driving/workflow-call-scope.ts";
 import type { WorkflowRuntimeGateway } from "../../../workflows/application/ports/workflow-runtime-gateway.ts";
-import { CUSTOM_AGENTS_READ_PERMISSION, CUSTOM_AGENTS_WRITE_PERMISSION, type SelectableAgentOptions } from "../../application/custom-agents-deps.ts";
+import {
+  CUSTOM_AGENTS_READ_PERMISSION,
+  CUSTOM_AGENTS_WRITE_PERMISSION,
+  type SelectableAgentOptions,
+} from "../../application/custom-agents-deps.ts";
 import type { CustomAgentsServices } from "../../composition.ts";
 import {
   CustomAgentNotFoundError,
@@ -40,25 +49,46 @@ export type CustomAgentsRouteDeps = {
 /** @throws the error when it is not an expected custom agents error (the boundary answers 500). */
 export const customAgentErrorResponse = (error: Error, requestId: string): Response => {
   if (error instanceof AccessDeniedError) return deniedResponse(error.reason, requestId);
-  if (error instanceof CustomAgentNotFoundError || error instanceof CustomSkillNotFoundError) return apiError(404, "NOT_FOUND", requestId);
-  if (error instanceof InvalidCustomDefinitionError) return apiError(400, "VALIDATION_FAILED", requestId, [...error.details]);
-  if (error instanceof CustomSkillNameTakenError) return apiError(409, "CONFLICT", requestId, [{ field: "name", issue: "TAKEN" }]);
-  if (error instanceof CustomLimitReachedError) return apiError(422, "CUSTOM_LIMIT_REACHED", requestId, [{ field: error.kind, issue: "LIMIT_REACHED" }]);
+  if (error instanceof CustomAgentNotFoundError || error instanceof CustomSkillNotFoundError)
+    return apiError(404, "NOT_FOUND", requestId);
+  if (error instanceof InvalidCustomDefinitionError)
+    return apiError(400, "VALIDATION_FAILED", requestId, [...error.details]);
+  if (error instanceof CustomSkillNameTakenError)
+    return apiError(409, "CONFLICT", requestId, [{ field: "name", issue: "TAKEN" }]);
+  if (error instanceof CustomLimitReachedError)
+    return apiError(422, "CUSTOM_LIMIT_REACHED", requestId, [{ field: error.kind, issue: "LIMIT_REACHED" }]);
   throw error;
 };
 
-type InvalidateCtx = { readonly principal: Principal; readonly requestId: string; readonly request: Request; readonly logger: Pick<Logger, "warn"> };
+type InvalidateCtx = {
+  readonly principal: Principal;
+  readonly requestId: string;
+  readonly request: Request;
+  readonly logger: Pick<Logger, "warn">;
+};
 
 /**
  * Asks the runtime to drop the tenant's cached custom agents after a write (decision 0046 §14).
  * Best effort: a failure is logged and the write stands; the runtime cache expires on its own.
  */
-export const invalidateRuntimeCache = async (deps: Pick<CustomAgentsRouteDeps, "gateway" | "resolveAccessContext">, ctx: InvalidateCtx, tenantId: TenantId): Promise<void> => {
+export const invalidateRuntimeCache = async (
+  deps: Pick<CustomAgentsRouteDeps, "gateway" | "resolveAccessContext">,
+  ctx: InvalidateCtx,
+  tenantId: TenantId,
+): Promise<void> => {
   try {
     const scope = await runtimeCallScope({ ctx, tenantId, resolveAccessContext: deps.resolveAccessContext });
     if (scope === null) return;
-    const result = await deps.gateway.invalidateCustomAgents({ ...scope, signal: AbortSignal.timeout(INVALIDATE_TIMEOUT_MS) });
-    if (!result.ok) ctx.logger.warn("custom_agents_invalidate_failed", { requestId: ctx.requestId, tenantId, code: result.error.code });
+    const result = await deps.gateway.invalidateCustomAgents({
+      ...scope,
+      signal: AbortSignal.timeout(INVALIDATE_TIMEOUT_MS),
+    });
+    if (!result.ok)
+      ctx.logger.warn("custom_agents_invalidate_failed", {
+        requestId: ctx.requestId,
+        tenantId,
+        code: result.error.code,
+      });
   } catch (error: unknown) {
     ctx.logger.warn("custom_agents_invalidate_failed", { requestId: ctx.requestId, tenantId, err: error });
   }
@@ -79,11 +109,19 @@ const selectableOf = async (
   body: { readonly tools?: readonly string[] | undefined; readonly coreSkills?: readonly string[] | undefined },
 ): Promise<SelectableAgentOptions | undefined | Response> => {
   if ((body.tools ?? []).length === 0 && (body.coreSkills ?? []).length === 0) return undefined;
-  const scope = await workflowCallScope({ ctx, organizationId: tenantId, permission: CUSTOM_AGENTS_WRITE_PERMISSION, resolveAccessContext: deps.resolveAccessContext });
+  const scope = await workflowCallScope({
+    ctx,
+    organizationId: tenantId,
+    permission: CUSTOM_AGENTS_WRITE_PERMISSION,
+    resolveAccessContext: deps.resolveAccessContext,
+  });
   if (scope instanceof Response) return scope;
   const options = await deps.gateway.getCustomAgentOptions(scope);
   if (!options.ok) return workflowGatewayErrorResponse(options.error, ctx.requestId);
-  return { tools: new Set(options.data.tools.map((tool) => tool.id)), coreSkills: new Set(options.data.coreSkills.map((skill) => skill.name)) };
+  return {
+    tools: new Set(options.data.tools.map((tool) => tool.id)),
+    coreSkills: new Set(options.data.coreSkills.map((skill) => skill.name)),
+  };
 };
 
 const agentPath = (agentId: string, tenantId: string) => `/v1/agents/${agentId}?organizationId=${tenantId}`;
@@ -96,7 +134,14 @@ const buildAgentWriteRoutes = (deps: CustomAgentsRouteDeps): Record<string, Rout
       if (tenantId instanceof Response) return tenantId;
       const selectable = await selectableOf(deps, ctx, tenantId, ctx.input.body);
       if (selectable instanceof Response) return selectable;
-      const result = await customAgents.createCustomAgent({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, input: ctx.input.body, selectable });
+      const result = await customAgents.createCustomAgent({
+        actor: ctx.principal,
+        access: ctx.scope,
+        tenantId,
+        requestId: ctx.requestId,
+        input: ctx.input.body,
+        selectable,
+      });
       if (!result.ok) return customAgentErrorResponse(result.error, ctx.requestId);
       await invalidateRuntimeCache(deps, ctx, tenantId);
       return dataResponse({ data: result.data }, { status: 201, location: agentPath(result.data.id, tenantId) });
@@ -106,7 +151,15 @@ const buildAgentWriteRoutes = (deps: CustomAgentsRouteDeps): Record<string, Rout
       if (tenantId instanceof Response) return tenantId;
       const selectable = await selectableOf(deps, ctx, tenantId, ctx.input.body);
       if (selectable instanceof Response) return selectable;
-      const result = await customAgents.updateCustomAgent({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, agentId: ctx.input.params.agentId, input: ctx.input.body, selectable });
+      const result = await customAgents.updateCustomAgent({
+        actor: ctx.principal,
+        access: ctx.scope,
+        tenantId,
+        requestId: ctx.requestId,
+        agentId: ctx.input.params.agentId,
+        input: ctx.input.body,
+        selectable,
+      });
       if (!result.ok) return customAgentErrorResponse(result.error, ctx.requestId);
       await invalidateRuntimeCache(deps, ctx, tenantId);
       return dataResponse({ data: result.data });
@@ -114,7 +167,13 @@ const buildAgentWriteRoutes = (deps: CustomAgentsRouteDeps): Record<string, Rout
     [deleteCustomAgentEndpoint.id]: withApiRoute(deleteCustomAgentEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);
       if (tenantId instanceof Response) return tenantId;
-      const result = await customAgents.deleteCustomAgent({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, agentId: ctx.input.params.agentId });
+      const result = await customAgents.deleteCustomAgent({
+        actor: ctx.principal,
+        access: ctx.scope,
+        tenantId,
+        requestId: ctx.requestId,
+        agentId: ctx.input.params.agentId,
+      });
       if (!result.ok) return customAgentErrorResponse(result.error, ctx.requestId);
       await invalidateRuntimeCache(deps, ctx, tenantId);
       return noContentResponse();
@@ -128,19 +187,31 @@ const buildAgentReadRoutes = (deps: CustomAgentsRouteDeps): Record<string, Route
     [getCustomAgentEndpoint.id]: withApiRoute(getCustomAgentEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);
       if (tenantId instanceof Response) return tenantId;
-      const result = await customAgents.getCustomAgent({ actor: ctx.principal, access: ctx.scope, tenantId, agentId: ctx.input.params.agentId });
+      const result = await customAgents.getCustomAgent({
+        actor: ctx.principal,
+        access: ctx.scope,
+        tenantId,
+        agentId: ctx.input.params.agentId,
+      });
       return result.ok ? dataResponse({ data: result.data }) : customAgentErrorResponse(result.error, ctx.requestId);
     }),
     // The runtime knows the tools and skills, the plan the limits: both must answer.
     [getCustomAgentOptionsEndpoint.id]: withApiRoute(getCustomAgentOptionsEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);
       if (tenantId instanceof Response) return tenantId;
-      const scope = await workflowCallScope({ ctx, organizationId: tenantId, permission: CUSTOM_AGENTS_READ_PERMISSION, resolveAccessContext: deps.resolveAccessContext });
+      const scope = await workflowCallScope({
+        ctx,
+        organizationId: tenantId,
+        permission: CUSTOM_AGENTS_READ_PERMISSION,
+        resolveAccessContext: deps.resolveAccessContext,
+      });
       if (scope instanceof Response) return scope;
       const usage = await customAgents.getCustomAgentUsage({ actor: ctx.principal, access: ctx.scope, tenantId });
       if (!usage.ok) return customAgentErrorResponse(usage.error, ctx.requestId);
       const options = await deps.gateway.getCustomAgentOptions(scope);
-      return options.ok ? dataResponse({ data: { ...options.data, ...usage.data } }) : workflowGatewayErrorResponse(options.error, ctx.requestId);
+      return options.ok
+        ? dataResponse({ data: { ...options.data, ...usage.data } })
+        : workflowGatewayErrorResponse(options.error, ctx.requestId);
     }),
     [listChatAgentsEndpoint.id]: withApiRoute(listChatAgentsEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);

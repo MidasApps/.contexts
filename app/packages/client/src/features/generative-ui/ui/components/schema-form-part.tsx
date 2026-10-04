@@ -16,7 +16,13 @@ import type { GenerativeComponentProps } from "../../model/ui-registry.ts";
  * asks for confirmation — the form itself saves nothing. Without the contract on the client
  * (a module that did not register it) the generic tool view is shown.
  */
-export function SchemaFormPart({ props, toolCallId, toolName, interactive, fallback }: GenerativeComponentProps<SchemaFormProps>) {
+export function SchemaFormPart({
+  props,
+  toolCallId,
+  toolName,
+  interactive,
+  fallback,
+}: GenerativeComponentProps<SchemaFormProps>) {
   const t = useTranslations("chat.ui.form");
   const { findContract, submit, can, defaultCurrency } = useGenerativeUi();
   const commandLabel = useCommandLabel();
@@ -26,20 +32,42 @@ export function SchemaFormPart({ props, toolCallId, toolName, interactive, fallb
   if (contract === undefined) return <>{fallback}</>;
 
   const onSubmit = async (values: unknown): Promise<SchemaFormResult> => {
-    await submit({ kind: "schema-form", commandId: props.commandId, contractId: props.contractId, mode: props.mode, values: values as Record<string, unknown> }, { toolCallId, toolName });
+    await submit(
+      {
+        kind: "schema-form",
+        commandId: props.commandId,
+        contractId: props.contractId,
+        mode: props.mode,
+        values: values as Record<string, unknown>,
+      },
+      { toolCallId, toolName },
+    );
     setSubmitted(true);
     return { ok: true };
   };
 
   const label = t("label", { command: commandLabel(props.commandId) });
   return (
-    <section data-slot="schema-form-part" aria-label={label} className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
+    <section
+      data-slot="schema-form-part"
+      aria-label={label}
+      className="flex flex-col gap-3 rounded-md border border-border bg-card p-4"
+    >
       <h3 className="text-body font-medium text-muted-foreground">{label}</h3>
       <p role="status" className={submitted ? "text-body text-emerald-foreground" : "sr-only"}>
         {submitted ? t("submitted") : ""}
       </p>
       {submitted || !interactive ? null : (
-        <SchemaForm contract={contract} defaultValues={props.initialValues} onSubmit={onSubmit} can={can} defaultCurrency={defaultCurrency} submitLabelKey="chat.ui.form.submit" successMessageKey="chat.ui.form.submitted" aria-label={label} />
+        <SchemaForm
+          contract={contract}
+          defaultValues={props.initialValues}
+          onSubmit={onSubmit}
+          can={can}
+          defaultCurrency={defaultCurrency}
+          submitLabelKey="chat.ui.form.submit"
+          successMessageKey="chat.ui.form.submitted"
+          aria-label={label}
+        />
       )}
     </section>
   );

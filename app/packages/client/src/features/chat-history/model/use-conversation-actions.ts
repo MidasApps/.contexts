@@ -3,7 +3,12 @@
 import type { Conversation, ConversationPatch } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
-import { conversationListsKey, deleteConversation, summarizeConversation, updateConversation } from "#/entities/conversation/index.ts";
+import {
+  conversationListsKey,
+  deleteConversation,
+  summarizeConversation,
+  updateConversation,
+} from "#/entities/conversation/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
@@ -29,7 +34,8 @@ export const useConversationActions = (organizationId: string): ConversationActi
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const describe = useDescribeError();
-  const refresh = (): Promise<void> => queryClient.invalidateQueries({ queryKey: conversationListsKey(organizationId) });
+  const refresh = (): Promise<void> =>
+    queryClient.invalidateQueries({ queryKey: conversationListsKey(organizationId) });
 
   const patch = async (conversation: Conversation, change: ConversationPatch): Promise<void> => {
     await updateConversation(callEndpoint, conversation.id, change);
@@ -47,8 +53,14 @@ export const useConversationActions = (organizationId: string): ConversationActi
 
   return {
     rename: (conversation, title) => patch(conversation, { title }),
-    togglePin: (conversation) => quick(conversation, { pinned: !conversation.pinned }, t(conversation.pinned ? "unpinnedDone" : "pinnedDone")),
-    toggleArchive: (conversation) => quick(conversation, { archived: conversation.archivedAt === null }, t(conversation.archivedAt === null ? "archivedDone" : "restoredDone")),
+    togglePin: (conversation) =>
+      quick(conversation, { pinned: !conversation.pinned }, t(conversation.pinned ? "unpinnedDone" : "pinnedDone")),
+    toggleArchive: (conversation) =>
+      quick(
+        conversation,
+        { archived: conversation.archivedAt === null },
+        t(conversation.archivedAt === null ? "archivedDone" : "restoredDone"),
+      ),
     summarize: async (conversation) => {
       const summarized = await summarizeConversation(callEndpoint, conversation.id);
       await refresh();

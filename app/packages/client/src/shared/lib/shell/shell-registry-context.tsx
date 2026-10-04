@@ -1,9 +1,13 @@
 "use client";
 
-import { createContext, use, type ReactNode } from "react";
+import { createContext, type ReactNode, use } from "react";
 import type { ModuleRegistry, NavigationRegistry, ShellSlots } from "./shell-types.ts";
 
-type ShellRegistries = { readonly modules: ModuleRegistry; readonly navigation: NavigationRegistry; readonly slots: ShellSlots };
+type ShellRegistries = {
+  readonly modules: ModuleRegistry;
+  readonly navigation: NavigationRegistry;
+  readonly slots: ShellSlots;
+};
 
 const ShellRegistryContext = createContext<ShellRegistries | null>(null);
 

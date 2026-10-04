@@ -3,7 +3,9 @@ import { expect } from "./sp5-test.ts";
 
 // Helpers of the `/admin` journeys (admin-*.spec.ts).
 
-export const ERROR_ENVELOPE = { error: { code: "INTERNAL_ERROR", message: "Internal error.", requestId: "e2e-request-1" } };
+export const ERROR_ENVELOPE = {
+  error: { code: "INTERNAL_ERROR", message: "Internal error.", requestId: "e2e-request-1" },
+};
 
 /**
  * Answers matching `/v1` reads with a 500 envelope until the returned `heal` is called (the

@@ -1,4 +1,11 @@
-import type { CustomAgent, CustomAgentId, CustomAgentLimits, CustomSkill, CustomSkillId, TenantId } from "@core/contracts";
+import type {
+  CustomAgent,
+  CustomAgentId,
+  CustomAgentLimits,
+  CustomSkill,
+  CustomSkillId,
+  TenantId,
+} from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
 
@@ -9,7 +16,10 @@ export const MAX_CUSTOM_RECORDS_PER_TENANT = 200;
 export type CustomAgentRepository = {
   readonly newId: () => CustomAgentId;
   /** `null` for a missing agent or one of another tenant. */
-  readonly get: (tx: Transaction | undefined, key: { tenantId: TenantId; agentId: CustomAgentId }) => Promise<CustomAgent | null>;
+  readonly get: (
+    tx: Transaction | undefined,
+    key: { tenantId: TenantId; agentId: CustomAgentId },
+  ) => Promise<CustomAgent | null>;
   /** Every agent of the tenant, newest first (`tenantId + createdAt desc`). */
   readonly listByTenant: (args: { tenantId: TenantId }) => Promise<readonly CustomAgent[]>;
   readonly count: (args: { tenantId: TenantId }) => Promise<number>;
@@ -22,11 +32,17 @@ export type CustomAgentRepository = {
 export type CustomSkillRepository = {
   readonly newId: () => CustomSkillId;
   /** `null` for a missing skill or one of another tenant. */
-  readonly get: (tx: Transaction | undefined, key: { tenantId: TenantId; skillId: CustomSkillId }) => Promise<CustomSkill | null>;
+  readonly get: (
+    tx: Transaction | undefined,
+    key: { tenantId: TenantId; skillId: CustomSkillId },
+  ) => Promise<CustomSkill | null>;
   /** Newest first (`tenantId + createdAt desc`). */
   readonly list: (args: { tenantId: TenantId; page: PageRequest }) => Promise<Page<CustomSkill>>;
   readonly listByTenant: (args: { tenantId: TenantId }) => Promise<readonly CustomSkill[]>;
-  readonly findByName: (tx: Transaction | undefined, key: { tenantId: TenantId; name: string }) => Promise<CustomSkill | null>;
+  readonly findByName: (
+    tx: Transaction | undefined,
+    key: { tenantId: TenantId; name: string },
+  ) => Promise<CustomSkill | null>;
   readonly count: (args: { tenantId: TenantId }) => Promise<number>;
   readonly create: (tx: Transaction, args: { skill: CustomSkill }) => void;
   readonly replace: (tx: Transaction, args: { skill: CustomSkill; actorId: string }) => void;

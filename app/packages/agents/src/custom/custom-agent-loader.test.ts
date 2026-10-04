@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildAgentContextEntries, TEST_TENANT } from "../testing/agent-context-fixture.ts";
 import { createFakeCustomAgentsPort } from "../testing/fake-ports.ts";
 import { buildCustomAgent, buildCustomSkill, CUSTOM_AGENT_TEST_ID, OTHER_TENANT } from "./custom-agent.fixture.ts";
-import { createCustomAgentLoader, CUSTOM_AGENT_ID_KEY } from "./custom-agent-loader.ts";
+import { CUSTOM_AGENT_ID_KEY, createCustomAgentLoader } from "./custom-agent-loader.ts";
 
 const contextOf = (entries: [string, unknown][]) => new Map<string, unknown>(entries);
 
@@ -12,14 +12,21 @@ describe("custom agent loader", () => {
     const disabled = buildCustomSkill({ id: "Sk000000000000000002" as never, name: "off", enabled: false });
     const unselected = buildCustomSkill({ id: "Sk000000000000000003" as never, name: "other" });
     const agent = buildCustomAgent({ customSkills: [selected.id, disabled.id] });
-    const loader = createCustomAgentLoader(createFakeCustomAgentsPort({ agents: [agent], skills: [selected, disabled, unselected] }));
+    const loader = createCustomAgentLoader(
+      createFakeCustomAgentsPort({ agents: [agent], skills: [selected, disabled, unselected] }),
+    );
     const loaded = await loader.load({ tenantId: TEST_TENANT, agentId: agent.id });
     expect(loaded?.agent.id).toBe(agent.id);
     expect(loaded?.skills.map((skill) => skill.name)).toEqual(["weekly-report"]);
   });
 
   it("answers null for a disabled agent, an unknown id, a malformed id and another tenant's agent", async () => {
-    const port = createFakeCustomAgentsPort({ agents: [buildCustomAgent({ enabled: false }), buildCustomAgent({ id: "Ag000000000000000002" as never, tenantId: OTHER_TENANT as never })] });
+    const port = createFakeCustomAgentsPort({
+      agents: [
+        buildCustomAgent({ enabled: false }),
+        buildCustomAgent({ id: "Ag000000000000000002" as never, tenantId: OTHER_TENANT as never }),
+      ],
+    });
     const loader = createCustomAgentLoader(port);
     expect(await loader.load({ tenantId: TEST_TENANT, agentId: CUSTOM_AGENT_TEST_ID })).toBeNull();
     expect(await loader.load({ tenantId: TEST_TENANT, agentId: "Ag000000000000000009" })).toBeNull();
@@ -31,7 +38,11 @@ describe("custom agent loader", () => {
 
   it("refuses a record whose tenant differs from the one asked for, whatever the port returns", async () => {
     const foreign = buildCustomAgent({ tenantId: OTHER_TENANT as never });
-    const loader = createCustomAgentLoader({ getAgent: () => Promise.resolve(foreign), listAgents: () => Promise.resolve([]), listSkills: () => Promise.resolve([]) });
+    const loader = createCustomAgentLoader({
+      getAgent: () => Promise.resolve(foreign),
+      listAgents: () => Promise.resolve([]),
+      listSkills: () => Promise.resolve([]),
+    });
     expect(await loader.load({ tenantId: TEST_TENANT, agentId: foreign.id })).toBeNull();
   });
 
@@ -82,7 +93,10 @@ describe("custom agent loader", () => {
   it("reads the agent of a run from the context key and the verified tenant only", async () => {
     const loader = createCustomAgentLoader(createFakeCustomAgentsPort({ agents: [buildCustomAgent()] }));
     const own = contextOf([...buildAgentContextEntries(), [CUSTOM_AGENT_ID_KEY, CUSTOM_AGENT_TEST_ID]]);
-    const foreign = contextOf([...buildAgentContextEntries({ tenantId: OTHER_TENANT }), [CUSTOM_AGENT_ID_KEY, CUSTOM_AGENT_TEST_ID]]);
+    const foreign = contextOf([
+      ...buildAgentContextEntries({ tenantId: OTHER_TENANT }),
+      [CUSTOM_AGENT_ID_KEY, CUSTOM_AGENT_TEST_ID],
+    ]);
     const unnamed = contextOf(buildAgentContextEntries());
     const noTenant = contextOf([[CUSTOM_AGENT_ID_KEY, CUSTOM_AGENT_TEST_ID]]);
     expect((await loader.ofRun(own))?.agent.id).toBe(CUSTOM_AGENT_TEST_ID);

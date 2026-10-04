@@ -5,7 +5,9 @@ import { isAtOrBefore } from "../../shared/clock/clock.ts";
 export type ApprovalTransition = "approve" | "reject" | "cancel" | "expire" | "execute" | "fail";
 
 // pending → approved|rejected|cancelled|expired; approved → executed|failed; the rest is terminal.
-const TRANSITIONS: Readonly<Partial<Record<ApprovalStatus, Readonly<Partial<Record<ApprovalTransition, ApprovalStatus>>>>>> = {
+const TRANSITIONS: Readonly<
+  Partial<Record<ApprovalStatus, Readonly<Partial<Record<ApprovalTransition, ApprovalStatus>>>>>
+> = {
   pending: { approve: "approved", reject: "rejected", cancel: "cancelled", expire: "expired" },
   approved: { execute: "executed", fail: "failed" },
 };
@@ -18,8 +20,14 @@ export const nextApprovalStatus = (from: ApprovalStatus, transition: ApprovalTra
  * Status as callers see it: a stored `pending` request past `expiresAt` is `expired` (nothing
  * rewrites it when it expires; a decision attempt does).
  */
-export const effectiveApprovalStatus = (request: Pick<ApprovalRequest, "status" | "expiresAt">, now: Date): ApprovalStatus =>
+export const effectiveApprovalStatus = (
+  request: Pick<ApprovalRequest, "status" | "expiresAt">,
+  now: Date,
+): ApprovalStatus =>
   request.status === "pending" && isAtOrBefore(request.expiresAt, now) ? "expired" : request.status;
 
 /** The request as listed, with its effective status. */
-export const approvalView = (request: ApprovalRequest, now: Date): ApprovalRequest => ({ ...request, status: effectiveApprovalStatus(request, now) });
+export const approvalView = (request: ApprovalRequest, now: Date): ApprovalRequest => ({
+  ...request,
+  status: effectiveApprovalStatus(request, now),
+});

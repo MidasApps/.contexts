@@ -13,20 +13,45 @@ const sampleModule = defineClientModule({
   manifest: defineModule({
     id: "sample",
     labelKey: "sample.module.name",
-    permissions: [{ id: "sample.item.read", descriptionKey: "sample.permissions.read", kind: "read", scope: "tenant", defaultRoles: ["member"] }],
-    navigation: [{ id: "items", slot: "project", labelKey: "sample.nav.items", icon: "list", path: "", permission: "sample.item.read" }],
-    messages: { "pt-BR": { module: { name: "Amostras" }, nav: { items: "Itens de amostra" }, permissions: { read: "Ler itens" } } },
+    permissions: [
+      {
+        id: "sample.item.read",
+        descriptionKey: "sample.permissions.read",
+        kind: "read",
+        scope: "tenant",
+        defaultRoles: ["member"],
+      },
+    ],
+    navigation: [
+      {
+        id: "items",
+        slot: "project",
+        labelKey: "sample.nav.items",
+        icon: "list",
+        path: "",
+        permission: "sample.item.read",
+      },
+    ],
+    messages: {
+      "pt-BR": { module: { name: "Amostras" }, nav: { items: "Itens de amostra" }, permissions: { read: "Ler itens" } },
+    },
   }),
   pages: { "": () => Promise.resolve({ default: () => <p>página</p> }) },
 });
 
 const PATH = `/o/${IDS.organization}/p/${IDS.project}`;
-const renderView = (options: { path?: string; permissions?: readonly string[]; routes?: Parameters<typeof shellRoutes>[1] } = {}) =>
+const renderView = (
+  options: { path?: string; permissions?: readonly string[]; routes?: Parameters<typeof shellRoutes>[1] } = {},
+) =>
   renderApp(
     <main>
       <ProjectHomeView />
     </main>,
-    { path: options.path ?? PATH, modules: [sampleModule], routes: shellRoutes(options.permissions ?? [...MEMBER_PERMISSIONS, "sample.item.read"], options.routes) },
+    {
+      path: options.path ?? PATH,
+      modules: [sampleModule],
+      routes: shellRoutes(options.permissions ?? [...MEMBER_PERMISSIONS, "sample.item.read"], options.routes),
+    },
   );
 
 describe("ProjectHomeView", () => {
@@ -35,9 +60,15 @@ describe("ProjectHomeView", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Launch" })).toBeDefined();
     expect(screen.getByText("Northwind")).toBeDefined();
     const units = await screen.findByRole("list", { name: "Unidades" });
-    expect(within(units).getByRole("link", { name: /Site A/u }).getAttribute("href")).toBe(`${PATH}?unit=site-1`);
+    expect(
+      within(units)
+        .getByRole("link", { name: /Site A/u })
+        .getAttribute("href"),
+    ).toBe(`${PATH}?unit=site-1`);
     const modules = screen.getByRole("list", { name: "Módulos" });
-    expect(within(modules).getByRole("link", { name: "Itens de amostra" }).getAttribute("href")).toBe(`${PATH}/m/sample`);
+    expect(within(modules).getByRole("link", { name: "Itens de amostra" }).getAttribute("href")).toBe(
+      `${PATH}/m/sample`,
+    );
     await expectNoAxeViolations(container);
   });
 

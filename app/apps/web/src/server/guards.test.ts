@@ -17,8 +17,15 @@ const outcomes = (locale: "pt-BR" | "en-US", requestPath: string | null) => ({
   },
 });
 
-const principal = { type: "user", uid: "u-1" } as unknown as Extract<WebSessionGuardResult, { kind: "session" }>["principal"];
-const session: WebSessionGuardResult = { kind: "session", principal, sessionId: "s-1" as Extract<WebSessionGuardResult, { kind: "session" }>["sessionId"] };
+const principal = { type: "user", uid: "u-1" } as unknown as Extract<
+  WebSessionGuardResult,
+  { kind: "session" }
+>["principal"];
+const session: WebSessionGuardResult = {
+  kind: "session",
+  principal,
+  sessionId: "s-1" as Extract<WebSessionGuardResult, { kind: "session" }>["sessionId"],
+};
 
 describe("signInHref", () => {
   it("sends the user back to the requested page after signing in", () => {
@@ -44,7 +51,12 @@ describe("enforceWebSession", () => {
 });
 
 describe("enforceStaffSession", () => {
-  const staff: StaffSessionGuardResult = { kind: "staff", principal, sessionId: session.kind === "session" ? session.sessionId : ("s" as never), role: "platform-admin" };
+  const staff: StaffSessionGuardResult = {
+    kind: "staff",
+    principal,
+    sessionId: session.kind === "session" ? session.sessionId : ("s" as never),
+    role: "platform-admin",
+  };
 
   it("returns the staff session", () => {
     expect(enforceStaffSession(staff, outcomes("en-US", "/en-US/admin"))).toBe(staff);
@@ -55,6 +67,8 @@ describe("enforceStaffSession", () => {
   });
 
   it("redirects to sign-in when there is no session at all", () => {
-    expect(() => enforceStaffSession({ kind: "redirect" }, outcomes("en-US", "/en-US/admin"))).toThrow(new Redirected("/en-US/sign-in?next=%2Fadmin"));
+    expect(() => enforceStaffSession({ kind: "redirect" }, outcomes("en-US", "/en-US/admin"))).toThrow(
+      new Redirected("/en-US/sign-in?next=%2Fadmin"),
+    );
   });
 });

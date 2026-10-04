@@ -3,7 +3,11 @@ import { IDS } from "./fixtures.ts";
 
 type Json = Record<string, unknown>;
 
-export const IMPERSONATION_IDS = { session: "Im5sK2lPq0WnR5tYu3bV", target: "uT9s8R7q6P5o4N3m2L1k", staff: "uS1t2A3f4F5u6S7e8R9x" } as const;
+export const IMPERSONATION_IDS = {
+  session: "Im5sK2lPq0WnR5tYu3bV",
+  target: "uT9s8R7q6P5o4N3m2L1k",
+  staff: "uS1t2A3f4F5u6S7e8R9x",
+} as const;
 
 /** A row of `GET /v1/admin/users` (the default is the impersonation target). */
 export const buildAdminUser = (overrides: Json = {}): Json => ({

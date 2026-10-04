@@ -18,10 +18,24 @@ export type SeedCore = {
   readonly createOrganization: (args: { uid: string; name: string }) => Promise<Named>;
   readonly listProjects: (args: { uid: string; organizationId: string }) => Promise<readonly Named[]>;
   readonly createProject: (args: { uid: string; organizationId: string; name: string }) => Promise<Named>;
-  readonly listUnits: (args: { uid: string; projectId: string; parentUnitId: string | null }) => Promise<readonly Named[]>;
-  readonly createUnit: (args: { uid: string; projectId: string; parentUnitId: string | null; name: string }) => Promise<Named>;
+  readonly listUnits: (args: {
+    uid: string;
+    projectId: string;
+    parentUnitId: string | null;
+  }) => Promise<readonly Named[]>;
+  readonly createUnit: (args: {
+    uid: string;
+    projectId: string;
+    parentUnitId: string | null;
+    name: string;
+  }) => Promise<Named>;
   /** `granted`, or `unchanged` when the principal already holds a grant on that node. */
-  readonly grantRole: (args: { actorUid: string; principalUid: string; node: SeedGrantNode; role: SeedSystemRole }) => Promise<"granted" | "unchanged">;
+  readonly grantRole: (args: {
+    actorUid: string;
+    principalUid: string;
+    node: SeedGrantNode;
+    role: SeedSystemRole;
+  }) => Promise<"granted" | "unchanged">;
   /** Makes `organizationId` the user's active organization (claims synced); `unchanged` when it already is. */
   readonly ensureActiveOrganization: (args: { uid: string; organizationId: string }) => Promise<"set" | "unchanged">;
   /** The active platform role of `uid`, or null. */

@@ -1,11 +1,16 @@
 "use client";
 
 import { ArrowUpIcon, PlusIcon, SquareIcon } from "lucide-react";
-import { useState, type ComponentProps, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import { type ComponentProps, type FormEvent, type KeyboardEvent, type ReactNode, useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
 
 export type PromptInputStatus = "ready" | "submitted" | "streaming" | "error";
 
@@ -85,7 +90,13 @@ export function PromptInputTextarea({ label, onEscape, onKeyDown, className, ...
 }
 
 export function PromptInputFooter({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="prompt-input-footer" className={cn("flex items-center justify-between gap-2", className)} {...props} />;
+  return (
+    <div
+      data-slot="prompt-input-footer"
+      className={cn("flex items-center justify-between gap-2", className)}
+      {...props}
+    />
+  );
 }
 
 export function PromptInputTools({ className, ...props }: ComponentProps<"div">) {
@@ -96,7 +107,9 @@ export type PromptInputButtonProps = Omit<ComponentProps<typeof Button>, "aria-l
 
 /** An icon tool of the composer (attach, voice); always named. */
 export function PromptInputButton({ label, variant = "ghost", size = "icon-sm", ...props }: PromptInputButtonProps) {
-  return <Button data-slot="prompt-input-button" variant={variant} size={size} aria-label={label} title={label} {...props} />;
+  return (
+    <Button data-slot="prompt-input-button" variant={variant} size={size} aria-label={label} title={label} {...props} />
+  );
 }
 
 export type PromptInputActionMenuProps = { label: string; children: ReactNode; disabled?: boolean | undefined };
@@ -136,13 +149,31 @@ export function PromptInputSubmit({ status, onStop, disabled, className, ...prop
   const busy = status === "submitted" || status === "streaming";
   if (busy) {
     return (
-      <Button data-slot="prompt-input-stop" type="button" size="icon-sm" aria-label={t("stop")} title={t("stop")} onClick={onStop} className={cn("rounded-full", className)} {...props}>
+      <Button
+        data-slot="prompt-input-stop"
+        type="button"
+        size="icon-sm"
+        aria-label={t("stop")}
+        title={t("stop")}
+        onClick={onStop}
+        className={cn("rounded-full", className)}
+        {...props}
+      >
         <SquareIcon aria-hidden="true" className="size-3 fill-current" />
       </Button>
     );
   }
   return (
-    <Button data-slot="prompt-input-submit" type="submit" size="icon-sm" aria-label={t("send")} title={t("send")} disabled={disabled} className={cn("rounded-full", className)} {...props}>
+    <Button
+      data-slot="prompt-input-submit"
+      type="submit"
+      size="icon-sm"
+      aria-label={t("send")}
+      title={t("send")}
+      disabled={disabled}
+      className={cn("rounded-full", className)}
+      {...props}
+    >
       <ArrowUpIcon aria-hidden="true" />
     </Button>
   );

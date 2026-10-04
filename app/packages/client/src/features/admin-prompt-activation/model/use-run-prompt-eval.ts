@@ -1,6 +1,11 @@
 "use client";
 
-import { adminEvaluatePromptVersionEndpoint, type PromptAgentId, type PromptEvalResult, type PromptVersion } from "@core/contracts";
+import {
+  adminEvaluatePromptVersionEndpoint,
+  type PromptAgentId,
+  type PromptEvalResult,
+  type PromptVersion,
+} from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { promptVersionKeys } from "#/entities/prompt-version/index.ts";
@@ -33,7 +38,9 @@ export const useRunPromptEval = (agentId: PromptAgentId): RunPromptEval => {
     setPendingId(version.id);
     setError(null);
     try {
-      const { data } = await callEndpoint(adminEvaluatePromptVersionEndpoint, { params: { agentId, versionId: version.id } });
+      const { data } = await callEndpoint(adminEvaluatePromptVersionEndpoint, {
+        params: { agentId, versionId: version.id },
+      });
       setOutcome({ version, result: data });
     } catch (cause: unknown) {
       setError({ version, cause });

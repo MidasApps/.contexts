@@ -21,7 +21,12 @@ export type DenyReason =
 
 /** Where an allowed permission came from: a membership (tenant) or a staff role (platform). */
 export type GrantSource =
-  | { readonly kind: "membership"; readonly membershipId: MembershipId; readonly nodeId: string; readonly roles: readonly RoleRef[] }
+  | {
+      readonly kind: "membership";
+      readonly membershipId: MembershipId;
+      readonly nodeId: string;
+      readonly roles: readonly RoleRef[];
+    }
   | { readonly kind: "platform-role"; readonly role: PlatformRole };
 
 export type AuthorizeDecision =

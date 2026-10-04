@@ -36,10 +36,17 @@ function TracesPage({ context }: { context: AccessContext }) {
   const t = useTranslations("settings.traces");
   const { organization } = context;
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes(READ)}
-      header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} description={t("description")} />}
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow", { organization: organization.name })}
+          title={t("title")}
+          description={t("description")}
+        />
+      }
     >
       <TraceList organization={organization} />
     </SettingsPageFrame>
@@ -55,7 +62,8 @@ function TraceDetailPage({ context, traceId }: { context: AccessContext; traceId
   // Another organization's trace answers 404 too: the page never says which case it was.
   const missing = !valid || isApiErrorStatus(trace.error, 404);
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={allowed}
       header={
@@ -68,7 +76,13 @@ function TraceDetailPage({ context, traceId }: { context: AccessContext; traceId
       }
     >
       {missing ? (
-        <EmptyState frame="plain" headingLevel={2} icon="search" title={t("detail.notFoundTitle")} description={t("detail.notFoundDescription")} />
+        <EmptyState
+          frame="plain"
+          headingLevel={2}
+          icon="search"
+          title={t("detail.notFoundTitle")}
+          description={t("detail.notFoundDescription")}
+        />
       ) : (
         <QuerySection query={trace} loadingLabel={t("detail.loading")}>
           {(detail) => <TraceDetail detail={detail} />}
@@ -90,7 +104,13 @@ export function SettingsTracesView() {
   const context = useAccessContext(node === null ? null : { organizationId: node.organizationId });
   return (
     <QueryPage query={context} loadingLabel={t("loading")}>
-      {(data) => (rest === undefined || rest === "" ? <TracesPage context={data} /> : <TraceDetailPage context={data} traceId={rest} />)}
+      {(data) =>
+        rest === undefined || rest === "" ? (
+          <TracesPage context={data} />
+        ) : (
+          <TraceDetailPage context={data} traceId={rest} />
+        )
+      }
     </QueryPage>
   );
 }

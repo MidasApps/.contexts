@@ -3,7 +3,7 @@
 import { createInvitationEndpoint, type Role, type RoleRef } from "@core/contracts";
 import { isSupportedLocale } from "@core/i18n";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { z } from "zod";
 import { invitationKeys } from "#/entities/invitation/index.ts";
@@ -16,10 +16,24 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { CopyField } from "#/shared/ui/molecules/CopyField/CopyField.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { localizeAcceptUrl } from "../model/localize-accept-url.ts";
 
 export type InviteMemberDialogProps = {
@@ -34,21 +48,42 @@ type Problems = { email?: "required" | "invalid"; roles?: boolean };
 
 const EmailSchema = z.email();
 const DEFAULT_ROLES: RoleRef[] = [{ kind: "system", key: "member" }];
-const emptyDraft = (organizationId: string): Draft => ({ email: "", node: { level: "organization", tenantId: organizationId }, roles: DEFAULT_ROLES });
+const emptyDraft = (organizationId: string): Draft => ({
+  email: "",
+  node: { level: "organization", tenantId: organizationId },
+  roles: DEFAULT_ROLES,
+});
 
 const validate = (draft: Draft): Problems => ({
-  ...(draft.email.trim() === "" ? { email: "required" as const } : EmailSchema.safeParse(draft.email.trim()).success ? {} : { email: "invalid" as const }),
+  ...(draft.email.trim() === ""
+    ? { email: "required" as const }
+    : EmailSchema.safeParse(draft.email.trim()).success
+      ? {}
+      : { email: "invalid" as const }),
   ...(draft.roles.length === 0 ? { roles: true } : {}),
 });
 
 /** A server `VALIDATION_FAILED` on `email` becomes the field error; everything else is the alert. */
-const emailIssueOf = (error: unknown): boolean => error instanceof ApiError && error.code === "VALIDATION_FAILED" && (error.details ?? []).some((detail) => detail.field === "email");
+const emailIssueOf = (error: unknown): boolean =>
+  error instanceof ApiError &&
+  error.code === "VALIDATION_FAILED" &&
+  (error.details ?? []).some((detail) => detail.field === "email");
 
 /**
  * The one-time accept link, shown right after creation and never again (the API keeps only a hash),
  * in the inviter's UI locale.
  */
-function InvitationLink({ email, acceptUrl, onAnother, onDone }: { email: string; acceptUrl: string; onAnother: () => void; onDone: () => void }) {
+function InvitationLink({
+  email,
+  acceptUrl,
+  onAnother,
+  onDone,
+}: {
+  email: string;
+  acceptUrl: string;
+  onAnother: () => void;
+  onDone: () => void;
+}) {
   const t = useTranslations("settings.invitations.inviteDialog");
   const locale = useLocale();
   // "Done" and "Invite another" are deliberate; Esc, outside click or X ask before the link is lost.
@@ -59,7 +94,11 @@ function InvitationLink({ email, acceptUrl, onAnother, onDone }: { email: string
         <AlertTitle>{t("createdTitle", { email })}</AlertTitle>
         <AlertDescription>{t("createdDescription")}</AlertDescription>
       </Alert>
-      <CopyField label={t("link")} value={isSupportedLocale(locale) ? localizeAcceptUrl(acceptUrl, locale) : acceptUrl} description={t("linkHint")} />
+      <CopyField
+        label={t("link")}
+        value={isSupportedLocale(locale) ? localizeAcceptUrl(acceptUrl, locale) : acceptUrl}
+        description={t("linkHint")}
+      />
       <DialogFooter>
         <Button variant="secondary" onClick={onAnother}>
           {t("another")}
@@ -109,7 +148,11 @@ function InviteMemberDialogBody({ organization, customRoles, onOpenChange }: Inv
     const body = { email: draft.email.trim(), node: draft.node, roles: draft.roles };
     setPending(true);
     try {
-      const { data } = await callEndpoint(createInvitationEndpoint, { params: { organizationId: organization.id }, body, idempotencyKey: idempotency.keyFor(body) });
+      const { data } = await callEndpoint(createInvitationEndpoint, {
+        params: { organizationId: organization.id },
+        body,
+        idempotencyKey: idempotency.keyFor(body),
+      });
       idempotency.reset();
       setCreated({ email: body.email, acceptUrl: data.acceptUrl });
     } catch (error: unknown) {
@@ -125,42 +168,64 @@ function InviteMemberDialogBody({ organization, customRoles, onOpenChange }: Inv
 
   return (
     <>
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("description", { organization: organization.name })}</DialogDescription>
-        </DialogHeader>
-        {created !== null ? (
-          <InvitationLink email={created.email} acceptUrl={created.acceptUrl} onAnother={reset} onDone={() => onOpenChange(false)} />
-        ) : (
-          <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
-            {failure === null ? null : <ApiErrorAlert error={failure} />}
-            <FieldGroup>
-              <Field>
-                <FieldLabel>{t("email")}</FieldLabel>
-                <FieldControl>
-                  <Input ref={emailInput} type="email" autoComplete="off" required value={draft.email} onChange={(event) => setDraft({ ...draft, email: event.target.value })} />
-                </FieldControl>
-                <FieldError errors={[problems.email === undefined ? undefined : t(`errors.${problems.email}`)]} />
-              </Field>
-              <Field>
-                <FieldLabel>{t("node")}</FieldLabel>
-                <FieldControl>
-                  <NodeSelect organization={organization} value={draft.node} onValueChange={(node) => setDraft({ ...draft, node })} />
-                </FieldControl>
-                <FieldDescription>{t("nodeHint")}</FieldDescription>
-              </Field>
-              <RoleChecklist legend={t("roles")} options={options} value={draft.roles} onChange={(roles) => setDraft({ ...draft, roles })} error={problems.roles === true ? t("errors.roles") : undefined} />
-            </FieldGroup>
-            <DialogFooter>
-              <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
-                {t("cancel")}
-              </Button>
-              <Button type="submit" pending={pending}>
-                {t("submit")}
-              </Button>
-            </DialogFooter>
-          </form>
-        )}
+      <DialogHeader>
+        <DialogTitle>{t("title")}</DialogTitle>
+        <DialogDescription>{t("description", { organization: organization.name })}</DialogDescription>
+      </DialogHeader>
+      {created !== null ? (
+        <InvitationLink
+          email={created.email}
+          acceptUrl={created.acceptUrl}
+          onAnother={reset}
+          onDone={() => onOpenChange(false)}
+        />
+      ) : (
+        <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
+          {failure === null ? null : <ApiErrorAlert error={failure} />}
+          <FieldGroup>
+            <Field>
+              <FieldLabel>{t("email")}</FieldLabel>
+              <FieldControl>
+                <Input
+                  ref={emailInput}
+                  type="email"
+                  autoComplete="off"
+                  required
+                  value={draft.email}
+                  onChange={(event) => setDraft({ ...draft, email: event.target.value })}
+                />
+              </FieldControl>
+              <FieldError errors={[problems.email === undefined ? undefined : t(`errors.${problems.email}`)]} />
+            </Field>
+            <Field>
+              <FieldLabel>{t("node")}</FieldLabel>
+              <FieldControl>
+                <NodeSelect
+                  organization={organization}
+                  value={draft.node}
+                  onValueChange={(node) => setDraft({ ...draft, node })}
+                />
+              </FieldControl>
+              <FieldDescription>{t("nodeHint")}</FieldDescription>
+            </Field>
+            <RoleChecklist
+              legend={t("roles")}
+              options={options}
+              value={draft.roles}
+              onChange={(roles) => setDraft({ ...draft, roles })}
+              error={problems.roles === true ? t("errors.roles") : undefined}
+            />
+          </FieldGroup>
+          <DialogFooter>
+            <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
+              {t("cancel")}
+            </Button>
+            <Button type="submit" pending={pending}>
+              {t("submit")}
+            </Button>
+          </DialogFooter>
+        </form>
+      )}
     </>
   );
 }

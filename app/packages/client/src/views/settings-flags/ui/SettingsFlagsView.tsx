@@ -5,7 +5,11 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useTenantFlags } from "#/entities/feature-flag/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
-import { TenantClearFlagOverrideDialog, TenantSetFlagDialog, type TenantFlagChange } from "#/features/tenant-set-flag/index.ts";
+import {
+  TenantClearFlagOverrideDialog,
+  type TenantFlagChange,
+  TenantSetFlagDialog,
+} from "#/features/tenant-set-flag/index.ts";
 import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -44,12 +48,20 @@ function OnOff({ value }: { value: boolean }) {
  */
 function PlatformValue({ flag }: { flag: FeatureFlag }) {
   const t = useTranslations("settings.flags");
-  return flag.tenantOverride === null ? <OnOff value={flag.value} /> : <span className="text-body text-muted-foreground">{t("platformUnknown")}</span>;
+  return flag.tenantOverride === null ? (
+    <OnOff value={flag.value} />
+  ) : (
+    <span className="text-body text-muted-foreground">{t("platformUnknown")}</span>
+  );
 }
 
 function Override({ flag }: { flag: FeatureFlag }) {
   const t = useTranslations("settings.flags.override");
-  return flag.tenantOverride === null ? <span className="text-muted-foreground">{t("none")}</span> : t(flag.tenantOverride ? "on" : "off");
+  return flag.tenantOverride === null ? (
+    <span className="text-muted-foreground">{t("none")}</span>
+  ) : (
+    t(flag.tenantOverride ? "on" : "off")
+  );
 }
 
 /** Off for the organization → offer to use it again; otherwise, when it is on, offer to switch it off. */
@@ -59,7 +71,10 @@ const changeOf = (flag: FeatureFlag): TenantFlagChange | null => {
 };
 
 /** What a writer may do on a row: change the override, or remove it (decision 0066). */
-type FlagHandlers = { readonly onChange: (change: TenantFlagChange) => void; readonly onClear: (flag: FeatureFlag) => void };
+type FlagHandlers = {
+  readonly onChange: (change: TenantFlagChange) => void;
+  readonly onClear: (flag: FeatureFlag) => void;
+};
 
 function FlagAction({ flag, handlers }: { flag: FeatureFlag; handlers: FlagHandlers }) {
   const t = useTranslations("settings.flags.actions");
@@ -67,14 +82,24 @@ function FlagAction({ flag, handlers }: { flag: FeatureFlag; handlers: FlagHandl
   const name = useFlagLabel().name(flag.key);
   const follow =
     flag.tenantOverride === null ? null : (
-      <Button variant="ghost" size="sm" onClick={() => handlers.onClear(flag)} aria-label={t("followNamed", { key: name })}>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handlers.onClear(flag)}
+        aria-label={t("followNamed", { key: name })}
+      >
         {t("follow")}
       </Button>
     );
   if (change === null) return follow ?? <span className="text-body text-muted-foreground">{t("platformOff")}</span>;
   return (
     <span className="flex flex-wrap gap-2">
-      <Button variant="outline" size="sm" onClick={() => handlers.onChange(change)} aria-label={t(change.value ? "turnOnNamed" : "turnOffNamed", { key: name })}>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => handlers.onChange(change)}
+        aria-label={t(change.value ? "turnOnNamed" : "turnOffNamed", { key: name })}
+      >
         {t(change.value ? "turnOn" : "turnOff")}
       </Button>
       {follow}
@@ -86,10 +111,25 @@ const useColumns = (handlers: FlagHandlers | null) => {
   const t = useTranslations("settings.flags");
   return useMemo(
     () => [
-      column.display({ id: "flag", header: () => t("columns.flag"), cell: ({ row }) => <FlagName flag={row.original} /> }),
-      column.display({ id: "platform", header: () => t("columns.platform"), cell: ({ row }) => <PlatformValue flag={row.original} /> }),
-      column.display({ id: "override", header: () => t("columns.override"), cell: ({ row }) => <Override flag={row.original} /> }),
-      column.accessor("value", { header: () => t("columns.effective"), cell: ({ getValue }) => <OnOff value={getValue()} /> }),
+      column.display({
+        id: "flag",
+        header: () => t("columns.flag"),
+        cell: ({ row }) => <FlagName flag={row.original} />,
+      }),
+      column.display({
+        id: "platform",
+        header: () => t("columns.platform"),
+        cell: ({ row }) => <PlatformValue flag={row.original} />,
+      }),
+      column.display({
+        id: "override",
+        header: () => t("columns.override"),
+        cell: ({ row }) => <Override flag={row.original} />,
+      }),
+      column.accessor("value", {
+        header: () => t("columns.effective"),
+        cell: ({ getValue }) => <OnOff value={getValue()} />,
+      }),
       column.display({
         id: "actions",
         header: () => t("columns.actions"),
@@ -101,7 +141,15 @@ const useColumns = (handlers: FlagHandlers | null) => {
   );
 };
 
-function FlagsTable({ flags, organizationName, handlers }: { flags: readonly FeatureFlag[]; organizationName: string; handlers: FlagHandlers | null }) {
+function FlagsTable({
+  flags,
+  organizationName,
+  handlers,
+}: {
+  flags: readonly FeatureFlag[];
+  organizationName: string;
+  handlers: FlagHandlers | null;
+}) {
   const t = useTranslations("settings.flags");
   const columns = useColumns(handlers);
   return (
@@ -124,7 +172,15 @@ function FlagsTable({ flags, organizationName, handlers }: { flags: readonly Fea
           {handlers === null ? null : <FlagAction flag={flag} handlers={handlers} />}
         </div>
       )}
-      empty={<EmptyState frame="plain" headingLevel={2} icon="flag" title={t("emptyTitle")} description={t("emptyDescription")} />}
+      empty={
+        <EmptyState
+          frame="plain"
+          headingLevel={2}
+          icon="flag"
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
+        />
+      }
     />
   );
 }
@@ -140,10 +196,17 @@ function SettingsFlags({ context }: { context: AccessContext }) {
   const [clearing, setClearing] = useState<FeatureFlag | null>(null);
   const handlers = useMemo<FlagHandlers>(() => ({ onChange: setChange, onClear: setClearing }), []);
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={allowed}
-      header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} description={t("description")} />}
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow", { organization: organization.name })}
+          title={t("title")}
+          description={t("description")}
+        />
+      }
     >
       <div className="flex flex-col gap-4">
         {online ? null : <OfflineNotice />}
@@ -151,11 +214,29 @@ function SettingsFlags({ context }: { context: AccessContext }) {
           <AlertDescription>{t("onlyOffNotice")}</AlertDescription>
         </Alert>
         <QuerySection query={flags} loadingLabel={t("loading")}>
-          {(data) => <FlagsTable flags={data} organizationName={organization.name} handlers={canWrite && online ? handlers : null} />}
+          {(data) => (
+            <FlagsTable
+              flags={data}
+              organizationName={organization.name}
+              handlers={canWrite && online ? handlers : null}
+            />
+          )}
         </QuerySection>
       </div>
-      {canWrite ? <TenantSetFlagDialog organizationId={organization.id} change={change} onOpenChange={(open) => !open && setChange(null)} /> : null}
-      {canWrite ? <TenantClearFlagOverrideDialog organizationId={organization.id} flag={clearing} onOpenChange={(open) => !open && setClearing(null)} /> : null}
+      {canWrite ? (
+        <TenantSetFlagDialog
+          organizationId={organization.id}
+          change={change}
+          onOpenChange={(open) => !open && setChange(null)}
+        />
+      ) : null}
+      {canWrite ? (
+        <TenantClearFlagOverrideDialog
+          organizationId={organization.id}
+          flag={clearing}
+          onOpenChange={(open) => !open && setClearing(null)}
+        />
+      ) : null}
     </SettingsPageFrame>
   );
 }

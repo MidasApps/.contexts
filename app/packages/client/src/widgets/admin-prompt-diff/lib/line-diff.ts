@@ -9,7 +9,8 @@ const lcsTable = (before: readonly string[], after: readonly string[]): number[]
     for (let j = after.length - 1; j >= 0; j -= 1) {
       const row = table[i];
       if (row === undefined) continue;
-      row[j] = before[i] === after[j] ? (table[i + 1]?.[j + 1] ?? 0) + 1 : Math.max(table[i + 1]?.[j] ?? 0, row[j + 1] ?? 0);
+      row[j] =
+        before[i] === after[j] ? (table[i + 1]?.[j + 1] ?? 0) + 1 : Math.max(table[i + 1]?.[j] ?? 0, row[j + 1] ?? 0);
     }
   }
   return table;

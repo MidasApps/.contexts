@@ -55,7 +55,11 @@ function DecisionError({ error }: { error: unknown }) {
   const message = code === null ? described.message : t(`errors.${code}`);
   return (
     <Alert variant="destructive" role="alert">
-      <AlertDescription>{described.requestId === undefined ? message : tError("messageWithReference", { message, requestId: described.requestId })}</AlertDescription>
+      <AlertDescription>
+        {described.requestId === undefined
+          ? message
+          : tError("messageWithReference", { message, requestId: described.requestId })}
+      </AlertDescription>
     </Alert>
   );
 }
@@ -72,7 +76,16 @@ function DecisionForm({ request }: { request: ApprovalRequest }) {
     if (result === null) return;
     // Approving runs the action at once: the answer says whether it worked.
     if (result.status === "failed") notify.error(t("done.failed"));
-    else notify.success(t(result.status === "rejected" ? "done.rejected" : result.status === "executed" ? "done.executed" : "done.approved"));
+    else
+      notify.success(
+        t(
+          result.status === "rejected"
+            ? "done.rejected"
+            : result.status === "executed"
+              ? "done.executed"
+              : "done.approved",
+        ),
+      );
   };
   if (decision.decided !== null) return null;
   const busy = decision.pending !== null;
@@ -125,7 +138,13 @@ export function ApprovalDecision({ request, viewerUid }: ApprovalDecisionProps) 
   const t = useTranslations("settings.approvals.decision");
   const blocker = useBlocker(request, viewerUid);
   if (request.status !== "pending") return null;
-  if (blocker === "loading") return <p className="text-sm text-muted-foreground" role="status">{t("checking")}</p>;
-  if (blocker !== null) return <p className="border-t border-border pt-3 text-sm text-muted-foreground">{t(`blocked.${blocker}`)}</p>;
+  if (blocker === "loading")
+    return (
+      <p className="text-sm text-muted-foreground" role="status">
+        {t("checking")}
+      </p>
+    );
+  if (blocker !== null)
+    return <p className="border-t border-border pt-3 text-sm text-muted-foreground">{t(`blocked.${blocker}`)}</p>;
   return <DecisionForm request={request} />;
 }

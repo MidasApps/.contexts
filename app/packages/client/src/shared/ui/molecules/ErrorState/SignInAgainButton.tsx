@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentProps } from "react";
+import { type ComponentProps, useState } from "react";
 import { useTranslations } from "use-intl";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";

@@ -23,7 +23,12 @@ export type DeleteKnowledgeDocumentDialogProps = {
  * core.knowledge.delete): agents stop citing it. The list is refetched, not patched, because the
  * server also removes the indexed chunks and the row must reflect that it is gone.
  */
-export function DeleteKnowledgeDocumentDialog({ organizationId, document, name, onOpenChange }: DeleteKnowledgeDocumentDialogProps) {
+export function DeleteKnowledgeDocumentDialog({
+  organizationId,
+  document,
+  name,
+  onOpenChange,
+}: DeleteKnowledgeDocumentDialogProps) {
   const t = useTranslations("settings.knowledge.delete");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();

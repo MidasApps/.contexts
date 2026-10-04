@@ -1,16 +1,28 @@
 import type { ChatAgentOption, CustomAgentId, CustomAgentLimits, TenantId } from "@core/contracts";
 import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
 import { ok, type Result } from "../../../shared/result/result.ts";
-import { authorizeCustomAgents, CHAT_USE_PERMISSION, CUSTOM_AGENTS_READ_PERMISSION, type CustomAgentsCommand, type CustomAgentsDeps } from "../custom-agents-deps.ts";
+import {
+  authorizeCustomAgents,
+  CHAT_USE_PERMISSION,
+  CUSTOM_AGENTS_READ_PERMISSION,
+  type CustomAgentsCommand,
+  type CustomAgentsDeps,
+} from "../custom-agents-deps.ts";
 
 type ReadCommand = Omit<CustomAgentsCommand, "requestId">;
 
-export type CustomAgentUsage = { readonly limits: CustomAgentLimits; readonly usage: { readonly agents: number; readonly skills: number } };
+export type CustomAgentUsage = {
+  readonly limits: CustomAgentLimits;
+  readonly usage: { readonly agents: number; readonly skills: number };
+};
 
 export type GetCustomAgentUsage = (command: ReadCommand) => Promise<Result<CustomAgentUsage, AccessDeniedError>>;
 export type ListChatAgents = (command: ReadCommand) => Promise<Result<ChatAgentOption[], AccessDeniedError>>;
 /** Server-side check of `/v1/chat`: no authorization, the tenant is the conversation's. */
-export type IsChatAgentEnabled = (input: { readonly tenantId: TenantId; readonly agentId: CustomAgentId }) => Promise<boolean>;
+export type IsChatAgentEnabled = (input: {
+  readonly tenantId: TenantId;
+  readonly agentId: CustomAgentId;
+}) => Promise<boolean>;
 
 /** The supervisor, as every member's default chat agent. */
 export const ASSISTANT_CHAT_AGENT: ChatAgentOption = {
@@ -42,7 +54,14 @@ export const makeListChatAgents =
     if (!allowed.ok) return allowed;
     const custom = (await deps.agents.listByTenant({ tenantId: command.tenantId }))
       .filter((agent) => agent.enabled)
-      .map((agent): ChatAgentOption => ({ id: agent.id, name: agent.name, description: agent.description, source: "custom" }));
+      .map(
+        (agent): ChatAgentOption => ({
+          id: agent.id,
+          name: agent.name,
+          description: agent.description,
+          source: "custom",
+        }),
+      );
     return ok([ASSISTANT_CHAT_AGENT, ...custom]);
   };
 

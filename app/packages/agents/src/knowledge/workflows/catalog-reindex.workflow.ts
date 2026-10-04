@@ -95,7 +95,8 @@ export const createCatalogReindexWorkflow = (deps: ReindexDeps) => {
     inputSchema: z.strictObject({}),
     outputSchema: CatalogReindexResultSchema,
     execute: async ({ requestContext, abortSignal }) => {
-      if (requestContext.get(AGENT_PRINCIPAL_KEY) !== undefined) return { status: "failed" as const, total: 0, indexed: 0, unchanged: 0, code: "PLATFORM_ONLY" };
+      if (requestContext.get(AGENT_PRINCIPAL_KEY) !== undefined)
+        return { status: "failed" as const, total: 0, indexed: 0, unchanged: 0, code: "PLATFORM_ONLY" };
       return reindexAll(deps, abortSignal);
     },
   });

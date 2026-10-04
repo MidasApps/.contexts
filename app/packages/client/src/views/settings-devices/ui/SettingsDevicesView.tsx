@@ -16,8 +16,8 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
-import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
@@ -35,18 +35,39 @@ const useColumns = (onRevoke: ((device: Device) => void) | null) => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.accessor("label", { header: () => t("columns.label"), cell: ({ getValue }) => <span className="font-medium">{getValue()}</span> }),
-      column.display({ id: "node", header: () => t("columns.node"), cell: ({ row }) => <NodeName node={row.original.node} /> }),
-      column.accessor("lastSeenAt", { header: () => t("columns.lastSeen"), cell: ({ getValue }) => (getValue() === null ? t("neverSeen") : formatDateTime(getValue() ?? "")) }),
-      column.accessor("createdAt", { header: () => t("columns.activated"), cell: ({ getValue }) => formatDateTime(getValue(), "date") }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ row }) => <DeviceStatus device={row.original} /> }),
+      column.accessor("label", {
+        header: () => t("columns.label"),
+        cell: ({ getValue }) => <span className="font-medium">{getValue()}</span>,
+      }),
+      column.display({
+        id: "node",
+        header: () => t("columns.node"),
+        cell: ({ row }) => <NodeName node={row.original.node} />,
+      }),
+      column.accessor("lastSeenAt", {
+        header: () => t("columns.lastSeen"),
+        cell: ({ getValue }) => (getValue() === null ? t("neverSeen") : formatDateTime(getValue() ?? "")),
+      }),
+      column.accessor("createdAt", {
+        header: () => t("columns.activated"),
+        cell: ({ getValue }) => formatDateTime(getValue(), "date"),
+      }),
+      column.accessor("status", {
+        header: () => t("columns.status"),
+        cell: ({ row }) => <DeviceStatus device={row.original} />,
+      }),
       column.display({
         id: "actions",
         header: () => t("columns.actions"),
         meta: { headerHidden: true },
         cell: ({ row }) =>
           onRevoke === null || row.original.status !== "active" ? null : (
-            <Button variant="outline" size="sm" onClick={() => onRevoke(row.original)} aria-label={t("revokeNamed", { name: row.original.label })}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onRevoke(row.original)}
+              aria-label={t("revokeNamed", { name: row.original.label })}
+            >
               {t("revokeAction")}
             </Button>
           ),
@@ -86,9 +107,19 @@ function DevicesTable({ context, onCreate }: { context: AccessContext; onCreate:
             <span className="text-body">
               <NodeName node={device.node} />
             </span>
-            <span className="text-xs text-muted-foreground">{device.lastSeenAt === null ? t("neverSeen") : t("lastSeenOn", { date: formatDateTime(device.lastSeenAt) })}</span>
+            <span className="text-xs text-muted-foreground">
+              {device.lastSeenAt === null
+                ? t("neverSeen")
+                : t("lastSeenOn", { date: formatDateTime(device.lastSeenAt) })}
+            </span>
             {canRevoke && device.status === "active" ? (
-              <Button variant="outline" size="sm" className="self-start" onClick={() => setRevoking(device)} aria-label={t("revokeNamed", { name: device.label })}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start"
+                onClick={() => setRevoking(device)}
+                aria-label={t("revokeNamed", { name: device.label })}
+              >
                 {t("revokeAction")}
               </Button>
             ) : null}
@@ -111,7 +142,11 @@ function DevicesTable({ context, onCreate }: { context: AccessContext; onCreate:
           />
         }
       />
-      <RevokeDeviceDialog organizationId={organization.id} device={revoking} onOpenChange={(open) => !open && setRevoking(null)} />
+      <RevokeDeviceDialog
+        organizationId={organization.id}
+        device={revoking}
+        onOpenChange={(open) => !open && setRevoking(null)}
+      />
     </>
   );
 }
@@ -124,7 +159,8 @@ function SettingsDevices({ context }: { context: AccessContext }) {
   const canCreate = context.permissions.includes("core.device.create");
   const roles = useRoles(canCreate ? organization.id : undefined);
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.device.read")}
       header={
@@ -145,7 +181,14 @@ function SettingsDevices({ context }: { context: AccessContext }) {
     >
       {/* The empty-state copy follows the permission; offline only holds the action (the shell says why). */}
       <DevicesTable context={context} onCreate={canCreate ? () => setCreating(true) : null} />
-      {canCreate ? <CreateDeviceActivationDialog organization={organization} customRoles={roles.data} open={creating} onOpenChange={setCreating} /> : null}
+      {canCreate ? (
+        <CreateDeviceActivationDialog
+          organization={organization}
+          customRoles={roles.data}
+          open={creating}
+          onOpenChange={setCreating}
+        />
+      ) : null}
     </SettingsPageFrame>
   );
 }

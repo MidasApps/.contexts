@@ -15,10 +15,16 @@ const orNull = async <T>(work: () => Promise<T>): Promise<T | null> => {
 };
 
 const mfaOf = (decoded: DecodedIdToken): boolean =>
-  provesMfa({ claims: decoded, signInProvider: decoded.firebase.sign_in_provider, secondFactor: decoded.firebase.sign_in_second_factor ?? null });
+  provesMfa({
+    claims: decoded,
+    signInProvider: decoded.firebase.sign_in_provider,
+    secondFactor: decoded.firebase.sign_in_second_factor ?? null,
+  });
 
 /** Firebase Admin `SessionCookieIssuer`; every verification checks revocation (decision 0007). */
-export const createFirebaseSessionCookieIssuer = (deps: { auth: Pick<Auth, "verifyIdToken" | "createSessionCookie" | "verifySessionCookie"> }): SessionCookieIssuer => ({
+export const createFirebaseSessionCookieIssuer = (deps: {
+  auth: Pick<Auth, "verifyIdToken" | "createSessionCookie" | "verifySessionCookie">;
+}): SessionCookieIssuer => ({
   verifyIdToken: (idToken) =>
     orNull(async () => {
       const decoded = await deps.auth.verifyIdToken(idToken, true);

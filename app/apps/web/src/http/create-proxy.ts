@@ -73,5 +73,7 @@ export const createProxy =
   (deps: ProxyDeps) =>
   (request: NextRequest): NextResponse => {
     const requestId = resolveRequestId(request.headers.get(REQUEST_ID_HEADER));
-    return isPublicApiPath(request.nextUrl.pathname) ? handleApi(deps, request, requestId) : handlePage(deps, request, requestId);
+    return isPublicApiPath(request.nextUrl.pathname)
+      ? handleApi(deps, request, requestId)
+      : handlePage(deps, request, requestId);
   };

@@ -18,9 +18,27 @@ export default defineConfig({
       // jsdom because the page tests render inside the real client composition (Testing Library +
       // axe-core); server and agent tests opt into node with `// @vitest-environment node`.
       // The 5 s default timed out under that load; `@core/client` uses 15 s too.
-      { test: { ...presetDefaults, name: "unit", include, exclude: [...exclude, EMULATOR_TESTS], environment: "jsdom", setupFiles: ["./src/testing/setup.ts"], testTimeout: 15_000 } },
+      {
+        test: {
+          ...presetDefaults,
+          name: "unit",
+          include,
+          exclude: [...exclude, EMULATOR_TESTS],
+          environment: "jsdom",
+          setupFiles: ["./src/testing/setup.ts"],
+          testTimeout: 15_000,
+        },
+      },
       // `*.emulator.test.ts` needs the Firebase Emulator Suite (root `pnpm test:emulators`).
-      { test: { ...presetDefaults, ...EMULATOR_PROJECT_DEFAULTS, name: "emulators", include: [EMULATOR_TESTS], exclude } },
+      {
+        test: {
+          ...presetDefaults,
+          ...EMULATOR_PROJECT_DEFAULTS,
+          name: "emulators",
+          include: [EMULATOR_TESTS],
+          exclude,
+        },
+      },
     ],
   },
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, use, type ReactNode } from "react";
+import { createContext, type ReactNode, use } from "react";
 
 /**
  * Where client code reports a failure it handled itself (it showed a fallback and went on).

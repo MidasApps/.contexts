@@ -9,7 +9,14 @@ const WORKFLOW_ID = "gate-probe";
 const PAST = Date.parse("2026-01-01T00:00:00.000Z");
 
 const probe = createWorkflow({ id: WORKFLOW_ID, inputSchema: z.object({}), outputSchema: z.object({}) })
-  .then(createStep({ id: "noop", inputSchema: z.object({}), outputSchema: z.object({}), execute: ({ inputData }) => Promise.resolve(inputData) }))
+  .then(
+    createStep({
+      id: "noop",
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+      execute: ({ inputData }) => Promise.resolve(inputData),
+    }),
+  )
   .commit();
 
 /** A store with one due schedule row, gated by a switch the test flips. */
@@ -23,7 +30,15 @@ const setup = async () => {
   });
   const schedules = await storage.getStore("schedules");
   if (schedules === undefined) throw new Error("no schedules domain");
-  await schedules.createSchedule({ id: "schedule_due", target: { type: "workflow", workflowId: WORKFLOW_ID }, cron: "* * * * *", status: "active", nextFireAt: PAST, createdAt: PAST, updatedAt: PAST });
+  await schedules.createSchedule({
+    id: "schedule_due",
+    target: { type: "workflow", workflowId: WORKFLOW_ID },
+    cron: "* * * * *",
+    status: "active",
+    nextFireAt: PAST,
+    createdAt: PAST,
+    updatedAt: PAST,
+  });
   return { flag, decisions, storage, schedules };
 };
 
@@ -51,7 +66,12 @@ describe("workflows.schedules gate on schedule fires", () => {
 
   it("holds Mastra's scheduler tick while off, and the due fire happens once when turned back on", async () => {
     const { flag, storage, schedules } = await setup();
-    mastra = new Mastra({ workflows: { [WORKFLOW_ID]: probe }, storage, logger: false, scheduler: { enabled: true, tickIntervalMs: 3_600_000 } });
+    mastra = new Mastra({
+      workflows: { [WORKFLOW_ID]: probe },
+      storage,
+      logger: false,
+      scheduler: { enabled: true, tickIntervalMs: 3_600_000 },
+    });
     await mastra.startWorkers();
     await mastra.scheduler?.tick();
     expect((await schedules.getSchedule("schedule_due"))?.lastRunId).toBeUndefined();

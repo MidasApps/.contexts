@@ -1,12 +1,16 @@
 "use client";
 
-import { createContext, use, type ComponentProps, type ReactNode } from "react";
+import { type ComponentProps, createContext, type ReactNode, use } from "react";
 import { cn } from "#/shared/lib/cn.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import type { ToolState } from "./tool.tsx";
 
 /** The approval of an AI SDK tool part (`approval` field), once the member decided. */
-export type ConfirmationApproval = { readonly id: string; readonly approved?: boolean | undefined; readonly reason?: string | undefined };
+export type ConfirmationApproval = {
+  readonly id: string;
+  readonly approved?: boolean | undefined;
+  readonly reason?: string | undefined;
+};
 
 type ConfirmationContextValue = { readonly state: ToolState; readonly approval: ConfirmationApproval | undefined };
 
@@ -38,7 +42,11 @@ export function Confirmation({ state, approval, label, className, ...props }: Co
         data-slot="confirmation"
         data-state={state}
         aria-label={label}
-        className={cn("flex w-full flex-col gap-3 rounded-md border border-border bg-card p-4 text-sm", "data-[state=approval-requested]:border-amber/40", className)}
+        className={cn(
+          "flex w-full flex-col gap-3 rounded-md border border-border bg-card p-4 text-sm",
+          "data-[state=approval-requested]:border-amber/40",
+          className,
+        )}
         {...props}
       />
     </ConfirmationContext>
@@ -75,7 +83,13 @@ export function ConfirmationRejected({ children }: StateSlotProps) {
 }
 
 export function ConfirmationActions({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="confirmation-actions" className={cn("flex flex-wrap items-center justify-end gap-2", className)} {...props} />;
+  return (
+    <div
+      data-slot="confirmation-actions"
+      className={cn("flex flex-wrap items-center justify-end gap-2", className)}
+      {...props}
+    />
+  );
 }
 
 export function ConfirmationAction({ size = "sm", ...props }: ComponentProps<typeof Button>) {

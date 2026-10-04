@@ -26,11 +26,16 @@ describe("evaluateGate", () => {
   it("fails a baselined scorer that produced no score", () => {
     const gate = evaluateGate({ means: { "tool-routing": 1 }, baseline });
     expect(gate.passed).toBe(false);
-    expect(gate.scorers.find((scorer) => scorer.scorerId === "format-compliance")).toMatchObject({ mean: null, passed: false });
+    expect(gate.scorers.find((scorer) => scorer.scorerId === "format-compliance")).toMatchObject({
+      mean: null,
+      passed: false,
+    });
   });
 
   it("ignores scorers without a baseline", () => {
-    expect(evaluateGate({ means: { "tool-routing": 1, "format-compliance": 1, extra: 0 }, baseline }).passed).toBe(true);
+    expect(evaluateGate({ means: { "tool-routing": 1, "format-compliance": 1, extra: 0 }, baseline }).passed).toBe(
+      true,
+    );
   });
 
   it("rounds the floor so 0.9 - 0.05 is exactly 0.85", () => {
@@ -40,11 +45,17 @@ describe("evaluateGate", () => {
 
 describe("baselineFor", () => {
   it("uses the real band in real mode and the main band otherwise", () => {
-    const withReal = BaselineSchema.parse({ "tool-routing": { minimum: 1, tolerance: 0, real: { minimum: 0.9, tolerance: 0.1 } } });
+    const withReal = BaselineSchema.parse({
+      "tool-routing": { minimum: 1, tolerance: 0, real: { minimum: 0.9, tolerance: 0.1 } },
+    });
     expect(baselineFor(withReal, "fake")).toEqual({ "tool-routing": { minimum: 1, tolerance: 0 } });
     expect(baselineFor(withReal, "real")).toEqual({ "tool-routing": { minimum: 0.9, tolerance: 0.1 } });
-    expect(evaluateGate({ means: { "tool-routing": 0.85 }, baseline: baselineFor(withReal, "real") }).passed).toBe(true);
-    expect(evaluateGate({ means: { "tool-routing": 0.85 }, baseline: baselineFor(withReal, "fake") }).passed).toBe(false);
+    expect(evaluateGate({ means: { "tool-routing": 0.85 }, baseline: baselineFor(withReal, "real") }).passed).toBe(
+      true,
+    );
+    expect(evaluateGate({ means: { "tool-routing": 0.85 }, baseline: baselineFor(withReal, "fake") }).passed).toBe(
+      false,
+    );
   });
 });
 

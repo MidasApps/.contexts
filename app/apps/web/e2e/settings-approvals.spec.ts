@@ -1,6 +1,16 @@
-import type { Page } from "@playwright/test";
 import { signInThroughUi } from "@core/e2e/sign-in";
-import { addMember, expect, openAs, settingsPath, test, toast, unique, type FreshUser, type Sp5Org } from "./sp5-test.ts";
+import type { Page } from "@playwright/test";
+import {
+  addMember,
+  expect,
+  type FreshUser,
+  openAs,
+  type Sp5Org,
+  settingsPath,
+  test,
+  toast,
+  unique,
+} from "./sp5-test.ts";
 
 // SP5 Task 16, `/settings/approvals` with four eyes: the owner starts `approval-demo`, which
 // suspends on an approval request; the owner (the requester) sees no decision buttons and why;
@@ -22,16 +32,32 @@ const startRunAwaitingApproval = async (page: Page, org: Sp5Org, title: string):
   return href.replace(/^\/pt-BR\//, "");
 };
 
-const signInAdmin = async (args: { browser: Parameters<typeof openAs>[0]; ownerApi: Parameters<typeof addMember>[0]["owner"]; createUser: (a: { label: string }) => Promise<FreshUser>; org: Sp5Org }) => {
+const signInAdmin = async (args: {
+  browser: Parameters<typeof openAs>[0];
+  ownerApi: Parameters<typeof addMember>[0]["owner"];
+  createUser: (a: { label: string }) => Promise<FreshUser>;
+  org: Sp5Org;
+}) => {
   const admin = await args.createUser({ label: "Approver" });
-  await addMember({ owner: args.ownerApi, user: admin, organizationId: args.org.id, roles: [{ kind: "system", key: "admin" }] });
+  await addMember({
+    owner: args.ownerApi,
+    user: admin,
+    organizationId: args.org.id,
+    roles: [{ kind: "system", key: "admin" }],
+  });
   const session = await openAs(args.browser, { cookies: [], origins: [] });
   await signInThroughUi(session.page, admin);
   return session;
 };
 
 test.describe("four-eyes approvals", () => {
-  test("the requester cannot decide; a second admin approves one run and rejects another", async ({ page, browser, sp5Org, ownerApi, createUser }) => {
+  test("the requester cannot decide; a second admin approves one run and rejects another", async ({
+    page,
+    browser,
+    sp5Org,
+    ownerApi,
+    createUser,
+  }) => {
     test.setTimeout(360_000);
     const approveTitle = unique("Note to approve");
     const rejectTitle = unique("Note to reject");
@@ -45,7 +71,9 @@ test.describe("four-eyes approvals", () => {
     await expect(page.getByRole("tabpanel").getByText(approveTitle).first()).toBeVisible();
     await page.goto(toApprove);
     await expect(page.getByRole("heading", { level: 1, name: "Solicitação de aprovação" })).toBeVisible();
-    await expect(page.getByText("Você pediu esta aprovação. Outra pessoa com permissão precisa decidir.")).toBeVisible();
+    await expect(
+      page.getByText("Você pediu esta aprovação. Outra pessoa com permissão precisa decidir."),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "Aprovar" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Recusar" })).toHaveCount(0);
 
@@ -65,11 +93,17 @@ test.describe("four-eyes approvals", () => {
 
     await admin.goto(toReject);
     await admin.getByRole("button", { name: "Recusar" }).click();
-    await admin.getByRole("alertdialog", { name: "Recusar esta solicitação?" }).getByRole("button", { name: "Recusar solicitação" }).click();
+    await admin
+      .getByRole("alertdialog", { name: "Recusar esta solicitação?" })
+      .getByRole("button", { name: "Recusar solicitação" })
+      .click();
     await expect(toast(admin, "Solicitação recusada.")).toBeVisible();
 
     await admin.goto(settingsPath(sp5Org.id, "approvals"));
-    await expect(admin.getByRole("tab", { name: /^Aguardando minha decisão/ })).toHaveAttribute("aria-selected", "true");
+    await expect(admin.getByRole("tab", { name: /^Aguardando minha decisão/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await expect(admin.getByRole("tabpanel").getByText(approveTitle)).toHaveCount(0);
     await expect(admin.getByRole("tabpanel").getByText(rejectTitle)).toHaveCount(0);
     await admin.getByRole("tab", { name: /^Histórico/ }).click();
@@ -82,7 +116,9 @@ test.describe("four-eyes approvals", () => {
     const runs = page.getByRole("table", { name: `Execuções de fluxos de ${sp5Org.name}` });
     await expect(async () => {
       await page.reload();
-      await expect(runs.getByRole("row").filter({ hasText: "Demonstração de aprovação" }).filter({ hasText: "Concluída" })).toHaveCount(2, { timeout: 5_000 });
+      await expect(
+        runs.getByRole("row").filter({ hasText: "Demonstração de aprovação" }).filter({ hasText: "Concluída" }),
+      ).toHaveCount(2, { timeout: 5_000 });
     }).toPass({ timeout: 120_000 });
   });
 });

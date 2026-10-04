@@ -26,5 +26,13 @@ export const createWebErrorReporter =
   (args: { appEnv: string; sink: (entry: WebClientLogEntry) => void; now?: () => Date }): ReportError =>
   (error, context) => {
     const now = args.now ?? (() => new Date());
-    args.sink({ timestamp: now().toISOString(), level: "error", message: "web_client_error", service: "web", env: args.appEnv, operation: context.operation, err: describeError(error) });
+    args.sink({
+      timestamp: now().toISOString(),
+      level: "error",
+      message: "web_client_error",
+      service: "web",
+      env: args.appEnv,
+      operation: context.operation,
+      err: describeError(error),
+    });
   };

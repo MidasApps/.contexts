@@ -2,7 +2,10 @@ import type { EmbeddingModelV4 } from "@ai-sdk/provider";
 import type { MastraSupportedEmbeddingModel } from "@mastra/core/vector";
 
 /** The v3 embedding model type Mastra bundles (its internal AI SDK v6 types). */
-export type MastraEmbeddingModelV3 = Extract<MastraSupportedEmbeddingModel<string>, { readonly specificationVersion: "v3" }>;
+export type MastraEmbeddingModelV3 = Extract<
+  MastraSupportedEmbeddingModel<string>,
+  { readonly specificationVersion: "v3" }
+>;
 
 /**
  * `@mastra/memory` 1.32 embeds with AI SDK v2/v3 embedding models only

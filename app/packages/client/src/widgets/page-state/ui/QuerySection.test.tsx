@@ -5,19 +5,47 @@ import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { QuerySection } from "./QuerySection.tsx";
 
-const query = (overrides: Partial<Parameters<typeof QuerySection>[0]["query"]>) => ({ status: "success" as const, data: "ok", error: null, isFetching: false, refetch: vi.fn(), ...overrides });
+const query = (overrides: Partial<Parameters<typeof QuerySection>[0]["query"]>) => ({
+  status: "success" as const,
+  data: "ok",
+  error: null,
+  isFetching: false,
+  refetch: vi.fn(),
+  ...overrides,
+});
 
 describe("QuerySection", () => {
   it("renders loading, no-access for 403, an error with retry, then the content", async () => {
-    const view = (props: Parameters<typeof QuerySection>[0]["query"]) => <QuerySection query={props} loadingLabel="Carregando dados">{(data) => <p>{data as string}</p>}</QuerySection>;
+    const view = (props: Parameters<typeof QuerySection>[0]["query"]) => (
+      <QuerySection query={props} loadingLabel="Carregando dados">
+        {(data) => <p>{data as string}</p>}
+      </QuerySection>
+    );
     const { rerender, user, container } = renderWithProviders(view(query({ status: "pending", data: undefined })));
     expect(screen.getByRole("status").textContent).toContain("Carregando dados");
 
-    rerender(view(query({ status: "error", data: undefined, error: new ApiError({ status: 403, code: "FORBIDDEN", message: "x" }) })));
+    rerender(
+      view(
+        query({
+          status: "error",
+          data: undefined,
+          error: new ApiError({ status: 403, code: "FORBIDDEN", message: "x" }),
+        }),
+      ),
+    );
     expect(screen.getByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();
 
     const refetch = vi.fn();
-    rerender(view(query({ status: "error", data: undefined, refetch, error: new ApiError({ status: 503, code: "INTERNAL_ERROR", message: "x", requestId: "01K6REQ" }) })));
+    rerender(
+      view(
+        query({
+          status: "error",
+          data: undefined,
+          refetch,
+          error: new ApiError({ status: 503, code: "INTERNAL_ERROR", message: "x", requestId: "01K6REQ" }),
+        }),
+      ),
+    );
     await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
     expect(refetch).toHaveBeenCalledOnce();
     expect(screen.getByText("Referência: 01K6REQ")).toBeDefined();
@@ -33,14 +61,30 @@ describe("QuerySection", () => {
         {(data) => <p>{data as string}</p>}
       </QuerySection>
     );
-    const { rerender } = renderWithProviders(view(query({ status: "error", data: undefined, error: new ApiError({ status: 404, code: "NOT_FOUND", message: "x" }) })));
+    const { rerender } = renderWithProviders(
+      view(
+        query({
+          status: "error",
+          data: undefined,
+          error: new ApiError({ status: 404, code: "NOT_FOUND", message: "x" }),
+        }),
+      ),
+    );
     expect(screen.getByText("Sumiu")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
 
     rerender(view(query({ data: null })));
     expect(screen.getByText("Sumiu")).toBeDefined();
 
-    rerender(view(query({ status: "error", data: undefined, error: new ApiError({ status: 500, code: "INTERNAL_ERROR", message: "x" }) })));
+    rerender(
+      view(
+        query({
+          status: "error",
+          data: undefined,
+          error: new ApiError({ status: 500, code: "INTERNAL_ERROR", message: "x" }),
+        }),
+      ),
+    );
     expect(screen.getByRole("button", { name: "Tentar novamente" })).toBeDefined();
   });
 });

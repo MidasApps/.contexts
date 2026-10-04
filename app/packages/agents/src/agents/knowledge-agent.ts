@@ -21,7 +21,9 @@ export const KNOWLEDGE_AGENT_MAX_STEPS = 6;
  * (`agent-knowledge`, Task 20), so it runs the `delegated` guardrail profile.
  * @param instructionsDirs directories tried first for `knowledge.v1.md` (bundled copy).
  */
-export const createKnowledgeAgentDefinition = (options: { readonly instructionsDirs?: readonly string[] } = {}): AgentDefinition => ({
+export const createKnowledgeAgentDefinition = (
+  options: { readonly instructionsDirs?: readonly string[] } = {},
+): AgentDefinition => ({
   id: KNOWLEDGE_AGENT_ID,
   role: "subagent",
   ceiling: ["core.chat.use", KNOWLEDGE_READ_PERMISSION, CATALOG_READ_PERMISSION],
@@ -31,8 +33,12 @@ export const createKnowledgeAgentDefinition = (options: { readonly instructionsD
     return new Agent({
       id: KNOWLEDGE_AGENT_ID,
       name: "Knowledge",
-      description: "Answers questions about the organization's documents and data catalog from the knowledge base, citing every claim.",
-      instructions: instructions(KNOWLEDGE_AGENT_ID, loadInstructions(KNOWLEDGE_INSTRUCTIONS, options.instructionsDirs)),
+      description:
+        "Answers questions about the organization's documents and data catalog from the knowledge base, citing every claim.",
+      instructions: instructions(
+        KNOWLEDGE_AGENT_ID,
+        loadInstructions(KNOWLEDGE_INSTRUCTIONS, options.instructionsDirs),
+      ),
       model: models.language("chat", { agentId: KNOWLEDGE_AGENT_ID }),
       tools: tools.toMastraTools([SEARCH_KNOWLEDGE_TOOL_ID]),
       skills: skills([CORE_SKILLS.knowledgeCitations]),

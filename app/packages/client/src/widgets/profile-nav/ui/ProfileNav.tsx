@@ -3,14 +3,17 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { usePermissions } from "#/entities/permission/index.ts";
-import { useRouter } from "#/shared/lib/router/router-context.tsx";
 import { routeHref } from "#/shared/lib/router/route-paths.ts";
+import { useRouter } from "#/shared/lib/router/router-context.tsx";
 import { useIsImpersonating } from "#/shared/lib/session/use-impersonation.ts";
 import { useNavigationRegistry } from "#/shared/lib/shell/shell-registry-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { SectionNav, type SectionNavItem } from "#/shared/ui/molecules/SectionNav/SectionNav.tsx";
-import { SettingsTemplate, type SettingsTemplateProps } from "#/shared/ui/templates/SettingsTemplate/SettingsTemplate.tsx";
+import {
+  SettingsTemplate,
+  type SettingsTemplateProps,
+} from "#/shared/ui/templates/SettingsTemplate/SettingsTemplate.tsx";
 
 /**
  * Sections of the user's profile (SP2 spec §8): the profile items of the `user-menu` navigation
@@ -57,7 +60,15 @@ function ImpersonationReadOnlyNotice() {
 }
 
 /** Frame of every profile page: header, the labelled section navigation, the content. */
-export function ProfilePageFrame({ header, width, children }: { header: ReactNode; width?: SettingsTemplateProps["width"]; children: ReactNode }) {
+export function ProfilePageFrame({
+  header,
+  width,
+  children,
+}: {
+  header: ReactNode;
+  width?: SettingsTemplateProps["width"];
+  children: ReactNode;
+}) {
   const t = useTranslations("profile");
   return (
     <SettingsTemplate header={header} navigation={<ProfileNav />} navigationLabel={t("navLabel")} width={width}>

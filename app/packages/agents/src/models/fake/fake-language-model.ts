@@ -10,7 +10,6 @@ import type {
 import { simulateReadableStream } from "ai";
 import { extractCitationIds } from "../../knowledge/citation.ts";
 import { deferred } from "./deferred.ts";
-import { buildFakeJsonAnswer } from "./fake-structured-output.ts";
 import {
   type FakeScenarioRegistry,
   type FakeTurn,
@@ -18,6 +17,7 @@ import {
   readStreamDelay,
   resolveFakeTurn,
 } from "./fake-scenarios.ts";
+import { buildFakeJsonAnswer } from "./fake-structured-output.ts";
 
 /**
  * Scripted, deterministic `LanguageModelV4` for `AI_MODE=fake` (spec §5.3,
@@ -49,7 +49,11 @@ const readPrompt = (prompt: LanguageModelV4Prompt): PromptParts => {
     typeof message.content === "string" ? message.content : message.content.map((part) => partText(part)).join("\n"),
   );
   const lastUserIndex = prompt.findLastIndex((message) => message.role === "user");
-  return { lastUserText: lastUserIndex < 0 ? "" : (texts[lastUserIndex] ?? ""), allText: texts.join("\n"), lastRole: prompt.at(-1)?.role };
+  return {
+    lastUserText: lastUserIndex < 0 ? "" : (texts[lastUserIndex] ?? ""),
+    allText: texts.join("\n"),
+    lastRole: prompt.at(-1)?.role,
+  };
 };
 
 type ToolResultSummary = { toolName: string; output: unknown };
@@ -57,7 +61,9 @@ type ToolResultSummary = { toolName: string; output: unknown };
 const lastToolResults = (prompt: LanguageModelV4Prompt): ToolResultSummary[] => {
   const last = prompt.at(-1);
   if (last?.role !== "tool") return [];
-  return last.content.flatMap((part) => (part.type === "tool-result" ? [{ toolName: part.toolName, output: part.output }] : []));
+  return last.content.flatMap((part) =>
+    part.type === "tool-result" ? [{ toolName: part.toolName, output: part.output }] : [],
+  );
 };
 
 // A summary cites the knowledge passages it saw, like a grounded model would.
@@ -67,7 +73,12 @@ const citationsOf = (output: unknown): string => {
 };
 
 const summarizeToolResults = (results: readonly ToolResultSummary[]): FakeTurn => ({
-  text: results.map(({ toolName, output }) => `Fake summary of ${toolName}: ${JSON.stringify(output).slice(0, 200)}${citationsOf(output)}`).join("\n"),
+  text: results
+    .map(
+      ({ toolName, output }) =>
+        `Fake summary of ${toolName}: ${JSON.stringify(output).slice(0, 200)}${citationsOf(output)}`,
+    )
+    .join("\n"),
 });
 
 const toolNamesOf = (options: LanguageModelV4CallOptions): string[] => (options.tools ?? []).map((tool) => tool.name);
@@ -84,7 +95,10 @@ const planTurn = (options: LanguageModelV4CallOptions, settings: FakeLanguageMod
   const turn =
     results.length > 0
       ? summarizeToolResults(results)
-      : resolveFakeTurn({ agentId: settings.agentId, text: lastUserText, toolNames: toolNamesOf(options) }, settings.registry);
+      : resolveFakeTurn(
+          { agentId: settings.agentId, text: lastUserText, toolNames: toolNamesOf(options) },
+          settings.registry,
+        );
   return { turn, json: undefined, promptText: allText, seed };
 };
 
@@ -109,7 +123,8 @@ const finishReasonOf = (turn: FakeTurn): LanguageModelV4FinishReason => {
 const contentOf = (planned: PlannedTurn): LanguageModelV4Content[] => {
   if (planned.json !== undefined) return [{ type: "text", text: planned.json }];
   const { turn, seed } = planned;
-  const reasoning: LanguageModelV4Content[] = turn.reasoning === undefined ? [] : [{ type: "reasoning", text: turn.reasoning }];
+  const reasoning: LanguageModelV4Content[] =
+    turn.reasoning === undefined ? [] : [{ type: "reasoning", text: turn.reasoning }];
   const text: LanguageModelV4Content[] = turn.text === undefined ? [] : [{ type: "text", text: turn.text }];
   const calls: LanguageModelV4Content[] = (turn.toolCalls ?? []).map((call, index) => ({
     type: "tool-call",
@@ -121,7 +136,11 @@ const contentOf = (planned: PlannedTurn): LanguageModelV4Content[] => {
 };
 
 const outputTextOf = (content: readonly LanguageModelV4Content[]): string =>
-  content.map((part) => (part.type === "text" || part.type === "reasoning" ? part.text : part.type === "tool-call" ? part.input : "")).join("");
+  content
+    .map((part) =>
+      part.type === "text" || part.type === "reasoning" ? part.text : part.type === "tool-call" ? part.input : "",
+    )
+    .join("");
 
 const chunk = (text: string): string[] => {
   const chunks: string[] = [];
@@ -163,14 +182,20 @@ export const createFakeLanguageModel = (settings: FakeLanguageModelOptions): Lan
       const planned = planTurn(options, settings);
       if (planned.turn.error !== undefined) throw new Error(planned.turn.error);
       const content = contentOf(planned);
-      return { content, finishReason: finishReasonOf(planned.turn), usage: usageOf(planned, outputTextOf(content)), warnings: [] };
+      return {
+        content,
+        finishReason: finishReasonOf(planned.turn),
+        usage: usageOf(planned, outputTextOf(content)),
+        warnings: [],
+      };
     }),
   doStream: (options) =>
     deferred(() => {
       const planned = planTurn(options, settings);
       const content = contentOf(planned);
       const id = `fake-${planned.seed.slice(0, 12)}`;
-      const errorParts: LanguageModelV4StreamPart[] = planned.turn.error === undefined ? [] : [{ type: "error", error: new Error(planned.turn.error) }];
+      const errorParts: LanguageModelV4StreamPart[] =
+        planned.turn.error === undefined ? [] : [{ type: "error", error: new Error(planned.turn.error) }];
       const chunks: LanguageModelV4StreamPart[] = [
         { type: "stream-start", warnings: [] },
         { type: "response-metadata", id, modelId: settings.modelId, timestamp: FIXED_TIMESTAMP },

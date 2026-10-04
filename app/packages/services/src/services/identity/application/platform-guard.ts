@@ -12,10 +12,20 @@ import type { PlatformDeps } from "./platform-deps.ts";
  */
 export const requireImpersonateRight = async (
   deps: Pick<PlatformDeps, "audit">,
-  args: { actor: UserPrincipal; access: RequestAccess; targetUid: UserId | null; targetTenantId: TenantId | null; requestId: string },
+  args: {
+    actor: UserPrincipal;
+    access: RequestAccess;
+    targetUid: UserId | null;
+    targetTenantId: TenantId | null;
+    requestId: string;
+  },
 ): Promise<Result<void, AccessDeniedError>> => {
   if (args.actor.impersonation !== undefined) return err(new AccessDeniedError("IMPERSONATION_READ_ONLY"));
-  const decision = await args.access.authorize({ principal: args.actor, permission: "platform.user.impersonate", node: { level: "platform" } });
+  const decision = await args.access.authorize({
+    principal: args.actor,
+    permission: "platform.user.impersonate",
+    node: { level: "platform" },
+  });
   if (decision.allowed) return ok(undefined);
   await deps.audit.record({
     log: "platform",

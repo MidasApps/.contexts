@@ -16,12 +16,19 @@ export type AuthState =
   | { readonly status: "signed-in"; readonly user: AuthUser };
 
 /** An enrolled factor offered in a sign-in challenge. */
-export type MfaHint = { readonly uid: string; readonly factor: MfaFactor; readonly displayName: string | null; readonly phoneNumber: string | null };
+export type MfaHint = {
+  readonly uid: string;
+  readonly factor: MfaFactor;
+  readonly displayName: string | null;
+  readonly phoneNumber: string | null;
+};
 
 /** A pending second-factor sign-in; `handle` is opaque (the SDK resolver). */
 export type MfaChallenge = { readonly hints: readonly MfaHint[]; readonly handle: unknown };
 
-export type SignInResult = { readonly kind: "signed-in" } | { readonly kind: "mfa-required"; readonly challenge: MfaChallenge };
+export type SignInResult =
+  | { readonly kind: "signed-in" }
+  | { readonly kind: "mfa-required"; readonly challenge: MfaChallenge };
 
 /** Stable codes for auth failures (`auth.errors.<code>` copy); SDK messages never reach the UI. */
 export const AUTH_ERROR_CODES = [
@@ -72,7 +79,10 @@ export type AuthPort = {
   sendPasswordReset: (email: string, locale: string) => Promise<void>;
   /** SMS factor: sends the code; returns the verification id for `resolveMfa`. */
   sendMfaSmsCode: (challenge: MfaChallenge, hintUid: string, recaptchaContainer: HTMLElement) => Promise<string>;
-  resolveMfa: (challenge: MfaChallenge, answer: { hintUid: string; code: string; verificationId?: string }) => Promise<void>;
+  resolveMfa: (
+    challenge: MfaChallenge,
+    answer: { hintUid: string; code: string; verificationId?: string },
+  ) => Promise<void>;
   startTotpEnrollment: (issuer: string) => Promise<TotpEnrollment>;
   finishTotpEnrollment: (enrollment: TotpEnrollment, code: string, displayName: string) => Promise<void>;
   startSmsEnrollment: (phoneNumber: string, recaptchaContainer: HTMLElement) => Promise<string>;

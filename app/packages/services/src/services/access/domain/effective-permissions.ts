@@ -20,7 +20,9 @@ const makeRoleResolver = (args: {
   tenantId: string;
 }): RolePermissionsResolver => {
   const live = new Map(
-    args.customRoles.filter((role) => !role.isDeleted && role.tenantId === args.tenantId).map((role) => [role.id, role] as const),
+    args.customRoles
+      .filter((role) => !role.isDeleted && role.tenantId === args.tenantId)
+      .map((role) => [role.id, role] as const),
   );
   return (role) => {
     if (role.kind === "system") return [...args.registry.permissionsForSystemRole(role.key)];
@@ -53,7 +55,12 @@ export const computeEffectivePermissions = (args: {
   const sources = new Map<Permission, GrantSource[]>();
   for (const grant of args.grants) {
     if (grant.isDeleted || grant.tenantId !== tenantId || !onChain.has(grant.nodeId)) continue;
-    const source: GrantSource = { kind: "membership", membershipId: grant.membershipId, nodeId: grant.nodeId, roles: grant.roles };
+    const source: GrantSource = {
+      kind: "membership",
+      membershipId: grant.membershipId,
+      nodeId: grant.nodeId,
+      roles: grant.roles,
+    };
     for (const role of grant.roles) {
       for (const permission of resolve(role)) {
         if (args.ceiling === undefined || args.ceiling.has(permission)) addSource(sources, permission, source);

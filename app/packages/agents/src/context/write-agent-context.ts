@@ -26,7 +26,10 @@ export type RequestContextStore = {
  */
 export const AgentRuntimeContextSchema = z
   .looseObject({ ...AgentRequestContextSchema.def.shape, [AGENT_PRINCIPAL_KEY]: PrincipalSchema })
-  .refine((context) => context.organizationId === context.tenantId, { error: "organizationId must equal tenantId.", path: ["organizationId"] });
+  .refine((context) => context.organizationId === context.tenantId, {
+    error: "organizationId must equal tenantId.",
+    path: ["organizationId"],
+  });
 
 const optionalEntries = (principal: AgentPrincipal, conversationId: string | undefined) => ({
   ...(principal.projectId === undefined ? {} : { projectId: principal.projectId }),
@@ -65,14 +68,24 @@ export const buildAgentRequestContext = (args: {
 
 /** Removes every key the middleware owns, so a client-sent value never survives. */
 export const clearAgentContext = (store: RequestContextStore): void => {
-  for (const key of [...AGENT_CONTEXT_KEYS, AGENT_PRINCIPAL_KEY, MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY, ...SERVER_ONLY_CONTEXT_KEYS]) store.delete(key);
+  for (const key of [
+    ...AGENT_CONTEXT_KEYS,
+    AGENT_PRINCIPAL_KEY,
+    MASTRA_RESOURCE_ID_KEY,
+    MASTRA_THREAD_ID_KEY,
+    ...SERVER_ONLY_CONTEXT_KEYS,
+  ])
+    store.delete(key);
 };
 
 /**
  * Writes one key per context field, the principal, `MASTRA_RESOURCE_ID_KEY`
  * (`tenantId:uid`) and, with a conversation, `MASTRA_THREAD_ID_KEY`.
  */
-export const writeAgentContext = (store: RequestContextStore, snapshot: { context: AgentRequestContext; principal: AccessPrincipal }): void => {
+export const writeAgentContext = (
+  store: RequestContextStore,
+  snapshot: { context: AgentRequestContext; principal: AccessPrincipal },
+): void => {
   const { context, principal } = snapshot;
   clearAgentContext(store);
   for (const [key, value] of Object.entries(context)) store.set(key, value);

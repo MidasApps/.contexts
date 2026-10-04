@@ -1,2 +1,2 @@
 // Public API of the schedule-table widget (SP5 Task 13; shared by `/admin` and `/settings`).
-export { ScheduleTable, type ScheduleRow, type ScheduleTableProps } from "./ui/ScheduleTable.tsx";
+export { type ScheduleRow, ScheduleTable, type ScheduleTableProps } from "./ui/ScheduleTable.tsx";

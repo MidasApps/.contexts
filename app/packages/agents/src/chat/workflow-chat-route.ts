@@ -3,8 +3,14 @@ import { handleWorkflowStream, withSseHeartbeat } from "@mastra/ai-sdk";
 import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
 import { createUIMessageStreamResponse } from "ai";
 import { z } from "zod";
+import {
+  authorizeCaller,
+  inputsOf,
+  type RouteInputs,
+  routeError,
+  validateWorkflowInput,
+} from "../workflows/runs/workflow-route-http.ts";
 import { WORKFLOW_RUN_PERMISSIONS } from "../workflows/runs/workflow-run-routes.ts";
-import { authorizeCaller, inputsOf, type RouteInputs, routeError, validateWorkflowInput } from "../workflows/runs/workflow-route-http.ts";
 import type { WorkflowCatalog } from "../workflows/workflow-catalog.ts";
 import { CHAT_HEARTBEAT_MS } from "./chat-routes.ts";
 
@@ -25,9 +31,16 @@ export type WorkflowChatRouteDeps = {
  * chat shows its progress. Same checks as `/workflow-runs/start`: `core.workflow-run.start`, the
  * catalog's `startable` flag and the workflow's input schema; the resource is `tenantId:uid`.
  */
-export const handleWorkflowChatPost = async (input: RouteInputs & { readonly workflowId: string; readonly readBody: () => Promise<unknown> }, deps: WorkflowChatRouteDeps): Promise<Response> => {
+export const handleWorkflowChatPost = async (
+  input: RouteInputs & { readonly workflowId: string; readonly readBody: () => Promise<unknown> },
+  deps: WorkflowChatRouteDeps,
+): Promise<Response> => {
   const { mastra, requestContext, workflowId } = input;
-  const caller = await authorizeCaller({ access: deps.access, requestContext, permission: WORKFLOW_RUN_PERMISSIONS.start });
+  const caller = await authorizeCaller({
+    access: deps.access,
+    requestContext,
+    permission: WORKFLOW_RUN_PERMISSIONS.start,
+  });
   if (!caller.ok) return caller.response;
   const policy = deps.catalog.get(workflowId);
   if (policy === undefined) return routeError("NOT_FOUND", requestContext);
@@ -55,6 +68,10 @@ export const createWorkflowChatRoutes = (deps: WorkflowChatRouteDeps): ApiRoute[
   registerApiRoute(WORKFLOW_CHAT_ROUTE_PATH, {
     method: "POST",
     requiresAuth: true,
-    handler: (c) => handleWorkflowChatPost({ ...inputsOf(c), workflowId: c.req.param("workflowId"), readBody: () => c.req.json() }, deps),
+    handler: (c) =>
+      handleWorkflowChatPost(
+        { ...inputsOf(c), workflowId: c.req.param("workflowId"), readBody: () => c.req.json() },
+        deps,
+      ),
   }),
 ];

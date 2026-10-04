@@ -21,9 +21,28 @@ const sampleModule = defineClientModule({
   manifest: defineModule({
     id: "sample",
     labelKey: "sample.module.name",
-    permissions: [{ id: "sample.item.read", descriptionKey: "sample.permissions.read", kind: "read", scope: "tenant", defaultRoles: ["member"] }],
-    navigation: [{ id: "items", slot: "project", labelKey: "sample.nav.items", icon: "list", path: "", permission: "sample.item.read" }],
-    messages: { "pt-BR": { module: { name: "Amostras" }, nav: { items: "Itens" }, permissions: { read: "Ler itens" } } },
+    permissions: [
+      {
+        id: "sample.item.read",
+        descriptionKey: "sample.permissions.read",
+        kind: "read",
+        scope: "tenant",
+        defaultRoles: ["member"],
+      },
+    ],
+    navigation: [
+      {
+        id: "items",
+        slot: "project",
+        labelKey: "sample.nav.items",
+        icon: "list",
+        path: "",
+        permission: "sample.item.read",
+      },
+    ],
+    messages: {
+      "pt-BR": { module: { name: "Amostras" }, nav: { items: "Itens" }, permissions: { read: "Ler itens" } },
+    },
   }),
   pages: {
     "": () => Promise.resolve({ default: () => <h1>Lista de amostras</h1> }),

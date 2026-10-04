@@ -28,4 +28,6 @@ export type AppModule = {
  * Modules served by this Mastra app, listed here and only here (the core packages never
  * import a module, umbrella D6). Installing a module = one entry in this list.
  */
-export const APP_MODULES: readonly AppModule[] = [{ manifest: exampleManifest, createCommands: createExampleCommands, createAgentModule: createExampleAgentModule }];
+export const APP_MODULES: readonly AppModule[] = [
+  { manifest: exampleManifest, createCommands: createExampleCommands, createAgentModule: createExampleAgentModule },
+];

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createRouteResolver, UnknownEndpointError } from "./core-routes.ts";
-import { createLogger, type LogRecord } from "./shared/observability/logger.ts";
 import type { ErrorEnvelope } from "./shared/http/error-envelope.ts";
+import { createLogger, type LogRecord } from "./shared/observability/logger.ts";
 
 const errorOf = async (response: Response) => ((await response.json()) as ErrorEnvelope).error;
 

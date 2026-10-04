@@ -2,7 +2,9 @@ import type { WorkflowCatalogEntry, WorkflowRun } from "@core/contracts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 
 /** Test data: a run of the fixture organization (wire shape, before parsing). */
-export const buildWorkflowRun = (overrides: Partial<Record<keyof WorkflowRun, unknown>> = {}): Record<string, unknown> => ({
+export const buildWorkflowRun = (
+  overrides: Partial<Record<keyof WorkflowRun, unknown>> = {},
+): Record<string, unknown> => ({
   runId: "run-1",
   workflowId: "approval-demo",
   tenantId: IDS.organization,

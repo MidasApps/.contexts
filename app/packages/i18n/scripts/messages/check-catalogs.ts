@@ -1,4 +1,4 @@
-import { parse, TYPE, type MessageFormatElement } from "@formatjs/icu-messageformat-parser";
+import { type MessageFormatElement, parse, TYPE } from "@formatjs/icu-messageformat-parser";
 
 /** One catalog file: a namespace (`common`, a module id, …) in one locale. */
 export type CatalogEntry = { namespace: string; locale: string; messages: unknown; file: string };
@@ -30,13 +30,23 @@ type Parsed = { ok: true; args: string } | { ok: false; reason: string };
 
 const parseMessage = (message: string): Parsed => {
   try {
-    return { ok: true, args: [...collectArguments(parse(message))].sort().map((name) => `{${name}}`).join(" ") };
+    return {
+      ok: true,
+      args: [...collectArguments(parse(message))]
+        .sort()
+        .map((name) => `{${name}}`)
+        .join(" "),
+    };
   } catch (error: unknown) {
     return { ok: false, reason: error instanceof Error ? error.message : String(error) };
   }
 };
 
-const checkLeaves = (entry: CatalogEntry, sourceArgs: ReadonlyMap<string, string> | undefined, sourceLocale: string): string[] => {
+const checkLeaves = (
+  entry: CatalogEntry,
+  sourceArgs: ReadonlyMap<string, string> | undefined,
+  sourceLocale: string,
+): string[] => {
   const label = `${entry.namespace}/${entry.locale}`;
   const problems: string[] = [];
   for (const { key, value } of flatten(entry.messages)) {
@@ -46,7 +56,9 @@ const checkLeaves = (entry: CatalogEntry, sourceArgs: ReadonlyMap<string, string
       const parsed = parseMessage(value);
       if (!parsed.ok) problems.push(`${label}: ${key} is not valid ICU (${parsed.reason})`);
       else if (sourceArgs?.has(key) === true && sourceArgs.get(key) !== parsed.args) {
-        problems.push(`${label}: ${key} placeholders ${parsed.args || "(none)"} differ from ${sourceLocale} ${sourceArgs.get(key) || "(none)"}`);
+        problems.push(
+          `${label}: ${key} placeholders ${parsed.args || "(none)"} differ from ${sourceLocale} ${sourceArgs.get(key) || "(none)"}`,
+        );
       }
     }
   }
@@ -96,6 +108,10 @@ const checkNamespace = (namespace: string, entries: readonly CatalogEntry[], opt
 export const checkCatalogs = (entries: readonly CatalogEntry[], options: CheckOptions): string[] => {
   const namespaces = [...new Set(entries.map((entry) => entry.namespace))];
   return namespaces.flatMap((namespace) =>
-    checkNamespace(namespace, entries.filter((entry) => entry.namespace === namespace), options),
+    checkNamespace(
+      namespace,
+      entries.filter((entry) => entry.namespace === namespace),
+      options,
+    ),
   );
 };

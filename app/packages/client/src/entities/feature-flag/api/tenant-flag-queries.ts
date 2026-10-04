@@ -1,10 +1,10 @@
 "use client";
 
-import { listFlagsEndpoint, type FeatureFlag } from "@core/contracts";
+import { type FeatureFlag, listFlagsEndpoint } from "@core/contracts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
-import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
+import { type QueryKey, queryKeys } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 
 export const tenantFlagKeys = {
@@ -18,11 +18,15 @@ export const tenantFlagKeys = {
 export const tenantFlagsQuery = (callEndpoint: CallEndpoint, organizationId: string) =>
   queryOptions({
     queryKey: tenantFlagKeys.list(organizationId),
-    queryFn: async ({ signal }): Promise<FeatureFlag[]> => (await callEndpoint(listFlagsEndpoint, { query: { organizationId }, signal })).data,
+    queryFn: async ({ signal }): Promise<FeatureFlag[]> =>
+      (await callEndpoint(listFlagsEndpoint, { query: { organizationId }, signal })).data,
   });
 
 export const useTenantFlags = (organizationId: string, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...tenantFlagsQuery(callEndpoint, organizationId), enabled: signedIn && organizationId !== "" && options.enabled !== false });
+  return useQuery({
+    ...tenantFlagsQuery(callEndpoint, organizationId),
+    enabled: signedIn && organizationId !== "" && options.enabled !== false,
+  });
 };

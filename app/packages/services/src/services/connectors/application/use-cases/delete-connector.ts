@@ -3,9 +3,17 @@ import type { AccessDeniedError } from "../../../access/domain/errors/access-den
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { ConnectorNotFoundError } from "../../domain/connector-errors.ts";
 import { connectorSecretName } from "../../domain/connector-policy.ts";
-import { authorizeConnectors, CONNECTOR_WRITE_PERMISSION, type ConnectorsCommand, type ConnectorsDeps, recordConnectorAudit } from "../connectors-deps.ts";
+import {
+  authorizeConnectors,
+  CONNECTOR_WRITE_PERMISSION,
+  type ConnectorsCommand,
+  type ConnectorsDeps,
+  recordConnectorAudit,
+} from "../connectors-deps.ts";
 
-export type DeleteConnector = (command: ConnectorsCommand & { readonly connectorId: ConnectorId }) => Promise<Result<void, AccessDeniedError | ConnectorNotFoundError>>;
+export type DeleteConnector = (
+  command: ConnectorsCommand & { readonly connectorId: ConnectorId },
+) => Promise<Result<void, AccessDeniedError | ConnectorNotFoundError>>;
 
 /**
  * Deletes a connector and then its secret (`core.connector.write`), audited as

@@ -13,15 +13,27 @@ import { loadOwnedRun } from "./chat-stream-route-handler.ts";
  * partial answer stays in memory) and clears `activeRunId`. 204 also when nothing is running.
  */
 export const buildChatStopRoute = (deps: ChatRoutesDeps): Record<string, RouteHandler> => ({
-  [stopChatRunEndpoint.id]: withApiRoute(stopChatRunEndpoint, deps.pipeline, async ({ principal, input, authorize, requestId, request, logger }) => {
-    const owned = await loadOwnedRun({ deps, principal, conversationId: input.params.conversationId, permission: CONVERSATION_SEND_PERMISSION, authorize, request, requestId });
-    if (owned instanceof Response) return owned;
-    const { conversation, runId, scope } = owned;
-    if (runId === null) return noContentResponse();
-    const aborted = await deps.chat.abort({ scope, runId });
-    if (!aborted.ok) return gatewayErrorResponse(aborted.error, requestId);
-    await endRunOnClose({ deps, logger, scope, conversation, runId })();
-    logger.info("chat_run_stopped", { requestId, conversationId: conversation.id, runId });
-    return noContentResponse();
-  }),
+  [stopChatRunEndpoint.id]: withApiRoute(
+    stopChatRunEndpoint,
+    deps.pipeline,
+    async ({ principal, input, authorize, requestId, request, logger }) => {
+      const owned = await loadOwnedRun({
+        deps,
+        principal,
+        conversationId: input.params.conversationId,
+        permission: CONVERSATION_SEND_PERMISSION,
+        authorize,
+        request,
+        requestId,
+      });
+      if (owned instanceof Response) return owned;
+      const { conversation, runId, scope } = owned;
+      if (runId === null) return noContentResponse();
+      const aborted = await deps.chat.abort({ scope, runId });
+      if (!aborted.ok) return gatewayErrorResponse(aborted.error, requestId);
+      await endRunOnClose({ deps, logger, scope, conversation, runId })();
+      logger.info("chat_run_stopped", { requestId, conversationId: conversation.id, runId });
+      return noContentResponse();
+    },
+  ),
 });

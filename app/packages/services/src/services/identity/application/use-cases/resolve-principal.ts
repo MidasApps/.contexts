@@ -1,4 +1,4 @@
-import { PrincipalSchema, type Principal } from "@core/contracts";
+import { type Principal, PrincipalSchema } from "@core/contracts";
 import type { ApiKeyAuthenticator } from "../ports/driven/api-key-authenticator.ts";
 import type { TokenVerifier, VerifiedToken } from "../ports/driven/token-verifier.ts";
 
@@ -24,7 +24,8 @@ const READ_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD"]);
 const MFA_FACTORS: ReadonlySet<string> = new Set(["totp", "phone"]);
 
 /** The credential of `Authorization: Bearer <credential>`; any other scheme or shape is null. Query strings are never read. */
-export const parseBearer = (authorization: string | null): string | null => BEARER.exec(authorization?.trim() ?? "")?.[1] ?? null;
+export const parseBearer = (authorization: string | null): string | null =>
+  BEARER.exec(authorization?.trim() ?? "")?.[1] ?? null;
 
 /** Mutations re-check revocation; reads skip it (umbrella §16.2, follow-up #12e). */
 export const requiresRevocationCheck = (method: string): boolean => !READ_METHODS.has(method.toUpperCase());
@@ -49,7 +50,12 @@ const userCandidate = (token: VerifiedToken): unknown => {
   if (sessionId === undefined && staffUid === undefined) {
     // Only our session exchanges mint custom tokens with `sessionId` (developer claims cannot be forged).
     const session = token.signInProvider === "custom" ? stringClaim(token.claims, "sessionId") : undefined;
-    return { type: "user", uid: token.uid, mfa: provesMfa(token), ...(session === undefined ? {} : { sessionId: session }) };
+    return {
+      type: "user",
+      uid: token.uid,
+      mfa: provesMfa(token),
+      ...(session === undefined ? {} : { sessionId: session }),
+    };
   }
   if (sessionId === undefined || staffUid === undefined) return null;
   // The staff member's MFA is not the impersonated user's: never carried over.
@@ -58,7 +64,8 @@ const userCandidate = (token: VerifiedToken): unknown => {
 
 const candidateOf = (token: VerifiedToken): unknown => {
   const principalType = token.claims["principalType"];
-  if (principalType === "device") return { type: "device", deviceId: token.uid, tenantId: stringClaim(token.claims, "tenantId") };
+  if (principalType === "device")
+    return { type: "device", deviceId: token.uid, tenantId: stringClaim(token.claims, "tenantId") };
   if (principalType === undefined || principalType === "user") return userCandidate(token);
   return null;
 };

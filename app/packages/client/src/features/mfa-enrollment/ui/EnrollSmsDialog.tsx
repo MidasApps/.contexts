@@ -1,13 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { authErrorCode } from "#/shared/lib/auth/auth-error-code.ts";
 import type { AuthErrorCode } from "#/shared/lib/auth/auth-port.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { CODE_PATTERN, CodeField, EnrollmentAlert, FactorNameField } from "./enrollment-fields.tsx";
 
@@ -95,49 +102,60 @@ function EnrollSmsDialogBody({ onOpenChange, onEnrolled }: Props) {
 
   return (
     <>
-        <DialogHeader>
-          <DialogTitle>{t("smsTitle")}</DialogTitle>
-          <DialogDescription>{t("smsDescription")}</DialogDescription>
-        </DialogHeader>
-        <form noValidate onSubmit={submit} className="flex flex-col gap-5">
-          {failure === null ? null : <EnrollmentAlert code={failure} />}
-          <Field>
-            <FieldLabel>{t("phone")}</FieldLabel>
-            <FieldControl>
-              <Input
-                ref={phoneInput}
-                type="tel"
-                autoComplete="tel"
-                required
-                readOnly={step.verificationId !== null}
-                value={step.phone}
-                onChange={(event) => setStep({ verificationId: null, phone: event.target.value })}
-              />
-            </FieldControl>
-            <FieldDescription>{t("phoneHint")}</FieldDescription>
-            <FieldError errors={[errors.phone]} />
-          </Field>
-          <p role="status" className="text-sm text-muted-foreground empty:hidden">
-            {step.verificationId === null ? "" : t("codeSent", { phone: step.phone })}
-          </p>
+      <DialogHeader>
+        <DialogTitle>{t("smsTitle")}</DialogTitle>
+        <DialogDescription>{t("smsDescription")}</DialogDescription>
+      </DialogHeader>
+      <form noValidate onSubmit={submit} className="flex flex-col gap-5">
+        {failure === null ? null : <EnrollmentAlert code={failure} />}
+        <Field>
+          <FieldLabel>{t("phone")}</FieldLabel>
+          <FieldControl>
+            <Input
+              ref={phoneInput}
+              type="tel"
+              autoComplete="tel"
+              required
+              readOnly={step.verificationId !== null}
+              value={step.phone}
+              onChange={(event) => setStep({ verificationId: null, phone: event.target.value })}
+            />
+          </FieldControl>
+          <FieldDescription>{t("phoneHint")}</FieldDescription>
+          <FieldError errors={[errors.phone]} />
+        </Field>
+        <p role="status" className="text-sm text-muted-foreground empty:hidden">
+          {step.verificationId === null ? "" : t("codeSent", { phone: step.phone })}
+        </p>
+        {step.verificationId === null ? null : (
+          <>
+            <FactorNameField value={name} onChange={setName} />
+            <CodeField
+              value={code}
+              onChange={setCode}
+              error={errors.code}
+              inputRef={codeInput}
+              hint={t("smsCodeHint")}
+            />
+          </>
+        )}
+        <div ref={recaptcha} />
+        <DialogFooter>
           {step.verificationId === null ? null : (
-            <>
-              <FactorNameField value={name} onChange={setName} />
-              <CodeField value={code} onChange={setCode} error={errors.code} inputRef={codeInput} hint={t("smsCodeHint")} />
-            </>
-          )}
-          <div ref={recaptcha} />
-          <DialogFooter>
-            {step.verificationId === null ? null : (
-              <Button type="button" variant="ghost" disabled={pending} onClick={() => setStep((current) => ({ ...current, verificationId: null }))}>
-                {t("changePhone")}
-              </Button>
-            )}
-            <Button type="submit" pending={pending}>
-              {step.verificationId === null ? t("sendCode") : t("verify")}
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={pending}
+              onClick={() => setStep((current) => ({ ...current, verificationId: null }))}
+            >
+              {t("changePhone")}
             </Button>
-          </DialogFooter>
-        </form>
+          )}
+          <Button type="submit" pending={pending}>
+            {step.verificationId === null ? t("sendCode") : t("verify")}
+          </Button>
+        </DialogFooter>
+      </form>
     </>
   );
 }

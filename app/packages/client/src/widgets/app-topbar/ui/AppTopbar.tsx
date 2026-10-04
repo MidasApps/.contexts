@@ -12,7 +12,14 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Kbd, KbdGroup } from "#/shared/ui/atoms/Kbd/Kbd.tsx";
 import { Separator } from "#/shared/ui/atoms/Separator/Separator.tsx";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "#/shared/ui/molecules/Breadcrumb/Breadcrumb.tsx";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "#/shared/ui/molecules/Breadcrumb/Breadcrumb.tsx";
 import { SidebarTrigger } from "#/shared/ui/organisms/Sidebar/Sidebar.tsx";
 import { usePageLabel } from "../model/use-page-label.ts";
 
@@ -26,10 +33,21 @@ const useCrumbs = (): Crumb[] => {
   const units = useUnitPath(node?.organizationId, context.data?.unit);
   if (node === null) return [];
   const { organizationId, projectId } = node;
-  const crumbs: Crumb[] = [{ key: "organization", label: context.data?.organization.name ?? null, to: { id: "organization", organizationId } }];
+  const crumbs: Crumb[] = [
+    { key: "organization", label: context.data?.organization.name ?? null, to: { id: "organization", organizationId } },
+  ];
   if (projectId === undefined) return crumbs;
-  crumbs.push({ key: "project", label: context.data?.project?.name ?? null, to: { id: "project", organizationId, projectId } });
-  for (const unit of units) crumbs.push({ key: `unit-${unit.id}`, label: unit.name ?? t("hiddenUnit"), to: { id: "project", organizationId, projectId, unit: unit.id } });
+  crumbs.push({
+    key: "project",
+    label: context.data?.project?.name ?? null,
+    to: { id: "project", organizationId, projectId },
+  });
+  for (const unit of units)
+    crumbs.push({
+      key: `unit-${unit.id}`,
+      label: unit.name ?? t("hiddenUnit"),
+      to: { id: "project", organizationId, projectId, unit: unit.id },
+    });
   return crumbs;
 };
 
@@ -53,7 +71,9 @@ function Breadcrumbs() {
                 </BreadcrumbLink>
               )}
             </BreadcrumbItem>
-            {index < crumbs.length - 1 || page !== undefined ? <BreadcrumbSeparator className={index < crumbs.length - 1 ? "hidden md:inline-flex" : undefined} /> : null}
+            {index < crumbs.length - 1 || page !== undefined ? (
+              <BreadcrumbSeparator className={index < crumbs.length - 1 ? "hidden md:inline-flex" : undefined} />
+            ) : null}
           </Fragment>
         ))}
         {page === undefined ? null : (
@@ -86,7 +106,13 @@ export function AppTopbar({ onOpenCommandPalette, actions }: AppTopbarProps) {
       <Separator orientation="vertical" className="mr-1 data-[orientation=vertical]:h-4" />
       <Breadcrumbs />
       <div className="ml-auto flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={onOpenCommandPalette} aria-keyshortcuts={`${modifier.aria}+K`} className="gap-2 text-muted-foreground-strong">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onOpenCommandPalette}
+          aria-keyshortcuts={`${modifier.aria}+K`}
+          className="gap-2 text-muted-foreground-strong"
+        >
           <Icon name="search" />
           <span className="max-sm:sr-only">{t("open")}</span>
           <KbdGroup className="hidden sm:inline-flex">

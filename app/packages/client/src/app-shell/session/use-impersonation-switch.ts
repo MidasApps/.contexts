@@ -1,10 +1,13 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, type ActionDispatch } from "react";
+import { type ActionDispatch, useCallback } from "react";
 import type { AuthPort } from "#/shared/lib/auth/auth-port.ts";
-import { ImpersonationUnsupportedError, type SessionBridgePort } from "#/shared/lib/session-bridge/session-bridge-port.ts";
 import type { SessionController } from "#/shared/lib/session/session-state.ts";
+import {
+  ImpersonationUnsupportedError,
+  type SessionBridgePort,
+} from "#/shared/lib/session-bridge/session-bridge-port.ts";
 import { waitForSignedInUid } from "./session-effects.ts";
 import type { SessionEvent } from "./session-machine.ts";
 

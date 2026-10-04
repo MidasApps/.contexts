@@ -1,6 +1,6 @@
 import { adminListLogsEndpoint } from "@core/contracts";
 import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
-import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
+import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import type { LogRecord } from "../../../shared/observability/logger.ts";
 import { listLogLines } from "../../application/use-cases/list-log-lines.ts";

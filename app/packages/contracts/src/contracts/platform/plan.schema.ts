@@ -19,7 +19,9 @@ export const PlanLimitsSchema = z.strictObject({
   // Decision 0046: optional so plans stored before it stay valid; absent means the platform default.
   maxCustomAgents: limit("Most custom agents an organization may have; absent means the platform default.").optional(),
   maxCustomSkills: limit("Most custom skills an organization may have; absent means the platform default.").optional(),
-  maxCustomInstructionChars: limit("Longest instructions of a custom agent or skill, in characters; absent means the platform default.").optional(),
+  maxCustomInstructionChars: limit(
+    "Longest instructions of a custom agent or skill, in characters; absent means the platform default.",
+  ).optional(),
   features: z
     .array(z.string().regex(/^[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)*$/))
     .max(50)
@@ -40,13 +42,26 @@ export const PlanSchema = z.strictObject({
 });
 export type Plan = z.infer<typeof PlanSchema>;
 
-const LIMITS_EXAMPLE = { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000, maxConnectors: 5, features: ["web-tools"] };
+const LIMITS_EXAMPLE = {
+  monthlyMicroUsd: 50_000_000,
+  monthlyTokens: 20_000_000,
+  maxConnectors: 5,
+  features: ["web-tools"],
+};
 
 export const PlanContract = defineContract(PlanSchema, {
   id: "platform.Plan",
   kind: "entity",
   description: "A plan with the spend, token and connector limits it grants to organizations.",
-  examples: [{ id: "Pl1aB2cD3eF4gH5iJ6kL", name: "Standard", limits: LIMITS_EXAMPLE, createdAt: EXAMPLE_TIMES.created, updatedAt: EXAMPLE_TIMES.created }],
+  examples: [
+    {
+      id: "Pl1aB2cD3eF4gH5iJ6kL",
+      name: "Standard",
+      limits: LIMITS_EXAMPLE,
+      createdAt: EXAMPLE_TIMES.created,
+      updatedAt: EXAMPLE_TIMES.created,
+    },
+  ],
   pii: "none",
   tenancyScope: "platform",
   relations: [],

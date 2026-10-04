@@ -1,10 +1,13 @@
-import { ImpersonationSessionSchema, type ImpersonationSession } from "@core/contracts";
+import { type ImpersonationSession, ImpersonationSessionSchema } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
 import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
 import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
 import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
-import { makeEndImpersonationSession, makeListImpersonationSessions } from "../../application/use-cases/admin-impersonation-sessions.ts";
+import {
+  makeEndImpersonationSession,
+  makeListImpersonationSessions,
+} from "../../application/use-cases/admin-impersonation-sessions.ts";
 import { createInMemoryImpersonationSessionRepository } from "../driven/in-memory-platform-repositories.ts";
 import { buildAdminImpersonationRoutes } from "./admin-impersonation-routes.ts";
 
@@ -48,22 +51,43 @@ const setup = () => {
   });
   const impersonations = createInMemoryImpersonationSessionRepository();
   for (const row of SEED) impersonations.create(NO_TX, { session: row, actorId: row.staffUid });
-  const deps = { impersonations, audit: makeRecordAudit({ writer: auditLog, clock }), unitOfWork: inMemoryUnitOfWork, clock };
+  const deps = {
+    impersonations,
+    audit: makeRecordAudit({ writer: auditLog, clock }),
+    unitOfWork: inMemoryUnitOfWork,
+    clock,
+  };
   const routes = buildAdminImpersonationRoutes({
     pipeline,
-    platform: { listImpersonationSessions: makeListImpersonationSessions(deps), endImpersonationSession: makeEndImpersonationSession(deps) },
+    platform: {
+      listImpersonationSessions: makeListImpersonationSessions(deps),
+      endImpersonationSession: makeEndImpersonationSession(deps),
+    },
   });
   return { routes, auditLog, impersonations };
 };
 
 type Routes = ReturnType<typeof setup>["routes"];
-type ListBody = { data: { id: string; status: string }[]; meta: { page: { cursor: string | null; hasMore: boolean } }; error?: { code: string } };
+type ListBody = {
+  data: { id: string; status: string }[];
+  meta: { page: { cursor: string | null; hasMore: boolean } };
+  error?: { code: string };
+};
 
 const list = async (routes: Routes, search = "", as = "sam") => {
-  const response = await callRoute(routes, "admin.listImpersonationSessions", `/v1/admin/impersonation-sessions${search}`, { as });
+  const response = await callRoute(
+    routes,
+    "admin.listImpersonationSessions",
+    `/v1/admin/impersonation-sessions${search}`,
+    { as },
+  );
   return { status: response.status, body: (await response.json()) as ListBody };
 };
-const end = (routes: Routes, id: string, as = "sam") => callRoute(routes, "admin.endImpersonationSession", `/v1/admin/impersonation-sessions/${id}/end`, { method: "POST", as });
+const end = (routes: Routes, id: string, as = "sam") =>
+  callRoute(routes, "admin.endImpersonationSession", `/v1/admin/impersonation-sessions/${id}/end`, {
+    method: "POST",
+    as,
+  });
 
 describe("GET /v1/admin/impersonation-sessions", () => {
   it("is staff only: non-staff 403, staff without MFA MFA_REQUIRED, support staff may read", async () => {
@@ -109,9 +133,20 @@ describe("POST /v1/admin/impersonation-sessions/{sessionId}/end", () => {
     expect((await end(routes, OPEN_A)).status).toBe(204);
     expect(impersonations.rowOf(OPEN_A)?.endedAt).toBe(NOW);
     expect(auditLog.entries("platform")).toEqual([
-      expect.objectContaining({ action: "IMPERSONATION_ENDED", actor: { type: "user", id: "sam" }, target: { type: "impersonation-session", id: OPEN_A }, targetTenantId: ORG_A }),
+      expect.objectContaining({
+        action: "IMPERSONATION_ENDED",
+        actor: { type: "user", id: "sam" },
+        target: { type: "impersonation-session", id: OPEN_A },
+        targetTenantId: ORG_A,
+      }),
     ]);
-    expect(auditLog.entries("tenant")).toEqual([expect.objectContaining({ action: "IMPERSONATION_ENDED", tenantId: ORG_A, actor: { type: "user", id: "alice", onBehalfOf: "sue" } })]);
+    expect(auditLog.entries("tenant")).toEqual([
+      expect.objectContaining({
+        action: "IMPERSONATION_ENDED",
+        tenantId: ORG_A,
+        actor: { type: "user", id: "alice", onBehalfOf: "sue" },
+      }),
+    ]);
     expect((await list(routes, "?status=active")).body.data.map((row) => row.id)).toEqual([OPEN_B]);
   });
 

@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { chunkDocument, estimateTokens } from "./chunk-document.ts";
 
-const paragraph = (seed: string, words: number): string => Array.from({ length: words }, (_, index) => `${seed}${index}`).join(" ");
+const paragraph = (seed: string, words: number): string =>
+  Array.from({ length: words }, (_, index) => `${seed}${index}`).join(" ");
 
 describe("chunkDocument", () => {
   it("keeps a short document in one chunk and numbers chunks from 0", () => {
     expect(chunkDocument("# Guide\n\nMembers join after an owner approves them.", { format: "markdown" })).toEqual([
-      { index: 0, text: "# Guide\n\nMembers join after an owner approves them.", tokenCount: estimateTokens("# Guide\n\nMembers join after an owner approves them.") },
+      {
+        index: 0,
+        text: "# Guide\n\nMembers join after an owner approves them.",
+        tokenCount: estimateTokens("# Guide\n\nMembers join after an owner approves them."),
+      },
     ]);
   });
 
@@ -16,7 +21,9 @@ describe("chunkDocument", () => {
   });
 
   it("never exceeds maxSize and prefers heading boundaries in markdown", () => {
-    const doc = ["# One", paragraph("a", 60), "## Two", paragraph("b", 60), "## Three", paragraph("c", 60)].join("\n\n");
+    const doc = ["# One", paragraph("a", 60), "## Two", paragraph("b", 60), "## Three", paragraph("c", 60)].join(
+      "\n\n",
+    );
     const chunks = chunkDocument(doc, { format: "markdown", maxSize: 500, overlap: 50 });
     expect(chunks.length).toBeGreaterThan(2);
     for (const chunk of chunks) expect(chunk.text.length).toBeLessThanOrEqual(500);

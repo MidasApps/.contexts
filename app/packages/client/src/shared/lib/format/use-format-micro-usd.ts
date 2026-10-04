@@ -7,7 +7,10 @@ const MICRO_PER_CENT = 10_000;
 const MICRO_PER_USD = 1_000_000;
 
 /** Model costs are stored in micro-USD (1 USD = 1 000 000): to `{ amountMinor, currency }`, rounded to the cent. */
-export const microUsdToMoney = (microUsd: number): MoneyValue => ({ amountMinor: Math.round(microUsd / MICRO_PER_CENT), currency: "USD" });
+export const microUsdToMoney = (microUsd: number): MoneyValue => ({
+  amountMinor: Math.round(microUsd / MICRO_PER_CENT),
+  currency: "USD",
+});
 
 /** A cap typed as money (cents) back to the API's micro-USD. */
 export const moneyToMicroUsd = (money: MoneyValue): number => money.amountMinor * MICRO_PER_CENT;
@@ -22,5 +25,10 @@ export const useFormatMicroUsd = (): ((microUsd: number, precision?: "cents" | "
   return (microUsd, precision = "cents") =>
     precision === "cents"
       ? formatMoney(microUsdToMoney(microUsd), locale)
-      : new Intl.NumberFormat(locale, { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(microUsd / MICRO_PER_USD);
+      : new Intl.NumberFormat(locale, {
+          style: "currency",
+          currency: "USD",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 6,
+        }).format(microUsd / MICRO_PER_USD);
 };

@@ -3,7 +3,12 @@
  * `redacted`: a success of an endpoint that returns a one-time secret; its body was never
  * stored and a replay answers 409 CONFLICT (decision 0030 §5).
  */
-export type StoredResponse = { readonly status: number; readonly body: string | null; readonly location?: string; readonly redacted?: boolean };
+export type StoredResponse = {
+  readonly status: number;
+  readonly body: string | null;
+  readonly location?: string;
+  readonly redacted?: boolean;
+};
 
 /** What `IdempotencyStore.begin` tells the pipeline to do; `attemptId` owns a new attempt. */
 export type IdempotencyBegin =
@@ -57,7 +62,8 @@ export const decideBegin = (args: {
   const fresh = () => ({ begin: { kind: "new", attemptId } as const, write: freshRecord(requestHash, now, attemptId) });
   if (record === null || record.expiresAt.getTime() <= nowMs) return fresh();
   if (record.requestHash !== requestHash) return { begin: { kind: "conflict" }, write: null };
-  if (record.state === "done" && record.response !== null) return { begin: { kind: "replay", response: record.response }, write: null };
+  if (record.state === "done" && record.response !== null)
+    return { begin: { kind: "replay", response: record.response }, write: null };
   if (record.leaseUntil.getTime() > nowMs) return { begin: { kind: "in-flight" }, write: null };
   return fresh();
 };

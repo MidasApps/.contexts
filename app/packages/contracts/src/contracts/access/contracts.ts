@@ -21,8 +21,8 @@ import { MemberContract } from "./member.schema.ts";
 import { MembershipContract } from "./membership.schema.ts";
 import { MyGrantContract } from "./my-grant.schema.ts";
 import { PermissionDefinitionContract } from "./permission-definition.schema.ts";
-import { RoleRefContract } from "./role-ref.schema.ts";
 import { RoleContract } from "./role.schema.ts";
+import { RoleRefContract } from "./role-ref.schema.ts";
 import { UpdateMembershipInputContract } from "./update-membership-input.schema.ts";
 import { UpdateRoleInputContract } from "./update-role-input.schema.ts";
 

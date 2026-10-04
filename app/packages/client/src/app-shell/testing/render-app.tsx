@@ -2,8 +2,8 @@
 // composition (`createClientApp`) with fake ports — a fake `/v1`, fake Firebase auth, an in-memory
 // router, session bridge and shell UI storage. Tests run what the apps run (integration first).
 import type { SupportedLocale } from "@core/i18n";
-import { render, type RenderResult } from "@testing-library/react";
-import { userEvent, type UserEvent } from "@testing-library/user-event";
+import { type RenderResult, render } from "@testing-library/react";
+import { type UserEvent, userEvent } from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { afterEach } from "vitest";
 import type { StateStorage } from "zustand/middleware";
@@ -12,10 +12,10 @@ import { createFakeAuth, type FakeAuth } from "#/shared/lib/auth/fake-auth.ts";
 import { createMemoryRouter, type MemoryRouter } from "#/shared/lib/router/memory-router.tsx";
 import type { SessionBridgePort } from "#/shared/lib/session-bridge/session-bridge-port.ts";
 import type { ClientModule, ShellNavItem, ShellSlots } from "#/shared/lib/shell/shell-types.ts";
-import { createFakeApi, noContent, ok, type FakeApi, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { createFakeApi, type FakeApi, type FakeRoutes, noContent, ok } from "#/shared/testing/fake-api.ts";
 import { buildMe } from "#/shared/testing/fixtures.ts";
 import { TEST_USER } from "#/shared/testing/render-client.tsx";
-import { createClientApp, type CreatedClientApp } from "../create-client-app.tsx";
+import { type CreatedClientApp, createClientApp } from "../create-client-app.tsx";
 
 export const TEST_CONFIG: ClientConfig = {
   appEnv: "local",
@@ -30,12 +30,17 @@ const reported: unknown[] = [];
 // A render error or a missing message caught by the shell must fail the test that caused it.
 afterEach(() => {
   const errors = reported.splice(0);
-  if (errors.length > 0) throw new Error(`the shell reported ${String(errors.length)} error(s): ${errors.map(String).join("; ")}`);
+  if (errors.length > 0)
+    throw new Error(`the shell reported ${String(errors.length)} error(s): ${errors.map(String).join("; ")}`);
 });
 
 const memoryStorage = (): StateStorage => {
   const data = new Map<string, string>();
-  return { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => void data.set(key, value), removeItem: (key) => void data.delete(key) };
+  return {
+    getItem: (key) => data.get(key) ?? null,
+    setItem: (key, value) => void data.set(key, value),
+    removeItem: (key) => void data.delete(key),
+  };
 };
 
 /** What the fake session bridge was asked: sign-ins, sign-outs, impersonations entered and left. */

@@ -71,7 +71,12 @@ export const AuditMetadataSchema = z.strictObject({
     .optional()
     .meta(none("Id of the tool call an approval decision answers (SP4).")),
   durationMs: z.int().min(0).max(86_400_000).optional().meta(none("How long the attempt took, in milliseconds.")),
-  thresholdPercent: z.int().min(1).max(100).optional().meta(none("Budget threshold reached, in percent of a monthly cap (SP5).")),
+  thresholdPercent: z
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .meta(none("Budget threshold reached, in percent of a monthly cap (SP5).")),
   endpointId: z
     .string()
     .regex(/^[a-z][a-z0-9-]{0,63}\.[a-z][A-Za-z0-9]{0,63}$/, { error: "Expected an endpoint id." })
@@ -92,8 +97,16 @@ const ENTRY_FIELDS = {
   requestId: z.string().min(1).meta(none("Request id (X-Request-Id) to correlate with logs.")),
   traceId: z.string().min(1).optional().meta(none("Trace id, when tracing is on.")),
   changes: z.array(ChangedFieldSchema).max(100).optional().meta(none("Names of the changed fields; never values.")),
-  reason: z.string().trim().min(1).max(500).optional().meta(personal("Reason given by the actor (impersonation, approvals).")),
-  metadata: AuditMetadataSchema.optional().meta(none("Allowlisted machine facts (hashes, codes, ids, duration); never free text.")),
+  reason: z
+    .string()
+    .trim()
+    .min(1)
+    .max(500)
+    .optional()
+    .meta(personal("Reason given by the actor (impersonation, approvals).")),
+  metadata: AuditMetadataSchema.optional().meta(
+    none("Allowlisted machine facts (hashes, codes, ids, duration); never free text."),
+  ),
 };
 
 /** Append-only tenant audit entry (`audit-logs`, SP1 spec §6.7). */

@@ -35,7 +35,13 @@ describe("Postgres prompt store (decision 0038)", () => {
   it("numbers versions per key and lists them newest first", async () => {
     await repository.insertVersion({ ...platformKey, body: "P1", bodySha256: SHA, note: null, createdBy: "staff" });
     await repository.insertVersion({ ...platformKey, body: "P2", bodySha256: SHA, note: "second", createdBy: "staff" });
-    await repository.insertVersion({ ...tenantKey(TENANT_A), body: "A1", bodySha256: SHA, note: null, createdBy: "alice" });
+    await repository.insertVersion({
+      ...tenantKey(TENANT_A),
+      body: "A1",
+      bodySha256: SHA,
+      note: null,
+      createdBy: "alice",
+    });
     expect((await repository.listVersions(platformKey)).map((version) => [version.version, version.body])).toEqual([
       [2, "P2"],
       [1, "P1"],
@@ -44,10 +50,34 @@ describe("Postgres prompt store (decision 0038)", () => {
   });
 
   it("isolates tenant addenda with row level security while platform rows stay visible to every tenant", async () => {
-    const platform = await repository.insertVersion({ ...platformKey, body: "P1", bodySha256: SHA, note: null, createdBy: "staff" });
-    const addendum = await repository.insertVersion({ ...tenantKey(TENANT_A), body: "A secret", bodySha256: SHA, note: null, createdBy: "alice" });
-    await repository.insertActivation({ ...platformKey, versionId: platform.id, forced: true, reason: "seed", activatedBy: "staff" });
-    await repository.insertActivation({ ...tenantKey(TENANT_A), versionId: addendum.id, forced: false, reason: null, activatedBy: "alice" });
+    const platform = await repository.insertVersion({
+      ...platformKey,
+      body: "P1",
+      bodySha256: SHA,
+      note: null,
+      createdBy: "staff",
+    });
+    const addendum = await repository.insertVersion({
+      ...tenantKey(TENANT_A),
+      body: "A secret",
+      bodySha256: SHA,
+      note: null,
+      createdBy: "alice",
+    });
+    await repository.insertActivation({
+      ...platformKey,
+      versionId: platform.id,
+      forced: true,
+      reason: "seed",
+      activatedBy: "staff",
+    });
+    await repository.insertActivation({
+      ...tenantKey(TENANT_A),
+      versionId: addendum.id,
+      forced: false,
+      reason: null,
+      activatedBy: "alice",
+    });
     expect(await repository.getVersion({ versionId: addendum.id, tenantId: TENANT_B })).toBeNull();
     expect(await repository.getVersion({ versionId: addendum.id, tenantId: null })).toBeNull();
     expect((await repository.getVersion({ versionId: platform.id, tenantId: TENANT_B }))?.body).toBe("P1");
@@ -66,25 +96,66 @@ describe("Postgres prompt store (decision 0038)", () => {
   });
 
   it("is append-only for the runtime role: bodies cannot change and rows cannot be deleted, only the eval is recorded", async () => {
-    const version = await repository.insertVersion({ ...platformKey, body: "P1", bodySha256: SHA, note: null, createdBy: "staff" });
+    const version = await repository.insertVersion({
+      ...platformKey,
+      body: "P1",
+      bodySha256: SHA,
+      note: null,
+      createdBy: "staff",
+    });
     await repository.recordEval({ versionId: version.id, tenantId: null, experimentId: "exp-1", verdict: "passed" });
-    expect(await repository.getVersion({ versionId: version.id, tenantId: null })).toMatchObject({ evalExperimentId: "exp-1", evalVerdict: "passed", body: "P1" });
+    expect(await repository.getVersion({ versionId: version.id, tenantId: null })).toMatchObject({
+      evalExperimentId: "exp-1",
+      evalVerdict: "passed",
+      body: "P1",
+    });
     const asRuntime = (statement: string) =>
       sql.begin(async (tx) => {
         await tx`SELECT set_config('app.tenant_id', '~platform', true)`;
         await tx.unsafe(`SET LOCAL ROLE ${PROMPTS_RUNTIME_ROLE}`);
         await tx.unsafe(statement, [version.id]);
       });
-    await expect(asRuntime(`UPDATE agents.prompt_versions SET body = 'changed' WHERE id = $1`)).rejects.toMatchObject({ code: "42501" });
-    await expect(asRuntime(`DELETE FROM agents.prompt_versions WHERE id = $1`)).rejects.toMatchObject({ code: "42501" });
+    await expect(asRuntime(`UPDATE agents.prompt_versions SET body = 'changed' WHERE id = $1`)).rejects.toMatchObject({
+      code: "42501",
+    });
+    await expect(asRuntime(`DELETE FROM agents.prompt_versions WHERE id = $1`)).rejects.toMatchObject({
+      code: "42501",
+    });
   });
 
   it("keeps rollback as a new activation: the latest row wins", async () => {
-    const v1 = await repository.insertVersion({ ...platformKey, body: "V1", bodySha256: SHA, note: null, createdBy: "staff" });
-    const v2 = await repository.insertVersion({ ...platformKey, body: "V2", bodySha256: SHA, note: null, createdBy: "staff" });
-    await repository.insertActivation({ ...platformKey, versionId: v2.id, forced: false, reason: null, activatedBy: "staff" });
-    await repository.insertActivation({ ...platformKey, versionId: v1.id, forced: true, reason: "rollback", activatedBy: "staff" });
-    expect((await repository.listActivations(platformKey)).map((activation) => activation.versionId)).toEqual([v1.id, v2.id]);
+    const v1 = await repository.insertVersion({
+      ...platformKey,
+      body: "V1",
+      bodySha256: SHA,
+      note: null,
+      createdBy: "staff",
+    });
+    const v2 = await repository.insertVersion({
+      ...platformKey,
+      body: "V2",
+      bodySha256: SHA,
+      note: null,
+      createdBy: "staff",
+    });
+    await repository.insertActivation({
+      ...platformKey,
+      versionId: v2.id,
+      forced: false,
+      reason: null,
+      activatedBy: "staff",
+    });
+    await repository.insertActivation({
+      ...platformKey,
+      versionId: v1.id,
+      forced: true,
+      reason: "rollback",
+      activatedBy: "staff",
+    });
+    expect((await repository.listActivations(platformKey)).map((activation) => activation.versionId)).toEqual([
+      v1.id,
+      v2.id,
+    ]);
     expect((await repository.getActive({ agentId: AGENT, tenantId: null })).platform?.body).toBe("V1");
   });
 });

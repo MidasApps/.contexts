@@ -2,7 +2,15 @@
 
 import type { ApprovalDiffProps } from "@core/contracts";
 import { useTranslations } from "use-intl";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/shared/ui/atoms/Table/Table.tsx";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "#/shared/ui/atoms/Table/Table.tsx";
 import type { GenerativeComponentProps } from "../../model/ui-registry.ts";
 
 const display = (value: unknown, none: string): string => {
@@ -46,7 +54,8 @@ export function ApprovalDiffPart({ props }: GenerativeComponentProps<ApprovalDif
   return <ApprovalDiff {...props} />;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 
 /**
@@ -54,7 +63,9 @@ const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.str
  * `after` that differ from `before` (all of them for a create). `null` when there is nothing
  * tabular to show.
  */
-export const diffPropsOf = (preview: { readonly before: unknown; readonly after: unknown } | null): ApprovalDiffProps | null => {
+export const diffPropsOf = (
+  preview: { readonly before: unknown; readonly after: unknown } | null,
+): ApprovalDiffProps | null => {
   if (preview === null || !isRecord(preview.after)) return null;
   const before = isRecord(preview.before) ? preview.before : null;
   const after = preview.after;

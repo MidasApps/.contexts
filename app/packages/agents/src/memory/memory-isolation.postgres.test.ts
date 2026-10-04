@@ -48,7 +48,11 @@ const recordingModels = (): AgentModels => {
     doGenerate: (options) => (prompts.push(JSON.stringify(options.prompt)), model.doGenerate(options)),
     doStream: (options) => (prompts.push(JSON.stringify(options.prompt)), model.doStream(options)),
   });
-  return { ...models, language: (role, options) => (role === "chat" ? record(models.language(role, options)) : models.language(role, options)) };
+  return {
+    ...models,
+    language: (role, options) =>
+      role === "chat" ? record(models.language(role, options)) : models.language(role, options),
+  };
 };
 
 const memoryAgentModule = defineAgentModule({
@@ -82,7 +86,11 @@ const freePort = (): Promise<number> =>
     });
   });
 
-const storage = new PostgresStore({ id: "memory-isolation-store", connectionString: DATABASE_URL, schemaName: "mastra" });
+const storage = new PostgresStore({
+  id: "memory-isolation-store",
+  connectionString: DATABASE_URL,
+  schemaName: "mastra",
+});
 const vector = new PgVector({ id: "memory-isolation-vector", connectionString: DATABASE_URL, schemaName: "mastra" });
 let runtime: RuntimeParts | undefined;
 let mastra: Mastra | undefined;
@@ -110,7 +118,13 @@ beforeAll(async () => {
     storage: runtime.storage,
     vectors: runtime.vectors,
     observability: runtime.observability,
-    server: { port, host: "127.0.0.1", auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes },
+    server: {
+      port,
+      host: "127.0.0.1",
+      auth: runtime.auth,
+      middleware: runtime.middleware,
+      apiRoutes: runtime.apiRoutes,
+    },
   });
   const server = await createNodeServer(mastra, { tools: {} });
   baseUrl = `http://127.0.0.1:${port}`;
@@ -134,7 +148,11 @@ const headers = (tenantId: string, threadId?: string): Record<string, string> =>
 
 const say = async (tenantId: string, threadId: string, text: string): Promise<{ status: number; prompt: string }> => {
   const before = prompts.length;
-  const response = await fetch(`${baseUrl}/api/agents/${AGENT_ID}/generate`, { method: "POST", headers: headers(tenantId, threadId), body: JSON.stringify({ messages: text }) });
+  const response = await fetch(`${baseUrl}/api/agents/${AGENT_ID}/generate`, {
+    method: "POST",
+    headers: headers(tenantId, threadId),
+    body: JSON.stringify({ messages: text }),
+  });
   await response.body?.cancel();
   return { status: response.status, prompt: prompts.slice(before).join("\n") };
 };

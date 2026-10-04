@@ -33,5 +33,5 @@ export const EMULATOR_PROJECT_DEFAULTS = {
   hookTimeout: 60_000,
 } as const;
 
-export const defineCoreVitestConfig =(overrides: ViteUserConfig = {}): ViteUserConfig =>
+export const defineCoreVitestConfig = (overrides: ViteUserConfig = {}): ViteUserConfig =>
   mergeConfig(coreVitestConfig, overrides);

@@ -1,7 +1,7 @@
-import { test as setup } from "@playwright/test";
-import { readWorld, seedWorld, writeWorld } from "@core/e2e/seed-users";
 import { readE2eEnv } from "@core/e2e/e2e-env";
+import { readWorld, seedWorld, writeWorld } from "@core/e2e/seed-users";
 import { warmAgentRuntime } from "@core/e2e/warm-agents";
+import { test as setup } from "@playwright/test";
 import { DESKTOP_AUTH_DIR } from "./desktop-test.ts";
 
 // Same idempotent world as the web run (it may already exist in these emulators). No storage

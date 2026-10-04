@@ -8,7 +8,11 @@ const LABELS = "shell.projects.create";
  * overrides stay in project settings). The API validates the full input again.
  */
 export const CreateProjectFormSchema = z.object({
-  name: NodeNameSchema.meta({ description: "Name of the new project.", pii: "none", ui: { labelKey: `${LABELS}.name`, order: 1 } }),
+  name: NodeNameSchema.meta({
+    description: "Name of the new project.",
+    pii: "none",
+    ui: { labelKey: `${LABELS}.name`, order: 1 },
+  }),
   description: ProjectDescriptionSchema.optional().meta({
     description: "What the project is for.",
     pii: "personal",

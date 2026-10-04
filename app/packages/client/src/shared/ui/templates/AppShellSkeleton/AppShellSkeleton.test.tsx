@@ -5,7 +5,8 @@ import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { SIDEBAR_WIDTH, SIDEBAR_WIDTH_ICON } from "#/shared/ui/organisms/Sidebar/sidebar-context.tsx";
 import { AppShellSkeleton } from "./AppShellSkeleton.tsx";
 
-const sidebarOf = (container: HTMLElement): HTMLElement | null => container.querySelector('[data-slot="app-shell-skeleton-sidebar"]');
+const sidebarOf = (container: HTMLElement): HTMLElement | null =>
+  container.querySelector('[data-slot="app-shell-skeleton-sidebar"]');
 
 describe("AppShellSkeleton", () => {
   it("draws the shell's frame and announces once, inside the only main, what is loading", async () => {

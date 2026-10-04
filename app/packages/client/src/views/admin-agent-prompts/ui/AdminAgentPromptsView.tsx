@@ -5,8 +5,19 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAdminUserNames } from "#/entities/admin-user/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
-import { activeVersionOf, usePromptActivations, usePromptSeed, usePromptVersions } from "#/entities/prompt-version/index.ts";
-import { PromptActivationDialog, PromptEvalResultTable, useRunPromptEval, type PromptActivationRequest, type RunPromptEval } from "#/features/admin-prompt-activation/index.ts";
+import {
+  activeVersionOf,
+  usePromptActivations,
+  usePromptSeed,
+  usePromptVersions,
+} from "#/entities/prompt-version/index.ts";
+import {
+  PromptActivationDialog,
+  type PromptActivationRequest,
+  PromptEvalResultTable,
+  type RunPromptEval,
+  useRunPromptEval,
+} from "#/features/admin-prompt-activation/index.ts";
 import { PromptVersionDialog } from "#/features/admin-prompt-version-editor/index.ts";
 import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
@@ -15,14 +26,15 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
-import { AdminPageFrame, AdminQuerySection, useAdminSearch, type AdminQuery } from "#/widgets/admin-nav/index.ts";
+import { AdminPageFrame, type AdminQuery, AdminQuerySection, useAdminSearch } from "#/widgets/admin-nav/index.ts";
 import { PromptDiff } from "#/widgets/admin-prompt-diff/index.ts";
 import { PageNotFound } from "#/widgets/page-state/index.ts";
 import { PromptActivationHistory } from "./PromptActivationHistory.tsx";
 import { PromptVersionsTable } from "./PromptVersionsTable.tsx";
 
 const PATH = /^agents\/([^/]+)\/prompts$/u;
-const isPromptAgentId = (value: string | undefined): value is PromptAgentId => value !== undefined && (PROMPT_AGENT_IDS as readonly string[]).includes(value);
+const isPromptAgentId = (value: string | undefined): value is PromptAgentId =>
+  value !== undefined && (PROMPT_AGENT_IDS as readonly string[]).includes(value);
 
 type PromptData = { versions: PromptVersion[]; activations: PromptActivation[] };
 
@@ -32,8 +44,16 @@ const usePromptData = (agentId: PromptAgentId, enabled: boolean): AdminQuery<Pro
   const activations = usePromptActivations(agentId, { enabled });
   const failed = versions.status === "error" ? versions : activations.status === "error" ? activations : null;
   return {
-    status: failed !== null ? "error" : versions.status === "pending" || activations.status === "pending" ? "pending" : "success",
-    data: versions.data === undefined || activations.data === undefined ? undefined : { versions: versions.data, activations: activations.data },
+    status:
+      failed !== null
+        ? "error"
+        : versions.status === "pending" || activations.status === "pending"
+          ? "pending"
+          : "success",
+    data:
+      versions.data === undefined || activations.data === undefined
+        ? undefined
+        : { versions: versions.data, activations: activations.data },
     error: failed?.error ?? null,
     isFetching: versions.isFetching || activations.isFetching,
     refetch: () => Promise.all([versions.refetch(), activations.refetch()]),
@@ -57,7 +77,11 @@ function EvalOutcome({ evalRun }: { evalRun: RunPromptEval }) {
     return (
       <Alert variant="destructive">
         <AlertTitle>{t("failedTitle", { version: evalRun.error.version.version })}</AlertTitle>
-        <AlertDescription>{described.requestId === undefined ? described.message : tCommon("messageWithReference", { message: described.message, requestId: described.requestId })}</AlertDescription>
+        <AlertDescription>
+          {described.requestId === undefined
+            ? described.message
+            : tCommon("messageWithReference", { message: described.message, requestId: described.requestId })}
+        </AlertDescription>
       </Alert>
     );
   }
@@ -68,7 +92,8 @@ function EvalOutcome({ evalRun }: { evalRun: RunPromptEval }) {
 /** The versions picked for the diff, by version number in the URL (`?base=2&compare=3`). */
 const useDiffSelection = (versions: readonly PromptVersion[], active: PromptVersion | undefined) => {
   const search = useAdminSearch(["base", "compare"]);
-  const byNumber = (value: string | undefined): PromptVersion | undefined => versions.find((version) => String(version.version) === value);
+  const byNumber = (value: string | undefined): PromptVersion | undefined =>
+    versions.find((version) => String(version.version) === value);
   const newest = versions[0];
   const compare = byNumber(search.values.compare) ?? newest;
   const base = byNumber(search.values.base) ?? active ?? versions.find((version) => version.id !== compare?.id);
@@ -91,7 +116,19 @@ const focusDiffIn = (root: HTMLElement | null): void => {
   target?.focus();
 };
 
-function PromptSections({ agentId, agentName, data, online, onCreate }: { agentId: PromptAgentId; agentName: string; data: PromptData; online: boolean; onCreate: () => void }) {
+function PromptSections({
+  agentId,
+  agentName,
+  data,
+  online,
+  onCreate,
+}: {
+  agentId: PromptAgentId;
+  agentName: string;
+  data: PromptData;
+  online: boolean;
+  onCreate: () => void;
+}) {
   const t = useTranslations("admin.prompts");
   const active = activeVersionOf(data.versions, data.activations);
   const evalRun = useRunPromptEval(agentId);
@@ -112,11 +149,32 @@ function PromptSections({ agentId, agentName, data, online, onCreate }: { agentI
   const [request, setRequest] = useState<PromptActivationRequest | null>(null);
   // One lookup for every author and activator on the page (decision 0044), never one per row.
   const canReadUsers = usePlatformPermissions().can("platform.user.read");
-  const userLabel = useAdminUserNames([...data.versions.map((version) => version.createdBy), ...data.activations.map((activation) => activation.activatedBy)], { enabled: canReadUsers });
+  const userLabel = useAdminUserNames(
+    [
+      ...data.versions.map((version) => version.createdBy),
+      ...data.activations.map((activation) => activation.activatedBy),
+    ],
+    { enabled: canReadUsers },
+  );
   return (
     <div className="flex flex-col gap-6">
-      <SectionCard title={t("versions.title")} description={active === undefined ? t("versions.seedActive") : t("versions.description", { version: active.version })}>
-        <PromptVersionsTable agentName={agentName} versions={data.versions} activeVersion={active} evalRun={evalRun} online={online} onActivate={setRequest} onCompare={compareWith} onCreate={onCreate} userLabel={userLabel} />
+      <SectionCard
+        title={t("versions.title")}
+        description={
+          active === undefined ? t("versions.seedActive") : t("versions.description", { version: active.version })
+        }
+      >
+        <PromptVersionsTable
+          agentName={agentName}
+          versions={data.versions}
+          activeVersion={active}
+          evalRun={evalRun}
+          online={online}
+          onActivate={setRequest}
+          onCompare={compareWith}
+          onCreate={onCreate}
+          userLabel={userLabel}
+        />
       </SectionCard>
       {data.versions.length === 0 ? null : (
         <SectionCard title={t("eval.title")} description={t("eval.description")}>
@@ -126,14 +184,32 @@ function PromptSections({ agentId, agentName, data, online, onCreate }: { agentI
       {data.versions.length < 2 ? null : (
         <SectionCard title={t("diff.title")} description={t("diff.description")}>
           <div ref={diffRef} tabIndex={-1} className="focus-visible:outline-none">
-            <PromptDiff versions={data.versions} baseId={diff.baseId} compareId={diff.compareId} onBaseChange={diff.setBase} onCompareChange={diff.setCompare} activeId={active?.id} />
+            <PromptDiff
+              versions={data.versions}
+              baseId={diff.baseId}
+              compareId={diff.compareId}
+              onBaseChange={diff.setBase}
+              onCompareChange={diff.setCompare}
+              activeId={active?.id}
+            />
           </div>
         </SectionCard>
       )}
       <SectionCard title={t("history.title")} description={t("history.description")}>
-        <PromptActivationHistory agentName={agentName} activations={data.activations} versions={data.versions} userLabel={userLabel} />
+        <PromptActivationHistory
+          agentName={agentName}
+          activations={data.activations}
+          versions={data.versions}
+          userLabel={userLabel}
+        />
       </SectionCard>
-      <PromptActivationDialog agentId={agentId} agentName={agentName} request={request} activeVersion={active} onOpenChange={(open) => !open && setRequest(null)} />
+      <PromptActivationDialog
+        agentId={agentId}
+        agentName={agentName}
+        request={request}
+        activeVersion={active}
+        onOpenChange={(open) => !open && setRequest(null)}
+      />
     </div>
   );
 }
@@ -164,7 +240,15 @@ function AgentPrompts({ agentId }: { agentId: PromptAgentId }) {
       }
     >
       <AdminQuerySection query={data} loadingLabel={t("prompts.loading")}>
-        {(loaded) => <PromptSections agentId={agentId} agentName={agentName} data={loaded} online={online} onCreate={() => setCreating(true)} />}
+        {(loaded) => (
+          <PromptSections
+            agentId={agentId}
+            agentName={agentName}
+            data={loaded}
+            online={online}
+            onCreate={() => setCreating(true)}
+          />
+        )}
       </AdminQuerySection>
       <PromptVersionDialog
         key={active?.id ?? (seedBody === undefined ? "empty" : "seed")}

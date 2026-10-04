@@ -3,7 +3,14 @@
 import type { TraceDetail, TraceSpan } from "@core/contracts";
 import { useMemo, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
-import { buildSpanTree, hasSpanPayload, TraceCost, TraceDuration, TraceStatusPill, type SpanNode } from "#/entities/trace/index.ts";
+import {
+  buildSpanTree,
+  hasSpanPayload,
+  type SpanNode,
+  TraceCost,
+  TraceDuration,
+  TraceStatusPill,
+} from "#/entities/trace/index.ts";
 import type { Route } from "#/shared/lib/router/route-paths.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
@@ -28,7 +35,10 @@ function Payload({ label, value }: { label: string; value: unknown }) {
   return (
     <div className="flex flex-col gap-1">
       <span className="text-caption font-medium text-muted-foreground">{label}</span>
-      <pre {...scrollable} className="max-h-64 overflow-auto rounded-md border border-border bg-muted p-2 font-mono text-caption leading-relaxed focus-visible:outline-offset-2">
+      <pre
+        {...scrollable}
+        className="max-h-64 overflow-auto rounded-md border border-border bg-muted p-2 font-mono text-caption leading-relaxed focus-visible:outline-offset-2"
+      >
         {pretty(value)}
       </pre>
     </div>
@@ -41,15 +51,24 @@ function SpanPayload({ span }: { span: TraceSpan }) {
   return (
     <Collapsible>
       <CollapsibleTrigger asChild>
-        <Button variant="ghost" size="sm" className="group -ml-2 h-7 px-2 text-xs" aria-label={t("payloadOf", { name: span.name })}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="group -ml-2 h-7 px-2 text-xs"
+          aria-label={t("payloadOf", { name: span.name })}
+        >
           <Icon name="chevron-right" className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
           {t("payload")}
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="flex flex-col gap-2 pt-1 pb-2">
-          {span.input === null || span.input === undefined ? null : <Payload label={t("inputOf", { name: span.name })} value={span.input} />}
-          {span.output === null || span.output === undefined ? null : <Payload label={t("outputOf", { name: span.name })} value={span.output} />}
+          {span.input === null || span.input === undefined ? null : (
+            <Payload label={t("inputOf", { name: span.name })} value={span.input} />
+          )}
+          {span.output === null || span.output === undefined ? null : (
+            <Payload label={t("outputOf", { name: span.name })} value={span.output} />
+          )}
         </div>
       </CollapsibleContent>
     </Collapsible>
@@ -75,7 +94,9 @@ function SpanMetrics({ span }: { span: TraceSpan }) {
       </div>
       <div className="flex gap-1">
         <dt>{t("tokens")}</dt>
-        <dd className="font-mono text-foreground tabular-nums">{t("tokensValue", { input: format.number(span.inputTokens), output: format.number(span.outputTokens) })}</dd>
+        <dd className="font-mono text-foreground tabular-nums">
+          {t("tokensValue", { input: format.number(span.inputTokens), output: format.number(span.outputTokens) })}
+        </dd>
       </div>
       <div className="flex gap-1">
         <dt>{t("cost")}</dt>
@@ -96,7 +117,14 @@ function SpanItem({ node }: { node: SpanNode }) {
       <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-card p-3">
         <div className="flex flex-wrap items-center gap-2">
           {children.length === 0 ? null : (
-            <Button variant="ghost" size="icon-xs" className="-ml-1" aria-expanded={open} aria-label={open ? t("collapse", { name: span.name }) : t("expand", { name: span.name })} onClick={() => setOpen(!open)}>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              className="-ml-1"
+              aria-expanded={open}
+              aria-label={open ? t("collapse", { name: span.name }) : t("expand", { name: span.name })}
+              onClick={() => setOpen(!open)}
+            >
               <Icon name={open ? "chevron-down" : "chevron-right"} className="size-3.5" />
             </Button>
           )}
@@ -108,7 +136,10 @@ function SpanItem({ node }: { node: SpanNode }) {
         {hasSpanPayload(span) ? <SpanPayload span={span} /> : null}
       </div>
       {children.length > 0 && open ? (
-        <ul aria-label={t("childrenOf", { name: span.name })} className="ml-3 flex flex-col gap-1 border-l border-border pl-3 sm:ml-5 sm:pl-4">
+        <ul
+          aria-label={t("childrenOf", { name: span.name })}
+          className="ml-3 flex flex-col gap-1 border-l border-border pl-3 sm:ml-5 sm:pl-4"
+        >
           {children.map((child) => (
             <SpanItem key={child.span.spanId} node={child} />
           ))}

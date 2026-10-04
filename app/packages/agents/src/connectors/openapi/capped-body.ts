@@ -2,7 +2,10 @@
  * Reads a response body as UTF-8 up to `maxBytes`, then cancels the stream: an external
  * API can never make the runtime buffer more than the cap.
  */
-export const readCappedText = async (response: Response, maxBytes: number): Promise<{ readonly text: string; readonly truncated: boolean }> => {
+export const readCappedText = async (
+  response: Response,
+  maxBytes: number,
+): Promise<{ readonly text: string; readonly truncated: boolean }> => {
   const reader: ReadableStreamDefaultReader<Uint8Array> | undefined = response.body?.getReader();
   if (reader === undefined) return { text: "", truncated: false };
   const chunks: Uint8Array[] = [];

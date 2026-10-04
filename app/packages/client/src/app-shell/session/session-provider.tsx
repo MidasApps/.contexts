@@ -1,14 +1,20 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useReducer, type ReactNode } from "react";
+import { type ReactNode, useCallback, useMemo, useReducer } from "react";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { AuthError, type MfaChallenge } from "#/shared/lib/auth/auth-port.ts";
-import type { SessionBridgePort } from "#/shared/lib/session-bridge/session-bridge-port.ts";
 import { SessionContextProvider } from "#/shared/lib/session/session-context.tsx";
 import type { SessionController } from "#/shared/lib/session/session-state.ts";
-import { useAuthLossWatch, useClaimsFreshness, useSessionBoot, waitForSignedInUid, type ReportError } from "./session-effects.ts";
+import type { SessionBridgePort } from "#/shared/lib/session-bridge/session-bridge-port.ts";
+import {
+  type ReportError,
+  useAuthLossWatch,
+  useClaimsFreshness,
+  useSessionBoot,
+  waitForSignedInUid,
+} from "./session-effects.ts";
 import { INITIAL_SESSION_STATE, sessionReducer } from "./session-machine.ts";
 import { useImpersonationSwitch } from "./use-impersonation-switch.ts";
 

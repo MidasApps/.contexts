@@ -2,7 +2,11 @@ import { defineContract, NoteIdSchema } from "@core/contracts";
 import { z } from "zod";
 
 /** Permissions of the note commands; the manifest declares them (`example.note.archive` needs four eyes). */
-export const NOTE_PERMISSIONS = { read: "example.note.read", create: "example.note.create", archive: "example.note.archive" } as const;
+export const NOTE_PERMISSIONS = {
+  read: "example.note.read",
+  create: "example.note.create",
+  archive: "example.note.archive",
+} as const;
 
 /**
  * Input of `example.CreateNoteCommand`: the same schema for the form (`SchemaForm`), the agent

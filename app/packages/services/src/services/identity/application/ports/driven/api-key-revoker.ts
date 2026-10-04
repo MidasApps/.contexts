@@ -8,7 +8,12 @@ import type { AuditLogEntry, TenantId, UserId } from "@core/contracts";
  */
 export type ApiKeyRevoker = {
   /** @returns how many keys were revoked. */
-  readonly revokeOwnedKeys: (args: { tenantId: TenantId; ownerUid: UserId; actor: AuditLogEntry["actor"]; requestId: string }) => Promise<number>;
+  readonly revokeOwnedKeys: (args: {
+    tenantId: TenantId;
+    ownerUid: UserId;
+    actor: AuditLogEntry["actor"];
+    requestId: string;
+  }) => Promise<number>;
 };
 
 /** Stand-in until SP1 Task 14 lands the API keys store: there are no keys to revoke. */

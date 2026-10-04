@@ -49,7 +49,9 @@ const PS_LINE = /^\s*(\d+)\s+(\d+)\s+(\w{3} \w{3} [ \d]\d \d\d:\d\d:\d\d \d{4})\
 export const parsePsOutput = (output: string): ProcessEntry[] =>
   output.split("\n").flatMap((line): ProcessEntry[] => {
     const match = PS_LINE.exec(line);
-    return match === null ? [] : [{ pid: Number(match[1]), ppid: Number(match[2]), name: match[4] ?? "", startedAt: match[3] ?? "" }];
+    return match === null
+      ? []
+      : [{ pid: Number(match[1]), ppid: Number(match[2]), name: match[4] ?? "", startedAt: match[3] ?? "" }];
   });
 
 const CimProcessSchema = z.object({
@@ -84,7 +86,10 @@ export const listProcesses = (): ProcessEntry[] => {
           windowsHide: true,
           maxBuffer: 16 * 1024 * 1024,
         })
-      : spawnSync("ps", ["-A", "-o", "pid=,ppid=,lstart=,comm="], { encoding: "utf8", env: { ...process.env, LC_ALL: "C" } });
+      : spawnSync("ps", ["-A", "-o", "pid=,ppid=,lstart=,comm="], {
+          encoding: "utf8",
+          env: { ...process.env, LC_ALL: "C" },
+        });
   if (result.status !== 0) return [];
   try {
     return process.platform === "win32" ? parseWindowsProcessJson(result.stdout) : parsePsOutput(result.stdout);

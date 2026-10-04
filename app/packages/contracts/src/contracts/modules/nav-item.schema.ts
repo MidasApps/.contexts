@@ -17,11 +17,20 @@ const NAV_PATH = /^(?:[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*)?$
 
 /** A navigation entry a module contributes (data only: no component, no route file). */
 export const NavItemSchema = z.strictObject({
-  id: z.string().regex(KEBAB, { error: "Expected a kebab-case id." }).meta(none("Id of the item, unique inside the module.")),
+  id: z
+    .string()
+    .regex(KEBAB, { error: "Expected a kebab-case id." })
+    .meta(none("Id of the item, unique inside the module.")),
   slot: NavSlotSchema.meta(none("Shell slot the item appears in.")),
   labelKey: z.string().min(1).meta(none("i18n key of the label, in the module namespace.")),
-  icon: z.string().regex(KEBAB, { error: "Expected a kebab-case icon name." }).meta(none("Icon name of the client icon registry.")),
-  path: z.string().regex(NAV_PATH, { error: "Expected a relative path without params, e.g. items/archived." }).meta(none("Page key under the module route; empty for its root.")),
+  icon: z
+    .string()
+    .regex(KEBAB, { error: "Expected a kebab-case icon name." })
+    .meta(none("Icon name of the client icon registry.")),
+  path: z
+    .string()
+    .regex(NAV_PATH, { error: "Expected a relative path without params, e.g. items/archived." })
+    .meta(none("Page key under the module route; empty for its root.")),
   permission: PermissionSchema.optional().meta(none("Shown only when the viewer holds it at the current node.")),
   order: z.int().nonnegative().optional().meta(none("Position inside the slot; lower first, then by id.")),
 });

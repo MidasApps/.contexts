@@ -1,4 +1,4 @@
-import { parseClientConfig, type ClientConfig } from "@core/client/shared/config";
+import { type ClientConfig, parseClientConfig } from "@core/client/shared/config";
 
 /** The public variables the browser bundle carries (all `NEXT_PUBLIC_*`, never a secret). */
 export type WebPublicEnv = {
@@ -16,7 +16,16 @@ export type WebPublicEnv = {
 const DEFAULT_MFA_FACTORS = ["totp"];
 
 const factorList = (value: string | undefined): string[] =>
-  value === undefined ? DEFAULT_MFA_FACTORS : [...new Set(value.split(",").map((item) => item.trim()).filter((item) => item !== ""))];
+  value === undefined
+    ? DEFAULT_MFA_FACTORS
+    : [
+        ...new Set(
+          value
+            .split(",")
+            .map((item) => item.trim())
+            .filter((item) => item !== ""),
+        ),
+      ];
 
 /**
  * The shared client config (SP2 spec §2.1) from the web's public env: `/v1` is same-origin
@@ -32,9 +41,13 @@ export const toWebClientConfig = (source: WebPublicEnv): ClientConfig =>
       authDomain: source.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
       projectId: source.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     },
-    ...(source.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL === undefined ? {} : { authEmulatorUrl: source.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL }),
+    ...(source.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL === undefined
+      ? {}
+      : { authEmulatorUrl: source.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL }),
     mfaFactors: factorList(source.NEXT_PUBLIC_MFA_FACTORS),
-    ...(source.NEXT_PUBLIC_SELF_SERVE_SIGN_UP === undefined ? {} : { selfServeSignUp: source.NEXT_PUBLIC_SELF_SERVE_SIGN_UP === "true" }),
+    ...(source.NEXT_PUBLIC_SELF_SERVE_SIGN_UP === undefined
+      ? {}
+      : { selfServeSignUp: source.NEXT_PUBLIC_SELF_SERVE_SIGN_UP === "true" }),
   });
 
 /**

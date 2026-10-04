@@ -11,7 +11,8 @@ export const adminListAgentsEndpoint = defineEndpoint({
   auth: "user",
   responses: { 200: dataEnvelope(z.array(AdminAgentSchema)) },
   errors: { 403: ["FORBIDDEN", "MFA_REQUIRED"], 502: ["UPSTREAM_UNAVAILABLE"] },
-  summary: "Lists the agents registered in the runtime with their subagents, tools, skills and permission ceiling (staff, platform.agent.manage).",
+  summary:
+    "Lists the agents registered in the runtime with their subagents, tools, skills and permission ceiling (staff, platform.agent.manage).",
 });
 
 export const ADMIN_AGENT_ENDPOINTS: readonly EndpointDefinition[] = [adminListAgentsEndpoint];

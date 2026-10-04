@@ -6,7 +6,8 @@ import { expect, settingsPath, test, toast, unique } from "./sp5-test.ts";
 // by the agent runtime with fake embeddings), wait until it is ready, delete it. A web page cannot
 // be read offline, so its ingestion fails; the page must say so.
 
-const documentsOf = (page: Page, organizationName: string) => page.getByRole("table", { name: `Documentos da base de conhecimento de ${organizationName}` });
+const documentsOf = (page: Page, organizationName: string) =>
+  page.getByRole("table", { name: `Documentos da base de conhecimento de ${organizationName}` });
 
 const openAddDialog = async (page: Page) => {
   await page.getByRole("button", { name: "Adicionar documento" }).first().click();
@@ -37,7 +38,10 @@ test("uploads a markdown file, waits until it is indexed and deletes it", async 
   await expect(row).toContainText("Pronto", { timeout: 120_000 });
 
   await row.getByRole("button", { name: `Excluir ${fileName}` }).click();
-  await page.getByRole("alertdialog", { name: `Excluir ${fileName}?` }).getByRole("button", { name: "Excluir documento" }).click();
+  await page
+    .getByRole("alertdialog", { name: `Excluir ${fileName}?` })
+    .getByRole("button", { name: "Excluir documento" })
+    .click();
   await expect(toast(page, `${fileName} foi excluído.`)).toBeVisible();
   await expect(row).toHaveCount(0);
 });
@@ -69,7 +73,10 @@ test("adds an https page, waits until it is indexed and deletes it", async ({ pa
   await expect(row).toContainText("Pronto", { timeout: 120_000 });
   await expect(page.getByRole("list", { name: "Indexações em andamento" })).toHaveCount(0);
   await row.getByRole("button", { name: "Excluir Security overview" }).click();
-  await page.getByRole("alertdialog", { name: "Excluir Security overview?" }).getByRole("button", { name: "Excluir documento" }).click();
+  await page
+    .getByRole("alertdialog", { name: "Excluir Security overview?" })
+    .getByRole("button", { name: "Excluir documento" })
+    .click();
   await expect(row).toHaveCount(0);
 });
 

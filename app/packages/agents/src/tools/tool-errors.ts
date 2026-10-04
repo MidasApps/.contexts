@@ -47,7 +47,10 @@ export class CoreToolError extends Error {
   readonly toolId: string;
   readonly details: CoreToolErrorDetails;
 
-  constructor(args: { code: CoreToolErrorCode; toolId: string; message?: string; details?: CoreToolErrorDetails }, options?: ErrorOptions) {
+  constructor(
+    args: { code: CoreToolErrorCode; toolId: string; message?: string; details?: CoreToolErrorDetails },
+    options?: ErrorOptions,
+  ) {
     super(args.message ?? SAFE_MESSAGES[args.code] ?? "The tool failed.", options);
     this.name = "CoreToolError";
     this.code = args.code;
@@ -57,7 +60,11 @@ export class CoreToolError extends Error {
 }
 
 /** Domain-level failure a tool's `execute` may throw to give the model a specific, safe code. */
-export const toolFailure = (toolId: string, code: string, message: string, details?: CoreToolErrorDetails): CoreToolError =>
-  new CoreToolError({ code, toolId, message, ...(details === undefined ? {} : { details }) });
+export const toolFailure = (
+  toolId: string,
+  code: string,
+  message: string,
+  details?: CoreToolErrorDetails,
+): CoreToolError => new CoreToolError({ code, toolId, message, ...(details === undefined ? {} : { details }) });
 
 export const isCoreToolError = (error: unknown): error is CoreToolError => error instanceof CoreToolError;

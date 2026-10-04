@@ -5,7 +5,10 @@ import { isVisibleTo, liveActiveRunId } from "../../domain/conversation.ts";
 import type { ConversationRepository } from "../ports/conversation-repository.ts";
 import { CONVERSATION_NOT_FOUND, type ConversationNotFound } from "./get-conversation.ts";
 
-export type DeleteConversationError = ConversationNotFound | { readonly code: "CONVERSATION_STREAMING" } | { readonly code: "THREAD_DELETE_FAILED" };
+export type DeleteConversationError =
+  | ConversationNotFound
+  | { readonly code: "CONVERSATION_STREAMING" }
+  | { readonly code: "THREAD_DELETE_FAILED" };
 
 export type DeleteConversation = (input: {
   readonly conversationId: string;

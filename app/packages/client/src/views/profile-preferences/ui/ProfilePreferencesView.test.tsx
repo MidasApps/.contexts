@@ -2,14 +2,24 @@ import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, type FakeRequest } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, ok } from "#/shared/testing/fake-api.ts";
 import { buildMe } from "#/shared/testing/fixtures.ts";
 import { ProfilePreferencesView } from "./ProfilePreferencesView.tsx";
 
 type Me = ReturnType<typeof buildMe>;
 
 /** `/v1/me` that applies PATCHes (preferences merged), recording every body. */
-const meServer = (initial: Me = buildMe({ preferences: { locale: "pt-BR", timeZone: "America/Sao_Paulo", currency: "BRL", theme: "system", notifications: { productUpdates: false, securityAlerts: true } } })) => {
+const meServer = (
+  initial: Me = buildMe({
+    preferences: {
+      locale: "pt-BR",
+      timeZone: "America/Sao_Paulo",
+      currency: "BRL",
+      theme: "system",
+      notifications: { productUpdates: false, securityAlerts: true },
+    },
+  }),
+) => {
   let me = initial;
   const patches: unknown[] = [];
   return {

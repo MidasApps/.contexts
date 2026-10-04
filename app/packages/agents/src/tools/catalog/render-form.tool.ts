@@ -1,8 +1,8 @@
 import { ContractIdSchema, ToolUiSchema } from "@core/contracts";
 import { z } from "zod";
 import type { AccessPort } from "../../runtime/runtime-ports.ts";
-import { type CoreToolContext, defineCoreTool } from "../define-core-tool.ts";
 import { commandToolIdOf } from "../commands/command-tools.ts";
+import { type CoreToolContext, defineCoreTool } from "../define-core-tool.ts";
 import { CoreToolError, toolFailure } from "../tool-errors.ts";
 import type { AiCatalogReader } from "./ai-catalog-reader.ts";
 import { CATALOG_READ_PERMISSION } from "./list-entities.tool.ts";
@@ -32,18 +32,31 @@ const filterInitialValues = (schema: z.ZodObject, values: Readonly<Record<string
 
 const assertCommandAllowed = async (access: AccessPort, command: FormCommand, ctx: CoreToolContext): Promise<void> => {
   const decision = await access
-    .authorize({ principal: ctx.principal, permission: command.permission, node: ctx.node, ceiling: new Set(ctx.agent.permissions) })
+    .authorize({
+      principal: ctx.principal,
+      permission: command.permission,
+      node: ctx.node,
+      ceiling: new Set(ctx.agent.permissions),
+    })
     .catch((error: unknown) => {
       throw new CoreToolError({ code: "AUTHORIZATION_UNAVAILABLE", toolId: TOOL_ID }, { cause: error });
     });
-  if (!decision.allowed) throw new CoreToolError({ code: "FORBIDDEN", toolId: TOOL_ID, details: { reason: decision.reason } });
+  if (!decision.allowed)
+    throw new CoreToolError({ code: "FORBIDDEN", toolId: TOOL_ID, details: { reason: decision.reason } });
 };
 
-const resolveCommand = async (deps: RenderFormDeps, input: { commandId: string; contractId: string }, ctx: CoreToolContext): Promise<FormCommand> => {
+const resolveCommand = async (
+  deps: RenderFormDeps,
+  input: { commandId: string; contractId: string },
+  ctx: CoreToolContext,
+): Promise<FormCommand> => {
   const command = deps.commands.get(input.commandId);
   // A command of a module the tenant did not enable answers like an unknown one (decision 0064).
-  const offered = command !== undefined && (deps.isCommandOffered === undefined || (await deps.isCommandOffered(commandToolIdOf(command.commandId), ctx)));
-  if (command === undefined || !offered) throw toolFailure(TOOL_ID, "COMMAND_NOT_FOUND", "No command with this id is registered.");
+  const offered =
+    command !== undefined &&
+    (deps.isCommandOffered === undefined || (await deps.isCommandOffered(commandToolIdOf(command.commandId), ctx)));
+  if (command === undefined || !offered)
+    throw toolFailure(TOOL_ID, "COMMAND_NOT_FOUND", "No command with this id is registered.");
   if (command.targetContractId !== input.contractId) {
     throw toolFailure(TOOL_ID, "COMMAND_CONTRACT_MISMATCH", "This command does not create or update that contract.");
   }
@@ -77,7 +90,10 @@ export const createRenderFormTool = (deps: RenderFormDeps) =>
       contractId: ContractIdSchema.describe("Contract the form is about, e.g. example.Note."),
       mode: z.enum(["create", "update"]).describe("Whether the form creates a record or updates one."),
       commandId: ContractIdSchema.describe("Command contract that will save the form, e.g. example.CreateNoteCommand."),
-      initialValues: z.record(z.string(), z.unknown()).optional().describe("Values to prefill; unknown or invalid fields are dropped."),
+      initialValues: z
+        .record(z.string(), z.unknown())
+        .optional()
+        .describe("Values to prefill; unknown or invalid fields are dropped."),
     }),
     outputSchema: z.strictObject({ ui: ToolUiSchema }),
     ui: { component: SCHEMA_FORM_COMPONENT },

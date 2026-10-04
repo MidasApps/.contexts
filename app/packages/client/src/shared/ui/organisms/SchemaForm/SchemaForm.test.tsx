@@ -71,7 +71,14 @@ describe("SchemaForm", () => {
   });
 
   it("drops the saved confirmation as soon as the user edits again", async () => {
-    const { user } = renderForm({ defaultValues: { id: "note-1", title: "Fornecedor", priority: "low", budget: { amountMinor: 500, currency: "BRL" } } });
+    const { user } = renderForm({
+      defaultValues: {
+        id: "note-1",
+        title: "Fornecedor",
+        priority: "low",
+        budget: { amountMinor: 500, currency: "BRL" },
+      },
+    });
     const title = screen.getByRole("textbox", { name: /^Título/ });
     await user.type(title, "s");
     await user.click(submitButton());
@@ -82,7 +89,16 @@ describe("SchemaForm", () => {
 
   it("keeps submit off until something changed when the form edits saved values", async () => {
     const onSubmit = submitSpy();
-    const { user } = renderForm({ onSubmit, requireChanges: true, defaultValues: { id: "note-1", title: "Fornecedor", priority: "low", budget: { amountMinor: 500, currency: "BRL" } } });
+    const { user } = renderForm({
+      onSubmit,
+      requireChanges: true,
+      defaultValues: {
+        id: "note-1",
+        title: "Fornecedor",
+        priority: "low",
+        budget: { amountMinor: 500, currency: "BRL" },
+      },
+    });
     expect(submitButton()).toHaveProperty("disabled", true);
     await user.type(screen.getByRole("textbox", { name: /^Título/ }), "s");
     expect(submitButton()).toHaveProperty("disabled", false);
@@ -99,7 +115,9 @@ describe("SchemaForm", () => {
     const title = screen.getByRole("textbox", { name: /^Título/ });
     await vi.waitFor(() => expect(document.activeElement).toBe(title));
     expect(title.getAttribute("aria-invalid")).toBe("true");
-    expect(screen.getByText("Use pelo menos 3 caracteres.").id).toBe(title.getAttribute("aria-describedby")?.split(" ").at(-1));
+    expect(screen.getByText("Use pelo menos 3 caracteres.").id).toBe(
+      title.getAttribute("aria-describedby")?.split(" ").at(-1),
+    );
     expect(screen.getAllByText("Preencha este campo.").length).toBeGreaterThanOrEqual(2);
     expect(onSubmit).not.toHaveBeenCalled();
     await expectNoAxeViolations(container);
@@ -126,7 +144,12 @@ describe("SchemaForm", () => {
 
   it("shows existing values: a UTC instant as wall time in the display time zone", () => {
     renderForm({
-      defaultValues: { id: "n", title: "Olá", dueAt: "2026-10-01T12:30:00.000Z", budget: { amountMinor: 500, currency: "USD" } },
+      defaultValues: {
+        id: "n",
+        title: "Olá",
+        dueAt: "2026-10-01T12:30:00.000Z",
+        budget: { amountMinor: 500, currency: "USD" },
+      },
     });
     expect(screen.getByLabelText<HTMLInputElement>(/^Prazo/).value).toBe("2026-10-01T09:30");
     expect(screen.getByRole<HTMLInputElement>("textbox", { name: /^Orçamento/ }).value).toBe("5,00");
@@ -147,7 +170,11 @@ describe("SchemaForm", () => {
       (): Promise<SchemaFormResult> =>
         Promise.resolve({
           ok: false,
-          error: { code: "VALIDATION_FAILED", details: [{ field: "budget.amountMinor", issue: "TOO_BIG" }], requestId: "req-1" },
+          error: {
+            code: "VALIDATION_FAILED",
+            details: [{ field: "budget.amountMinor", issue: "TOO_BIG" }],
+            requestId: "req-1",
+          },
         }),
     );
     const { user } = renderForm({ onSubmit });

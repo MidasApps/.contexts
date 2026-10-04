@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { makeFakeAuthAdmin, makeFakeSeedCore, localSeedTarget } from "./seed-core.fixture.ts";
+import { localSeedTarget, makeFakeAuthAdmin, makeFakeSeedCore } from "./seed-core.fixture.ts";
 import type { SeedState } from "./seed-core-port.ts";
 import { seedMembers } from "./seed-members.ts";
 import { SEED_STAFF_PHONE, seedStaff } from "./seed-staff.ts";
@@ -7,7 +7,10 @@ import { seedTenancy } from "./seed-tenancy.ts";
 
 const OWNER_UID = "uid-owner";
 
-const runAll = async (world: { core: ReturnType<typeof makeFakeSeedCore>["core"]; auth: ReturnType<typeof makeFakeAuthAdmin> }) => {
+const runAll = async (world: {
+  core: ReturnType<typeof makeFakeSeedCore>["core"];
+  auth: ReturnType<typeof makeFakeAuthAdmin>;
+}) => {
   const state: SeedState = { uids: { owner: OWNER_UID } };
   const target = localSeedTarget();
   const tenancy = await seedTenancy(world.core, state);
@@ -21,9 +24,16 @@ describe("SP1 seed steps", () => {
     const fake = makeFakeSeedCore();
     const state: SeedState = { uids: { owner: OWNER_UID } };
     expect(await seedTenancy(fake.core, state)).toMatch(/^created 2 organizations, 3 projects, 2 units/);
-    expect(fake.organizations.map((organization) => organization.name)).toEqual(["Demo Organization", "Second Organization"]);
+    expect(fake.organizations.map((organization) => organization.name)).toEqual([
+      "Demo Organization",
+      "Second Organization",
+    ]);
     const [demo, second] = fake.organizations;
-    expect(fake.projects.map((project) => `${project.organizationId}/${project.name}`)).toEqual([`${demo?.id}/Project 1`, `${demo?.id}/Project 2`, `${second?.id}/Project 1`]);
+    expect(fake.projects.map((project) => `${project.organizationId}/${project.name}`)).toEqual([
+      `${demo?.id}/Project 1`,
+      `${demo?.id}/Project 2`,
+      `${second?.id}/Project 1`,
+    ]);
     const [root, child] = fake.units;
     expect(root).toMatchObject({ name: "Unit A", projectId: fake.projects[0]?.id, parentUnitId: null });
     expect(child).toMatchObject({ name: "Unit A.1", projectId: fake.projects[0]?.id, parentUnitId: root?.id });
@@ -35,10 +45,18 @@ describe("SP1 seed steps", () => {
     const fake = makeFakeSeedCore();
     const auth = makeFakeAuthAdmin();
     const { state } = await runAll({ core: fake.core, auth });
-    expect([...auth.users.keys()].sort()).toEqual(["invitee@demo.local", "member@demo.local", "staff@demo.local", "viewer@demo.local"]);
+    expect([...auth.users.keys()].sort()).toEqual([
+      "invitee@demo.local",
+      "member@demo.local",
+      "staff@demo.local",
+      "viewer@demo.local",
+    ]);
     expect([...auth.users.values()].every((user) => user.emailVerified)).toBe(true);
     const { member, viewer, invitee, staff } = state.uids;
-    expect(Object.fromEntries(fake.grants)).toEqual({ [`${member}@${state.firstProjectId}`]: "member", [`${viewer}@${state.demoOrganizationId}`]: "viewer" });
+    expect(Object.fromEntries(fake.grants)).toEqual({
+      [`${member}@${state.firstProjectId}`]: "member",
+      [`${viewer}@${state.demoOrganizationId}`]: "viewer",
+    });
     expect([...fake.grants.keys()].some((key) => key.startsWith(`${invitee}@`))).toBe(false);
     expect(fake.staff.get(staff ?? "")).toBe("platform-admin");
     expect(fake.phones.get(staff ?? "")).toBe(SEED_STAFF_PHONE);
@@ -52,7 +70,14 @@ describe("SP1 seed steps", () => {
     const fake = makeFakeSeedCore();
     const auth = makeFakeAuthAdmin();
     await runAll({ core: fake.core, auth });
-    const sizes = () => [fake.organizations.length, fake.projects.length, fake.units.length, fake.grants.size, auth.users.size, fake.staff.size];
+    const sizes = () => [
+      fake.organizations.length,
+      fake.projects.length,
+      fake.units.length,
+      fake.grants.size,
+      auth.users.size,
+      fake.staff.size,
+    ];
     const before = sizes();
     const { summaries } = await runAll({ core: fake.core, auth });
     expect(summaries.tenancy).toMatch(/^unchanged \(2 organizations, 3 projects, 2 units;/);
@@ -64,7 +89,12 @@ describe("SP1 seed steps", () => {
   it("refuses to run a step before the step it depends on", async () => {
     const fake = makeFakeSeedCore();
     await expect(seedTenancy(fake.core, { uids: {} })).rejects.toThrow(/owner user must be seeded first/);
-    const members = seedMembers({ core: fake.core, auth: makeFakeAuthAdmin(), target: localSeedTarget(), state: { uids: { owner: OWNER_UID } } });
+    const members = seedMembers({
+      core: fake.core,
+      auth: makeFakeAuthAdmin(),
+      target: localSeedTarget(),
+      state: { uids: { owner: OWNER_UID } },
+    });
     await expect(members).rejects.toThrow(/tenancy must be seeded first/);
   });
 });

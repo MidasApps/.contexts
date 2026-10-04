@@ -19,9 +19,9 @@ export type {
 } from "./application/ports/driven/semantic-sql-ports.ts";
 export {
   DEFAULT_SEMANTIC_LIMIT,
-  makeRunSemanticQuery,
   MAX_SEMANTIC_LIMIT,
   MAX_SEMANTIC_PARAMS,
+  makeRunSemanticQuery,
   type RunSemanticQuery,
   type RunSemanticQueryError,
   type RunSemanticQueryInput,

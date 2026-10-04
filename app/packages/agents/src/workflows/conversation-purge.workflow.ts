@@ -39,7 +39,8 @@ export const createConversationPurgeWorkflow = (deps: ConversationPurgeDeps) =>
         inputSchema: z.strictObject({}),
         outputSchema: ConversationPurgeResultSchema,
         execute: async ({ requestContext, mastra }) => {
-          if (!isPlatformRun(requestContext)) return { status: "failed" as const, purged: 0, failed: 0, code: PLATFORM_ONLY };
+          if (!isPlatformRun(requestContext))
+            return { status: "failed" as const, purged: 0, failed: 0, code: PLATFORM_ONLY };
           const deleteThread = async (threadId: string): Promise<boolean> => {
             try {
               if (deps.memory !== undefined) await deps.memory.deleteThread(threadId);

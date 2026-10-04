@@ -45,11 +45,20 @@ const STATUSES_OF: Readonly<Record<HumanApprovalDecision, readonly string[]>> = 
 type RunRef = { readonly workflowId: string; readonly runId: string; readonly stepId: string };
 
 /** The stored request must be settled with this decision and name this very run and step. */
-export const confirmsDecision = (record: WorkflowApprovalRecord | null, decision: HumanApprovalDecision, run: RunRef): record is WorkflowApprovalRecord => {
+export const confirmsDecision = (
+  record: WorkflowApprovalRecord | null,
+  decision: HumanApprovalDecision,
+  run: RunRef,
+): record is WorkflowApprovalRecord => {
   if (record === null || record.kind !== WORKFLOW_RESUME_ACTION_KIND) return false;
   if (!STATUSES_OF[decision].includes(record.status)) return false;
   const action = WorkflowResumeActionInputSchema.safeParse(record.input);
-  return action.success && action.data.workflowId === run.workflowId && action.data.runId === run.runId && action.data.stepId === run.stepId;
+  return (
+    action.success &&
+    action.data.workflowId === run.workflowId &&
+    action.data.runId === run.runId &&
+    action.data.stepId === run.stepId
+  );
 };
 
 export type RequestHumanApprovalStepOptions<Input extends z.ZodObject> = {
@@ -68,7 +77,9 @@ export type RequestHumanApprovalStepOptions<Input extends z.ZodObject> = {
  * trusts `resumeData`: the stored request must be settled with the same decision and name this
  * run and step, else the step suspends again. Output: `{ input, approval }`.
  */
-export const createRequestHumanApprovalStep = <Input extends z.ZodObject>(options: RequestHumanApprovalStepOptions<Input>) =>
+export const createRequestHumanApprovalStep = <Input extends z.ZodObject>(
+  options: RequestHumanApprovalStepOptions<Input>,
+) =>
   createStep({
     id: REQUEST_HUMAN_APPROVAL_STEP_ID,
     description: "Asks for a four-eyes approval (SP1 approval request) and waits for its decision.",
@@ -96,7 +107,13 @@ export const createRequestHumanApprovalStep = <Input extends z.ZodObject>(option
       if (approvalRequestId === undefined) throw new HumanApprovalStepError("APPROVAL_REQUEST_MISSING");
       const record = await options.approvals.getApprovalRequest({ approvalRequestId });
       if (!confirmsDecision(record, resumeData.decision, run)) return await suspend({ approvalRequestId });
-      const approval = { approvalRequestId, decision: resumeData.decision, decidedBy: record.decidedBy, reason: record.reason, requestedBy: record.requestedBy };
+      const approval = {
+        approvalRequestId,
+        decision: resumeData.decision,
+        decidedBy: record.decidedBy,
+        reason: record.reason,
+        requestedBy: record.requestedBy,
+      };
       return { input: inputData, approval };
     },
   });

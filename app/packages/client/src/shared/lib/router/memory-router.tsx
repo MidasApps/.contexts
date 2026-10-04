@@ -1,9 +1,9 @@
 "use client";
 
 import type { SupportedLocale } from "@core/i18n";
-import { useSyncExternalStore, type MouseEvent } from "react";
+import { type MouseEvent, useSyncExternalStore } from "react";
 import { parseRoute } from "./parse-route.ts";
-import { routeHref, type Route } from "./route-paths.ts";
+import { type Route, routeHref } from "./route-paths.ts";
 import type { RouterLinkProps, RouterPort } from "./router-port.ts";
 
 export type MemoryRouter = RouterPort & {
@@ -20,7 +20,11 @@ export type MemoryRouter = RouterPort & {
 const paramsOf = (route: Route | null): Record<string, string | undefined> => {
   if (route === null) return {};
   // `id` names the route itself, not a path parameter.
-  return Object.fromEntries(Object.entries(route).filter((entry): entry is [string, string] => entry[0] !== "id" && typeof entry[1] === "string"));
+  return Object.fromEntries(
+    Object.entries(route).filter(
+      (entry): entry is [string, string] => entry[0] !== "id" && typeof entry[1] === "string",
+    ),
+  );
 };
 
 const isPlainClick = (event: MouseEvent<HTMLAnchorElement>): boolean =>

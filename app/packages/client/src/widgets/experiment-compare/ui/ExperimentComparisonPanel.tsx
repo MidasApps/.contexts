@@ -47,7 +47,15 @@ function PanelBody({ pair, copy, nameOf }: Pick<ExperimentComparisonPanelProps, 
         </Alert>
       );
     case "error":
-      return <ApiErrorState error={pair.error} headingLevel={3} frame="plain" onRetry={pair.retry} retrying={pair.retrying} />;
+      return (
+        <ApiErrorState
+          error={pair.error}
+          headingLevel={3}
+          frame="plain"
+          onRetry={pair.retry}
+          retrying={pair.retrying}
+        />
+      );
     case "ready":
       return <ExperimentCompare a={pair.a} b={pair.b} nameOf={nameOf} />;
   }
@@ -65,7 +73,9 @@ export function ExperimentComparisonPanel({ ids, pair, onClear, copy, nameOf }: 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id={titleId} className="flex min-w-0 flex-wrap items-baseline gap-x-2 text-sm font-medium">
           {copy.title}
-          {ids.length === 0 ? null : <span className="font-mono text-xs font-normal break-all text-muted-foreground">{ids.join(" × ")}</span>}
+          {ids.length === 0 ? null : (
+            <span className="font-mono text-xs font-normal break-all text-muted-foreground">{ids.join(" × ")}</span>
+          )}
         </h2>
         {ids.length === 0 ? null : (
           <Button variant="ghost" size="sm" onClick={onClear}>

@@ -21,7 +21,11 @@ export class EmulatorSignerOutsideLocalError extends Error {
  * @param args.host `FIREBASE_STORAGE_EMULATOR_HOST` (`127.0.0.1:9199`).
  * @throws {EmulatorSignerOutsideLocalError} when `appEnv` is not `local`.
  */
-export const createEmulatorUrlSigner = (args: { readonly appEnv: string; readonly host: string; readonly bucket: string }): FileUrlSigner => {
+export const createEmulatorUrlSigner = (args: {
+  readonly appEnv: string;
+  readonly host: string;
+  readonly bucket: string;
+}): FileUrlSigner => {
   if (args.appEnv !== "local") throw new EmulatorSignerOutsideLocalError(args.appEnv);
   const origin = `http://${args.host}`;
   const bucket = encodeURIComponent(args.bucket);

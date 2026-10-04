@@ -10,19 +10,28 @@ import { createWebSearchTool } from "./web-search.tool.ts";
 export const FIRECRAWL_TOOL_IDS = ["web.search", "web.scrape"] as const;
 
 /** DNS of the SSRF guard: real DNS, plus the fixture hosts in `AI_MODE=fake`. */
-export const guardResolverFor = (aiMode: WebClientEnv["AI_MODE"]): ResolveHost => (aiMode === "fake" ? createFakeModeResolver(resolveWithDns) : resolveWithDns);
+export const guardResolverFor = (aiMode: WebClientEnv["AI_MODE"]): ResolveHost =>
+  aiMode === "fake" ? createFakeModeResolver(resolveWithDns) : resolveWithDns;
 
 /** What the composition wires once: the tenant client resolver and the guard's DNS. */
 export type WebToolsRuntime = { readonly clients: WebClientResolver; readonly resolve: ResolveHost };
 
-export const createWebToolsRuntime = (deps: { readonly env: WebClientEnv; readonly secrets: SecretStore }): WebToolsRuntime => ({
+export const createWebToolsRuntime = (deps: {
+  readonly env: WebClientEnv;
+  readonly secrets: SecretStore;
+}): WebToolsRuntime => ({
   clients: createWebClientResolver(deps),
   resolve: guardResolverFor(deps.env.AI_MODE),
 });
 
 /** `web.search` and `web.scrape` definitions bound to one runtime (registered once in the tool registry). */
-export const createFirecrawlTools = (runtime: WebToolsRuntime) => [createWebSearchTool(runtime), createWebScrapeTool(runtime)];
+export const createFirecrawlTools = (runtime: WebToolsRuntime) => [
+  createWebSearchTool(runtime),
+  createWebScrapeTool(runtime),
+];
 
 /** The knowledge ingestion's `WebContentPort` over the same Firecrawl clients and guard (bound in `apps/mastra`). */
-export const createWebContentPort = (deps: { readonly env: WebClientEnv; readonly secrets: SecretStore }): WebContentPort =>
-  createFirecrawlWebContent(createWebToolsRuntime(deps));
+export const createWebContentPort = (deps: {
+  readonly env: WebClientEnv;
+  readonly secrets: SecretStore;
+}): WebContentPort => createFirecrawlWebContent(createWebToolsRuntime(deps));

@@ -17,7 +17,9 @@ export const InvitationStatusSchema = z.enum(["pending", "accepted", "revoked", 
 export type InvitationStatus = z.infer<typeof InvitationStatusSchema>;
 
 /** 32 random bytes, base64url without padding; stored only as sha256 (SP1 spec §6.2). */
-export const InvitationTokenSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/, { error: "Expected a 43-char base64url token." });
+export const InvitationTokenSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{43}$/, { error: "Expected a 43-char base64url token." });
 
 const nodeField = () => tenantNodeRefField("Node the invitee will be granted at.");
 const rolesField = () => roleRefsField("Roles the invitee will get (no escalation).");
@@ -84,7 +86,13 @@ export const CreateInvitationInputContract = defineContract(CreateInvitationInpu
 
 export const CreateInvitationResponseSchema = z.object({
   invitation: z.object(InvitationSchema.shape).meta(personal("The created invitation, as later listed.")),
-  acceptUrl: z.url().meta(sensitive("One-time link `<app>/{locale}/invite#token=<token>` in the inviter's locale (else the organization default), returned only here.")),
+  acceptUrl: z
+    .url()
+    .meta(
+      sensitive(
+        "One-time link `<app>/{locale}/invite#token=<token>` in the inviter's locale (else the organization default), returned only here.",
+      ),
+    ),
 });
 export type CreateInvitationResponse = z.infer<typeof CreateInvitationResponseSchema>;
 
@@ -92,7 +100,9 @@ export const CreateInvitationResponseContract = defineContract(CreateInvitationR
   id: "access.CreateInvitationResponse",
   kind: "view",
   description: "Answer of invitation creation with the one-time accept link.",
-  examples: [{ invitation: INVITATION_EXAMPLE, acceptUrl: `https://app.example.com/pt-BR/invite#token=${EXAMPLE_TOKEN}` }],
+  examples: [
+    { invitation: INVITATION_EXAMPLE, acceptUrl: `https://app.example.com/pt-BR/invite#token=${EXAMPLE_TOKEN}` },
+  ],
   pii: "sensitive",
   tenancyScope: "organization",
   relations: [],
@@ -126,7 +136,14 @@ export const InvitationPreviewContract = defineContract(InvitationPreviewSchema,
   id: "access.InvitationPreview",
   kind: "view",
   description: "What an invitee sees before accepting (POST /v1/invitations/preview).",
-  examples: [{ organizationName: "Northwind", inviterDisplayName: "Ana Souza", maskedEmail: "c***@example.com", expiresAt: EXAMPLE_TIMES.expires }],
+  examples: [
+    {
+      organizationName: "Northwind",
+      inviterDisplayName: "Ana Souza",
+      maskedEmail: "c***@example.com",
+      expiresAt: EXAMPLE_TIMES.expires,
+    },
+  ],
   pii: "personal",
   tenancyScope: "user",
   relations: [],

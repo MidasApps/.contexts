@@ -4,7 +4,9 @@ import { decisionErrorCodeOf } from "./use-approval-decision.ts";
 
 describe("decisionErrorCodeOf", () => {
   it("names the refusals that have their own copy in the decision form", () => {
-    expect(decisionErrorCodeOf(new ApiError({ status: 403, code: "SELF_APPROVAL_FORBIDDEN", message: "x" }))).toBe("SELF_APPROVAL_FORBIDDEN");
+    expect(decisionErrorCodeOf(new ApiError({ status: 403, code: "SELF_APPROVAL_FORBIDDEN", message: "x" }))).toBe(
+      "SELF_APPROVAL_FORBIDDEN",
+    );
     expect(decisionErrorCodeOf(new ApiError({ status: 409, code: "CONFLICT", message: "x" }))).toBe("CONFLICT");
   });
 

@@ -1,8 +1,14 @@
 "use client";
 
-import { createCustomAgentEndpoint, updateCustomAgentEndpoint, type CustomAgent, type CustomAgentOptions, type CustomSkill } from "@core/contracts";
+import {
+  type CustomAgent,
+  type CustomAgentOptions,
+  type CustomSkill,
+  createCustomAgentEndpoint,
+  updateCustomAgentEndpoint,
+} from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useCustomAgent } from "#/entities/custom-agent/index.ts";
 import { useCustomSkills } from "#/entities/custom-skill/index.ts";
@@ -11,11 +17,25 @@ import { ApiError } from "#/shared/api/api-error.ts";
 import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Spinner } from "#/shared/ui/atoms/Spinner/Spinner.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
-import { agentInputOf, agentProblemsFromDetails, draftFromAgent, emptyAgentDraft, type AgentDraft, type AgentDraftProblems } from "../model/custom-agent-draft.ts";
+import {
+  type AgentDraft,
+  type AgentDraftProblems,
+  agentInputOf,
+  agentProblemsFromDetails,
+  draftFromAgent,
+  emptyAgentDraft,
+} from "../model/custom-agent-draft.ts";
 import { invalidateAgentData } from "../model/invalidate-agent-data.ts";
 import { CustomAgentFields } from "./CustomAgentFields.tsx";
 
@@ -29,7 +49,13 @@ export type CustomAgentEditorDialogProps = {
   options: CustomAgentOptions;
 };
 
-type FormProps = { organizationId: string; agent: CustomAgent | null; options: CustomAgentOptions; skills: readonly CustomSkill[]; onClose: () => void };
+type FormProps = {
+  organizationId: string;
+  agent: CustomAgent | null;
+  options: CustomAgentOptions;
+  skills: readonly CustomSkill[];
+  onClose: () => void;
+};
 
 function AgentForm({ organizationId, agent, options, skills, onClose }: FormProps) {
   const t = useTranslations("settings.agents.custom.editor");
@@ -59,10 +85,18 @@ function AgentForm({ organizationId, agent, options, skills, onClose }: FormProp
     setPending(true);
     try {
       if (agent === null) {
-        await callEndpoint(createCustomAgentEndpoint, { query: { organizationId }, body: input, idempotencyKey: idempotency.keyFor(input) });
+        await callEndpoint(createCustomAgentEndpoint, {
+          query: { organizationId },
+          body: input,
+          idempotencyKey: idempotency.keyFor(input),
+        });
         idempotency.reset();
       } else {
-        await callEndpoint(updateCustomAgentEndpoint, { params: { agentId: agent.id }, query: { organizationId }, body: input });
+        await callEndpoint(updateCustomAgentEndpoint, {
+          params: { agentId: agent.id },
+          query: { organizationId },
+          body: input,
+        });
       }
       await invalidateAgentData(queryClient, organizationId);
       notify.success(t(agent === null ? "created" : "saved", { name: input.name }));
@@ -120,7 +154,13 @@ function AgentEditorBody({ organizationId, onOpenChange, agent = null, options }
           {t("loading")}
         </p>
       ) : (
-        <AgentForm organizationId={organizationId} agent={agent === null ? null : (record.data ?? null)} options={options} skills={skills.data ?? []} onClose={() => onOpenChange(false)} />
+        <AgentForm
+          organizationId={organizationId}
+          agent={agent === null ? null : (record.data ?? null)}
+          options={options}
+          skills={skills.data ?? []}
+          onClose={() => onOpenChange(false)}
+        />
       )}
     </>
   );

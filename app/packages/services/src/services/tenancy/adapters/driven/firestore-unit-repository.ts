@@ -1,4 +1,4 @@
-import { IsoDateTimeSchema, UnitIdSchema, UnitSchema, type Unit } from "@core/contracts";
+import { IsoDateTimeSchema, type Unit, UnitIdSchema, UnitSchema } from "@core/contracts";
 import { FieldPath, type Firestore, type WriteBatch } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
@@ -21,7 +21,9 @@ const liveOnly = (value: (Unit & { deletedAt: string | null }) | undefined): Uni
 };
 
 const chunks = <T>(items: readonly T[]): T[][] =>
-  Array.from({ length: Math.ceil(items.length / BATCH_SIZE) }, (_, index) => items.slice(index * BATCH_SIZE, (index + 1) * BATCH_SIZE));
+  Array.from({ length: Math.ceil(items.length / BATCH_SIZE) }, (_, index) =>
+    items.slice(index * BATCH_SIZE, (index + 1) * BATCH_SIZE),
+  );
 
 /** Firestore `UnitRepository` over the top-level `units` collection. */
 export const createFirestoreUnitRepository = (deps: { firestore: Firestore }): UnitRepository => {
@@ -41,19 +43,28 @@ export const createFirestoreUnitRepository = (deps: { firestore: Firestore }): U
       const ref = typed().doc(id);
       return liveOnly((tx === undefined ? await ref.get() : await tx.get(ref)).data());
     },
-    getMany: async (ids) => (await Promise.all(ids.map((id) => typed().doc(id).get()))).flatMap((snapshot) => liveOnly(snapshot.data()) ?? []),
+    getMany: async (ids) =>
+      (await Promise.all(ids.map((id) => typed().doc(id).get()))).flatMap(
+        (snapshot) => liveOnly(snapshot.data()) ?? [],
+      ),
     listChildren: async ({ projectId, parentUnitId, page }) => {
-      let query = live().where("projectId", "==", projectId).where("parentUnitId", "==", parentUnitId).orderBy("name").orderBy(FieldPath.documentId());
+      let query = live()
+        .where("projectId", "==", projectId)
+        .where("parentUnitId", "==", parentUnitId)
+        .orderBy("name")
+        .orderBy(FieldPath.documentId());
       if (page.after !== undefined) query = query.startAfter(...page.after);
       const fetched = (await query.limit(page.limit + 1).get()).docs.flatMap((doc) => liveOnly(doc.data()) ?? []);
       return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (unit) => [unit.name, unit.id] });
     },
     listOfProject: async ({ projectId, limit }) =>
-      (await live().where("projectId", "==", projectId).limit(limit).get()).docs.flatMap((doc) => liveOnly(doc.data()) ?? []),
-    listDescendants: async ({ tenantId, unitId, limit }) =>
-      (await live().where("tenantId", "==", tenantId).where("ancestorIds", "array-contains", unitId).limit(limit).get()).docs.flatMap(
+      (await live().where("projectId", "==", projectId).limit(limit).get()).docs.flatMap(
         (doc) => liveOnly(doc.data()) ?? [],
       ),
+    listDescendants: async ({ tenantId, unitId, limit }) =>
+      (
+        await live().where("tenantId", "==", tenantId).where("ancestorIds", "array-contains", unitId).limit(limit).get()
+      ).docs.flatMap((doc) => liveOnly(doc.data()) ?? []),
     create: (tx, { unit, actorId }) =>
       void tx.create(raw().doc(unit.id), {
         ...converter.toFirestore({ ...unit, deletedAt: null }),
@@ -76,15 +87,29 @@ export const createFirestoreUnitRepository = (deps: { firestore: Firestore }): U
         }),
       ),
     softDelete: (tx, { id, deletedAt, actorId }) =>
-      void tx.update(raw().doc(id), toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId })),
+      void tx.update(
+        raw().doc(id),
+        toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId }),
+      ),
     rewriteTree: ({ rewrites, updatedAt, actorId }) =>
       inBatches(rewrites, (batch, rewrite) =>
         batch.update(
           raw().doc(rewrite.id),
-          toFirestoreUpdate(stored, { parentUnitId: rewrite.parentUnitId, ancestorIds: [...rewrite.ancestorIds], depth: rewrite.depth, updatedAt, updatedBy: actorId }),
+          toFirestoreUpdate(stored, {
+            parentUnitId: rewrite.parentUnitId,
+            ancestorIds: [...rewrite.ancestorIds],
+            depth: rewrite.depth,
+            updatedAt,
+            updatedBy: actorId,
+          }),
         ),
       ),
     softDeleteMany: ({ ids, deletedAt, actorId }) =>
-      inBatches(ids, (batch, id) => batch.update(raw().doc(id), toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId }))),
+      inBatches(ids, (batch, id) =>
+        batch.update(
+          raw().doc(id),
+          toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId }),
+        ),
+      ),
   };
 };

@@ -51,10 +51,13 @@ const erase = <Input>(handler: ApprovalActionHandler<Input>): RegisteredApproval
   run: async (input, context) => handler.execute(handler.inputSchema.parse(input), context),
 });
 
-export const createApprovalHandlerRegistry = (initial: readonly ApprovalActionHandler[] = []): ApprovalHandlerRegistry => {
+export const createApprovalHandlerRegistry = (
+  initial: readonly ApprovalActionHandler[] = [],
+): ApprovalHandlerRegistry => {
   const handlers = new Map<string, RegisteredApprovalHandler>();
   const register = <Input>(handler: ApprovalActionHandler<Input>): void => {
-    if (!ApprovalActionKindSchema.safeParse(handler.kind).success) throw new ApprovalHandlerRegistryError("APPROVAL_HANDLER_KIND_INVALID", handler.kind);
+    if (!ApprovalActionKindSchema.safeParse(handler.kind).success)
+      throw new ApprovalHandlerRegistryError("APPROVAL_HANDLER_KIND_INVALID", handler.kind);
     if (handlers.has(handler.kind)) throw new ApprovalHandlerRegistryError("APPROVAL_HANDLER_DUPLICATE", handler.kind);
     handlers.set(handler.kind, erase(handler));
   };

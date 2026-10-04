@@ -9,7 +9,11 @@ import { AdminPlansView } from "./AdminPlansView.tsx";
 const plain = (text: string | null): string => (text ?? "").replace(/\s/gu, " ");
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminPlansView />, { path: "/admin/plans", routes: { "GET /v1/admin/plans": ok([buildPlan()]) }, ...options });
+  renderAdmin(<AdminPlansView />, {
+    path: "/admin/plans",
+    routes: { "GET /v1/admin/plans": ok([buildPlan()]) },
+    ...options,
+  });
 
 const setOnline = (online: boolean): void => {
   Object.defineProperty(globalThis.navigator, "onLine", { configurable: true, get: () => online });
@@ -26,13 +30,26 @@ describe("AdminPlansView", () => {
     const row = within(table).getByRole("row", { name: /Standard/u });
     expect(plain(row.textContent)).toContain("US$ 50,00");
     expect(plain(row.textContent)).toContain("20.000.000");
-    expect(within(within(row).getByRole("list", { name: "Funcionalidades do plano Standard" })).getByText("web-tools")).toBeDefined();
+    expect(
+      within(within(row).getByRole("list", { name: "Funcionalidades do plano Standard" })).getByText("web-tools"),
+    ).toBeDefined();
     await expectNoAxeViolations(container);
   });
 
   it("creates a plan from the dialog, converting dollars to micro-USD and splitting features", async () => {
-    const created = buildPlan({ id: ADMIN_IDS.otherPlan, name: "Pro", limits: { monthlyMicroUsd: 120_500_000, monthlyTokens: 5000, maxConnectors: 3, features: ["web-tools", "chat.voice"] } });
-    const { user, api, container } = render({ routes: { "GET /v1/admin/plans": ok([buildPlan()]), "POST /v1/admin/plans": ok(created, 201) } });
+    const created = buildPlan({
+      id: ADMIN_IDS.otherPlan,
+      name: "Pro",
+      limits: {
+        monthlyMicroUsd: 120_500_000,
+        monthlyTokens: 5000,
+        maxConnectors: 3,
+        features: ["web-tools", "chat.voice"],
+      },
+    });
+    const { user, api, container } = render({
+      routes: { "GET /v1/admin/plans": ok([buildPlan()]), "POST /v1/admin/plans": ok(created, 201) },
+    });
     await user.click(await screen.findByRole("button", { name: "Novo plano" }));
     const dialog = await screen.findByRole("dialog", { name: "Novo plano" });
     await expectNoAxeViolations(container.ownerDocument.body);
@@ -46,18 +63,34 @@ describe("AdminPlansView", () => {
     const connectors = within(dialog).getByRole("spinbutton", { name: /Máximo de conectores/u });
     await user.clear(connectors);
     await user.type(connectors, "3");
-    await user.type(within(dialog).getByRole("textbox", { name: /Funcionalidades/u }), "web-tools, chat.voice web-tools");
+    await user.type(
+      within(dialog).getByRole("textbox", { name: /Funcionalidades/u }),
+      "web-tools, chat.voice web-tools",
+    );
     api.route("GET /v1/admin/plans", ok([buildPlan(), created]));
     await user.click(within(dialog).getByRole("button", { name: "Criar plano" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     const post = api.calls.find((call) => call.method === "POST");
-    expect(post?.body).toEqual({ name: "Pro", limits: { monthlyMicroUsd: 120_500_000, monthlyTokens: 5000, maxConnectors: 3, features: ["web-tools", "chat.voice"] } });
+    expect(post?.body).toEqual({
+      name: "Pro",
+      limits: {
+        monthlyMicroUsd: 120_500_000,
+        monthlyTokens: 5000,
+        maxConnectors: 3,
+        features: ["web-tools", "chat.voice"],
+      },
+    });
     expect(await screen.findByText("Plano Pro criado.")).toBeDefined();
     expect(await screen.findByRole("row", { name: /Pro/u })).toBeDefined();
   });
 
   it("edits a plan with its current values and warns that budgets follow", async () => {
-    const { user, api } = render({ routes: { "GET /v1/admin/plans": ok([buildPlan()]), "PUT /v1/admin/plans/:planId": ok(buildPlan({ name: "Standard+" })) } });
+    const { user, api } = render({
+      routes: {
+        "GET /v1/admin/plans": ok([buildPlan()]),
+        "PUT /v1/admin/plans/:planId": ok(buildPlan({ name: "Standard+" })),
+      },
+    });
     await user.click(await screen.findByRole("button", { name: "Editar o plano Standard" }));
     const dialog = await screen.findByRole("dialog", { name: "Editar o plano Standard" });
     expect(within(dialog).getByText(/atualiza o orçamento de todas as organizações/u)).toBeDefined();
@@ -68,7 +101,10 @@ describe("AdminPlansView", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     const put = api.calls.find((call) => call.method === "PUT");
     expect(put?.path).toBe(`/v1/admin/plans/${ADMIN_IDS.plan}`);
-    expect(put?.body).toEqual({ name: "Standard+", limits: { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000, maxConnectors: 5, features: ["web-tools"] } });
+    expect(put?.body).toEqual({
+      name: "Standard+",
+      limits: { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000, maxConnectors: 5, features: ["web-tools"] },
+    });
     expect(await screen.findByText("Plano Standard+ atualizado.")).toBeDefined();
   });
 
@@ -89,7 +125,9 @@ describe("AdminPlansView", () => {
   });
 
   it("keeps the dialog open with the error and its reference when saving fails", async () => {
-    const { user } = render({ routes: { "GET /v1/admin/plans": ok([buildPlan()]), "PUT /v1/admin/plans/:planId": apiError(403, "FORBIDDEN") } });
+    const { user } = render({
+      routes: { "GET /v1/admin/plans": ok([buildPlan()]), "PUT /v1/admin/plans/:planId": apiError(403, "FORBIDDEN") },
+    });
     await user.click(await screen.findByRole("button", { name: "Editar o plano Standard" }));
     const dialog = await screen.findByRole("dialog", { name: "Editar o plano Standard" });
     await user.click(within(dialog).getByRole("button", { name: "Salvar plano" }));
@@ -104,7 +142,13 @@ describe("AdminPlansView", () => {
     const dialog = await screen.findByRole("dialog", { name: "Editar o plano Standard" });
     await user.type(within(dialog).getByRole("textbox", { name: /Funcionalidades/u }), ", Web Tools!");
     await user.click(within(dialog).getByRole("button", { name: "Salvar plano" }));
-    await waitFor(() => expect(within(dialog).getByRole("textbox", { name: /Funcionalidades/u }).getAttribute("aria-invalid")).toBe("true"));
+    await waitFor(() =>
+      expect(
+        within(dialog)
+          .getByRole("textbox", { name: /Funcionalidades/u })
+          .getAttribute("aria-invalid"),
+      ).toBe("true"),
+    );
     expect(api.calls.some((call) => call.method === "PUT")).toBe(false);
   });
 
@@ -112,7 +156,9 @@ describe("AdminPlansView", () => {
     const { user, container } = render({ routes: { "GET /v1/admin/plans": ok([]) } });
     const empty = await screen.findByRole("heading", { level: 2, name: "Nenhum plano cadastrado" });
     await expectNoAxeViolations(container);
-    const cta = within(empty.closest("[data-slot='state-panel']") as HTMLElement).getByRole("button", { name: "Novo plano" });
+    const cta = within(empty.closest("[data-slot='state-panel']") as HTMLElement).getByRole("button", {
+      name: "Novo plano",
+    });
     await user.click(cta);
     expect(await screen.findByRole("dialog", { name: "Novo plano" })).toBeDefined();
   });
@@ -122,7 +168,9 @@ describe("AdminPlansView", () => {
     await screen.findByRole("table", { name: "Catálogo de planos" });
     try {
       setOnline(false);
-      await waitFor(() => expect(screen.getByRole("button", { name: "Novo plano" }).hasAttribute("disabled")).toBe(true));
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Novo plano" }).hasAttribute("disabled")).toBe(true),
+      );
       expect(screen.getByRole("button", { name: "Editar o plano Standard" }).hasAttribute("disabled")).toBe(true);
     } finally {
       setOnline(true);

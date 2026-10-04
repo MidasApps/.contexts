@@ -71,39 +71,63 @@ describe("loadWebEnv", () => {
   });
 
   it("requires MASTRA_URL (https) and MASTRA_AUDIENCE outside local, reporting every issue at once", () => {
-    const withoutMastra = { ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", MASTRA_URL: undefined, MASTRA_AUDIENCE: undefined };
+    const withoutMastra = {
+      ...REMOTE_ENV,
+      CORS_ALLOWED_ORIGINS: "",
+      MASTRA_URL: undefined,
+      MASTRA_AUDIENCE: undefined,
+    };
     expect(() => loadWebEnv(withoutMastra)).toThrow(/MASTRA_URL \(REQUIRED\).*MASTRA_AUDIENCE \(REQUIRED\)/);
-    expect(() => loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", MASTRA_URL: "http://mastra.internal" })).toThrow(/MASTRA_URL \(HTTPS_REQUIRED\)/);
+    expect(() => loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", MASTRA_URL: "http://mastra.internal" })).toThrow(
+      /MASTRA_URL \(HTTPS_REQUIRED\)/,
+    );
     expect(loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "" }).MASTRA_URL).toBe("https://mastra-staging.a.run.app");
   });
 
   it("defaults FILES_BUCKET to the demo project's default bucket in local and requires it outside local", () => {
     expect(loadWebEnv(LOCAL_ENV).FILES_BUCKET).toBe("demo-core.appspot.com");
-    expect(() => loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", FILES_BUCKET: undefined })).toThrow(/FILES_BUCKET \(REQUIRED\)/);
+    expect(() => loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", FILES_BUCKET: undefined })).toThrow(
+      /FILES_BUCKET \(REQUIRED\)/,
+    );
     expect(loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "" }).FILES_BUCKET).toBe("core-staging-files");
   });
 });
 
 describe("loadWebEnv public client variables", () => {
   it("requires NEXT_PUBLIC_APP_ENV and that it equals APP_ENV (the client bundle must name the same environment)", () => {
-    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_APP_ENV: undefined })).toThrow(/NEXT_PUBLIC_APP_ENV \(REQUIRED\)/);
+    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_APP_ENV: undefined })).toThrow(
+      /NEXT_PUBLIC_APP_ENV \(REQUIRED\)/,
+    );
     expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_APP_ENV: "prod" })).toThrow(/NEXT_PUBLIC_APP_ENV \(MISMATCH\)/);
   });
 
   it("accepts NEXT_PUBLIC_SELF_SERVE_SIGN_UP as true or false only", () => {
-    expect(loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_SELF_SERVE_SIGN_UP: "true" }).NEXT_PUBLIC_SELF_SERVE_SIGN_UP).toBe("true");
-    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_SELF_SERVE_SIGN_UP: "yes" })).toThrow(/NEXT_PUBLIC_SELF_SERVE_SIGN_UP/);
+    expect(loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_SELF_SERVE_SIGN_UP: "true" }).NEXT_PUBLIC_SELF_SERVE_SIGN_UP).toBe(
+      "true",
+    );
+    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_SELF_SERVE_SIGN_UP: "yes" })).toThrow(
+      /NEXT_PUBLIC_SELF_SERVE_SIGN_UP/,
+    );
   });
 
   it("parses NEXT_PUBLIC_MFA_FACTORS as a list of known factors", () => {
-    expect(loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_MFA_FACTORS: "phone, totp" }).NEXT_PUBLIC_MFA_FACTORS).toEqual(["phone", "totp"]);
+    expect(loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_MFA_FACTORS: "phone, totp" }).NEXT_PUBLIC_MFA_FACTORS).toEqual([
+      "phone",
+      "totp",
+    ]);
     expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_MFA_FACTORS: "email" })).toThrow(/NEXT_PUBLIC_MFA_FACTORS/);
   });
 
   it("requires the Auth Emulator URL in local and refuses it elsewhere", () => {
     expect(loadWebEnv(LOCAL_ENV).NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL).toBe("http://127.0.0.1:9099");
-    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: undefined })).toThrow(/NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL \(REQUIRED\)/);
-    const remote = { ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099" };
+    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: undefined })).toThrow(
+      /NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL \(REQUIRED\)/,
+    );
+    const remote = {
+      ...REMOTE_ENV,
+      CORS_ALLOWED_ORIGINS: "",
+      NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099",
+    };
     expect(() => loadWebEnv(remote)).toThrow(/NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL \(FORBIDDEN\)/);
   });
 });

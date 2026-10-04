@@ -7,7 +7,10 @@ export type DeletedConversation = { readonly id: string; readonly tenantId: stri
 
 export type DeletedConversationStore = {
   /** Conversations with `deletedAt < before`, oldest first (a platform read across tenants). */
-  readonly listDeletedBefore: (input: { readonly before: string; readonly limit: number }) => Promise<DeletedConversation[]>;
+  readonly listDeletedBefore: (input: {
+    readonly before: string;
+    readonly limit: number;
+  }) => Promise<DeletedConversation[]>;
   /**
    * Hard-deletes the metadata after re-reading it in a transaction.
    * @returns `false` when the document is gone or no longer deleted before `before` (restored, raced).

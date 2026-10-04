@@ -35,7 +35,10 @@ describe("compareExperiments", () => {
   });
 
   it("keeps scorers only one experiment ran", () => {
-    const rows = compareExperiments(experiment([{ scorer: "x", mean: 0.5, baseline: 0.4 }]), experiment([{ scorer: "y", mean: 0.6, baseline: null }]));
+    const rows = compareExperiments(
+      experiment([{ scorer: "x", mean: 0.5, baseline: 0.4 }]),
+      experiment([{ scorer: "y", mean: 0.6, baseline: null }]),
+    );
     expect(rows).toEqual([
       { scorer: "x", a: 0.5, b: null, baseline: 0.4, outcome: "only-a" },
       { scorer: "y", a: null, b: 0.6, baseline: null, outcome: "only-b" },

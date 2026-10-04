@@ -48,7 +48,9 @@ describe("createContextMiddleware", () => {
     const store = new RequestContext<unknown>();
     const headers: Record<string, string> = {};
     const raw = new Request("http://mastra.internal/chat/assistant", { method: "POST", headers: memberHeaders });
-    await chat.handler({ req: { raw }, get: () => store, header: (name, value) => (headers[name] = value) }, () => Promise.resolve());
+    await chat.handler({ req: { raw }, get: () => store, header: (name, value) => (headers[name] = value) }, () =>
+      Promise.resolve(),
+    );
     expect(store.get(MASTRA_RESOURCE_ID_KEY)).toBe(`${TENANT}:member-uid`);
     expect(store.get(MASTRA_THREAD_ID_KEY)).toMatch(/^[A-Za-z0-9]{20}$/);
     expect(headers["x-conversation-id"]).toBe(store.get(MASTRA_THREAD_ID_KEY));
@@ -56,13 +58,25 @@ describe("createContextMiddleware", () => {
 
   describe("body cap of the chat instance (SP4 Task 0-2 concern 10)", () => {
     const chatWithCap = () => {
-      const access = createFakeAccessPort({ credentials: { "member-token": MEMBER }, memberships: [{ tenantId: TENANT, uid: "member-uid", permissions: ["core.chat.use"] }] });
-      return createContextMiddleware({ auth: new FirebaseMastraAuth({ access }), aiMode: "fake", path: "/chat/*", maxBodyBytes: 10 });
+      const access = createFakeAccessPort({
+        credentials: { "member-token": MEMBER },
+        memberships: [{ tenantId: TENANT, uid: "member-uid", permissions: ["core.chat.use"] }],
+      });
+      return createContextMiddleware({
+        auth: new FirebaseMastraAuth({ access }),
+        aiMode: "fake",
+        path: "/chat/*",
+        maxBodyBytes: 10,
+      });
     };
     const post = async (body: string, headers: Record<string, string>) => {
       const store = new RequestContext<unknown>();
       let nextCalled = false;
-      const raw = new Request("http://mastra.internal/chat/assistant", { method: "POST", headers: { ...memberHeaders, "content-type": "application/json", ...headers }, body });
+      const raw = new Request("http://mastra.internal/chat/assistant", {
+        method: "POST",
+        headers: { ...memberHeaders, "content-type": "application/json", ...headers },
+        body,
+      });
       const response = await chatWithCap().handler({ req: { raw }, get: () => store }, () => {
         nextCalled = true;
         return Promise.resolve();
@@ -97,7 +111,10 @@ describe("createContextMiddleware", () => {
     ]);
     expect(nextCalled).toBe(true);
     const read = readAgentContext(store);
-    expect(read).toMatchObject({ ok: true, data: { context: { tenantId: TENANT, organizationId: TENANT, requestId: REQUEST_ID, aiMode: "fake" } } });
+    expect(read).toMatchObject({
+      ok: true,
+      data: { context: { tenantId: TENANT, organizationId: TENANT, requestId: REQUEST_ID, aiMode: "fake" } },
+    });
     expect(store.get("permissions")).toEqual(["core.catalog.read", "core.chat.use"]);
     expect(store.get(MASTRA_RESOURCE_ID_KEY)).toBe(`${TENANT}:member-uid`);
   });
@@ -126,7 +143,10 @@ describe("createContextMiddleware", () => {
     };
 
     it("creates a conversation owned by the caller when a run names none, and returns its id", async () => {
-      const { store, sent, nextCalled } = await runWith("http://mastra.internal/api/agents/assistant/generate", memberHeaders);
+      const { store, sent, nextCalled } = await runWith(
+        "http://mastra.internal/api/agents/assistant/generate",
+        memberHeaders,
+      );
       expect(nextCalled).toBe(true);
       const created = store.get("conversationId");
       expect(created).toMatch(/^[A-Za-z0-9]{20}$/);
@@ -136,8 +156,13 @@ describe("createContextMiddleware", () => {
     });
 
     it("creates one for an MCP server call too, but never for approvals or memory reads", async () => {
-      expect((await runWith("http://mastra.internal/api/mcp/core/mcp", memberHeaders)).store.get(MASTRA_THREAD_ID_KEY)).toMatch(/^[A-Za-z0-9]{20}$/);
-      for (const url of ["http://mastra.internal/api/agents/assistant/approve-tool-call", "http://mastra.internal/api/memory/threads"]) {
+      expect(
+        (await runWith("http://mastra.internal/api/mcp/core/mcp", memberHeaders)).store.get(MASTRA_THREAD_ID_KEY),
+      ).toMatch(/^[A-Za-z0-9]{20}$/);
+      for (const url of [
+        "http://mastra.internal/api/agents/assistant/approve-tool-call",
+        "http://mastra.internal/api/memory/threads",
+      ]) {
         const { store, sent } = await runWith(url, memberHeaders);
         expect(store.get(MASTRA_THREAD_ID_KEY)).toBeUndefined();
         expect(sent).toEqual({});
@@ -145,20 +170,28 @@ describe("createContextMiddleware", () => {
     });
 
     it("keeps a forwarded conversation id and sends no header", async () => {
-      const { store, sent } = await runWith("http://mastra.internal/api/agents/assistant/stream", { ...memberHeaders, "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" });
+      const { store, sent } = await runWith("http://mastra.internal/api/agents/assistant/stream", {
+        ...memberHeaders,
+        "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV",
+      });
       expect(store.get(MASTRA_THREAD_ID_KEY)).toBe("Cv3sK2lPq0WnR5tYu3bV");
       expect(sent).toEqual({});
     });
 
     it("answers 400 for a malformed conversation id instead of running without memory", async () => {
-      const { response, nextCalled } = await runWith("http://mastra.internal/api/agents/assistant/generate", { ...memberHeaders, "x-conversation-id": "../other/thread" });
+      const { response, nextCalled } = await runWith("http://mastra.internal/api/agents/assistant/generate", {
+        ...memberHeaders,
+        "x-conversation-id": "../other/thread",
+      });
       expect(response?.status).toBe(400);
       expect(await response?.json()).toEqual({ error: "Invalid conversation id" });
       expect(nextCalled).toBe(false);
     });
 
     it("creates nothing for an unauthenticated run (Mastra answers 401)", async () => {
-      const { store, sent } = await runWith("http://mastra.internal/api/agents/assistant/generate", { "x-tenant-id": TENANT });
+      const { store, sent } = await runWith("http://mastra.internal/api/agents/assistant/generate", {
+        "x-tenant-id": TENANT,
+      });
       expect([...store.keys()]).toEqual([]);
       expect(sent).toEqual({});
     });
@@ -170,7 +203,11 @@ describe("createContextMiddleware", () => {
   });
 
   it("leaves the 401 path to Mastra's auth: no principal, no keys, no response", async () => {
-    const seed: [string, unknown][] = [["tenantId", TENANT], [AGENT_PRINCIPAL_KEY, MEMBER], [MASTRA_RESOURCE_ID_KEY, "x"]];
+    const seed: [string, unknown][] = [
+      ["tenantId", TENANT],
+      [AGENT_PRINCIPAL_KEY, MEMBER],
+      [MASTRA_RESOURCE_ID_KEY, "x"],
+    ];
     for (const headers of [{ "x-tenant-id": TENANT }, { authorization: "Bearer garbage", "x-tenant-id": TENANT }]) {
       const { store, nextCalled, response } = await run(headers, seed);
       expect(nextCalled).toBe(true);
@@ -190,7 +227,10 @@ describe("createContextMiddleware", () => {
     const failing = { ...access, resolveAccessContext: () => Promise.reject(new Error("readers down")) };
     const middleware = createContextMiddleware({ auth: new FirebaseMastraAuth({ access: failing }), aiMode: "fake" });
     const store = new RequestContext<unknown>();
-    const raw = new Request("http://mastra.internal/api/agents/ping/generate", { method: "POST", headers: memberHeaders });
+    const raw = new Request("http://mastra.internal/api/agents/ping/generate", {
+      method: "POST",
+      headers: memberHeaders,
+    });
     await middleware.handler({ req: { raw }, get: () => store }, () => Promise.resolve());
     expect([...store.keys()]).toEqual([]);
   });
@@ -199,7 +239,10 @@ describe("createContextMiddleware", () => {
     const { access, middleware } = setup();
     const auth = new FirebaseMastraAuth({ access });
     const shared = createContextMiddleware({ auth, aiMode: "fake" });
-    const raw = new Request("http://mastra.internal/api/agents/ping/generate", { method: "POST", headers: memberHeaders });
+    const raw = new Request("http://mastra.internal/api/agents/ping/generate", {
+      method: "POST",
+      headers: memberHeaders,
+    });
     await shared.handler({ req: { raw }, get: () => new RequestContext<unknown>() }, () => Promise.resolve());
     await auth.authenticateToken("member-token", raw);
     expect(access.verifyCalls).toHaveLength(1);
@@ -225,7 +268,11 @@ describe("createContextMiddleware", () => {
   describe("memory thread ownership", () => {
     const withOwner = async (lookup: ThreadOwnerLookup, url: string, extraHeaders: Record<string, string> = {}) => {
       const { access } = setup();
-      const middleware = createContextMiddleware({ auth: new FirebaseMastraAuth({ access }), aiMode: "fake", threadOwnerOf: lookup });
+      const middleware = createContextMiddleware({
+        auth: new FirebaseMastraAuth({ access }),
+        aiMode: "fake",
+        threadOwnerOf: lookup,
+      });
       const raw = new Request(url, { method: "POST", headers: { ...memberHeaders, ...extraHeaders } });
       let nextCalled = false;
       const response = await middleware.handler({ req: { raw }, get: () => new RequestContext<unknown>() }, () => {
@@ -238,24 +285,39 @@ describe("createContextMiddleware", () => {
     const ownResource = `${TENANT}:member-uid`;
 
     it("refuses with 403 a conversation that belongs to another resource, before the run", async () => {
-      const { response, nextCalled } = await withOwner(() => Promise.resolve("OtherTenant000000000:member-uid"), RUN_URL, { "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" });
+      const { response, nextCalled } = await withOwner(
+        () => Promise.resolve("OtherTenant000000000:member-uid"),
+        RUN_URL,
+        { "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" },
+      );
       expect(response?.status).toBe(403);
       expect(await response?.json()).toEqual({ error: "Forbidden" });
       expect(nextCalled).toBe(false);
     });
 
     it("checks a thread named in a memory route path too", async () => {
-      const { response } = await withOwner(() => Promise.resolve("OtherTenant000000000:member-uid"), "http://mastra.internal/api/memory/threads/Cv3sK2lPq0WnR5tYu3bV/messages");
+      const { response } = await withOwner(
+        () => Promise.resolve("OtherTenant000000000:member-uid"),
+        "http://mastra.internal/api/memory/threads/Cv3sK2lPq0WnR5tYu3bV/messages",
+      );
       expect(response?.status).toBe(403);
     });
 
     it("lets the owner and a new thread through", async () => {
-      expect((await withOwner(() => Promise.resolve(ownResource), RUN_URL, { "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" })).nextCalled).toBe(true);
-      expect((await withOwner(() => Promise.resolve(null), RUN_URL, { "x-conversation-id": "NewThread00000000000" })).nextCalled).toBe(true);
+      expect(
+        (await withOwner(() => Promise.resolve(ownResource), RUN_URL, { "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" }))
+          .nextCalled,
+      ).toBe(true);
+      expect(
+        (await withOwner(() => Promise.resolve(null), RUN_URL, { "x-conversation-id": "NewThread00000000000" }))
+          .nextCalled,
+      ).toBe(true);
     });
 
     it("fails closed with 503 when the owner cannot be read", async () => {
-      const { response, nextCalled } = await withOwner(() => Promise.reject(new Error("db down")), RUN_URL, { "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" });
+      const { response, nextCalled } = await withOwner(() => Promise.reject(new Error("db down")), RUN_URL, {
+        "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV",
+      });
       expect(response?.status).toBe(503);
       expect(nextCalled).toBe(false);
     });

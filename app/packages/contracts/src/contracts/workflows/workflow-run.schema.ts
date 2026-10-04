@@ -7,7 +7,17 @@ import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
 import { WorkflowIdSchema } from "./human-approval-resume.schema.ts";
 
 /** Mastra run statuses (`@mastra/core` 1.71) plus the in-flight ones. */
-export const WORKFLOW_RUN_STATUSES = ["pending", "running", "waiting", "suspended", "paused", "success", "failed", "canceled", "tripwire"] as const;
+export const WORKFLOW_RUN_STATUSES = [
+  "pending",
+  "running",
+  "waiting",
+  "suspended",
+  "paused",
+  "success",
+  "failed",
+  "canceled",
+  "tripwire",
+] as const;
 export const WorkflowRunStatusSchema = z.enum(WORKFLOW_RUN_STATUSES);
 export type WorkflowRunStatus = z.infer<typeof WorkflowRunStatusSchema>;
 
@@ -21,7 +31,9 @@ export type WorkflowRunFailureCode = z.infer<typeof WorkflowRunFailureCodeSchema
  * the error message, the guardrail's reason or a stack (they stay in logs and traces).
  */
 export const WorkflowRunFailureSchema = z.strictObject({
-  code: WorkflowRunFailureCodeSchema.meta(none("Why the run ended: a step failed, a guardrail stopped it, or it failed outside any step.")),
+  code: WorkflowRunFailureCodeSchema.meta(
+    none("Why the run ended: a step failed, a guardrail stopped it, or it failed outside any step."),
+  ),
   stepId: z.string().min(1).max(128).nullable().meta(none("Step that failed or was stopped, when known.")),
 });
 export type WorkflowRunFailure = z.infer<typeof WorkflowRunFailureSchema>;
@@ -36,7 +48,9 @@ export const WorkflowRunSchema = z.strictObject({
   scheduleId: z.string().min(1).nullable().meta(none("Schedule that started the run, if any.")),
   approvalRequestId: z.string().min(1).nullable().meta(none("Approval request a suspended run waits for, if any.")),
   // Optional: added after the first release of the view (additive, schemas rule); null when the run did not fail.
-  failure: WorkflowRunFailureSchema.nullable().optional().meta(none("Why a failed or stopped run ended; null otherwise.")),
+  failure: WorkflowRunFailureSchema.nullable()
+    .optional()
+    .meta(none("Why a failed or stopped run ended; null otherwise.")),
   createdAt: IsoDateTimeSchema.meta(none("When the run started (UTC).")),
   updatedAt: IsoDateTimeSchema.meta(none("When the run last changed (UTC).")),
 });
@@ -67,7 +81,9 @@ export const WorkflowRunContract = defineContract(WorkflowRunSchema, {
 });
 
 export const StartWorkflowRunInputSchema = z.strictObject({
-  inputData: z.record(z.string(), z.unknown()).meta(personal("Workflow input; validated by the workflow's own schema on the server.")),
+  inputData: z
+    .record(z.string(), z.unknown())
+    .meta(personal("Workflow input; validated by the workflow's own schema on the server.")),
 });
 export type StartWorkflowRunInput = z.infer<typeof StartWorkflowRunInputSchema>;
 

@@ -50,15 +50,26 @@ function SettingsGeneral({ context }: { context: AccessContext }) {
           eyebrow={t("eyebrow", { organization: organization.name })}
           title={t("title")}
           description={t("description")}
-          meta={organization.status === "suspended" ? <StatusPill tone="amber">{t("suspended")}</StatusPill> : undefined}
+          meta={
+            organization.status === "suspended" ? <StatusPill tone="amber">{t("suspended")}</StatusPill> : undefined
+          }
         />
       }
     >
       <div className="flex flex-col gap-6">
-        <SectionCard title={t("detailsTitle")} description={canUpdate ? t("detailsDescription") : t("readOnlyDescription")}>
-          {canUpdate ? <UpdateOrganizationForm organization={organization} /> : <OrganizationDetails organization={organization} />}
+        <SectionCard
+          title={t("detailsTitle")}
+          description={canUpdate ? t("detailsDescription") : t("readOnlyDescription")}
+        >
+          {canUpdate ? (
+            <UpdateOrganizationForm organization={organization} />
+          ) : (
+            <OrganizationDetails organization={organization} />
+          )}
         </SectionCard>
-        <p className="text-xs text-muted-foreground">{t("createdAt", { date: formatDateTime(organization.createdAt, "date") })}</p>
+        <p className="text-xs text-muted-foreground">
+          {t("createdAt", { date: formatDateTime(organization.createdAt, "date") })}
+        </p>
       </div>
     </SettingsPageFrame>
   );

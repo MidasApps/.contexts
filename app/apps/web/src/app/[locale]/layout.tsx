@@ -1,10 +1,10 @@
 import { isSupportedLocale, SUPPORTED_LOCALES } from "@core/i18n";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import { connection } from "next/server";
-import { Suspense, type ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
+import { type ReactNode, Suspense } from "react";
 import { WebClientApp } from "@/client/web-client-app";
 import "./globals.css";
 
@@ -22,10 +22,13 @@ export function generateStaticParams(): { locale: string }[] {
  * probes `new Function`. The page CSP has no 'unsafe-eval' (decision 0016) and browsers report the
  * blocked probe as a CSP violation even though Zod catches it.
  */
-const ZOD_JITLESS_SCRIPT = "globalThis.__zod_globalConfig=Object.assign(globalThis.__zod_globalConfig||{},{jitless:true});";
+const ZOD_JITLESS_SCRIPT =
+  "globalThis.__zod_globalConfig=Object.assign(globalThis.__zod_globalConfig||{},{jitless:true});";
 
 const directionOf = (locale: string): "ltr" | "rtl" => {
-  const info = (new Intl.Locale(locale) as Intl.Locale & { getTextInfo?: () => { direction?: string } }).getTextInfo?.();
+  const info = (
+    new Intl.Locale(locale) as Intl.Locale & { getTextInfo?: () => { direction?: string } }
+  ).getTextInfo?.();
   return info?.direction === "rtl" ? "rtl" : "ltr";
 };
 

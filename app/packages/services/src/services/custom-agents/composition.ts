@@ -1,11 +1,17 @@
 // Composition root of the custom agents context (decision 0046).
 import type { CustomAgent, CustomAgentId, CustomSkill, TenantId } from "@core/contracts";
 import type { AuditWriter } from "../audit/application/use-cases/record-audit.ts";
-import { createFirestoreOrganizationAdminStore, createFirestorePlanRepository } from "../platform/adapters/driven/firestore-console-stores.ts";
+import {
+  createFirestoreOrganizationAdminStore,
+  createFirestorePlanRepository,
+} from "../platform/adapters/driven/firestore-console-stores.ts";
 import type { Clock } from "../shared/clock/clock.ts";
 import type { FirebaseAdmin } from "../shared/firebase/firebase-admin.ts";
 import { createFirestoreUnitOfWork, type UnitOfWork } from "../shared/firestore/unit-of-work.ts";
-import { createFirestoreCustomAgentRepository, createFirestoreCustomSkillRepository } from "./adapters/driven/firestore-custom-repositories.ts";
+import {
+  createFirestoreCustomAgentRepository,
+  createFirestoreCustomSkillRepository,
+} from "./adapters/driven/firestore-custom-repositories.ts";
 import { createPlanCustomLimitsReader } from "./adapters/driven/plan-custom-limits.ts";
 import type { CustomAgentsDeps } from "./application/custom-agents-deps.ts";
 import {
@@ -44,7 +50,10 @@ import {
  * context of the run. `getAgent` answers an agent in any enabled state; the runtime decides.
  */
 export type CustomAgentsRuntimeReads = {
-  readonly getAgent: (input: { readonly tenantId: TenantId; readonly agentId: CustomAgentId }) => Promise<CustomAgent | null>;
+  readonly getAgent: (input: {
+    readonly tenantId: TenantId;
+    readonly agentId: CustomAgentId;
+  }) => Promise<CustomAgent | null>;
   readonly listAgents: (input: { readonly tenantId: TenantId }) => Promise<readonly CustomAgent[]>;
   readonly listSkills: (input: { readonly tenantId: TenantId }) => Promise<readonly CustomSkill[]>;
 };
@@ -98,7 +107,10 @@ export const createFirebaseCustomAgentsServices = (args: {
   return createCustomAgentsServices({
     agents: createFirestoreCustomAgentRepository({ firestore }),
     skills: createFirestoreCustomSkillRepository({ firestore }),
-    limits: createPlanCustomLimitsReader({ organizations: createFirestoreOrganizationAdminStore({ firestore }), plans: createFirestorePlanRepository({ firestore }) }),
+    limits: createPlanCustomLimitsReader({
+      organizations: createFirestoreOrganizationAdminStore({ firestore }),
+      plans: createFirestorePlanRepository({ firestore }),
+    }),
     audit: args.audit,
     unitOfWork: args.unitOfWork ?? createFirestoreUnitOfWork({ firestore }),
     clock: args.clock,

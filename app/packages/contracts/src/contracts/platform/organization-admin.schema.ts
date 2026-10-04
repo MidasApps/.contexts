@@ -2,8 +2,8 @@ import { z } from "zod";
 import { defineContract } from "../contract.ts";
 import { EXAMPLE_IDS } from "../example-values.ts";
 import { none } from "../field-docs.ts";
-import { NodeNameSchema, OrganizationStatusSchema } from "../tenancy/organization.schema.ts";
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
+import { NodeNameSchema, OrganizationStatusSchema } from "../tenancy/organization.schema.ts";
 import { PlanIdSchema } from "./plan.schema.ts";
 
 const cap = (description: string) => z.int().nonnegative().meta(none(description));
@@ -78,7 +78,9 @@ export const UpdateOrganizationAdminInputSchema = z
     planId: PlanIdSchema.nullable().optional().meta(none("Plan to assign; null removes it (platform default caps).")),
     status: OrganizationStatusSchema.optional().meta(none("`active` or `suspended`.")),
   })
-  .refine((input) => input.planId !== undefined || input.status !== undefined, { error: "Change the plan, the status or both." });
+  .refine((input) => input.planId !== undefined || input.status !== undefined, {
+    error: "Change the plan, the status or both.",
+  });
 export type UpdateOrganizationAdminInput = z.infer<typeof UpdateOrganizationAdminInputSchema>;
 
 export const UpdateOrganizationAdminInputContract = defineContract(UpdateOrganizationAdminInputSchema, {

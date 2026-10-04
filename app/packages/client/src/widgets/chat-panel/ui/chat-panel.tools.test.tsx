@@ -2,7 +2,11 @@ import { act, screen, waitFor, within } from "@testing-library/react";
 import type { UIMessage, UIMessageChunk } from "ai";
 import { describe, expect, it } from "vitest";
 import { parseUiSubmission } from "#/entities/message/index.ts";
-import { CreateTestNoteContract, NOTE_FORM_UI, TEST_NOTE_MESSAGES } from "#/features/generative-ui/testing/note-contract.fixture.ts";
+import {
+  CreateTestNoteContract,
+  NOTE_FORM_UI,
+  TEST_NOTE_MESSAGES,
+} from "#/features/generative-ui/testing/note-contract.fixture.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { renderWithClient } from "#/shared/testing/render-client.tsx";
@@ -35,17 +39,39 @@ const streamAt = async (transport: FakeChatTransport, index: number): Promise<Fa
 const APPROVAL_REQUEST: UIMessageChunk[] = [
   { type: "start", messageId: "a-1" },
   { type: "tool-input-start", toolCallId: "call-1", toolName: "agent-action" },
-  { type: "tool-input-available", toolCallId: "call-1", toolName: "agent-action", input: { prompt: 'confirm project named "Launch"' } },
+  {
+    type: "tool-input-available",
+    toolCallId: "call-1",
+    toolName: "agent-action",
+    input: { prompt: 'confirm project named "Launch"' },
+  },
   { type: "tool-approval-request", approvalId: APPROVAL_ID, toolCallId: "call-1" },
-  { type: "data-tool-call-approval", id: "call-1", data: { runId: "run-1", toolCallId: "call-1", toolName: "command_tenancy_CreateProjectInput", args: { name: "Launch" } } },
+  {
+    type: "data-tool-call-approval",
+    id: "call-1",
+    data: {
+      runId: "run-1",
+      toolCallId: "call-1",
+      toolName: "command_tenancy_CreateProjectInput",
+      args: { name: "Launch" },
+    },
+  },
   {
     type: "data-tool-preview",
     id: "call-1",
-    data: { toolCallId: "call-1", toolName: "command_tenancy_CreateProjectInput", toolId: "command.tenancy.CreateProjectInput", permission: "core.project.create", summary: "Criar projeto Launch", preview: { before: null, after: { name: "Launch" } } },
+    data: {
+      toolCallId: "call-1",
+      toolName: "command_tenancy_CreateProjectInput",
+      toolId: "command.tenancy.CreateProjectInput",
+      permission: "core.project.create",
+      summary: "Criar projeto Launch",
+      preview: { before: null, after: { name: "Launch" } },
+    },
   },
 ];
 
-const approvalPartOf = (stream: FakeStream): unknown => (stream.messages.at(-1) as UIMessage).parts.find((part) => part.type === "tool-agent-action");
+const approvalPartOf = (stream: FakeStream): unknown =>
+  (stream.messages.at(-1) as UIMessage).parts.find((part) => part.type === "tool-agent-action");
 
 const askForProject = async (context: ReturnType<typeof setup>): Promise<void> => {
   await context.user.type(context.field(), "Crie o projeto Launch{Enter}");
@@ -66,14 +92,20 @@ describe("ChatPanel — approvals and generative UI", () => {
     expect(within(diff).getByRole("row", { name: /name/ }).textContent).toContain("Launch");
     expect(within(card).getByText("Criar projetos")).toBeTruthy();
     expect(screen.getByRole("button", { name: /Delegado para Agente de ações/ })).toBeTruthy();
-    await waitFor(() => expect(screen.getAllByRole("status").some((node) => node.textContent === "Aguardando sua aprovação.")).toBe(true));
+    await waitFor(() =>
+      expect(screen.getAllByRole("status").some((node) => node.textContent === "Aguardando sua aprovação.")).toBe(true),
+    );
     expect(screen.queryByRole("button", { name: "Gerar novamente" })).toBeNull();
     await expectNoAxeViolations(context.container);
 
     await context.user.click(within(card).getByRole("button", { name: "Aprovar" }));
     const continuation = await streamAt(context.transport, 1);
     expect(continuation.trigger).toBe("submit-message");
-    expect(approvalPartOf(continuation)).toMatchObject({ toolCallId: "call-1", state: "approval-responded", approval: { id: APPROVAL_ID, approved: true } });
+    expect(approvalPartOf(continuation)).toMatchObject({
+      toolCallId: "call-1",
+      state: "approval-responded",
+      approval: { id: APPROVAL_ID, approved: true },
+    });
     expect(await within(card).findByText("Aprovado. Executando…")).toBeTruthy();
 
     act(() => {
@@ -101,10 +133,17 @@ describe("ChatPanel — approvals and generative UI", () => {
     await context.user.type(within(card).getByRole("textbox", { name: "Motivo da recusa (opcional)" }), "Nome errado");
     await context.user.click(within(card).getByRole("button", { name: "Confirmar recusa" }));
     const continuation = await streamAt(context.transport, 1);
-    expect(approvalPartOf(continuation)).toMatchObject({ state: "approval-responded", approval: { id: APPROVAL_ID, approved: false, reason: "Nome errado" } });
+    expect(approvalPartOf(continuation)).toMatchObject({
+      state: "approval-responded",
+      approval: { id: APPROVAL_ID, approved: false, reason: "Nome errado" },
+    });
     expect(await within(card).findByText("Recusado: Nome errado")).toBeTruthy();
     act(() => {
-      continuation.emit({ type: "start", messageId: "a-1" }, { type: "tool-output-denied", toolCallId: "call-1" }, { type: "finish" });
+      continuation.emit(
+        { type: "start", messageId: "a-1" },
+        { type: "tool-output-denied", toolCallId: "call-1" },
+        { type: "finish" },
+      );
       continuation.close();
     });
     await waitFor(() => expect(within(card).getByText("Recusado: Nome errado")).toBeTruthy());
@@ -117,8 +156,22 @@ describe("ChatPanel — approvals and generative UI", () => {
     act(() => {
       stream.emit(
         { type: "start", messageId: "a-1" },
-        { type: "tool-input-available", toolCallId: "call-1", toolName: "agent-data", input: { prompt: "create a note" } },
-        { type: "tool-output-available", toolCallId: "call-1", output: { text: "Form shown.", subAgentToolResults: [{ toolName: "catalog_renderForm", toolCallId: "sub-1", args: {}, result: { ui: NOTE_FORM_UI } }] } },
+        {
+          type: "tool-input-available",
+          toolCallId: "call-1",
+          toolName: "agent-data",
+          input: { prompt: "create a note" },
+        },
+        {
+          type: "tool-output-available",
+          toolCallId: "call-1",
+          output: {
+            text: "Form shown.",
+            subAgentToolResults: [
+              { toolName: "catalog_renderForm", toolCallId: "sub-1", args: {}, result: { ui: NOTE_FORM_UI } },
+            ],
+          },
+        },
         { type: "finish" },
       );
       stream.close();
@@ -131,7 +184,13 @@ describe("ChatPanel — approvals and generative UI", () => {
     const sent = next.messages.at(-1) as UIMessage;
     expect(sent.role).toBe("user");
     const text = sent.parts[0]?.type === "text" ? sent.parts[0].text : "";
-    expect(parseUiSubmission(text)).toEqual({ kind: "schema-form", commandId: "testnotes.CreateNoteCommand", contractId: "testnotes.Note", mode: "create", values: { title: "Kickoff" } });
+    expect(parseUiSubmission(text)).toEqual({
+      kind: "schema-form",
+      commandId: "testnotes.CreateNoteCommand",
+      contractId: "testnotes.Note",
+      mode: "create",
+      values: { title: "Kickoff" },
+    });
     expect(await screen.findByText("Formulário enviado: testnotes.CreateNoteCommand")).toBeTruthy();
     expect(screen.queryByRole("form", { name: "Formulário: testnotes.CreateNoteCommand" })).toBeNull();
   });
@@ -144,9 +203,22 @@ describe("ChatPanel — approvals and generative UI", () => {
       stream.emit(
         { type: "start", messageId: "a-1" },
         { type: "tool-input-available", toolCallId: "call-1", toolName: "module_fancyWidget", input: {} },
-        { type: "tool-output-available", toolCallId: "call-1", output: { ui: { component: "fancy-widget", props: { html: "<script>1</script>" } } } },
-        { type: "tool-input-available", toolCallId: "call-2", toolName: "command_example_ArchiveNoteCommand", input: { noteId: "n-1" } },
-        { type: "tool-output-available", toolCallId: "call-2", output: { status: "pending-approval", approvalId: "Ap3rQ9vLr3TnB7pWc1aZ" } },
+        {
+          type: "tool-output-available",
+          toolCallId: "call-1",
+          output: { ui: { component: "fancy-widget", props: { html: "<script>1</script>" } } },
+        },
+        {
+          type: "tool-input-available",
+          toolCallId: "call-2",
+          toolName: "command_example_ArchiveNoteCommand",
+          input: { noteId: "n-1" },
+        },
+        {
+          type: "tool-output-available",
+          toolCallId: "call-2",
+          output: { status: "pending-approval", approvalId: "Ap3rQ9vLr3TnB7pWc1aZ" },
+        },
         { type: "finish" },
       );
       stream.close();
@@ -154,7 +226,9 @@ describe("ChatPanel — approvals and generative UI", () => {
     expect(await screen.findByRole("button", { name: /Ferramenta: module_fancyWidget/ })).toBeTruthy();
     expect(context.container.querySelector("script")).toBeNull();
     const pending = await screen.findByRole("region", { name: "Aguardando aprovação de outra pessoa" });
-    expect(within(pending).getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals/Ap3rQ9vLr3TnB7pWc1aZ`);
+    expect(within(pending).getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe(
+      `/o/${IDS.organization}/settings/approvals/Ap3rQ9vLr3TnB7pWc1aZ`,
+    );
     await expectNoAxeViolations(context.container);
   });
 });

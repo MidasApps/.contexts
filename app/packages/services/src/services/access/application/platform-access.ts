@@ -12,7 +12,8 @@ export type PlatformAccess =
  * checked by the callers after the permission, so the UI can ask for it.
  */
 export const loadPlatformAccess = async (principal: Principal, deps: AccessDeps): Promise<PlatformAccess> => {
-  if (principal.type !== "user" || principal.impersonation !== undefined) return { ok: false, reason: "PERMISSION_NOT_GRANTED" };
+  if (principal.type !== "user" || principal.impersonation !== undefined)
+    return { ok: false, reason: "PERMISSION_NOT_GRANTED" };
   const profile = await deps.readers.principals.getUser(principal.uid);
   if (profile?.status !== "active") return { ok: false, reason: "PRINCIPAL_INACTIVE" };
   const staff = await deps.readers.principals.getPlatformStaff(principal.uid);

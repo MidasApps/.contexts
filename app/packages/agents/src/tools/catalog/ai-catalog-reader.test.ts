@@ -17,7 +17,9 @@ describe("createAiCatalogReader.list", () => {
     const ids = reader.list({ permissions: withoutCatalogRead, limit: 50 }).entities.map((entity) => entity.id);
     expect(ids).toEqual(["example.CreateNoteCommand", "example.Note"]);
     expect(reader.describe({ id: "tenancy.Organization", permissions: withoutCatalogRead })).toBeUndefined();
-    expect(reader.describe({ id: "tenancy.Organization", permissions: new Set(["core.catalog.read"]) })?.id).toBe("tenancy.Organization");
+    expect(reader.describe({ id: "tenancy.Organization", permissions: new Set(["core.catalog.read"]) })?.id).toBe(
+      "tenancy.Organization",
+    );
   });
 
   it("never describes sensitive fields or values of a contract without a permission", () => {
@@ -28,12 +30,20 @@ describe("createAiCatalogReader.list", () => {
   });
 
   it("filters by kind and by a case-insensitive query over id, name and description", () => {
-    expect(reader.list({ permissions: MEMBER, kind: "command", limit: 50 }).entities.map((entity) => entity.id)).toEqual(["example.CreateNoteCommand"]);
-    expect(reader.list({ permissions: MEMBER, query: "SHORT note", limit: 50 }).entities.map((entity) => entity.id)).toEqual(["example.Note"]);
+    expect(
+      reader.list({ permissions: MEMBER, kind: "command", limit: 50 }).entities.map((entity) => entity.id),
+    ).toEqual(["example.CreateNoteCommand"]);
+    expect(
+      reader.list({ permissions: MEMBER, query: "SHORT note", limit: 50 }).entities.map((entity) => entity.id),
+    ).toEqual(["example.Note"]);
   });
 
   it("caps the page and says it was truncated", () => {
-    expect(reader.list({ permissions: MEMBER, limit: 1 })).toMatchObject({ total: 3, truncated: true, entities: [{ id: "example.CreateNoteCommand" }] });
+    expect(reader.list({ permissions: MEMBER, limit: 1 })).toMatchObject({
+      total: 3,
+      truncated: true,
+      entities: [{ id: "example.CreateNoteCommand" }],
+    });
   });
 });
 
@@ -41,7 +51,12 @@ describe("createAiCatalogReader.describe", () => {
   it("describes personal fields but redacts their examples, and never lists sensitive fields", () => {
     const note = reader.describe({ id: "example.Note", permissions: MEMBER });
     expect(note?.fields.map((field) => field.name)).toEqual(["id", "text", "authorId"]);
-    expect(note?.fields.find((field) => field.name === "text")).toEqual({ name: "text", description: "Note body.", pii: "personal", required: true });
+    expect(note?.fields.find((field) => field.name === "text")).toEqual({
+      name: "text",
+      description: "Note body.",
+      pii: "personal",
+      required: true,
+    });
     expect(note?.fields.find((field) => field.name === "authorId")?.ui).toEqual({ widget: "hidden" });
     expect(note?.examples).toEqual([{ id: "Xk2mQ9vLr3TnB7pWc1aZ", text: REDACTED, authorId: REDACTED }]);
     expect(JSON.stringify(note)).not.toContain("secretToken");
@@ -51,7 +66,9 @@ describe("createAiCatalogReader.describe", () => {
   it("returns undefined for a hidden or unknown contract", () => {
     expect(reader.describe({ id: "billing.Invoice", permissions: MEMBER })).toBeUndefined();
     expect(reader.describe({ id: "example.Missing", permissions: MEMBER })).toBeUndefined();
-    expect(reader.describe({ id: "billing.Invoice", permissions: new Set(["billing.invoice.read"]) })?.id).toBe("billing.Invoice");
+    expect(reader.describe({ id: "billing.Invoice", permissions: new Set(["billing.invoice.read"]) })?.id).toBe(
+      "billing.Invoice",
+    );
   });
 
   it("refuses a catalog that does not match the expected shape", () => {

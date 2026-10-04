@@ -61,12 +61,16 @@ describe("lockfileVersions", () => {
 
 describe("findPinDrift", () => {
   it("passes when every shared package resolves to a version the workspace lockfile has", () => {
-    const output = outputLock("  '@mastra/core@1.71.0':\n    resolution: {integrity: x}\n\n  zod@4.6.5:\n    resolution: {integrity: y}\n\n  left-pad@1.3.0:\n    resolution: {integrity: z}\n");
+    const output = outputLock(
+      "  '@mastra/core@1.71.0':\n    resolution: {integrity: x}\n\n  zod@4.6.5:\n    resolution: {integrity: y}\n\n  left-pad@1.3.0:\n    resolution: {integrity: z}\n",
+    );
     expect(findPinDrift({ workspaceLock: WORKSPACE_LOCK, outputLock: output })).toEqual([]);
   });
 
   it("reports a shared package the nested install resolved differently", () => {
-    const output = outputLock("  '@mastra/core@1.72.0':\n    resolution: {integrity: x}\n\n  axios@1.18.1:\n    resolution: {integrity: y}\n");
+    const output = outputLock(
+      "  '@mastra/core@1.72.0':\n    resolution: {integrity: x}\n\n  axios@1.18.1:\n    resolution: {integrity: y}\n",
+    );
     expect(findPinDrift({ workspaceLock: WORKSPACE_LOCK, outputLock: output })).toEqual([
       { name: "@mastra/core", output: ["1.72.0"], workspace: ["1.71.0"] },
       { name: "axios", output: ["1.18.1"], workspace: ["1.18.0"] },
@@ -74,7 +78,9 @@ describe("findPinDrift", () => {
   });
 
   it("ignores the workspace tarballs the deployer packs (file: specifiers)", () => {
-    const output = outputLock("  '@core/agents@file:workspace-module/core-agents-0.0.0.tgz':\n    resolution: {tarball: file:x}\n");
+    const output = outputLock(
+      "  '@core/agents@file:workspace-module/core-agents-0.0.0.tgz':\n    resolution: {tarball: file:x}\n",
+    );
     expect(findPinDrift({ workspaceLock: WORKSPACE_LOCK, outputLock: output })).toEqual([]);
   });
 });

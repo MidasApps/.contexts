@@ -25,7 +25,10 @@ export type SessionRepository = {
   readonly listOpen: (args: { uid: UserId; page: PageRequest }) => Promise<Page<SessionRecord>>;
   readonly touch: (args: { id: SessionId; lastSeenAt: string }) => Promise<void>;
   /** Marks (or clears, with `null`) the impersonation session a web session is in (decision 0047). */
-  readonly setImpersonation: (args: { id: SessionId; impersonationSessionId: ImpersonationSessionId | null }) => Promise<void>;
+  readonly setImpersonation: (args: {
+    id: SessionId;
+    impersonationSessionId: ImpersonationSessionId | null;
+  }) => Promise<void>;
   readonly rotate: (tx: Transaction, rotation: SessionRotation) => void;
   readonly revoke: (tx: Transaction | undefined, args: { id: SessionId; revokedAt: string }) => Promise<void>;
   /** Marks every open session of the user revoked. @returns how many. */

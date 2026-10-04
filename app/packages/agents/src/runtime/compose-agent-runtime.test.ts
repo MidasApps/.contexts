@@ -1,9 +1,9 @@
-import { createSkill } from "@mastra/core/skills";
+import { ConnectorSchema } from "@core/contracts";
 import { Mastra } from "@mastra/core";
 import { RequestContext } from "@mastra/core/request-context";
+import { createSkill } from "@mastra/core/skills";
 import { InMemoryStore } from "@mastra/core/storage";
 import type { MastraVector } from "@mastra/core/vector";
-import { ConnectorSchema } from "@core/contracts";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { PING_AGENT_ID } from "../agents/ping-agent.ts";
@@ -31,8 +31,13 @@ const ENV = {
   GOOGLE_AI_BACKEND: "ai-studio",
 } as const;
 
-const compose = (modules: readonly AgentModule[] = [], permissions: readonly string[] = ["core.chat.use", "core.catalog.read"]) => {
-  const access = createFakeAccessPort({ memberships: [{ tenantId: "Jd8sK2lPq0WnR5tYu3bV", uid: "member-uid", permissions }] });
+const compose = (
+  modules: readonly AgentModule[] = [],
+  permissions: readonly string[] = ["core.chat.use", "core.catalog.read"],
+) => {
+  const access = createFakeAccessPort({
+    memberships: [{ tenantId: "Jd8sK2lPq0WnR5tYu3bV", uid: "member-uid", permissions }],
+  });
   return composeAgentRuntime({
     env: ENV,
     ports: createFakeRuntimePorts({ access }),
@@ -57,7 +62,14 @@ const echoTool = (id: string) =>
 describe("composeAgentRuntime", () => {
   it("returns the entry agents, the subagents, the auth provider, both middlewares and the core tools", () => {
     const runtime = compose();
-    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "assistant", "assistant-chat", "conversation-summarizer", "custom-agent", "custom-agent-chat"]);
+    expect(Object.keys(runtime.agents)).toEqual([
+      PING_AGENT_ID,
+      "assistant",
+      "assistant-chat",
+      "conversation-summarizer",
+      "custom-agent",
+      "custom-agent-chat",
+    ]);
     expect(runtime.chat.chatAgents).toEqual({ assistant: "assistant-chat" });
     expect(Object.keys(runtime.subagents)).toEqual(["knowledge", "data", "action", "web"]);
     expect(runtime.auth).toBeInstanceOf(FirebaseMastraAuth);
@@ -69,8 +81,20 @@ describe("composeAgentRuntime", () => {
       { workflowId: "eval-export", cron: "0 5 * * *" },
     ]);
     expect(runtime.workflowCatalog.get("usage-report")).toMatchObject({ schedulable: true, startable: false });
-    expect(runtime.workflowCatalog.get("approval-demo")).toEqual({ id: "approval-demo", startable: true, schedulable: false });
-    expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*", "/chat/*", "/workflow-runs/*", "/tenant-schedules/*", "/tenant-catalog/*", "/voice/*"]);
+    expect(runtime.workflowCatalog.get("approval-demo")).toEqual({
+      id: "approval-demo",
+      startable: true,
+      schedulable: false,
+    });
+    expect(runtime.middleware.map((entry) => entry.path)).toEqual([
+      "/api/*",
+      "/api/*",
+      "/chat/*",
+      "/workflow-runs/*",
+      "/tenant-schedules/*",
+      "/tenant-catalog/*",
+      "/voice/*",
+    ]);
     expect(runtime.tools.ids()).toEqual([
       "catalog.listEntities",
       "catalog.describeEntity",
@@ -83,7 +107,12 @@ describe("composeAgentRuntime", () => {
     ]);
     expect(Object.keys(runtime.mcpServers)).toEqual(["core"]);
     expect(runtime).toMatchObject({ vectors: {} });
-    expect(Object.keys(runtime.scorers)).toEqual(["tool-routing", "citations-grounded", "tenant-leak", "format-compliance"]);
+    expect(Object.keys(runtime.scorers)).toEqual([
+      "tool-routing",
+      "citations-grounded",
+      "tenant-leak",
+      "format-compliance",
+    ]);
     expect(runtime.apiRoutes.map((route) => `${route.method} ${route.path}`)).toEqual([
       "POST /voice/transcriptions",
       "POST /voice/speech",
@@ -136,7 +165,15 @@ describe("composeAgentRuntime", () => {
       "POST /tenant-catalog/custom-agents/invalidate",
     ]);
     expect(runtime.voice?.capabilities).toEqual({ transcription: true, speech: true, realtime: false });
-    expect(Object.keys(runtime.workflows).sort()).toEqual(["approval-demo", "approval-expiry-sweep", "catalog-reindex", "conversation-purge", "eval-export", "knowledge-ingest", "usage-report"]);
+    expect(Object.keys(runtime.workflows).sort()).toEqual([
+      "approval-demo",
+      "approval-expiry-sweep",
+      "catalog-reindex",
+      "conversation-purge",
+      "eval-export",
+      "knowledge-ingest",
+      "usage-report",
+    ]);
   });
 
   it("registers module tools and agents", () => {
@@ -155,7 +192,9 @@ describe("composeAgentRuntime", () => {
 
   it("runs the ping agent on the fake model with the typed context", async () => {
     const agent = compose().agents[PING_AGENT_ID];
-    const result = await agent?.generate("ping", { requestContext: new RequestContext<unknown>(buildAgentContextEntries()) });
+    const result = await agent?.generate("ping", {
+      requestContext: new RequestContext<unknown>(buildAgentContextEntries()),
+    });
     expect(result?.text.length).toBeGreaterThan(0);
   });
 
@@ -167,10 +206,15 @@ describe("composeAgentRuntime", () => {
     for (const agent of entryAgents) {
       const input = (await agent.listConfiguredInputProcessors()).map((processor) => processor.id);
       const output = (await agent.listConfiguredOutputProcessors()).map((processor) => processor.id);
-      expect(input).toEqual(expect.arrayContaining([TENANT_BUDGET_GUARD_ID, "prompt-injection-detector", "moderation", "token-limiter"]));
+      expect(input).toEqual(
+        expect.arrayContaining([TENANT_BUDGET_GUARD_ID, "prompt-injection-detector", "moderation", "token-limiter"]),
+      );
       expect(output).toEqual(expect.arrayContaining(["regex-filter"]));
     }
-    const delegated = [...Object.values(runtime.subagents), ...Object.values(runtime.agents).filter((agent) => agent.id === "conversation-summarizer")];
+    const delegated = [
+      ...Object.values(runtime.subagents),
+      ...Object.values(runtime.agents).filter((agent) => agent.id === "conversation-summarizer"),
+    ];
     for (const agent of delegated) {
       const input = (await agent.listConfiguredInputProcessors()).map((processor) => processor.id);
       expect(input).toEqual(expect.arrayContaining([TENANT_BUDGET_GUARD_ID, "token-limiter"]));
@@ -202,27 +246,54 @@ describe("composeAgentRuntime", () => {
 
   it("bills the agent and its guardrail detectors in the usage ledger", async () => {
     const usage = createFakeUsagePort();
-    const access = createFakeAccessPort({ memberships: [{ tenantId: "Jd8sK2lPq0WnR5tYu3bV", uid: "member-uid", permissions: ["core.chat.use"] }] });
-    const runtime = composeAgentRuntime({ env: ENV, ports: createFakeRuntimePorts({ access, usage }), modules: [], storage: new InMemoryStore(), serviceName: "mastra", aiCatalog: FIXTURE_AI_CATALOG });
-    const mastra = new Mastra({ agents: runtime.agents, storage: runtime.storage, observability: runtime.observability });
-    await mastra.getAgent(PING_AGENT_ID).generate("ping", { requestContext: new RequestContext<unknown>(buildAgentContextEntries()) });
-    await vi.waitFor(() => expect(usage.calls.map((call) => call.agentId)).toEqual(expect.arrayContaining([PING_AGENT_ID, "prompt-injection-detector", "moderation"])), { timeout: 5000 });
+    const access = createFakeAccessPort({
+      memberships: [{ tenantId: "Jd8sK2lPq0WnR5tYu3bV", uid: "member-uid", permissions: ["core.chat.use"] }],
+    });
+    const runtime = composeAgentRuntime({
+      env: ENV,
+      ports: createFakeRuntimePorts({ access, usage }),
+      modules: [],
+      storage: new InMemoryStore(),
+      serviceName: "mastra",
+      aiCatalog: FIXTURE_AI_CATALOG,
+    });
+    const mastra = new Mastra({
+      agents: runtime.agents,
+      storage: runtime.storage,
+      observability: runtime.observability,
+    });
+    await mastra
+      .getAgent(PING_AGENT_ID)
+      .generate("ping", { requestContext: new RequestContext<unknown>(buildAgentContextEntries()) });
+    await vi.waitFor(
+      () =>
+        expect(usage.calls.map((call) => call.agentId)).toEqual(
+          expect.arrayContaining([PING_AGENT_ID, "prompt-injection-detector", "moderation"]),
+        ),
+      { timeout: 5000 },
+    );
     expect(new Set(usage.calls.map((call) => call.tenantId))).toEqual(new Set(["Jd8sK2lPq0WnR5tYu3bV"]));
   });
 
   it("refuses a run without the typed context before the model runs", async () => {
     const agent = compose().agents[PING_AGENT_ID];
-    await expect(agent?.generate("ping", { requestContext: new RequestContext<unknown>() })).rejects.toThrow(/Request context validation failed/);
+    await expect(agent?.generate("ping", { requestContext: new RequestContext<unknown>() })).rejects.toThrow(
+      /Request context validation failed/,
+    );
   });
 
   it("caps tool calls at the agent ceiling and the context permissions", async () => {
     const agent = compose().agents[PING_AGENT_ID];
     const directive = '[[fake:tool-call {"toolName":"catalog.listEntities","input":{"limit":5}}]]';
     const allowed = await agent?.generate(directive, {
-      requestContext: new RequestContext<unknown>(buildAgentContextEntries({ permissions: ["core.chat.use", "core.catalog.read"] })),
+      requestContext: new RequestContext<unknown>(
+        buildAgentContextEntries({ permissions: ["core.chat.use", "core.catalog.read"] }),
+      ),
     });
     expect(JSON.stringify(allowed?.toolResults)).toContain("tenancy.Organization");
-    const denied = await agent?.generate(directive, { requestContext: new RequestContext<unknown>(buildAgentContextEntries({ permissions: ["core.chat.use"] })) });
+    const denied = await agent?.generate(directive, {
+      requestContext: new RequestContext<unknown>(buildAgentContextEntries({ permissions: ["core.chat.use"] })),
+    });
     // A denied call reaches the model as an error result, never as data.
     const deniedContent = JSON.stringify(denied?.steps.map((step) => step.content));
     expect(deniedContent).toContain("not allowed");
@@ -234,17 +305,36 @@ describe("defineAgentModule", () => {
   it("rejects reserved ids, unprefixed capabilities and unknown manifest refs", () => {
     expect(() => defineAgentModule({ id: "core" })).toThrow(AgentModuleError);
     expect(() => defineAgentModule({ id: "sample", tools: [echoTool("other.echo")] })).toThrow(/UNPREFIXED_CAPABILITY/);
-    expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample", tools: [{ id: "sample.missing" }] } })).toThrow(/UNKNOWN_CAPABILITY_REF/);
-    expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample" }, tools: [echoTool("sample.echo")] })).toThrow(/MANIFEST_MISMATCH/);
-    expect(defineAgentModule({ id: "sample", manifest: { id: "sample", tools: [{ id: "sample.echo" }] }, tools: [echoTool("sample.echo")] }).id).toBe("sample");
+    expect(() =>
+      defineAgentModule({ id: "sample", manifest: { id: "sample", tools: [{ id: "sample.missing" }] } }),
+    ).toThrow(/UNKNOWN_CAPABILITY_REF/);
+    expect(() =>
+      defineAgentModule({ id: "sample", manifest: { id: "sample" }, tools: [echoTool("sample.echo")] }),
+    ).toThrow(/MANIFEST_MISMATCH/);
+    expect(
+      defineAgentModule({
+        id: "sample",
+        manifest: { id: "sample", tools: [{ id: "sample.echo" }] },
+        tools: [echoTool("sample.echo")],
+      }).id,
+    ).toBe("sample");
   });
 
   it("requires an implementation for every skill and workflow ref of the manifest", () => {
     const skill = createSkill({ name: "sample-notes", description: "Sample skill.", instructions: "Do it." });
-    expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample", skills: [{ id: "sample-notes" }] } })).toThrow(/UNKNOWN_CAPABILITY_REF/);
-    expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample", workflows: [{ id: "sample-flow" }] } })).toThrow(/UNKNOWN_CAPABILITY_REF/);
-    expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample" }, skills: [skill] })).toThrow(/MANIFEST_MISMATCH/);
-    expect(defineAgentModule({ id: "sample", manifest: { id: "sample", skills: [{ id: "sample-notes" }] }, skills: [skill] }).id).toBe("sample");
+    expect(() =>
+      defineAgentModule({ id: "sample", manifest: { id: "sample", skills: [{ id: "sample-notes" }] } }),
+    ).toThrow(/UNKNOWN_CAPABILITY_REF/);
+    expect(() =>
+      defineAgentModule({ id: "sample", manifest: { id: "sample", workflows: [{ id: "sample-flow" }] } }),
+    ).toThrow(/UNKNOWN_CAPABILITY_REF/);
+    expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample" }, skills: [skill] })).toThrow(
+      /MANIFEST_MISMATCH/,
+    );
+    expect(
+      defineAgentModule({ id: "sample", manifest: { id: "sample", skills: [{ id: "sample-notes" }] }, skills: [skill] })
+        .id,
+    ).toBe("sample");
   });
 });
 
@@ -258,12 +348,21 @@ describe("connector tools in the composed agents", () => {
       status: "active",
       secretRef: null,
       toolPolicy: { allow: ["listIssues", "createIssue"], readOnly: ["listIssues"] },
-      config: { specUrl: "https://api.example.com/openapi.json", allowedHosts: ["api.example.com"], auth: "none", apiKeyHeader: null },
+      config: {
+        specUrl: "https://api.example.com/openapi.json",
+        allowedHosts: ["api.example.com"],
+        auth: "none",
+        apiKeyHeader: null,
+      },
       createdBy: "uA1b2C3d4E5f6G7h8I9j",
       createdAt: "2026-09-30T12:00:00.000Z",
       updatedAt: "2026-09-30T12:00:00.000Z",
     });
-    const connectorTool = (id: string, kind: "read" | "mutation") => ({ ...echoTool(id), kind, permission: "core.chat.use" });
+    const connectorTool = (id: string, kind: "read" | "mutation") => ({
+      ...echoTool(id),
+      kind,
+      permission: "core.chat.use",
+    });
     const runtime = composeAgentRuntime({
       env: ENV,
       ports: createFakeRuntimePorts({ connectors: { listActive: () => Promise.resolve([connector]) } }),
@@ -272,14 +371,26 @@ describe("connector tools in the composed agents", () => {
       serviceName: "mastra",
       aiCatalog: FIXTURE_AI_CATALOG,
       connectorLoaders: {
-        openApiTools: () => Promise.resolve([connectorTool("api.issues-api.listIssues", "read"), connectorTool("api.issues-api.createIssue", "mutation")]),
+        openApiTools: () =>
+          Promise.resolve([
+            connectorTool("api.issues-api.listIssues", "read"),
+            connectorTool("api.issues-api.createIssue", "mutation"),
+          ]),
         mcpToolset: () => Promise.reject(new Error("unused")),
         postgresTools: () => [],
       },
     });
     const requestContext = new RequestContext<unknown>(buildAgentContextEntries());
-    expect(Object.keys(await runtime.agents.assistant?.listTools({ requestContext }) ?? {})).toEqual(["api.issues-api.listIssues"]);
+    expect(Object.keys((await runtime.agents.assistant?.listTools({ requestContext })) ?? {})).toEqual([
+      "api.issues-api.listIssues",
+    ]);
     const actionTools = Object.keys((await runtime.subagents.action?.listTools({ requestContext })) ?? {});
-    expect(actionTools).toEqual(expect.arrayContaining(["command.tenancy.CreateProjectInput", "api.issues-api.createIssue", "api.issues-api.listIssues"]));
+    expect(actionTools).toEqual(
+      expect.arrayContaining([
+        "command.tenancy.CreateProjectInput",
+        "api.issues-api.createIssue",
+        "api.issues-api.listIssues",
+      ]),
+    );
   });
 });

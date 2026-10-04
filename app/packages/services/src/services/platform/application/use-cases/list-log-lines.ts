@@ -12,7 +12,15 @@ export type LogLinesQuery = {
 };
 
 const RANK: Readonly<Record<LogLineLevel, number>> = { debug: 0, info: 1, warn: 2, error: 3 };
-const BASE_FIELDS: ReadonlySet<string> = new Set(["timestamp", "level", "message", "service", "env", "requestId", "traceId"]);
+const BASE_FIELDS: ReadonlySet<string> = new Set([
+  "timestamp",
+  "level",
+  "message",
+  "service",
+  "env",
+  "requestId",
+  "traceId",
+]);
 const MAX_STACK_CHARS = 2000;
 
 const textOrNull = (value: unknown): string | null => (typeof value === "string" && value !== "" ? value : null);
@@ -21,7 +29,9 @@ const textOrNull = (value: unknown): string | null => (typeof value === "string"
 const trimStack = (value: unknown): unknown => {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return value;
   const stack = (value as Record<string, unknown>)["stack"];
-  return typeof stack === "string" && stack.length > MAX_STACK_CHARS ? { ...value, stack: stack.slice(0, MAX_STACK_CHARS) } : value;
+  return typeof stack === "string" && stack.length > MAX_STACK_CHARS
+    ? { ...value, stack: stack.slice(0, MAX_STACK_CHARS) }
+    : value;
 };
 
 const toLine = (record: LogRecord): LogLine => ({
@@ -32,7 +42,11 @@ const toLine = (record: LogRecord): LogLine => ({
   env: record.env,
   requestId: textOrNull(record["requestId"]),
   traceId: textOrNull(record["traceId"]),
-  fields: Object.fromEntries(Object.entries(record).flatMap(([key, value]) => (BASE_FIELDS.has(key) ? [] : [[key, key === "err" ? trimStack(value) : value]]))),
+  fields: Object.fromEntries(
+    Object.entries(record).flatMap(([key, value]) =>
+      BASE_FIELDS.has(key) ? [] : [[key, key === "err" ? trimStack(value) : value]],
+    ),
+  ),
 });
 
 /**

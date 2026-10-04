@@ -3,10 +3,17 @@ import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
 import { normalizeSearchText } from "../../../shared/text/search-text.ts";
 import type { AdminUserDirectory } from "../ports/admin-user-directory.ts";
 
-export type FindAdminUsers = (input: { readonly query: string; readonly by: AdminUserSearchBy | undefined; readonly page: PageRequest }) => Promise<Page<AdminUserSummary>>;
+export type FindAdminUsers = (input: {
+  readonly query: string;
+  readonly by: AdminUserSearchBy | undefined;
+  readonly page: PageRequest;
+}) => Promise<Page<AdminUserSummary>>;
 
 const EMPTY: Page<AdminUserSummary> = { items: [], nextCursor: null };
-const single = (users: readonly AdminUserSummary[]): Page<AdminUserSummary> => ({ items: users.slice(0, 1), nextCursor: null });
+const single = (users: readonly AdminUserSummary[]): Page<AdminUserSummary> => ({
+  items: users.slice(0, 1),
+  nextCursor: null,
+});
 
 // A Firestore document id never holds a slash; such text can only be a name.
 const mayBeUid = (query: string): boolean => !query.includes("/") && query.length <= 128;

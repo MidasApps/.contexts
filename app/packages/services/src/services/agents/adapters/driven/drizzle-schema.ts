@@ -1,5 +1,16 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, foreignKey, index, integer, pgPolicy, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  foreignKey,
+  index,
+  integer,
+  pgPolicy,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { agentsSchema } from "../../../shared/postgres/drizzle-schemas.ts";
 
 /**
@@ -43,11 +54,16 @@ export const agentsPromptVersions = agentsSchema
       updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     },
     (table) => [
-      unique("prompt_versions_agent_scope_tenant_version_key").on(table.agentId, table.scope, table.tenantId, table.version).nullsNotDistinct(),
+      unique("prompt_versions_agent_scope_tenant_version_key")
+        .on(table.agentId, table.scope, table.tenantId, table.version)
+        .nullsNotDistinct(),
       ...scopeChecks("prompt_versions", table),
       check("prompt_versions_version_check", sql`${table.version} >= 1`),
       check("prompt_versions_sha_check", sql`${table.bodySha256} ~ '^[0-9a-f]{64}$'`),
-      check("prompt_versions_verdict_check", sql`${table.evalVerdict} IS NULL OR ${table.evalVerdict} IN ('passed', 'failed')`),
+      check(
+        "prompt_versions_verdict_check",
+        sql`${table.evalVerdict} IS NULL OR ${table.evalVerdict} IN ('passed', 'failed')`,
+      ),
       promptPolicy("prompt_versions"),
     ],
   )
@@ -71,7 +87,11 @@ export const agentsPromptActivations = agentsSchema
       updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     },
     (table) => [
-      foreignKey({ name: "prompt_activations_version_fk", columns: [table.versionId], foreignColumns: [agentsPromptVersions.id] }).onDelete("restrict"),
+      foreignKey({
+        name: "prompt_activations_version_fk",
+        columns: [table.versionId],
+        foreignColumns: [agentsPromptVersions.id],
+      }).onDelete("restrict"),
       index("prompt_activations_version_idx").on(table.versionId),
       index("prompt_activations_lookup_idx").on(table.agentId, table.scope, table.tenantId, table.activatedAt),
       ...scopeChecks("prompt_activations", table),

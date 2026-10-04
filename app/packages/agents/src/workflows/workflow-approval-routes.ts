@@ -15,7 +15,8 @@ export type WorkflowApprovalRouteDeps = {
   readonly logger: Pick<Logger, "info" | "error">;
 };
 
-const json = (status: number, body: unknown): Response => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+const json = (status: number, body: unknown): Response =>
+  new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 
 const errorOf = (status: number, code: string, message: string, requestId: string | null): Response =>
   json(status, { error: { code, message, ...(requestId === null ? {} : { requestId }) } });
@@ -34,7 +35,8 @@ export const handleSettleWorkflowApproval = async (input: {
 }): Promise<Response> => {
   const { approvalRequestId, requestId, deps } = input;
   const correlation = requestId === null ? {} : { requestId };
-  if (!APPROVAL_REQUEST_ID.test(approvalRequestId)) return errorOf(404, "NOT_FOUND", "Approval request not found.", requestId);
+  if (!APPROVAL_REQUEST_ID.test(approvalRequestId))
+    return errorOf(404, "NOT_FOUND", "Approval request not found.", requestId);
   try {
     const result = await settleWorkflowApproval({ mastra: input.mastra, approvals: deps.approvals, approvalRequestId });
     if (!result.ok) return errorOf(404, "NOT_FOUND", "Approval request not found.", requestId);

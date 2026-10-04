@@ -3,9 +3,16 @@ import type { AccessDeniedError } from "../../../access/domain/errors/access-den
 import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { ConnectorNotFoundError } from "../../domain/connector-errors.ts";
-import { authorizeConnectors, CONNECTOR_READ_PERMISSION, type ConnectorsCommand, type ConnectorsDeps } from "../connectors-deps.ts";
+import {
+  authorizeConnectors,
+  CONNECTOR_READ_PERMISSION,
+  type ConnectorsCommand,
+  type ConnectorsDeps,
+} from "../connectors-deps.ts";
 
-export type ListConnectors = (command: Omit<ConnectorsCommand, "requestId"> & { readonly page: PageRequest }) => Promise<Result<Page<Connector>, AccessDeniedError>>;
+export type ListConnectors = (
+  command: Omit<ConnectorsCommand, "requestId"> & { readonly page: PageRequest },
+) => Promise<Result<Page<Connector>, AccessDeniedError>>;
 
 export type GetConnector = (
   command: Omit<ConnectorsCommand, "requestId"> & { readonly connectorId: ConnectorId },
@@ -26,6 +33,9 @@ export const makeGetConnector =
   async (command) => {
     const allowed = await authorizeConnectors(command, CONNECTOR_READ_PERMISSION);
     if (!allowed.ok) return allowed;
-    const connector = await deps.connectors.get(undefined, { tenantId: command.tenantId, connectorId: command.connectorId });
+    const connector = await deps.connectors.get(undefined, {
+      tenantId: command.tenantId,
+      connectorId: command.connectorId,
+    });
     return connector === null ? err(new ConnectorNotFoundError()) : ok(connector);
   };

@@ -1,7 +1,10 @@
 import type { ConsoleGateway } from "../ports/console-gateway.ts";
 import { type TraceCostDeps, withLedgerCosts } from "./trace-costs.ts";
 
-export type GetTrace = (query: { readonly traceId: string; readonly tenantId: string | null }) => ReturnType<ConsoleGateway["getTrace"]>;
+export type GetTrace = (query: {
+  readonly traceId: string;
+  readonly tenantId: string | null;
+}) => ReturnType<ConsoleGateway["getTrace"]>;
 
 /**
  * One trace with its spans; another tenant's trace reads as missing (404) for a tenant query. The

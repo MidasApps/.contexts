@@ -1,6 +1,6 @@
 "use client";
 
-import { createPlanEndpoint, updatePlanEndpoint, type Plan } from "@core/contracts";
+import { createPlanEndpoint, type Plan, updatePlanEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { useTranslations } from "use-intl";
@@ -8,12 +8,18 @@ import { adminOrganizationKeys } from "#/entities/admin-organization/index.ts";
 import { planKeys } from "#/entities/plan/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { SchemaForm } from "#/shared/ui/organisms/SchemaForm/SchemaForm.tsx";
 import type { SchemaFormResult } from "#/shared/ui/organisms/SchemaForm/server-errors.ts";
-import { PlanFormContract, planFormDefaults, toUpsertPlanInput, type PlanForm } from "../model/plan-form.contract.ts";
+import { type PlanForm, PlanFormContract, planFormDefaults, toUpsertPlanInput } from "../model/plan-form.contract.ts";
 
 export type PlanFormDialogProps = {
   /** `null` creates a plan; a plan edits it (a replace: `PUT`). */
@@ -23,7 +29,13 @@ export type PlanFormDialogProps = {
 };
 
 /** The plan form inside the dialog: Esc, outside click or X ask before dropping edited values. */
-function GuardedPlanForm({ plan, submit }: { plan: Plan | null; submit: (values: PlanForm) => Promise<SchemaFormResult> }) {
+function GuardedPlanForm({
+  plan,
+  submit,
+}: {
+  plan: Plan | null;
+  submit: (values: PlanForm) => Promise<SchemaFormResult>;
+}) {
   const [dirty, setDirty] = useState(false);
   useDialogDismissGuard(dirty ? "confirmUnsaved" : "allow");
   return (
@@ -54,13 +66,19 @@ export function PlanFormDialog({ plan, open, onOpenChange }: PlanFormDialogProps
     const body = toUpsertPlanInput(values);
     let saved: Plan;
     try {
-      saved = plan === null ? (await callEndpoint(createPlanEndpoint, { body })).data : (await callEndpoint(updatePlanEndpoint, { params: { planId: plan.id }, body })).data;
+      saved =
+        plan === null
+          ? (await callEndpoint(createPlanEndpoint, { body })).data
+          : (await callEndpoint(updatePlanEndpoint, { params: { planId: plan.id }, body })).data;
     } catch (error: unknown) {
       if (error instanceof ApiError) return { ok: false, error };
       throw error;
     }
     // A plan change re-materializes the budgets of its organizations (decision 0039).
-    await Promise.all([queryClient.invalidateQueries({ queryKey: planKeys.all() }), queryClient.invalidateQueries({ queryKey: adminOrganizationKeys.all() })]);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: planKeys.all() }),
+      queryClient.invalidateQueries({ queryKey: adminOrganizationKeys.all() }),
+    ]);
     notify.success(plan === null ? t("created", { name: saved.name }) : t("updated", { name: saved.name }));
     onOpenChange(false);
     return { ok: true };

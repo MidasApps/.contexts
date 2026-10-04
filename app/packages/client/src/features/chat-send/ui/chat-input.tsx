@@ -1,15 +1,15 @@
 "use client";
 
 import { MAX_CHAT_TEXT_CHARS } from "@core/contracts";
-import { useId, useState, type ClipboardEvent, type DragEvent, type ReactNode, type Ref } from "react";
+import { type ClipboardEvent, type DragEvent, type ReactNode, type Ref, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import {
   PromptInput,
   PromptInputFooter,
+  type PromptInputStatus,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
-  type PromptInputStatus,
 } from "#/shared/ui/ai/prompt-input.tsx";
 
 export type ChatInputProps = {
@@ -47,7 +47,21 @@ const COUNTER_FROM = 0.9;
  * and the send button becomes stop. Over the limit the text is kept and the reason is said;
  * nothing is truncated silently.
  */
-export function ChatInput({ status, onSend, onStop, offline = false, disabled = false, tools, onFiles, attachments, blocked, value, onValueChange, inputRef, maxLength = MAX_CHAT_TEXT_CHARS }: ChatInputProps) {
+export function ChatInput({
+  status,
+  onSend,
+  onStop,
+  offline = false,
+  disabled = false,
+  tools,
+  onFiles,
+  attachments,
+  blocked,
+  value,
+  onValueChange,
+  inputRef,
+  maxLength = MAX_CHAT_TEXT_CHARS,
+}: ChatInputProps) {
   const t = useTranslations("chat.input");
   const [ownText, setOwnText] = useState("");
   const text = value ?? ownText;
@@ -119,7 +133,13 @@ export function ChatInput({ status, onSend, onStop, offline = false, disabled = 
           <PromptInputTools>{tools}</PromptInputTools>
           <div className="flex items-center gap-2">
             {trimmed.length >= maxLength * COUNTER_FROM ? (
-              <span className={tooLong ? "font-mono text-caption text-destructive-text tabular-nums" : "font-mono text-caption text-muted-foreground tabular-nums"}>
+              <span
+                className={
+                  tooLong
+                    ? "font-mono text-caption text-destructive-text tabular-nums"
+                    : "font-mono text-caption text-muted-foreground tabular-nums"
+                }
+              >
                 {t("counter", { count: trimmed.length, max: maxLength })}
               </span>
             ) : null}
@@ -127,7 +147,17 @@ export function ChatInput({ status, onSend, onStop, offline = false, disabled = 
           </div>
         </PromptInputFooter>
       </PromptInput>
-      <p id={problemId} role="status" className={problem === null ? "sr-only" : tooLong ? "text-body-sm text-destructive-text" : "text-body-sm text-amber-foreground"}>
+      <p
+        id={problemId}
+        role="status"
+        className={
+          problem === null
+            ? "sr-only"
+            : tooLong
+              ? "text-body-sm text-destructive-text"
+              : "text-body-sm text-amber-foreground"
+        }
+      >
         {problem ?? ""}
       </p>
       {/* Keyboard keys mean nothing on a touch screen; the hint stays in the field description. */}

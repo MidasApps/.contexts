@@ -1,15 +1,19 @@
-import { ImpersonationSessionIdSchema, type ImpersonationSession, type PlatformStaff } from "@core/contracts";
+import { type ImpersonationSession, ImpersonationSessionIdSchema, type PlatformStaff } from "@core/contracts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
 import type { ImpersonationSessionRepository } from "../../application/ports/driven/impersonation-session-repository.ts";
 import type { PlatformStaffRepository } from "../../application/ports/driven/platform-staff-repository.ts";
 
-export type InMemoryPlatformStaffRepository = PlatformStaffRepository & { readonly rowOf: (uid: string) => PlatformStaff | undefined };
+export type InMemoryPlatformStaffRepository = PlatformStaffRepository & {
+  readonly rowOf: (uid: string) => PlatformStaff | undefined;
+};
 
 /**
  * In-memory `PlatformStaffRepository` for unit tests. `onWrite` mirrors each write into the
  * access test store, so `authorize()` sees the staff doc the use case wrote.
  */
-export const createInMemoryPlatformStaffRepository = (args: { onWrite?: (staff: PlatformStaff) => void } = {}): InMemoryPlatformStaffRepository => {
+export const createInMemoryPlatformStaffRepository = (
+  args: { onWrite?: (staff: PlatformStaff) => void } = {},
+): InMemoryPlatformStaffRepository => {
   const rows = new Map<string, PlatformStaff>();
   return {
     get: (_tx, uid) => Promise.resolve(rows.get(uid) ?? null),
@@ -48,8 +52,17 @@ export const createInMemoryImpersonationSessionRepository = (
     },
     listRecent: ({ after, limit }) => {
       const sorted = [...rows.values()].sort(newestFirst);
-      const remaining = after === undefined ? sorted : sorted.filter((row) => row.createdAt < after[0] || (row.createdAt === after[0] && row.id < after[1]));
-      return Promise.resolve(pageFromOverfetch({ fetched: remaining.slice(0, limit + 1), limit, positionOf: (row) => [row.createdAt, row.id] }));
+      const remaining =
+        after === undefined
+          ? sorted
+          : sorted.filter((row) => row.createdAt < after[0] || (row.createdAt === after[0] && row.id < after[1]));
+      return Promise.resolve(
+        pageFromOverfetch({
+          fetched: remaining.slice(0, limit + 1),
+          limit,
+          positionOf: (row) => [row.createdAt, row.id],
+        }),
+      );
     },
     listOpen: ({ now, limit }) =>
       Promise.resolve(

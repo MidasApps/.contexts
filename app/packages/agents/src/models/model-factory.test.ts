@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createModelProvider, FakeModeNotAllowedError, type ModelFactoryEnv } from "./model-factory.ts";
-import type { ProviderFactories, ProviderSettings } from "./provider-registry.ts";
 import type { ModelProvider } from "./model-roles.ts";
+import type { ProviderFactories, ProviderSettings } from "./provider-registry.ts";
 
 const baseEnv: ModelFactoryEnv = {
   APP_ENV: "local",
@@ -38,7 +38,9 @@ const recordingFactories = (calls: FactoryCall[]): ProviderFactories => {
 describe("createModelProvider in fake mode", () => {
   it.each(["staging", "prod"] as const)("refuses fake models in %s even if the env check was skipped", (APP_ENV) => {
     const calls: FactoryCall[] = [];
-    expect(() => createModelProvider({ ...baseEnv, APP_ENV }, { providerFactories: recordingFactories(calls) })).toThrow(FakeModeNotAllowedError);
+    expect(() =>
+      createModelProvider({ ...baseEnv, APP_ENV }, { providerFactories: recordingFactories(calls) }),
+    ).toThrow(FakeModeNotAllowedError);
     expect(calls).toEqual([]);
   });
 
@@ -100,7 +102,9 @@ describe("createModelProvider in real mode", () => {
       { ...realEnv, AI_MODEL_CHAT_FALLBACK: "anthropic/claude-sonnet-5", ANTHROPIC_API_KEY: "test-anthropic-key" },
       { providerFactories: recordingFactories([]) },
     );
-    expect(models.languageFallbacks("chat")).toEqual([expect.objectContaining({ provider: "anthropic", modelId: "claude-sonnet-5" })]);
+    expect(models.languageFallbacks("chat")).toEqual([
+      expect.objectContaining({ provider: "anthropic", modelId: "claude-sonnet-5" }),
+    ]);
     expect(models.languageFallbacks("fast")).toEqual([]);
   });
 
@@ -111,8 +115,15 @@ describe("createModelProvider in real mode", () => {
   });
 
   it("builds voice models when the key exists", () => {
-    const models = createModelProvider({ ...realEnv, OPENAI_API_KEY: "test-openai-key" }, { providerFactories: recordingFactories([]) });
-    expect(models.transcription()).toMatchObject({ kind: "transcription", provider: "openai", modelId: "gpt-transcribe" });
+    const models = createModelProvider(
+      { ...realEnv, OPENAI_API_KEY: "test-openai-key" },
+      { providerFactories: recordingFactories([]) },
+    );
+    expect(models.transcription()).toMatchObject({
+      kind: "transcription",
+      provider: "openai",
+      modelId: "gpt-transcribe",
+    });
   });
 
   it("pins google embeddings to 1536 dimensions", () => {

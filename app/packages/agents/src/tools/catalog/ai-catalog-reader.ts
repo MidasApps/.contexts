@@ -69,7 +69,12 @@ export type AiEntityDescription = AiEntitySummary & {
 export type AiEntityPage = { entities: AiEntitySummary[]; total: number; truncated: boolean };
 
 export type AiCatalogReader = {
-  readonly list: (args: { permissions: ReadonlySet<string>; query?: string; kind?: string; limit: number }) => AiEntityPage;
+  readonly list: (args: {
+    permissions: ReadonlySet<string>;
+    query?: string;
+    kind?: string;
+    limit: number;
+  }) => AiEntityPage;
   /** @returns `undefined` when the contract is unknown or hidden (the caller cannot tell which). */
   readonly describe: (args: { id: string; permissions: ReadonlySet<string> }) => AiEntityDescription | undefined;
   readonly kinds: () => readonly string[];
@@ -149,12 +154,21 @@ const matchesQuery = (entry: AiCatalogEntry, query: string | undefined): boolean
 export const createAiCatalogReader = (raw: unknown): AiCatalogReader => {
   const parsed = AiCatalogSchema.safeParse(raw);
   if (!parsed.success) throw new InvalidAiCatalogError({ cause: parsed.error });
-  const entries = [...parsed.data.contracts].sort((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0));
+  const entries = [...parsed.data.contracts].sort((left, right) =>
+    left.id < right.id ? -1 : left.id > right.id ? 1 : 0,
+  );
   const byId = new Map(entries.map((entry) => [entry.id, entry]));
   return {
     list: ({ permissions, query, kind, limit }) => {
-      const matches = entries.filter((entry) => isVisible(entry, permissions) && (kind === undefined || entry.kind === kind) && matchesQuery(entry, query));
-      return { entities: matches.slice(0, limit).map(summarize), total: matches.length, truncated: matches.length > limit };
+      const matches = entries.filter(
+        (entry) =>
+          isVisible(entry, permissions) && (kind === undefined || entry.kind === kind) && matchesQuery(entry, query),
+      );
+      return {
+        entities: matches.slice(0, limit).map(summarize),
+        total: matches.length,
+        truncated: matches.length > limit,
+      };
     },
     describe: ({ id, permissions }) => {
       const entry = byId.get(id);

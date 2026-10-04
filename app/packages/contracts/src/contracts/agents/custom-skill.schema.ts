@@ -25,12 +25,21 @@ export const CustomSkillNameSchema = z
   .max(60);
 
 const name = CustomSkillNameSchema.meta(none("Kebab-case name, unique in the organization."));
-const description = z.string().trim().min(1).max(1024).meta(none("When an agent should use the skill; the model routes by it."));
+const description = z
+  .string()
+  .trim()
+  .min(1)
+  .max(1024)
+  .meta(none("When an agent should use the skill; the model routes by it."));
 const instructions = z
   .string()
   .min(1)
   .max(MAX_CUSTOM_INSTRUCTION_CHARS)
-  .meta(personal("Markdown instructions the skill gives an agent; written by the organization, so they may mention people."));
+  .meta(
+    personal(
+      "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+    ),
+  );
 
 /**
  * A skill an organization wrote (Firestore `custom-skills/{id}`, decision 0046): instructions an
@@ -106,7 +115,9 @@ export const UpdateCustomSkillInputSchema = z
     instructions: instructions.optional(),
     enabled: z.boolean().optional().meta(none("Enable or disable the skill.")),
   })
-  .refine((input) => Object.values(input).some((value) => value !== undefined), { error: "Change at least one field." });
+  .refine((input) => Object.values(input).some((value) => value !== undefined), {
+    error: "Change at least one field.",
+  });
 export type UpdateCustomSkillInput = z.infer<typeof UpdateCustomSkillInputSchema>;
 
 export const UpdateCustomSkillInputContract = defineContract(UpdateCustomSkillInputSchema, {

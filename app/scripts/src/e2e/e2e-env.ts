@@ -79,7 +79,8 @@ export const buildE2eEnv = (args: {
 }): Record<string, string> => {
   const config = FirebaseE2eConfigSchema.parse(args.firebaseConfig);
   const parsed = OverridesSchema.safeParse(args.overrides);
-  if (!parsed.success) throw new InvalidE2eEnvError([...new Set(parsed.error.issues.map((issue) => String(issue.path[0])))]);
+  if (!parsed.success)
+    throw new InvalidE2eEnvError([...new Set(parsed.error.issues.map((issue) => String(issue.path[0])))]);
   const { E2E_WEB_PORT: webPort, E2E_DESKTOP_PORT: desktopPort, E2E_MASTRA_PORT: mastraPort } = parsed.data;
   const mastraOrigin = `http://localhost:${String(mastraPort)}`;
   const webOrigin = `http://localhost:${String(webPort)}`;

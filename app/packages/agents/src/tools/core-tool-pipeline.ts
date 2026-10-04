@@ -19,8 +19,16 @@ export const AGENT_TOOL_EXECUTED = "AGENT_TOOL_EXECUTED";
 type Outcome = "succeeded" | "failed" | "denied" | "pending-approval";
 type AuditExtras = Readonly<Record<string, string | boolean>>;
 
-const fail = (definition: CoreToolDefinition, code: string, cause?: unknown, details?: CoreToolError["details"]): CoreToolError =>
-  new CoreToolError({ code, toolId: definition.id, ...(details === undefined ? {} : { details }) }, cause === undefined ? undefined : { cause });
+const fail = (
+  definition: CoreToolDefinition,
+  code: string,
+  cause?: unknown,
+  details?: CoreToolError["details"],
+): CoreToolError =>
+  new CoreToolError(
+    { code, toolId: definition.id, ...(details === undefined ? {} : { details }) },
+    cause === undefined ? undefined : { cause },
+  );
 
 const parseInput = (definition: CoreToolDefinition, input: unknown): Record<string, unknown> => {
   const parsed = definition.inputSchema.safeParse(input);
@@ -35,28 +43,52 @@ const buildContext = (definition: CoreToolDefinition, deps: CoreToolDeps, call: 
   const { context, principal } = read.data;
   const toolCallId = call.toolCallId === "" ? (deps.newCallId ?? randomUUID)() : call.toolCallId;
   const runId = call.runId ?? context.requestId;
-  return { agent: context, principal, node: nodeOfContext(context), agentId: call.agentId, toolCallId, runId, idempotencyKey: `${runId}:${toolCallId}` };
+  return {
+    agent: context,
+    principal,
+    node: nodeOfContext(context),
+    agentId: call.agentId,
+    toolCallId,
+    runId,
+    idempotencyKey: `${runId}:${toolCallId}`,
+  };
 };
 
 /**
  * Effective ceiling: context permissions (principal ∩ supervisor ceiling) ∩ the calling agent's
  * ceiling, which is the run's own one when the resolver has it (custom agents, decision 0046).
  */
-const ceilingOf = async (deps: CoreToolDeps, ctx: Omit<CoreToolContext, "abortSignal">, requestContext: ToolCallInfo["requestContext"]): Promise<ReadonlySet<string>> => {
-  const agentCeiling = (await deps.runCeilingOf?.({ agentId: ctx.agentId, requestContext })) ?? deps.agentCeilings?.[ctx.agentId];
+const ceilingOf = async (
+  deps: CoreToolDeps,
+  ctx: Omit<CoreToolContext, "abortSignal">,
+  requestContext: ToolCallInfo["requestContext"],
+): Promise<ReadonlySet<string>> => {
+  const agentCeiling =
+    (await deps.runCeilingOf?.({ agentId: ctx.agentId, requestContext })) ?? deps.agentCeilings?.[ctx.agentId];
   return new Set(ctx.agent.permissions.filter((permission) => agentCeiling?.has(permission) ?? true));
 };
 
-const authorizeCall = async (definition: CoreToolDefinition, deps: CoreToolDeps, ctx: Omit<CoreToolContext, "abortSignal">, requestContext: ToolCallInfo["requestContext"]) => {
+const authorizeCall = async (
+  definition: CoreToolDefinition,
+  deps: CoreToolDeps,
+  ctx: Omit<CoreToolContext, "abortSignal">,
+  requestContext: ToolCallInfo["requestContext"],
+) => {
   try {
     const ceiling = await ceilingOf(deps, ctx, requestContext);
-    return await deps.access.authorize({ principal: ctx.principal, permission: definition.permission, node: ctx.node, ceiling });
+    return await deps.access.authorize({
+      principal: ctx.principal,
+      permission: definition.permission,
+      node: ctx.node,
+      ceiling,
+    });
   } catch (error: unknown) {
     throw fail(definition, "AUTHORIZATION_UNAVAILABLE", error);
   }
 };
 
-const shouldAudit = (definition: CoreToolDefinition): boolean => definition.kind === "mutation" || definition.audit !== undefined;
+const shouldAudit = (definition: CoreToolDefinition): boolean =>
+  definition.kind === "mutation" || definition.audit !== undefined;
 
 const recordAudit = async (args: {
   definition: CoreToolDefinition;
@@ -68,18 +100,37 @@ const recordAudit = async (args: {
 }): Promise<void> => {
   const { definition, deps, ctx, input, outcome, extras } = args;
   if (!shouldAudit(definition)) return;
-  const metadata = { toolId: definition.id, permission: definition.permission, agentId: ctx.agentId, runId: ctx.runId, inputHash: hashToolInput(input), outcome, ...extras };
+  const metadata = {
+    toolId: definition.id,
+    permission: definition.permission,
+    agentId: ctx.agentId,
+    runId: ctx.runId,
+    inputHash: hashToolInput(input),
+    outcome,
+    ...extras,
+  };
   try {
-    await deps.audit.record({ action: definition.audit?.action ?? AGENT_TOOL_EXECUTED, tenantId: ctx.agent.tenantId, actor: ctx.principal, metadata, requestId: ctx.agent.requestId });
+    await deps.audit.record({
+      action: definition.audit?.action ?? AGENT_TOOL_EXECUTED,
+      tenantId: ctx.agent.tenantId,
+      actor: ctx.principal,
+      metadata,
+      requestId: ctx.agent.requestId,
+    });
   } catch (error: unknown) {
     throw fail(definition, "AUDIT_UNAVAILABLE", error, { outcome });
   }
 };
 
 const commandIdOf = (definition: CoreToolDefinition): string =>
-  definition.commandId ?? (definition.id.startsWith("command.") ? definition.id.slice("command.".length) : definition.id);
+  definition.commandId ??
+  (definition.id.startsWith("command.") ? definition.id.slice("command.".length) : definition.id);
 
-const buildApprovalAction = async (definition: CoreToolDefinition, input: Record<string, unknown>, ctx: CoreToolContext): Promise<AgentApprovalRequest> =>
+const buildApprovalAction = async (
+  definition: CoreToolDefinition,
+  input: Record<string, unknown>,
+  ctx: CoreToolContext,
+): Promise<AgentApprovalRequest> =>
   AgentApprovalRequestSchema.parse({
     kind: AGENT_COMMAND_ACTION_KIND,
     tenantId: ctx.agent.tenantId,
@@ -97,18 +148,37 @@ const buildApprovalAction = async (definition: CoreToolDefinition, input: Record
   });
 
 /** Four eyes (decision 0025): an SP1 approval request replaces execution; any failure is fail-closed. */
-const requestApproval = async (definition: CoreToolDefinition, deps: CoreToolDeps, input: Record<string, unknown>, ctx: CoreToolContext) => {
+const requestApproval = async (
+  definition: CoreToolDefinition,
+  deps: CoreToolDeps,
+  input: Record<string, unknown>,
+  ctx: CoreToolContext,
+) => {
   try {
     const action = await buildApprovalAction(definition, input, ctx);
-    return await deps.approvals.requestApproval({ principal: ctx.principal, node: ctx.node, permission: definition.permission, action, requestId: ctx.agent.requestId });
+    return await deps.approvals.requestApproval({
+      principal: ctx.principal,
+      node: ctx.node,
+      permission: definition.permission,
+      action,
+      requestId: ctx.agent.requestId,
+    });
   } catch (error: unknown) {
     throw fail(definition, "APPROVAL_UNAVAILABLE", error);
   }
 };
 
 /** Runs `execute` under the timeout and the run's abort signal; the combined signal reaches `execute`. */
-const executeWithDeadline = async (definition: CoreToolDefinition, deps: CoreToolDeps, input: Record<string, unknown>, ctx: CoreToolContext, parent?: AbortSignal) => {
-  const timeout = (deps.timeoutSignal ?? ((ms: number) => AbortSignal.timeout(ms)))(definition.timeoutMs ?? DEFAULT_TIMEOUT_MS[definition.kind]);
+const executeWithDeadline = async (
+  definition: CoreToolDefinition,
+  deps: CoreToolDeps,
+  input: Record<string, unknown>,
+  ctx: CoreToolContext,
+  parent?: AbortSignal,
+) => {
+  const timeout = (deps.timeoutSignal ?? ((ms: number) => AbortSignal.timeout(ms)))(
+    definition.timeoutMs ?? DEFAULT_TIMEOUT_MS[definition.kind],
+  );
   const signal = AbortSignal.any(parent === undefined ? [timeout] : [timeout, parent]);
   const stopped = new Promise<never>((_resolve, reject) => {
     const onAbort = () => reject(fail(definition, timeout.aborted ? "TOOL_TIMEOUT" : "TOOL_ABORTED", signal.reason));
@@ -131,11 +201,23 @@ const storeCodeOf = (error: unknown): string => {
 };
 
 /** A mutation runs at most once per `runId:toolCallId` (follow-up #26); a replay returns the stored output. */
-const executeOnce = async (definition: CoreToolDefinition, deps: CoreToolDeps, input: Record<string, unknown>, ctx: CoreToolContext, parent?: AbortSignal) => {
+const executeOnce = async (
+  definition: CoreToolDefinition,
+  deps: CoreToolDeps,
+  input: Record<string, unknown>,
+  ctx: CoreToolContext,
+  parent?: AbortSignal,
+) => {
   const run = () => executeWithDeadline(definition, deps, input, ctx, parent);
   if (definition.kind !== "mutation" || deps.commands === undefined) return { output: await run(), replayed: false };
   try {
-    return await deps.commands.runOnce({ tenantId: ctx.agent.tenantId, commandId: commandIdOf(definition), idempotencyKey: ctx.idempotencyKey, input, run });
+    return await deps.commands.runOnce({
+      tenantId: ctx.agent.tenantId,
+      commandId: commandIdOf(definition),
+      idempotencyKey: ctx.idempotencyKey,
+      input,
+      run,
+    });
   } catch (error: unknown) {
     throw isCoreToolError(error) ? error : fail(definition, storeCodeOf(error), error);
   }
@@ -147,7 +229,13 @@ const parseOutput = (definition: CoreToolDefinition, output: unknown): unknown =
   return parsed.data;
 };
 
-const executeAndAudit = async (definition: CoreToolDefinition, deps: CoreToolDeps, input: Record<string, unknown>, ctx: CoreToolContext, parent?: AbortSignal) => {
+const executeAndAudit = async (
+  definition: CoreToolDefinition,
+  deps: CoreToolDeps,
+  input: Record<string, unknown>,
+  ctx: CoreToolContext,
+  parent?: AbortSignal,
+) => {
   try {
     const { output: raw, replayed } = await executeOnce(definition, deps, input, ctx, parent);
     const output = parseOutput(definition, raw);
@@ -168,12 +256,24 @@ const executeAndAudit = async (definition: CoreToolDefinition, deps: CoreToolDep
  * it (mutations) → execute under timeout/abort → output check → audit.
  * @throws {CoreToolError} with a stable code; nothing runs after a failed check.
  */
-export const runCoreTool = async (definition: CoreToolDefinition, deps: CoreToolDeps, rawInput: unknown, call: ToolCallInfo): Promise<unknown> => {
+export const runCoreTool = async (
+  definition: CoreToolDefinition,
+  deps: CoreToolDeps,
+  rawInput: unknown,
+  call: ToolCallInfo,
+): Promise<unknown> => {
   const input = parseInput(definition, rawInput);
   const base = buildContext(definition, deps, call);
   const decision = await authorizeCall(definition, deps, base, call.requestContext);
   if (!decision.allowed) {
-    await recordAudit({ definition, deps, ctx: base, input, outcome: "denied", extras: { errorCode: "FORBIDDEN", reason: decision.reason } });
+    await recordAudit({
+      definition,
+      deps,
+      ctx: base,
+      input,
+      outcome: "denied",
+      extras: { errorCode: "FORBIDDEN", reason: decision.reason },
+    });
     throw fail(definition, "FORBIDDEN", undefined, { reason: decision.reason });
   }
   const ctx: CoreToolContext = { ...base, abortSignal: call.abortSignal ?? new AbortController().signal };
@@ -200,6 +300,13 @@ export const previewCoreToolCall = async (
   const input = parseInput(definition, rawInput);
   const base = buildContext(definition, deps, call);
   const summary = definition.summarize?.(input) ?? `Run ${definition.id}`;
-  if (definition.preview === undefined || !(await authorizeCall(definition, deps, base, call.requestContext)).allowed) return { summary, preview: null };
-  return { summary, preview: await definition.preview(input, { ...base, abortSignal: call.abortSignal ?? new AbortController().signal }) };
+  if (definition.preview === undefined || !(await authorizeCall(definition, deps, base, call.requestContext)).allowed)
+    return { summary, preview: null };
+  return {
+    summary,
+    preview: await definition.preview(input, {
+      ...base,
+      abortSignal: call.abortSignal ?? new AbortController().signal,
+    }),
+  };
 };

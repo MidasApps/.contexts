@@ -1,10 +1,23 @@
 "use client";
 
-import { getApprovalRequestEndpoint, listApprovalRequestsEndpoint, type ApprovalRequest, type ApprovalStatus } from "@core/contracts";
+import {
+  type ApprovalRequest,
+  type ApprovalStatus,
+  getApprovalRequestEndpoint,
+  listApprovalRequestsEndpoint,
+} from "@core/contracts";
 import { type InfiniteData, queryOptions } from "@tanstack/react-query";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
-import { type CollectedPages, collectPages, cursorListQuery, type ListPage, mergePages, nullOnNotFound, pageQuery } from "#/shared/api/cursor-list.ts";
-import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
+import {
+  type CollectedPages,
+  collectPages,
+  cursorListQuery,
+  type ListPage,
+  mergePages,
+  nullOnNotFound,
+  pageQuery,
+} from "#/shared/api/cursor-list.ts";
+import { type QueryKey, queryKeys } from "#/shared/api/query-keys.ts";
 
 /** The pending inbox reads at most this many pages of 100 requests; beyond that it says the list was cut. */
 export const APPROVALS_MAX_PAGES = 3;
@@ -15,7 +28,8 @@ export const approvalRequestKeys = {
   all: (organizationId: string): QueryKey => queryKeys.organizationScoped(organizationId, "approval-requests"),
   list: (organizationId: string, status: ApprovalStatus | undefined): QueryKey =>
     queryKeys.organizationScoped(organizationId, "approval-requests", "list", status ?? "all"),
-  history: (organizationId: string): QueryKey => queryKeys.organizationScoped(organizationId, "approval-requests", "history"),
+  history: (organizationId: string): QueryKey =>
+    queryKeys.organizationScoped(organizationId, "approval-requests", "history"),
   one: (organizationId: string, approvalRequestId: string): QueryKey =>
     queryKeys.organizationScoped(organizationId, "approval-requests", "one", approvalRequestId),
 };
@@ -54,7 +68,12 @@ const settledOf = (data: InfiniteData<ListPage<ApprovalRequest>, string | undefi
 export const approvalHistoryQuery = (callEndpoint: CallEndpoint, organizationId: string) => ({
   ...cursorListQuery<ApprovalRequest>({
     queryKey: approvalRequestKeys.history(organizationId),
-    fetchPage: (cursor, signal) => callEndpoint(listApprovalRequestsEndpoint, { params: { organizationId }, query: pageQuery(cursor, APPROVAL_HISTORY_PAGE_SIZE), signal }),
+    fetchPage: (cursor, signal) =>
+      callEndpoint(listApprovalRequestsEndpoint, {
+        params: { organizationId },
+        query: pageQuery(cursor, APPROVAL_HISTORY_PAGE_SIZE),
+        signal,
+      }),
   }),
   select: settledOf,
 });
@@ -68,7 +87,9 @@ export const approvalRequestQuery = (callEndpoint: CallEndpoint, organizationId:
   queryOptions({
     queryKey: approvalRequestKeys.one(organizationId, approvalRequestId),
     queryFn: async ({ signal }): Promise<ApprovalRequest | null> => {
-      const request = await nullOnNotFound(async () => (await callEndpoint(getApprovalRequestEndpoint, { params: { approvalRequestId }, signal })).data);
+      const request = await nullOnNotFound(
+        async () => (await callEndpoint(getApprovalRequestEndpoint, { params: { approvalRequestId }, signal })).data,
+      );
       return request === null || request.tenantId !== organizationId ? null : request;
     },
   });

@@ -2,5 +2,5 @@
 export { SessionContextProvider, useSession } from "./session-context.tsx";
 export type { SessionController, SessionState, SignedOutReason } from "./session-state.ts";
 export { useCurrentNode } from "./use-current-node.ts";
-export { useIsSignedIn } from "./use-signed-in.ts";
 export { useImpersonationSessionId, useIsImpersonating } from "./use-impersonation.ts";
+export { useIsSignedIn } from "./use-signed-in.ts";

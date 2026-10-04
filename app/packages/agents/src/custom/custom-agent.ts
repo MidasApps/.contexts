@@ -41,14 +41,19 @@ export const customInstructionsOf = (seed: string, agent: CustomAgent): string =
 // A skill Mastra refuses (its own name or content rules) is left out; the agent still runs.
 const inlineSkillOf = (skill: CustomSkill): InlineSkill[] => {
   try {
-    return [createSkill({ name: customSkillNameOf(skill), description: skill.description, instructions: skill.instructions })];
+    return [
+      createSkill({ name: customSkillNameOf(skill), description: skill.description, instructions: skill.instructions }),
+    ];
   } catch {
     return [];
   }
 };
 
 /** Skills of a run: the selected platform skills that exist, then the organization's enabled ones. */
-export const skillsOfRecord = (loaded: LoadedCustomAgent, coreSkills: Readonly<Record<string, InlineSkill>>): InlineSkill[] => [
+export const skillsOfRecord = (
+  loaded: LoadedCustomAgent,
+  coreSkills: Readonly<Record<string, InlineSkill>>,
+): InlineSkill[] => [
   ...loaded.agent.coreSkills.flatMap((name) => coreSkills[name] ?? []),
   ...loaded.skills.flatMap(inlineSkillOf),
 ];
@@ -86,7 +91,8 @@ export const createCustomAgent = (args: CustomAgentArgs): Agent => {
   return new Agent({
     id: CUSTOM_AGENT_ID,
     name: "Organization agent",
-    description: "Runs an agent the organization configured: its instructions, model role, tools, skills and knowledge scope.",
+    description:
+      "Runs an agent the organization configured: its instructions, model role, tools, skills and knowledge scope.",
     instructions: async (run: Run) => customInstructionsOf(seed, (await required(run)).agent),
     // Mastra also resolves the model outside a run (registration, the durable wrapper), so this
     // never throws: a run without a record still fails on its instructions and has no tools.

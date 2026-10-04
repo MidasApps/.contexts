@@ -1,11 +1,11 @@
-import { UserIdSchema, type MembershipId, type Principal } from "@core/contracts";
+import { type MembershipId, type Principal, UserIdSchema } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import type { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
-import type { EscalationForbiddenError } from "../../domain/errors/escalation-forbidden-error.ts";
 import { AccessNotFoundError } from "../../domain/errors/access-not-found-error.ts";
+import type { EscalationForbiddenError } from "../../domain/errors/escalation-forbidden-error.ts";
 import { LastOwnerError } from "../../domain/errors/last-owner-error.ts";
 import type { AccessWriteDeps } from "../access-write-deps.ts";
 import { requirePermission, requireWithinActor } from "../grant-checks.ts";
@@ -23,7 +23,11 @@ export type RevokeMembershipError = AccessDeniedError | AccessNotFoundError | La
 
 export type RevokeMembership = (command: RevokeMembershipCommand) => Promise<Result<void, RevokeMembershipError>>;
 
-const applyRevoke = async (tx: Transaction, deps: AccessWriteDeps, command: RevokeMembershipCommand): Promise<Result<void, RevokeMembershipError>> => {
+const applyRevoke = async (
+  tx: Transaction,
+  deps: AccessWriteDeps,
+  command: RevokeMembershipCommand,
+): Promise<Result<void, RevokeMembershipError>> => {
   const membership = await deps.memberships.get(tx, command.membershipId);
   if (membership === null) return err(new AccessNotFoundError("membership"));
   const principal = { type: membership.principalType, id: membership.principalId };

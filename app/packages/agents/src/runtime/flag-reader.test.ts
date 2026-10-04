@@ -24,7 +24,9 @@ describe("createFlagReader", () => {
 
   it("keeps the last values when a refresh fails and answers the fallback when nothing is cached", async () => {
     let fail = false;
-    const port: FlagsPort = { getValues: () => (fail ? Promise.reject(new Error("down")) : Promise.resolve({ "ai.kill-switch": false })) };
+    const port: FlagsPort = {
+      getValues: () => (fail ? Promise.reject(new Error("down")) : Promise.resolve({ "ai.kill-switch": false })),
+    };
     let now = 0;
     const reader = createFlagReader(port, { now: () => now });
     expect(await reader.isEnabled({ key: "ai.kill-switch", tenantId: "t1", fallback: true })).toBe(false);
@@ -39,7 +41,16 @@ describe("createFlagReader", () => {
     const registry = new Set(CORE_FLAGS.map((flag) => flag.key));
     for (const key of Object.values(CORE_FLAG_KEYS)) expect(registry.has(key)).toBe(true);
     const applies = isAgentRunPath();
-    expect(["/api/agents/assistant/stream", "/api/mcp/core/mcp", "/chat/assistant", "/voice/speech"].every(applies)).toBe(true);
-    expect(["/api/workflows/approval-demo/runs", "/workflow-runs/x", "/tenant-schedules", "/workflow-approvals/a/settle"].some(applies)).toBe(false);
+    expect(
+      ["/api/agents/assistant/stream", "/api/mcp/core/mcp", "/chat/assistant", "/voice/speech"].every(applies),
+    ).toBe(true);
+    expect(
+      [
+        "/api/workflows/approval-demo/runs",
+        "/workflow-runs/x",
+        "/tenant-schedules",
+        "/workflow-approvals/a/settle",
+      ].some(applies),
+    ).toBe(false);
   });
 });

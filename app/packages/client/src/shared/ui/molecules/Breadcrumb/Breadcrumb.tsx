@@ -26,7 +26,9 @@ export function BreadcrumbList({ className, ...props }: ComponentProps<"ol">) {
 }
 
 export function BreadcrumbItem({ className, ...props }: ComponentProps<"li">) {
-  return <li data-slot="breadcrumb-item" className={cn("inline-flex min-w-0 items-center gap-1.5", className)} {...props} />;
+  return (
+    <li data-slot="breadcrumb-item" className={cn("inline-flex min-w-0 items-center gap-1.5", className)} {...props} />
+  );
 }
 
 /** Link to an ancestor; pass the router's `Link` with `asChild`. */
@@ -35,7 +37,10 @@ export function BreadcrumbLink({ asChild = false, className, ...props }: Compone
   return (
     <Component
       data-slot="breadcrumb-link"
-      className={cn("truncate rounded-2xs underline-offset-4 transition-colors hover:text-foreground hover:underline", className)}
+      className={cn(
+        "truncate rounded-2xs underline-offset-4 transition-colors hover:text-foreground hover:underline",
+        className,
+      )}
       {...props}
     />
   );
@@ -43,13 +48,24 @@ export function BreadcrumbLink({ asChild = false, className, ...props }: Compone
 
 export function BreadcrumbPage({ className, ...props }: ComponentProps<"span">) {
   return (
-    <span data-slot="breadcrumb-page" aria-current="page" className={cn("truncate font-medium text-foreground", className)} {...props} />
+    <span
+      data-slot="breadcrumb-page"
+      aria-current="page"
+      className={cn("truncate font-medium text-foreground", className)}
+      {...props}
+    />
   );
 }
 
 export function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<"li">) {
   return (
-    <li data-slot="breadcrumb-separator" role="presentation" aria-hidden="true" className={cn("[&>svg]:size-3.5", className)} {...props}>
+    <li
+      data-slot="breadcrumb-separator"
+      role="presentation"
+      aria-hidden="true"
+      className={cn("[&>svg]:size-3.5", className)}
+      {...props}
+    >
       {children ?? <ChevronRightIcon />}
     </li>
   );
@@ -59,7 +75,11 @@ export function BreadcrumbSeparator({ children, className, ...props }: Component
 export function BreadcrumbEllipsis({ className, ...props }: ComponentProps<"span">) {
   const t = useTranslations("common.navigation");
   return (
-    <span data-slot="breadcrumb-ellipsis" className={cn("flex size-6 items-center justify-center", className)} {...props}>
+    <span
+      data-slot="breadcrumb-ellipsis"
+      className={cn("flex size-6 items-center justify-center", className)}
+      {...props}
+    >
       <EllipsisIcon className="size-4" aria-hidden="true" />
       <span className="sr-only">{t("more")}</span>
     </span>

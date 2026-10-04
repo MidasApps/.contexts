@@ -10,7 +10,10 @@ export const LOCAL_SECRETS_COLLECTION = "local-secrets";
  * emulator, so local connectors work without Secret Manager.
  * @throws {LocalSecretStoreOutsideLocalError} outside `local` (startup bug, never a fallback).
  */
-export const createLocalSecretStore = (deps: { readonly firestore: Firestore; readonly appEnv: string }): SecretStore => {
+export const createLocalSecretStore = (deps: {
+  readonly firestore: Firestore;
+  readonly appEnv: string;
+}): SecretStore => {
   if (deps.appEnv !== "local") throw new LocalSecretStoreOutsideLocalError(deps.appEnv);
   const doc = (name: string) => deps.firestore.collection(LOCAL_SECRETS_COLLECTION).doc(name);
   return {

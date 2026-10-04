@@ -1,6 +1,6 @@
-import type { Page } from "@playwright/test";
 import { SEED_USERS } from "@core/e2e/seed-users";
 import { completeSmsChallenge, showSidebar, submitSignIn } from "@core/e2e/sign-in";
+import type { Page } from "@playwright/test";
 import { expect, openAs, test, toast } from "./sp5-test.ts";
 
 // SP5 Task 16: `/admin/users`: search by name, e-mail and id, support access (impersonation)
@@ -76,7 +76,9 @@ test.describe("support access", () => {
     await expect(row).toContainText(viewer.displayName);
     await expect(row).toContainText("Aberta");
 
-    await row.getByRole("button", { name: `Encerrar a sessão de ${SEED_USERS.staff.displayName} como ${viewer.displayName}` }).click();
+    await row
+      .getByRole("button", { name: `Encerrar a sessão de ${SEED_USERS.staff.displayName} como ${viewer.displayName}` })
+      .click();
     const confirm = staffPage.getByRole("alertdialog", { name: "Encerrar esta sessão de suporte?" });
     await confirm.getByRole("button", { name: "Encerrar sessão" }).click();
     await expect(toast(staffPage, `Sessão de ${SEED_USERS.staff.displayName} encerrada.`)).toBeVisible();
@@ -84,7 +86,9 @@ test.describe("support access", () => {
 
     await sessions.getByRole("combobox", { name: "Mostrar" }).click();
     await staffPage.getByRole("option", { name: "Todas, mais recentes primeiro" }).click();
-    await expect(sessions.getByRole("row").filter({ hasText: "E2E support ticket 4711" }).first()).toContainText("Encerrada");
+    await expect(sessions.getByRole("row").filter({ hasText: "E2E support ticket 4711" }).first()).toContainText(
+      "Encerrada",
+    );
   });
 
   test("refuses a reason that is too short", async ({ staffPage }) => {
@@ -102,7 +106,11 @@ test.describe("support access", () => {
 });
 
 test.describe("support access in the tab", () => {
-  test("opens the app as the user, survives a reload and leaves back to the staff account", async ({ browser, emulator, world }) => {
+  test("opens the app as the user, survives a reload and leaves back to the staff account", async ({
+    browser,
+    emulator,
+    world,
+  }) => {
     test.setTimeout(180_000);
     const staff = await openAs(browser, { cookies: [], origins: [] });
     const page = staff.page;
@@ -115,9 +123,14 @@ test.describe("support access in the tab", () => {
     const reason = `${REASON_PATTERN} 5150: reload and leave.`;
     await startSession(page, world.alpha.name, reason);
 
-    await page.getByRole("region", { name: "Sessão aberta nesta aba" }).getByRole("button", { name: "Abrir o app como este usuário" }).click();
+    await page
+      .getByRole("region", { name: "Sessão aberta nesta aba" })
+      .getByRole("button", { name: "Abrir o app como este usuário" })
+      .click();
     // The banner names the user (and the organization when known) the staff member is viewing as.
-    const banner = page.getByText(new RegExp(`^Você está vendo o app como ${viewer.displayName}\\b.*, em modo somente leitura`));
+    const banner = page.getByText(
+      new RegExp(`^Você está vendo o app como ${viewer.displayName}\\b.*, em modo somente leitura`),
+    );
     await expect(banner).toBeVisible();
     await showSidebar(page);
     await expect(page.getByRole("button", { name: `${viewer.displayName}, menu da conta` })).toBeVisible();

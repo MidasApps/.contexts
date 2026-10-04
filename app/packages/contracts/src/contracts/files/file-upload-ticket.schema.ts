@@ -11,9 +11,13 @@ const none = (description: string) => ({ description, pii: "none" as const });
  * The client sends every header listed, unchanged, or the storage rejects it.
  */
 export const UploadInstructionsSchema = z.strictObject({
-  method: z.enum(["PUT", "POST"]).meta(none("HTTP method of the upload: PUT for a signed URL; POST only for the local Storage Emulator.")),
+  method: z
+    .enum(["PUT", "POST"])
+    .meta(none("HTTP method of the upload: PUT for a signed URL; POST only for the local Storage Emulator.")),
   url: z.url().meta(none("Short-lived upload URL; it grants write access to one object only.")),
-  headers: z.record(z.string(), z.string()).meta(none("Headers the upload must carry exactly (Content-Type, x-goog-content-length-range).")),
+  headers: z
+    .record(z.string(), z.string())
+    .meta(none("Headers the upload must carry exactly (Content-Type, x-goog-content-length-range).")),
   expiresAt: IsoDateTimeSchema.meta(none("When the upload URL stops working (UTC).")),
 });
 export type UploadInstructions = z.infer<typeof UploadInstructionsSchema>;

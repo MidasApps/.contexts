@@ -1,6 +1,6 @@
 "use client";
 
-import { adminListImpersonationSessionsEndpoint, type AdminImpersonationSession } from "@core/contracts";
+import { type AdminImpersonationSession, adminListImpersonationSessionsEndpoint } from "@core/contracts";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -28,13 +28,22 @@ export const adminImpersonationSessionsQuery = (callEndpoint: CallEndpoint, scop
     queryKey: impersonationSessionKeys.list(scope),
     fetchPage: async (cursor, signal) =>
       callEndpoint(adminListImpersonationSessionsEndpoint, {
-        query: { ...pageQuery(cursor, IMPERSONATION_SESSIONS_PAGE_LIMIT), ...(scope === "active" ? { status: "active" as const } : {}) },
+        query: {
+          ...pageQuery(cursor, IMPERSONATION_SESSIONS_PAGE_LIMIT),
+          ...(scope === "active" ? { status: "active" as const } : {}),
+        },
         signal,
       }),
   });
 
-export const useAdminImpersonationSessions = (scope: ImpersonationSessionScope, options: { enabled?: boolean } = {}) => {
+export const useAdminImpersonationSessions = (
+  scope: ImpersonationSessionScope,
+  options: { enabled?: boolean } = {},
+) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useInfiniteQuery({ ...adminImpersonationSessionsQuery(callEndpoint, scope), enabled: signedIn && options.enabled !== false });
+  return useInfiniteQuery({
+    ...adminImpersonationSessionsQuery(callEndpoint, scope),
+    enabled: signedIn && options.enabled !== false,
+  });
 };

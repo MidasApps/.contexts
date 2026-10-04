@@ -62,7 +62,14 @@ export const useEvalsUrl = (): EvalsUrl => {
         else next.set("page", String(page));
       }),
     toggleCompare: (experimentId) =>
-      write((next) => writeCompare(next, compare.includes(experimentId) ? compare.filter((id) => id !== experimentId) : [compare[0], experimentId].filter((id): id is string => id !== undefined))),
+      write((next) =>
+        writeCompare(
+          next,
+          compare.includes(experimentId)
+            ? compare.filter((id) => id !== experimentId)
+            : [compare[0], experimentId].filter((id): id is string => id !== undefined),
+        ),
+      ),
     clearCompare: () => write((next) => writeCompare(next, [])),
   };
 };

@@ -22,7 +22,10 @@ const main = async (): Promise<void> => {
   if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
   const target = resolveSeedTarget(process.env);
   const auth = createAuthEmulatorAdmin({ origin: target.authEmulatorOrigin, projectId: target.projectId });
-  const firebase = createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: target.projectId }, processEnv: process.env });
+  const firebase = createFirebaseAdmin({
+    env: { APP_ENV: "local", FIREBASE_PROJECT_ID: target.projectId },
+    processEnv: process.env,
+  });
   const logger = createLogger({ context: { service: "scripts", env: "local" } });
   const server = createCoreServer({ env: { API_KEY_PREFIX: "core", ORGANIZATION_SELF_SERVE: true }, firebase, logger });
   const core = createCoreSeedAdapter({ server, firebase });

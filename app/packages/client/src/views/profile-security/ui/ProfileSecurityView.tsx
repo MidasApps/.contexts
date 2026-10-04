@@ -11,7 +11,9 @@ import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-nav/index.
 /** The sign-in MFA form reused to confirm a sensitive change. */
 function ReauthMfaStep({ challenge, onResolved, onCancel }: MfaStepProps) {
   const t = useTranslations("profile.security.password");
-  return <MfaChallengeForm challenge={challenge} onResolved={onResolved} onCancel={onCancel} cancelLabel={t("cancelMfa")} />;
+  return (
+    <MfaChallengeForm challenge={challenge} onResolved={onResolved} onCancel={onCancel} cancelLabel={t("cancelMfa")} />
+  );
 }
 
 /**

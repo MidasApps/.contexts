@@ -1,7 +1,12 @@
 import { ApiError } from "@core/client/shared/api";
 import type { SessionBridgePort } from "@core/client/shared/lib/session-bridge";
 
-type ActionError = { readonly code: string; readonly message: string; readonly requestId: string; readonly details?: readonly { field: string; issue: string }[] | undefined };
+type ActionError = {
+  readonly code: string;
+  readonly message: string;
+  readonly requestId: string;
+  readonly details?: readonly { field: string; issue: string }[] | undefined;
+};
 type ActionResult<T> = { readonly ok: true; readonly data: T } | { readonly ok: false; readonly error: ActionError };
 
 /** The web session Server Actions (`src/app/[locale]/(auth)/actions.ts`, SP1 decision 0007). */
@@ -9,7 +14,9 @@ export type WebSessionActions = {
   readonly createSession: (input: { idToken: string }) => Promise<ActionResult<{ expiresAt: string }>>;
   readonly exchangeSession: () => Promise<ActionResult<{ customToken: string }>>;
   readonly signOut: () => Promise<ActionResult<null>>;
-  readonly enterImpersonation: (input: { impersonationSessionId: string }) => Promise<ActionResult<{ customToken: string }>>;
+  readonly enterImpersonation: (input: {
+    impersonationSessionId: string;
+  }) => Promise<ActionResult<{ customToken: string }>>;
   readonly leaveImpersonation: () => Promise<ActionResult<{ customToken: string }>>;
 };
 
@@ -23,7 +30,13 @@ const STATUS_BY_CODE: Readonly<Record<string, number>> = {
 };
 
 const toApiError = (error: ActionError): ApiError =>
-  new ApiError({ status: STATUS_BY_CODE[error.code] ?? 500, code: error.code, message: error.message, details: error.details, requestId: error.requestId });
+  new ApiError({
+    status: STATUS_BY_CODE[error.code] ?? 500,
+    code: error.code,
+    message: error.message,
+    details: error.details,
+    requestId: error.requestId,
+  });
 
 const dataOf = <T>(result: ActionResult<T>): T => {
   if (!result.ok) throw toApiError(result.error);

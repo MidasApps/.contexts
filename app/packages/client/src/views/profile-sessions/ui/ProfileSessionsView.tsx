@@ -14,8 +14,8 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
-import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { ProfilePageFrame } from "#/widgets/profile-nav/index.ts";
 
@@ -27,7 +27,9 @@ function SessionDevice({ session }: { session: SessionSummary }) {
     <span className="flex items-center gap-2.5">
       <Icon name={session.kind === "desktop" ? "monitor" : "globe"} className="size-4 text-muted-foreground" />
       <span className="flex min-w-0 flex-col">
-        <span className="truncate font-medium">{session.userAgent === "" ? t("unknownDevice") : session.userAgent}</span>
+        <span className="truncate font-medium">
+          {session.userAgent === "" ? t("unknownDevice") : session.userAgent}
+        </span>
         <span className="text-xs text-muted-foreground">{t(`kinds.${session.kind}`)}</span>
       </span>
       {session.current ? (
@@ -48,7 +50,15 @@ function SessionDevice({ session }: { session: SessionSummary }) {
  * Revoke for other sessions; the current one is ended by signing out (its revocation would only
  * surface at the next request, SP1 `SessionSummary.current`).
  */
-function SessionAction({ session, onRevoke, className }: { session: SessionSummary; onRevoke: () => void; className?: string }) {
+function SessionAction({
+  session,
+  onRevoke,
+  className,
+}: {
+  session: SessionSummary;
+  onRevoke: () => void;
+  className?: string;
+}) {
   const t = useTranslations("profile.sessions");
   if (session.current) {
     return (
@@ -58,7 +68,13 @@ function SessionAction({ session, onRevoke, className }: { session: SessionSumma
     );
   }
   return (
-    <Button variant="outline" size="sm" className={className} onClick={onRevoke} aria-label={t("revokeNamed", { name: session.userAgent })}>
+    <Button
+      variant="outline"
+      size="sm"
+      className={className}
+      onClick={onRevoke}
+      aria-label={t("revokeNamed", { name: session.userAgent })}
+    >
       {t("revokeAction")}
     </Button>
   );
@@ -69,10 +85,23 @@ const useColumns = (onRevoke: (session: SessionSummary) => void) => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.display({ id: "device", header: () => t("columns.device"), cell: ({ row }) => <SessionDevice session={row.original} /> }),
-      column.accessor("lastSeenAt", { header: () => t("columns.lastSeen"), cell: ({ getValue }) => formatDateTime(getValue()) }),
-      column.accessor("createdAt", { header: () => t("columns.created"), cell: ({ getValue }) => formatDateTime(getValue(), "date") }),
-      column.accessor("expiresAt", { header: () => t("columns.expires"), cell: ({ getValue }) => formatDateTime(getValue(), "date") }),
+      column.display({
+        id: "device",
+        header: () => t("columns.device"),
+        cell: ({ row }) => <SessionDevice session={row.original} />,
+      }),
+      column.accessor("lastSeenAt", {
+        header: () => t("columns.lastSeen"),
+        cell: ({ getValue }) => formatDateTime(getValue()),
+      }),
+      column.accessor("createdAt", {
+        header: () => t("columns.created"),
+        cell: ({ getValue }) => formatDateTime(getValue(), "date"),
+      }),
+      column.accessor("expiresAt", {
+        header: () => t("columns.expires"),
+        cell: ({ getValue }) => formatDateTime(getValue(), "date"),
+      }),
       column.display({
         id: "actions",
         header: () => t("columns.actions"),
@@ -126,7 +155,15 @@ export function ProfileSessionsView() {
             status={dataTableStatusOf(sessions)}
             pagination={paged.pagination}
             renderCard={(session) => <SessionCard session={session} onRevoke={() => setTarget(session)} />}
-            empty={<EmptyState frame="plain" headingLevel={3} icon="monitor" title={t("emptyTitle")} description={t("emptyDescription")} />}
+            empty={
+              <EmptyState
+                frame="plain"
+                headingLevel={3}
+                icon="monitor"
+                title={t("emptyTitle")}
+                description={t("emptyDescription")}
+              />
+            }
           />
         </SectionCard>
         <SectionCard tone="danger" title={t("revokeAll.title")} description={t("revokeAll.sectionDescription")}>
@@ -135,7 +172,11 @@ export function ProfileSessionsView() {
           </div>
         </SectionCard>
       </div>
-      <RevokeSessionDialog session={target} onOpenChange={(open) => !open && setTarget(null)} label={target?.userAgent ?? ""} />
+      <RevokeSessionDialog
+        session={target}
+        onOpenChange={(open) => !open && setTarget(null)}
+        label={target?.userAgent ?? ""}
+      />
     </ProfilePageFrame>
   );
 }

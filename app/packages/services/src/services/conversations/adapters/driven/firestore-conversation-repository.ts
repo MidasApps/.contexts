@@ -21,7 +21,8 @@ const listQuery = (base: Query, query: ConversationListQuery): Query | typeof EM
     .where("deletedAt", "==", null)
     .where("archived", "==", query.archived);
   if (query.pinned !== undefined) q = q.where("pinned", "==", query.pinned);
-  if (query.tokens !== undefined && query.tokens.length > 0) q = q.where("searchTokens", "array-contains-any", [...query.tokens]);
+  if (query.tokens !== undefined && query.tokens.length > 0)
+    q = q.where("searchTokens", "array-contains-any", [...query.tokens]);
   q = q.orderBy("pinned", "desc").orderBy("lastMessageAt", "desc").orderBy(FieldPath.documentId(), "desc");
   if (query.page.after === undefined) return q;
   const position = parseConversationPosition(query.page.after);
@@ -34,7 +35,9 @@ const listQuery = (base: Query, query: ConversationListQuery): Query | typeof EM
  * composite indexes `tenantId, ownerId, deletedAt, archived[, pinned][, searchTokens], pinned desc,
  * lastMessageAt desc`; the stream cap uses `tenantId, activeStreamStartedAt`.
  */
-export const createFirestoreConversationRepository = (deps: { readonly firestore: Firestore }): ConversationRepository => {
+export const createFirestoreConversationRepository = (deps: {
+  readonly firestore: Firestore;
+}): ConversationRepository => {
   const collection = () => deps.firestore.collection(CONVERSATIONS_COLLECTION);
   const read = async (id: string) => {
     const snapshot = await collection().doc(id).get();
@@ -43,8 +46,10 @@ export const createFirestoreConversationRepository = (deps: { readonly firestore
   return {
     newId: () => ConversationIdSchema.parse(collection().doc().id),
     get: read,
-    create: async (conversation) => void (await collection().doc(conversation.id).create(toConversationDocument(conversation))),
-    save: async (conversation) => void (await collection().doc(conversation.id).set(toConversationDocument(conversation))),
+    create: async (conversation) =>
+      void (await collection().doc(conversation.id).create(toConversationDocument(conversation))),
+    save: async (conversation) =>
+      void (await collection().doc(conversation.id).set(toConversationDocument(conversation))),
     list: async (query) => {
       const q = listQuery(collection(), query);
       if (q === EMPTY) return { items: [], nextCursor: null };
@@ -55,7 +60,11 @@ export const createFirestoreConversationRepository = (deps: { readonly firestore
     startRun: async ({ conversationId, runId, startedAt }) =>
       void (await collection()
         .doc(conversationId)
-        .update({ activeRunId: runId, activeStreamStartedAt: Timestamp.fromDate(new Date(startedAt)), updatedAt: Timestamp.fromDate(new Date(startedAt)) })),
+        .update({
+          activeRunId: runId,
+          activeStreamStartedAt: Timestamp.fromDate(new Date(startedAt)),
+          updatedAt: Timestamp.fromDate(new Date(startedAt)),
+        })),
     endRun: (end) =>
       deps.firestore.runTransaction(async (tx) => {
         const ref = collection().doc(end.conversationId);
@@ -67,7 +76,11 @@ export const createFirestoreConversationRepository = (deps: { readonly firestore
         return next;
       }),
     countActiveRuns: async ({ tenantId, since }) => {
-      const snapshot = await collection().where("tenantId", "==", tenantId).where("activeStreamStartedAt", ">", Timestamp.fromDate(new Date(since))).count().get();
+      const snapshot = await collection()
+        .where("tenantId", "==", tenantId)
+        .where("activeStreamStartedAt", ">", Timestamp.fromDate(new Date(since)))
+        .count()
+        .get();
       return snapshot.data().count;
     },
   };

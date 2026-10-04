@@ -1,7 +1,7 @@
 "use client";
 
 import type { OrganizationAdminSummary, Plan } from "@core/contracts";
-import { useId, useState, type FormEvent } from "react";
+import { type FormEvent, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAsyncAction } from "#/shared/lib/errors/use-async-action.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
@@ -44,12 +44,18 @@ export function OrganizationPlanForm({ organization, plans }: OrganizationPlanFo
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={selectId}>{t("label")}</Label>
         <Select value={selected} onValueChange={setSelected}>
-          <SelectTrigger id={selectId} className="w-full sm:w-72" aria-describedby={save.error === undefined ? undefined : errorId}>
+          <SelectTrigger
+            id={selectId}
+            className="w-full sm:w-72"
+            aria-describedby={save.error === undefined ? undefined : errorId}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={DEFAULT_PLAN}>{t("default")}</SelectItem>
-            {unknownCurrent && organization.planId !== null ? <SelectItem value={organization.planId}>{organization.planId}</SelectItem> : null}
+            {unknownCurrent && organization.planId !== null ? (
+              <SelectItem value={organization.planId}>{organization.planId}</SelectItem>
+            ) : null}
             {plans.map((plan) => (
               <SelectItem key={plan.id} value={plan.id}>
                 {plan.name}

@@ -2,7 +2,13 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
-import { generativeUiOf, pendingApprovalOf, type GenerativeUiView, type RenderToolPart, type ToolPartContext } from "#/entities/message/index.ts";
+import {
+  type GenerativeUiView,
+  generativeUiOf,
+  pendingApprovalOf,
+  type RenderToolPart,
+  type ToolPartContext,
+} from "#/entities/message/index.ts";
 import { ToolConfirmation } from "#/features/chat-approval/index.ts";
 import { ApprovalDiff, diffPropsOf, GenerativePart } from "#/features/generative-ui/index.ts";
 import type { ChatSession } from "../model/use-chat-session.ts";
@@ -15,7 +21,9 @@ const uiOf = (output: unknown, call: { toolCallId: string; toolName: string }, s
   const ui = generativeUiOf(output);
   if (ui !== null) return { ui, ...call };
   const pending = pendingApprovalOf(output);
-  return pending === null ? null : { ui: { component: "approval-pending", props: { approvalId: pending.approvalId, summary } }, ...call };
+  return pending === null
+    ? null
+    : { ui: { component: "approval-pending", props: { approvalId: pending.approvalId, summary } }, ...call };
 };
 
 /**
@@ -23,13 +31,24 @@ const uiOf = (output: unknown, call: { toolCallId: string; toolName: string }, s
  * outputs of the subagent's tool calls (`catalog.renderForm` runs inside the data agent, so its
  * `{ ui }` arrives in `subAgentToolResults`, not as a part of its own).
  */
-const uiRequestsOf = ({ tool, delegation }: ToolPartContext, pendingSummary: (toolName: string) => string): UiRequest[] => {
+const uiRequestsOf = (
+  { tool, delegation }: ToolPartContext,
+  pendingSummary: (toolName: string) => string,
+): UiRequest[] => {
   const own = uiOf(tool.output, tool, pendingSummary(tool.toolName));
   const nested = (delegation?.steps ?? []).map((step) => uiOf(step.result, step, pendingSummary(step.toolName)));
   return [own, ...nested].filter((request): request is UiRequest => request !== null);
 };
 
-function ChatToolPart({ context, fallback, session }: { context: ToolPartContext; fallback: ReactNode; session: ChatSession }) {
+function ChatToolPart({
+  context,
+  fallback,
+  session,
+}: {
+  context: ToolPartContext;
+  fallback: ReactNode;
+  session: ChatSession;
+}) {
   const t = useTranslations("chat.approval");
   const { tool, delegation, preview, request, message } = context;
   // Answers go to the latest turn only: a form of an older turn was already answered or abandoned.

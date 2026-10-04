@@ -7,7 +7,9 @@ import type { HttpClient } from "./http-client.ts";
 type InputOf<Schema> = Schema extends z.ZodType ? z.input<Schema> : never;
 
 /** Declared parts are required (params, body); the query is optional as a whole. */
-type PartsOf<E extends EndpointDefinition> = (E["params"] extends z.ZodType ? { params: InputOf<E["params"]> } : { params?: never }) &
+type PartsOf<E extends EndpointDefinition> = (E["params"] extends z.ZodType
+  ? { params: InputOf<E["params"]> }
+  : { params?: never }) &
   (E["query"] extends z.ZodType ? { query?: InputOf<E["query"]> } : { query?: never }) &
   (E["body"] extends z.ZodType ? { body: InputOf<E["body"]> } : { body?: never });
 
@@ -17,7 +19,10 @@ export type EndpointCallOptions<E extends EndpointDefinition> = PartsOf<E> & {
   signal?: AbortSignal;
 };
 
-export type CallEndpoint = <const E extends EndpointDefinition>(endpoint: E, options: EndpointCallOptions<E>) => Promise<InferEndpointResponse<E>>;
+export type CallEndpoint = <const E extends EndpointDefinition>(
+  endpoint: E,
+  options: EndpointCallOptions<E>,
+) => Promise<InferEndpointResponse<E>>;
 
 const PARAM = /\{([a-zA-Z][A-Za-z0-9]*)\}/gu;
 
@@ -28,7 +33,7 @@ const toText = (value: unknown, name: string): string => {
   throw new RangeError(`Unsupported value for "${name}"`);
 };
 
-const fillPath =(path: string, params: Record<string, unknown> | undefined): string =>
+const fillPath = (path: string, params: Record<string, unknown> | undefined): string =>
   path.replace(PARAM, (_segment, name: string) => {
     const value = params?.[name];
     if (value === undefined || value === null || value === "") throw new RangeError(`Missing path param {${name}}`);
@@ -47,10 +52,18 @@ const serializeQuery = (query: Record<string, unknown> | undefined): string => {
 };
 
 const invalidResponse = (status: number, requestId: string | undefined, cause?: unknown): ApiError =>
-  new ApiError({ status, code: "INVALID_RESPONSE", message: "Response does not match the endpoint contract.", requestId }, { cause });
+  new ApiError(
+    { status, code: "INVALID_RESPONSE", message: "Response does not match the endpoint contract.", requestId },
+    { cause },
+  );
 
 /** Parses a success body with the schema the descriptor declares for that status. */
-const parseResponse = (endpoint: EndpointDefinition, status: number, body: unknown, requestId: string | undefined): unknown => {
+const parseResponse = (
+  endpoint: EndpointDefinition,
+  status: number,
+  body: unknown,
+  requestId: string | undefined,
+): unknown => {
   const responses = endpoint.responses as Record<number, z.ZodType | null | undefined>;
   if (!(status in responses)) throw invalidResponse(status, requestId);
   const schema = responses[status];
@@ -82,5 +95,7 @@ export const createEndpointCaller =
       auth: endpoint.auth,
       signal: options.signal,
     });
-    return parseResponse(endpoint, response.status, response.body, response.requestId) as InferEndpointResponse<typeof endpoint>;
+    return parseResponse(endpoint, response.status, response.body, response.requestId) as InferEndpointResponse<
+      typeof endpoint
+    >;
   };

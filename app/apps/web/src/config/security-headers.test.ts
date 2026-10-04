@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { API_CONTENT_SECURITY_POLICY, buildPageContentSecurityPolicy, buildSecurityHeaders } from "./security-headers";
 
-const toRecord = (headers: { key: string; value: string }[]) => Object.fromEntries(headers.map(({ key, value }) => [key, value]));
+const toRecord = (headers: { key: string; value: string }[]) =>
+  Object.fromEntries(headers.map(({ key, value }) => [key, value]));
 
 const directive = (policy: string, name: string) => policy.split("; ").find((entry) => entry.startsWith(`${name} `));
 
@@ -22,7 +23,13 @@ describe("buildPageContentSecurityPolicy", () => {
   it("locks down framing, plugins, base URI and form targets", () => {
     const policy = buildPageContentSecurityPolicy({ isDevelopment: false });
 
-    for (const expected of ["default-src 'self'", "frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'", "form-action 'self'"]) {
+    for (const expected of [
+      "default-src 'self'",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ]) {
       expect(policy).toContain(expected);
     }
   });
@@ -31,12 +38,22 @@ describe("buildPageContentSecurityPolicy", () => {
     expect(directive(buildPageContentSecurityPolicy({ isDevelopment: false }), "connect-src")).toBe(
       "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://storage.googleapis.com",
     );
-    expect(directive(buildPageContentSecurityPolicy({ isDevelopment: false, authEmulatorOrigin: "http://127.0.0.1:9099" }), "connect-src")).toContain("http://127.0.0.1:9099");
+    expect(
+      directive(
+        buildPageContentSecurityPolicy({ isDevelopment: false, authEmulatorOrigin: "http://127.0.0.1:9099" }),
+        "connect-src",
+      ),
+    ).toContain("http://127.0.0.1:9099");
   });
 
   it("lets uploads reach the signed URL origin (and the Storage Emulator in local) and plays only own or blob audio", () => {
-    const policy = buildPageContentSecurityPolicy({ isDevelopment: false, storageEmulatorOrigin: "http://127.0.0.1:9199" });
-    expect(directive(policy, "connect-src")).toBe("connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://storage.googleapis.com http://127.0.0.1:9199");
+    const policy = buildPageContentSecurityPolicy({
+      isDevelopment: false,
+      storageEmulatorOrigin: "http://127.0.0.1:9199",
+    });
+    expect(directive(policy, "connect-src")).toBe(
+      "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://storage.googleapis.com http://127.0.0.1:9199",
+    );
     expect(directive(policy, "media-src")).toBe("media-src 'self' blob:");
     expect(directive(policy, "img-src")).toBe("img-src 'self' blob: data:");
   });
@@ -48,7 +65,9 @@ describe("buildPageContentSecurityPolicy", () => {
   });
 
   it("falls back to inline scripts without a nonce (decision 0016 §2)", () => {
-    expect(directive(buildPageContentSecurityPolicy({ isDevelopment: false }), "script-src")).toBe("script-src 'self' 'unsafe-inline'");
+    expect(directive(buildPageContentSecurityPolicy({ isDevelopment: false }), "script-src")).toBe(
+      "script-src 'self' 'unsafe-inline'",
+    );
   });
 
   it("never allows eval or websocket origins outside development", () => {

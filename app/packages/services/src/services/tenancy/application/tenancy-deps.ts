@@ -61,7 +61,12 @@ type AuditFact = {
 };
 
 /** Appends a tenant audit entry for a tenancy change inside `tx`. */
-export const recordTenancyAudit = async (tx: Transaction, deps: Pick<TenancyDeps, "audit">, command: TenancyCommand, fact: AuditFact): Promise<void> => {
+export const recordTenancyAudit = async (
+  tx: Transaction,
+  deps: Pick<TenancyDeps, "audit">,
+  command: TenancyCommand,
+  fact: AuditFact,
+): Promise<void> => {
   await deps.audit.record(
     {
       log: "tenant",

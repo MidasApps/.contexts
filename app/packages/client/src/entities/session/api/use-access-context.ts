@@ -1,7 +1,7 @@
 "use client";
 
 import type { AccessContext } from "@core/contracts";
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { accessContextQuery, type NodeParams } from "#/shared/api/core-queries.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";

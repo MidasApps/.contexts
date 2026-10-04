@@ -10,7 +10,11 @@ const mode = evalModeOf(process.env);
 describe.skipIf(mode === null)("observational memory comparison", () => {
   it("runs configs A and B over memory.v1 and records score, tokens and cost", { timeout: 600_000 }, async () => {
     const dataset = loadMemoryDataset();
-    const { report, reportPath } = await runMemoryComparison({ mode: mode ?? "fake", env: evalEnvOf(mode ?? "fake", process.env), dataset });
+    const { report, reportPath } = await runMemoryComparison({
+      mode: mode ?? "fake",
+      env: evalEnvOf(mode ?? "fake", process.env),
+      dataset,
+    });
     expect(reportPath).not.toBeNull();
     expect(report.configs.map((config) => config.configId)).toEqual(["A-semantic-recall", "B-observational"]);
     for (const config of report.configs) {

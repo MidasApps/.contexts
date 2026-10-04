@@ -17,7 +17,9 @@ const weekdayName = (weekday: number, locale: string): string =>
 // The wall-clock time as the viewer writes it; the cron's time is already in the schedule's zone.
 const wallTime = (time: string, locale: string): string => {
   const [hour = 0, minute = 0] = time.split(":").map(Number);
-  return new Intl.DateTimeFormat(locale, { timeStyle: "short", timeZone: "UTC" }).format(Date.UTC(2023, 0, 1, hour, minute));
+  return new Intl.DateTimeFormat(locale, { timeStyle: "short", timeZone: "UTC" }).format(
+    Date.UTC(2023, 0, 1, hour, minute),
+  );
 };
 
 /**
@@ -34,7 +36,10 @@ export const cronDescriptionOf = (cron: string, locale: string): CronDescription
     case "weekdays":
       return { kind: draft.kind, values: { time: wallTime(draft.time, locale) } };
     case "weekly":
-      return { kind: "weekly", values: { weekday: weekdayName(draft.weekday, locale), time: wallTime(draft.time, locale) } };
+      return {
+        kind: "weekly",
+        values: { weekday: weekdayName(draft.weekday, locale), time: wallTime(draft.time, locale) },
+      };
     case "monthly":
       return { kind: "monthly", values: { day: draft.monthDay, time: wallTime(draft.time, locale) } };
     case "custom":

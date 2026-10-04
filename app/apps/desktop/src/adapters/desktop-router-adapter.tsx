@@ -1,5 +1,11 @@
 import type { ReportError } from "@core/client/app-shell";
-import { parseRoute, routeHref, type Route, type RouterLinkProps, type RouterPort } from "@core/client/shared/lib/router";
+import {
+  parseRoute,
+  type Route,
+  type RouterLinkProps,
+  type RouterPort,
+  routeHref,
+} from "@core/client/shared/lib/router";
 import type { SupportedLocale } from "@core/i18n";
 import { useRouterState } from "@tanstack/react-router";
 import type { MouseEvent } from "react";
@@ -16,7 +22,11 @@ export type DesktopRouterAdapterArgs = {
 
 const paramsOf = (route: Route | null): Record<string, string | undefined> => {
   if (route === null) return {};
-  return Object.fromEntries(Object.entries(route).filter((entry): entry is [string, string] => entry[0] !== "id" && typeof entry[1] === "string"));
+  return Object.fromEntries(
+    Object.entries(route).filter(
+      (entry): entry is [string, string] => entry[0] !== "id" && typeof entry[1] === "string",
+    ),
+  );
 };
 
 const isPlainClick = (event: MouseEvent<HTMLAnchorElement>): boolean =>
@@ -29,9 +39,15 @@ const useHref = (): string => useRouterState({ select: (state) => state.location
  * map (`routeHref`/`parseRoute`), so views see the same params (`organizationId`, `rest`, …) as on
  * web and in tests; TanStack only owns history and matching. Hooks must run under its provider.
  */
-export const createDesktopRouterAdapter = ({ navigate: navigateByHref, switchLocale, reportError }: DesktopRouterAdapterArgs): RouterPort => {
+export const createDesktopRouterAdapter = ({
+  navigate: navigateByHref,
+  switchLocale,
+  reportError,
+}: DesktopRouterAdapterArgs): RouterPort => {
   const navigate: RouterPort["navigate"] = (route, options) => {
-    navigateByHref({ href: routeHref(route), replace: options?.replace === true }).catch((error: unknown) => reportError(error, { operation: "navigate" }));
+    navigateByHref({ href: routeHref(route), replace: options?.replace === true }).catch((error: unknown) =>
+      reportError(error, { operation: "navigate" }),
+    );
   };
   function Link({ to, replace, onClick, target, children, ...props }: RouterLinkProps) {
     return (
@@ -55,7 +71,8 @@ export const createDesktopRouterAdapter = ({ navigate: navigateByHref, switchLoc
     navigate,
     Link,
     useRouteParams: () => paramsOf(parseRoute(useHref())),
-    useSearchParam: (name) => new URLSearchParams(useRouterState({ select: (state) => state.location.searchStr })).get(name),
+    useSearchParam: (name) =>
+      new URLSearchParams(useRouterState({ select: (state) => state.location.searchStr })).get(name),
     useSearch: () => new URLSearchParams(useRouterState({ select: (state) => state.location.searchStr })).toString(),
     useLocationPath: () => useRouterState({ select: (state) => state.location.pathname }),
     switchLocale,

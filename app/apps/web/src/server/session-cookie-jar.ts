@@ -14,7 +14,11 @@ export const createSessionCookieJar = async (): Promise<CookieJar> => {
   return {
     get: (name) => store.get(name)?.value,
     set: (name, value, { maxAgeSeconds }) =>
-      void store.set(name, value, sessionCookieOptions({ appEnv: env.APP_ENV, appUrl: env.NEXT_PUBLIC_APP_URL, maxAgeSeconds })),
+      void store.set(
+        name,
+        value,
+        sessionCookieOptions({ appEnv: env.APP_ENV, appUrl: env.NEXT_PUBLIC_APP_URL, maxAgeSeconds }),
+      ),
     delete: (name) => void store.delete(name),
   };
 };

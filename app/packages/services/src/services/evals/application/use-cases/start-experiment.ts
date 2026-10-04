@@ -18,9 +18,19 @@ export type StartExperiment = (command: {
  * organization (another tenant's answers 404) and runs with the caller's current grants.
  */
 export const makeStartExperiment =
-  (deps: { readonly console: Pick<ConsoleGateway, "startExperiment">; readonly getAgentSettings: (input: { tenantId: string }) => Promise<AgentSettings> }): StartExperiment =>
+  (deps: {
+    readonly console: Pick<ConsoleGateway, "startExperiment">;
+    readonly getAgentSettings: (input: { tenantId: string }) => Promise<AgentSettings>;
+  }): StartExperiment =>
   async ({ actor, tenantId, input, requestId }) => {
     const settings = await deps.getAgentSettings({ tenantId });
-    if (input.agentId !== SUPERVISOR_AGENT_ID && !settings.enabledAgents.includes(input.agentId)) return { ok: false, error: { code: "AGENT_NOT_ENABLED", status: 400 } };
-    return deps.console.startExperiment({ tenantId, userId: actor.uid, datasetId: input.datasetId, agentId: input.agentId, requestId });
+    if (input.agentId !== SUPERVISOR_AGENT_ID && !settings.enabledAgents.includes(input.agentId))
+      return { ok: false, error: { code: "AGENT_NOT_ENABLED", status: 400 } };
+    return deps.console.startExperiment({
+      tenantId,
+      userId: actor.uid,
+      datasetId: input.datasetId,
+      agentId: input.agentId,
+      requestId,
+    });
   };

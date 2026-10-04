@@ -1,5 +1,24 @@
-import { type Note, type NoteId, type Principal, type TenantId, type TenantNodeRef, UserIdSchema } from "@core/contracts";
-import { type AccessCore, AccessDeniedError, auditActorOf, type AuditWriter, type Clock, err, ok, type Page, type PageRequest, type Result, type UnitOfWork } from "@core/services";
+import {
+  type Note,
+  type NoteId,
+  type Principal,
+  type TenantId,
+  type TenantNodeRef,
+  UserIdSchema,
+} from "@core/contracts";
+import {
+  type AccessCore,
+  AccessDeniedError,
+  type AuditWriter,
+  auditActorOf,
+  type Clock,
+  err,
+  ok,
+  type Page,
+  type PageRequest,
+  type Result,
+  type UnitOfWork,
+} from "@core/services";
 import { type CreateNoteCommand, NOTE_PERMISSIONS } from "../contracts/note-commands.schema.ts";
 import type { NoteRepository } from "./note-repository.ts";
 
@@ -34,9 +53,15 @@ export class NoteNotFoundError extends Error {
   }
 }
 
-const authorizeAt = async (deps: NotesDeps, command: NoteCommand, permission: string): Promise<Result<void, AccessDeniedError>> => {
+const authorizeAt = async (
+  deps: NotesDeps,
+  command: NoteCommand,
+  permission: string,
+): Promise<Result<void, AccessDeniedError>> => {
   if (command.node.tenantId !== command.tenantId) return err(new AccessDeniedError("NODE_NOT_FOUND"));
-  const decision = await deps.access.forRequest().authorize({ principal: command.actor, permission, node: command.node });
+  const decision = await deps.access
+    .forRequest()
+    .authorize({ principal: command.actor, permission, node: command.node });
   return decision.allowed ? ok(undefined) : err(new AccessDeniedError(decision.reason));
 };
 
@@ -85,7 +110,9 @@ export const makeCreateNote =
  */
 export const makeArchiveNote =
   (deps: NotesDeps) =>
-  async (command: NoteCommand & { readonly noteId: NoteId }): Promise<Result<Note, AccessDeniedError | NoteNotFoundError>> => {
+  async (
+    command: NoteCommand & { readonly noteId: NoteId },
+  ): Promise<Result<Note, AccessDeniedError | NoteNotFoundError>> => {
     const allowed = await authorizeAt(deps, command, NOTE_PERMISSIONS.archive);
     if (!allowed.ok) return allowed;
     const now = deps.clock.now().toISOString();
@@ -94,7 +121,10 @@ export const makeArchiveNote =
       if (note === null || note.archivedAt !== undefined) return note;
       const next: Note = { ...note, archivedAt: now, updatedAt: now };
       deps.notes.replace(tx, next);
-      await deps.audit.record({ ...auditFields(command, next), action: "MODULE_RECORD_UPDATED", changes: ["archivedAt"] }, tx);
+      await deps.audit.record(
+        { ...auditFields(command, next), action: "MODULE_RECORD_UPDATED", changes: ["archivedAt"] },
+        tx,
+      );
       return next;
     });
     return archived === null ? err(new NoteNotFoundError(command.noteId)) : ok(archived);
@@ -106,9 +136,15 @@ export const makeArchiveNote =
  */
 export const makeListNotes =
   (deps: Pick<NotesDeps, "notes" | "access">) =>
-  async (query: { readonly actor: Principal; readonly tenantId: TenantId; readonly page: PageRequest }): Promise<Result<Page<Note>, AccessDeniedError>> => {
+  async (query: {
+    readonly actor: Principal;
+    readonly tenantId: TenantId;
+    readonly page: PageRequest;
+  }): Promise<Result<Page<Note>, AccessDeniedError>> => {
     const node = { level: "organization", tenantId: query.tenantId } as const;
-    const decision = await deps.access.forRequest().authorize({ principal: query.actor, permission: NOTE_PERMISSIONS.read, node });
+    const decision = await deps.access
+      .forRequest()
+      .authorize({ principal: query.actor, permission: NOTE_PERMISSIONS.read, node });
     if (!decision.allowed) return err(new AccessDeniedError(decision.reason));
     return ok(await deps.notes.list({ tenantId: query.tenantId, page: query.page }));
   };

@@ -22,7 +22,12 @@ export const adminFlagsQuery = (callEndpoint: CallEndpoint, organizationId?: str
   queryOptions({
     queryKey: featureFlagKeys.list(organizationId),
     queryFn: async ({ signal }): Promise<FeatureFlag[]> =>
-      (await callEndpoint(adminListFlagsEndpoint, { query: organizationId === undefined ? {} : { organizationId }, signal })).data,
+      (
+        await callEndpoint(adminListFlagsEndpoint, {
+          query: organizationId === undefined ? {} : { organizationId },
+          signal,
+        })
+      ).data,
   });
 
 export const useAdminFlags = (organizationId?: string, options: { enabled?: boolean } = {}) => {

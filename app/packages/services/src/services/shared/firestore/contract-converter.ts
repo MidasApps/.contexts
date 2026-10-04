@@ -17,7 +17,8 @@ const hasIdField = (schema: z.ZodType): boolean => {
 };
 
 // Wire contracts carry ISO strings; Firestore stores Timestamp (contracts/firebase-firestore.md §13).
-const isoToTimestamp = (leaf: unknown): unknown => (typeof leaf === "string" ? Timestamp.fromDate(new Date(leaf)) : leaf);
+const isoToTimestamp = (leaf: unknown): unknown =>
+  typeof leaf === "string" ? Timestamp.fromDate(new Date(leaf)) : leaf;
 const timestampToIso = (leaf: unknown): unknown => (leaf instanceof Timestamp ? leaf.toDate().toISOString() : leaf);
 
 const withoutId = (data: DocumentData): DocumentData =>
@@ -85,6 +86,9 @@ export const toFirestoreUpdate = <Schema extends z.ZodType<DocumentData>>(
 ): DocumentData => {
   const dateTimePaths = listDateTimePaths(contract.schema);
   return Object.fromEntries(
-    Object.entries(patch).map(([key, value]) => [key, mapAtPaths(value, pathsBelowKey(key, dateTimePaths), isoToTimestamp)]),
+    Object.entries(patch).map(([key, value]) => [
+      key,
+      mapAtPaths(value, pathsBelowKey(key, dateTimePaths), isoToTimestamp),
+    ]),
   );
 };

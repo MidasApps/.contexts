@@ -4,7 +4,14 @@
  * synthesized audio, and the duration of a PCM WAV read from its header.
  */
 
-export const ACCEPTED_AUDIO_TYPES: ReadonlySet<string> = new Set(["audio/webm", "audio/ogg", "audio/mp4", "audio/wav", "audio/x-wav", "audio/mpeg"]);
+export const ACCEPTED_AUDIO_TYPES: ReadonlySet<string> = new Set([
+  "audio/webm",
+  "audio/ogg",
+  "audio/mp4",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/mpeg",
+]);
 
 /** `audio/webm;codecs=opus` → `audio/webm`; lowercase; `undefined` for a missing header. */
 export const baseMediaType = (contentType: string | null): string | undefined => {
@@ -12,7 +19,8 @@ export const baseMediaType = (contentType: string | null): string | undefined =>
   return base === undefined || base === "" ? undefined : base;
 };
 
-const ascii = (bytes: Uint8Array, start: number, length: number): string => Buffer.from(bytes.subarray(start, start + length)).toString("latin1");
+const ascii = (bytes: Uint8Array, start: number, length: number): string =>
+  Buffer.from(bytes.subarray(start, start + length)).toString("latin1");
 
 /** Media type from magic bytes (RIFF/WAVE, OggS, ID3 or an MPEG frame sync, EBML, ftyp); `undefined` otherwise. */
 export const sniffAudioMediaType = (bytes: Uint8Array): string | undefined => {
@@ -39,7 +47,8 @@ export const wavDurationSeconds = (bytes: Uint8Array): number | undefined => {
   for (let offset = WAV_HEADER_BYTES; offset + CHUNK_HEADER_BYTES <= bytes.byteLength; ) {
     const id = ascii(bytes, offset, 4);
     const size = view.getUint32(offset + 4, true);
-    if (id === "fmt " && offset + 16 <= bytes.byteLength - CHUNK_HEADER_BYTES) byteRate = view.getUint32(offset + CHUNK_HEADER_BYTES + 8, true);
+    if (id === "fmt " && offset + 16 <= bytes.byteLength - CHUNK_HEADER_BYTES)
+      byteRate = view.getUint32(offset + CHUNK_HEADER_BYTES + 8, true);
     if (id === "data") return byteRate === undefined || byteRate === 0 ? undefined : size / byteRate;
     offset += CHUNK_HEADER_BYTES + size + (size % 2);
   }

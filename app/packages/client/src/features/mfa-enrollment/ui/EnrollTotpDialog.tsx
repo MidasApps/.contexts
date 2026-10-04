@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { authErrorCode } from "#/shared/lib/auth/auth-error-code.ts";
@@ -9,7 +9,14 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { QrCode } from "#/shared/ui/atoms/QrCode/QrCode.tsx";
 import { CopyField } from "#/shared/ui/molecules/CopyField/CopyField.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { CODE_PATTERN, CodeField, EnrollmentAlert, FactorNameField } from "./enrollment-fields.tsx";
 
@@ -86,45 +93,45 @@ function EnrollTotpDialogBody({ onOpenChange, onEnrolled }: Props) {
 
   return (
     <>
-        <DialogHeader>
-          <DialogTitle>{t("totpTitle")}</DialogTitle>
-          <DialogDescription>{t("totpDescription")}</DialogDescription>
-        </DialogHeader>
-        {failure === null ? null : <EnrollmentAlert code={failure} />}
-        {enrollment === null ? (
-          failure === null ? (
-            <LoadingState variant="spinner" label={t("preparing")} />
-          ) : (
-            <Button variant="secondary" onClick={retry}>
-              {t("retry")}
-            </Button>
-          )
+      <DialogHeader>
+        <DialogTitle>{t("totpTitle")}</DialogTitle>
+        <DialogDescription>{t("totpDescription")}</DialogDescription>
+      </DialogHeader>
+      {failure === null ? null : <EnrollmentAlert code={failure} />}
+      {enrollment === null ? (
+        failure === null ? (
+          <LoadingState variant="spinner" label={t("preparing")} />
         ) : (
-          <form noValidate onSubmit={(event) => void verify(event)} className="flex flex-col gap-5">
-            <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm text-muted-foreground">
-              <li>{t("totpStepScan")}</li>
-              <li>{t("totpStepCode")}</li>
-            </ol>
-            <QrCode value={enrollment.uri} label={t("totpQrLabel")} className="self-center" />
-            <Button variant="outline" asChild className="self-start">
-              <a href={enrollment.uri}>
-                <Icon name="external-link" />
-                {t("openAuthenticator")}
-              </a>
+          <Button variant="secondary" onClick={retry}>
+            {t("retry")}
+          </Button>
+        )
+      ) : (
+        <form noValidate onSubmit={(event) => void verify(event)} className="flex flex-col gap-5">
+          <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm text-muted-foreground">
+            <li>{t("totpStepScan")}</li>
+            <li>{t("totpStepCode")}</li>
+          </ol>
+          <QrCode value={enrollment.uri} label={t("totpQrLabel")} className="self-center" />
+          <Button variant="outline" asChild className="self-start">
+            <a href={enrollment.uri}>
+              <Icon name="external-link" />
+              {t("openAuthenticator")}
+            </a>
+          </Button>
+          <CopyField label={t("setupKey")} value={enrollment.secretKey} sensitive description={t("setupKeyHint")} />
+          <FactorNameField value={name} onChange={setName} />
+          <CodeField value={code} onChange={setCode} error={codeError} inputRef={codeInput} hint={t("totpCodeHint")} />
+          <DialogFooter>
+            <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
+              {t("cancel")}
             </Button>
-            <CopyField label={t("setupKey")} value={enrollment.secretKey} sensitive description={t("setupKeyHint")} />
-            <FactorNameField value={name} onChange={setName} />
-            <CodeField value={code} onChange={setCode} error={codeError} inputRef={codeInput} hint={t("totpCodeHint")} />
-            <DialogFooter>
-              <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
-                {t("cancel")}
-              </Button>
-              <Button type="submit" pending={pending}>
-                {t("verify")}
-              </Button>
-            </DialogFooter>
-          </form>
-        )}
+            <Button type="submit" pending={pending}>
+              {t("verify")}
+            </Button>
+          </DialogFooter>
+        </form>
+      )}
     </>
   );
 }

@@ -7,7 +7,7 @@ import { SafeMarkdown } from "./safe-markdown.tsx";
 const HOSTILE = [
   "Before",
   "",
-  '<script>window.pwned = true</script>',
+  "<script>window.pwned = true</script>",
   "",
   '<img src="x" onerror="window.pwned = true">',
   "",
@@ -44,27 +44,35 @@ describe("SafeMarkdown", () => {
   });
 
   it("renders the text of javascript: and data: links without a link", () => {
-    renderWithProviders(<SafeMarkdown>{"[click me](javascript:alert(1)) and [this](data:text/html,x) and [rel](/admin)"}</SafeMarkdown>);
+    renderWithProviders(
+      <SafeMarkdown>{"[click me](javascript:alert(1)) and [this](data:text/html,x) and [rel](/admin)"}</SafeMarkdown>,
+    );
     expect(screen.queryByRole("link")).toBeNull();
     expect(screen.getByText(/click me/)).toBeTruthy();
   });
 
   it("does not load images the model points to; the alt text stays", () => {
-    const { container } = renderWithProviders(<SafeMarkdown>{"![tracking pixel](https://evil.test/p.png)"}</SafeMarkdown>);
+    const { container } = renderWithProviders(
+      <SafeMarkdown>{"![tracking pixel](https://evil.test/p.png)"}</SafeMarkdown>,
+    );
     expect(container.querySelector("img")).toBeNull();
     expect(screen.getByText(/tracking pixel/)).toBeTruthy();
   });
 
   it("renders citations through the caller and code as code", () => {
     renderWithProviders(
-      <SafeMarkdown renderCitation={(index) => <sup data-testid="cite">{index}</sup>}>{"Fact [1](#cite-1).\n\n```ts\nconst a = 1;\n```"}</SafeMarkdown>,
+      <SafeMarkdown renderCitation={(index) => <sup data-testid="cite">{index}</sup>}>
+        {"Fact [1](#cite-1).\n\n```ts\nconst a = 1;\n```"}
+      </SafeMarkdown>,
     );
     expect(screen.getByTestId("cite").textContent).toBe("1");
     expect(screen.getByText(/const a = 1;/)).toBeTruthy();
   });
 
   it("gives fenced code a labelled region with its language and a copy button, and keeps inline code inline", async () => {
-    const { user, container } = renderWithProviders(<SafeMarkdown>{"Use `npm ci` first.\n\n```ts\nconst a = 1;\n```"}</SafeMarkdown>);
+    const { user, container } = renderWithProviders(
+      <SafeMarkdown>{"Use `npm ci` first.\n\n```ts\nconst a = 1;\n```"}</SafeMarkdown>,
+    );
     const region = screen.getByRole("region", { name: "Código ts" });
     expect(region.textContent).toBe("const a = 1;");
     expect(screen.getByText("npm ci").closest("[data-slot=code-block]")).toBeNull();
@@ -75,7 +83,11 @@ describe("SafeMarkdown", () => {
   });
 
   it("has no axe violations", async () => {
-    const { container } = renderWithProviders(<SafeMarkdown>{"## Heading\n\nA [link](https://example.com) and `code`.\n\n| a | b |\n|---|---|\n| 1 | 2 |"}</SafeMarkdown>);
+    const { container } = renderWithProviders(
+      <SafeMarkdown>
+        {"## Heading\n\nA [link](https://example.com) and `code`.\n\n| a | b |\n|---|---|\n| 1 | 2 |"}
+      </SafeMarkdown>,
+    );
     await expectNoAxeViolations(container);
   });
 });

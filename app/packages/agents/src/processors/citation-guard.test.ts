@@ -10,22 +10,44 @@ const UNKNOWN = `kb:${OTHER}#4`;
 
 describe("guardCitations", () => {
   it("keeps markers of retrieved passages and strips unknown ones", () => {
-    const guarded = guardCitations({ text: `Owners approve members [${KNOWN}]. Billing is monthly [${UNKNOWN}].`, retrievedIds: new Set([KNOWN]) });
-    expect(guarded).toEqual({ text: `Owners approve members [${KNOWN}]. Billing is monthly.`, confidence: "normal", removed: [UNKNOWN], cited: [KNOWN] });
+    const guarded = guardCitations({
+      text: `Owners approve members [${KNOWN}]. Billing is monthly [${UNKNOWN}].`,
+      retrievedIds: new Set([KNOWN]),
+    });
+    expect(guarded).toEqual({
+      text: `Owners approve members [${KNOWN}]. Billing is monthly.`,
+      confidence: "normal",
+      removed: [UNKNOWN],
+      cited: [KNOWN],
+    });
   });
 
   it("marks an answer without any valid citation as low confidence", () => {
-    expect(guardCitations({ text: "Probably yes.", retrievedIds: new Set([KNOWN]) })).toMatchObject({ confidence: "low", cited: [] });
-    expect(guardCitations({ text: `Yes [${UNKNOWN}]`, retrievedIds: new Set() })).toMatchObject({ text: "Yes ", confidence: "low", removed: [UNKNOWN] });
+    expect(guardCitations({ text: "Probably yes.", retrievedIds: new Set([KNOWN]) })).toMatchObject({
+      confidence: "low",
+      cited: [],
+    });
+    expect(guardCitations({ text: `Yes [${UNKNOWN}]`, retrievedIds: new Set() })).toMatchObject({
+      text: "Yes ",
+      confidence: "low",
+      removed: [UNKNOWN],
+    });
   });
 
   it("compares ids case-insensitively", () => {
-    expect(guardCitations({ text: `A [${KNOWN.toUpperCase().replace("KB:", "kb:")}]`, retrievedIds: new Set([KNOWN]) }).confidence).toBe("normal");
+    expect(
+      guardCitations({ text: `A [${KNOWN.toUpperCase().replace("KB:", "kb:")}]`, retrievedIds: new Set([KNOWN]) })
+        .confidence,
+    ).toBe("normal");
   });
 });
 
-const assistant = (text: string, extraParts: MastraDBMessage["content"]["parts"] = []): MastraDBMessage =>
-  ({ id: "m1", role: "assistant", createdAt: new Date(0), content: { format: 2, parts: [...extraParts, { type: "text", text }] } });
+const assistant = (text: string, extraParts: MastraDBMessage["content"]["parts"] = []): MastraDBMessage => ({
+  id: "m1",
+  role: "assistant",
+  createdAt: new Date(0),
+  content: { format: 2, parts: [...extraParts, { type: "text", text }] },
+});
 
 const run = (messages: MastraDBMessage[], toolResults: unknown[] = []) => {
   const processor = createCitationGuard();
@@ -35,7 +57,10 @@ const run = (messages: MastraDBMessage[], toolResults: unknown[] = []) => {
 
 describe("createCitationGuard (output processor)", () => {
   it("treats citation ids of this turn's tool results as retrieved", () => {
-    const [message] = run([assistant(`Owners approve [${KNOWN}] and [${UNKNOWN}].`)], [{ toolName: "knowledge.searchKnowledge", result: { results: [{ citationId: KNOWN }] } }]);
+    const [message] = run(
+      [assistant(`Owners approve [${KNOWN}] and [${UNKNOWN}].`)],
+      [{ toolName: "knowledge.searchKnowledge", result: { results: [{ citationId: KNOWN }] } }],
+    );
     const text = message?.content.parts.find((part) => part.type === "text");
     expect(text).toMatchObject({ text: `Owners approve [${KNOWN}] and.` });
     expect(message?.content.metadata).toEqual({ confidence: "normal" });

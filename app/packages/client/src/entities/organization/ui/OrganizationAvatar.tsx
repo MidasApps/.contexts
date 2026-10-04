@@ -12,5 +12,12 @@ export type OrganizationAvatarProps = Omit<ComponentProps<typeof Avatar>, "name"
  * hashed tone, square-ish corners so it reads as a workspace rather than a person.
  */
 export function OrganizationAvatar({ name, className, size = "sm", ...props }: OrganizationAvatarProps) {
-  return <Avatar name={name} size={size} className={cn("rounded-xs [&_[data-slot=avatar-fallback]]:rounded-xs", className)} {...props} />;
+  return (
+    <Avatar
+      name={name}
+      size={size}
+      className={cn("rounded-xs [&_[data-slot=avatar-fallback]]:rounded-xs", className)}
+      {...props}
+    />
+  );
 }

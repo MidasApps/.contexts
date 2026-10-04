@@ -8,7 +8,9 @@ describe("cron presets", () => {
     expect(cronOfDraft({ ...DEFAULT_CRON_DRAFT, kind: "weekdays", time: "08:30" })).toBe("30 8 * * 1-5");
     expect(cronOfDraft({ ...DEFAULT_CRON_DRAFT, kind: "weekly", time: "18:05", weekday: 5 })).toBe("5 18 * * 5");
     expect(cronOfDraft({ ...DEFAULT_CRON_DRAFT, kind: "monthly", time: "00:00", monthDay: 28 })).toBe("0 0 28 * *");
-    expect(cronOfDraft({ ...DEFAULT_CRON_DRAFT, kind: "custom", custom: "  */30  9-17 * * 1-5 " })).toBe("*/30 9-17 * * 1-5");
+    expect(cronOfDraft({ ...DEFAULT_CRON_DRAFT, kind: "custom", custom: "  */30  9-17 * * 1-5 " })).toBe(
+      "*/30 9-17 * * 1-5",
+    );
   });
 
   it("refuses an incomplete or invalid draft", () => {

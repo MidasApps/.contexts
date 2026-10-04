@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { applyCorsHeaders, CorsOriginListSchema, createCorsPolicy, isCorsPreflight, preflightResponse } from "./cors.ts";
+import {
+  applyCorsHeaders,
+  CorsOriginListSchema,
+  createCorsPolicy,
+  isCorsPreflight,
+  preflightResponse,
+} from "./cors.ts";
 
 const DESKTOP_DEV = "http://localhost:1420";
 const TAURI_WINDOWS = "http://tauri.localhost";
@@ -35,7 +41,10 @@ describe("CorsOriginListSchema", () => {
   });
 
   it("normalizes origins to lower case, as browsers send them in Origin", () => {
-    expect(CorsOriginListSchema.parse("HTTP://LocalHost:1420,Tauri://LOCALHOST")).toEqual([DESKTOP_DEV, "tauri://localhost"]);
+    expect(CorsOriginListSchema.parse("HTTP://LocalHost:1420,Tauri://LOCALHOST")).toEqual([
+      DESKTOP_DEV,
+      "tauri://localhost",
+    ]);
   });
 
   it("accepts an empty list (CORS disabled)", () => {
@@ -53,7 +62,9 @@ describe("isCorsPreflight", () => {
   });
 
   it("is false for a GET", () => {
-    expect(isCorsPreflight(new Request("http://localhost:3000/v1/health", { headers: { origin: DESKTOP_DEV } }))).toBe(false);
+    expect(isCorsPreflight(new Request("http://localhost:3000/v1/health", { headers: { origin: DESKTOP_DEV } }))).toBe(
+      false,
+    );
   });
 });
 
@@ -82,7 +93,9 @@ describe("preflightResponse", () => {
 
   it("never echoes a wildcard or the literal null origin", () => {
     expect(preflightResponse(policy, preflight("null")).headers.get("access-control-allow-origin")).toBeNull();
-    expect(preflightResponse(createCorsPolicy([]), preflight(DESKTOP_DEV)).headers.get("access-control-allow-origin")).toBeNull();
+    expect(
+      preflightResponse(createCorsPolicy([]), preflight(DESKTOP_DEV)).headers.get("access-control-allow-origin"),
+    ).toBeNull();
   });
 });
 

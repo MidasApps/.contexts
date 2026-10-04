@@ -81,7 +81,15 @@ describe("defineEndpoint", () => {
   });
 
   it("rejects path params without a params schema", () => {
-    const withoutParams = { id: base.id, method: base.method, path: base.path, auth: base.auth, body: base.body, responses: base.responses, summary: base.summary };
+    const withoutParams = {
+      id: base.id,
+      method: base.method,
+      path: base.path,
+      auth: base.auth,
+      body: base.body,
+      responses: base.responses,
+      summary: base.summary,
+    };
     expect(captureProblems(() => defineEndpoint(withoutParams))).toEqual(["path param {projectId} is not in params"]);
   });
 
@@ -140,6 +148,10 @@ describe("endpoint type inference", () => {
     });
     expect(endpoint.responses).toEqual({ 204: null });
     expectTypeOf<InferEndpointResponse<typeof endpoint>>().toEqualTypeOf<undefined>();
-    expectTypeOf<InferEndpointInput<typeof endpoint>>().toEqualTypeOf<{ params: undefined; query: undefined; body: undefined }>();
+    expectTypeOf<InferEndpointInput<typeof endpoint>>().toEqualTypeOf<{
+      params: undefined;
+      query: undefined;
+      body: undefined;
+    }>();
   });
 });

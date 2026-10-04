@@ -28,7 +28,9 @@ function FailureAlert({ status }: { status: Extract<SubmitStatus, { kind: "faile
       <AlertTitle>{t("common.form.submitFailedTitle")}</AlertTitle>
       <AlertDescription>
         <p>{status.kind === "unavailable" ? t("common.form.unavailableFields") : t(errorKey)}</p>
-        {requestId === undefined ? null : <p className="font-mono text-xs">{t("common.errorState.reference", { requestId })}</p>}
+        {requestId === undefined ? null : (
+          <p className="font-mono text-xs">{t("common.errorState.reference", { requestId })}</p>
+        )}
       </AlertDescription>
     </Alert>
   );

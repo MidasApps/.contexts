@@ -4,12 +4,18 @@ import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildInvitation } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsInvitationsView } from "./SettingsInvitationsView.tsx";
 
-const INVITER: Permission[] = ["core.organization.read", "core.member.read", "core.member.invite", "core.role.read", "core.project.read"];
+const INVITER: Permission[] = [
+  "core.organization.read",
+  "core.member.read",
+  "core.member.invite",
+  "core.role.read",
+  "core.project.read",
+];
 const ACCEPT_URL = "https://app.example.com/invite#token=Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W";
 // The dialog shows the link in the inviter's UI locale (pt-BR here).
 const LOCALIZED_ACCEPT_URL = "https://app.example.com/pt-BR/invite#token=Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W";
@@ -38,22 +44,39 @@ describe("SettingsInvitationsView", () => {
     expect(api.calls.find((call) => call.path.endsWith("/invitations"))?.query).toContain("status=pending");
     await expectNoAxeViolations(container);
     await user.click(screen.getByRole("tab", { name: "Todos" }));
-    await waitFor(() => expect(api.calls.filter((call) => call.path.endsWith("/invitations")).some((call) => !call.query.includes("status"))).toBe(true));
+    await waitFor(() =>
+      expect(
+        api.calls.filter((call) => call.path.endsWith("/invitations")).some((call) => !call.query.includes("status")),
+      ).toBe(true),
+    );
   });
 
   it("shows no expiry on accepted or revoked invitations", async () => {
     renderView({
       "GET /v1/organizations/:organizationId/invitations": page([
         buildInvitation(),
-        buildInvitation({ id: "Iv2", email: "dora@example.com", status: "accepted", expiresAt: "2026-10-07T14:30:00.000Z" }),
-        buildInvitation({ id: "Iv3", email: "eva@example.com", status: "revoked", expiresAt: "2026-10-08T14:30:00.000Z" }),
+        buildInvitation({
+          id: "Iv2",
+          email: "dora@example.com",
+          status: "accepted",
+          expiresAt: "2026-10-07T14:30:00.000Z",
+        }),
+        buildInvitation({
+          id: "Iv3",
+          email: "eva@example.com",
+          status: "revoked",
+          expiresAt: "2026-10-08T14:30:00.000Z",
+        }),
       ]),
     });
     await screen.findByText("dora@example.com");
     const table = screen.getByRole("table", { name: "Convites pendentes" });
     const rowOf = (email: string) => within(table).getByText(email).closest("tr") as HTMLElement;
     expect(within(rowOf("carla@example.com")).getByText(/6 de out\. de 2026/u)).toBeDefined();
-    for (const [email, day] of [["dora@example.com", /7 de out\./u], ["eva@example.com", /8 de out\./u]] as const) {
+    for (const [email, day] of [
+      ["dora@example.com", /7 de out\./u],
+      ["eva@example.com", /8 de out\./u],
+    ] as const) {
       expect(within(rowOf(email)).queryByText(day)).toBeNull();
       expect(within(rowOf(email)).getByText("Não se aplica")).toBeDefined();
     }
@@ -76,7 +99,14 @@ describe("SettingsInvitationsView", () => {
     await user.click(within(dialog).getByRole("button", { name: "Enviar convite" }));
     const link = await within(dialog).findByRole("textbox", { name: "Link do convite" });
     expect((link as HTMLInputElement).value).toBe(LOCALIZED_ACCEPT_URL);
-    expect(bodies[0]?.body).toEqual({ email: "dora@example.com", node: { level: "organization", tenantId: IDS.organization }, roles: [{ kind: "system", key: "member" }, { kind: "system", key: "viewer" }] });
+    expect(bodies[0]?.body).toEqual({
+      email: "dora@example.com",
+      node: { level: "organization", tenantId: IDS.organization },
+      roles: [
+        { kind: "system", key: "member" },
+        { kind: "system", key: "viewer" },
+      ],
+    });
     expect(bodies[0]?.headers.get("idempotency-key")).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/u);
     await expectNoAxeViolations(dialog);
 
@@ -89,7 +119,10 @@ describe("SettingsInvitationsView", () => {
 
   it("asks before Escape or the close button drops the one-time link", async () => {
     const { user } = renderView({
-      "POST /v1/organizations/:organizationId/invitations": ok({ invitation: buildInvitation({ email: "dora@example.com" }), acceptUrl: ACCEPT_URL }, 201),
+      "POST /v1/organizations/:organizationId/invitations": ok(
+        { invitation: buildInvitation({ email: "dora@example.com" }), acceptUrl: ACCEPT_URL },
+        201,
+      ),
     });
     await user.click(await screen.findByRole("button", { name: "Convidar" }));
     const dialog = await screen.findByRole("dialog", { name: "Convidar pessoa" });
@@ -106,8 +139,12 @@ describe("SettingsInvitationsView", () => {
     let listCalls = 0;
     const { user } = renderView({
       // The refresh after the invitation never answers: the link is on screen meanwhile.
-      "GET /v1/organizations/:organizationId/invitations": () => (++listCalls === 1 ? page([buildInvitation()]) : new Promise(() => undefined)),
-      "POST /v1/organizations/:organizationId/invitations": ok({ invitation: buildInvitation({ email: "dora@example.com" }), acceptUrl: ACCEPT_URL }, 201),
+      "GET /v1/organizations/:organizationId/invitations": () =>
+        ++listCalls === 1 ? page([buildInvitation()]) : new Promise(() => undefined),
+      "POST /v1/organizations/:organizationId/invitations": ok(
+        { invitation: buildInvitation({ email: "dora@example.com" }), acceptUrl: ACCEPT_URL },
+        201,
+      ),
     });
     await user.click(await screen.findByRole("button", { name: "Convidar" }));
     const dialog = await screen.findByRole("dialog", { name: "Convidar pessoa" });
@@ -122,7 +159,9 @@ describe("SettingsInvitationsView", () => {
   });
 
   it("keeps ESCALATION_FORBIDDEN in the dialog with the request reference", async () => {
-    const { user } = renderView({ "POST /v1/organizations/:organizationId/invitations": apiError(403, "ESCALATION_FORBIDDEN") });
+    const { user } = renderView({
+      "POST /v1/organizations/:organizationId/invitations": apiError(403, "ESCALATION_FORBIDDEN"),
+    });
     await user.click(await screen.findByRole("button", { name: "Convidar" }));
     const dialog = await screen.findByRole("dialog");
     await user.type(within(dialog).getByRole("textbox", { name: "E-mail" }), "dora@example.com");

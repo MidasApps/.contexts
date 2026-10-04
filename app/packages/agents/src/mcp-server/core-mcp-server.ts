@@ -1,7 +1,7 @@
 import type { Agent } from "@mastra/core/agent";
 import type { MCPServerBase } from "@mastra/core/mcp";
 import { MCPServer } from "@mastra/mcp";
-import { readAgentContext, type RequestContextReader } from "../context/agent-request-context.ts";
+import { type RequestContextReader, readAgentContext } from "../context/agent-request-context.ts";
 import type { AiCatalogReader } from "../tools/catalog/ai-catalog-reader.ts";
 import type { CoreToolDeps } from "../tools/define-core-tool.ts";
 import { bindCoreTool, type ToolRegistry } from "../tools/tool-registry.ts";
@@ -12,7 +12,13 @@ export const CORE_MCP_SERVER_ID = "core";
 /** Ceiling key of the MCP caller: tools run with context permissions ∩ this ceiling. */
 export const MCP_CALLER_ID = "mcp";
 /** Read-only in v1 (decision 0027): no mutation tool is exposed over MCP. */
-export const MCP_CEILING = ["core.mcp.use", "core.chat.use", "core.catalog.read", "core.catalog.query", "core.knowledge.read"];
+export const MCP_CEILING = [
+  "core.mcp.use",
+  "core.chat.use",
+  "core.catalog.read",
+  "core.catalog.query",
+  "core.knowledge.read",
+];
 
 /** MCP tool name → core tool id (spec §9). */
 export const CORE_MCP_TOOLS = {
@@ -89,7 +95,8 @@ export const createCoreMcpServer = (deps: {
     name: "Core",
     version: "1.0.0",
     description: "Read-only access to the organization's data catalog, knowledge base, semantic SQL and assistant.",
-    instructions: "Start with listEntities or the catalog resources; answers are scoped to the caller's organization and permissions.",
+    instructions:
+      "Start with listEntities or the catalog resources; answers are scoped to the caller's organization and permissions.",
     tools,
     agents: { assistant: deps.assistant },
     resources: catalogResources(deps.catalog),

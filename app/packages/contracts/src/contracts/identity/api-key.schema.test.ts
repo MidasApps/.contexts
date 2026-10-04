@@ -33,7 +33,9 @@ describe("apiKeyExpiryIssue", () => {
   });
 
   it("rejects an expiry beyond 365 days", () => {
-    expect(apiKeyExpiryIssue({ expiresAt: at(API_KEY_MAX_LIFETIME_DAYS * DAY_MS + 1), now: NOW })).toBe("EXPIRY_TOO_FAR");
+    expect(apiKeyExpiryIssue({ expiresAt: at(API_KEY_MAX_LIFETIME_DAYS * DAY_MS + 1), now: NOW })).toBe(
+      "EXPIRY_TOO_FAR",
+    );
   });
 });
 
@@ -45,7 +47,9 @@ describe("CreateApiKeyInputSchema", () => {
 
   it("requires 1-200 distinct, well-formed scopes", () => {
     expect(CreateApiKeyInputSchema.safeParse({ ...input, scopes: [] }).success).toBe(false);
-    expect(CreateApiKeyInputSchema.safeParse({ ...input, scopes: ["core.project.read", "core.project.read"] }).success).toBe(false);
+    expect(
+      CreateApiKeyInputSchema.safeParse({ ...input, scopes: ["core.project.read", "core.project.read"] }).success,
+    ).toBe(false);
     expect(CreateApiKeyInputSchema.safeParse({ ...input, scopes: ["project.read"] }).success).toBe(false);
   });
 

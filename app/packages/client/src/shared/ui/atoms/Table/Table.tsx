@@ -7,14 +7,19 @@ import { cn } from "#/shared/lib/cn.ts";
  * wrapper scrolls horizontally on narrow screens and is focusable so keyboard users can scroll it.
  * Data tables need a `TableCaption` (or `aria-labelledby`) and `scope` on header cells.
  */
-export function Table({ className, scrollLabel, ...props }: ComponentProps<"table"> & {
+export function Table({
+  className,
+  scrollLabel,
+  ...props
+}: ComponentProps<"table"> & {
   /**
    * Name of the scroll container. When given, the container becomes a focusable, labelled region so
    * keyboard users can scroll a wide table (axe `scrollable-region-focusable`); pass the caption.
    */
   scrollLabel?: string | undefined;
 }) {
-  const scrollable = scrollLabel === undefined ? {} : ({ tabIndex: 0, role: "region", "aria-label": scrollLabel } as const);
+  const scrollable =
+    scrollLabel === undefined ? {} : ({ tabIndex: 0, role: "region", "aria-label": scrollLabel } as const);
   return (
     <div
       data-slot="table-container"
@@ -27,7 +32,9 @@ export function Table({ className, scrollLabel, ...props }: ComponentProps<"tabl
 }
 
 export function TableHeader({ className, ...props }: ComponentProps<"thead">) {
-  return <thead data-slot="table-header" className={cn("[&_tr]:border-b [&_tr]:border-border", className)} {...props} />;
+  return (
+    <thead data-slot="table-header" className={cn("[&_tr]:border-b [&_tr]:border-border", className)} {...props} />
+  );
 }
 
 export function TableBody({ className, ...props }: ComponentProps<"tbody">) {
@@ -35,14 +42,23 @@ export function TableBody({ className, ...props }: ComponentProps<"tbody">) {
 }
 
 export function TableFooter({ className, ...props }: ComponentProps<"tfoot">) {
-  return <tfoot data-slot="table-footer" className={cn("border-t border-border bg-muted/50 font-medium", className)} {...props} />;
+  return (
+    <tfoot
+      data-slot="table-footer"
+      className={cn("border-t border-border bg-muted/50 font-medium", className)}
+      {...props}
+    />
+  );
 }
 
 export function TableRow({ className, ...props }: ComponentProps<"tr">) {
   return (
     <tr
       data-slot="table-row"
-      className={cn("border-b border-border transition-colors hover:bg-muted/40 data-[state=selected]:bg-muted", className)}
+      className={cn(
+        "border-b border-border transition-colors hover:bg-muted/40 data-[state=selected]:bg-muted",
+        className,
+      )}
       {...props}
     />
   );
@@ -65,10 +81,22 @@ export function TableHead({ className, scope = "col", ...props }: ComponentProps
 }
 
 export function TableCell({ className, ...props }: ComponentProps<"td">) {
-  return <td data-slot="table-cell" className={cn("px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0", className)} {...props} />;
+  return (
+    <td
+      data-slot="table-cell"
+      className={cn("px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0", className)}
+      {...props}
+    />
+  );
 }
 
 /** Table title for assistive tech and sighted users; use `className="sr-only"` when a heading already shows it. */
 export function TableCaption({ className, ...props }: ComponentProps<"caption">) {
-  return <caption data-slot="table-caption" className={cn("mb-3 text-left text-sm text-muted-foreground", className)} {...props} />;
+  return (
+    <caption
+      data-slot="table-caption"
+      className={cn("mb-3 text-left text-sm text-muted-foreground", className)}
+      {...props}
+    />
+  );
 }

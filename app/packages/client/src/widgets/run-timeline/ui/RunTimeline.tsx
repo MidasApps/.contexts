@@ -35,7 +35,9 @@ function Step({ title, when, children }: { title: string; when?: string | undefi
     <li className="relative flex flex-col gap-0.5 border-l border-border pb-4 pl-4 last:pb-0">
       <span aria-hidden="true" className="absolute top-1.5 -left-[4.5px] size-2 rounded-full bg-muted-foreground" />
       <span className="text-sm font-medium">{title}</span>
-      {when === undefined ? null : <span className="font-mono text-caption text-muted-foreground tabular-nums">{when}</span>}
+      {when === undefined ? null : (
+        <span className="font-mono text-caption text-muted-foreground tabular-nums">{when}</span>
+      )}
       {children === undefined ? null : <span className="text-body text-muted-foreground">{children}</span>}
     </li>
   );
@@ -51,8 +53,14 @@ function Step({ title, when, children }: { title: string; when?: string | undefi
 export function RunTimeline({ run, label, starterLabel, scheduleLabel, renderApproval }: RunTimelineProps) {
   const t = useTranslations("common.runTimeline");
   const formatDateTime = useFormatDateTime();
-  const bySchedule = scheduleLabel === undefined ? t("startedByAnySchedule") : t("startedBySchedule", { schedule: scheduleLabel });
-  const origin = run.scheduleId !== null ? bySchedule : run.startedBy !== null ? t("startedByUser", { user: starterLabel ?? run.startedBy }) : t("startedByPlatform");
+  const bySchedule =
+    scheduleLabel === undefined ? t("startedByAnySchedule") : t("startedBySchedule", { schedule: scheduleLabel });
+  const origin =
+    run.scheduleId !== null
+      ? bySchedule
+      : run.startedBy !== null
+        ? t("startedByUser", { user: starterLabel ?? run.startedBy })
+        : t("startedByPlatform");
   const waiting = run.status === "suspended" && run.approvalRequestId !== null;
   const failure = run.failure ?? null;
   return (
@@ -61,7 +69,11 @@ export function RunTimeline({ run, label, starterLabel, scheduleLabel, renderApp
         {origin}
       </Step>
       {waiting && run.approvalRequestId !== null ? (
-        <Step title={t("waitingApproval")}>{renderApproval?.(run.approvalRequestId) ?? <span className="font-mono text-caption">{run.approvalRequestId}</span>}</Step>
+        <Step title={t("waitingApproval")}>
+          {renderApproval?.(run.approvalRequestId) ?? (
+            <span className="font-mono text-caption">{run.approvalRequestId}</span>
+          )}
+        </Step>
       ) : null}
       {failure === null ? null : (
         <Step title={t(`failure.${failure.code}`)}>

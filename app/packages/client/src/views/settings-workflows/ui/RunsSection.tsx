@@ -1,14 +1,27 @@
 "use client";
 
-import { WORKFLOW_RUN_STATUSES, type AccessContext, type WorkflowCatalogEntry, type WorkflowRun, type WorkflowRunStatus } from "@core/contracts";
+import {
+  type AccessContext,
+  WORKFLOW_RUN_STATUSES,
+  type WorkflowCatalogEntry,
+  type WorkflowRun,
+  type WorkflowRunStatus,
+} from "@core/contracts";
 import { useId, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { isRunCancelable, RunStatusPill, TENANT_RUNS_PAGE_LIMIT, useTenantWorkflowRuns, type TenantRunFilters } from "#/entities/workflow-run/index.ts";
+import { useMemberNames } from "#/entities/member/index.ts";
+import {
+  isRunCancelable,
+  RunStatusPill,
+  TENANT_RUNS_PAGE_LIMIT,
+  type TenantRunFilters,
+  useTenantWorkflowRuns,
+} from "#/entities/workflow-run/index.ts";
 import { CancelWorkflowRunDialog } from "#/features/cancel-workflow-run/index.ts";
-import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
-import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
+import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
@@ -16,12 +29,12 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { useMemberNames } from "#/entities/member/index.ts";
 import { SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
 
 const ANY = "any";
-const isStatus = (value: string): value is WorkflowRunStatus => (WORKFLOW_RUN_STATUSES as readonly string[]).includes(value);
+const isStatus = (value: string): value is WorkflowRunStatus =>
+  (WORKFLOW_RUN_STATUSES as readonly string[]).includes(value);
 const column = dataTableColumnHelper<WorkflowRun>();
 
 type RowActions = { organizationId: string; onCancel: ((run: WorkflowRun) => void) | null };
@@ -45,12 +58,20 @@ function Origin({ run, labels }: { run: WorkflowRun; labels: Labels }) {
   const tTimeline = useTranslations("common.runTimeline");
   const { starterName, scheduleLabel } = labels;
   const schedule = run.scheduleId === null ? undefined : scheduleLabel(run.scheduleId);
-  const bySchedule = schedule === undefined ? tTimeline("startedByAnySchedule") : tTimeline("startedBySchedule", { schedule });
-  const origin = run.scheduleId !== null ? bySchedule : run.startedBy !== null ? tTimeline("startedByUser", { user: starterName(run.startedBy) ?? run.startedBy }) : tTimeline("startedByPlatform");
+  const bySchedule =
+    schedule === undefined ? tTimeline("startedByAnySchedule") : tTimeline("startedBySchedule", { schedule });
+  const origin =
+    run.scheduleId !== null
+      ? bySchedule
+      : run.startedBy !== null
+        ? tTimeline("startedByUser", { user: starterName(run.startedBy) ?? run.startedBy })
+        : tTimeline("startedByPlatform");
   return (
     <span className="flex min-w-0 flex-col">
       <span className="break-all">{origin}</span>
-      {run.approvalRequestId === null || run.status !== "suspended" ? null : <span className="text-caption text-muted-foreground">{t("waitsApproval")}</span>}
+      {run.approvalRequestId === null || run.status !== "suspended" ? null : (
+        <span className="text-caption text-muted-foreground">{t("waitsApproval")}</span>
+      )}
     </span>
   );
 }
@@ -65,12 +86,22 @@ function RunActions({ run, organizationId, onCancel }: RowActions & { run: Workf
   return (
     <span className="flex flex-wrap justify-end gap-2">
       <Button variant="outline" size="sm" asChild>
-        <SettingsSectionLink organizationId={organizationId} section="workflows" rest={`runs/${run.runId}`} aria-label={t("openNamed", { workflow, id: run.runId })}>
+        <SettingsSectionLink
+          organizationId={organizationId}
+          section="workflows"
+          rest={`runs/${run.runId}`}
+          aria-label={t("openNamed", { workflow, id: run.runId })}
+        >
           {t("open")}
         </SettingsSectionLink>
       </Button>
       {onCancel !== null && isRunCancelable(run.status) ? (
-        <Button variant="outline" size="sm" onClick={() => onCancel(run)} aria-label={t("cancelNamed", { workflow, id: run.runId })}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onCancel(run)}
+          aria-label={t("cancelNamed", { workflow, id: run.runId })}
+        >
           {t("cancel")}
         </Button>
       ) : null}
@@ -83,17 +114,43 @@ const useColumns = ({ organizationId, onCancel }: RowActions, labels: Labels) =>
   return useMemo(
     () => [
       column.display({ id: "run", header: () => t("columns.run"), cell: ({ row }) => <RunName run={row.original} /> }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <RunStatusPill status={getValue()} /> }),
-      column.display({ id: "origin", header: () => t("columns.origin"), cell: ({ row }) => <Origin run={row.original} labels={labels} /> }),
-      column.accessor("createdAt", { header: () => t("columns.createdAt"), cell: ({ getValue }) => <When iso={getValue()} /> }),
-      column.accessor("updatedAt", { header: () => t("columns.updatedAt"), cell: ({ getValue }) => <When iso={getValue()} /> }),
-      column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <RunActions run={row.original} organizationId={organizationId} onCancel={onCancel} /> }),
+      column.accessor("status", {
+        header: () => t("columns.status"),
+        cell: ({ getValue }) => <RunStatusPill status={getValue()} />,
+      }),
+      column.display({
+        id: "origin",
+        header: () => t("columns.origin"),
+        cell: ({ row }) => <Origin run={row.original} labels={labels} />,
+      }),
+      column.accessor("createdAt", {
+        header: () => t("columns.createdAt"),
+        cell: ({ getValue }) => <When iso={getValue()} />,
+      }),
+      column.accessor("updatedAt", {
+        header: () => t("columns.updatedAt"),
+        cell: ({ getValue }) => <When iso={getValue()} />,
+      }),
+      column.display({
+        id: "actions",
+        header: () => t("columns.actions"),
+        meta: { headerHidden: true },
+        cell: ({ row }) => <RunActions run={row.original} organizationId={organizationId} onCancel={onCancel} />,
+      }),
     ],
     [t, organizationId, onCancel, labels],
   );
 };
 
-function RunFilters({ filters, onChange, workflows }: { filters: TenantRunFilters; onChange: (filters: TenantRunFilters) => void; workflows: readonly WorkflowCatalogEntry[] }) {
+function RunFilters({
+  filters,
+  onChange,
+  workflows,
+}: {
+  filters: TenantRunFilters;
+  onChange: (filters: TenantRunFilters) => void;
+  workflows: readonly WorkflowCatalogEntry[];
+}) {
   const t = useTranslations("settings.workflows.runs.filters");
   const workflowLabel = useWorkflowLabel();
   const tStatus = useTranslations("common.runTimeline.status");
@@ -103,7 +160,10 @@ function RunFilters({ filters, onChange, workflows }: { filters: TenantRunFilter
     <div role="search" aria-label={t("label")} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={workflowId}>{t("workflow")}</Label>
-        <Select value={filters.workflowId ?? ANY} onValueChange={(value) => onChange({ ...filters, workflowId: value === ANY ? undefined : value })}>
+        <Select
+          value={filters.workflowId ?? ANY}
+          onValueChange={(value) => onChange({ ...filters, workflowId: value === ANY ? undefined : value })}
+        >
           <SelectTrigger id={workflowId} className="w-full sm:w-56">
             <SelectValue />
           </SelectTrigger>
@@ -119,7 +179,10 @@ function RunFilters({ filters, onChange, workflows }: { filters: TenantRunFilter
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={statusId}>{t("status")}</Label>
-        <Select value={filters.status ?? ANY} onValueChange={(value) => onChange({ ...filters, status: isStatus(value) ? value : undefined })}>
+        <Select
+          value={filters.status ?? ANY}
+          onValueChange={(value) => onChange({ ...filters, status: isStatus(value) ? value : undefined })}
+        >
           <SelectTrigger id={statusId} className="w-full sm:w-48">
             <SelectValue />
           </SelectTrigger>
@@ -169,7 +232,10 @@ export function RunsSection({ context, workflows, onStart, online }: RunsSection
   const paged = useCursorPages(runs, TENANT_RUNS_PAGE_LIMIT, t("pagination"), search);
   const canCancel = context.permissions.includes("core.workflow-run.cancel") && online;
   const actions: RowActions = { organizationId: organization.id, onCancel: canCancel ? setCanceling : null };
-  const starterName = useMemberNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
+  const starterName = useMemberNames({
+    organizationId: organization.id,
+    canReadMembers: context.permissions.includes("core.member.read"),
+  });
   const scheduleLabel = useTenantScheduleLabels(context);
   const labels = useMemo((): Labels => ({ starterName, scheduleLabel }), [starterName, scheduleLabel]);
   const columns = useColumns(actions, labels);
@@ -204,15 +270,37 @@ export function RunsSection({ context, workflows, onStart, online }: RunsSection
             )}
             empty={
               filtering ? (
-                <EmptyState frame="plain" headingLevel={2} icon="search" title={t("noMatchTitle")} description={t("noMatchDescription")} action={<Button variant="secondary" onClick={() => setFilters({})}>{t("clearFilters")}</Button>} />
+                <EmptyState
+                  frame="plain"
+                  headingLevel={2}
+                  icon="search"
+                  title={t("noMatchTitle")}
+                  description={t("noMatchDescription")}
+                  action={
+                    <Button variant="secondary" onClick={() => setFilters({})}>
+                      {t("clearFilters")}
+                    </Button>
+                  }
+                />
               ) : (
-                <EmptyState frame="plain" headingLevel={2} icon="workflow" title={t("emptyTitle")} description={onStart === null ? t("emptyDescription") : t("emptyDescriptionCanStart")} action={onStart === null ? undefined : <Button onClick={onStart}>{t("start")}</Button>} />
+                <EmptyState
+                  frame="plain"
+                  headingLevel={2}
+                  icon="workflow"
+                  title={t("emptyTitle")}
+                  description={onStart === null ? t("emptyDescription") : t("emptyDescriptionCanStart")}
+                  action={onStart === null ? undefined : <Button onClick={onStart}>{t("start")}</Button>}
+                />
               )
             }
           />
         )}
       </QuerySection>
-      <CancelWorkflowRunDialog organizationId={organization.id} run={canceling} onOpenChange={(open) => !open && setCanceling(null)} />
+      <CancelWorkflowRunDialog
+        organizationId={organization.id}
+        run={canceling}
+        onOpenChange={(open) => !open && setCanceling(null)}
+      />
     </div>
   );
 }

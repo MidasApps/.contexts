@@ -10,7 +10,8 @@ export type EndpointRegistry = {
 const METHOD_ORDER = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
 
 // `/v1/projects/{projectId}` and `/v1/projects/{id}` are the same route for a router.
-const routeKey = (endpoint: EndpointDefinition): string => `${endpoint.method} ${endpoint.path.replaceAll(/\{[^}]+\}/g, "{}")}`;
+const routeKey = (endpoint: EndpointDefinition): string =>
+  `${endpoint.method} ${endpoint.path.replaceAll(/\{[^}]+\}/g, "{}")}`;
 
 const compareEndpoints = (left: EndpointDefinition, right: EndpointDefinition): number => {
   if (left.path !== right.path) return left.path < right.path ? -1 : 1;

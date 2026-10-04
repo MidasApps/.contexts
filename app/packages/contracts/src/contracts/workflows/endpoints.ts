@@ -5,20 +5,30 @@ import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.schema.ts";
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
 import { WorkflowIdSchema } from "./human-approval-resume.schema.ts";
-import { CreateScheduleInputSchema, SchedulePreviewInputSchema, SchedulePreviewSchema, ScheduleSchema, UpdateScheduleInputSchema } from "./schedule.schema.ts";
+import {
+  CreateScheduleInputSchema,
+  SchedulePreviewInputSchema,
+  SchedulePreviewSchema,
+  ScheduleSchema,
+  UpdateScheduleInputSchema,
+} from "./schedule.schema.ts";
 import { StartWorkflowRunInputSchema, WorkflowRunSchema, WorkflowRunStatusSchema } from "./workflow-run.schema.ts";
 
 const RunIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,128}$/);
 
 /** The organization of the call: required for users, an API key's own one otherwise (like `/v1/mcp`). */
 export const OrganizationQuerySchema = z.object({
-  organizationId: OrganizationIdSchema.optional().meta(none("Organization to act in; required for users, and when given it must be an API key's own organization.")),
+  organizationId: OrganizationIdSchema.optional().meta(
+    none("Organization to act in; required for users, and when given it must be an API key's own organization."),
+  ),
 });
 
 const runParams = z.object({ runId: RunIdSchema.meta(none("Workflow run id.")) });
 
 /** `202` of `POST /v1/workflows/{workflowId}/runs`: the run to follow. */
-export const StartedWorkflowRunSchema = z.strictObject({ runId: z.string().min(1).max(128).meta(none("Id of the started run.")) });
+export const StartedWorkflowRunSchema = z.strictObject({
+  runId: z.string().min(1).max(128).meta(none("Id of the started run.")),
+});
 
 /**
  * `200` of the progress stream: `text/event-stream` in the `api.md` §14 format, one
@@ -61,7 +71,8 @@ export const streamWorkflowRunEndpoint = defineEndpoint({
   query: OrganizationQuerySchema,
   responses: { 200: WorkflowRunStreamSchema },
   errors: { 403: ["FORBIDDEN"], 404: ["NOT_FOUND"] },
-  summary: "Streams the run's progress as server-sent events; Last-Event-Id resumes after an event index (core.workflow-run.read).",
+  summary:
+    "Streams the run's progress as server-sent events; Last-Event-Id resumes after an event index (core.workflow-run.read).",
 });
 
 export const cancelWorkflowRunEndpoint = defineEndpoint({
@@ -98,13 +109,24 @@ export const WORKFLOW_RUN_ENDPOINTS: readonly EndpointDefinition[] = [
   startWorkflowRunEndpoint,
 ];
 
-const scheduleParams = z.object({ scheduleId: z.string().regex(/^schedule_[a-z0-9-]{1,120}$/).meta(none("Schedule id.")) });
+const scheduleParams = z.object({
+  scheduleId: z
+    .string()
+    .regex(/^schedule_[a-z0-9-]{1,120}$/)
+    .meta(none("Schedule id.")),
+});
 
 /** `202` of `POST /v1/schedules/{scheduleId}/run`: the schedule whose run was queued. */
-export const ScheduleRunQueuedSchema = z.strictObject({ scheduleId: z.string().min(1).meta(none("Schedule that will start a run now.")) });
+export const ScheduleRunQueuedSchema = z.strictObject({
+  scheduleId: z.string().min(1).meta(none("Schedule that will start a run now.")),
+});
 
 const scheduleErrors = { 403: ["FORBIDDEN"], 404: ["NOT_FOUND"] } as const;
-const scheduleWriteErrors = { ...scheduleErrors, 409: ["CONFLICT"], 422: ["WORKFLOW_NOT_SCHEDULABLE", "SCHEDULE_INTERVAL_TOO_SHORT"] } as const;
+const scheduleWriteErrors = {
+  ...scheduleErrors,
+  409: ["CONFLICT"],
+  422: ["WORKFLOW_NOT_SCHEDULABLE", "SCHEDULE_INTERVAL_TOO_SHORT"],
+} as const;
 
 export const listSchedulesEndpoint = defineEndpoint({
   id: "schedules.list",
@@ -127,7 +149,8 @@ export const createScheduleEndpoint = defineEndpoint({
   responses: { 201: dataEnvelope(ScheduleSchema) },
   errors: scheduleWriteErrors,
   idempotency: "optional",
-  summary: "Schedules a schedulable workflow on a 5-field cron in an IANA time zone; runs re-authorize the creator (core.schedule.write).",
+  summary:
+    "Schedules a schedulable workflow on a 5-field cron in an IANA time zone; runs re-authorize the creator (core.schedule.write).",
 });
 
 export const getScheduleEndpoint = defineEndpoint({
@@ -180,8 +203,14 @@ const scheduleActionEndpoint = <A extends "pause" | "resume">(action: A, summary
     summary,
   });
 
-export const pauseScheduleEndpoint = scheduleActionEndpoint("pause", "Pauses a schedule; it does not fire until resumed (core.schedule.write).");
-export const resumeScheduleEndpoint = scheduleActionEndpoint("resume", "Resumes a schedule from now on; missed fires are not replayed (core.schedule.write).");
+export const pauseScheduleEndpoint = scheduleActionEndpoint(
+  "pause",
+  "Pauses a schedule; it does not fire until resumed (core.schedule.write).",
+);
+export const resumeScheduleEndpoint = scheduleActionEndpoint(
+  "resume",
+  "Resumes a schedule from now on; missed fires are not replayed (core.schedule.write).",
+);
 
 export const runScheduleNowEndpoint = defineEndpoint({
   id: "schedules.runNow",
@@ -204,7 +233,8 @@ export const previewScheduleEndpoint = defineEndpoint({
   body: SchedulePreviewInputSchema,
   responses: { 200: dataEnvelope(SchedulePreviewSchema) },
   errors: { 403: ["FORBIDDEN"] },
-  summary: "The next five fires of an unsaved cron expression in its time zone, from the scheduler's own engine (core.schedule.read).",
+  summary:
+    "The next five fires of an unsaved cron expression in its time zone, from the scheduler's own engine (core.schedule.read).",
 });
 
 export const SCHEDULE_ENDPOINTS: readonly EndpointDefinition[] = [

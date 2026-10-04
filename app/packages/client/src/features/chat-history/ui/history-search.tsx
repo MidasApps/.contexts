@@ -25,5 +25,13 @@ export function HistorySearch({ onSearch, delayMs = HISTORY_SEARCH_DELAY_MS, cla
     const timer = setTimeout(() => onSearch(text.trim()), delayMs);
     return () => clearTimeout(timer);
   }, [text, delayMs, onSearch]);
-  return <SearchField value={text} onValueChange={setText} label={t("searchLabel")} placeholder={t("searchPlaceholder")} className={className} />;
+  return (
+    <SearchField
+      value={text}
+      onValueChange={setText}
+      label={t("searchLabel")}
+      placeholder={t("searchPlaceholder")}
+      className={className}
+    />
+  );
 }

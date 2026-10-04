@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "use-intl";
 import { CreateAccountForm } from "#/features/create-account/index.ts";
 import { MfaChallengeForm } from "#/features/mfa-challenge/index.ts";
@@ -60,7 +60,10 @@ function SignUpBody({ next }: { next: string | null }) {
     return (
       <>
         <h1 className="sr-only">{t("signUp.title")}</h1>
-        <LoadingState variant="spinner" label={state.status === "signed-in" ? t("signIn.redirecting") : t("signIn.loading")} />
+        <LoadingState
+          variant="spinner"
+          label={state.status === "signed-in" ? t("signIn.redirecting") : t("signIn.loading")}
+        />
       </>
     );
   }
@@ -70,7 +73,10 @@ function SignUpBody({ next }: { next: string | null }) {
       <CreateAccountForm />
       <p className="text-center text-sm text-muted-foreground">
         {t("signUp.haveAccount")}{" "}
-        <RouteLink to={{ id: "sign-in", next: next ?? undefined }} className="font-medium text-foreground underline underline-offset-4">
+        <RouteLink
+          to={{ id: "sign-in", next: next ?? undefined }}
+          className="font-medium text-foreground underline underline-offset-4"
+        >
           {t("signUp.signIn")}
         </RouteLink>
       </p>

@@ -10,12 +10,28 @@ import { groupPermissionsByModule, PermissionPicker, RoleChecklist, useRoleOptio
 function Roles() {
   const options = useRoleOptions([]);
   const [value, setValue] = useState<RoleRef[]>([{ kind: "system", key: "member" }]);
-  return <RoleChecklist legend="Papéis" options={options} value={value} onChange={setValue} error={value.length === 0 ? "Escolha um papel." : undefined} />;
+  return (
+    <RoleChecklist
+      legend="Papéis"
+      options={options}
+      value={value}
+      onChange={setValue}
+      error={value.length === 0 ? "Escolha um papel." : undefined}
+    />
+  );
 }
 
 function Permissions() {
   const [value, setValue] = useState<string[]>([]);
-  return <PermissionPicker legend="Permissões" permissions={PERMISSION_REGISTRY as unknown as PermissionDefinition[]} value={value} onChange={setValue} grantable={(id) => id !== "core.member.read"} />;
+  return (
+    <PermissionPicker
+      legend="Permissões"
+      permissions={PERMISSION_REGISTRY as unknown as PermissionDefinition[]}
+      value={value}
+      onChange={setValue}
+      grantable={(id) => id !== "core.member.read"}
+    />
+  );
 }
 
 describe("role pickers", () => {

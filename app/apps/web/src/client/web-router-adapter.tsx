@@ -1,6 +1,12 @@
 "use client";
 
-import { parseRoute, routeHref, type Route, type RouterLinkProps, type RouterPort } from "@core/client/shared/lib/router";
+import {
+  parseRoute,
+  type Route,
+  type RouterLinkProps,
+  type RouterPort,
+  routeHref,
+} from "@core/client/shared/lib/router";
 import type { SupportedLocale } from "@core/i18n";
 import { usePathname as useNextPathname, useSearchParams } from "next/navigation";
 import type { ComponentType, ReactNode } from "react";
@@ -19,7 +25,12 @@ export type WebRouterHooks = {
   /** Current pathname without the locale prefix (next-intl `usePathname`). */
   readonly usePathname: () => string;
   readonly useSearch: () => string;
-  readonly Link: ComponentType<{ href: string; replace?: boolean | undefined; prefetch?: boolean | undefined; children?: ReactNode } & Omit<RouterLinkProps, "to" | "replace">>;
+  readonly Link: ComponentType<
+    { href: string; replace?: boolean | undefined; prefetch?: boolean | undefined; children?: ReactNode } & Omit<
+      RouterLinkProps,
+      "to" | "replace"
+    >
+  >;
 };
 
 export type WebRouterAdapter = RouterPort & {
@@ -54,7 +65,11 @@ const NEXT_HOOKS: WebRouterHooks = {
 
 const paramsOf = (route: Route | null): Record<string, string | undefined> => {
   if (route === null) return {};
-  return Object.fromEntries(Object.entries(route).filter((entry): entry is [string, string] => entry[0] !== "id" && typeof entry[1] === "string"));
+  return Object.fromEntries(
+    Object.entries(route).filter(
+      (entry): entry is [string, string] => entry[0] !== "id" && typeof entry[1] === "string",
+    ),
+  );
 };
 
 const withSearch = (path: string, search: string): string => (search === "" ? path : `${path}?${search}`);
@@ -64,7 +79,12 @@ const withSearch = (path: string, search: string): string => (search === "" ? pa
  * (`routeHref`/`parseRoute`) so views see the same params on web, desktop and tests; the web only
  * adds `/{locale}`. Navigation goes through next-intl's router once `WebRouterBridge` attaches it.
  */
-export const createWebRouterAdapter = ({ locale, assign, hooks = NEXT_HOOKS, replaceAddress = replaceBrowserAddress }: WebRouterAdapterArgs): WebRouterAdapter => {
+export const createWebRouterAdapter = ({
+  locale,
+  assign,
+  hooks = NEXT_HOOKS,
+  replaceAddress = replaceBrowserAddress,
+}: WebRouterAdapterArgs): WebRouterAdapter => {
   let navigator: WebNavigator | null = null;
   const localized = (href: string, target: SupportedLocale = locale): string => `/${target}${href === "/" ? "" : href}`;
   const navigate: RouterPort["navigate"] = (route, options) => {

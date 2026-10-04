@@ -8,9 +8,7 @@ export const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 
 // eslint-module-utils loads resolvers by module path; passing the absolute path
 // avoids depending on pnpm hoisting the resolver next to each consumer.
-const TYPESCRIPT_RESOLVER = createRequire(import.meta.url).resolve(
-  "eslint-import-resolver-typescript",
-);
+const TYPESCRIPT_RESOLVER = createRequire(import.meta.url).resolve("eslint-import-resolver-typescript");
 
 /** Element types of spec §3; patterns are relative to the workspace root. */
 export const ELEMENTS = [
@@ -51,10 +49,7 @@ export const DEPENDENCY_POLICIES = [
   // apps only compose: they may import every package and module, never each other.
   {
     from: { element: { type: "app" } },
-    allow: [
-      sameCaptured("app"),
-      ...["client", "contracts", "services", "agents", "i18n", "module", "e2e"].map(to),
-    ],
+    allow: [sameCaptured("app"), ...["client", "contracts", "services", "agents", "i18n", "module", "e2e"].map(to)],
   },
   { from: { element: { type: "client" } }, allow: [to("client"), to("contracts"), to("i18n")] },
   // i18n is a leaf (it imports nothing of the workspace) and owns the supported locales (decision 0013);
@@ -71,14 +66,7 @@ export const DEPENDENCY_POLICIES = [
   // The core never imports a module (spec D6); a module builds on the core.
   {
     from: { element: { type: "module" } },
-    allow: [
-      sameCaptured("module"),
-      to("client"),
-      to("contracts"),
-      to("i18n"),
-      to("agents"),
-      SERVICES_USE_CASE_ENTRY,
-    ],
+    allow: [sameCaptured("module"), to("client"), to("contracts"), to("i18n"), to("agents"), SERVICES_USE_CASE_ENTRY],
   },
 ];
 
@@ -100,10 +88,7 @@ export const createBoundariesConfig = ({ rootPath = WORKSPACE_ROOT } = {}) => [
       "import/resolver": { [TYPESCRIPT_RESOLVER]: { alwaysTryTypes: true } },
     },
     rules: {
-      "boundaries/dependencies": [
-        "error",
-        { default: "disallow", policies: DEPENDENCY_POLICIES },
-      ],
+      "boundaries/dependencies": ["error", { default: "disallow", policies: DEPENDENCY_POLICIES }],
     },
   },
 ];

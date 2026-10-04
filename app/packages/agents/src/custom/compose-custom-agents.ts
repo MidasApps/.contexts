@@ -10,9 +10,9 @@ import type { AccessPort, CustomAgentsPort } from "../runtime/runtime-ports.ts";
 import type { CoreToolDeps } from "../tools/define-core-tool.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
 import { createCustomAgent } from "./custom-agent.ts";
-import { createCustomAgentLoader, type CustomAgentLoader } from "./custom-agent-loader.ts";
-import { createCustomAgentRoutes, type CustomCatalogDeps, customCatalogEntriesOf } from "./custom-agent-routes.ts";
-import { createCustomCeilingResolver, createCustomToolsResolver, CUSTOM_AGENT_ID } from "./custom-agent-tools.ts";
+import { type CustomAgentLoader, createCustomAgentLoader } from "./custom-agent-loader.ts";
+import { type CustomCatalogDeps, createCustomAgentRoutes, customCatalogEntriesOf } from "./custom-agent-routes.ts";
+import { CUSTOM_AGENT_ID, createCustomCeilingResolver, createCustomToolsResolver } from "./custom-agent-tools.ts";
 
 /** Mastra ids that run custom agents: the plain agent and its durable chat wrapper. */
 export const CUSTOM_AGENT_RUN_IDS: readonly string[] = [CUSTOM_AGENT_ID, chatAgentIdOf(CUSTOM_AGENT_ID)];
@@ -21,7 +21,8 @@ export const CUSTOM_AGENT_RUN_IDS: readonly string[] = [CUSTOM_AGENT_ID, chatAge
  * Platform ceiling of custom agents (decision 0046): the union of the code-defined subagents'
  * ceilings, so an organization's agent never holds a permission no shipped agent could use.
  */
-export const platformCeilingOf = (subagents: readonly Pick<AgentDefinition, "ceiling">[]): ReadonlySet<string> => new Set(subagents.flatMap((agent) => agent.ceiling));
+export const platformCeilingOf = (subagents: readonly Pick<AgentDefinition, "ceiling">[]): ReadonlySet<string> =>
+  new Set(subagents.flatMap((agent) => agent.ceiling));
 
 /**
  * The loader and the `runCeilingOf` of the runtime. Built before the tool registry exists (the
@@ -33,7 +34,12 @@ export const createCustomAgentAccess = (args: {
   readonly registry: () => Pick<ToolRegistry, "has" | "get">;
 }): { readonly loader: CustomAgentLoader; readonly runCeilingOf: NonNullable<CoreToolDeps["runCeilingOf"]> } => {
   const loader = createCustomAgentLoader(args.customAgents);
-  const runCeilingOf = createCustomCeilingResolver({ loader, registry: args.registry, platformCeiling: platformCeilingOf(args.subagents), agentIds: CUSTOM_AGENT_RUN_IDS });
+  const runCeilingOf = createCustomCeilingResolver({
+    loader,
+    registry: args.registry,
+    platformCeiling: platformCeilingOf(args.subagents),
+    agentIds: CUSTOM_AGENT_RUN_IDS,
+  });
   return { loader, runCeilingOf };
 };
 
@@ -59,7 +65,9 @@ export type CustomAgentRuntime = {
   readonly resolveChatAgent: ReturnType<typeof createCustomChatResolver>;
   readonly routes: ApiRoute[];
   /** The tenant's custom agents as catalog entries (`GET /tenant-catalog/agents`). */
-  readonly catalogEntries: (input: Parameters<typeof customCatalogEntriesOf>[1]) => ReturnType<typeof customCatalogEntriesOf>;
+  readonly catalogEntries: (
+    input: Parameters<typeof customCatalogEntriesOf>[1],
+  ) => ReturnType<typeof customCatalogEntriesOf>;
 };
 
 /** The custom agent, its chat resolver, its runtime routes and its catalog entries. */
@@ -79,15 +87,35 @@ export const composeCustomAgents = (args: {
   const agent = createCustomAgent({
     deps,
     loader,
-    tools: createCustomToolsResolver({ registry, toolDeps: args.toolDeps, connectorTools: deps.connectorTools, moduleIds, tenantSettings: deps.tenantSettings }),
+    tools: createCustomToolsResolver({
+      registry,
+      toolDeps: args.toolDeps,
+      connectorTools: deps.connectorTools,
+      moduleIds,
+      tenantSettings: deps.tenantSettings,
+    }),
     coreSkills,
     ...(args.instructionsDirs === undefined ? {} : { instructionsDirs: args.instructionsDirs }),
   });
-  const catalogDeps: CustomCatalogDeps = { customAgents: args.customAgents, registry, moduleIds, coreSkills, connectorTools: deps.connectorTools };
+  const catalogDeps: CustomCatalogDeps = {
+    customAgents: args.customAgents,
+    registry,
+    moduleIds,
+    coreSkills,
+    connectorTools: deps.connectorTools,
+  };
   return {
     agent,
     resolveChatAgent: createCustomChatResolver(loader),
-    routes: createCustomAgentRoutes({ access: args.access, registry, moduleIds, tenantSettings: deps.tenantSettings, coreSkills, loader, logger: args.logger }),
+    routes: createCustomAgentRoutes({
+      access: args.access,
+      registry,
+      moduleIds,
+      tenantSettings: deps.tenantSettings,
+      coreSkills,
+      loader,
+      logger: args.logger,
+    }),
     catalogEntries: (input) => customCatalogEntriesOf(catalogDeps, input),
   };
 };

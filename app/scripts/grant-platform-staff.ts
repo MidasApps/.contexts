@@ -18,13 +18,23 @@ const print = (line: string): void => {
 const main = async (): Promise<void> => {
   // Never overrides a variable already set in the shell.
   if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
-  const args = parseGrantStaffArgs(process.argv.slice(2).filter((arg) => arg !== "--"), process.env);
-  const firebase = createFirebaseAdmin({ env: { APP_ENV: args.appEnv, FIREBASE_PROJECT_ID: args.projectId }, processEnv: process.env });
+  const args = parseGrantStaffArgs(
+    process.argv.slice(2).filter((arg) => arg !== "--"),
+    process.env,
+  );
+  const firebase = createFirebaseAdmin({
+    env: { APP_ENV: args.appEnv, FIREBASE_PROJECT_ID: args.projectId },
+    processEnv: process.env,
+  });
   const logger = createLogger({ context: { service: "scripts", env: args.appEnv } });
   const server = createCoreServer({ env: { API_KEY_PREFIX: "core" }, firebase, logger });
   // The email only finds the account; it is never printed or audited.
   const account = await firebase.auth.getUserByEmail(args.email);
-  const staff = await server.platform.grantPlatformStaff({ uid: UserIdSchema.parse(account.uid), role: args.role, requestId: resolveRequestId(null) });
+  const staff = await server.platform.grantPlatformStaff({
+    uid: UserIdSchema.parse(account.uid),
+    role: args.role,
+    requestId: resolveRequestId(null),
+  });
   print(`project ${args.projectId}: uid ${staff.uid} is ${staff.role} (MFA is still required to use it)`);
 };
 
@@ -32,7 +42,12 @@ try {
   await main();
 } catch (error: unknown) {
   const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
-  const message = code === "auth/user-not-found" ? "no Auth account has that email" : error instanceof Error ? error.message : String(error);
+  const message =
+    code === "auth/user-not-found"
+      ? "no Auth account has that email"
+      : error instanceof Error
+        ? error.message
+        : String(error);
   print(`failed: ${message}`);
   process.exitCode = 1;
 }

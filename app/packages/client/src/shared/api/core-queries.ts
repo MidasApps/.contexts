@@ -1,4 +1,4 @@
-import { getAccessContextEndpoint, getMeEndpoint, type AccessContext, type Me } from "@core/contracts";
+import { type AccessContext, getAccessContextEndpoint, getMeEndpoint, type Me } from "@core/contracts";
 import { queryOptions } from "@tanstack/react-query";
 import type { CallEndpoint } from "./call-endpoint.ts";
 import { queryKeys } from "./query-keys.ts";

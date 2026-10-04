@@ -1,6 +1,11 @@
 "use client";
 
-import { ADMIN_USER_LOOKUP_MAX, adminListUsersEndpoint, type AdminUserSearchBy, type AdminUserSummary } from "@core/contracts";
+import {
+  ADMIN_USER_LOOKUP_MAX,
+  type AdminUserSearchBy,
+  type AdminUserSummary,
+  adminListUsersEndpoint,
+} from "@core/contracts";
 import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -30,7 +35,11 @@ export const adminUserSearchQuery = (callEndpoint: CallEndpoint, search: AdminUs
     queryKey: adminUserKeys.search(search),
     fetchPage: async (cursor, signal) =>
       callEndpoint(adminListUsersEndpoint, {
-        query: { ...pageQuery(cursor, ADMIN_USERS_PAGE_LIMIT), query: search.query, ...(search.by === undefined ? {} : { by: search.by }) },
+        query: {
+          ...pageQuery(cursor, ADMIN_USERS_PAGE_LIMIT),
+          query: search.query,
+          ...(search.by === undefined ? {} : { by: search.by }),
+        },
         signal,
       }),
   });
@@ -49,7 +58,8 @@ export const useAdminUserSearch = (search: AdminUserSearch | null, options: { en
 export const distinctSortedIds = (ids: readonly (string | null | undefined)[]): string[] =>
   [...new Set(ids.filter((id): id is string => typeof id === "string" && id !== ""))].sort();
 
-const chunksOf = (ids: readonly string[], size: number): string[][] => Array.from({ length: Math.ceil(ids.length / size) }, (_, index) => ids.slice(index * size, (index + 1) * size));
+const chunksOf = (ids: readonly string[], size: number): string[][] =>
+  Array.from({ length: Math.ceil(ids.length / size) }, (_, index) => ids.slice(index * size, (index + 1) * size));
 
 /**
  * `GET /v1/admin/users?ids=` (decision 0044): the users of a whole list in one call (one call per
@@ -60,7 +70,12 @@ export const adminUsersByIdQuery = (callEndpoint: CallEndpoint, ids: readonly st
     queryKey: adminUserKeys.names(ids),
     queryFn: async ({ signal }): Promise<AdminUserSummary[]> => {
       const pages = await Promise.all(
-        chunksOf(ids, ADMIN_USER_LOOKUP_MAX).map((chunk) => callEndpoint(adminListUsersEndpoint, { query: { ids: chunk.join(","), limit: ADMIN_USER_LOOKUP_MAX }, signal })),
+        chunksOf(ids, ADMIN_USER_LOOKUP_MAX).map((chunk) =>
+          callEndpoint(adminListUsersEndpoint, {
+            query: { ids: chunk.join(","), limit: ADMIN_USER_LOOKUP_MAX },
+            signal,
+          }),
+        ),
       );
       return pages.flatMap((page) => page.data);
     },
@@ -75,12 +90,18 @@ export const adminUsersByIdQuery = (callEndpoint: CallEndpoint, ids: readonly st
  * failure it answers the id, so a list never waits for or breaks on the names.
  * @example const userLabel = useAdminUserNames(runs.map((run) => run.startedBy));
  */
-export const useAdminUserNames = (ids: readonly (string | null | undefined)[], options: { enabled?: boolean } = {}): ((id: string) => string) => {
+export const useAdminUserNames = (
+  ids: readonly (string | null | undefined)[],
+  options: { enabled?: boolean } = {},
+): ((id: string) => string) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
   const key = distinctSortedIds(ids).join(",");
   const wanted = useMemo(() => (key === "" ? [] : key.split(",")), [key]);
-  const users = useQuery({ ...adminUsersByIdQuery(callEndpoint, wanted), enabled: signedIn && wanted.length > 0 && options.enabled !== false });
+  const users = useQuery({
+    ...adminUsersByIdQuery(callEndpoint, wanted),
+    enabled: signedIn && wanted.length > 0 && options.enabled !== false,
+  });
   return useMemo(() => {
     const labels = new Map((users.data ?? []).map((user) => [user.id as string, adminUserLabel(user)]));
     return (id: string): string => labels.get(id) ?? id;

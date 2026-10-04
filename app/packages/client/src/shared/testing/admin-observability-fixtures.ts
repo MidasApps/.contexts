@@ -49,7 +49,17 @@ export const buildTraceDetail = (overrides: Json = {}): Json => ({
   summary: buildTraceSummary(),
   spans: [
     buildSpan(),
-    buildSpan({ spanId: OBS_IDS.modelSpan, parentSpanId: OBS_IDS.rootSpan, name: "llm: gemini", type: "model_generation", model: "gemini-3.5-flash", durationMs: 1200, inputTokens: 1500, outputTokens: 300, costMicroUsd: 850 }),
+    buildSpan({
+      spanId: OBS_IDS.modelSpan,
+      parentSpanId: OBS_IDS.rootSpan,
+      name: "llm: gemini",
+      type: "model_generation",
+      model: "gemini-3.5-flash",
+      durationMs: 1200,
+      inputTokens: 1500,
+      outputTokens: 300,
+      costMicroUsd: 850,
+    }),
     buildSpan({
       spanId: OBS_IDS.toolSpan,
       parentSpanId: OBS_IDS.rootSpan,
@@ -68,7 +78,10 @@ export const buildTraceDetail = (overrides: Json = {}): Json => ({
 });
 
 /** `{ data, meta: { hasMore } }` of a console list paged by number. */
-export const numberedPage = (items: readonly unknown[], hasMore = false): { status: number; body: unknown } => ({ status: 200, body: { data: items, meta: { hasMore } } });
+export const numberedPage = (items: readonly unknown[], hasMore = false): { status: number; body: unknown } => ({
+  status: 200,
+  body: { data: items, meta: { hasMore } },
+});
 
 export const buildExperiment = (overrides: Json = {}): Json => ({
   experimentId: "exp_01J8Z3K4M5",

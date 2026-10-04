@@ -17,24 +17,34 @@ export const AdminAgentSchema = z.strictObject({
   name: z.string().min(1).max(120).meta(none("Name the runtime registered (English, from code).")),
   description: z.string().max(1000).meta(none("What the agent does, as registered (English, from code).")),
   role: AdminAgentRoleSchema.meta(none("`supervisor`, `entry` or `subagent`.")),
-  enablement: AdminAgentEnablementSchema.meta(none("`always`, or `per-organization` when the organization's agent settings decide.")),
-  subagents: idList("Ids of the agents it may delegate to (the supervisor); the organization's settings narrow them per run."),
+  enablement: AdminAgentEnablementSchema.meta(
+    none("`always`, or `per-organization` when the organization's agent settings decide."),
+  ),
+  subagents: idList(
+    "Ids of the agents it may delegate to (the supervisor); the organization's settings narrow them per run.",
+  ),
   tools: idList("Ids of the tools it has in every organization."),
-  toolsVaryByOrganization: z.boolean().meta(none("True when it also gets tools from the organization's connectors or web opt-ins.")),
+  toolsVaryByOrganization: z
+    .boolean()
+    .meta(none("True when it also gets tools from the organization's connectors or web opt-ins.")),
   skills: idList("Names of the core skills it loads; skills of enabled modules come on top."),
-  permissions: idList("Its ceiling: the permissions its tool calls may ever use (the caller's permissions narrow them)."),
+  permissions: idList(
+    "Its ceiling: the permissions its tool calls may ever use (the caller's permissions narrow them).",
+  ),
 });
 export type AdminAgent = z.infer<typeof AdminAgentSchema>;
 
 export const AdminAgentContract = defineContract(AdminAgentSchema, {
   id: "platform.AdminAgent",
   kind: "view",
-  description: "A registered agent for staff: its role, subagents, tools, skills, permission ceiling and whether organizations enable it.",
+  description:
+    "A registered agent for staff: its role, subagents, tools, skills, permission ceiling and whether organizations enable it.",
   examples: [
     {
       id: "knowledge",
       name: "Knowledge",
-      description: "Answers questions about the organization's documents and data catalog from the knowledge base, citing every claim.",
+      description:
+        "Answers questions about the organization's documents and data catalog from the knowledge base, citing every claim.",
       role: "subagent",
       enablement: "per-organization",
       subagents: [],

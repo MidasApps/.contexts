@@ -1,39 +1,39 @@
+import type { CustomAgent, CustomSkill, StoredFile } from "@core/contracts";
 import { type AgentSettings, AgentSettingsSchema, CreateProjectInputContract, type LlmCall } from "@core/contracts";
-import { type ContractCommand, CORE_FLAGS, defineContractCommand } from "@core/services";
+import { CORE_FLAGS, type ContractCommand, defineContractCommand } from "@core/services";
 import { z } from "zod";
 import type {
   AccessContext,
   AccessPort,
   AccessPrincipal,
+  AgentRunRecord,
   AgentRuntimePorts,
   ApprovalPort,
   AuditEntry,
+  AuditPort,
+  BudgetCheck,
   CommandIdempotencyPort,
   CustomAgentsPort,
-  AuditPort,
-  AgentRunRecord,
-  BudgetCheck,
   FilesPort,
   FlagsPort,
+  KnowledgeEventsPort,
+  NodeRef,
+  NotificationPort,
   PromptBody,
   PromptStorePort,
   PromptVersionRecord,
-  KnowledgeEventsPort,
-  NodeRef,
+  RegionalSettings,
+  SettingsPort,
+  TenantUsageReportResult,
+  UsagePort,
+  UsageReportPort,
+  WebContentPort,
+  WebPage,
   WorkflowApprovalPort,
   WorkflowApprovalRecord,
   WorkflowCommandPort,
-  RegionalSettings,
-  SettingsPort,
-  UsagePort,
-  WebContentPort,
-  WebPage,
-  NotificationPort,
-  TenantUsageReportResult,
-  UsageReportPort,
   WorkflowNotification,
 } from "../runtime/runtime-ports.ts";
-import type { CustomAgent, CustomSkill, StoredFile } from "@core/contracts";
 
 /**
  * In-memory fakes for every runtime port (exported as `@core/agents/testing`).
@@ -91,7 +91,9 @@ export const createFakeAccessPort = (args: {
     principal.type === "service" ? args.apiKeyScopes?.[principal.apiKeyId] : undefined;
   const effective = (principal: AccessPrincipal, node: NodeRef, ceiling?: ReadonlySet<string>): ReadonlySet<string> => {
     const scopes = scopesOf(principal);
-    const granted = (membershipOf(principal, node)?.permissions ?? []).filter((permission) => scopes?.includes(permission) ?? true);
+    const granted = (membershipOf(principal, node)?.permissions ?? []).filter(
+      (permission) => scopes?.includes(permission) ?? true,
+    );
     return new Set(ceiling === undefined ? granted : granted.filter((permission) => ceiling.has(permission)));
   };
   return {
@@ -117,7 +119,10 @@ export const createFakeAccessPort = (args: {
       if (!effective(principal, node, ceiling).has(permission)) {
         return Promise.resolve({ allowed: false, reason: "PERMISSION_NOT_GRANTED" });
       }
-      return Promise.resolve({ allowed: true, requiresApproval: args.approvalPermissions?.includes(permission) ?? false });
+      return Promise.resolve({
+        allowed: true,
+        requiresApproval: args.approvalPermissions?.includes(permission) ?? false,
+      });
     },
     getEffectivePermissions: ({ principal, node, ceiling }) => Promise.resolve(effective(principal, node, ceiling)),
   };
@@ -207,7 +212,9 @@ export const defaultAgentSettings = (tenantId: string): AgentSettings =>
  * Flag values like a local environment: the registry defaults with voice and realtime on (the
  * local default of `AI_VOICE_ENABLED`). Pass `values` to switch flags; `fails` makes reads reject.
  */
-export const createFakeFlagsPort = (values: Readonly<Record<string, boolean>> | "fails" = {}): FlagsPort & { readonly reads: (string | null)[] } => {
+export const createFakeFlagsPort = (
+  values: Readonly<Record<string, boolean>> | "fails" = {},
+): FlagsPort & { readonly reads: (string | null)[] } => {
   const reads: (string | null)[] = [];
   return {
     reads,
@@ -230,7 +237,11 @@ export type FakePromptStorePort = PromptStorePort & {
  * `versions` are readable by id (platform rows to everyone, tenant rows to their tenant).
  */
 export const createFakePromptStorePort = (
-  seed: { readonly active?: Readonly<Record<string, PromptBody>>; readonly versions?: readonly PromptVersionRecord[]; readonly fails?: boolean } = {},
+  seed: {
+    readonly active?: Readonly<Record<string, PromptBody>>;
+    readonly versions?: readonly PromptVersionRecord[];
+    readonly fails?: boolean;
+  } = {},
 ): FakePromptStorePort => {
   const evals: FakePromptStorePort["evals"] = [];
   const reads: FakePromptStorePort["reads"] = [];
@@ -241,10 +252,17 @@ export const createFakePromptStorePort = (
       reads.push({ agentId, tenantId });
       if (seed.fails === true) return Promise.reject(new Error("prompt store down"));
       const active = seed.active ?? {};
-      return Promise.resolve({ platform: active[agentId] ?? null, addendum: tenantId === null ? null : (active[`${agentId}:${tenantId}`] ?? null) });
+      return Promise.resolve({
+        platform: active[agentId] ?? null,
+        addendum: tenantId === null ? null : (active[`${agentId}:${tenantId}`] ?? null),
+      });
     },
     getVersion: ({ versionId, tenantId }) =>
-      Promise.resolve(seed.versions?.find((version) => version.versionId === versionId && (version.tenantId === null || version.tenantId === tenantId)) ?? null),
+      Promise.resolve(
+        seed.versions?.find(
+          (version) => version.versionId === versionId && (version.tenantId === null || version.tenantId === tenantId),
+        ) ?? null,
+      ),
     recordEval: (input) => {
       evals.push({ versionId: input.versionId, experimentId: input.experimentId, verdict: input.verdict });
       return Promise.resolve();
@@ -257,7 +275,9 @@ export const createFakeSettingsPort = (overrides: Partial<AgentSettings> = {}): 
 });
 
 /** Ready files by id, with their bytes; tenant, status and purpose are checked like the `files` context. */
-export const createFakeFilesPort = (files: readonly { readonly file: StoredFile; readonly bytes: Uint8Array }[] = []): FilesPort => {
+export const createFakeFilesPort = (
+  files: readonly { readonly file: StoredFile; readonly bytes: Uint8Array }[] = [],
+): FilesPort => {
   const find = (input: { tenantId: string; fileId: string; purpose: StoredFile["purpose"] }) => {
     const entry = files.find(({ file }) => file.id === input.fileId && file.tenantId === input.tenantId);
     if (entry === undefined) return { ok: false as const, error: "FILE_NOT_FOUND" as const };
@@ -275,7 +295,9 @@ export const createFakeFilesPort = (files: readonly { readonly file: StoredFile;
 };
 
 /** Fixture pages by URL (the fake Firecrawl of `AI_MODE=fake`); an unknown URL rejects. */
-export const createFakeWebContentPort = (pages: readonly WebPage[] = []): WebContentPort & { readonly scraped: string[] } => {
+export const createFakeWebContentPort = (
+  pages: readonly WebPage[] = [],
+): WebContentPort & { readonly scraped: string[] } => {
   const scraped: string[] = [];
   return {
     scraped,
@@ -287,7 +309,9 @@ export const createFakeWebContentPort = (pages: readonly WebPage[] = []): WebCon
   };
 };
 
-export type RecordingKnowledgeEvents = KnowledgeEventsPort & { readonly events: Parameters<KnowledgeEventsPort["documentIndexed"]>[0][] };
+export type RecordingKnowledgeEvents = KnowledgeEventsPort & {
+  readonly events: Parameters<KnowledgeEventsPort["documentIndexed"]>[0][];
+};
 
 export const createRecordingKnowledgeEvents = (): RecordingKnowledgeEvents => {
   const events: Parameters<KnowledgeEventsPort["documentIndexed"]>[0][] = [];
@@ -300,7 +324,9 @@ export const createRecordingKnowledgeEvents = (): RecordingKnowledgeEvents => {
   };
 };
 
-type CommandCall = Parameters<NonNullable<ReturnType<ContractCommand["prepare"]>>>[0] & { readonly input: { readonly name: string } };
+type CommandCall = Parameters<NonNullable<ReturnType<ContractCommand["prepare"]>>>[0] & {
+  readonly input: { readonly name: string };
+};
 
 export type FakeProjectCommands = { readonly commands: readonly ContractCommand[]; readonly created: CommandCall[] };
 
@@ -324,10 +350,16 @@ export const createFakeProjectCommands = (): FakeProjectCommands => {
 const notWired = (name: string) => () => Promise.reject(new Error(`${name} is not faked in this test`));
 
 /** Every port faked; override any of them per test. */
-export type FakeCustomAgentsPort = CustomAgentsPort & { readonly agents: CustomAgent[]; readonly skills: CustomSkill[]; readonly reads: string[] };
+export type FakeCustomAgentsPort = CustomAgentsPort & {
+  readonly agents: CustomAgent[];
+  readonly skills: CustomSkill[];
+  readonly reads: string[];
+};
 
 /** In-memory custom agents and skills; `reads` records every `getAgent` (cache tests). */
-export const createFakeCustomAgentsPort = (seed: { agents?: readonly CustomAgent[]; skills?: readonly CustomSkill[] } = {}): FakeCustomAgentsPort => {
+export const createFakeCustomAgentsPort = (
+  seed: { agents?: readonly CustomAgent[]; skills?: readonly CustomSkill[] } = {},
+): FakeCustomAgentsPort => {
   const agents = [...(seed.agents ?? [])];
   const skills = [...(seed.skills ?? [])];
   const reads: string[] = [];
@@ -350,7 +382,11 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   approvals: createFakeApprovalPort(),
   commands: createFakeCommandIdempotency(),
   usage: createFakeUsagePort(),
-  knowledge: { searchChunks: () => Promise.resolve([]), registerDocument: notWired("registerDocument"), replaceChunks: notWired("replaceChunks") },
+  knowledge: {
+    searchChunks: () => Promise.resolve([]),
+    registerDocument: notWired("registerDocument"),
+    replaceChunks: notWired("replaceChunks"),
+  },
   files: createFakeFilesPort(),
   webContent: createFakeWebContentPort(),
   knowledgeEvents: createRecordingKnowledgeEvents(),
@@ -364,7 +400,10 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   workflowCommands: createFakeWorkflowCommandPort(),
   notifications: createRecordingNotificationPort(),
   usageReport: createFakeUsageReportPort(),
-  approvalSweeps: { expire: () => Promise.resolve({ expired: 0 }), failInterrupted: () => Promise.resolve({ failed: 0 }) },
+  approvalSweeps: {
+    expire: () => Promise.resolve({ expired: 0 }),
+    failInterrupted: () => Promise.resolve({ failed: 0 }),
+  },
   conversationPurge: { purgeDeleted: () => Promise.resolve({ purged: 0, failed: 0 }) },
   evalExport: { listFinishedSince: () => Promise.resolve([]), exportSummaries: () => Promise.resolve(0) },
   flags: createFakeFlagsPort(),
@@ -408,7 +447,11 @@ export const createFakeWorkflowApprovalPort = (): FakeWorkflowApprovalPort => {
       const tenantId = input.node.level === "platform" ? "" : input.node.tenantId;
       const { principal } = input;
       const requestedBy =
-        principal.type === "user" ? { type: "user" as const, id: principal.uid } : principal.type === "device" ? { type: "device" as const, id: principal.deviceId } : { type: "service" as const, id: principal.apiKeyId };
+        principal.type === "user"
+          ? { type: "user" as const, id: principal.uid }
+          : principal.type === "device"
+            ? { type: "device" as const, id: principal.deviceId }
+            : { type: "service" as const, id: principal.apiKeyId };
       records.set(id, {
         id,
         tenantId,
@@ -424,7 +467,8 @@ export const createFakeWorkflowApprovalPort = (): FakeWorkflowApprovalPort => {
     getApprovalRequest: ({ approvalRequestId }) => Promise.resolve(records.get(approvalRequestId) ?? null),
     cancelWorkflowApproval: ({ approvalRequestId, runId }) => {
       const record = records.get(approvalRequestId);
-      if (record === undefined || record.status !== "pending" || record.input["runId"] !== runId) return Promise.resolve({ cancelled: false });
+      if (record === undefined || record.status !== "pending" || record.input["runId"] !== runId)
+        return Promise.resolve({ cancelled: false });
       records.set(approvalRequestId, { ...record, status: "cancelled" });
       return Promise.resolve({ cancelled: true });
     },
@@ -441,7 +485,9 @@ type WorkflowCommandRun = Parameters<WorkflowCommandPort["run"]>[0];
 export type FakeWorkflowCommandPort = WorkflowCommandPort & { readonly runs: WorkflowCommandRun[] };
 
 /** Runs commands once per tenant, command and key; `refuse` answers a code for a command id. */
-export const createFakeWorkflowCommandPort = (options: { readonly refuse?: Readonly<Record<string, string>> } = {}): FakeWorkflowCommandPort => {
+export const createFakeWorkflowCommandPort = (
+  options: { readonly refuse?: Readonly<Record<string, string>> } = {},
+): FakeWorkflowCommandPort => {
   const runs: WorkflowCommandRun[] = [];
   const results = new Map<string, unknown>();
   return {
@@ -462,7 +508,12 @@ export const createFakeWorkflowCommandPort = (options: { readonly refuse?: Reado
 export type FakeUsageReportPort = UsageReportPort & { readonly reported: string[] };
 
 /** Usage report over fixed tenants; `alerts` gives the thresholds a tenant reaches for the first time. */
-export const createFakeUsageReportPort = (options: { readonly tenantIds?: readonly string[]; readonly alerts?: Readonly<Record<string, readonly (80 | 100)[]>> } = {}): FakeUsageReportPort => {
+export const createFakeUsageReportPort = (
+  options: {
+    readonly tenantIds?: readonly string[];
+    readonly alerts?: Readonly<Record<string, readonly (80 | 100)[]>>;
+  } = {},
+): FakeUsageReportPort => {
   const reported: string[] = [];
   const sent = new Set<string>();
   return {
@@ -472,7 +523,13 @@ export const createFakeUsageReportPort = (options: { readonly tenantIds?: readon
       reported.push(tenantId);
       const newAlerts = (options.alerts?.[tenantId] ?? []).filter((threshold) => !sent.has(`${tenantId}:${threshold}`));
       for (const threshold of newAlerts) sent.add(`${tenantId}:${threshold}`);
-      const result: TenantUsageReportResult = { tenantId, rollups: 1, exportedCalls: 0, newAlerts, usedPercent: newAlerts.at(-1) ?? 0 };
+      const result: TenantUsageReportResult = {
+        tenantId,
+        rollups: 1,
+        exportedCalls: 0,
+        newAlerts,
+        usedPercent: newAlerts.at(-1) ?? 0,
+      };
       return Promise.resolve(result);
     },
   };

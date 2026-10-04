@@ -21,7 +21,12 @@ describe("NodeName", () => {
           <NodeName node={{ level: "unit", tenantId: IDS.organization, projectId: IDS.project, unitId: "gone" }} />
         </li>
       </ul>,
-      { routes: shellRoutes([], { "GET /v1/projects/:projectId": ok(buildProject()), "GET /v1/units/:unitId": apiError(404, "NOT_FOUND") }) },
+      {
+        routes: shellRoutes([], {
+          "GET /v1/projects/:projectId": ok(buildProject()),
+          "GET /v1/units/:unitId": apiError(404, "NOT_FOUND"),
+        }),
+      },
     );
     expect(screen.getByText("Toda a organização")).toBeDefined();
     expect(await screen.findByText("Launch")).toBeDefined();

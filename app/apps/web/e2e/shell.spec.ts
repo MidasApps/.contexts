@@ -1,6 +1,6 @@
-import type { Page, Route } from "@playwright/test";
 import { SEED_USERS } from "@core/e2e/seed-users";
 import { closeSidebarSheet, showSidebar, signInThroughUi } from "@core/e2e/sign-in";
+import type { Page, Route } from "@playwright/test";
 import { authFile, expect, test } from "./web-test.ts";
 
 // SP2 spec §13 item 2: switching from the sidebar and the palette, units, breadcrumbs, the module
@@ -24,7 +24,11 @@ const holdRequests = async (page: Page, pattern: string | RegExp) => {
 test.describe("switching context", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test("switches organization and project from the sidebar; breadcrumbs follow", async ({ page, world, createUser }) => {
+  test("switches organization and project from the sidebar; breadcrumbs follow", async ({
+    page,
+    world,
+    createUser,
+  }) => {
     const user = await createUser({ label: "Switch", organizations: [{ id: world.beta.id }, { id: world.alpha.id }] });
     await signInThroughUi(page, user);
     await showSidebar(page);
@@ -47,12 +51,17 @@ test.describe("switching context", () => {
     await expect(page.getByRole("heading", { level: 1, name: world.alpha.projects.growth.name })).toBeVisible();
     await expect(navigationSheet(page)).toBeHidden();
     await showSidebar(page);
-    await expect(page.getByRole("button", { name: `${world.alpha.projects.growth.name}, trocar de projeto` })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: `${world.alpha.projects.growth.name}, trocar de projeto` }),
+    ).toBeVisible();
     await closeSidebarSheet(page);
     await expect(breadcrumbs(page).getByRole("link", { name: world.alpha.projects.growth.name })).toBeVisible();
   });
 
-  test("a project-only member lands on their project instead of the organization's not-found", async ({ page, world }) => {
+  test("a project-only member lands on their project instead of the organization's not-found", async ({
+    page,
+    world,
+  }) => {
     const { growth } = world.alpha.projects;
     await signInThroughUi(page, SEED_USERS.member);
     await expect(page.getByRole("heading", { level: 1, name: "Página não encontrada" })).toHaveCount(0);
@@ -92,7 +101,10 @@ test.describe("project shell", () => {
     await page.goto(`o/${world.alpha.id}/p/${launch.id}`);
     await showSidebar(page);
     await page.getByRole("button", { name: "Unidade: Projeto inteiro. Escolher unidade" }).click();
-    await page.getByRole("dialog", { name: "Escolha uma unidade" }).getByRole("treeitem", { name: world.alpha.units.north.name }).click();
+    await page
+      .getByRole("dialog", { name: "Escolha uma unidade" })
+      .getByRole("treeitem", { name: world.alpha.units.north.name })
+      .click();
     await expect(page).toHaveURL(new RegExp(`/p/${launch.id}\\?unit=${world.alpha.units.north.id}$`));
     await closeSidebarSheet(page);
     await expect(breadcrumbs(page).getByText(world.alpha.units.north.name)).toBeVisible();
@@ -116,7 +128,9 @@ test.describe("project shell", () => {
     test("sees the module item the viewer role can read", async ({ page, world }) => {
       await page.goto(`o/${world.alpha.id}/p/${world.alpha.projects.launch.id}`);
       await showSidebar(page);
-      await expect(page.getByRole("navigation", { name: "Navegação" }).getByRole("link", { name: "Exemplo" })).toBeVisible();
+      await expect(
+        page.getByRole("navigation", { name: "Navegação" }).getByRole("link", { name: "Exemplo" }),
+      ).toBeVisible();
     });
   });
 
@@ -148,7 +162,12 @@ test.describe("shell states", () => {
     let failing = true;
     await page.route(/\/v1\/organizations\/[^/]+\/projects/, async (route) => {
       if (!failing || route.request().method() !== "GET") return route.continue();
-      return route.fulfill({ status: 500, json: { error: { code: "INTERNAL_ERROR", message: "Internal error.", requestId: "01JE2E0000000000000000TEST" } } });
+      return route.fulfill({
+        status: 500,
+        json: {
+          error: { code: "INTERNAL_ERROR", message: "Internal error.", requestId: "01JE2E0000000000000000TEST" },
+        },
+      });
     });
     await page.goto(`o/${world.alpha.id}`);
     await expect(page.getByRole("alert").filter({ hasText: "Algo deu errado do nosso lado" })).toBeVisible();

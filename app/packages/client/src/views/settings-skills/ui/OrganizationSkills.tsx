@@ -5,17 +5,33 @@ import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useCustomAgentOptions } from "#/entities/custom-agent/index.ts";
 import { useCustomSkills } from "#/entities/custom-skill/index.ts";
-import { CustomSkillEditorDialog, DeleteCustomSkillDialog, ToggleCustomSkillDialog } from "#/features/custom-skill-editor/index.ts";
+import {
+  CustomSkillEditorDialog,
+  DeleteCustomSkillDialog,
+  ToggleCustomSkillDialog,
+} from "#/features/custom-skill-editor/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/shared/ui/atoms/Table/Table.tsx";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "#/shared/ui/atoms/Table/Table.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { QuerySection } from "#/widgets/page-state/index.ts";
 
-type RowActions = { edit: (skill: CustomSkill) => void; toggle: (skill: CustomSkill) => void; remove: (skill: CustomSkill) => void };
+type RowActions = {
+  edit: (skill: CustomSkill) => void;
+  toggle: (skill: CustomSkill) => void;
+  remove: (skill: CustomSkill) => void;
+};
 
 function SkillActions({ skill, actions }: { skill: CustomSkill; actions: RowActions }) {
   const t = useTranslations("settings.skills.custom.actions");
@@ -25,7 +41,12 @@ function SkillActions({ skill, actions }: { skill: CustomSkill; actions: RowActi
       <Button variant="outline" size="sm" onClick={() => actions.edit(skill)} aria-label={t("editNamed", { name })}>
         {t("edit")}
       </Button>
-      <Button variant="outline" size="sm" onClick={() => actions.toggle(skill)} aria-label={t(skill.enabled ? "disableNamed" : "enableNamed", { name })}>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => actions.toggle(skill)}
+        aria-label={t(skill.enabled ? "disableNamed" : "enableNamed", { name })}
+      >
         {t(skill.enabled ? "disable" : "enable")}
       </Button>
       <Button variant="outline" size="sm" onClick={() => actions.remove(skill)} aria-label={t("deleteNamed", { name })}>
@@ -35,7 +56,15 @@ function SkillActions({ skill, actions }: { skill: CustomSkill; actions: RowActi
   );
 }
 
-function OwnSkillsTable({ skills, organizationName, actions }: { skills: readonly CustomSkill[]; organizationName: string; actions: RowActions | null }) {
+function OwnSkillsTable({
+  skills,
+  organizationName,
+  actions,
+}: {
+  skills: readonly CustomSkill[];
+  organizationName: string;
+  actions: RowActions | null;
+}) {
   const t = useTranslations("settings.skills.custom");
   const caption = t("caption", { organization: organizationName });
   return (
@@ -58,7 +87,9 @@ function OwnSkillsTable({ skills, organizationName, actions }: { skills: readonl
               </span>
             </TableHead>
             <TableCell>
-              <StatusPill tone={skill.enabled ? "emerald" : "neutral"}>{skill.enabled ? t("enabled") : t("disabled")}</StatusPill>
+              <StatusPill tone={skill.enabled ? "emerald" : "neutral"}>
+                {skill.enabled ? t("enabled") : t("disabled")}
+              </StatusPill>
             </TableCell>
             {actions === null ? null : (
               <TableCell>
@@ -72,7 +103,12 @@ function OwnSkillsTable({ skills, organizationName, actions }: { skills: readonl
   );
 }
 
-type SectionProps = { organizationId: string; organizationName: string; canUpdate: boolean; options: CustomAgentOptions };
+type SectionProps = {
+  organizationId: string;
+  organizationName: string;
+  canUpdate: boolean;
+  options: CustomAgentOptions;
+};
 
 function OwnSkills({ organizationId, organizationName, canUpdate, options }: SectionProps) {
   const t = useTranslations("settings.skills.custom");
@@ -83,7 +119,9 @@ function OwnSkills({ organizationId, organizationName, canUpdate, options }: Sec
   const [removing, setRemoving] = useState<CustomSkill | null>(null);
   const writable = canUpdate && online;
   const capReached = options.usage.skills >= options.limits.maxSkills;
-  const actions: RowActions | null = writable ? { edit: (skill) => setEditor({ skill }), toggle: setToggling, remove: setRemoving } : null;
+  const actions: RowActions | null = writable
+    ? { edit: (skill) => setEditor({ skill }), toggle: setToggling, remove: setRemoving }
+    : null;
   const create = (): void => setEditor({ skill: null });
   return (
     <SectionCard
@@ -99,12 +137,19 @@ function OwnSkills({ organizationId, organizationName, canUpdate, options }: Sec
       }
     >
       <p className="text-sm text-muted-foreground">
-        {t("usage", { used: options.usage.skills, maximum: options.limits.maxSkills })} {capReached ? t("capReached") : null} {canUpdate ? null : t("readOnly")}
+        {t("usage", { used: options.usage.skills, maximum: options.limits.maxSkills })}{" "}
+        {capReached ? t("capReached") : null} {canUpdate ? null : t("readOnly")}
       </p>
       <QuerySection query={skills} loadingLabel={t("loading")}>
         {(data) =>
           data.length === 0 ? (
-            <EmptyState frame="plain" headingLevel={3} icon="sparkles" title={t("emptyTitle")} description={canUpdate ? t("emptyDescription") : t("emptyDescriptionNoPermission")} />
+            <EmptyState
+              frame="plain"
+              headingLevel={3}
+              icon="sparkles"
+              title={t("emptyTitle")}
+              description={canUpdate ? t("emptyDescription") : t("emptyDescriptionNoPermission")}
+            />
           ) : (
             <OwnSkillsTable skills={data} organizationName={organizationName} actions={actions} />
           )
@@ -112,9 +157,23 @@ function OwnSkills({ organizationId, organizationName, canUpdate, options }: Sec
       </QuerySection>
       {canUpdate ? (
         <>
-          <CustomSkillEditorDialog organizationId={organizationId} open={editor !== null} skill={editor?.skill ?? null} maxInstructionChars={options.limits.maxInstructionChars} onOpenChange={(open) => !open && setEditor(null)} />
-          <ToggleCustomSkillDialog organizationId={organizationId} skill={toggling} onOpenChange={(open) => !open && setToggling(null)} />
-          <DeleteCustomSkillDialog organizationId={organizationId} skill={removing} onOpenChange={(open) => !open && setRemoving(null)} />
+          <CustomSkillEditorDialog
+            organizationId={organizationId}
+            open={editor !== null}
+            skill={editor?.skill ?? null}
+            maxInstructionChars={options.limits.maxInstructionChars}
+            onOpenChange={(open) => !open && setEditor(null)}
+          />
+          <ToggleCustomSkillDialog
+            organizationId={organizationId}
+            skill={toggling}
+            onOpenChange={(open) => !open && setToggling(null)}
+          />
+          <DeleteCustomSkillDialog
+            organizationId={organizationId}
+            skill={removing}
+            onOpenChange={(open) => !open && setRemoving(null)}
+          />
         </>
       ) : null}
     </SectionCard>

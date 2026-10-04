@@ -16,13 +16,20 @@ const UsageTotalsSchema = z.strictObject({
 /** Month-to-date model usage of one organization against its caps (SP3 spec §12), with the breakdowns of SP5 spec §7. */
 export const UsageSummarySchema = z.strictObject({
   tenantId: TenantIdSchema.meta(none("Organization the summary is about.")),
-  month: z.string().regex(/^\d{4}-(?:0[1-9]|1[0-2])$/).meta(none("Calendar month in UTC, YYYY-MM.")),
+  month: z
+    .string()
+    .regex(/^\d{4}-(?:0[1-9]|1[0-2])$/)
+    .meta(none("Calendar month in UTC, YYYY-MM.")),
   totals: UsageTotalsSchema.meta(none("Totals for the month.")),
   budget: z
     .strictObject({
       monthlyMicroUsd: count("Hard spend cap for the month in micro-USD."),
       monthlyTokens: count("Hard token cap for the month."),
-      alertThresholdPercent: z.int().min(1).max(99).meta(none("Percent of a cap that triggers an alert; always below 100.")),
+      alertThresholdPercent: z
+        .int()
+        .min(1)
+        .max(99)
+        .meta(none("Percent of a cap that triggers an alert; always below 100.")),
     })
     .meta(none("Caps in force for the month.")),
   byModel: z
@@ -53,7 +60,10 @@ export const UsageSummarySchema = z.strictObject({
   byUser: z
     .array(
       z.strictObject({
-        userId: UserIdSchema.nullable().meta({ description: "Uid of the caller; null groups the calls of platform jobs.", pii: "personal" }),
+        userId: UserIdSchema.nullable().meta({
+          description: "Uid of the caller; null groups the calls of platform jobs.",
+          pii: "personal",
+        }),
         totals: UsageTotalsSchema.meta(none("Totals for this user.")),
       }),
     )
@@ -64,7 +74,8 @@ export type UsageSummary = z.infer<typeof UsageSummarySchema>;
 export const UsageSummaryContract = defineContract(UsageSummarySchema, {
   id: "usage.UsageSummary",
   kind: "view",
-  description: "Month-to-date model usage and cost of an organization compared with its budget caps, per model, day, agent and user.",
+  description:
+    "Month-to-date model usage and cost of an organization compared with its budget caps, per model, day, agent and user.",
   examples: [
     {
       tenantId: "Jd8sK2lPq0WnR5tYu3bV",
@@ -78,9 +89,24 @@ export const UsageSummaryContract = defineContract(UsageSummarySchema, {
           totals: { calls: 42, inputTokens: 50_000, outputTokens: 12_000, costMicroUsd: 61_000, unpricedCalls: 0 },
         },
       ],
-      byDay: [{ day: "2026-09-30", totals: { calls: 42, inputTokens: 50_000, outputTokens: 12_000, costMicroUsd: 61_000, unpricedCalls: 0 } }],
-      byAgent: [{ agentId: "assistant", totals: { calls: 42, inputTokens: 50_000, outputTokens: 12_000, costMicroUsd: 61_000, unpricedCalls: 0 } }],
-      byUser: [{ userId: "uA1b2C3d4E5f6G7h8I9j", totals: { calls: 42, inputTokens: 50_000, outputTokens: 12_000, costMicroUsd: 61_000, unpricedCalls: 0 } }],
+      byDay: [
+        {
+          day: "2026-09-30",
+          totals: { calls: 42, inputTokens: 50_000, outputTokens: 12_000, costMicroUsd: 61_000, unpricedCalls: 0 },
+        },
+      ],
+      byAgent: [
+        {
+          agentId: "assistant",
+          totals: { calls: 42, inputTokens: 50_000, outputTokens: 12_000, costMicroUsd: 61_000, unpricedCalls: 0 },
+        },
+      ],
+      byUser: [
+        {
+          userId: "uA1b2C3d4E5f6G7h8I9j",
+          totals: { calls: 42, inputTokens: 50_000, outputTokens: 12_000, costMicroUsd: 61_000, unpricedCalls: 0 },
+        },
+      ],
     },
   ],
   pii: "personal",

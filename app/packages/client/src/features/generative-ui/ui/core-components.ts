@@ -1,6 +1,13 @@
-import { ApprovalDiffPropsSchema, ApprovalPendingPropsSchema, ChartPropsSchema, DataTablePropsSchema, PickerPropsSchema, SchemaFormPropsSchema } from "@core/contracts";
+import {
+  ApprovalDiffPropsSchema,
+  ApprovalPendingPropsSchema,
+  ChartPropsSchema,
+  DataTablePropsSchema,
+  PickerPropsSchema,
+  SchemaFormPropsSchema,
+} from "@core/contracts";
 import { lazy } from "react";
-import { uiEntry, type UiRegistryEntry } from "../model/ui-registry.ts";
+import { type UiRegistryEntry, uiEntry } from "../model/ui-registry.ts";
 import { ApprovalDiffPart } from "./components/approval-diff-part.tsx";
 import { ApprovalPendingPart } from "./components/approval-pending-part.tsx";
 import { DataTablePart } from "./components/data-table-part.tsx";

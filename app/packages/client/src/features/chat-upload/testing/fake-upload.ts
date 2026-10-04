@@ -1,7 +1,7 @@
 // Test helpers of the upload feature: a scripted `XMLHttpRequest` and the `/v1` routes of the
 // files API, so the queue's state machine is driven step by step without timers or a network.
 import { StoredFileContract } from "@core/contracts";
-import { apiError, ok, type FakeApi, type FakeResponse } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeApi, type FakeResponse, ok } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import type { UploadRequest, UploadSource } from "../api/request-upload.ts";
 
@@ -18,7 +18,10 @@ export type FakeTransfer = {
 };
 
 /** A factory of fake upload requests; every `send` shows up in `transfers`. */
-export const createFakeTransfers = (): { readonly transfers: FakeTransfer[]; readonly createRequest: () => UploadRequest } => {
+export const createFakeTransfers = (): {
+  readonly transfers: FakeTransfer[];
+  readonly createRequest: () => UploadRequest;
+} => {
   const transfers: FakeTransfer[] = [];
   const createRequest = (): UploadRequest => {
     const headers: Record<string, string> = {};
@@ -90,13 +93,28 @@ export type FilesApiScript = {
  * Adds the files routes to a fake API: every upload request gets the next id of `fileIds` and a
  * PUT ticket; `GET /v1/files/{id}` answers from the script (default: ready at once).
  */
-export const routeFilesApi = (api: FakeApi, fileIds: readonly string[], script: FilesApiScript = { files: {} }): void => {
+export const routeFilesApi = (
+  api: FakeApi,
+  fileIds: readonly string[],
+  script: FilesApiScript = { files: {} },
+): void => {
   let next = 0;
   api.route(`POST ${FILE_PATH}`, (request) => {
     const fileId = fileIds[next] ?? `File${String(next).padStart(16, "0")}`;
     next += 1;
     const body = request.body as { contentType: string; sizeBytes: number };
-    return ok({ fileId, upload: { method: "PUT", url: UPLOAD_URL, headers: { "content-type": body.contentType, "x-goog-content-length-range": `0,${body.sizeBytes}` }, expiresAt: "2026-10-01T12:15:00.000Z" } }, 201);
+    return ok(
+      {
+        fileId,
+        upload: {
+          method: "PUT",
+          url: UPLOAD_URL,
+          headers: { "content-type": body.contentType, "x-goog-content-length-range": `0,${body.sizeBytes}` },
+          expiresAt: "2026-10-01T12:15:00.000Z",
+        },
+      },
+      201,
+    );
   });
   api.route("GET /v1/files/:fileId", (request) => {
     const fileId = request.params["fileId"] ?? "";

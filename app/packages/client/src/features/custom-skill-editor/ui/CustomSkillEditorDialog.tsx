@@ -1,8 +1,8 @@
 "use client";
 
-import { createCustomSkillEndpoint, updateCustomSkillEndpoint, type CustomSkill } from "@core/contracts";
+import { type CustomSkill, createCustomSkillEndpoint, updateCustomSkillEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
@@ -11,12 +11,33 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Switch } from "#/shared/ui/atoms/Switch/Switch.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
-import { draftFromSkill, emptySkillDraft, skillInputOf, skillProblemsFromDetails, type SkillDraft, type SkillDraftProblems } from "../model/custom-skill-draft.ts";
+import {
+  draftFromSkill,
+  emptySkillDraft,
+  type SkillDraft,
+  type SkillDraftProblems,
+  skillInputOf,
+  skillProblemsFromDetails,
+} from "../model/custom-skill-draft.ts";
 import { invalidateSkillData } from "../model/invalidate-skill-data.ts";
 
 export type CustomSkillEditorDialogProps = {
@@ -29,7 +50,12 @@ export type CustomSkillEditorDialogProps = {
   maxInstructionChars: number;
 };
 
-type FieldsProps = { draft: SkillDraft; setDraft: (draft: SkillDraft) => void; problems: SkillDraftProblems; maxInstructionChars: number };
+type FieldsProps = {
+  draft: SkillDraft;
+  setDraft: (draft: SkillDraft) => void;
+  problems: SkillDraftProblems;
+  maxInstructionChars: number;
+};
 
 function SkillFields({ draft, setDraft, problems, maxInstructionChars }: FieldsProps) {
   const t = useTranslations("settings.skills.custom.editor");
@@ -42,7 +68,14 @@ function SkillFields({ draft, setDraft, problems, maxInstructionChars }: FieldsP
       <Field>
         <FieldLabel>{t("fields.name")}</FieldLabel>
         <FieldControl>
-          <Input required autoComplete="off" spellCheck={false} className="font-mono" value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} />
+          <Input
+            required
+            autoComplete="off"
+            spellCheck={false}
+            className="font-mono"
+            value={draft.name}
+            onChange={(event) => setDraft({ ...draft, name: event.target.value })}
+          />
         </FieldControl>
         <FieldDescription>{t("hints.name")}</FieldDescription>
         <FieldError errors={problem("name")} />
@@ -50,7 +83,12 @@ function SkillFields({ draft, setDraft, problems, maxInstructionChars }: FieldsP
       <Field>
         <FieldLabel>{t("fields.description")}</FieldLabel>
         <FieldControl>
-          <Textarea required rows={2} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} />
+          <Textarea
+            required
+            rows={2}
+            value={draft.description}
+            onChange={(event) => setDraft({ ...draft, description: event.target.value })}
+          />
         </FieldControl>
         <FieldDescription>{t("hints.description")}</FieldDescription>
         <FieldError errors={problem("description")} />
@@ -58,7 +96,13 @@ function SkillFields({ draft, setDraft, problems, maxInstructionChars }: FieldsP
       <Field>
         <FieldLabel>{t("fields.instructions")}</FieldLabel>
         <FieldControl>
-          <Textarea required rows={10} className="font-mono text-body-sm" value={draft.instructions} onChange={(event) => setDraft({ ...draft, instructions: event.target.value })} />
+          <Textarea
+            required
+            rows={10}
+            className="font-mono text-body-sm"
+            value={draft.instructions}
+            onChange={(event) => setDraft({ ...draft, instructions: event.target.value })}
+          />
         </FieldControl>
         <FieldDescription>
           {t("hints.instructions")} {t("counter", { count: draft.instructions.length, maximum: maxInstructionChars })}
@@ -75,7 +119,12 @@ function SkillFields({ draft, setDraft, problems, maxInstructionChars }: FieldsP
   );
 }
 
-function SkillEditorBody({ organizationId, onOpenChange, skill = null, maxInstructionChars }: CustomSkillEditorDialogProps) {
+function SkillEditorBody({
+  organizationId,
+  onOpenChange,
+  skill = null,
+  maxInstructionChars,
+}: CustomSkillEditorDialogProps) {
   const t = useTranslations("settings.skills.custom.editor");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
@@ -104,17 +153,26 @@ function SkillEditorBody({ organizationId, onOpenChange, skill = null, maxInstru
     setPending(true);
     try {
       if (skill === null) {
-        await callEndpoint(createCustomSkillEndpoint, { query: { organizationId }, body: input, idempotencyKey: idempotency.keyFor(input) });
+        await callEndpoint(createCustomSkillEndpoint, {
+          query: { organizationId },
+          body: input,
+          idempotencyKey: idempotency.keyFor(input),
+        });
         idempotency.reset();
       } else {
-        await callEndpoint(updateCustomSkillEndpoint, { params: { skillId: skill.id }, query: { organizationId }, body: input });
+        await callEndpoint(updateCustomSkillEndpoint, {
+          params: { skillId: skill.id },
+          query: { organizationId },
+          body: input,
+        });
       }
       await invalidateSkillData(queryClient, organizationId);
       notify.success(t(mode === "create" ? "created" : "saved", { name: input.name }));
       onOpenChange(false);
     } catch (error: unknown) {
       setFailure(error);
-      if (error instanceof ApiError) setProblems(error.status === 409 ? { name: "taken" } : skillProblemsFromDetails(error.details));
+      if (error instanceof ApiError)
+        setProblems(error.status === 409 ? { name: "taken" } : skillProblemsFromDetails(error.details));
     } finally {
       setPending(false);
     }

@@ -9,7 +9,11 @@ describe("resolveExperimentPair", () => {
   it("is idle with nothing chosen, one with A, ready with both", () => {
     expect(resolveExperimentPair([])).toEqual({ status: "idle" });
     expect(resolveExperimentPair([found("a")])).toEqual({ status: "one", a: experiment("a") });
-    expect(resolveExperimentPair([found("a"), found("b")])).toEqual({ status: "ready", a: experiment("a"), b: experiment("b") });
+    expect(resolveExperimentPair([found("a"), found("b")])).toEqual({
+      status: "ready",
+      a: experiment("a"),
+      b: experiment("b"),
+    });
   });
 
   it("waits for a read still on its way", () => {

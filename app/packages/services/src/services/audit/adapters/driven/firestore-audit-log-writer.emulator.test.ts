@@ -5,7 +5,7 @@ import { fixedClock } from "../../../shared/clock/clock.ts";
 import { createFirebaseAdmin } from "../../../shared/firebase/firebase-admin.ts";
 import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
 import { runInTransaction } from "../../../shared/firestore/transaction-runner.ts";
-import { makeRecordAudit, type AuditRecordInput } from "../../application/use-cases/record-audit.ts";
+import { type AuditRecordInput, makeRecordAudit } from "../../application/use-cases/record-audit.ts";
 import { AuditEntryRejectedError } from "../../domain/audit-entry-rejected-error.ts";
 import { AUDIT_LOG_COLLECTIONS, createFirestoreAuditLogWriter } from "./firestore-audit-log-writer.ts";
 
@@ -36,7 +36,11 @@ const tenantLog = () => firestore.collection(AUDIT_LOG_COLLECTIONS.tenant);
 const platformLog = () => firestore.collection(AUDIT_LOG_COLLECTIONS.platform);
 
 beforeEach(async () => {
-  await Promise.all([tenantLog(), platformLog(), firestore.collection(BUSINESS)].map((collection) => firestore.recursiveDelete(collection)));
+  await Promise.all(
+    [tenantLog(), platformLog(), firestore.collection(BUSINESS)].map((collection) =>
+      firestore.recursiveDelete(collection),
+    ),
+  );
 });
 
 describe("Firestore audit log writer", () => {
@@ -51,15 +55,26 @@ describe("Firestore audit log writer", () => {
     expect(raw?.["occurredAt"]).toBeInstanceOf(Timestamp);
     expect(raw).toMatchObject({ schemaVersion: 1, createdBy: "user-1" });
     const read = (await tenantLog().withConverter(createContractConverter(AuditLogEntryContract)).doc(id).get()).data();
-    expect(read).toEqual({ id, occurredAt: NOW, ...Object.fromEntries(Object.entries(entry()).filter(([key]) => key !== "log")) });
+    expect(read).toEqual({
+      id,
+      occurredAt: NOW,
+      ...Object.fromEntries(Object.entries(entry()).filter(([key]) => key !== "log")),
+    });
     expect((await business.get()).exists).toBe(true);
   });
 
   it("stores and reads back the failed outcome with allowlisted metadata", async () => {
-    const failed = entry({ action: "AGENT_TOOL_EXECUTED", outcome: "failed", metadata: { toolId: "core.search", errorCode: "TOOL_TIMEOUT", durationMs: 1200 } });
+    const failed = entry({
+      action: "AGENT_TOOL_EXECUTED",
+      outcome: "failed",
+      metadata: { toolId: "core.search", errorCode: "TOOL_TIMEOUT", durationMs: 1200 },
+    });
     const id = await audit.record(failed);
     const read = (await tenantLog().withConverter(createContractConverter(AuditLogEntryContract)).doc(id).get()).data();
-    expect(read).toMatchObject({ outcome: "failed", metadata: { toolId: "core.search", errorCode: "TOOL_TIMEOUT", durationMs: 1200 } });
+    expect(read).toMatchObject({
+      outcome: "failed",
+      metadata: { toolId: "core.search", errorCode: "TOOL_TIMEOUT", durationMs: 1200 },
+    });
   });
 
   it("drops the entry when the business transaction fails", async () => {
@@ -83,13 +98,17 @@ describe("Firestore audit log writer", () => {
       requestId: "req-2",
       reason: "Ticket 1",
     } as AuditRecordInput);
-    const read = (await platformLog().withConverter(createContractConverter(PlatformAuditLogEntryContract)).doc(id).get()).data();
+    const read = (
+      await platformLog().withConverter(createContractConverter(PlatformAuditLogEntryContract)).doc(id).get()
+    ).data();
     expect(read).toMatchObject({ action: "IMPERSONATION_STARTED", targetTenantId: "org-a", occurredAt: NOW });
     expect((await tenantLog().get()).size).toBe(0);
   });
 
   it("rejects an entry with an email key and writes nothing", async () => {
-    await expect(audit.record(entry({ actor: { type: "user", id: "user-1", email: "a@b.c" } }))).rejects.toBeInstanceOf(AuditEntryRejectedError);
+    await expect(audit.record(entry({ actor: { type: "user", id: "user-1", email: "a@b.c" } }))).rejects.toBeInstanceOf(
+      AuditEntryRejectedError,
+    );
     expect((await tenantLog().get()).size).toBe(0);
   });
 });

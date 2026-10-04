@@ -2,9 +2,9 @@ import {
   ImpersonationSessionIdSchema,
   MembershipIdSchema,
   OrganizationIdSchema,
+  type OrganizationStatus,
   ProjectIdSchema,
   RoleIdSchema,
-  type OrganizationStatus,
   type RoleRef,
   type TenantNodeRef,
   type UserStatus,
@@ -36,9 +36,27 @@ export type AccessReaderCall =
 export type InMemoryAccessStore = AccessReaders & {
   readonly putOrganization: (args: { id: string; status?: OrganizationStatus; isDeleted?: boolean }) => void;
   readonly putProject: (args: { id: string; tenantId: string; isDeleted?: boolean }) => void;
-  readonly putUnit: (args: { id: string; tenantId: string; projectId: string; ancestorIds?: readonly string[]; isDeleted?: boolean }) => void;
-  readonly putGrant: (args: { tenantId: string; principalId: string; nodeId: string; roles: readonly RoleRef[]; isDeleted?: boolean; membershipId?: string }) => void;
-  readonly putRole: (args: { id: string; tenantId: string; permissions: readonly string[]; isDeleted?: boolean }) => void;
+  readonly putUnit: (args: {
+    id: string;
+    tenantId: string;
+    projectId: string;
+    ancestorIds?: readonly string[];
+    isDeleted?: boolean;
+  }) => void;
+  readonly putGrant: (args: {
+    tenantId: string;
+    principalId: string;
+    nodeId: string;
+    roles: readonly RoleRef[];
+    isDeleted?: boolean;
+    membershipId?: string;
+  }) => void;
+  readonly putRole: (args: {
+    id: string;
+    tenantId: string;
+    permissions: readonly string[];
+    isDeleted?: boolean;
+  }) => void;
   readonly putUser: (uid: string, status?: UserStatus) => void;
   readonly putDevice: (deviceId: string, record: DeviceStatusRecord) => void;
   readonly putApiKey: (apiKeyId: string, record: ApiKeyStatusRecord) => void;
@@ -97,7 +115,11 @@ const loadChain = (tables: Tables, node: TenantNodeRef): NodeChain | null => {
 };
 
 const makeReaders = (tables: Tables, count: (call: AccessReaderCall) => void): AccessReaders => {
-  const lookup = <Value>(call: AccessReaderCall, table: ReadonlyMap<string, Value>, key: string): Promise<Value | null> => {
+  const lookup = <Value>(
+    call: AccessReaderCall,
+    table: ReadonlyMap<string, Value>,
+    key: string,
+  ): Promise<Value | null> => {
     count(call);
     return Promise.resolve(table.get(key) ?? null);
   };
@@ -111,7 +133,9 @@ const buildReaders = (tables: Tables, count: (call: AccessReaderCall) => void, l
     listGrants: ({ tenantId, principalId, nodeIds }) => {
       count("listGrants");
       const onNodes = new Set(nodeIds);
-      return Promise.resolve(tables.grants.filter((g) => g.tenantId === tenantId && g.principalId === principalId && onNodes.has(g.nodeId)));
+      return Promise.resolve(
+        tables.grants.filter((g) => g.tenantId === tenantId && g.principalId === principalId && onNodes.has(g.nodeId)),
+      );
     },
   },
   roles: {
@@ -140,23 +164,72 @@ const buildReaders = (tables: Tables, count: (call: AccessReaderCall) => void, l
 });
 
 const makeWriters = (tables: Tables) => ({
-  putOrganization: ({ id, status = "active", isDeleted = false }: { id: string; status?: OrganizationStatus; isDeleted?: boolean }) => {
+  putOrganization: ({
+    id,
+    status = "active",
+    isDeleted = false,
+  }: {
+    id: string;
+    status?: OrganizationStatus;
+    isDeleted?: boolean;
+  }) => {
     tables.organizations.set(id, { id, tenantId: OrganizationIdSchema.parse(id), status, isDeleted });
   },
   putProject: ({ id, tenantId, isDeleted = false }: { id: string; tenantId: string; isDeleted?: boolean }) => {
     tables.projects.set(id, { id, tenantId: OrganizationIdSchema.parse(tenantId), isDeleted });
   },
-  putUnit: (args: { id: string; tenantId: string; projectId: string; ancestorIds?: readonly string[]; isDeleted?: boolean }) => {
+  putUnit: (args: {
+    id: string;
+    tenantId: string;
+    projectId: string;
+    ancestorIds?: readonly string[];
+    isDeleted?: boolean;
+  }) => {
     const { id, tenantId, projectId, ancestorIds = [], isDeleted = false } = args;
-    tables.units.set(id, { id, tenantId: OrganizationIdSchema.parse(tenantId), projectId: ProjectIdSchema.parse(projectId), ancestorIds, isDeleted });
+    tables.units.set(id, {
+      id,
+      tenantId: OrganizationIdSchema.parse(tenantId),
+      projectId: ProjectIdSchema.parse(projectId),
+      ancestorIds,
+      isDeleted,
+    });
   },
-  putGrant: (args: { tenantId: string; principalId: string; nodeId: string; roles: readonly RoleRef[]; isDeleted?: boolean; membershipId?: string }) => {
+  putGrant: (args: {
+    tenantId: string;
+    principalId: string;
+    nodeId: string;
+    roles: readonly RoleRef[];
+    isDeleted?: boolean;
+    membershipId?: string;
+  }) => {
     const membershipId = MembershipIdSchema.parse(args.membershipId ?? `membership-${tables.grants.length + 1}`);
     const { tenantId, principalId, nodeId, roles, isDeleted = false } = args;
-    tables.grants.push({ membershipId, tenantId: OrganizationIdSchema.parse(tenantId), principalId, nodeId, roles, isDeleted });
+    tables.grants.push({
+      membershipId,
+      tenantId: OrganizationIdSchema.parse(tenantId),
+      principalId,
+      nodeId,
+      roles,
+      isDeleted,
+    });
   },
-  putRole: ({ id, tenantId, permissions, isDeleted = false }: { id: string; tenantId: string; permissions: readonly string[]; isDeleted?: boolean }) => {
-    tables.roles.set(id, { id: RoleIdSchema.parse(id), tenantId: OrganizationIdSchema.parse(tenantId), permissions, isDeleted });
+  putRole: ({
+    id,
+    tenantId,
+    permissions,
+    isDeleted = false,
+  }: {
+    id: string;
+    tenantId: string;
+    permissions: readonly string[];
+    isDeleted?: boolean;
+  }) => {
+    tables.roles.set(id, {
+      id: RoleIdSchema.parse(id),
+      tenantId: OrganizationIdSchema.parse(tenantId),
+      permissions,
+      isDeleted,
+    });
   },
   putUser: (uid: string, status: UserStatus = "active") => void tables.users.set(uid, status),
   putDevice: (deviceId: string, record: DeviceStatusRecord) => void tables.devices.set(deviceId, record),

@@ -1,4 +1,10 @@
-import { type AdminImpersonationSession, AdminImpersonationSessionSchema, type ImpersonationSession, type ImpersonationSessionId, type UserPrincipal } from "@core/contracts";
+import {
+  type AdminImpersonationSession,
+  AdminImpersonationSessionSchema,
+  type ImpersonationSession,
+  type ImpersonationSessionId,
+  type UserPrincipal,
+} from "@core/contracts";
 import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { ImpersonationNotFoundError } from "../../domain/errors/impersonation-errors.ts";
@@ -26,7 +32,10 @@ const toView = (session: ImpersonationSession, now: Date): AdminImpersonationSes
     status: statusOf(session, now),
   });
 
-export type ListImpersonationSessions = (query: { readonly activeOnly: boolean; readonly page: PageRequest }) => Promise<Page<AdminImpersonationSession>>;
+export type ListImpersonationSessions = (query: {
+  readonly activeOnly: boolean;
+  readonly page: PageRequest;
+}) => Promise<Page<AdminImpersonationSession>>;
 
 /**
  * `GET /v1/admin/impersonation-sessions` (decision 0044): every staff member's sessions, newest
@@ -68,7 +77,13 @@ export const makeEndImpersonationSession =
       deps.impersonations.end(tx, { id: session.id, endedAt: now.toISOString(), actorId: actor.uid });
       const common = { action: "IMPERSONATION_ENDED", outcome: "success", requestId } as const;
       await deps.audit.record(
-        { log: "platform", ...common, actor: { type: "user", id: actor.uid }, target: { type: "impersonation-session", id: session.id }, targetTenantId: session.tenantId },
+        {
+          log: "platform",
+          ...common,
+          actor: { type: "user", id: actor.uid },
+          target: { type: "impersonation-session", id: session.id },
+          targetTenantId: session.tenantId,
+        },
         tx,
       );
       await deps.audit.record(

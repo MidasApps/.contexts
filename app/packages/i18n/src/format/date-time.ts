@@ -46,7 +46,12 @@ const wallTimeAsUtcMs = (local: string): number => {
   const match = WALL_TIME.exec(local);
   if (match === null) throw new RangeError(`Expected a wall time YYYY-MM-DDTHH:mm[:ss]: ${local}`);
   const [year, month, day, hour, minute, second] = match.slice(1).map((part) => Number(part ?? "0")) as [
-    number, number, number, number, number, number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
   ];
   const ms = Date.UTC(year, month - 1, day, hour, minute, second);
   const check = new Date(ms);
@@ -77,7 +82,14 @@ const offsetFormatter = (timeZone: string): Intl.DateTimeFormat =>
 /** Offset (ms) of `timeZone` at the instant `utcMs`: local wall clock minus UTC. */
 const zoneOffsetMs = (formatter: Intl.DateTimeFormat, utcMs: number): number => {
   const parts = Object.fromEntries(formatter.formatToParts(utcMs).map((part) => [part.type, Number(part.value)]));
-  const asUtc = Date.UTC(parts["year"] ?? 0, (parts["month"] ?? 1) - 1, parts["day"], parts["hour"], parts["minute"], parts["second"]);
+  const asUtc = Date.UTC(
+    parts["year"] ?? 0,
+    (parts["month"] ?? 1) - 1,
+    parts["day"],
+    parts["hour"],
+    parts["minute"],
+    parts["second"],
+  );
   return asUtc - Math.floor(utcMs / 1000) * 1000;
 };
 

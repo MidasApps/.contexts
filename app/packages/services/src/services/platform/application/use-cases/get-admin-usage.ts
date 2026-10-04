@@ -4,8 +4,14 @@ import { utcMonthStart } from "../../../usage/application/use-cases/usage-month.
 import type { ConsoleDeps } from "../console-deps.ts";
 import type { UsageBucket } from "../ports/console-ports.ts";
 
-export type AdminUsageQuery = { readonly from?: string | undefined; readonly to?: string | undefined; readonly tenantId: string | null };
-export type AdminUsageError = { readonly code: "INVALID_RANGE"; readonly field: "from" | "to"; readonly issue: "AFTER_TO" | "RANGE_TOO_LONG" } | { readonly code: "NOT_FOUND" };
+export type AdminUsageQuery = {
+  readonly from?: string | undefined;
+  readonly to?: string | undefined;
+  readonly tenantId: string | null;
+};
+export type AdminUsageError =
+  | { readonly code: "INVALID_RANGE"; readonly field: "from" | "to"; readonly issue: "AFTER_TO" | "RANGE_TOO_LONG" }
+  | { readonly code: "NOT_FOUND" };
 export type GetAdminUsage = (query: AdminUsageQuery) => Promise<Result<AdminUsage, AdminUsageError>>;
 
 type UsageDeps = Pick<ConsoleDeps, "organizations" | "usage" | "clock">;
@@ -29,7 +35,13 @@ const add = (left: AdminUsageTotals, right: AdminUsageTotals): AdminUsageTotals 
   unpricedCalls: left.unpricedCalls + right.unpricedCalls,
 });
 
-const totalsOf = ({ calls, inputTokens, outputTokens, costMicroUsd, unpricedCalls }: UsageBucket): AdminUsageTotals => ({ calls, inputTokens, outputTokens, costMicroUsd, unpricedCalls });
+const totalsOf = ({
+  calls,
+  inputTokens,
+  outputTokens,
+  costMicroUsd,
+  unpricedCalls,
+}: UsageBucket): AdminUsageTotals => ({ calls, inputTokens, outputTokens, costMicroUsd, unpricedCalls });
 
 // Default: the UTC month to date. A range is at most ADMIN_USAGE_MAX_DAYS days, `from` not after `to`.
 const rangeOf = (query: AdminUsageQuery, now: Date): Result<{ from: string; to: string }, AdminUsageError> => {
@@ -54,7 +66,11 @@ const liveTenantIds = async (deps: UsageDeps): Promise<{ ids: string[]; truncate
   }
 };
 
-const readBuckets = async (deps: UsageDeps, tenantIds: readonly string[], range: { from: Date; to: Date }): Promise<UsageBucket[]> => {
+const readBuckets = async (
+  deps: UsageDeps,
+  tenantIds: readonly string[],
+  range: { from: Date; to: Date },
+): Promise<UsageBucket[]> => {
   const buckets: UsageBucket[] = [];
   for (let index = 0; index < tenantIds.length; index += CONCURRENCY) {
     const chunk = tenantIds.slice(index, index + CONCURRENCY);
@@ -64,11 +80,18 @@ const readBuckets = async (deps: UsageDeps, tenantIds: readonly string[], range:
   return buckets;
 };
 
-const groupBy = <K>(buckets: readonly UsageBucket[], keyOf: (bucket: UsageBucket) => string, labelOf: (bucket: UsageBucket) => K): { label: K; totals: AdminUsageTotals }[] => {
+const groupBy = <K>(
+  buckets: readonly UsageBucket[],
+  keyOf: (bucket: UsageBucket) => string,
+  labelOf: (bucket: UsageBucket) => K,
+): { label: K; totals: AdminUsageTotals }[] => {
   const groups = new Map<string, { label: K; totals: AdminUsageTotals }>();
   for (const bucket of buckets) {
     const key = keyOf(bucket);
-    groups.set(key, { label: groups.get(key)?.label ?? labelOf(bucket), totals: add(groups.get(key)?.totals ?? ZERO, totalsOf(bucket)) });
+    groups.set(key, {
+      label: groups.get(key)?.label ?? labelOf(bucket),
+      totals: add(groups.get(key)?.totals ?? ZERO, totalsOf(bucket)),
+    });
   }
   return [...groups.values()];
 };
@@ -92,13 +115,32 @@ export const makeGetAdminUsage =
     const range = rangeOf(query, now);
     if (!range.ok) return range;
     const { from, to } = range.data;
-    if (query.tenantId !== null && (await deps.organizations.getLive(query.tenantId)) === null) return err({ code: "NOT_FOUND" });
+    if (query.tenantId !== null && (await deps.organizations.getLive(query.tenantId)) === null)
+      return err({ code: "NOT_FOUND" });
     const tenants = query.tenantId === null ? await liveTenantIds(deps) : { ids: [query.tenantId], truncated: false };
-    const buckets = await readBuckets(deps, tenants.ids, { from: startOf(from), to: new Date(startOf(to).getTime() + DAY_MS) });
-    const perDay = new Map(groupBy(buckets, (bucket) => bucket.day, (bucket) => bucket.day).map((group) => [group.label, group.totals]));
-    const byModel = groupBy(buckets, (bucket) => `${bucket.provider}\u0000${bucket.model}`, (bucket) => ({ provider: bucket.provider, model: bucket.model }))
+    const buckets = await readBuckets(deps, tenants.ids, {
+      from: startOf(from),
+      to: new Date(startOf(to).getTime() + DAY_MS),
+    });
+    const perDay = new Map(
+      groupBy(
+        buckets,
+        (bucket) => bucket.day,
+        (bucket) => bucket.day,
+      ).map((group) => [group.label, group.totals]),
+    );
+    const byModel = groupBy(
+      buckets,
+      (bucket) => `${bucket.provider}\u0000${bucket.model}`,
+      (bucket) => ({ provider: bucket.provider, model: bucket.model }),
+    )
       .map((group) => ({ ...group.label, ...group.totals }))
-      .sort((left, right) => right.costMicroUsd - left.costMicroUsd || left.provider.localeCompare(right.provider) || left.model.localeCompare(right.model));
+      .sort(
+        (left, right) =>
+          right.costMicroUsd - left.costMicroUsd ||
+          left.provider.localeCompare(right.provider) ||
+          left.model.localeCompare(right.model),
+      );
     return ok(
       AdminUsageSchema.parse({
         from,

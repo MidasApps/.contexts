@@ -58,35 +58,81 @@ afterAll(async () => {
 describe("console budgets reach the budget guard (Postgres)", () => {
   it("enforces the plan, a staff override and the tenant's lower cap through checkTenantBudget", async () => {
     const memory = createInMemoryConsoleStores({ organizations: [{ id: TENANT }] });
-    const services = createConsoleServices({ ...memory.stores, usage: createPostgresConsoleUsage(sql), audit: makeRecordAudit({ writer: createInMemoryAuditLogWriter(), clock }), clock });
+    const services = createConsoleServices({
+      ...memory.stores,
+      usage: createPostgresConsoleUsage(sql),
+      audit: makeRecordAudit({ writer: createInMemoryAuditLogWriter(), clock }),
+      clock,
+    });
     await record([spend(2_000)]);
     expect(await check({ tenantId: TENANT })).toEqual({ allowed: true, alert: false });
 
-    const plan = await services.createPlan({ actor: STAFF, requestId: "r1", input: { name: "Tiny", limits: { monthlyMicroUsd: 2_000, monthlyTokens: 1_000, maxConnectors: 1, features: [] } } });
+    const plan = await services.createPlan({
+      actor: STAFF,
+      requestId: "r1",
+      input: { name: "Tiny", limits: { monthlyMicroUsd: 2_000, monthlyTokens: 1_000, maxConnectors: 1, features: [] } },
+    });
     await services.updateOrganization({ actor: STAFF, tenantId: TENANT, requestId: "r2", input: { planId: plan.id } });
     expect(await check({ tenantId: TENANT })).toEqual({ allowed: false, reason: "BUDGET_EXCEEDED" });
 
-    await services.setOrganizationBudget({ actor: STAFF, tenantId: TENANT, requestId: "r3", input: { override: { monthlyMicroUsd: 10_000, monthlyTokens: 1_000 } } });
+    await services.setOrganizationBudget({
+      actor: STAFF,
+      tenantId: TENANT,
+      requestId: "r3",
+      input: { override: { monthlyMicroUsd: 10_000, monthlyTokens: 1_000 } },
+    });
     expect(await check({ tenantId: TENANT })).toEqual({ allowed: true, alert: false });
 
-    expect(await services.updateAgentSettings({ actor: OWNER, by: "tenant", tenantId: TENANT, requestId: "r4", input: { budget: { monthlyMicroUsd: 20_000, monthlyTokens: 1_000 } } })).toEqual({
+    expect(
+      await services.updateAgentSettings({
+        actor: OWNER,
+        by: "tenant",
+        tenantId: TENANT,
+        requestId: "r4",
+        input: { budget: { monthlyMicroUsd: 20_000, monthlyTokens: 1_000 } },
+      }),
+    ).toEqual({
       ok: false,
       error: { code: "ABOVE_PLAN" },
     });
-    await services.updateAgentSettings({ actor: OWNER, by: "tenant", tenantId: TENANT, requestId: "r5", input: { budget: { monthlyMicroUsd: 2_400, monthlyTokens: 1_000 } } });
+    await services.updateAgentSettings({
+      actor: OWNER,
+      by: "tenant",
+      tenantId: TENANT,
+      requestId: "r5",
+      input: { budget: { monthlyMicroUsd: 2_400, monthlyTokens: 1_000 } },
+    });
     expect(await check({ tenantId: TENANT })).toEqual({ allowed: true, alert: true });
-    expect(await repository.getTenantBudget({ tenantId: TENANT })).toEqual({ monthlyMicroUsd: 2_400, monthlyTokens: 1_000 });
+    expect(await repository.getTenantBudget({ tenantId: TENANT })).toEqual({
+      monthlyMicroUsd: 2_400,
+      monthlyTokens: 1_000,
+    });
   });
 
   it("enforces a lowered plan through checkTenantBudget even when the plan assignment fails to reach Firestore", async () => {
     const memory = createInMemoryConsoleStores({ organizations: [{ id: TENANT }] });
-    const failingSetPlan = { ...memory.stores.organizations, setPlan: () => Promise.reject(new Error("firestore down")) };
+    const failingSetPlan = {
+      ...memory.stores.organizations,
+      setPlan: () => Promise.reject(new Error("firestore down")),
+    };
     const audit = makeRecordAudit({ writer: createInMemoryAuditLogWriter(), clock });
     const services = createConsoleServices({ ...memory.stores, usage: createPostgresConsoleUsage(sql), audit, clock });
-    const failing = createConsoleServices({ ...memory.stores, organizations: failingSetPlan, usage: createPostgresConsoleUsage(sql), audit, clock });
+    const failing = createConsoleServices({
+      ...memory.stores,
+      organizations: failingSetPlan,
+      usage: createPostgresConsoleUsage(sql),
+      audit,
+      clock,
+    });
     await record([spend(2_000)]);
-    const tiny = await services.createPlan({ actor: STAFF, requestId: "r1", input: { name: "Tiny", limits: { monthlyMicroUsd: 2_000, monthlyTokens: 1_000, maxConnectors: 1, features: [] } } });
-    await expect(failing.updateOrganization({ actor: STAFF, tenantId: TENANT, requestId: "r2", input: { planId: tiny.id } })).rejects.toThrow("firestore down");
+    const tiny = await services.createPlan({
+      actor: STAFF,
+      requestId: "r1",
+      input: { name: "Tiny", limits: { monthlyMicroUsd: 2_000, monthlyTokens: 1_000, maxConnectors: 1, features: [] } },
+    });
+    await expect(
+      failing.updateOrganization({ actor: STAFF, tenantId: TENANT, requestId: "r2", input: { planId: tiny.id } }),
+    ).rejects.toThrow("firestore down");
     expect(await check({ tenantId: TENANT })).toEqual({ allowed: false, reason: "BUDGET_EXCEEDED" });
   });
 });

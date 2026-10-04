@@ -1,4 +1,9 @@
-import type { ImpersonationSession, StartImpersonationInput, StartImpersonationResponse, UserPrincipal } from "@core/contracts";
+import type {
+  ImpersonationSession,
+  StartImpersonationInput,
+  StartImpersonationResponse,
+  UserPrincipal,
+} from "@core/contracts";
 import type { RequestAccess } from "../../../access/composition.ts";
 import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
 import { AccessNotFoundError } from "../../../access/domain/errors/access-not-found-error.ts";
@@ -13,7 +18,9 @@ export type StartImpersonationCommand = {
   readonly requestId: string;
 };
 
-export type StartImpersonation = (command: StartImpersonationCommand) => Promise<Result<StartImpersonationResponse, AccessDeniedError | AccessNotFoundError>>;
+export type StartImpersonation = (
+  command: StartImpersonationCommand,
+) => Promise<Result<StartImpersonationResponse, AccessDeniedError | AccessNotFoundError>>;
 
 const MINUTE_MS = 60_000;
 
@@ -29,7 +36,13 @@ const record = async (deps: PlatformDeps, session: ImpersonationSession, request
   await deps.unitOfWork.run(async (tx) => {
     deps.impersonations.create(tx, { session, actorId: session.staffUid });
     await deps.audit.record(
-      { log: "platform", ...common, actor: { type: "user", id: session.staffUid }, target: { type: "user", id: session.targetUid }, targetTenantId: session.tenantId },
+      {
+        log: "platform",
+        ...common,
+        actor: { type: "user", id: session.staffUid },
+        target: { type: "user", id: session.targetUid },
+        targetTenantId: session.tenantId,
+      },
       tx,
     );
     await deps.audit.record(
@@ -57,7 +70,11 @@ export const makeStartImpersonation =
   (deps: PlatformDeps): StartImpersonation =>
   async (command) => {
     const { actor, input } = command;
-    const allowed = await requireImpersonateRight(deps, { ...command, targetUid: input.targetUid, targetTenantId: input.organizationId });
+    const allowed = await requireImpersonateRight(deps, {
+      ...command,
+      targetUid: input.targetUid,
+      targetTenantId: input.organizationId,
+    });
     if (!allowed.ok) return allowed;
     if (input.targetUid === actor.uid) return err(new AccessDeniedError("PERMISSION_NOT_GRANTED"));
     if (!(await targetIsMember(command))) return err(new AccessNotFoundError("user"));
@@ -73,6 +90,9 @@ export const makeStartImpersonation =
       createdAt: now.toISOString(),
     };
     await record(deps, session, command.requestId);
-    const customToken = await deps.customTokens.createCustomToken(session.targetUid, { imp: session.id, impBy: session.staffUid });
+    const customToken = await deps.customTokens.createCustomToken(session.targetUid, {
+      imp: session.id,
+      impBy: session.staffUid,
+    });
     return ok({ sessionId: session.id, customToken, expiresAt: session.expiresAt });
   };

@@ -14,7 +14,10 @@ export const customLimitsOfPlan = (limits: PlanLimits | null): CustomAgentLimits
  * → `plans/{planId}`, decision 0039). No plan, or a deleted one, means the platform defaults.
  */
 export const createPlanCustomLimitsReader =
-  (deps: { readonly organizations: Pick<OrganizationAdminStore, "getPlan">; readonly plans: Pick<PlanRepository, "get"> }): CustomLimitsReader =>
+  (deps: {
+    readonly organizations: Pick<OrganizationAdminStore, "getPlan">;
+    readonly plans: Pick<PlanRepository, "get">;
+  }): CustomLimitsReader =>
   async (tenantId) => {
     const { planId } = await deps.organizations.getPlan(tenantId);
     const plan = planId === null ? null : await deps.plans.get(planId);

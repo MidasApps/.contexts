@@ -6,7 +6,10 @@ const DEV_HMR_SOCKET = "ws://localhost:1420";
  * REST origins the Firebase Auth JS SDK calls for email/password, MFA, custom-token sign-in and
  * token refresh (decision 0017 §3). No popup/redirect flow is used, so `authDomain` is never loaded.
  */
-export const FIREBASE_AUTH_ORIGINS = ["https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com"] as const;
+export const FIREBASE_AUTH_ORIGINS = [
+  "https://identitytoolkit.googleapis.com",
+  "https://securetoken.googleapis.com",
+] as const;
 
 /** Where chat uploads send their bytes: the signed URL of the files API (decision 0035). */
 export const FILE_UPLOAD_ORIGIN = "https://storage.googleapis.com";
@@ -33,8 +36,14 @@ export type TauriApiConfigInput = {
  * `devCsp`. Only `connect-src` is replaced; every other directive stays as in
  * tauri.conf.json.
  */
-export const buildTauriApiConfigPatch = ({ apiUrl, authEmulatorUrl, storageEmulatorUrl }: TauriApiConfigInput): TauriApiConfigPatch => {
-  const emulatorOrigins = [authEmulatorUrl, storageEmulatorUrl].filter((url): url is string => url !== undefined).map((url) => new URL(url).origin);
+export const buildTauriApiConfigPatch = ({
+  apiUrl,
+  authEmulatorUrl,
+  storageEmulatorUrl,
+}: TauriApiConfigInput): TauriApiConfigPatch => {
+  const emulatorOrigins = [authEmulatorUrl, storageEmulatorUrl]
+    .filter((url): url is string => url !== undefined)
+    .map((url) => new URL(url).origin);
   const origins = [new URL(apiUrl).origin, ...FIREBASE_AUTH_ORIGINS, FILE_UPLOAD_ORIGIN, ...emulatorOrigins].join(" ");
   return {
     app: {

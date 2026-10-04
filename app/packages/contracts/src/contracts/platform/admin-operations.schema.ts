@@ -41,8 +41,13 @@ export const AdminWorkflowRunContract = defineContract(AdminWorkflowRunSchema, {
 
 /** A schedule as staff list it: a tenant schedule or a platform one (boot-time rows, UTC). */
 export const AdminScheduleSchema = z.strictObject({
-  id: z.string().regex(/^schedule_[a-z0-9-]{1,120}$/).meta(none("Schedule id.")),
-  scope: z.enum(["platform", "tenant"]).meta(none("`platform` for the core crons, `tenant` for a schedule of an organization.")),
+  id: z
+    .string()
+    .regex(/^schedule_[a-z0-9-]{1,120}$/)
+    .meta(none("Schedule id.")),
+  scope: z
+    .enum(["platform", "tenant"])
+    .meta(none("`platform` for the core crons, `tenant` for a schedule of an organization.")),
   tenantId: TenantIdSchema.nullable().meta(none("Organization that owns a tenant schedule; null for platform ones.")),
   workflowId: WorkflowIdSchema.meta(none("Scheduled workflow.")),
   cron: CronExpressionSchema.meta(none("5-field cron expression, evaluated in `timezone`.")),

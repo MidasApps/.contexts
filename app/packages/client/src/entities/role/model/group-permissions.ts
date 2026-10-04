@@ -1,17 +1,24 @@
 import type { PermissionDefinition } from "@core/contracts";
 
 /** Permissions of one resource (`core.member.*`), in registry order. */
-export type PermissionResourceGroup = { readonly resource: string; readonly permissions: readonly PermissionDefinition[] };
+export type PermissionResourceGroup = {
+  readonly resource: string;
+  readonly permissions: readonly PermissionDefinition[];
+};
 
 /** Permissions of one module (`core` or a module id), grouped by resource. */
-export type PermissionModuleGroup = { readonly moduleId: string; readonly resources: readonly PermissionResourceGroup[] };
+export type PermissionModuleGroup = {
+  readonly moduleId: string;
+  readonly resources: readonly PermissionResourceGroup[];
+};
 
 const partsOf = (id: string): { moduleId: string; resource: string } => {
   const [moduleId = id, resource = id] = id.split(".");
   return { moduleId, resource };
 };
 
-const coreFirst = (a: string, b: string): number => (a === "core" ? -1 : b === "core" ? 1 : a.localeCompare(b, "en-US"));
+const coreFirst = (a: string, b: string): number =>
+  a === "core" ? -1 : b === "core" ? 1 : a.localeCompare(b, "en-US");
 
 /**
  * Groups tenant permissions by module (the id prefix: `core` first, then modules by id) and by
@@ -29,6 +36,8 @@ export const groupPermissionsByModule = (permissions: readonly PermissionDefinit
   }
   return [...modules.keys()].toSorted(coreFirst).map((moduleId) => ({
     moduleId,
-    resources: [...(modules.get(moduleId) ?? new Map<string, PermissionDefinition[]>()).entries()].map(([resource, list]) => ({ resource, permissions: list })),
+    resources: [...(modules.get(moduleId) ?? new Map<string, PermissionDefinition[]>()).entries()].map(
+      ([resource, list]) => ({ resource, permissions: list }),
+    ),
   }));
 };

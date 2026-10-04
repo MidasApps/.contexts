@@ -21,20 +21,32 @@ const print = (line: string): void => {
 };
 
 const run = (bin: string, args: readonly string[], env: NodeJS.ProcessEnv): number => {
-  const result = spawnSync(process.execPath, [bin, ...args], { cwd: APP_ROOT, env, stdio: "inherit", windowsHide: true });
+  const result = spawnSync(process.execPath, [bin, ...args], {
+    cwd: APP_ROOT,
+    env,
+    stdio: "inherit",
+    windowsHide: true,
+  });
   if (result.error !== undefined) throw result.error;
   return result.status ?? 1;
 };
 
 const main = (): number => {
-  const env = { ...process.env, FUNCTIONS_DISCOVERY_TIMEOUT: process.env["FUNCTIONS_DISCOVERY_TIMEOUT"] ?? FUNCTIONS_DISCOVERY_TIMEOUT_SECONDS };
+  const env = {
+    ...process.env,
+    FUNCTIONS_DISCOVERY_TIMEOUT: process.env["FUNCTIONS_DISCOVERY_TIMEOUT"] ?? FUNCTIONS_DISCOVERY_TIMEOUT_SECONDS,
+  };
   const turbo = resolvePackageBin({ fromDir: APP_ROOT, packageName: "turbo", binName: "turbo" });
   const firebase = resolvePackageBin({ fromDir: APP_ROOT, packageName: "firebase-tools", binName: "firebase" });
   print("building the functions source");
   const built = run(turbo, ["run", "build", "--filter=@core/functions"], env);
   if (built !== 0) return built;
   print(`running the emulator suites (${EMULATORS}), one package at a time`);
-  return run(firebase, ["emulators:exec", "--project", "demo-core", "--only", EMULATORS, "turbo run test:emulators --concurrency=1"], env);
+  return run(
+    firebase,
+    ["emulators:exec", "--project", "demo-core", "--only", EMULATORS, "turbo run test:emulators --concurrency=1"],
+    env,
+  );
 };
 
 try {

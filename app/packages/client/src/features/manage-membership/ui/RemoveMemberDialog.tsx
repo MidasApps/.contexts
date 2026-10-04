@@ -1,6 +1,6 @@
 "use client";
 
-import { removeMemberEndpoint, type Member } from "@core/contracts";
+import { type Member, removeMemberEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { memberKeys } from "#/entities/member/index.ts";
@@ -21,7 +21,9 @@ const useRemoveMember = (organizationId: string) => {
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   return async (member: Member): Promise<void> => {
-    const rollback = await patchCachedLists<Member>(queryClient, memberKeys.all(organizationId), (items) => items.filter((item) => item.uid !== member.uid));
+    const rollback = await patchCachedLists<Member>(queryClient, memberKeys.all(organizationId), (items) =>
+      items.filter((item) => item.uid !== member.uid),
+    );
     try {
       await callEndpoint(removeMemberEndpoint, { params: { organizationId, userId: member.uid } });
     } catch (error: unknown) {

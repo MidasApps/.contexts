@@ -1,7 +1,7 @@
 import type { z } from "zod";
 import { ContractDefinitionError } from "./contract-definition-error.ts";
 import { inspectSchema, isPiiBelow } from "./field-meta-rules.ts";
-import { CatalogMetaSchema, type CatalogMeta } from "./primitives/catalog-meta.schema.ts";
+import { type CatalogMeta, CatalogMetaSchema } from "./primitives/catalog-meta.schema.ts";
 
 /** A validated contract: schema plus catalog meta. Registering it is a composition step. */
 export type ContractDefinition<Schema extends z.ZodType = z.ZodType> = {
@@ -19,7 +19,12 @@ const parseMeta = (meta: unknown): CatalogMeta => {
   const contractId = readContractId(meta);
   const fields = parsed.error.issues.map((issue) => issue.path.map(String).join("."));
   throw new ContractDefinitionError(
-    { code: "INVALID_CONTRACT_META", contractId, fields, message: `Invalid catalog meta for ${contractId}: ${fields.join(", ")}` },
+    {
+      code: "INVALID_CONTRACT_META",
+      contractId,
+      fields,
+      message: `Invalid catalog meta for ${contractId}: ${fields.join(", ")}`,
+    },
     { cause: parsed.error },
   );
 };
@@ -53,7 +58,10 @@ const assertFieldMeta = (schema: z.ZodType, meta: CatalogMeta): void => {
  * @throws {ContractDefinitionError} on invalid meta, missing field meta, or a pii
  *   level lower than the fields it contains (a declaration bug, raised at startup).
  */
-export const defineContract = <Schema extends z.ZodType>(schema: Schema, rawMeta: unknown): ContractDefinition<Schema> => {
+export const defineContract = <Schema extends z.ZodType>(
+  schema: Schema,
+  rawMeta: unknown,
+): ContractDefinition<Schema> => {
   const meta = parseMeta(rawMeta);
   assertFieldMeta(schema, meta);
   return { id: meta.id, meta, schema };

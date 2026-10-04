@@ -57,17 +57,28 @@ const resolveLimit = (limit: number | undefined): number | undefined => {
  * default and 1000 at most. A rejected statement never reaches the database.
  */
 export const makeRunSemanticQuery =
-  (deps: { readonly views: SemanticViewRegistry; readonly guard: SemanticSqlGuard; readonly runner: SemanticQueryRunner }): RunSemanticQuery =>
+  (deps: {
+    readonly views: SemanticViewRegistry;
+    readonly guard: SemanticSqlGuard;
+    readonly runner: SemanticQueryRunner;
+  }): RunSemanticQuery =>
   async ({ principal, sql, params = [], limit }) => {
     if (principal.tenantId.trim() === "") return { ok: false, error: { code: "TENANT_CONTEXT_MISSING" } };
     const cap = resolveLimit(limit);
     if (cap === undefined) return { ok: false, error: { code: "INVALID_LIMIT" } };
     if (params.length > MAX_SEMANTIC_PARAMS) return { ok: false, error: { code: "TOO_MANY_PARAMS" } };
-    const guarded = await deps.guard({ sql, allowedViews: deps.views.allowedFor(principal.permissions), paramCount: params.length });
+    const guarded = await deps.guard({
+      sql,
+      allowedViews: deps.views.allowedFor(principal.permissions),
+      paramCount: params.length,
+    });
     if (!guarded.ok) return guarded;
     const scope = { tenantId: principal.tenantId, nodeIds: principal.nodeIds };
     const result = await deps.runner.run({ scope, sql: guarded.data.sql, params, limit: cap });
     if (!result.ok) return result;
     const { columns, rows, truncated } = result.data;
-    return { ok: true, data: { columns, rows, rowCount: rows.length, truncated, fingerprint: guarded.data.fingerprint } };
+    return {
+      ok: true,
+      data: { columns, rows, rowCount: rows.length, truncated, fingerprint: guarded.data.fingerprint },
+    };
   };

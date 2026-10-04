@@ -1,7 +1,12 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
-import { ADMIN_IDS, buildOrganizationDetail, buildOrganizationSummary, buildPlan } from "#/shared/testing/admin-fixtures.ts";
+import {
+  ADMIN_IDS,
+  buildOrganizationDetail,
+  buildOrganizationSummary,
+  buildPlan,
+} from "#/shared/testing/admin-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, FAKE_REQUEST_ID, ok } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
@@ -20,7 +25,8 @@ const routes = (organization: unknown = NORTHWIND, extra = {}) => ({
   ...extra,
 });
 
-const render = (options: Parameters<typeof renderAdmin>[1] = {}) => renderAdmin(<AdminOrganizationDetailView />, { path: PATH, routes: routes(), ...options });
+const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
+  renderAdmin(<AdminOrganizationDetailView />, { path: PATH, routes: routes(), ...options });
 const section = (name: string | RegExp): HTMLElement => screen.getByRole("region", { name });
 
 const setOnline = (online: boolean): void => {
@@ -40,17 +46,27 @@ describe("AdminOrganizationDetailView", () => {
     expect(within(summary).getByText("Do plano")).toBeDefined();
     expect(plain(summary.textContent)).toContain("20.000.000");
     // Value and hint are separate words for assistive tech (the e2e read "12pessoas com acesso").
-    expect(plain(within(summary).getByText("Membros").parentElement?.textContent ?? null)).toContain("12 pessoas com acesso");
+    expect(plain(within(summary).getByText("Membros").parentElement?.textContent ?? null)).toContain(
+      "12 pessoas com acesso",
+    );
     const related = section("Ver esta organização em");
-    expect(within(related).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(
-      ["agents", "connectors", "workflows", "traces", "flags", "costs"].map((area) => `/admin/${area}?organizationId=${IDS.organization}`),
+    expect(
+      within(related)
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href")),
+    ).toEqual(
+      ["agents", "connectors", "workflows", "traces", "flags", "costs"].map(
+        (area) => `/admin/${area}?organizationId=${IDS.organization}`,
+      ),
     );
     await expectNoAxeViolations(container);
   });
 
   it("assigns another plan and shows the answer without refetching the organization", async () => {
     const saved = buildOrganizationSummary({ planId: ADMIN_IDS.otherPlan });
-    const { user, api } = render({ routes: routes(NORTHWIND, { "PATCH /v1/admin/organizations/:organizationId": ok(saved) }) });
+    const { user, api } = render({
+      routes: routes(NORTHWIND, { "PATCH /v1/admin/organizations/:organizationId": ok(saved) }),
+    });
     const plan = await screen.findByRole("region", { name: "Plano" });
     const save = within(plan).getByRole("button", { name: "Salvar plano" });
     expect(save.hasAttribute("disabled")).toBe(true);
@@ -61,12 +77,18 @@ describe("AdminOrganizationDetailView", () => {
     expect(api.calls.find((call) => call.method === "PATCH")?.body).toEqual({ planId: ADMIN_IDS.otherPlan });
     await waitFor(() => expect(within(section("Resumo")).getByText("Pro")).toBeDefined());
     expect(within(section("Resumo")).getByText("Membros")).toBeDefined();
-    expect(api.calls.filter((call) => call.method === "GET" && call.path === `/v1/admin/organizations/${IDS.organization}`)).toHaveLength(1);
+    expect(
+      api.calls.filter((call) => call.method === "GET" && call.path === `/v1/admin/organizations/${IDS.organization}`),
+    ).toHaveLength(1);
     expect(api.callLines()).not.toContain("GET /v1/admin/organizations");
   });
 
   it("returns the organization to the platform default plan", async () => {
-    const { user, api } = render({ routes: routes(NORTHWIND, { "PATCH /v1/admin/organizations/:organizationId": ok(buildOrganizationSummary({ planId: null })) }) });
+    const { user, api } = render({
+      routes: routes(NORTHWIND, {
+        "PATCH /v1/admin/organizations/:organizationId": ok(buildOrganizationSummary({ planId: null })),
+      }),
+    });
     const plan = await screen.findByRole("region", { name: "Plano" });
     await user.click(within(plan).getByRole("combobox", { name: "Plano da organização" }));
     await user.click(await screen.findByRole("option", { name: "Padrão da plataforma (sem plano)" }));
@@ -75,7 +97,13 @@ describe("AdminOrganizationDetailView", () => {
   });
 
   it("saves a budget override in micro-USD", async () => {
-    const { user, api } = render({ routes: routes(NORTHWIND, { "PUT /v1/admin/organizations/:organizationId/budget": ok(buildOrganizationSummary({ budget: { caps: OVERRIDE, source: "override", override: OVERRIDE } })) }) });
+    const { user, api } = render({
+      routes: routes(NORTHWIND, {
+        "PUT /v1/admin/organizations/:organizationId/budget": ok(
+          buildOrganizationSummary({ budget: { caps: OVERRIDE, source: "override", override: OVERRIDE } }),
+        ),
+      }),
+    });
     const budget = await screen.findByRole("region", { name: "Ajuste de orçamento" });
     expect(within(budget).queryByRole("button", { name: "Voltar ao plano" })).toBeNull();
     const money = within(budget).getByRole("textbox", { name: "Gasto mensal com modelos" });
@@ -119,7 +147,11 @@ describe("AdminOrganizationDetailView", () => {
   });
 
   it("clears the override after a confirmation", async () => {
-    const { user, api, container } = render({ routes: routes(OVERRIDDEN, { "PUT /v1/admin/organizations/:organizationId/budget": ok(buildOrganizationSummary()) }) });
+    const { user, api, container } = render({
+      routes: routes(OVERRIDDEN, {
+        "PUT /v1/admin/organizations/:organizationId/budget": ok(buildOrganizationSummary()),
+      }),
+    });
     const budget = await screen.findByRole("region", { name: "Ajuste de orçamento" });
     expect(within(budget).getByText(/Há um ajuste da equipe em vigor/u)).toBeDefined();
     await user.click(within(budget).getByRole("button", { name: "Voltar ao plano" }));
@@ -132,7 +164,9 @@ describe("AdminOrganizationDetailView", () => {
 
   it("suspends after a confirmation and can reactivate", async () => {
     const suspended = buildOrganizationSummary({ status: "suspended" });
-    const { user, api } = render({ routes: routes(NORTHWIND, { "PATCH /v1/admin/organizations/:organizationId": ok(suspended) }) });
+    const { user, api } = render({
+      routes: routes(NORTHWIND, { "PATCH /v1/admin/organizations/:organizationId": ok(suspended) }),
+    });
     await user.click(await screen.findByRole("button", { name: "Suspender organização" }));
     const dialog = await screen.findByRole("alertdialog", { name: "Suspender Northwind?" });
     expect(api.calls.some((call) => call.method === "PATCH")).toBe(false);
@@ -144,7 +178,9 @@ describe("AdminOrganizationDetailView", () => {
   });
 
   it("keeps the confirmation open with the error and its reference when the write fails", async () => {
-    const { user } = render({ routes: routes(NORTHWIND, { "PATCH /v1/admin/organizations/:organizationId": apiError(403, "FORBIDDEN") }) });
+    const { user } = render({
+      routes: routes(NORTHWIND, { "PATCH /v1/admin/organizations/:organizationId": apiError(403, "FORBIDDEN") }),
+    });
     await user.click(await screen.findByRole("button", { name: "Suspender organização" }));
     const dialog = await screen.findByRole("alertdialog", { name: "Suspender Northwind?" });
     await user.click(within(dialog).getByRole("button", { name: "Suspender" }));
@@ -159,7 +195,11 @@ describe("AdminOrganizationDetailView", () => {
     expect(screen.getByText(/Seu papel na equipe só permite consultar/u)).toBeDefined();
     expect(screen.queryByRole("button", { name: "Suspender organização" })).toBeNull();
     expect(screen.queryByRole("region", { name: "Plano" })).toBeNull();
-    expect(within(section("Ver esta organização em")).getAllByRole("link").map((link) => link.textContent)).toEqual(["Conectores", "Traces", "Custos"]);
+    expect(
+      within(section("Ver esta organização em"))
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Conectores", "Traces", "Custos"]);
     expect(api.callLines()).not.toContain("GET /v1/admin/plans");
     await expectNoAxeViolations(container);
   });
@@ -177,12 +217,17 @@ describe("AdminOrganizationDetailView", () => {
   });
 
   it("is not found when the API answers 404", async () => {
-    render({ path: "/admin/organizations/Unknown0000000000001", routes: routes(NORTHWIND, { "GET /v1/admin/organizations/:organizationId": apiError(404, "NOT_FOUND") }) });
+    render({
+      path: "/admin/organizations/Unknown0000000000001",
+      routes: routes(NORTHWIND, { "GET /v1/admin/organizations/:organizationId": apiError(404, "NOT_FOUND") }),
+    });
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
   });
 
   it("shows an error with the request reference and a retry", async () => {
-    const { user, api, container } = render({ routes: routes(NORTHWIND, { "GET /v1/admin/organizations/:organizationId": apiError(409, "CONFLICT") }) });
+    const { user, api, container } = render({
+      routes: routes(NORTHWIND, { "GET /v1/admin/organizations/:organizationId": apiError(409, "CONFLICT") }),
+    });
     expect(await screen.findByRole("alert")).toBeDefined();
     expect(screen.getByText(new RegExp(FAKE_REQUEST_ID, "u"))).toBeDefined();
     await expectNoAxeViolations(container);
@@ -192,10 +237,16 @@ describe("AdminOrganizationDetailView", () => {
   });
 
   it("asks for the second factor when the API answers MFA_REQUIRED, and shows no access on another 403", async () => {
-    const mfa = render({ routes: routes(NORTHWIND, { "GET /v1/admin/organizations/:organizationId": apiError(403, "MFA_REQUIRED") }) });
-    expect(await screen.findByRole("link", { name: /segundo fator|verificação em duas etapas|segurança/iu })).toBeDefined();
+    const mfa = render({
+      routes: routes(NORTHWIND, { "GET /v1/admin/organizations/:organizationId": apiError(403, "MFA_REQUIRED") }),
+    });
+    expect(
+      await screen.findByRole("link", { name: /segundo fator|verificação em duas etapas|segurança/iu }),
+    ).toBeDefined();
     mfa.unmount();
-    render({ routes: routes(NORTHWIND, { "GET /v1/admin/organizations/:organizationId": apiError(403, "FORBIDDEN") }) });
+    render({
+      routes: routes(NORTHWIND, { "GET /v1/admin/organizations/:organizationId": apiError(403, "FORBIDDEN") }),
+    });
     await waitFor(() => expect(screen.queryByRole("region", { name: "Resumo" })).toBeNull());
     expect(await screen.findByText(/Peça a um administrador da plataforma/u)).toBeDefined();
   });

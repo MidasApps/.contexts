@@ -75,18 +75,30 @@ export type PushToTalk = {
 const NOT_ALLOWED = new Set(["NotAllowedError", "SecurityError", "PermissionDeniedError"]);
 
 // A `DOMException` is not an `Error` in every runtime: read the name off the object.
-const nameOf = (error: unknown): string => (typeof error === "object" && error !== null && "name" in error && typeof error.name === "string" ? error.name : "");
+const nameOf = (error: unknown): string =>
+  typeof error === "object" && error !== null && "name" in error && typeof error.name === "string" ? error.name : "";
 
-const microphoneProblem = (error: unknown): PushToTalkProblem => (NOT_ALLOWED.has(nameOf(error)) ? "denied" : "unsupported");
+const microphoneProblem = (error: unknown): PushToTalkProblem =>
+  NOT_ALLOWED.has(nameOf(error)) ? "denied" : "unsupported";
 
-type Session = { stream: StreamLike | undefined; recorder: RecorderLike | undefined; chunks: Blob[]; timer: unknown; controller: AbortController; released: boolean; stopRequested: boolean; discarded: boolean };
+type Session = {
+  stream: StreamLike | undefined;
+  recorder: RecorderLike | undefined;
+  chunks: Blob[];
+  timer: unknown;
+  controller: AbortController;
+  released: boolean;
+  stopRequested: boolean;
+  discarded: boolean;
+};
 
 export const createPushToTalk = (deps: PushToTalkDeps): PushToTalk => {
   const listeners = new Set<() => void>();
   let state: PushToTalkState = { phase: "idle", problem: undefined };
   let session: Session | undefined;
   const setTimer = deps.setTimer ?? ((run: () => void, ms: number): unknown => setTimeout(run, ms));
-  const clearTimer = deps.clearTimer ?? ((timer: unknown): void => clearTimeout(timer as ReturnType<typeof setTimeout>));
+  const clearTimer =
+    deps.clearTimer ?? ((timer: unknown): void => clearTimeout(timer as ReturnType<typeof setTimeout>));
 
   const set = (next: PushToTalkState): void => {
     state = next;
@@ -162,7 +174,16 @@ export const createPushToTalk = (deps: PushToTalkDeps): PushToTalk => {
     getSnapshot: () => state,
     start: () => {
       if (session !== undefined) return;
-      const current: Session = { stream: undefined, recorder: undefined, chunks: [], timer: undefined, controller: new AbortController(), released: false, stopRequested: false, discarded: false };
+      const current: Session = {
+        stream: undefined,
+        recorder: undefined,
+        chunks: [],
+        timer: undefined,
+        controller: new AbortController(),
+        released: false,
+        stopRequested: false,
+        discarded: false,
+      };
       session = current;
       set({ phase: "requesting", problem: undefined });
       deps.getUserMedia().then(

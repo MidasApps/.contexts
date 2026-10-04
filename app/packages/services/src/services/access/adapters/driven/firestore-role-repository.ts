@@ -1,4 +1,4 @@
-import { IsoDateTimeSchema, RoleIdSchema, RoleSchema, type Role } from "@core/contracts";
+import { IsoDateTimeSchema, type Role, RoleIdSchema, RoleSchema } from "@core/contracts";
 import { FieldPath, type Firestore } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
@@ -33,7 +33,11 @@ export const createFirestoreRoleRepository = (deps: { firestore: Firestore }): R
       return liveOnly((tx === undefined ? await ref.get() : await tx.get(ref)).data());
     },
     list: async ({ tenantId, page }) => {
-      let query = typed().where("tenantId", "==", tenantId).where("deletedAt", "==", null).orderBy("name").orderBy(FieldPath.documentId());
+      let query = typed()
+        .where("tenantId", "==", tenantId)
+        .where("deletedAt", "==", null)
+        .orderBy("name")
+        .orderBy(FieldPath.documentId());
       if (page.after !== undefined) query = query.startAfter(...page.after);
       const snapshot = await query.limit(page.limit + 1).get();
       const fetched = snapshot.docs.flatMap((doc) => liveOnly(doc.data()) ?? []);
@@ -50,9 +54,18 @@ export const createFirestoreRoleRepository = (deps: { firestore: Firestore }): R
     update: (tx, { role, actorId }) =>
       void tx.update(
         raw().doc(role.id),
-        toFirestoreUpdate(stored, { name: role.name, description: role.description, permissions: role.permissions, updatedAt: role.updatedAt, updatedBy: actorId }),
+        toFirestoreUpdate(stored, {
+          name: role.name,
+          description: role.description,
+          permissions: role.permissions,
+          updatedAt: role.updatedAt,
+          updatedBy: actorId,
+        }),
       ),
     softDelete: (tx, { id, deletedAt, actorId }) =>
-      void tx.update(raw().doc(id), toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId })),
+      void tx.update(
+        raw().doc(id),
+        toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId }),
+      ),
   };
 };

@@ -61,12 +61,23 @@ export const UID = {
   staff: "uid-staff",
 } as const;
 
-export const PROJECT = { first: "project-1", second: "project-2", deleted: "project-deleted", otherTenant: "project-x" } as const;
+export const PROJECT = {
+  first: "project-1",
+  second: "project-2",
+  deleted: "project-deleted",
+  otherTenant: "project-x",
+} as const;
 export const UNIT = { a: "unit-a", a1: "unit-a1", b: "unit-b", deleted: "unit-deleted" } as const;
 
 const accessId = (tenantId: string, principalId: string) => `${tenantId}_${principalId}`;
 
-type Access = { orgWide?: boolean; projectIds?: string[]; unitIds?: string[]; visibleProjectIds?: string[]; isRevoked?: boolean };
+type Access = {
+  orgWide?: boolean;
+  projectIds?: string[];
+  unitIds?: string[];
+  visibleProjectIds?: string[];
+  isRevoked?: boolean;
+};
 
 const accessDoc = (tenantId: string, principalId: string, access: Access) => ({
   tenantId,
@@ -93,8 +104,18 @@ const ACCESS_DOCS = [
 
 const DELETED_AT = new Date("2026-09-01T00:00:00Z");
 
-const organization = (id: string, deleted = false) => ({ tenantId: id, name: id, status: "active", deletedAt: deleted ? DELETED_AT : null });
-const project = (tenantId: string, deleted = false) => ({ tenantId, name: "Project", status: "active", deletedAt: deleted ? DELETED_AT : null });
+const organization = (id: string, deleted = false) => ({
+  tenantId: id,
+  name: id,
+  status: "active",
+  deletedAt: deleted ? DELETED_AT : null,
+});
+const project = (tenantId: string, deleted = false) => ({
+  tenantId,
+  name: "Project",
+  status: "active",
+  deletedAt: deleted ? DELETED_AT : null,
+});
 const unit = (args: { projectId: string; ancestorIds: string[]; deleted?: boolean }) => ({
   tenantId: ORG_1,
   projectId: args.projectId,
@@ -109,7 +130,12 @@ const unit = (args: { projectId: string; ancestorIds: string[]; deleted?: boolea
 /** Documents keyed by path; server-only collections get one doc each, owned by the owner in `ORG_1`. */
 export const seededDocuments = (): Record<string, Record<string, unknown>> => ({
   [`users/${UID.owner}`]: { email: "owner@example.test", displayName: "Owner", status: "active", accessVersion: 1 },
-  [`users/${UID.projectMember}`]: { email: "member@example.test", displayName: "Member", status: "active", accessVersion: 1 },
+  [`users/${UID.projectMember}`]: {
+    email: "member@example.test",
+    displayName: "Member",
+    status: "active",
+    accessVersion: 1,
+  },
   ...Object.fromEntries(ACCESS_DOCS.map((doc) => [`access/${accessId(doc.tenantId, doc.principalId)}`, doc])),
   [`organizations/${ORG_1}`]: organization(ORG_1),
   [`organizations/${ORG_2}`]: organization(ORG_2),

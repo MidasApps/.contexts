@@ -5,9 +5,7 @@
       "configDir": "apps/functions",
       "codebase": "default",
       "runtime": "nodejs24",
-      "predeploy": [
-        "pnpm turbo run build --filter=@core/functions"
-      ]
+      "predeploy": ["pnpm turbo run build --filter=@core/functions"]
     }
   ],
   "firestore": {

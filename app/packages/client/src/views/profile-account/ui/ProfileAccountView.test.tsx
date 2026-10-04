@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, type FakeRequest } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, ok } from "#/shared/testing/fake-api.ts";
 import { buildMe } from "#/shared/testing/fixtures.ts";
 import { ProfileAccountView } from "./ProfileAccountView.tsx";
 
@@ -38,7 +38,9 @@ describe("ProfileAccountView", () => {
   });
 
   it("keeps save off until the name changes, and maps a server field error", async () => {
-    const { user, api } = renderView({ "PATCH /v1/me": apiError(400, "VALIDATION_FAILED", [{ field: "displayName", issue: "TOO_BIG" }]) });
+    const { user, api } = renderView({
+      "PATCH /v1/me": apiError(400, "VALIDATION_FAILED", [{ field: "displayName", issue: "TOO_BIG" }]),
+    });
     await screen.findByText("ana@example.com");
     expect(screen.getByRole("button", { name: "Salvar" }).matches(":disabled")).toBe(true);
     expect(api.callLines()).not.toContain("PATCH /v1/me");
@@ -54,7 +56,9 @@ describe("ProfileAccountView", () => {
     const { auth, api, container } = renderView();
     auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
     expect(await screen.findByText(/Modo suporte: este perfil é somente leitura/u)).toBeDefined();
-    await waitFor(() => expect(screen.getByRole("textbox", { name: /Nome de exibição/u }).matches(":disabled")).toBe(true));
+    await waitFor(() =>
+      expect(screen.getByRole("textbox", { name: /Nome de exibição/u }).matches(":disabled")).toBe(true),
+    );
     expect(screen.getByRole("button", { name: "Salvar" }).matches(":disabled")).toBe(true);
     expect(api.callLines()).not.toContain("PATCH /v1/me");
     await expectNoAxeViolations(container);

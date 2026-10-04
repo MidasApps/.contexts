@@ -2,5 +2,5 @@
 // states, `QueryPage`, which picks one of them (or the page) from a query, and `QuerySection` for
 // content under an existing page header.
 export { PageError, PageForbidden, PageNotFound, PageRenderError } from "./ui/PageState.tsx";
-export { QueryPage, type PageQuery, type QueryPageProps } from "./ui/QueryPage.tsx";
+export { type PageQuery, QueryPage, type QueryPageProps } from "./ui/QueryPage.tsx";
 export { QuerySection, type QuerySectionProps } from "./ui/QuerySection.tsx";

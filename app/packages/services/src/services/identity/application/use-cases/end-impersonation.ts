@@ -15,10 +15,21 @@ export type EndImpersonation = (command: {
 }) => Promise<Result<void, AccessDeniedError | ImpersonationNotFoundError>>;
 
 /** Both audit entries of an ended impersonation session (platform and tenant logs). */
-export const auditEnd = async (tx: Transaction, deps: Pick<PlatformDeps, "audit">, session: ImpersonationSession, requestId: string): Promise<void> => {
+export const auditEnd = async (
+  tx: Transaction,
+  deps: Pick<PlatformDeps, "audit">,
+  session: ImpersonationSession,
+  requestId: string,
+): Promise<void> => {
   const common = { action: "IMPERSONATION_ENDED", outcome: "success", requestId } as const;
   await deps.audit.record(
-    { log: "platform", ...common, actor: { type: "user", id: session.staffUid }, target: { type: "user", id: session.targetUid }, targetTenantId: session.tenantId },
+    {
+      log: "platform",
+      ...common,
+      actor: { type: "user", id: session.staffUid },
+      target: { type: "user", id: session.targetUid },
+      targetTenantId: session.tenantId,
+    },
     tx,
   );
   await deps.audit.record(
@@ -42,7 +53,13 @@ export const auditEnd = async (tx: Transaction, deps: Pick<PlatformDeps, "audit"
 export const makeEndImpersonation =
   (deps: PlatformDeps): EndImpersonation =>
   async ({ actor, access, sessionId, requestId }) => {
-    const allowed = await requireImpersonateRight(deps, { actor, access, targetUid: null, targetTenantId: null, requestId });
+    const allowed = await requireImpersonateRight(deps, {
+      actor,
+      access,
+      targetUid: null,
+      targetTenantId: null,
+      requestId,
+    });
     if (!allowed.ok) return allowed;
     return deps.unitOfWork.run(async (tx): Promise<Result<void, ImpersonationNotFoundError>> => {
       const session = await deps.impersonations.get(tx, sessionId);

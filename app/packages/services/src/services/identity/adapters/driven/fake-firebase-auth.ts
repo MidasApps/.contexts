@@ -46,7 +46,8 @@ export const createFakeFirebaseAuth = (): FakeFirebaseAuth => {
     },
     customTokens: { createCustomToken: (uid, claims) => Promise.resolve(`custom:${uid}:${JSON.stringify(claims)}`) },
     authUsers: {
-      getState: (uid) => Promise.resolve(states.get(uid) ?? { disabled: disabled.includes(uid), tokensValidAfter: null }),
+      getState: (uid) =>
+        Promise.resolve(states.get(uid) ?? { disabled: disabled.includes(uid), tokensValidAfter: null }),
       revokeRefreshTokens: (uid) => {
         revoked.push(uid);
         for (const [cookie, owner] of liveCookies) if (owner === uid) liveCookies.delete(cookie);

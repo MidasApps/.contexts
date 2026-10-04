@@ -2,10 +2,17 @@ import type { Organization, UpdateOrganizationInput } from "@core/contracts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { TenancyNotFoundError } from "../../domain/errors/tenancy-not-found-error.ts";
-import { changedKeys, organizationNode, recordTenancyAudit, type TenancyCommand, type TenancyDeps } from "../tenancy-deps.ts";
-import { loadAuthorizedOrganization, type LoadError, type OrganizationCommand } from "./get-organization.ts";
+import {
+  changedKeys,
+  organizationNode,
+  recordTenancyAudit,
+  type TenancyCommand,
+  type TenancyDeps,
+} from "../tenancy-deps.ts";
+import { type LoadError, loadAuthorizedOrganization, type OrganizationCommand } from "./get-organization.ts";
 
-export type UpdateOrganizationCommand = OrganizationCommand & TenancyCommand & { readonly input: UpdateOrganizationInput };
+export type UpdateOrganizationCommand = OrganizationCommand &
+  TenancyCommand & { readonly input: UpdateOrganizationInput };
 
 export type UpdateOrganization = (command: UpdateOrganizationCommand) => Promise<Result<Organization, LoadError>>;
 

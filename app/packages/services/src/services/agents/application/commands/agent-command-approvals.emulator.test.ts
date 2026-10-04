@@ -1,9 +1,23 @@
-import { type AgentApprovalRequest, OrganizationIdSchema, type PermissionDefinition, type Principal } from "@core/contracts";
+import {
+  type AgentApprovalRequest,
+  OrganizationIdSchema,
+  type PermissionDefinition,
+  type Principal,
+} from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { AUDIT_LOG_COLLECTIONS } from "../../../audit/adapters/driven/firestore-audit-log-writer.ts";
-import { createFirestoreIdempotencyStore, IDEMPOTENCY_RECORDS_COLLECTION } from "../../../shared/idempotency/firestore-idempotency-store.ts";
-import { buildEmulatorServer, clearCoreCollections, emulatorFirebase, ensureAuthUser, seedActiveUser } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import {
+  createFirestoreIdempotencyStore,
+  IDEMPOTENCY_RECORDS_COLLECTION,
+} from "../../../shared/idempotency/firestore-idempotency-store.ts";
+import {
+  buildEmulatorServer,
+  clearCoreCollections,
+  emulatorFirebase,
+  ensureAuthUser,
+  seedActiveUser,
+} from "../../../shared/testing/core-server-emulator.fixture.ts";
 import { defineAgentCommandExecutor } from "./agent-command-executor.ts";
 import { registerAgentCommandApprovals } from "./register-agent-command-approvals.ts";
 
@@ -19,7 +33,11 @@ const ARCHIVE_NOTE: PermissionDefinition = {
 
 const firebase = emulatorFirebase();
 const { firestore, auth } = firebase;
-const harness = buildEmulatorServer({ firebase, uids: ["agc-owner", "agc-admin", "agc-member"], modules: [{ id: "sample", permissions: [ARCHIVE_NOTE] }] });
+const harness = buildEmulatorServer({
+  firebase,
+  uids: ["agc-owner", "agc-admin", "agc-member"],
+  modules: [{ id: "sample", permissions: [ARCHIVE_NOTE] }],
+});
 const executed: { principal: Principal; input: unknown }[] = [];
 const commands = registerAgentCommandApprovals({
   approvals: harness.server.approvals,
@@ -86,37 +104,71 @@ describe("agent-command approvals (emulator)", () => {
     const action = actionFor("run-approved");
     const requested = await harness.server.approvals.requestApproval({
       principal: MEMBER,
-      input: { node: { level: "organization", tenantId }, permission: "sample.note.archive", action: { kind: "agent-command", input: action, summary: action.summary } },
+      input: {
+        node: { level: "organization", tenantId },
+        permission: "sample.note.archive",
+        action: { kind: "agent-command", input: action, summary: action.summary },
+      },
       requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
     });
     if (!requested.ok) throw new Error(`request refused: ${requested.error.code}`);
     expect(executed).toEqual([]);
 
-    const approved = await harness.call("access.approveApprovalRequest", { method: "POST", path: `/v1/approval-requests/${requested.data.id}/approve`, as: "agc-admin", body: {} });
+    const approved = await harness.call("access.approveApprovalRequest", {
+      method: "POST",
+      path: `/v1/approval-requests/${requested.data.id}/approve`,
+      as: "agc-admin",
+      body: {},
+    });
     expect(approved.status).toBe(200);
     expect(((await approved.json()) as { data: { status: string } }).data.status).toBe("executed");
     expect(executed).toEqual([{ principal: MEMBER, input: { noteId: "Xk2mQ9vLr3TnB7pWc1aZ" } }]);
 
     // The stored result makes the same run:call key a replay, never a second execution.
-    const replay = await commands.runOnce({ tenantId, commandId: "sample.ArchiveNoteCommand", idempotencyKey: action.idempotencyKey, input: action.input, run: () => Promise.reject(new Error("must not run")) });
+    const replay = await commands.runOnce({
+      tenantId,
+      commandId: "sample.ArchiveNoteCommand",
+      idempotencyKey: action.idempotencyKey,
+      input: action.input,
+      run: () => Promise.reject(new Error("must not run")),
+    });
     expect(replay.replayed).toBe(true);
-    expect((await firestore.collection(IDEMPOTENCY_RECORDS_COLLECTION).get()).docs.some((doc) => doc.get("state") === "done")).toBe(true);
-    const actions = (await firestore.collection(AUDIT_LOG_COLLECTIONS.tenant).where("target.id", "==", requested.data.id).get()).docs.map((doc) => doc.get("action") as string);
+    expect(
+      (await firestore.collection(IDEMPOTENCY_RECORDS_COLLECTION).get()).docs.some(
+        (doc) => doc.get("state") === "done",
+      ),
+    ).toBe(true);
+    const actions = (
+      await firestore.collection(AUDIT_LOG_COLLECTIONS.tenant).where("target.id", "==", requested.data.id).get()
+    ).docs.map((doc) => doc.get("action") as string);
     expect(actions.sort()).toEqual(["APPROVAL_APPROVED", "APPROVAL_EXECUTED", "APPROVAL_REQUESTED"]);
   });
 
-  it("records APPROVAL_FAILED with the handler code when the stored action names another requester", { timeout: 60_000 }, async () => {
+  it("records APPROVAL_FAILED with the handler code when the stored action names another requester", {
+    timeout: 60_000,
+  }, async () => {
     const action = { ...actionFor("run-forged"), requestedBy: "agc-admin" } as AgentApprovalRequest;
     const requested = await harness.server.approvals.requestApproval({
       principal: MEMBER,
-      input: { node: { level: "organization", tenantId }, permission: "sample.note.archive", action: { kind: "agent-command", input: action, summary: action.summary } },
+      input: {
+        node: { level: "organization", tenantId },
+        permission: "sample.note.archive",
+        action: { kind: "agent-command", input: action, summary: action.summary },
+      },
       requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
     });
     if (!requested.ok) throw new Error(`request refused: ${requested.error.code}`);
-    const approved = await harness.call("access.approveApprovalRequest", { method: "POST", path: `/v1/approval-requests/${requested.data.id}/approve`, as: "agc-owner", body: {} });
+    const approved = await harness.call("access.approveApprovalRequest", {
+      method: "POST",
+      path: `/v1/approval-requests/${requested.data.id}/approve`,
+      as: "agc-owner",
+      body: {},
+    });
     expect(((await approved.json()) as { data: { status: string } }).data.status).toBe("failed");
     expect(executed).toEqual([]);
-    const failed = (await firestore.collection(AUDIT_LOG_COLLECTIONS.tenant).where("action", "==", "APPROVAL_FAILED").get()).docs.map((doc) => doc.get("metadata.errorCode") as string);
+    const failed = (
+      await firestore.collection(AUDIT_LOG_COLLECTIONS.tenant).where("action", "==", "APPROVAL_FAILED").get()
+    ).docs.map((doc) => doc.get("metadata.errorCode") as string);
     expect(failed).toEqual(["REQUESTER_MISMATCH"]);
   });
 });

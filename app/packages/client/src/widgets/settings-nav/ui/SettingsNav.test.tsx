@@ -15,11 +15,18 @@ describe("settings and profile navigation", () => {
           <p>Conteúdo</p>
         </SettingsPageFrame>
       </main>,
-      { path: `/o/${IDS.organization}/settings/members`, routes: shellRoutes(["core.organization.read", "core.member.read"]) },
+      {
+        path: `/o/${IDS.organization}/settings/members`,
+        routes: shellRoutes(["core.organization.read", "core.member.read"]),
+      },
     );
     const nav = await screen.findByRole("navigation", { name: "Seções das configurações" });
     await within(nav).findByRole("link", { name: "Membros" });
-    expect(within(nav).getAllByRole("link").map((link) => link.textContent)).toEqual(["Geral", "Membros"]);
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Geral", "Membros"]);
     expect(within(nav).getByRole("link", { name: "Membros" }).getAttribute("aria-current")).toBe("page");
     await expectNoAxeViolations(container);
   });
@@ -56,22 +63,46 @@ describe("settings and profile navigation", () => {
       </main>,
       {
         path: `/o/${IDS.organization}/settings/members`,
-        routes: shellRoutes(["core.organization.read", "core.member.read", "core.api-key.read", "core.agent-settings.read", "core.trace.read"]),
+        routes: shellRoutes([
+          "core.organization.read",
+          "core.member.read",
+          "core.api-key.read",
+          "core.agent-settings.read",
+          "core.trace.read",
+        ]),
       },
     );
     const nav = await screen.findByRole("navigation", { name: "Seções das configurações" });
     const organization = await within(nav).findByRole("list", { name: "Organização" });
-    expect(within(organization).getAllByRole("link").map((link) => link.textContent)).toEqual(["Geral", "Membros"]);
-    expect(within(within(nav).getByRole("list", { name: "Acesso" })).getAllByRole("link").map((link) => link.textContent)).toEqual(["Chaves de API"]);
-    expect(within(within(nav).getByRole("list", { name: "IA" })).getAllByRole("link").map((link) => link.textContent)).toEqual(["Agentes", "Habilidades"]);
-    expect(within(within(nav).getByRole("list", { name: "Operação" })).getAllByRole("link").map((link) => link.textContent)).toEqual(["Rastros"]);
+    expect(
+      within(organization)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Geral", "Membros"]);
+    expect(
+      within(within(nav).getByRole("list", { name: "Acesso" }))
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Chaves de API"]);
+    expect(
+      within(within(nav).getByRole("list", { name: "IA" }))
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Agentes", "Habilidades"]);
+    expect(
+      within(within(nav).getByRole("list", { name: "Operação" }))
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Rastros"]);
     await expectNoAxeViolations(container);
     // Seventeen pills do not fit a phone: a picker of the same sections, grouped, opens the chosen one.
     const picker = within(nav).getByRole("combobox", { name: "Seção" });
     expect(picker.textContent).toContain("Membros");
     await user.click(picker);
     const groups = within(screen.getByRole("listbox")).getAllByRole("group");
-    expect(groups.map((group) => document.getElementById(group.getAttribute("aria-labelledby") ?? "")?.textContent)).toEqual(["Organização", "Acesso", "IA", "Operação"]);
+    expect(
+      groups.map((group) => document.getElementById(group.getAttribute("aria-labelledby") ?? "")?.textContent),
+    ).toEqual(["Organização", "Acesso", "IA", "Operação"]);
     await user.click(screen.getByRole("option", { name: "Rastros" }));
     expect(router.current()).toBe(`/o/${IDS.organization}/settings/traces`);
   });
@@ -114,13 +145,31 @@ describe("settings and profile navigation", () => {
       {
         path: "/profile/account",
         navigation: [
-          { id: "sample.security-shortcut", slot: "user-menu", labelKey: "shell.nav.profile.security", icon: "shield-check", order: 5, target: { kind: "profile", section: "security" } },
-          { id: "sample.admin-shortcut", slot: "user-menu", labelKey: "shell.nav.admin.organizations", icon: "building", order: 6, target: { kind: "admin", rest: "organizations" } },
+          {
+            id: "sample.security-shortcut",
+            slot: "user-menu",
+            labelKey: "shell.nav.profile.security",
+            icon: "shield-check",
+            order: 5,
+            target: { kind: "profile", section: "security" },
+          },
+          {
+            id: "sample.admin-shortcut",
+            slot: "user-menu",
+            labelKey: "shell.nav.admin.organizations",
+            icon: "building",
+            order: 6,
+            target: { kind: "admin", rest: "organizations" },
+          },
         ],
       },
     );
     const nav = await screen.findByRole("navigation", { name: "Seções do perfil" });
-    expect(within(nav).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+    expect(
+      within(nav)
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href")),
+    ).toEqual([
       "/profile/account",
       "/profile/security",
       "/profile/preferences",

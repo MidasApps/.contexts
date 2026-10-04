@@ -14,7 +14,11 @@ const manifestOf = (id: string): ModuleManifest =>
 
 describe("client module contracts", () => {
   it("exposes the contracts of every module through the registry", () => {
-    const withContracts = defineClientModule({ manifest: manifestOf("testnotes"), pages: {}, contracts: [CreateTestNoteContract] });
+    const withContracts = defineClientModule({
+      manifest: manifestOf("testnotes"),
+      pages: {},
+      contracts: [CreateTestNoteContract],
+    });
     const without = defineClientModule({ manifest: manifestOf("plain"), pages: {} });
     expect(
       createModuleRegistry([withContracts, without])
@@ -24,6 +28,8 @@ describe("client module contracts", () => {
   });
 
   it("rejects a contract of another namespace", () => {
-    expect(() => defineClientModule({ manifest: manifestOf("other"), pages: {}, contracts: [CreateTestNoteContract] })).toThrow(ClientModuleError);
+    expect(() =>
+      defineClientModule({ manifest: manifestOf("other"), pages: {}, contracts: [CreateTestNoteContract] }),
+    ).toThrow(ClientModuleError);
   });
 });

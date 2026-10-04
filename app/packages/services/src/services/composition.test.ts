@@ -1,10 +1,10 @@
 import type { PermissionDefinition } from "@core/contracts";
 import { describe, expect, it } from "vitest";
+import { createInMemoryAccessStore } from "./access/adapters/driven/in-memory-access-store.ts";
+import { createCoreServer } from "./composition.ts";
 import { fixedClock } from "./shared/clock/clock.ts";
 import type { FirebaseAdmin } from "./shared/firebase/firebase-admin.ts";
 import { createLogger } from "./shared/observability/logger.ts";
-import { createInMemoryAccessStore } from "./access/adapters/driven/in-memory-access-store.ts";
-import { createCoreServer } from "./composition.ts";
 
 // Adapters only keep references at construction; nothing here reaches Firebase.
 const firebase = { app: {}, auth: {}, firestore: {} } as unknown as FirebaseAdmin;
@@ -24,7 +24,13 @@ const build = () =>
     firebase,
     logger,
     clock: fixedClock("2026-09-29T12:00:00.000Z"),
-    modules: [{ id: "sample", permissions: [samplePermission], unitTypes: [{ id: "sample.site", labelKey: "sample.unitTypes.site", allowedParents: ["project"] }] }],
+    modules: [
+      {
+        id: "sample",
+        permissions: [samplePermission],
+        unitTypes: [{ id: "sample.site", labelKey: "sample.unitTypes.site", allowedParents: ["project"] }],
+      },
+    ],
   });
 
 describe("createCoreServer", () => {
@@ -36,7 +42,14 @@ describe("createCoreServer", () => {
 
   it("registers the handlers of the verticals built so far", () => {
     expect(Object.keys(build().routes)).toEqual(
-      expect.arrayContaining(["access.listPermissions", "access.listRoles", "access.createRole", "access.getRole", "access.updateRole", "access.deleteRole"]),
+      expect.arrayContaining([
+        "access.listPermissions",
+        "access.listRoles",
+        "access.createRole",
+        "access.getRole",
+        "access.updateRole",
+        "access.deleteRole",
+      ]),
     );
     expect(Object.keys(build().routes)).toEqual(
       expect.arrayContaining([
@@ -85,7 +98,11 @@ describe("createCoreServer", () => {
   });
 
   it("registers the core unit type and the unit types of the installed modules", () => {
-    expect(build().tenancy.unitTypes.list().map((type) => type.id)).toEqual(["core.unit", "sample.site"]);
+    expect(
+      build()
+        .tenancy.unitTypes.list()
+        .map((type) => type.id),
+    ).toEqual(["core.unit", "sample.site"]);
   });
 
   it("refuses API keys until their authenticator is wired, without touching Firebase", async () => {
@@ -96,7 +113,12 @@ describe("createCoreServer", () => {
     const store = createInMemoryAccessStore();
     store.putOrganization({ id: "org-a" });
     store.putUser("u1");
-    const server = createCoreServer({ env: { API_KEY_PREFIX: "core" }, firebase, logger, adapters: { accessReaders: store } });
+    const server = createCoreServer({
+      env: { API_KEY_PREFIX: "core" },
+      firebase,
+      logger,
+      adapters: { accessReaders: store },
+    });
     const decision = await server.access.forRequest().authorize({
       principal: { type: "user", uid: "u1", mfa: false } as never,
       permission: "core.project.read",

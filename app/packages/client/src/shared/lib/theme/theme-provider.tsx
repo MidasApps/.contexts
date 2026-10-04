@@ -14,7 +14,15 @@ export type ThemePreference = (typeof THEME_PREFERENCES)[number];
  * server-rendered HTML; a client-rendered host (desktop) passes `prePaintScript={false}`, which marks
  * it as a data block so React does not warn that a client-rendered script never runs.
  */
-export function ThemeProvider({ children, nonce, prePaintScript = true }: { children: ReactNode; nonce?: string | undefined; prePaintScript?: boolean }) {
+export function ThemeProvider({
+  children,
+  nonce,
+  prePaintScript = true,
+}: {
+  children: ReactNode;
+  nonce?: string | undefined;
+  prePaintScript?: boolean;
+}) {
   return (
     <NextThemesProvider
       attribute="data-theme"

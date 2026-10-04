@@ -2,7 +2,11 @@ import type { Route } from "#/shared/lib/router/route-paths.ts";
 import type { NavTarget } from "./shell-types.ts";
 
 /** The current place in the tree, from the URL (`/o/:organizationId/p/:projectId?unit=`). */
-export type NavContext = { organizationId?: string | undefined; projectId?: string | undefined; unitId?: string | undefined };
+export type NavContext = {
+  organizationId?: string | undefined;
+  projectId?: string | undefined;
+  unitId?: string | undefined;
+};
 
 /**
  * The route a navigation target leads to from the current context, or `null` when the context
@@ -22,9 +26,13 @@ export const navItemRoute = (target: NavTarget, context: NavContext): Route | nu
     case "settings-module":
       return organizationId === undefined ? null : { id: "settings-module", organizationId, moduleId: target.moduleId };
     case "project-home":
-      return organizationId === undefined || projectId === undefined ? null : { id: "project", organizationId, projectId, unit: unitId };
+      return organizationId === undefined || projectId === undefined
+        ? null
+        : { id: "project", organizationId, projectId, unit: unitId };
     case "chat":
-      return organizationId === undefined || projectId === undefined ? null : { id: "chat", organizationId, projectId, unit: unitId };
+      return organizationId === undefined || projectId === undefined
+        ? null
+        : { id: "chat", organizationId, projectId, unit: unitId };
     case "module":
       return organizationId === undefined || projectId === undefined
         ? null

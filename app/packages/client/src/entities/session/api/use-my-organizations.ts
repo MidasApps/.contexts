@@ -12,7 +12,8 @@ import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 export const myOrganizationsQuery = (callEndpoint: CallEndpoint, limit = COLLECT_PAGE_LIMIT) =>
   cursorListQuery({
     queryKey: queryKeys.myOrganizations({ limit }),
-    fetchPage: async (cursor, signal) => callEndpoint(listMyOrganizationsEndpoint, { query: pageQuery(cursor, limit), signal }),
+    fetchPage: async (cursor, signal) =>
+      callEndpoint(listMyOrganizationsEndpoint, { query: pageQuery(cursor, limit), signal }),
   });
 
 /**

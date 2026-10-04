@@ -18,7 +18,9 @@ describe("cn", () => {
 
   it("knows the design-system shadow and radius values", () => {
     expect(cn("shadow-popover rounded-2xs", "shadow-modal rounded-sm")).toBe("shadow-modal rounded-sm");
-    expect(cn("text-xs text-muted-foreground", "text-muted-foreground-strong")).toBe("text-xs text-muted-foreground-strong");
+    expect(cn("text-xs text-muted-foreground", "text-muted-foreground-strong")).toBe(
+      "text-xs text-muted-foreground-strong",
+    );
   });
 
   it("reads the type scale steps as font sizes, never as colors", () => {

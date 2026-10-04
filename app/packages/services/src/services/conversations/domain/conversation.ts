@@ -1,4 +1,13 @@
-import { type ChatAgentId, type Conversation, type ConversationId, type ConversationPatch, MAX_TITLE_CHARS, type ProjectId, type TenantId, type UserId } from "@core/contracts";
+import {
+  type ChatAgentId,
+  type Conversation,
+  type ConversationId,
+  type ConversationPatch,
+  MAX_TITLE_CHARS,
+  type ProjectId,
+  type TenantId,
+  type UserId,
+} from "@core/contracts";
 import { buildSearchTokens } from "./search-tokens.ts";
 
 /**
@@ -42,16 +51,23 @@ export const createConversation = (input: NewConversation, now: Date): Conversat
 };
 
 /** Owner-only in v1: another member, or a deleted conversation, reads as missing. */
-export const isVisibleTo = (conversation: Conversation, ownerId: string): boolean => conversation.ownerId === ownerId && conversation.deletedAt === null;
+export const isVisibleTo = (conversation: Conversation, ownerId: string): boolean =>
+  conversation.ownerId === ownerId && conversation.deletedAt === null;
 
 /** The run streaming now, unless it started more than 15 minutes ago (its stream is gone). */
 export const liveActiveRunId = (conversation: Conversation, now: Date): string | null => {
   if (conversation.activeRunId === null || conversation.activeStreamStartedAt === null) return null;
-  return now.getTime() - Date.parse(conversation.activeStreamStartedAt) < ACTIVE_RUN_TTL_MS ? conversation.activeRunId : null;
+  return now.getTime() - Date.parse(conversation.activeStreamStartedAt) < ACTIVE_RUN_TTL_MS
+    ? conversation.activeRunId
+    : null;
 };
 
 /** Fields a patch changes (rename sets `titleSource: user`; archive stamps `archivedAt`). */
-export const applyConversationPatch = (conversation: Conversation, patch: ConversationPatch, now: Date): Conversation => {
+export const applyConversationPatch = (
+  conversation: Conversation,
+  patch: ConversationPatch,
+  now: Date,
+): Conversation => {
   const at = now.toISOString();
   const title = patch.title ?? conversation.title;
   return {
@@ -59,7 +75,8 @@ export const applyConversationPatch = (conversation: Conversation, patch: Conver
     title,
     titleSource: patch.title === undefined ? conversation.titleSource : "user",
     pinned: patch.pinned ?? conversation.pinned,
-    archivedAt: patch.archived === undefined ? conversation.archivedAt : patch.archived ? (conversation.archivedAt ?? at) : null,
+    archivedAt:
+      patch.archived === undefined ? conversation.archivedAt : patch.archived ? (conversation.archivedAt ?? at) : null,
     searchTokens: buildSearchTokens({ title, summary: conversation.summary }),
     updatedAt: at,
   };
@@ -82,13 +99,24 @@ export type RunEndFacts = { readonly runId: string; readonly endedAt: string; re
  */
 export const endRunOf = (current: Conversation, end: RunEndFacts): Conversation => {
   const ownsRun = current.activeRunId === end.runId;
-  const copied = current.titleSource === "auto" && end.title !== undefined && end.title.trim() !== "" ? end.title.trim().slice(0, MAX_TITLE_CHARS) : current.title;
+  const copied =
+    current.titleSource === "auto" && end.title !== undefined && end.title.trim() !== ""
+      ? end.title.trim().slice(0, MAX_TITLE_CHARS)
+      : current.title;
   return {
     ...current,
     // Only the end that clears the run counts the turn (a stop and the stream's close both end it).
-    ...(ownsRun ? { activeRunId: null, activeStreamStartedAt: null, messageCount: current.messageCount + MESSAGES_PER_TURN, lastMessageAt: end.endedAt } : {}),
+    ...(ownsRun
+      ? {
+          activeRunId: null,
+          activeStreamStartedAt: null,
+          messageCount: current.messageCount + MESSAGES_PER_TURN,
+          lastMessageAt: end.endedAt,
+        }
+      : {}),
     title: copied,
-    searchTokens: copied === current.title ? current.searchTokens : buildSearchTokens({ title: copied, summary: current.summary }),
+    searchTokens:
+      copied === current.title ? current.searchTokens : buildSearchTokens({ title: copied, summary: current.summary }),
     updatedAt: end.endedAt,
   };
 };

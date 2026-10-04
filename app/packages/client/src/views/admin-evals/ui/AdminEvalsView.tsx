@@ -4,7 +4,7 @@ import { useTranslations } from "use-intl";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/molecules/Tabs/Tabs.tsx";
 import { AdminPageFrame } from "#/widgets/admin-nav/index.ts";
-import { EVAL_TABS, useEvalsUrl, type EvalTab } from "../model/use-evals-url.ts";
+import { EVAL_TABS, type EvalTab, useEvalsUrl } from "../model/use-evals-url.ts";
 import { DatasetsPanel } from "./DatasetsPanel.tsx";
 import { ExperimentsPanel } from "./ExperimentsPanel.tsx";
 

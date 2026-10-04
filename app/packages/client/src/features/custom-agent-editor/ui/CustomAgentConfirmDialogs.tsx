@@ -56,7 +56,11 @@ export function ToggleCustomAgentDialog({ organizationId, agent, onOpenChange }:
   const action = useConfirmedAction(
     async () => {
       if (agent === null) return;
-      await callEndpoint(updateCustomAgentEndpoint, { params: { agentId: agent.id }, query: { organizationId }, body: { enabled: !disabling } });
+      await callEndpoint(updateCustomAgentEndpoint, {
+        params: { agentId: agent.id },
+        query: { organizationId },
+        body: { enabled: !disabling },
+      });
       await invalidateAgentData(queryClient, organizationId);
     },
     () => notify.success(t(disabling ? "doneDisabled" : "doneEnabled", { name: agent?.name ?? "" })),

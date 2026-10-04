@@ -3,7 +3,7 @@
 import type { UsageSummary } from "@core/contracts";
 import { useId, useMemo } from "react";
 import { useFormatter, useTranslations } from "use-intl";
-import { budgetUse, type BudgetLevel } from "#/entities/usage/index.ts";
+import { type BudgetLevel, budgetUse } from "#/entities/usage/index.ts";
 import { useFormatMicroUsd } from "#/shared/lib/format/use-format-micro-usd.ts";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
@@ -25,7 +25,11 @@ function Totals({ summary }: { summary: UsageSummary }) {
   const { totals } = summary;
   const items = [
     { key: "cost", value: formatCost(totals.costMicroUsd), hint: t("costHint") },
-    { key: "tokens", value: format.number(totals.inputTokens + totals.outputTokens), hint: t("tokensHint", { input: format.number(totals.inputTokens), output: format.number(totals.outputTokens) }) },
+    {
+      key: "tokens",
+      value: format.number(totals.inputTokens + totals.outputTokens),
+      hint: t("tokensHint", { input: format.number(totals.inputTokens), output: format.number(totals.outputTokens) }),
+    },
     { key: "calls", value: format.number(totals.calls), hint: t("callsHint") },
     { key: "unpriced", value: format.number(totals.unpricedCalls), hint: t("unpricedHint") },
   ] as const;
@@ -47,7 +51,21 @@ function Totals({ summary }: { summary: UsageSummary }) {
   );
 }
 
-function CapRow({ label, used, cap, usedText, capText, threshold }: { label: string; used: number; cap: number; usedText: string; capText: string; threshold: number }) {
+function CapRow({
+  label,
+  used,
+  cap,
+  usedText,
+  capText,
+  threshold,
+}: {
+  label: string;
+  used: number;
+  cap: number;
+  usedText: string;
+  capText: string;
+  threshold: number;
+}) {
   const t = useTranslations("settings.usage.budget");
   const format = useFormatter();
   const labelId = useId();
@@ -73,7 +91,13 @@ function CapRow({ label, used, cap, usedText, capText, threshold }: { label: str
         <div className={`h-full ${BAR_TONES[level]}`} style={{ width: `${String(percent)}%` }} />
       </div>
       <p className="font-mono text-xs text-muted-foreground tabular-nums">
-        {ratio === null ? t("useOfCap", { used: usedText, cap: capText }) : t("useOfCapWithPercent", { used: usedText, cap: capText, percent: format.number(ratio, { style: "percent", maximumFractionDigits: 0 }) })}
+        {ratio === null
+          ? t("useOfCap", { used: usedText, cap: capText })
+          : t("useOfCapWithPercent", {
+              used: usedText,
+              cap: capText,
+              percent: format.number(ratio, { style: "percent", maximumFractionDigits: 0 }),
+            })}
       </p>
     </li>
   );
@@ -86,10 +110,16 @@ function Budget({ summary }: { summary: UsageSummary }) {
   const { totals, budget } = summary;
   const tokens = totals.inputTokens + totals.outputTokens;
   const threshold = budget.alertThresholdPercent;
-  const levels = [budgetUse(totals.costMicroUsd, budget.monthlyMicroUsd, threshold).level, budgetUse(tokens, budget.monthlyTokens, threshold).level];
+  const levels = [
+    budgetUse(totals.costMicroUsd, budget.monthlyMicroUsd, threshold).level,
+    budgetUse(tokens, budget.monthlyTokens, threshold).level,
+  ];
   const worst: BudgetLevel = levels.includes("over") ? "over" : levels.includes("alert") ? "alert" : "ok";
   return (
-    <section aria-labelledby="usage-budget-title" className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 sm:p-5">
+    <section
+      aria-labelledby="usage-budget-title"
+      className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 sm:p-5"
+    >
       <div className="flex flex-col gap-1">
         <h2 id="usage-budget-title" className="text-title font-semibold">
           {t("title")}
@@ -103,8 +133,22 @@ function Budget({ summary }: { summary: UsageSummary }) {
         </Alert>
       )}
       <ul className="flex flex-col gap-4">
-        <CapRow label={t("spend")} used={totals.costMicroUsd} cap={budget.monthlyMicroUsd} usedText={formatCost(totals.costMicroUsd)} capText={formatCost(budget.monthlyMicroUsd)} threshold={threshold} />
-        <CapRow label={t("tokens")} used={tokens} cap={budget.monthlyTokens} usedText={format.number(tokens)} capText={format.number(budget.monthlyTokens)} threshold={threshold} />
+        <CapRow
+          label={t("spend")}
+          used={totals.costMicroUsd}
+          cap={budget.monthlyMicroUsd}
+          usedText={formatCost(totals.costMicroUsd)}
+          capText={formatCost(budget.monthlyMicroUsd)}
+          threshold={threshold}
+        />
+        <CapRow
+          label={t("tokens")}
+          used={tokens}
+          cap={budget.monthlyTokens}
+          usedText={format.number(tokens)}
+          capText={format.number(budget.monthlyTokens)}
+          threshold={threshold}
+        />
       </ul>
     </section>
   );
@@ -116,12 +160,36 @@ function Models({ summary }: { summary: UsageSummary }) {
   const formatCost = useFormatMicroUsd();
   const columns = useMemo(
     () => [
-      column.display({ id: "model", header: () => t("columns.model"), cell: ({ row }) => <span className="font-medium">{row.original.model}</span> }),
+      column.display({
+        id: "model",
+        header: () => t("columns.model"),
+        cell: ({ row }) => <span className="font-medium">{row.original.model}</span>,
+      }),
       column.accessor("provider", { header: () => t("columns.provider") }),
-      column.display({ id: "calls", header: () => t("columns.calls"), meta: { numeric: true }, cell: ({ row }) => format.number(row.original.totals.calls) }),
-      column.display({ id: "input", header: () => t("columns.inputTokens"), meta: { numeric: true }, cell: ({ row }) => format.number(row.original.totals.inputTokens) }),
-      column.display({ id: "output", header: () => t("columns.outputTokens"), meta: { numeric: true }, cell: ({ row }) => format.number(row.original.totals.outputTokens) }),
-      column.display({ id: "cost", header: () => t("columns.cost"), meta: { numeric: true }, cell: ({ row }) => formatCost(row.original.totals.costMicroUsd) }),
+      column.display({
+        id: "calls",
+        header: () => t("columns.calls"),
+        meta: { numeric: true },
+        cell: ({ row }) => format.number(row.original.totals.calls),
+      }),
+      column.display({
+        id: "input",
+        header: () => t("columns.inputTokens"),
+        meta: { numeric: true },
+        cell: ({ row }) => format.number(row.original.totals.inputTokens),
+      }),
+      column.display({
+        id: "output",
+        header: () => t("columns.outputTokens"),
+        meta: { numeric: true },
+        cell: ({ row }) => format.number(row.original.totals.outputTokens),
+      }),
+      column.display({
+        id: "cost",
+        header: () => t("columns.cost"),
+        meta: { numeric: true },
+        cell: ({ row }) => formatCost(row.original.totals.costMicroUsd),
+      }),
     ],
     [format, formatCost, t],
   );
@@ -141,10 +209,20 @@ function Models({ summary }: { summary: UsageSummary }) {
           <div className="flex flex-col gap-1">
             <span className="font-medium">{row.model}</span>
             <span className="text-xs text-muted-foreground">{row.provider}</span>
-            <span className="font-mono text-xs tabular-nums">{t("cardMeta", { calls: row.totals.calls, cost: formatCost(row.totals.costMicroUsd) })}</span>
+            <span className="font-mono text-xs tabular-nums">
+              {t("cardMeta", { calls: row.totals.calls, cost: formatCost(row.totals.costMicroUsd) })}
+            </span>
           </div>
         )}
-        empty={<EmptyState frame="plain" headingLevel={3} icon="chart" title={t("emptyTitle")} description={t("emptyDescription")} />}
+        empty={
+          <EmptyState
+            frame="plain"
+            headingLevel={3}
+            icon="chart"
+            title={t("emptyTitle")}
+            description={t("emptyDescription")}
+          />
+        }
       />
     </section>
   );
@@ -155,7 +233,13 @@ function Models({ summary }: { summary: UsageSummary }) {
  * breakdowns per model, day, agent and user.
  * @param memberName a member's display name by uid, `undefined` when unknown (the uid is shown).
  */
-export function UsageSummaryPanel({ summary, memberName }: { summary: UsageSummary; memberName: (uid: string | null) => string | undefined }) {
+export function UsageSummaryPanel({
+  summary,
+  memberName,
+}: {
+  summary: UsageSummary;
+  memberName: (uid: string | null) => string | undefined;
+}) {
   return (
     <div className="flex flex-col gap-6">
       <Totals summary={summary} />

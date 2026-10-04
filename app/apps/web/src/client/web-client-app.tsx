@@ -1,11 +1,17 @@
 "use client";
 
-import { createClientApp, type CreatedClientApp } from "@core/client/app-shell";
+import { type CreatedClientApp, createClientApp } from "@core/client/app-shell";
 import { createFirebaseAuthClient } from "@core/client/shared/lib/auth";
 import { CHAT_SHELL_SLOTS } from "@core/client/widgets/chat-panel";
 import type { SupportedLocale } from "@core/i18n";
-import { useState, type ReactNode } from "react";
-import { createSession, enterImpersonation, exchangeSession, leaveImpersonation, signOut } from "@/app/[locale]/(auth)/actions";
+import { type ReactNode, useState } from "react";
+import {
+  createSession,
+  enterImpersonation,
+  exchangeSession,
+  leaveImpersonation,
+  signOut,
+} from "@/app/[locale]/(auth)/actions";
 import { toWebClientConfig, WEB_PUBLIC_ENV } from "./client-config";
 import { WEB_CLIENT_MODULES } from "./modules";
 import { createServerRenderAuth } from "./server-render-auth";
@@ -40,7 +46,13 @@ const createWebClient = (locale: SupportedLocale): WebClient => {
     adapters: {
       auth: isBrowser() ? createFirebaseAuthClient(config) : createServerRenderAuth(),
       router,
-      sessionBridge: createWebSessionBridge({ createSession, exchangeSession, signOut, enterImpersonation, leaveImpersonation }),
+      sessionBridge: createWebSessionBridge({
+        createSession,
+        exchangeSession,
+        signOut,
+        enterImpersonation,
+        leaveImpersonation,
+      }),
       platform: { kind: "web", apiBaseUrl: config.apiBaseUrl },
       reportError: createWebErrorReporter({ appEnv: config.appEnv, sink: writeToConsole }),
     },

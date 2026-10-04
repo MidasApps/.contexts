@@ -8,14 +8,21 @@ import { chatTurn, expect, FAILED_REQUEST, test } from "./sp5-test.ts";
 /** Today's date as the `<input type="date">` value, in the browser's zone (America/Sao_Paulo). */
 const today = (): string => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
 
-
 test.describe("after a chat turn of the organization", () => {
-  test("traces lists the turn for the organization and today, and opens its span tree", async ({ staffPage, ownerApi, sp5Org }) => {
+  test("traces lists the turn for the organization and today, and opens its span tree", async ({
+    staffPage,
+    ownerApi,
+    sp5Org,
+  }) => {
     test.setTimeout(180_000);
     await chatTurn(ownerApi, sp5Org, "Olá! Pode me ajudar com uma dúvida?");
     await staffPage.goto("admin/traces");
     const filters = staffPage.getByRole("search", { name: "Filtrar traces" });
-    await chooseOrganization(staffPage, filters.getByRole("combobox", { name: "Organização", exact: true }), sp5Org.name);
+    await chooseOrganization(
+      staffPage,
+      filters.getByRole("combobox", { name: "Organização", exact: true }),
+      sp5Org.name,
+    );
     await filters.getByRole("textbox", { name: "De" }).fill(today());
     await filters.getByRole("textbox", { name: "Até" }).fill(today());
     await filters.getByRole("button", { name: "Filtrar" }).click();
@@ -48,10 +55,20 @@ test.describe("after a chat turn of the organization", () => {
     const spans = staffPage.getByRole("list", { name: /^\d+ spans$/ });
     const root = spans.getByRole("listitem").first();
     await expect(root).toContainText("agent_run");
-    await expect(root.getByRole("button", { name: "Recolher os spans de agent run: 'assistant-chat'" })).toHaveAttribute("aria-expanded", "true");
+    await expect(
+      root.getByRole("button", { name: "Recolher os spans de agent run: 'assistant-chat'" }),
+    ).toHaveAttribute("aria-expanded", "true");
     // Model spans carry their tokens.
-    await expect(spans.getByRole("definition").filter({ hasText: /^[1-9][\d.]* de entrada · \d[\d.]* de saída$/ }).first()).toBeVisible();
-    await expect(staffPage.getByRole("link", { name: "Ver logs deste trace" })).toHaveAttribute("href", /\/admin\/logs\?traceId=[0-9a-f]{32}$/);
+    await expect(
+      spans
+        .getByRole("definition")
+        .filter({ hasText: /^[1-9][\d.]* de entrada · \d[\d.]* de saída$/ })
+        .first(),
+    ).toBeVisible();
+    await expect(staffPage.getByRole("link", { name: "Ver logs deste trace" })).toHaveAttribute(
+      "href",
+      /\/admin\/logs\?traceId=[0-9a-f]{32}$/,
+    );
   });
 
   test("traces shows the empty state for a day without runs", async ({ staffPage, sp5Org }) => {
@@ -59,7 +76,11 @@ test.describe("after a chat turn of the organization", () => {
     await expect(staffPage.getByRole("heading", { name: /^Nenhum trace/ })).toBeVisible();
   });
 
-  test("costs shows the organization's calls and tokens by day and by model", async ({ staffPage, ownerApi, sp5Org }) => {
+  test("costs shows the organization's calls and tokens by day and by model", async ({
+    staffPage,
+    ownerApi,
+    sp5Org,
+  }) => {
     test.setTimeout(120_000);
     // Its own turn, so the journey also runs alone; the ledger row is written when the turn ends.
     await chatTurn(ownerApi, sp5Org, "Quanto custa uma resposta?");
@@ -78,7 +99,12 @@ test.describe("after a chat turn of the organization", () => {
     await expect(usage.getByText(/chamadas? sem preço conhecido/)).toHaveCount(0);
     await expect(usage.getByRole("table", { name: "Custo por dia" }).getByRole("row")).not.toHaveCount(1);
     const byModel = usage.getByRole("table", { name: "Custo por modelo" });
-    await expect(byModel.getByRole("row").filter({ hasText: /fake-(chat|fast)/ }).first()).toBeVisible();
+    await expect(
+      byModel
+        .getByRole("row")
+        .filter({ hasText: /fake-(chat|fast)/ })
+        .first(),
+    ).toBeVisible();
 
     await usage.getByRole("textbox", { name: "De" }).fill("2020-01-01");
     await usage.getByRole("textbox", { name: "Até" }).fill("2020-01-02");
@@ -112,7 +138,8 @@ test.describe("logs", () => {
     await filters.getByRole("button", { name: "Aplicar" }).click();
     await expect(staffPage).toHaveURL(/admin_list_organizations_ok/);
     await expect(lines.getByRole("listitem").first()).toContainText("admin_list_organizations_ok");
-    for (const line of await lines.getByRole("listitem").all()) await expect(line).toContainText("admin_list_organizations_ok");
+    for (const line of await lines.getByRole("listitem").all())
+      await expect(line).toContainText("admin_list_organizations_ok");
 
     await filters.getByRole("textbox", { name: "Texto da mensagem" }).fill("no line has this text 0000");
     await filters.getByRole("button", { name: "Aplicar" }).click();

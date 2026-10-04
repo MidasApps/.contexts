@@ -2,11 +2,11 @@ import type { Connector } from "@core/contracts";
 import { type RequestContextReader, readAgentContext } from "../context/agent-request-context.ts";
 import type { ConnectorsPort, SecretStore } from "../runtime/runtime-ports.ts";
 import type { CoreToolDefinition, CoreToolDeps } from "../tools/define-core-tool.ts";
+import type { BoundCoreTool } from "../tools/tool-registry.ts";
 import { bindCoreTool } from "../tools/tool-registry.ts";
 import { type ConnectorLoadOutcome, recordConnectorLoads } from "./connector-load-errors.ts";
 import { postgresConnectorTools } from "./db/postgres-readonly-connector.ts";
 import { loadMcpConnectorToolset, type McpConnectorToolset, type McpTool } from "./mcp/mcp-connector.ts";
-import type { BoundCoreTool } from "../tools/tool-registry.ts";
 import { loadOpenApiDocument } from "./openapi/openapi-document.ts";
 import { openApiToTools } from "./openapi/openapi-to-tools.ts";
 
@@ -40,7 +40,10 @@ export type ConnectorLoaders = {
 export const defaultConnectorLoaders = (appEnv: string): ConnectorLoaders => ({
   openApiTools: async (connector, secret) => {
     if (connector.type !== "openapi") return [];
-    const document = await loadOpenApiDocument({ specUrl: connector.config.specUrl, allowedHosts: connector.config.allowedHosts });
+    const document = await loadOpenApiDocument({
+      specUrl: connector.config.specUrl,
+      allowedHosts: connector.config.allowedHosts,
+    });
     return openApiToTools({ connector, document, secret });
   },
   mcpToolset: (connector, secret) => loadMcpConnectorToolset({ connector, secret, appEnv }),
@@ -50,14 +53,23 @@ export const defaultConnectorLoaders = (appEnv: string): ConnectorLoaders => ({
 /** Bound core tools (OpenAPI, Postgres) and MCP tools, keyed by the name the model sees. */
 export type ConnectorTool = BoundCoreTool | McpTool;
 
-export type ConnectorToolsResolver = ((requestContext: RequestContextReader | undefined, kind: ConnectorAgentKind) => Promise<Record<string, ConnectorTool>>) & {
+export type ConnectorToolsResolver = ((
+  requestContext: RequestContextReader | undefined,
+  kind: ConnectorAgentKind,
+) => Promise<Record<string, ConnectorTool>>) & {
   /** Disconnects every cached MCP client (shutdown, tests). */
   readonly close: () => Promise<void>;
 };
 
-const loadOne = async (connector: Connector, secret: string | null, loaders: ConnectorLoaders): Promise<LoadedConnector> => {
-  if (connector.type === "mcp" || connector.type === "browser") return { connector, coreTools: [], mcp: await loaders.mcpToolset(connector, secret) };
-  if (connector.type === "openapi") return { connector, coreTools: await loaders.openApiTools(connector, secret), mcp: null };
+const loadOne = async (
+  connector: Connector,
+  secret: string | null,
+  loaders: ConnectorLoaders,
+): Promise<LoadedConnector> => {
+  if (connector.type === "mcp" || connector.type === "browser")
+    return { connector, coreTools: [], mcp: await loaders.mcpToolset(connector, secret) };
+  if (connector.type === "openapi")
+    return { connector, coreTools: await loaders.openApiTools(connector, secret), mcp: null };
   return { connector, coreTools: loaders.postgresTools(connector, secret), mcp: null };
 };
 
@@ -69,7 +81,9 @@ const mcpToolsFor = (loaded: LoadedConnector, kind: ConnectorAgentKind): Record<
   if (kind === "action") return loaded.mcp.tools;
   // The supervisor answers questions: only the tools the policy marks read-only.
   const readOnly = new Set(loaded.connector.toolPolicy.readOnly.map((name) => name.replace(/[^A-Za-z0-9_-]/g, "_")));
-  return Object.fromEntries(Object.entries(loaded.mcp.tools).filter(([key]) => [...readOnly].some((name) => key.endsWith(`_${name}`))));
+  return Object.fromEntries(
+    Object.entries(loaded.mcp.tools).filter(([key]) => [...readOnly].some((name) => key.endsWith(`_${name}`))),
+  );
 };
 
 const coreToolsFor = (loaded: LoadedConnector, kind: ConnectorAgentKind): readonly CoreToolDefinition[] => {
@@ -95,7 +109,11 @@ export const createConnectorToolResolver = (args: {
     const entry = cache.get(tenantId);
     cache.delete(tenantId);
     const loaded = await entry?.loaded.catch(() => []);
-    await Promise.all((loaded ?? []).map((item) => (item.mcp === null ? Promise.resolve() : item.mcp.disconnect().catch(() => undefined))));
+    await Promise.all(
+      (loaded ?? []).map((item) =>
+        item.mcp === null ? Promise.resolve() : item.mcp.disconnect().catch(() => undefined),
+      ),
+    );
   };
   const loadTenant = async (tenantId: string): Promise<LoadedConnector[]> => {
     const active = await args.connectors.listActive({ tenantId });
@@ -104,13 +122,24 @@ export const createConnectorToolResolver = (args: {
         let secret: string | null = null;
         try {
           secret = connector.secretRef === null ? null : await args.secrets.get(connector.secretRef);
-          return { connector, secret, error: null, failed: false, loaded: await loadOne(connector, secret, args.loaders) };
+          return {
+            connector,
+            secret,
+            error: null,
+            failed: false,
+            loaded: await loadOne(connector, secret, args.loaders),
+          };
         } catch (error: unknown) {
           return { connector, secret, error, failed: true, loaded: null };
         }
       }),
     );
-    recordConnectorLoads({ connectors: args.connectors, tenantId, outcomes: settled, at: new Date(now()).toISOString() });
+    recordConnectorLoads({
+      connectors: args.connectors,
+      tenantId,
+      outcomes: settled,
+      at: new Date(now()).toISOString(),
+    });
     return settled.flatMap((outcome) => (outcome.loaded === null ? [] : [outcome.loaded]));
   };
   const tenantConnectors = async (tenantId: string): Promise<LoadedConnector[]> => {
@@ -121,11 +150,16 @@ export const createConnectorToolResolver = (args: {
     cache.set(tenantId, { expiresAt: now() + ttl, loaded });
     return loaded;
   };
-  const resolve = async (requestContext: RequestContextReader | undefined, kind: ConnectorAgentKind): Promise<Record<string, ConnectorTool>> => {
+  const resolve = async (
+    requestContext: RequestContextReader | undefined,
+    kind: ConnectorAgentKind,
+  ): Promise<Record<string, ConnectorTool>> => {
     const read = readAgentContext(requestContext);
     if (!read.ok) return {};
     const loaded = await tenantConnectors(read.data.context.tenantId).catch(() => []);
-    const core = loaded.flatMap((item) => coreToolsFor(item, kind).map((tool) => [tool.id, bindCoreTool(tool, args.toolDeps)] as const));
+    const core = loaded.flatMap((item) =>
+      coreToolsFor(item, kind).map((tool) => [tool.id, bindCoreTool(tool, args.toolDeps)] as const),
+    );
     const mcp = loaded.flatMap((item) => Object.entries(mcpToolsFor(item, kind)));
     return Object.fromEntries<ConnectorTool>([...core, ...mcp]);
   };

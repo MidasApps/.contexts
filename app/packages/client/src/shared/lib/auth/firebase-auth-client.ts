@@ -58,7 +58,8 @@ const createAuthStateStore = (sdk: FirebaseSdk, auth: Auth) => {
   };
 };
 
-const isMultiFactorRequired = (thrown: unknown): thrown is MultiFactorError => firebaseCodeOf(thrown) === "auth/multi-factor-auth-required";
+const isMultiFactorRequired = (thrown: unknown): thrown is MultiFactorError =>
+  firebaseCodeOf(thrown) === "auth/multi-factor-auth-required";
 
 /** Re-authentication with the current password; `mfa-required` when a second factor is enrolled. */
 const reauthenticate =
@@ -107,7 +108,8 @@ export const createFirebaseAuthClient = (config: ClientConfig, sdk: FirebaseSdk 
     signInWithCustomToken: (token) => guardAuth(async () => void (await sdk.signInWithCustomToken(auth, token))),
     getIdToken: ({ forceRefresh }) =>
       guardAuth(async () => (auth.currentUser === null ? null : auth.currentUser.getIdToken(forceRefresh))),
-    getIdTokenClaims: () => guardAuth(async () => (auth.currentUser === null ? null : (await auth.currentUser.getIdTokenResult()).claims)),
+    getIdTokenClaims: () =>
+      guardAuth(async () => (auth.currentUser === null ? null : (await auth.currentUser.getIdTokenResult()).claims)),
     signOut: () => guardAuth(() => sdk.signOut(auth)),
   };
 };

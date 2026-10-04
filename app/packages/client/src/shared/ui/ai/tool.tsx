@@ -44,7 +44,13 @@ export function ToolStatus({ state, className }: ToolStatusProps) {
 
 /** AI Elements `tool`: a tool call behind a disclosure, collapsed by default (SP4 spec §5.1). */
 export function Tool({ className, ...props }: ComponentProps<typeof Collapsible>) {
-  return <Collapsible data-slot="tool" className={cn("group/tool w-full rounded-md border border-border bg-card", className)} {...props} />;
+  return (
+    <Collapsible
+      data-slot="tool"
+      className={cn("group/tool w-full rounded-md border border-border bg-card", className)}
+      {...props}
+    />
+  );
 }
 
 export type ToolHeaderProps = Omit<ComponentProps<typeof CollapsibleTrigger>, "children" | "title"> & {
@@ -57,7 +63,10 @@ export function ToolHeader({ title, state, icon, className, ...props }: ToolHead
   return (
     <CollapsibleTrigger
       data-slot="tool-header"
-      className={cn("flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-body", className)}
+      className={cn(
+        "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-body",
+        className,
+      )}
       {...props}
     >
       <span className="flex min-w-0 items-center gap-2">
@@ -68,7 +77,10 @@ export function ToolHeader({ title, state, icon, className, ...props }: ToolHead
       </span>
       <span className="flex shrink-0 items-center gap-2">
         <ToolStatus state={state} />
-        <ChevronDownIcon aria-hidden="true" className="size-4 text-muted-foreground transition-transform group-data-[state=open]/tool:rotate-180" />
+        <ChevronDownIcon
+          aria-hidden="true"
+          className="size-4 text-muted-foreground transition-transform group-data-[state=open]/tool:rotate-180"
+        />
       </span>
     </CollapsibleTrigger>
   );
@@ -101,7 +113,10 @@ export function ToolInput({ value, className, ...props }: ToolSectionProps) {
   );
 }
 
-export type ToolOutputProps = Omit<ComponentProps<"div">, "children"> & { value?: unknown; errorText?: string | undefined };
+export type ToolOutputProps = Omit<ComponentProps<"div">, "children"> & {
+  value?: unknown;
+  errorText?: string | undefined;
+};
 
 /** The result of the call, or its error. Renders nothing while there is neither. */
 export function ToolOutput({ value, errorText, className, ...props }: ToolOutputProps) {
@@ -110,10 +125,19 @@ export function ToolOutput({ value, errorText, className, ...props }: ToolOutput
   const failed = errorText !== undefined;
   return (
     <div data-slot="tool-output" className={cn("space-y-1.5 p-3", className)} {...props}>
-      <h4 className={cn("text-label font-medium tracking-wide uppercase", failed ? "text-destructive-text" : "text-muted-foreground")}>
+      <h4
+        className={cn(
+          "text-label font-medium tracking-wide uppercase",
+          failed ? "text-destructive-text" : "text-muted-foreground",
+        )}
+      >
         {failed ? t("error") : t("output")}
       </h4>
-      <CodeBlock code={failed ? errorText : toJson(value)} language={failed ? undefined : "json"} label={failed ? t("error") : t("output")} />
+      <CodeBlock
+        code={failed ? errorText : toJson(value)}
+        language={failed ? undefined : "json"}
+        label={failed ? t("error") : t("output")}
+      />
     </div>
   );
 }

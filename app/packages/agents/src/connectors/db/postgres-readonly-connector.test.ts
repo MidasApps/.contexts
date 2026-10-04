@@ -1,7 +1,11 @@
 import { type Connector, ConnectorSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import type { CoreToolContext } from "../../tools/define-core-tool.ts";
-import { assertPublicDatabaseHost, type PostgresConnectorRunner, postgresConnectorTools } from "./postgres-readonly-connector.ts";
+import {
+  assertPublicDatabaseHost,
+  type PostgresConnectorRunner,
+  postgresConnectorTools,
+} from "./postgres-readonly-connector.ts";
 
 const connector: Connector = ConnectorSchema.parse({
   id: "Pg4sK2lPq0WnR5tYu3bV",
@@ -36,7 +40,10 @@ describe("postgres read-only connector", () => {
     const [tool] = postgresConnectorTools({ connector, dsn: DSN, runner, resolve: publicDns });
     expect(tool?.id).toBe("db.warehouse.query");
     expect(tool?.kind).toBe("read");
-    const result = await tool?.execute({ sql: "SELECT count(*) AS n FROM public.orders_summary WHERE status = $1", params: ["paid"], limit: 2 }, ctx);
+    const result = await tool?.execute(
+      { sql: "SELECT count(*) AS n FROM public.orders_summary WHERE status = $1", params: ["paid"], limit: 2 },
+      ctx,
+    );
     expect(result).toEqual({ rows: [{ n: 1 }, { n: 2 }], rowCount: 2, truncated: true });
     expect(calls[0]).toMatchObject({ dsn: DSN, params: ["paid"], limit: 2 });
   });
@@ -44,8 +51,12 @@ describe("postgres read-only connector", () => {
   it("refuses relations outside the allowlist and writes before any connection", async () => {
     const { calls, runner } = recordingRunner([]);
     const [tool] = postgresConnectorTools({ connector, dsn: DSN, runner, resolve: publicDns });
-    await expect(tool?.execute({ sql: "SELECT * FROM public.users" }, ctx)).rejects.toMatchObject({ code: "SQL_REJECTED" });
-    await expect(tool?.execute({ sql: "UPDATE public.orders_summary SET x = 1" }, ctx)).rejects.toMatchObject({ code: "SQL_REJECTED" });
+    await expect(tool?.execute({ sql: "SELECT * FROM public.users" }, ctx)).rejects.toMatchObject({
+      code: "SQL_REJECTED",
+    });
+    await expect(tool?.execute({ sql: "UPDATE public.orders_summary SET x = 1" }, ctx)).rejects.toMatchObject({
+      code: "SQL_REJECTED",
+    });
     expect(calls).toEqual([]);
   });
 

@@ -43,7 +43,13 @@ function Targets({ dataset }: { dataset: EvalDataset }) {
 function OpenItemsButton({ dataset, onOpenItems }: { dataset: EvalDataset; onOpenItems: (datasetId: string) => void }) {
   const t = useTranslations("settings.evals.datasets");
   return (
-    <Button variant="outline" size="sm" className="self-start" onClick={() => onOpenItems(dataset.id)} aria-label={t("openItemsNamed", { name: dataset.name })}>
+    <Button
+      variant="outline"
+      size="sm"
+      className="self-start"
+      onClick={() => onOpenItems(dataset.id)}
+      aria-label={t("openItemsNamed", { name: dataset.name })}
+    >
       <Icon name="list" />
       {t("openItems")}
     </Button>
@@ -56,11 +62,30 @@ const useColumns = (onOpenItems: (datasetId: string) => void) => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.display({ id: "name", header: () => t("columns.name"), cell: ({ row }) => <DatasetName dataset={row.original} /> }),
-      column.accessor("version", { header: () => t("columns.version"), meta: { numeric: true }, cell: ({ getValue }) => format.number(getValue()) }),
-      column.display({ id: "targets", header: () => t("columns.targets"), cell: ({ row }) => <Targets dataset={row.original} /> }),
-      column.accessor("createdAt", { header: () => t("columns.createdAt"), cell: ({ getValue }) => formatDateTime(getValue()) }),
-      column.display({ id: "items", header: () => t("columns.items"), cell: ({ row }) => <OpenItemsButton dataset={row.original} onOpenItems={onOpenItems} /> }),
+      column.display({
+        id: "name",
+        header: () => t("columns.name"),
+        cell: ({ row }) => <DatasetName dataset={row.original} />,
+      }),
+      column.accessor("version", {
+        header: () => t("columns.version"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => format.number(getValue()),
+      }),
+      column.display({
+        id: "targets",
+        header: () => t("columns.targets"),
+        cell: ({ row }) => <Targets dataset={row.original} />,
+      }),
+      column.accessor("createdAt", {
+        header: () => t("columns.createdAt"),
+        cell: ({ getValue }) => formatDateTime(getValue()),
+      }),
+      column.display({
+        id: "items",
+        header: () => t("columns.items"),
+        cell: ({ row }) => <OpenItemsButton dataset={row.original} onOpenItems={onOpenItems} />,
+      }),
     ],
     [format, formatDateTime, onOpenItems, t],
   );
@@ -73,7 +98,10 @@ type DatasetActions = {
   onCreate: (() => void) | null;
 };
 
-type DatasetsTableProps = DatasetActions & { organization: { id: string; name: string }; datasets: readonly EvalDataset[] };
+type DatasetsTableProps = DatasetActions & {
+  organization: { id: string; name: string };
+  datasets: readonly EvalDataset[];
+};
 
 function DatasetsTable({ organization, datasets, onSeeExperiments, onOpenItems, onCreate }: DatasetsTableProps) {
   const t = useTranslations("settings.evals.datasets");
@@ -90,7 +118,9 @@ function DatasetsTable({ organization, datasets, onSeeExperiments, onOpenItems, 
       renderCard={(dataset) => (
         <div className="flex flex-col gap-2">
           <DatasetName dataset={dataset} />
-          <span className="text-xs text-muted-foreground">{t("cardMeta", { version: dataset.version, when: formatDateTime(dataset.createdAt) })}</span>
+          <span className="text-xs text-muted-foreground">
+            {t("cardMeta", { version: dataset.version, when: formatDateTime(dataset.createdAt) })}
+          </span>
           <Targets dataset={dataset} />
           <OpenItemsButton dataset={dataset} onOpenItems={onOpenItems} />
         </div>
@@ -121,7 +151,10 @@ function DatasetsTable({ organization, datasets, onSeeExperiments, onOpenItems, 
  * The organization's own datasets (`GET /v1/evals/datasets`): name, version and the agents they
  * evaluate, each opening its items; creating one needs core.eval.write (decision 0062).
  */
-export function DatasetsPanel({ organization, ...actions }: DatasetActions & { organization: { id: string; name: string } }) {
+export function DatasetsPanel({
+  organization,
+  ...actions
+}: DatasetActions & { organization: { id: string; name: string } }) {
   const t = useTranslations("settings.evals.datasets");
   const datasets = useTenantDatasets(organization.id);
   return (

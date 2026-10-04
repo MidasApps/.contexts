@@ -1,7 +1,11 @@
 import { resolveRequestId } from "@core/services";
 import type { Mastra } from "@mastra/core/mastra";
 import type { RequestContext } from "@mastra/core/request-context";
-import { readAgentContext, type AgentContextSnapshot, type RequestContextReader } from "../../context/agent-request-context.ts";
+import {
+  type AgentContextSnapshot,
+  type RequestContextReader,
+  readAgentContext,
+} from "../../context/agent-request-context.ts";
 import type { AccessPort } from "../../runtime/runtime-ports.ts";
 
 /**
@@ -52,10 +56,21 @@ const requestIdOf = (requestContext: RequestContextReader): string => {
   return typeof value === "string" ? value : resolveRequestId(undefined);
 };
 
-export const routeError = (code: WorkflowRouteErrorCode, requestContext: RequestContextReader, details?: readonly FieldIssue[]): Response => {
+export const routeError = (
+  code: WorkflowRouteErrorCode,
+  requestContext: RequestContextReader,
+  details?: readonly FieldIssue[],
+): Response => {
   const status = STATUS[code];
   return Response.json(
-    { error: { code, message: MESSAGES[status] ?? "Error.", ...(details === undefined ? {} : { details }), requestId: requestIdOf(requestContext) } },
+    {
+      error: {
+        code,
+        message: MESSAGES[status] ?? "Error.",
+        ...(details === undefined ? {} : { details }),
+        requestId: requestIdOf(requestContext),
+      },
+    },
     { status },
   );
 };
@@ -78,7 +93,9 @@ export const authorizeCaller = async (args: {
   readonly access: AccessPort;
   readonly requestContext: RequestContextReader;
   readonly permission: string;
-}): Promise<{ readonly ok: true; readonly data: AgentContextSnapshot } | { readonly ok: false; readonly response: Response }> => {
+}): Promise<
+  { readonly ok: true; readonly data: AgentContextSnapshot } | { readonly ok: false; readonly response: Response }
+> => {
   const snapshot = readAgentContext(args.requestContext);
   if (!snapshot.ok) return { ok: false, response: routeError("UNAUTHORIZED", args.requestContext) };
   const { context, principal } = snapshot.data;
@@ -94,10 +111,17 @@ export const validateWorkflowInput = async (
   value: unknown,
 ): Promise<{ readonly ok: true } | { readonly ok: false; readonly details: FieldIssue[] }> => {
   if (schema === undefined) return { ok: true };
-  const result = (await schema["~standard"].validate(value)) as { issues?: readonly { message: string; path?: readonly unknown[] }[] };
+  const result = (await schema["~standard"].validate(value)) as {
+    issues?: readonly { message: string; path?: readonly unknown[] }[];
+  };
   if (result.issues === undefined || result.issues.length === 0) return { ok: true };
   const details = result.issues.map((issue) => ({
-    field: ["inputData", ...(issue.path ?? []).map((part) => (typeof part === "object" && part !== null && "key" in part ? String(part.key) : String(part)))].join("."),
+    field: [
+      "inputData",
+      ...(issue.path ?? []).map((part) =>
+        typeof part === "object" && part !== null && "key" in part ? String(part.key) : String(part),
+      ),
+    ].join("."),
     issue: "INVALID",
   }));
   return { ok: false, details };

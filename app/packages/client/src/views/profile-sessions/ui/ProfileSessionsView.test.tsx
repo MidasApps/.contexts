@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, page, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRoutes, noContent, page } from "#/shared/testing/fake-api.ts";
 import { ProfileSessionsView } from "./ProfileSessionsView.tsx";
 
 const session = (id: string, userAgent: string, overrides: Record<string, unknown> = {}) => ({
@@ -18,7 +18,10 @@ const session = (id: string, userAgent: string, overrides: Record<string, unknow
 });
 
 // s1 is the session of this browser (SP1 `current`); s2 another device.
-const SESSIONS = [session("s1", "Firefox on Windows", { mfa: true, current: true }), session("s2", "Tauri on macOS", { kind: "desktop" })];
+const SESSIONS = [
+  session("s1", "Firefox on Windows", { mfa: true, current: true }),
+  session("s2", "Tauri on macOS", { kind: "desktop" }),
+];
 
 const renderView = (routes: FakeRoutes = {}) =>
   renderApp(
@@ -36,7 +39,11 @@ describe("ProfileSessionsView", () => {
     expect(within(table).getByText("App para desktop")).toBeDefined();
     expect(within(table).getByText("Com 2 etapas")).toBeDefined();
     expect(within(table).getByText("Este dispositivo")).toBeDefined();
-    expect(within(table).getAllByRole("columnheader").map((header) => header.getAttribute("scope"))).toEqual(["col", "col", "col", "col", "col"]);
+    expect(
+      within(table)
+        .getAllByRole("columnheader")
+        .map((header) => header.getAttribute("scope")),
+    ).toEqual(["col", "col", "col", "col", "col"]);
     await expectNoAxeViolations(container);
   });
 
@@ -94,7 +101,7 @@ describe("ProfileSessionsView", () => {
     forbidden.unmount();
 
     const matchMedia = globalThis.matchMedia;
-    globalThis.matchMedia = ((query: string) => ({ ...matchMedia(query), matches: query.includes("max-width") }));
+    globalThis.matchMedia = (query: string) => ({ ...matchMedia(query), matches: query.includes("max-width") });
     try {
       const { container } = renderView();
       const list = await screen.findByRole("list", { name: "Sessões da sua conta" });

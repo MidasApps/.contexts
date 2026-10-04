@@ -10,7 +10,12 @@ import type { ConnectorsDeps } from "./application/connectors-deps.ts";
 import type { ConnectorRepository, SecretStore } from "./application/ports/connector-ports.ts";
 import { type CreateConnector, makeCreateConnector } from "./application/use-cases/create-connector.ts";
 import { type DeleteConnector, makeDeleteConnector } from "./application/use-cases/delete-connector.ts";
-import { type GetConnector, type ListConnectors, makeGetConnector, makeListConnectors } from "./application/use-cases/list-connectors.ts";
+import {
+  type GetConnector,
+  type ListConnectors,
+  makeGetConnector,
+  makeListConnectors,
+} from "./application/use-cases/list-connectors.ts";
 import { makeSetConnectorSecret, type SetConnectorSecret } from "./application/use-cases/set-connector-secret.ts";
 import { makeUpdateConnector, type UpdateConnector } from "./application/use-cases/update-connector.ts";
 
@@ -45,7 +50,11 @@ export const createConnectorsServices = (deps: ConnectorsDeps): ConnectorsServic
  * The secret store of an environment: the Firestore-emulator store in `local`, Secret
  * Manager everywhere else (contracts/secrets.md); never a silent fallback between them.
  */
-export const createSecretStoreFor = (args: { readonly firebase: FirebaseAdmin; readonly appEnv: string; readonly projectId: string }): SecretStore =>
+export const createSecretStoreFor = (args: {
+  readonly firebase: FirebaseAdmin;
+  readonly appEnv: string;
+  readonly projectId: string;
+}): SecretStore =>
   args.appEnv === "local"
     ? createLocalSecretStore({ firestore: args.firebase.firestore, appEnv: args.appEnv })
     : createSecretManagerStore({ client: createLazySecretManagerClient(), projectId: args.projectId });
@@ -60,7 +69,11 @@ export const createFirebaseConnectorsServices = (args: {
 }): ConnectorsServices =>
   createConnectorsServices({
     connectors: createFirestoreConnectorRepository({ firestore: args.firebase.firestore }),
-    secrets: createSecretStoreFor({ firebase: args.firebase, appEnv: args.env.APP_ENV, projectId: args.env.FIREBASE_PROJECT_ID }),
+    secrets: createSecretStoreFor({
+      firebase: args.firebase,
+      appEnv: args.env.APP_ENV,
+      projectId: args.env.FIREBASE_PROJECT_ID,
+    }),
     audit: args.audit,
     unitOfWork: args.unitOfWork ?? createFirestoreUnitOfWork({ firestore: args.firebase.firestore }),
     clock: args.clock,

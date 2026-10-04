@@ -27,7 +27,9 @@ export type MoveFailure = "CYCLE" | "TOO_DEEP" | "TOO_LARGE";
 
 export type TreeRewrite = TreeUnit;
 
-export type MovePlan = { readonly ok: true; readonly rewrites: readonly TreeRewrite[] } | { readonly ok: false; readonly reason: MoveFailure };
+export type MovePlan =
+  | { readonly ok: true; readonly rewrites: readonly TreeRewrite[] }
+  | { readonly ok: false; readonly reason: MoveFailure };
 
 const sameIds = (left: readonly string[], right: readonly string[]): boolean =>
   left.length === right.length && left.every((value, index) => value === right[index]);
@@ -52,7 +54,8 @@ export const planMove = (args: {
   maxSubtree?: number;
 }): MovePlan => {
   const { unit, newParent } = args;
-  if (newParent !== null && (newParent.id === unit.id || newParent.ancestorIds.includes(unit.id))) return { ok: false, reason: "CYCLE" };
+  if (newParent !== null && (newParent.id === unit.id || newParent.ancestorIds.includes(unit.id)))
+    return { ok: false, reason: "CYCLE" };
   if (args.descendants.length + 1 > (args.maxSubtree ?? MAX_SUBTREE_REWRITE)) return { ok: false, reason: "TOO_LARGE" };
   const base = newParent === null ? [] : [...newParent.ancestorIds, newParent.id];
   const moved: TreeUnit = { id: unit.id, parentUnitId: newParent?.id ?? null, ancestorIds: base, depth: base.length };
@@ -62,7 +65,11 @@ export const planMove = (args: {
   const current = new Map([unit, ...args.descendants].map((entry) => [entry.id, entry] as const));
   const rewrites = all.filter((entry) => {
     const before = current.get(entry.id);
-    return before === undefined || before.parentUnitId !== entry.parentUnitId || !sameIds(before.ancestorIds, entry.ancestorIds);
+    return (
+      before === undefined ||
+      before.parentUnitId !== entry.parentUnitId ||
+      !sameIds(before.ancestorIds, entry.ancestorIds)
+    );
   });
   return { ok: true, rewrites };
 };

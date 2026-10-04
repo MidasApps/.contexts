@@ -5,7 +5,13 @@ import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { useShortcut } from "#/shared/lib/shortcuts/use-shortcut.ts";
 import { Command, CommandInput, CommandList } from "#/shared/ui/molecules/Command/Command.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 
 /** ⌘K / Ctrl+K (atalhos.html "Abrir command palette"). */
 export const COMMAND_PALETTE_KEY = "k";

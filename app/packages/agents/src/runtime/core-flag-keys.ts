@@ -16,4 +16,7 @@ export const CORE_FLAG_KEYS = {
 export const isAgentRunPath =
   (apiPrefix = "/api") =>
   (pathname: string): boolean =>
-    pathname.startsWith(`${apiPrefix}/agents/`) || pathname.startsWith(`${apiPrefix}/mcp/`) || pathname.startsWith("/chat/") || pathname.startsWith("/voice/");
+    pathname.startsWith(`${apiPrefix}/agents/`) ||
+    pathname.startsWith(`${apiPrefix}/mcp/`) ||
+    pathname.startsWith("/chat/") ||
+    pathname.startsWith("/voice/");

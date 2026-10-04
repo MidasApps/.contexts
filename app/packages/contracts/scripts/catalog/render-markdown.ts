@@ -37,7 +37,9 @@ const renderFields = (fields: readonly CatalogField[]): string[] => {
 
 const renderRelations = (entry: CatalogEntry): string[] => {
   if (entry.relations.length === 0) return ["_None._"];
-  return entry.relations.map((relation) => `- ${code(relation.type)} ${code(relation.target)} via ${code(relation.field)}`);
+  return entry.relations.map(
+    (relation) => `- ${code(relation.type)} ${code(relation.target)} via ${code(relation.field)}`,
+  );
 };
 
 /** Human-readable page for one contract; generated, never edited by hand. */

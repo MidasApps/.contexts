@@ -1,5 +1,5 @@
-import { InvitationIdSchema, InvitationSchema, type Invitation } from "@core/contracts";
-import { FieldPath, Timestamp, type Firestore } from "firebase-admin/firestore";
+import { type Invitation, InvitationIdSchema, InvitationSchema } from "@core/contracts";
+import { FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
@@ -29,9 +29,14 @@ export const createFirestoreInvitationRepository = (deps: { firestore: Firestore
       let query = typed().where("tenantId", "==", tenantId);
       if (statuses !== undefined) query = query.where("status", "in", [...statuses]);
       query = query.orderBy("createdAt", "desc").orderBy(FieldPath.documentId(), "desc");
-      if (page.after !== undefined) query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
+      if (page.after !== undefined)
+        query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
       const fetched = (await query.limit(page.limit + 1).get()).docs.map((doc) => doc.data());
-      return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (invitation: Invitation) => [invitation.createdAt, invitation.id] });
+      return pageFromOverfetch({
+        fetched,
+        limit: page.limit,
+        positionOf: (invitation: Invitation) => [invitation.createdAt, invitation.id],
+      });
     },
     create: (tx, { invitation, tokenHash, actorId }) =>
       void tx.create(raw().doc(invitation.id), {
@@ -44,7 +49,10 @@ export const createFirestoreInvitationRepository = (deps: { firestore: Firestore
     setStatus: (tx, { id, status, acceptedByUid, updatedAt, actorId }) =>
       void tx.update(
         raw().doc(id),
-        toFirestoreUpdate({ schema: InvitationSchema }, { status, ...(acceptedByUid === undefined ? {} : { acceptedByUid }), updatedAt, updatedBy: actorId }),
+        toFirestoreUpdate(
+          { schema: InvitationSchema },
+          { status, ...(acceptedByUid === undefined ? {} : { acceptedByUid }), updatedAt, updatedBy: actorId },
+        ),
       ),
   };
 };

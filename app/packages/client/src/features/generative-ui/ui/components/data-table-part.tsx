@@ -16,7 +16,10 @@ const column = dataTableColumnHelper<Row>();
 const EMPTY = "—";
 
 const isMoney = (value: unknown): value is { amountMinor: number; currency: string } =>
-  typeof value === "object" && value !== null && typeof (value as { amountMinor?: unknown }).amountMinor === "number" && typeof (value as { currency?: unknown }).currency === "string";
+  typeof value === "object" &&
+  value !== null &&
+  typeof (value as { amountMinor?: unknown }).amountMinor === "number" &&
+  typeof (value as { currency?: unknown }).currency === "string";
 
 const asText = (value: unknown): string => {
   if (typeof value === "string") return value;
@@ -35,7 +38,8 @@ const useCellFormat = () => {
     if (type === "number" && typeof value === "number") return format.number(value);
     if (type === "boolean" && typeof value === "boolean") return value ? t("yes") : t("no");
     if (type === "money" && isMoney(value)) return formatMoney(value);
-    if ((type === "date" || type === "datetime") && typeof value === "string" && !Number.isNaN(Date.parse(value))) return formatDateTime(value, type);
+    if ((type === "date" || type === "datetime") && typeof value === "string" && !Number.isNaN(Date.parse(value)))
+      return formatDateTime(value, type);
     return asText(value);
   };
 };
@@ -53,15 +57,27 @@ export function DataTablePart({ props }: GenerativeComponentProps<DataTableProps
   const columns = props.columns.map((definition) =>
     column.accessor((row) => row.values[definition.key], {
       id: definition.key,
-      header: () => (definition.labelKey !== undefined && tRoot.has(definition.labelKey as never) ? tRoot(definition.labelKey as never) : (definition.label ?? definition.key)),
+      header: () =>
+        definition.labelKey !== undefined && tRoot.has(definition.labelKey as never)
+          ? tRoot(definition.labelKey as never)
+          : (definition.label ?? definition.key),
       cell: (cell) => formatCell(definition.type, cell.getValue()),
       meta: { numeric: definition.type === "number" || definition.type === "money" },
     }),
   );
   return (
     <div data-slot="data-table-part" className="flex flex-col gap-2">
-      <DataTable caption={t("caption")} captionHidden columns={columns} data={rows} getRowId={(row) => String(row.index)} empty={<p className="p-4 text-center text-body text-muted-foreground">{t("empty")}</p>} />
-      {props.truncated ? <p className="text-body-sm text-muted-foreground">{t("truncated", { count: props.rows.length })}</p> : null}
+      <DataTable
+        caption={t("caption")}
+        captionHidden
+        columns={columns}
+        data={rows}
+        getRowId={(row) => String(row.index)}
+        empty={<p className="p-4 text-center text-body text-muted-foreground">{t("empty")}</p>}
+      />
+      {props.truncated ? (
+        <p className="text-body-sm text-muted-foreground">{t("truncated", { count: props.rows.length })}</p>
+      ) : null}
     </div>
   );
 }

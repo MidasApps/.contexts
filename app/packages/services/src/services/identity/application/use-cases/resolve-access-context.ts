@@ -2,7 +2,10 @@ import type { NodeRef, Permission, Principal, RegionalSettings, TenantNodeRef } 
 import type { RequestAccess } from "../../../access/composition.ts";
 import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
-import { regionalSettingsAt, type NodeDetails } from "../../../tenancy/application/use-cases/resolve-regional-settings.ts";
+import {
+  type NodeDetails,
+  regionalSettingsAt,
+} from "../../../tenancy/application/use-cases/resolve-regional-settings.ts";
 import type { MeDeps } from "../me-deps.ts";
 import type { RegionalPreferences } from "../ports/driven/user-repository.ts";
 
@@ -27,12 +30,19 @@ export type ResolvedAccessContext = {
  * @throws on infrastructure failures (never resolves to a context on error).
  * @example const context = await resolveAccessContext({ principal, node: { level: "project", tenantId, projectId } });
  */
-export type ResolveAccessContext = (input: { principal: Principal; node: NodeRef }) => Promise<ResolvedAccessContext | null>;
+export type ResolveAccessContext = (input: {
+  principal: Principal;
+  node: NodeRef;
+}) => Promise<ResolvedAccessContext | null>;
 
 /** The resolved context plus the loaded nodes, for `GET /v1/me/context`. */
 export type AccessContextResolution = { readonly context: ResolvedAccessContext; readonly details: NodeDetails };
 
-export type LoadAccessContext = (input: { principal: Principal; node: TenantNodeRef; access: RequestAccess }) => Promise<Result<AccessContextResolution, AccessDeniedError>>;
+export type LoadAccessContext = (input: {
+  principal: Principal;
+  node: TenantNodeRef;
+  access: RequestAccess;
+}) => Promise<Result<AccessContextResolution, AccessDeniedError>>;
 
 type Deps = Pick<MeDeps, "users" | "loadNode">;
 
@@ -71,12 +81,11 @@ export const makeLoadAccessContext =
   };
 
 /** Binds `resolveAccessContext` to a fresh request scope per call (reads memoized per call only). */
-export const makeResolveAccessContext =
-  (deps: Deps & Pick<MeDeps, "access">): ResolveAccessContext => {
-    const load = makeLoadAccessContext(deps);
-    return async ({ principal, node }) => {
-      if (node.level === "platform") return null;
-      const resolved = await load({ principal, node, access: deps.access.forRequest() });
-      return resolved.ok ? resolved.data.context : null;
-    };
+export const makeResolveAccessContext = (deps: Deps & Pick<MeDeps, "access">): ResolveAccessContext => {
+  const load = makeLoadAccessContext(deps);
+  return async ({ principal, node }) => {
+    if (node.level === "platform") return null;
+    const resolved = await load({ principal, node, access: deps.access.forRequest() });
+    return resolved.ok ? resolved.data.context : null;
   };
+};

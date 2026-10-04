@@ -15,13 +15,20 @@ export type EnterImpersonation = (command: {
   requestId: string;
 }) => Promise<Result<CustomToken, SessionInvalidError | NotPlatformStaffError | ImpersonationNotFoundError>>;
 
-export type LeaveImpersonation = (command: { cookie: string | undefined; requestId: string }) => Promise<Result<CustomToken, SessionInvalidError>>;
+export type LeaveImpersonation = (command: {
+  cookie: string | undefined;
+  requestId: string;
+}) => Promise<Result<CustomToken, SessionInvalidError>>;
 
-const isOpen = (session: ImpersonationSession, now: Date): boolean => session.endedAt === null && Date.parse(session.expiresAt) > now.getTime();
+const isOpen = (session: ImpersonationSession, now: Date): boolean =>
+  session.endedAt === null && Date.parse(session.expiresAt) > now.getTime();
 
 /** The staff account of the cookie, still active platform staff with MFA (as `/admin` requires). */
 const isActiveStaff = async (deps: SessionDeps, record: SessionRecord): Promise<boolean> => {
-  const [staff, user] = await Promise.all([deps.principals.getPlatformStaff(record.uid), deps.principals.getUser(record.uid)]);
+  const [staff, user] = await Promise.all([
+    deps.principals.getPlatformStaff(record.uid),
+    deps.principals.getUser(record.uid),
+  ]);
   return staff !== null && staff.isActive && user?.status === "active" && record.mfa;
 };
 
@@ -48,9 +55,15 @@ const auditExpiry = (deps: SessionDeps, session: ImpersonationSession, requestId
  * Forgets the impersonation of a web session that can no longer be used (ended, expired, staff
  * role lost). An expiry nobody ended is audited once: the marker is cleared in the same step.
  */
-const closeMarker = async (deps: SessionDeps, record: SessionRecord, session: ImpersonationSession | null, requestId: string): Promise<void> => {
+const closeMarker = async (
+  deps: SessionDeps,
+  record: SessionRecord,
+  session: ImpersonationSession | null,
+  requestId: string,
+): Promise<void> => {
   await deps.sessions.setImpersonation({ id: record.id, impersonationSessionId: null });
-  if (session !== null && session.endedAt === null && !isOpen(session, deps.clock.now())) await auditExpiry(deps, session, requestId);
+  if (session !== null && session.endedAt === null && !isOpen(session, deps.clock.now()))
+    await auditExpiry(deps, session, requestId);
 };
 
 /**
@@ -58,11 +71,19 @@ const closeMarker = async (deps: SessionDeps, record: SessionRecord, session: Im
  * entered is open, belongs to the cookie's staff member and that member is still staff with MFA;
  * otherwise the staff account (fail closed, never the target user).
  */
-export const restoreWebSessionToken = async (deps: SessionDeps, record: SessionRecord, requestId: string): Promise<string> => {
+export const restoreWebSessionToken = async (
+  deps: SessionDeps,
+  record: SessionRecord,
+  requestId: string,
+): Promise<string> => {
   const markerId = record.impersonationSessionId ?? null;
   if (markerId === null) return staffToken(deps, record);
   const session = await deps.impersonations.get(undefined, markerId);
-  const usable = session !== null && session.staffUid === record.uid && isOpen(session, deps.clock.now()) && (await isActiveStaff(deps, record));
+  const usable =
+    session !== null &&
+    session.staffUid === record.uid &&
+    isOpen(session, deps.clock.now()) &&
+    (await isActiveStaff(deps, record));
   if (usable) return impersonatedToken(deps, session);
   await closeMarker(deps, record, session?.staffUid === record.uid ? session : null, requestId);
   return staffToken(deps, record);
@@ -82,7 +103,8 @@ export const makeEnterImpersonation =
     const { record } = loaded.data;
     if (!(await isActiveStaff(deps, record))) return err(new NotPlatformStaffError());
     const session = await deps.impersonations.get(undefined, impersonationSessionId);
-    if (session?.staffUid !== record.uid || !isOpen(session, deps.clock.now())) return err(new ImpersonationNotFoundError());
+    if (session?.staffUid !== record.uid || !isOpen(session, deps.clock.now()))
+      return err(new ImpersonationNotFoundError());
     await deps.sessions.setImpersonation({ id: record.id, impersonationSessionId: session.id });
     return ok({ customToken: await impersonatedToken(deps, session) });
   };
@@ -102,7 +124,8 @@ export const makeLeaveImpersonation =
     if (markerId !== null) {
       const ended = await deps.unitOfWork.run(async (tx) => {
         const session = await deps.impersonations.get(tx, markerId);
-        if (session?.staffUid !== record.uid || !isOpen(session, deps.clock.now())) return session?.staffUid === record.uid ? session : null;
+        if (session?.staffUid !== record.uid || !isOpen(session, deps.clock.now()))
+          return session?.staffUid === record.uid ? session : null;
         deps.impersonations.end(tx, { id: session.id, endedAt: deps.clock.now().toISOString(), actorId: record.uid });
         await auditEnd(tx, deps, session, requestId);
         return null;

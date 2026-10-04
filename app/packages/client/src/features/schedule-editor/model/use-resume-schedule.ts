@@ -40,7 +40,10 @@ export const useResumeSchedule = (organizationId: string): ResumeSchedule => {
     } catch (failure: unknown) {
       const described = describe(failure);
       notify.error(t("resumeFailed", { workflow: workflowLabel.name(schedule.workflowId) }), {
-        description: described.requestId === undefined ? described.message : tError("messageWithReference", { message: described.message, requestId: described.requestId }),
+        description:
+          described.requestId === undefined
+            ? described.message
+            : tError("messageWithReference", { message: described.message, requestId: described.requestId }),
       });
     } finally {
       setPendingId(null);

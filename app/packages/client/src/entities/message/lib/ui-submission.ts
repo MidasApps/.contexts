@@ -25,7 +25,8 @@ const FENCE = "```";
 const PATTERN = /^\[ui:(schema-form|picker)\][^\n]*\n```json\n([\s\S]*)\n```$/;
 
 const sentenceOf = (submission: UiSubmission): string => {
-  if (submission.kind === "picker") return `The user chose: ${submission.labels.map((label) => JSON.stringify(label)).join(", ")}. Continue with this choice.`;
+  if (submission.kind === "picker")
+    return `The user chose: ${submission.labels.map((label) => JSON.stringify(label)).join(", ")}. Continue with this choice.`;
   const verb = submission.mode === "create" ? "create" : "update";
   return `The user submitted the form of command ${submission.commandId} (${verb}). Confirm and run that command with exactly these values.`;
 };
@@ -39,14 +40,25 @@ export const formatUiSubmission = (submission: UiSubmission): string => {
   return `[ui:${kind}] ${sentenceOf(submission)}\n${FENCE}json\n${JSON.stringify(payload, null, 2)}\n${FENCE}`;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
-const isStrings = (value: unknown): value is string[] => Array.isArray(value) && value.every((item) => typeof item === "string");
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+const isStrings = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === "string");
 
 const toSubmission = (kind: string, payload: unknown): UiSubmission | null => {
   if (!isRecord(payload)) return null;
-  if (kind === "picker") return isStrings(payload["values"]) && isStrings(payload["labels"]) ? { kind: "picker", values: payload["values"], labels: payload["labels"] } : null;
+  if (kind === "picker")
+    return isStrings(payload["values"]) && isStrings(payload["labels"])
+      ? { kind: "picker", values: payload["values"], labels: payload["labels"] }
+      : null;
   const { commandId, contractId, mode, values } = payload;
-  if (typeof commandId !== "string" || typeof contractId !== "string" || (mode !== "create" && mode !== "update") || !isRecord(values)) return null;
+  if (
+    typeof commandId !== "string" ||
+    typeof contractId !== "string" ||
+    (mode !== "create" && mode !== "update") ||
+    !isRecord(values)
+  )
+    return null;
   return { kind: "schema-form", commandId, contractId, mode, values };
 };
 

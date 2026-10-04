@@ -30,17 +30,26 @@ export function CostCharts({ rows, totalCostMicroUsd, rowHeader, limit = 10 }: C
     <section data-slot="cost-charts" className="flex flex-col gap-2">
       <BarChartFigure
         title={t("title")}
-        description={rows.length > top.length ? t("descriptionTop", { shown: top.length, total: rows.length }) : t("description")}
+        description={
+          rows.length > top.length ? t("descriptionTop", { shown: top.length, total: rows.length }) : t("description")
+        }
         series={[
           { key: "cost", label: t("cost") },
           { key: "cap", label: t("cap") },
         ]}
-        rows={top.map((row) => ({ id: row.id, label: row.label, values: { cost: row.costMicroUsd, cap: row.capMicroUsd } }))}
+        rows={top.map((row) => ({
+          id: row.id,
+          label: row.label,
+          values: { cost: row.costMicroUsd, cap: row.capMicroUsd },
+        }))}
         rowHeader={rowHeader}
         formatValue={(value) => formatCost(value)}
       />
       <p className="text-sm">
-        {t.rich("total", { total: formatCost(totalCostMicroUsd), value: (chunks) => <span className="font-mono font-semibold tabular-nums">{chunks}</span> })}
+        {t.rich("total", {
+          total: formatCost(totalCostMicroUsd),
+          value: (chunks) => <span className="font-mono font-semibold tabular-nums">{chunks}</span>,
+        })}
       </p>
     </section>
   );

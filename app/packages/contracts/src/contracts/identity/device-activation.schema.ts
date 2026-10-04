@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { defineContract } from "../contract.ts";
 import { roleRefsField } from "../access/role-ref.schema.ts";
+import { defineContract } from "../contract.ts";
 import { EXAMPLE_IDS } from "../example-values.ts";
 import { none, sensitive } from "../field-docs.ts";
 import { TenantIdSchema } from "../primitives/ids.schema.ts";
@@ -13,7 +13,9 @@ import { DeviceActivationIdSchema, DeviceIdSchema } from "./ids.schema.ts";
 export const DEVICE_ACTIVATION_TTL_MINUTES = 10;
 
 /** 8 Crockford base32 chars (40 bits), as shown to the admin (SP1 spec §6.4). */
-export const DeviceActivationCodeSchema = z.string().regex(/^[0-9A-HJKMNP-TV-Z]{8}$/, { error: "Expected 8 Crockford base32 chars." });
+export const DeviceActivationCodeSchema = z
+  .string()
+  .regex(/^[0-9A-HJKMNP-TV-Z]{8}$/, { error: "Expected 8 Crockford base32 chars." });
 
 /** What a person types: case, dashes and spaces are normalized by the server (decision 0008). */
 export const DeviceActivationCodeInputSchema = z.string().trim().min(8).max(16);
@@ -85,7 +87,13 @@ export const RedeemDeviceActivationResponseContract = defineContract(RedeemDevic
   id: "identity.RedeemDeviceActivationResponse",
   kind: "view",
   description: "Answer of a successful redeem: the device signs in with the custom token.",
-  examples: [{ deviceId: EXAMPLE_IDS.device, tenantId: EXAMPLE_IDS.organization, customToken: "eyJhbGciOiJSUzI1NiJ9.eyJkZXYiOjF9.c2ln" }],
+  examples: [
+    {
+      deviceId: EXAMPLE_IDS.device,
+      tenantId: EXAMPLE_IDS.organization,
+      customToken: "eyJhbGciOiJSUzI1NiJ9.eyJkZXYiOjF9.c2ln",
+    },
+  ],
   pii: "sensitive",
   tenancyScope: "organization",
   relations: [],

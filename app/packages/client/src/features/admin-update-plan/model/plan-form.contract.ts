@@ -13,25 +13,72 @@ const FEATURE_LIST = /^(?:[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)*(?:[\s,]+|$))*$/u;
  * The API validates the full input again.
  */
 export const PlanFormSchema = z.object({
-  name: z.string().trim().min(1).max(80).meta({ description: "Display name of the plan.", pii: "none", ui: { labelKey: `${LABELS}.name`, order: 1 } }),
-  monthlyBudget: MoneySchema.meta({ description: "Monthly model spend cap.", pii: "none", ui: { widget: "money", labelKey: `${LABELS}.monthlyBudget`, order: 2 } }),
-  monthlyTokens: z.int().nonnegative().meta({ description: "Monthly model token cap.", pii: "none", ui: { labelKey: `${LABELS}.monthlyTokens`, order: 3 } }),
-  maxConnectors: z.int().nonnegative().meta({ description: "Most connectors an organization may configure.", pii: "none", ui: { labelKey: `${LABELS}.maxConnectors`, order: 4 } }),
+  name: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .meta({ description: "Display name of the plan.", pii: "none", ui: { labelKey: `${LABELS}.name`, order: 1 } }),
+  monthlyBudget: MoneySchema.meta({
+    description: "Monthly model spend cap.",
+    pii: "none",
+    ui: { widget: "money", labelKey: `${LABELS}.monthlyBudget`, order: 2 },
+  }),
+  monthlyTokens: z
+    .int()
+    .nonnegative()
+    .meta({
+      description: "Monthly model token cap.",
+      pii: "none",
+      ui: { labelKey: `${LABELS}.monthlyTokens`, order: 3 },
+    }),
+  maxConnectors: z
+    .int()
+    .nonnegative()
+    .meta({
+      description: "Most connectors an organization may configure.",
+      pii: "none",
+      ui: { labelKey: `${LABELS}.maxConnectors`, order: 4 },
+    }),
   // Decision 0046: blank means "not set", so the platform default applies.
-  maxCustomAgents: z.int().nonnegative().optional().meta({ description: "Most custom agents an organization may have.", pii: "none", ui: { labelKey: `${LABELS}.maxCustomAgents`, order: 5 } }),
-  maxCustomSkills: z.int().nonnegative().optional().meta({ description: "Most custom skills an organization may have.", pii: "none", ui: { labelKey: `${LABELS}.maxCustomSkills`, order: 6 } }),
+  maxCustomAgents: z
+    .int()
+    .nonnegative()
+    .optional()
+    .meta({
+      description: "Most custom agents an organization may have.",
+      pii: "none",
+      ui: { labelKey: `${LABELS}.maxCustomAgents`, order: 5 },
+    }),
+  maxCustomSkills: z
+    .int()
+    .nonnegative()
+    .optional()
+    .meta({
+      description: "Most custom skills an organization may have.",
+      pii: "none",
+      ui: { labelKey: `${LABELS}.maxCustomSkills`, order: 6 },
+    }),
   maxCustomInstructionChars: z
     .int()
     .nonnegative()
     .optional()
-    .meta({ description: "Longest instructions of a custom agent or skill, in characters.", pii: "none", ui: { labelKey: `${LABELS}.maxCustomInstructionChars`, order: 7 } }),
+    .meta({
+      description: "Longest instructions of a custom agent or skill, in characters.",
+      pii: "none",
+      ui: { labelKey: `${LABELS}.maxCustomInstructionChars`, order: 7 },
+    }),
   features: z
     .string()
     .trim()
     .max(2000)
     .regex(FEATURE_LIST)
     .optional()
-    .meta({ description: "Feature keys the plan includes, separated by commas.", pii: "none", ui: { widget: "textarea", labelKey: `${LABELS}.features`, order: 8 } }),
+    .meta({
+      description: "Feature keys the plan includes, separated by commas.",
+      pii: "none",
+      ui: { widget: "textarea", labelKey: `${LABELS}.features`, order: 8 },
+    }),
 });
 export type PlanForm = z.infer<typeof PlanFormSchema>;
 
@@ -39,14 +86,24 @@ export const PlanFormContract = defineContract(PlanFormSchema, {
   id: "client.PlanForm",
   kind: "command",
   description: "Client form behind POST and PUT /v1/admin/plans.",
-  examples: [{ name: "Standard", monthlyBudget: { amountMinor: 5000, currency: "USD" }, monthlyTokens: 20_000_000, maxConnectors: 5, features: "web-tools" }],
+  examples: [
+    {
+      name: "Standard",
+      monthlyBudget: { amountMinor: 5000, currency: "USD" },
+      monthlyTokens: 20_000_000,
+      maxConnectors: 5,
+      features: "web-tools",
+    },
+  ],
   pii: "none",
   tenancyScope: "platform",
   relations: [],
 });
 
 /** Unique feature keys in the order typed. */
-export const parseFeatures = (text: string | undefined): string[] => [...new Set((text ?? "").split(/[\s,]+/u).filter(Boolean))];
+export const parseFeatures = (text: string | undefined): string[] => [
+  ...new Set((text ?? "").split(/[\s,]+/u).filter(Boolean)),
+];
 
 export const toUpsertPlanInput = (form: PlanForm): UpsertPlanInput => ({
   name: form.name,
@@ -57,7 +114,9 @@ export const toUpsertPlanInput = (form: PlanForm): UpsertPlanInput => ({
     // A blank cap is left out: the PUT replaces the plan, so it clears a cap set before.
     ...(form.maxCustomAgents === undefined ? {} : { maxCustomAgents: form.maxCustomAgents }),
     ...(form.maxCustomSkills === undefined ? {} : { maxCustomSkills: form.maxCustomSkills }),
-    ...(form.maxCustomInstructionChars === undefined ? {} : { maxCustomInstructionChars: form.maxCustomInstructionChars }),
+    ...(form.maxCustomInstructionChars === undefined
+      ? {}
+      : { maxCustomInstructionChars: form.maxCustomInstructionChars }),
     features: parseFeatures(form.features),
   },
 });

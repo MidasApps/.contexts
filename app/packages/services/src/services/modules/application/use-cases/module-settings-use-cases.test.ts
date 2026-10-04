@@ -12,7 +12,10 @@ describe("getModuleSettings", () => {
   it("returns null values before the first save", async () => {
     const world = buildModuleSettingsWorld();
     const result = await world.services.getModuleSettings(commandFor(world, "viewer-1"));
-    expect(result).toEqual({ ok: true, data: { tenantId, moduleId: "sample", values: null, updatedAt: null, updatedBy: null } });
+    expect(result).toEqual({
+      ok: true,
+      data: { tenantId, moduleId: "sample", values: null, updatedAt: null, updatedBy: null },
+    });
   });
 
   it("fails with UNKNOWN_MODULE for a module without settings", async () => {
@@ -31,8 +34,15 @@ describe("getModuleSettings", () => {
 describe("updateModuleSettings", () => {
   it("stores parsed values, returns them with audit fields, and audits the changed field names", async () => {
     const world = buildModuleSettingsWorld();
-    const result = await world.services.updateModuleSettings({ ...commandFor(world, "owner-1"), values: validValues, requestId: "req-1" });
-    expect(result).toEqual({ ok: true, data: { tenantId, moduleId: "sample", values: validValues, updatedAt: NOW, updatedBy: "owner-1" } });
+    const result = await world.services.updateModuleSettings({
+      ...commandFor(world, "owner-1"),
+      values: validValues,
+      requestId: "req-1",
+    });
+    expect(result).toEqual({
+      ok: true,
+      data: { tenantId, moduleId: "sample", values: validValues, updatedAt: NOW, updatedBy: "owner-1" },
+    });
 
     const read = await world.services.getModuleSettings(commandFor(world, "viewer-1"));
     expect(read).toMatchObject({ ok: true, data: { values: validValues, updatedBy: "owner-1" } });
@@ -49,10 +59,20 @@ describe("updateModuleSettings", () => {
 
   it("audits only the fields that changed on a later save and keeps the creation fields", async () => {
     const world = buildModuleSettingsWorld();
-    await world.services.updateModuleSettings({ ...commandFor(world, "owner-1"), values: validValues, requestId: "req-1" });
-    await world.services.updateModuleSettings({ ...commandFor(world, "owner-1"), values: { ...validValues, greeting: "Oi" }, requestId: "req-2" });
+    await world.services.updateModuleSettings({
+      ...commandFor(world, "owner-1"),
+      values: validValues,
+      requestId: "req-1",
+    });
+    await world.services.updateModuleSettings({
+      ...commandFor(world, "owner-1"),
+      values: { ...validValues, greeting: "Oi" },
+      requestId: "req-2",
+    });
     expect(world.auditLog.entries("tenant")[1]?.changes).toEqual(["greeting"]);
-    expect(world.repository.snapshot()).toEqual([expect.objectContaining({ createdBy: "owner-1", createdAt: NOW, values: { ...validValues, greeting: "Oi" } })]);
+    expect(world.repository.snapshot()).toEqual([
+      expect.objectContaining({ createdBy: "owner-1", createdAt: NOW, values: { ...validValues, greeting: "Oi" } }),
+    ]);
   });
 
   it("rejects values that fail the module contract with one detail per field", async () => {
@@ -77,7 +97,11 @@ describe("updateModuleSettings", () => {
 
   it("denies a viewer (read permission only) before validating", async () => {
     const world = buildModuleSettingsWorld();
-    const result = await world.services.updateModuleSettings({ ...commandFor(world, "viewer-1"), values: {}, requestId: "req-1" });
+    const result = await world.services.updateModuleSettings({
+      ...commandFor(world, "viewer-1"),
+      values: {},
+      requestId: "req-1",
+    });
     expect(result).toMatchObject({ ok: false, error: { code: "ACCESS_DENIED", reason: "PERMISSION_NOT_GRANTED" } });
     expect(world.auditLog.entries("tenant")).toEqual([]);
   });

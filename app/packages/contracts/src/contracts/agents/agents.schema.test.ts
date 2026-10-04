@@ -1,8 +1,12 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type { TenantId } from "../primitives/ids.schema.ts";
 import { AGENT_PERMISSIONS } from "./agent-permissions.ts";
-import { AgentRequestContextContract, AgentRequestContextSchema, type AgentRequestContext } from "./agent-request-context.schema.ts";
-import { AgentSettingsContract, AgentSettingsSchema, type AgentSettings } from "./agent-settings.schema.ts";
+import {
+  type AgentRequestContext,
+  AgentRequestContextContract,
+  AgentRequestContextSchema,
+} from "./agent-request-context.schema.ts";
+import { type AgentSettings, AgentSettingsContract, AgentSettingsSchema } from "./agent-settings.schema.ts";
 import { AgentApprovalRequestContract, AgentApprovalRequestSchema } from "./approval-request.schema.ts";
 import { FORWARDED_HEADERS } from "./forwarded-headers.ts";
 import { ToolUiContract, ToolUiSchema } from "./tool-ui.schema.ts";
@@ -10,14 +14,20 @@ import { ToolUiContract, ToolUiSchema } from "./tool-ui.schema.ts";
 const contracts = [AgentRequestContextContract, AgentSettingsContract, ToolUiContract, AgentApprovalRequestContract];
 
 describe("agent contracts", () => {
-  it.each(contracts.map((contract) => [contract.id, contract] as const))("%s: every example parses", (_id, contract) => {
-    for (const example of contract.meta.examples) expect(contract.schema.safeParse(example).success).toBe(true);
-  });
+  it.each(contracts.map((contract) => [contract.id, contract] as const))(
+    "%s: every example parses",
+    (_id, contract) => {
+      for (const example of contract.meta.examples) expect(contract.schema.safeParse(example).success).toBe(true);
+    },
+  );
 
-  it.each(contracts.map((contract) => [contract.id, contract] as const))("%s: rejects an unknown key", (_id, contract) => {
-    const [example] = contract.meta.examples;
-    expect(contract.schema.safeParse({ ...(example as object), injected: true }).success).toBe(false);
-  });
+  it.each(contracts.map((contract) => [contract.id, contract] as const))(
+    "%s: rejects an unknown key",
+    (_id, contract) => {
+      const [example] = contract.meta.examples;
+      expect(contract.schema.safeParse({ ...(example as object), injected: true }).success).toBe(false);
+    },
+  );
 
   it("brands tenant ids", () => {
     expectTypeOf<AgentRequestContext["tenantId"]>().toEqualTypeOf<TenantId>();
@@ -49,7 +59,9 @@ describe("AgentSettingsSchema", () => {
   const [example] = AgentSettingsContract.meta.examples as [Record<string, unknown>];
 
   it("rejects a negative budget", () => {
-    expect(AgentSettingsSchema.safeParse({ ...example, budget: { monthlyMicroUsd: -1, monthlyTokens: 10 } }).success).toBe(false);
+    expect(
+      AgentSettingsSchema.safeParse({ ...example, budget: { monthlyMicroUsd: -1, monthlyTokens: 10 } }).success,
+    ).toBe(false);
   });
 
   it("accepts only warn or redact for pii", () => {
@@ -58,7 +70,9 @@ describe("AgentSettingsSchema", () => {
 
   it("carries the organization's own cap, null when it set none", () => {
     expect(AgentSettingsSchema.safeParse({ ...example, ownBudget: null }).success).toBe(true);
-    expect(AgentSettingsSchema.safeParse({ ...example, ownBudget: { monthlyMicroUsd: 1, monthlyTokens: 2 } }).success).toBe(true);
+    expect(
+      AgentSettingsSchema.safeParse({ ...example, ownBudget: { monthlyMicroUsd: 1, monthlyTokens: 2 } }).success,
+    ).toBe(true);
     expect(AgentSettingsSchema.safeParse({ ...example, ownBudget: undefined }).success).toBe(false);
   });
 });
@@ -94,7 +108,13 @@ describe("AGENT_PERMISSIONS", () => {
     const ids = AGENT_PERMISSIONS.map((permission) => permission.id);
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).toEqual(
-      expect.arrayContaining(["core.chat.use", "core.mcp.use", "core.file.upload", "core.usage.read", "core.catalog.query"]),
+      expect.arrayContaining([
+        "core.chat.use",
+        "core.mcp.use",
+        "core.file.upload",
+        "core.usage.read",
+        "core.catalog.query",
+      ]),
     );
     for (const permission of AGENT_PERMISSIONS) {
       expect(permission.scope).toBe("tenant");

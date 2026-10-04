@@ -3,7 +3,13 @@
  * mistake gets an immediate message. The server is the validator (`files` upload policy: declared
  * type and size, then the bytes); this list only mirrors it for the copy.
  */
-export const KNOWLEDGE_CONTENT_TYPES = ["application/pdf", "text/plain", "text/markdown", "text/csv", "application/json"] as const;
+export const KNOWLEDGE_CONTENT_TYPES = [
+  "application/pdf",
+  "text/plain",
+  "text/markdown",
+  "text/csv",
+  "application/json",
+] as const;
 export const KNOWLEDGE_EXTENSIONS = [".pdf", ".txt", ".md", ".csv", ".json"] as const;
 export const KNOWLEDGE_MAX_BYTES = 25 * 1024 * 1024;
 

@@ -12,7 +12,8 @@ const startOfDay = (day: string | undefined, plusDays: number): Date | undefined
 };
 
 /** A day of the URL when it is a real calendar day, else `undefined` (a hand-edited URL never becomes a 400). */
-export const validDay = (day: string | undefined): string | undefined => (startOfDay(day, 0) === undefined ? undefined : day);
+export const validDay = (day: string | undefined): string | undefined =>
+  startOfDay(day, 0) === undefined ? undefined : day;
 
 export type TraceDateRange = { readonly startedAfter?: string; readonly startedBefore?: string };
 

@@ -28,7 +28,9 @@ function ActiveText({ active }: { active: PromptVersion | undefined }) {
   if (active === undefined) return <p className="text-sm text-muted-foreground">{t("none")}</p>;
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="text-xs font-medium text-muted-foreground-strong">{t("activeLabel", { version: active.version })}</p>
+      <p className="text-xs font-medium text-muted-foreground-strong">
+        {t("activeLabel", { version: active.version })}
+      </p>
       <pre className="max-h-48 overflow-auto rounded-md bg-muted p-3 font-mono text-body-sm whitespace-pre-wrap">
         {active.body}
       </pre>
@@ -57,7 +59,8 @@ export function AgentInstructions({ organizationId, agentId, agentName, canWrite
       if (isApiErrorStatus(failed.error, 403)) return <NoAccessState />;
       return <ApiErrorState error={failed.error} onRetry={() => void failed.refetch()} retrying={failed.isFetching} />;
     }
-    if (versions.data === undefined || activations.data === undefined) return <LoadingState label={t("loading")} rows={2} />;
+    if (versions.data === undefined || activations.data === undefined)
+      return <LoadingState label={t("loading")} rows={2} />;
     return (
       <>
         <ActiveText active={active} />
@@ -87,7 +90,12 @@ export function AgentInstructions({ organizationId, agentId, agentName, canWrite
 
   // A group, not a region: the page shows one per agent with the same title.
   return (
-    <div role="group" aria-labelledby={headingId} data-slot="agent-instructions" className="flex flex-col gap-3 rounded-lg border border-border bg-background p-3 sm:p-4">
+    <div
+      role="group"
+      aria-labelledby={headingId}
+      data-slot="agent-instructions"
+      className="flex flex-col gap-3 rounded-lg border border-border bg-background p-3 sm:p-4"
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
           <h4 id={headingId} className="text-sm font-semibold">
@@ -96,7 +104,13 @@ export function AgentInstructions({ organizationId, agentId, agentName, canWrite
           <p className="text-xs text-muted-foreground">{t("description")}</p>
         </div>
         {canWrite ? (
-          <Button size="sm" className="shrink-0" disabled={!online || versions.data === undefined} onClick={() => setWriting(true)} aria-label={t("writeFor", { agent: agentName })}>
+          <Button
+            size="sm"
+            className="shrink-0"
+            disabled={!online || versions.data === undefined}
+            onClick={() => setWriting(true)}
+            aria-label={t("writeFor", { agent: agentName })}
+          >
             <Icon name="pencil" />
             {t("write")}
           </Button>
@@ -104,7 +118,14 @@ export function AgentInstructions({ organizationId, agentId, agentName, canWrite
       </div>
       {body()}
       {canWrite ? (
-        <AddendumVersionDialog organizationId={organizationId} agentId={agentId} agentName={agentName} initialBody={active?.body ?? ""} open={writing} onOpenChange={setWriting} />
+        <AddendumVersionDialog
+          organizationId={organizationId}
+          agentId={agentId}
+          agentName={agentName}
+          initialBody={active?.body ?? ""}
+          open={writing}
+          onOpenChange={setWriting}
+        />
       ) : null}
     </div>
   );

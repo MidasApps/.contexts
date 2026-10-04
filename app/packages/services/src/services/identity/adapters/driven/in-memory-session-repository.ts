@@ -19,7 +19,8 @@ const isAfter = (record: SessionRecord, after: readonly [string, string]): boole
 export const createInMemorySessionRepository = (): InMemorySessionRepository => {
   const rows = new Map<string, SessionRecord>();
   let sequence = 0;
-  const find = (predicate: (record: SessionRecord) => boolean) => Promise.resolve([...rows.values()].find(predicate) ?? null);
+  const find = (predicate: (record: SessionRecord) => boolean) =>
+    Promise.resolve([...rows.values()].find(predicate) ?? null);
   const update = (id: string, patch: Partial<SessionRecord>) => {
     const row = rows.get(id);
     if (row !== undefined) rows.set(id, { ...row, ...patch });
@@ -36,7 +37,13 @@ export const createInMemorySessionRepository = (): InMemorySessionRepository => 
         .filter((record) => record.uid === uid && record.revokedAt === null)
         .sort(newestFirst)
         .filter((record) => page.after === undefined || isAfter(record, page.after));
-      return Promise.resolve(pageFromOverfetch({ fetched: matching.slice(0, page.limit + 1), limit: page.limit, positionOf: (r) => [r.createdAt, r.id] }));
+      return Promise.resolve(
+        pageFromOverfetch({
+          fetched: matching.slice(0, page.limit + 1),
+          limit: page.limit,
+          positionOf: (r) => [r.createdAt, r.id],
+        }),
+      );
     },
     touch: ({ id, lastSeenAt }) => Promise.resolve(update(id, { lastSeenAt })),
     setImpersonation: ({ id, impersonationSessionId }) => Promise.resolve(update(id, { impersonationSessionId })),

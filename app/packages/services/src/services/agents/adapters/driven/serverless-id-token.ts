@@ -30,7 +30,10 @@ export type IdTokenMinter = {
  * account). Used only outside `local`, where `MASTRA_AUDIENCE` is required.
  * @param audience the Mastra service URL (Cloud Run audience).
  */
-export const createServerlessIdTokenSource = (args: { audience: string; auth?: IdTokenMinter }): ServerlessIdTokenSource => {
+export const createServerlessIdTokenSource = (args: {
+  audience: string;
+  auth?: IdTokenMinter;
+}): ServerlessIdTokenSource => {
   const auth: IdTokenMinter = args.auth ?? new GoogleAuth();
   let client: ReturnType<IdTokenMinter["getIdTokenClient"]> | undefined;
   return {

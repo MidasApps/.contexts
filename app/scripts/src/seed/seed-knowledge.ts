@@ -8,8 +8,12 @@ import {
   knowledgePortFromUseCases,
   resolveAgentEnv,
 } from "@core/agents";
-import { createKnowledgeServices, createPostgresClient, createPostgresKnowledgeRepository, loadServicesEnvWith } from "@core/services";
-
+import {
+  createKnowledgeServices,
+  createPostgresClient,
+  createPostgresKnowledgeRepository,
+  loadServicesEnvWith,
+} from "@core/services";
 
 /** Two sample Markdown documents of the demo organization (generic, no business domain). */
 export const SAMPLE_KNOWLEDGE_DOCUMENTS = [
@@ -42,7 +46,10 @@ export const SAMPLE_KNOWLEDGE_DOCUMENTS = [
  * second run finds every document unchanged.
  * @returns a one-line summary for the console.
  */
-export const seedKnowledgeBase = async (deps: KnowledgeIndexingDeps & { readonly aiCatalog?: unknown }, tenantId: string): Promise<string> => {
+export const seedKnowledgeBase = async (
+  deps: KnowledgeIndexingDeps & { readonly aiCatalog?: unknown },
+  tenantId: string,
+): Promise<string> => {
   const reindex = createCatalogReindexWorkflow(deps);
   // No request context: an in-process run carries no caller principal, which the workflow requires.
   const run = await (await reindex.createRun()).start({ inputData: {} });
@@ -76,11 +83,15 @@ export const seedKnowledgeBase = async (deps: KnowledgeIndexingDeps & { readonly
  * base. `close` ends the connection pool.
  * @throws {InvalidEnvError} naming the invalid variables (fail fast).
  */
-export const createKnowledgeSeedDeps = (processEnv: Record<string, string | undefined>): { deps: KnowledgeIndexingDeps; close: () => Promise<void> } => {
+export const createKnowledgeSeedDeps = (
+  processEnv: Record<string, string | undefined>,
+): { deps: KnowledgeIndexingDeps; close: () => Promise<void> } => {
   const env = resolveAgentEnv(loadServicesEnvWith(AgentEnvSchema, processEnv));
   const models = createModelProvider(env);
   const embeddingModelId = embeddingModelIdOf(env);
   const sql = createPostgresClient({ DATABASE_URL: env.DATABASE_URL }, { max: 2 });
-  const knowledge = knowledgePortFromUseCases(createKnowledgeServices({ repository: createPostgresKnowledgeRepository(sql), embeddingModel: embeddingModelId }));
+  const knowledge = knowledgePortFromUseCases(
+    createKnowledgeServices({ repository: createPostgresKnowledgeRepository(sql), embeddingModel: embeddingModelId }),
+  );
   return { deps: { knowledge, embedding: models.embedding, embeddingModelId }, close: () => sql.end() };
 };

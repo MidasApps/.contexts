@@ -4,17 +4,21 @@ import type { UIMessage } from "ai";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, createFakeApi, noContent, ok, page, type FakeApi } from "#/shared/testing/fake-api.ts";
+import { apiError, createFakeApi, type FakeApi, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { renderWithClient } from "#/shared/testing/render-client.tsx";
 import { TooltipProvider } from "#/shared/ui/atoms/Tooltip/Tooltip.tsx";
-import { createFakeChatTransport, textChunks, type FakeChatTransport } from "../testing/fake-chat-transport.ts";
+import { createFakeChatTransport, type FakeChatTransport, textChunks } from "../testing/fake-chat-transport.ts";
 import { ChatPanel, type ChatPanelProps } from "./chat-panel.tsx";
 
 const SCOPE = { organizationId: IDS.organization, projectId: IDS.project };
 const CONVERSATION_ID = "Cv8sK2lPq0WnR5tYu3bV";
 
-const conversation = (overrides: Record<string, unknown> = {}) => ({ ...(ConversationContract.meta.examples[0] as object), id: CONVERSATION_ID, ...overrides });
+const conversation = (overrides: Record<string, unknown> = {}) => ({
+  ...(ConversationContract.meta.examples[0] as object),
+  id: CONVERSATION_ID,
+  ...overrides,
+});
 
 const stored: UIMessage[] = [
   { id: "u-0", role: "user", parts: [{ type: "text", text: "Qual é o prazo?" }] },
@@ -39,7 +43,8 @@ const setup = (props: Partial<ChatPanelProps> = {}, api?: FakeApi) => {
   return { ...view, transport, field: () => screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Mensagem" }) };
 };
 
-const status = (): string => screen.getAllByRole("status").find((node) => node.getAttribute("aria-live") === "polite")?.textContent ?? "";
+const status = (): string =>
+  screen.getAllByRole("status").find((node) => node.getAttribute("aria-live") === "polite")?.textContent ?? "";
 
 const firstStream = async (transport: FakeChatTransport, index = 0) => {
   await waitFor(() => expect(transport.streams.length).toBeGreaterThan(index));
@@ -76,7 +81,10 @@ describe("ChatPanel", () => {
     expect(transport.streams).toHaveLength(0);
     await user.keyboard("{Enter}");
     const stream = await firstStream(transport);
-    expect(stream.messages.at(-1)).toMatchObject({ role: "user", parts: [{ type: "text", text: "Quais dados eu posso consultar?" }] });
+    expect(stream.messages.at(-1)).toMatchObject({
+      role: "user",
+      parts: [{ type: "text", text: "Quais dados eu posso consultar?" }],
+    });
   });
 
   it("goes from connecting to responding to finished, announcing each step once", async () => {
@@ -96,7 +104,11 @@ describe("ChatPanel", () => {
     await expectNoAxeViolations(container);
 
     act(() => {
-      stream.emit({ type: "text-delta", id: "t-1", delta: " 30 dias." }, { type: "text-end", id: "t-1" }, { type: "finish" });
+      stream.emit(
+        { type: "text-delta", id: "t-1", delta: " 30 dias." },
+        { type: "text-end", id: "t-1" },
+        { type: "finish" },
+      );
       stream.close();
     });
     await waitFor(() => expect(status()).toBe("Resposta concluída."));
@@ -168,7 +180,10 @@ describe("ChatPanel", () => {
   it("resumes the answer on mount when the conversation has an active run", async () => {
     const transport = createFakeChatTransport();
     transport.resumable = true;
-    setup({ conversationId: CONVERSATION_ID, transport }, historyApi({ activeRunId: "run-7", activeStreamStartedAt: "2026-09-30T12:00:00.000Z" }));
+    setup(
+      { conversationId: CONVERSATION_ID, transport },
+      historyApi({ activeRunId: "run-7", activeStreamStartedAt: "2026-09-30T12:00:00.000Z" }),
+    );
     const stream = await firstStream(transport);
     expect(stream.trigger).toBe("resume");
     expect(transport.resumeCalls()).toBe(1);
@@ -189,7 +204,10 @@ describe("ChatPanel", () => {
     expect(await screen.findByRole("heading", { name: "Como posso ajudar?" })).toBeTruthy();
     missing.unmount();
 
-    const api = createFakeApi({ [`GET /v1/conversations/${CONVERSATION_ID}`]: apiError(500, "INTERNAL_ERROR"), [`GET /v1/conversations/${CONVERSATION_ID}/messages`]: page(stored) });
+    const api = createFakeApi({
+      [`GET /v1/conversations/${CONVERSATION_ID}`]: apiError(500, "INTERNAL_ERROR"),
+      [`GET /v1/conversations/${CONVERSATION_ID}/messages`]: page(stored),
+    });
     const { user, container } = setup({ conversationId: CONVERSATION_ID }, api);
     expect(await screen.findByText("Não foi possível carregar a conversa.", undefined, { timeout: 5000 })).toBeTruthy();
     expect(screen.getByText(/Referência/)).toBeTruthy();
@@ -201,7 +219,9 @@ describe("ChatPanel", () => {
 
   it("shows the error with its reason, the request reference and a retry that sends again", async () => {
     const { user, transport, field, container } = setup();
-    transport.failNextSend(new ApiError({ status: 429, code: "RATE_LIMITED", message: "Too many requests.", requestId: "01K6REQ429" }));
+    transport.failNextSend(
+      new ApiError({ status: 429, code: "RATE_LIMITED", message: "Too many requests.", requestId: "01K6REQ429" }),
+    );
     await user.type(field(), "oi{Enter}");
     const alert = await screen.findByRole("alert");
     expect(within(alert).getByText("Não foi possível responder")).toBeTruthy();
@@ -219,7 +239,9 @@ describe("ChatPanel", () => {
     const { user, transport, field } = setup();
     await user.type(field(), "oi{Enter}");
     const stream = await firstStream(transport);
-    act(() => stream.emit({ type: "start", messageId: "a-1" }, { type: "error", errorText: "provider exploded: sk-secret" }));
+    act(() =>
+      stream.emit({ type: "start", messageId: "a-1" }, { type: "error", errorText: "provider exploded: sk-secret" }),
+    );
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("A resposta falhou antes de terminar. Tente de novo.");
     expect(alert.textContent).not.toContain("sk-secret");
@@ -270,7 +292,9 @@ describe("ChatPanel", () => {
 
   it("offers a retry when the send failed for lack of network", async () => {
     const { user, transport, field } = setup();
-    transport.failNextSend(new ApiError({ status: 0, code: "NETWORK_ERROR", message: "Network request failed.", requestId: "req-1" }));
+    transport.failNextSend(
+      new ApiError({ status: 0, code: "NETWORK_ERROR", message: "Network request failed.", requestId: "req-1" }),
+    );
     await user.type(field(), "oi{Enter}");
     await waitFor(() => expect(status()).toBe("Sem conexão."));
     await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
@@ -284,7 +308,10 @@ describe("ChatPanel", () => {
     act(() => {
       stream.emit(
         { type: "start", messageId: "a-1", messageMetadata: { confidence: "low" } },
-        { type: "data-tripwire", data: { reason: "BUDGET_EXCEEDED", metadata: { processorId: "tenant-budget-guard" } } },
+        {
+          type: "data-tripwire",
+          data: { reason: "BUDGET_EXCEEDED", metadata: { processorId: "tenant-budget-guard" } },
+        },
         { type: "text-start", id: "t-1" },
         { type: "text-delta", id: "t-1", delta: "Não encontrei fonte." },
         { type: "text-end", id: "t-1" },
@@ -332,7 +359,10 @@ describe("ChatPanel", () => {
     const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const api = historyApi({ activeRunId: "run-7", activeStreamStartedAt: "2026-09-30T12:00:00.000Z" });
     const partial: UIMessage = { id: "a-7", role: "assistant", parts: [{ type: "text", text: "Primeira etapa." }] };
-    api.route(`GET /v1/conversations/${CONVERSATION_ID}/messages`, page([...stored, { id: "u-7", role: "user", parts: [{ type: "text", text: "E depois?" }] }, partial]));
+    api.route(
+      `GET /v1/conversations/${CONVERSATION_ID}/messages`,
+      page([...stored, { id: "u-7", role: "user", parts: [{ type: "text", text: "E depois?" }] }, partial]),
+    );
     const transport = createFakeChatTransport();
     transport.resumable = true;
     setup({ conversationId: CONVERSATION_ID, transport }, api);
@@ -356,7 +386,9 @@ describe("ChatPanel", () => {
   it("loads earlier messages on demand", async () => {
     const api = historyApi();
     const older: UIMessage[] = [{ id: "u-old", role: "user", parts: [{ type: "text", text: "Mensagem antiga" }] }];
-    api.route(`GET /v1/conversations/${CONVERSATION_ID}/messages`, ({ query }) => (query.get("cursor") === "1" ? page(older) : page(stored, { cursor: "1" })));
+    api.route(`GET /v1/conversations/${CONVERSATION_ID}/messages`, ({ query }) =>
+      query.get("cursor") === "1" ? page(older) : page(stored, { cursor: "1" }),
+    );
     const { user } = setup({ conversationId: CONVERSATION_ID }, api);
     await user.click(await screen.findByRole("button", { name: "Carregar mensagens anteriores" }));
     expect(await screen.findByText("Mensagem antiga")).toBeTruthy();

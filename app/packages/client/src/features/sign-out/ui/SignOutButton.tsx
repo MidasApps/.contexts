@@ -8,7 +8,11 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { useSignOut } from "../model/use-sign-out.ts";
 
 /** "Sign out" as a button (pages such as a failed invitation); menus call `useSignOut` directly. */
-export function SignOutButton({ children, landing, ...props }: Omit<ComponentProps<typeof Button>, "onClick" | "pending"> & { landing?: Route | null }) {
+export function SignOutButton({
+  children,
+  landing,
+  ...props
+}: Omit<ComponentProps<typeof Button>, "onClick" | "pending"> & { landing?: Route | null }) {
   const t = useTranslations("auth.signOut");
   const { signOut, pending } = useSignOut(landing);
   return (

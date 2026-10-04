@@ -29,7 +29,12 @@ describe("loadMastraEnv", () => {
       PORT: 4111,
       LOG_LEVEL: "info",
       MASTRA_SERVER_TIMEOUT_MS: 900_000,
-      MASTRA_CORS_ORIGINS: ["http://localhost:3000", "http://localhost:1420", "tauri://localhost", "http://tauri.localhost"],
+      MASTRA_CORS_ORIGINS: [
+        "http://localhost:3000",
+        "http://localhost:1420",
+        "tauri://localhost",
+        "http://tauri.localhost",
+      ],
     });
   });
 
@@ -46,15 +51,16 @@ describe("loadMastraEnv", () => {
   });
 
   it("parses MASTRA_CORS_ORIGINS as a comma-separated list of origins", () => {
-    expect(loadMastraEnv({ ...LOCAL_ENV, MASTRA_CORS_ORIGINS: "http://localhost:3000, http://localhost:5173" }).MASTRA_CORS_ORIGINS).toEqual([
-      "http://localhost:3000",
-      "http://localhost:5173",
-    ]);
+    expect(
+      loadMastraEnv({ ...LOCAL_ENV, MASTRA_CORS_ORIGINS: "http://localhost:3000, http://localhost:5173" })
+        .MASTRA_CORS_ORIGINS,
+    ).toEqual(["http://localhost:3000", "http://localhost:5173"]);
     expect(() => loadMastraEnv({ ...LOCAL_ENV, MASTRA_CORS_ORIGINS: "*" })).toThrow(/MASTRA_CORS_ORIGINS/);
   });
 
   it("names every invalid variable of the services and Mastra schemas, never its value", () => {
-    const load = () => loadMastraEnv({ ...LOCAL_ENV, DATABASE_URL: "mysql://s3cr3t@db", PORT: "0", LOG_LEVEL: "trace" });
+    const load = () =>
+      loadMastraEnv({ ...LOCAL_ENV, DATABASE_URL: "mysql://s3cr3t@db", PORT: "0", LOG_LEVEL: "trace" });
 
     expect(load).toThrow(InvalidEnvError);
     expect(load).toThrow(/DATABASE_URL.*PORT.*LOG_LEVEL/);

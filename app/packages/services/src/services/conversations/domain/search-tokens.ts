@@ -24,8 +24,10 @@ const distinct = (words: readonly string[], cap: number): string[] => [...new Se
  * Search tokens of a conversation (spec §4.1, decision 0033): lower-case, accent-folded words of
  * the title and the summary, distinct, at most 50, title words first.
  */
-export const buildSearchTokens = (input: { readonly title: string | null; readonly summary: string | null }): string[] =>
-  distinct([...wordsOf(input.title ?? ""), ...wordsOf(input.summary ?? "")], MAX_SEARCH_TOKENS);
+export const buildSearchTokens = (input: {
+  readonly title: string | null;
+  readonly summary: string | null;
+}): string[] => distinct([...wordsOf(input.title ?? ""), ...wordsOf(input.summary ?? "")], MAX_SEARCH_TOKENS);
 
 /** Tokens of a search query `q`, folded the same way (at most 30, the `array-contains-any` cap). */
 export const queryTokens = (q: string): string[] => distinct(wordsOf(q), MAX_QUERY_TOKENS);

@@ -13,10 +13,18 @@ export const CITATION_GUARD_ID = "citation-guard";
 
 export type CitationConfidence = "normal" | "low";
 
-export type GuardedAnswer = { readonly text: string; readonly confidence: CitationConfidence; readonly removed: readonly string[]; readonly cited: readonly string[] };
+export type GuardedAnswer = {
+  readonly text: string;
+  readonly confidence: CitationConfidence;
+  readonly removed: readonly string[];
+  readonly cited: readonly string[];
+};
 
 /** Pure core of the guard: strips markers of ids outside `retrievedIds` and grades the answer. */
-export const guardCitations = (input: { readonly text: string; readonly retrievedIds: ReadonlySet<string> }): GuardedAnswer => {
+export const guardCitations = (input: {
+  readonly text: string;
+  readonly retrievedIds: ReadonlySet<string>;
+}): GuardedAnswer => {
   const removed: string[] = [];
   const cited: string[] = [];
   const text = input.text.replace(CITATION_MARKER_PATTERN, (marker: string, id: string) => {
@@ -37,7 +45,9 @@ type Part = MastraDBMessage["content"]["parts"][number];
 // Tool invocations of the turn (search results): every citation id they carry was retrieved.
 const retrievedIdsOf = (args: Pick<ProcessOutputResultArgs, "messages" | "result">): Set<string> => {
   const fromSteps = (args.result.steps ?? []).map((step) => JSON.stringify(step.toolResults ?? []));
-  const fromParts = args.messages.flatMap((message) => message.content.parts.filter((part: Part) => part.type !== "text").map((part: Part) => JSON.stringify(part)));
+  const fromParts = args.messages.flatMap((message) =>
+    message.content.parts.filter((part: Part) => part.type !== "text").map((part: Part) => JSON.stringify(part)),
+  );
   return new Set([...fromSteps, ...fromParts].flatMap(extractCitationIds));
 };
 
@@ -52,15 +62,22 @@ const guardMessage = (message: MastraDBMessage, retrievedIds: ReadonlySet<string
     if (guarded.confidence === "normal") confidence = "normal";
     return { ...part, text: guarded.text };
   });
-  const legacy = typeof message.content.content === "string" ? { content: guardCitations({ text: message.content.content, retrievedIds }).text } : {};
-  return { ...message, content: { ...message.content, ...legacy, parts, metadata: { ...message.content.metadata, confidence } } };
+  const legacy =
+    typeof message.content.content === "string"
+      ? { content: guardCitations({ text: message.content.content, retrievedIds }).text }
+      : {};
+  return {
+    ...message,
+    content: { ...message.content, ...legacy, parts, metadata: { ...message.content.metadata, confidence } },
+  };
 };
 
 /** Output processor of the knowledge agent (spec §6: its guardrail profile). */
 export const createCitationGuard = (): OutputProcessor => ({
   id: CITATION_GUARD_ID,
   name: "Citation guard",
-  description: "Strips citations of passages not retrieved in this turn and marks ungrounded answers as low confidence.",
+  description:
+    "Strips citations of passages not retrieved in this turn and marks ungrounded answers as low confidence.",
   processOutputResult: (args) => {
     const retrievedIds = retrievedIdsOf(args);
     return args.messages.map((message) => guardMessage(message, retrievedIds));

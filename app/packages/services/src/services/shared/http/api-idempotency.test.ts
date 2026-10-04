@@ -22,7 +22,10 @@ describe("replayResponse", () => {
   });
 
   it("rewrites the request id of a stored error envelope and leaves success bodies alone", async () => {
-    const error = replayResponse({ status: 404, body: '{"error":{"code":"NOT_FOUND","message":"x","requestId":"req-1"}}' }, "req-2");
+    const error = replayResponse(
+      { status: 404, body: '{"error":{"code":"NOT_FOUND","message":"x","requestId":"req-1"}}' },
+      "req-2",
+    );
     expect(await error.json()).toEqual({ error: { code: "NOT_FOUND", message: "x", requestId: "req-2" } });
     const success = replayResponse({ status: 200, body: '{"data":{"requestId":"req-1"}}' }, "req-2");
     expect(await success.json()).toEqual({ data: { requestId: "req-1" } });

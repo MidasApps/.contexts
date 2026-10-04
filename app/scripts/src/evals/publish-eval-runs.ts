@@ -10,7 +10,9 @@ const ReportSchema = z.object({
   verdict: z.enum(["passed", "failed"]),
   startedAt: z.string(),
   finishedAt: z.string(),
-  gate: z.object({ scorers: z.array(z.object({ scorerId: z.string(), mean: z.number().nullable(), floor: z.number() })) }),
+  gate: z.object({
+    scorers: z.array(z.object({ scorerId: z.string(), mean: z.number().nullable(), floor: z.number() })),
+  }),
   bigqueryRows: z.array(z.object({ git_sha: z.string().nullable() })),
 });
 
@@ -24,7 +26,9 @@ export const toEvalRunRecord = (raw: unknown): EvalRunRecord | null => {
     datasetName: data.dataset.name,
     datasetVersion: data.dataset.version,
     itemCount: data.dataset.itemCount,
-    scores: data.gate.scorers.flatMap((scorer) => (scorer.mean === null ? [] : [{ scorer: scorer.scorerId, mean: scorer.mean, baseline: Math.max(0, scorer.floor) }])),
+    scores: data.gate.scorers.flatMap((scorer) =>
+      scorer.mean === null ? [] : [{ scorer: scorer.scorerId, mean: scorer.mean, baseline: Math.max(0, scorer.floor) }],
+    ),
     verdict: data.verdict,
     source: "ci",
     promptVersionId: null,
@@ -48,7 +52,9 @@ export const publishEvalRuns = async (args: {
 }): Promise<{ readonly published: string[]; readonly skipped: string[] }> => {
   if (args.targetUrl === undefined || args.targetUrl === "") return { published: [], skipped: [] };
   const fetchFn = args.fetch ?? fetch;
-  const files = readdirSync(args.dir).filter((file) => file.endsWith(".json")).sort();
+  const files = readdirSync(args.dir)
+    .filter((file) => file.endsWith(".json"))
+    .sort();
   const published: string[] = [];
   const skipped: string[] = [];
   for (const file of files) {
@@ -57,8 +63,15 @@ export const publishEvalRuns = async (args: {
       skipped.push(file);
       continue;
     }
-    const headers: Record<string, string> = { "content-type": "application/json", ...(args.authorization === undefined ? {} : { authorization: args.authorization }) };
-    const response = await fetchFn(`${args.targetUrl.replace(/\/+$/, "")}/console/eval-runs`, { method: "POST", headers, body: JSON.stringify(record) });
+    const headers: Record<string, string> = {
+      "content-type": "application/json",
+      ...(args.authorization === undefined ? {} : { authorization: args.authorization }),
+    };
+    const response = await fetchFn(`${args.targetUrl.replace(/\/+$/, "")}/console/eval-runs`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(record),
+    });
     if (!response.ok) throw new Error(`publishing ${file} failed with HTTP ${response.status}`);
     published.push(file);
   }

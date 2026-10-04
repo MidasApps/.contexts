@@ -3,20 +3,36 @@ import { configure, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
-import { buildTraceDetail, buildTraceSummary, numberedPage, OBS_IDS } from "#/shared/testing/admin-observability-fixtures.ts";
-import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, ok, type FakeRoutes } from "#/shared/testing/fake-api.ts";
-import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildCatalogAgent } from "#/entities/agent-catalog/agent-catalog.fixture.ts";
+import {
+  buildTraceDetail,
+  buildTraceSummary,
+  numberedPage,
+  OBS_IDS,
+} from "#/shared/testing/admin-observability-fixtures.ts";
+import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
+import { apiError, FAKE_REQUEST_ID, type FakeRoutes, ok } from "#/shared/testing/fake-api.ts";
+import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsTracesView } from "./SettingsTracesView.tsx";
 
 const READER: Permission[] = ["core.organization.read", "core.project.read", "core.trace.read"];
 const OK = buildTraceSummary();
-const FAILED = buildTraceSummary({ traceId: OBS_IDS.otherTrace, name: "workflow run: usage-report", agentId: null, workflowId: "usage-report", status: "error", durationMs: null, costMicroUsd: null });
+const FAILED = buildTraceSummary({
+  traceId: OBS_IDS.otherTrace,
+  name: "workflow run: usage-report",
+  agentId: null,
+  workflowId: "usage-report",
+  status: "error",
+  durationMs: null,
+  costMicroUsd: null,
+});
 
 const plain = (text: string | null): string => (text ?? "").replace(/\s/gu, " ");
 
-const renderView = (routes: FakeRoutes = {}, options: { permissions?: readonly Permission[]; rest?: string; search?: string } = {}) =>
+const renderView = (
+  routes: FakeRoutes = {},
+  options: { permissions?: readonly Permission[]; rest?: string; search?: string } = {},
+) =>
   renderApp(
     <main>
       <SettingsTracesView />
@@ -42,8 +58,12 @@ describe("SettingsTracesView", () => {
     expect(within(row).getByText("Agente assistant")).toBeDefined();
     expect(within(row).getByText("OK")).toBeDefined();
     expect(plain(row.textContent)).toContain("1.800 / 350");
-    expect(within(table).getByRole("row", { name: /workflow run: usage-report/u }).textContent).toContain("Fluxo usage-report");
-    expect(within(row).getByRole("link", { name: "Abrir o rastro agent run: assistant" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/traces/${OBS_IDS.trace}`);
+    expect(within(table).getByRole("row", { name: /workflow run: usage-report/u }).textContent).toContain(
+      "Fluxo usage-report",
+    );
+    expect(within(row).getByRole("link", { name: "Abrir o rastro agent run: assistant" }).getAttribute("href")).toBe(
+      `/o/${IDS.organization}/settings/traces/${OBS_IDS.trace}`,
+    );
     const query = listQueries(api).at(-1);
     expect(query?.get("organizationId")).toBe(IDS.organization);
     expect(query?.get("page")).toBe("0");
@@ -51,24 +71,49 @@ describe("SettingsTracesView", () => {
   });
 
   it("picks the agent by name from the organization's catalog when the viewer may read it", async () => {
-    const catalog = [buildCatalogAgent(), buildCatalogAgent({ key: "sample-helper", name: "Sample helper", source: "module", moduleId: "sample" }), buildCatalogAgent({ key: "Cu5tomAgent000000001" as never, name: "Guide", source: "custom" })];
-    const { user, api, container } = renderView({ "GET /v1/agents": ok(catalog) }, { permissions: [...READER, "core.agent-settings.read"] });
+    const catalog = [
+      buildCatalogAgent(),
+      buildCatalogAgent({ key: "sample-helper", name: "Sample helper", source: "module", moduleId: "sample" }),
+      buildCatalogAgent({ key: "Cu5tomAgent000000001" as never, name: "Guide", source: "custom" }),
+    ];
+    const { user, api, container } = renderView(
+      { "GET /v1/agents": ok(catalog) },
+      { permissions: [...READER, "core.agent-settings.read"] },
+    );
     await screen.findByRole("table", { name: "Rastros de Northwind" });
     const filters = screen.getByRole("search", { name: "Filtrar rastros" });
     expect(within(filters).queryByRole("textbox", { name: "Agente" })).toBeNull();
-    await waitFor(() => expect(within(screen.getByRole("search", { name: "Filtrar rastros" })).getByRole("combobox", { name: "Agente" }).hasAttribute("disabled")).toBe(false));
-    await user.click(within(screen.getByRole("search", { name: "Filtrar rastros" })).getByRole("combobox", { name: "Agente" }));
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("search", { name: "Filtrar rastros" }))
+          .getByRole("combobox", { name: "Agente" })
+          .hasAttribute("disabled"),
+      ).toBe(false),
+    );
+    await user.click(
+      within(screen.getByRole("search", { name: "Filtrar rastros" })).getByRole("combobox", { name: "Agente" }),
+    );
     // Custom agents have no kebab-case key the trace filter accepts, so they are not offered.
-    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual(["Qualquer agente", "Assistente", "Conhecimento", "Sample helper"]);
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
+      "Qualquer agente",
+      "Assistente",
+      "Conhecimento",
+      "Sample helper",
+    ]);
     await user.click(screen.getByRole("option", { name: "Sample helper" }));
     await waitFor(() => expect(listQueries(api).at(-1)?.get("agentId")).toBe("sample-helper"));
     await expectNoAxeViolations(container);
   });
 
   it("falls back to typing the agent key when the catalog cannot be read", async () => {
-    renderView({ "GET /v1/agents": apiError(403, "FORBIDDEN") }, { permissions: [...READER, "core.agent-settings.read"] });
+    renderView(
+      { "GET /v1/agents": apiError(403, "FORBIDDEN") },
+      { permissions: [...READER, "core.agent-settings.read"] },
+    );
     await screen.findByRole("table", { name: "Rastros de Northwind" });
-    expect(await within(screen.getByRole("search", { name: "Filtrar rastros" })).findByRole("textbox", { name: "Agente" })).toBeDefined();
+    expect(
+      await within(screen.getByRole("search", { name: "Filtrar rastros" })).findByRole("textbox", { name: "Agente" }),
+    ).toBeDefined();
   });
 
   it("without the catalog permission, filters by a typed agent key and refuses an invalid one without a request", async () => {
@@ -89,17 +134,24 @@ describe("SettingsTracesView", () => {
   it("pages forward when the API says there is more", async () => {
     const { user, api } = renderView({ "GET /v1/traces": numberedPage([OK], true) });
     await screen.findByRole("table", { name: "Rastros de Northwind" });
-    await user.click(within(screen.getByRole("navigation", { name: "Páginas de rastros" })).getByRole("button", { name: /Próxima/u }));
+    await user.click(
+      within(screen.getByRole("navigation", { name: "Páginas de rastros" })).getByRole("button", { name: /Próxima/u }),
+    );
     await waitFor(() => expect(listQueries(api).at(-1)?.get("page")).toBe("1"));
   });
 
   it("keeps the status filter and the page in the URL, so a reload or a shared link opens the same list", async () => {
-    const { user, api, router } = renderView({ "GET /v1/traces": numberedPage([OK], true) }, { search: "?status=error&page=2" });
+    const { user, api, router } = renderView(
+      { "GET /v1/traces": numberedPage([OK], true) },
+      { search: "?status=error&page=2" },
+    );
     await screen.findByRole("table", { name: "Rastros de Northwind" });
     const first = listQueries(api)[0];
     expect(first?.get("status")).toBe("error");
     expect(first?.get("page")).toBe("1");
-    await user.click(within(screen.getByRole("navigation", { name: "Páginas de rastros" })).getByRole("button", { name: /Próxima/u }));
+    await user.click(
+      within(screen.getByRole("navigation", { name: "Páginas de rastros" })).getByRole("button", { name: /Próxima/u }),
+    );
     await waitFor(() => expect(router.current()).toBe(`/o/${IDS.organization}/settings/traces?status=error&page=3`));
   });
 
@@ -125,9 +177,14 @@ describe("SettingsTracesView", () => {
   });
 
   it("opens one trace with its numbers and span tree, scoped to the organization, with a way back", async () => {
-    const { container, api } = renderView({ "GET /v1/traces/:traceId": { status: 200, body: { data: buildTraceDetail() } } }, { rest: OBS_IDS.trace });
+    const { container, api } = renderView(
+      { "GET /v1/traces/:traceId": { status: 200, body: { data: buildTraceDetail() } } },
+      { rest: OBS_IDS.trace },
+    );
     expect(await screen.findByRole("heading", { level: 1, name: "agent run: assistant" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Voltar aos rastros" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/traces`);
+    expect(screen.getByRole("link", { name: "Voltar aos rastros" }).getAttribute("href")).toBe(
+      `/o/${IDS.organization}/settings/traces`,
+    );
     expect(await screen.findByText("tool: searchKnowledge")).toBeDefined();
     const call = api.calls.find((entry) => entry.path === `/v1/traces/${OBS_IDS.trace}`);
     expect(new URLSearchParams(call?.query).get("organizationId")).toBe(IDS.organization);

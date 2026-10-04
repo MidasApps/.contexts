@@ -2,7 +2,9 @@ import { parse, stringify } from "yaml";
 
 const overridesOf = (yaml: string): Record<string, string> => {
   const document = parse(yaml) as { overrides?: Record<string, unknown> } | null;
-  return Object.fromEntries(Object.entries(document?.overrides ?? {}).map(([name, version]) => [name, String(version)]));
+  return Object.fromEntries(
+    Object.entries(document?.overrides ?? {}).map(([name, version]) => [name, String(version)]),
+  );
 };
 
 /**
@@ -12,7 +14,10 @@ const overridesOf = (yaml: string): Record<string, string> => {
  * deployer's own entries (its workspace tarballs) win on a clash.
  * @returns the output YAML, unchanged when the workspace has no overrides.
  */
-export const mergeWorkspaceOverrides = (args: { readonly workspaceYaml: string; readonly outputYaml: string }): string => {
+export const mergeWorkspaceOverrides = (args: {
+  readonly workspaceYaml: string;
+  readonly outputYaml: string;
+}): string => {
   const workspace = overridesOf(args.workspaceYaml);
   if (Object.keys(workspace).length === 0) return args.outputYaml;
   const output = (parse(args.outputYaml) ?? {}) as Record<string, unknown>;

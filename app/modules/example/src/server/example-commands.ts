@@ -13,7 +13,15 @@ import type { Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
 import { ArchiveNoteCommandContract, CreateNoteCommandContract } from "../contracts/note-commands.schema.ts";
 import { createFirestoreNoteRepository, type NoteRepository } from "./note-repository.ts";
-import { type ArchiveNote, type CreateNote, type ListNotes, makeArchiveNote, makeCreateNote, makeListNotes, type NotesDeps } from "./note-use-cases.ts";
+import {
+  type ArchiveNote,
+  type CreateNote,
+  type ListNotes,
+  makeArchiveNote,
+  makeCreateNote,
+  makeListNotes,
+  type NotesDeps,
+} from "./note-use-cases.ts";
 
 /** What the apps hand to the module's server side: the core server's access, audit and Firestore. */
 export type ExampleServerDeps = {
@@ -26,7 +34,11 @@ export type ExampleServerDeps = {
   readonly unitOfWork?: UnitOfWork;
 };
 
-export type ExampleNotes = { readonly createNote: CreateNote; readonly archiveNote: ArchiveNote; readonly listNotes: ListNotes };
+export type ExampleNotes = {
+  readonly createNote: CreateNote;
+  readonly archiveNote: ArchiveNote;
+  readonly listNotes: ListNotes;
+};
 
 /** The module's note use cases over Firestore `notes`. */
 export const createExampleNotes = (deps: ExampleServerDeps): ExampleNotes => {
@@ -59,7 +71,8 @@ export const createExampleCommands = (deps: ExampleServerDeps): ContractCommand[
       preview: (input) => ({ before: null, after: { title: input.title, hasBody: (input.body ?? "") !== "" } }),
       execute: async ({ principal, tenantId, node, input, requestId }) => {
         const result = await notes.createNote({ actor: principal, tenantId, node, requestId, input });
-        if (!result.ok) throw new AgentCommandError("COMMAND_REFUSED", CreateNoteCommandContract.id, { cause: result.error });
+        if (!result.ok)
+          throw new AgentCommandError("COMMAND_REFUSED", CreateNoteCommandContract.id, { cause: result.error });
         return { noteId: result.data.id, title: result.data.title };
       },
     }),
@@ -70,7 +83,8 @@ export const createExampleCommands = (deps: ExampleServerDeps): ContractCommand[
       summarize: (input) => `Archive the note ${input.noteId}`,
       execute: async ({ principal, tenantId, node, input, requestId }) => {
         const result = await notes.archiveNote({ actor: principal, tenantId, node, requestId, noteId: input.noteId });
-        if (!result.ok) throw new AgentCommandError("COMMAND_REFUSED", ArchiveNoteCommandContract.id, { cause: result.error });
+        if (!result.ok)
+          throw new AgentCommandError("COMMAND_REFUSED", ArchiveNoteCommandContract.id, { cause: result.error });
         return { noteId: result.data.id, archivedAt: result.data.archivedAt ?? result.data.updatedAt };
       },
     }),

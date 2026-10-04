@@ -7,7 +7,14 @@ import { DataTablePagination } from "./DataTablePagination.tsx";
 describe("DataTablePagination", () => {
   it("disables both directions while a page is loading", async () => {
     const { container } = renderWithProviders(
-      <DataTablePagination hasPrevious hasNext pending onPrevious={vi.fn()} onNext={vi.fn()} label="Páginas de membros" />,
+      <DataTablePagination
+        hasPrevious
+        hasNext
+        pending
+        onPrevious={vi.fn()}
+        onNext={vi.fn()}
+        label="Páginas de membros"
+      />,
       { locale: "es-419" },
     );
     expect(screen.getByRole("navigation", { name: "Páginas de membros" })).toBeDefined();

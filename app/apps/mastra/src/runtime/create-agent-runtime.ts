@@ -32,7 +32,13 @@ export const createAgentRuntime = (args: {
 }): RuntimeParts => {
   const { env, overrides = {} } = args;
   const firebase = overrides.firebase ?? createFirebaseAdmin({ env, processEnv: args.processEnv });
-  const base = createRuntimePorts({ env, firebase, logger: processLogger, modules: args.modules, ...(overrides.adapters === undefined ? {} : { adapters: overrides.adapters }) });
+  const base = createRuntimePorts({
+    env,
+    firebase,
+    logger: processLogger,
+    modules: args.modules,
+    ...(overrides.adapters === undefined ? {} : { adapters: overrides.adapters }),
+  });
   const storage = overrides.storage ?? new PostgresStore(buildStorageConfig(env));
   // The eval export reads finished experiments from the same Mastra storage (decision 0040).
   const ports = { ...base, evalExport: withExperimentSource(base.evalExport, storage) };

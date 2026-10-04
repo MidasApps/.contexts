@@ -20,7 +20,11 @@ export function ApiErrorAlert({ error }: { error: unknown }) {
       <CircleAlertIcon aria-hidden="true" />
       <AlertDescription className="text-inherit">
         {described.message}
-        {described.requestId === undefined ? null : <span className="mt-1 block font-mono text-caption">{t("reference", { requestId: described.requestId })}</span>}
+        {described.requestId === undefined ? null : (
+          <span className="mt-1 block font-mono text-caption">
+            {t("reference", { requestId: described.requestId })}
+          </span>
+        )}
       </AlertDescription>
     </Alert>
   );

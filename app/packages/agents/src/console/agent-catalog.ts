@@ -47,7 +47,9 @@ export const buildAgentCatalog = (source: AgentCatalogSource): AdminAgent[] => {
       description: supervisor?.getDescription() ?? "",
       role: "supervisor",
       enablement: "always",
-      subagents: source.definitions.filter((definition) => !source.isEntry(definition)).map((definition) => definition.id),
+      subagents: source.definitions
+        .filter((definition) => !source.isEntry(definition))
+        .map((definition) => definition.id),
       tools: [],
       // Read-only tools of the organization's connectors, resolved per run.
       toolsVaryByOrganization: true,

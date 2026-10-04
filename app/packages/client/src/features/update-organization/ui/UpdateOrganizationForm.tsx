@@ -1,6 +1,6 @@
 "use client";
 
-import { updateOrganizationEndpoint, type Organization } from "@core/contracts";
+import { type Organization, updateOrganizationEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -8,7 +8,12 @@ import { ApiError } from "#/shared/api/api-error.ts";
 import { queryKeys } from "#/shared/api/query-keys.ts";
 import { SchemaForm } from "#/shared/ui/organisms/SchemaForm/SchemaForm.tsx";
 import type { SchemaFormResult } from "#/shared/ui/organisms/SchemaForm/server-errors.ts";
-import { changedOrganization, OrganizationFormContract, organizationFormValues, type OrganizationForm } from "../model/organization-form.contract.ts";
+import {
+  changedOrganization,
+  type OrganizationForm,
+  OrganizationFormContract,
+  organizationFormValues,
+} from "../model/organization-form.contract.ts";
 
 /**
  * Name and regional defaults of the organization (`PATCH /v1/organizations/{id}`,

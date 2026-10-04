@@ -16,7 +16,9 @@ const NOTE_INPUT = {
 describe("planJsonSchemaFields", () => {
   it("renders nothing without a schema or without properties", () => {
     expect(planJsonSchemaFields(null)).toEqual({ kind: "none" });
-    expect(planJsonSchemaFields({ type: "object", properties: {}, additionalProperties: false })).toEqual({ kind: "none" });
+    expect(planJsonSchemaFields({ type: "object", properties: {}, additionalProperties: false })).toEqual({
+      kind: "none",
+    });
   });
 
   it("plans a text and a long-text field with their limits and requiredness", () => {
@@ -24,8 +26,32 @@ describe("planJsonSchemaFields", () => {
     expect(plan).toEqual({
       kind: "fields",
       fields: [
-        { name: "title", kind: "text", required: true, title: undefined, labelKey: undefined, options: [], minLength: 1, maxLength: 200, minimum: undefined, maximum: undefined, defaultValue: undefined },
-        { name: "body", kind: "textarea", required: false, title: undefined, labelKey: undefined, options: [], minLength: undefined, maxLength: 10000, minimum: undefined, maximum: undefined, defaultValue: undefined },
+        {
+          name: "title",
+          kind: "text",
+          required: true,
+          title: undefined,
+          labelKey: undefined,
+          options: [],
+          minLength: 1,
+          maxLength: 200,
+          minimum: undefined,
+          maximum: undefined,
+          defaultValue: undefined,
+        },
+        {
+          name: "body",
+          kind: "textarea",
+          required: false,
+          title: undefined,
+          labelKey: undefined,
+          options: [],
+          minLength: undefined,
+          maxLength: 10000,
+          minimum: undefined,
+          maximum: undefined,
+          defaultValue: undefined,
+        },
       ],
     });
   });
@@ -59,10 +85,18 @@ describe("planJsonSchemaFields", () => {
   });
 
   it("falls back to JSON for shapes a form cannot hold", () => {
-    expect(planJsonSchemaFields({ type: "object", properties: { tags: { type: "array", items: { type: "string" } } } })).toEqual({ kind: "json" });
-    expect(planJsonSchemaFields({ type: "object", properties: { address: { type: "object", properties: {} } } })).toEqual({ kind: "json" });
-    expect(planJsonSchemaFields({ type: "object", properties: { id: { anyOf: [{ type: "string" }, { type: "null" }] } } })).toEqual({ kind: "json" });
+    expect(
+      planJsonSchemaFields({ type: "object", properties: { tags: { type: "array", items: { type: "string" } } } }),
+    ).toEqual({ kind: "json" });
+    expect(
+      planJsonSchemaFields({ type: "object", properties: { address: { type: "object", properties: {} } } }),
+    ).toEqual({ kind: "json" });
+    expect(
+      planJsonSchemaFields({ type: "object", properties: { id: { anyOf: [{ type: "string" }, { type: "null" }] } } }),
+    ).toEqual({ kind: "json" });
     expect(planJsonSchemaFields({ anyOf: [{ type: "object" }] })).toEqual({ kind: "json" });
-    expect(planJsonSchemaFields({ type: "object", properties: { mixed: { enum: ["a", 1] } } })).toEqual({ kind: "json" });
+    expect(planJsonSchemaFields({ type: "object", properties: { mixed: { enum: ["a", 1] } } })).toEqual({
+      kind: "json",
+    });
   });
 });

@@ -28,7 +28,8 @@ export const RoleRefSchema = z.discriminatedUnion("kind", [...roleRefOptions()])
 export type RoleRef = z.infer<typeof RoleRefSchema>;
 
 /** Stable key of a role ref, for de-duplication and comparisons. */
-export const roleRefKey = (ref: RoleRef): string => (ref.kind === "system" ? `system:${ref.key}` : `custom:${ref.roleId}`);
+export const roleRefKey = (ref: RoleRef): string =>
+  ref.kind === "system" ? `system:${ref.key}` : `custom:${ref.roleId}`;
 
 const hasDistinctRoles = (refs: readonly RoleRef[]): boolean => new Set(refs.map(roleRefKey)).size === refs.length;
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { parseMoneyInput, type MoneyValue, type ParseMoneyInputError } from "@core/i18n";
-import { useId, useState, type ComponentProps } from "react";
+import { type MoneyValue, type ParseMoneyInputError, parseMoneyInput } from "@core/i18n";
+import { type ComponentProps, useId, useState } from "react";
 import { useLocale } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { textControlClasses } from "#/shared/ui/atoms/Input/input-styles.ts";
@@ -72,10 +72,7 @@ export function MoneyInput({
         className={cn(textControlClasses, "h-9 py-2 pr-14 pl-3 text-right font-mono tabular-nums")}
         {...props}
       />
-      <span
-        id={suffixId}
-        className="pointer-events-none absolute right-3 font-mono text-xs text-muted-foreground"
-      >
+      <span id={suffixId} className="pointer-events-none absolute right-3 font-mono text-xs text-muted-foreground">
         {currency}
       </span>
     </div>

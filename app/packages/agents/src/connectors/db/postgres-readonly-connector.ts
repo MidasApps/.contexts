@@ -41,7 +41,8 @@ export const runReadOnlyQuery: PostgresConnectorRunner = async ({ dsn, sql, para
   }
 };
 
-const defaultResolve: ResolveHost = async (host) => (await lookup(host, { all: true, verbatim: true })).map((entry) => entry.address);
+const defaultResolve: ResolveHost = async (host) =>
+  (await lookup(host, { all: true, verbatim: true })).map((entry) => entry.address);
 
 /** @throws when the DSN host is an IP literal, local, or resolves to a non-public address. */
 export const assertPublicDatabaseHost = async (dsn: string, resolve: ResolveHost = defaultResolve): Promise<void> => {
@@ -75,17 +76,34 @@ export const postgresConnectorTools = (args: {
       permission: DB_QUERY_PERMISSION,
       inputSchema: z.strictObject({
         sql: z.string().min(1).max(10_000).describe("One SELECT over the allowed schema.relation names."),
-        params: z.array(z.union([z.string(), z.number(), z.boolean(), z.null()])).max(MAX_PARAMS).optional().describe("Values for $1, $2, ..."),
+        params: z
+          .array(z.union([z.string(), z.number(), z.boolean(), z.null()]))
+          .max(MAX_PARAMS)
+          .optional()
+          .describe("Values for $1, $2, ..."),
         limit: z.int().min(1).max(DB_MAX_LIMIT).optional().describe("Rows to return (default 100, at most 1000)."),
       }),
-      outputSchema: z.strictObject({ rows: z.array(z.record(z.string(), z.unknown())), rowCount: z.int(), truncated: z.boolean() }),
+      outputSchema: z.strictObject({
+        rows: z.array(z.record(z.string(), z.unknown())),
+        rowCount: z.int(),
+        truncated: z.boolean(),
+      }),
       audit: { action: "SEMANTIC_QUERY_EXECUTED" },
       execute: async (input) => {
         const params = input.params ?? [];
-        const guarded = await guardConnectorSql({ sql: input.sql, allowedRelations: relations, paramCount: params.length });
-        if (!guarded.ok) throw toolFailure(toolId, "SQL_REJECTED", "The query is not allowed on this connector.", { reason: guarded.error.reason });
+        const guarded = await guardConnectorSql({
+          sql: input.sql,
+          allowedRelations: relations,
+          paramCount: params.length,
+        });
+        if (!guarded.ok)
+          throw toolFailure(toolId, "SQL_REJECTED", "The query is not allowed on this connector.", {
+            reason: guarded.error.reason,
+          });
         await assertPublicDatabaseHost(dsn, args.resolve).catch((error: unknown) => {
-          throw toolFailure(toolId, "CONNECTOR_UNAVAILABLE", "The connector database is not reachable.", { reason: error instanceof Error ? error.message : "UNKNOWN" });
+          throw toolFailure(toolId, "CONNECTOR_UNAVAILABLE", "The connector database is not reachable.", {
+            reason: error instanceof Error ? error.message : "UNKNOWN",
+          });
         });
         const limit = input.limit ?? DB_DEFAULT_LIMIT;
         const rows = await (args.runner ?? runReadOnlyQuery)({ dsn, sql: guarded.data.sql, params, limit });

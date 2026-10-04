@@ -10,12 +10,17 @@ const viewer: readonly RoleRef[] = [{ kind: "system", key: "viewer" }];
 const setup = async () => {
   const world = makeMeWorld();
   const organization = await world.organizationOf("owner", "Shared");
-  const project = await world.tenancy.createProject({ ...world.command("owner"), tenantId: organization.id, input: { name: "Alpha" } });
+  const project = await world.tenancy.createProject({
+    ...world.command("owner"),
+    tenantId: organization.id,
+    input: { name: "Alpha" },
+  });
   if (!project.ok) throw project.error;
   world.account("pat");
   await world.identity.getMe({ actor: userOf("pat") });
   const projectNode: TenantNodeRef = { level: "project", tenantId: organization.id, projectId: project.data.id };
-  const list = (access = world.access()) => world.identity.listMyOrganizations({ actor: userOf("pat"), access, page: PAGE });
+  const list = (access = world.access()) =>
+    world.identity.listMyOrganizations({ actor: userOf("pat"), access, page: PAGE });
   return { ...world, organization, project: project.data, projectNode, list };
 };
 
@@ -29,7 +34,9 @@ describe("listMyOrganizations", () => {
   it("drops an organization whose only live grant sits on a deleted project", async () => {
     const world = await setup();
     await world.grant("pat", world.projectNode, viewer);
-    expect((await world.tenancy.deleteProject({ ...world.command("owner"), projectId: world.project.id })).ok).toBe(true);
+    expect((await world.tenancy.deleteProject({ ...world.command("owner"), projectId: world.project.id })).ok).toBe(
+      true,
+    );
 
     const listed = await world.list();
 
@@ -46,7 +53,10 @@ describe("listMyOrganizations", () => {
   it("fails closed when a reader throws", async () => {
     const world = await setup();
     await world.grant("pat", world.projectNode, viewer);
-    const failing = { ...world.access(), getEffectivePermissions: () => Promise.reject(new Error("firestore unavailable")) };
+    const failing = {
+      ...world.access(),
+      getEffectivePermissions: () => Promise.reject(new Error("firestore unavailable")),
+    };
     await expect(world.list(failing)).rejects.toThrow("firestore unavailable");
   });
 });

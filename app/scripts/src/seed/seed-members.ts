@@ -1,9 +1,19 @@
 import type { AuthAdmin } from "./auth-admin.ts";
-import { requireUid, type SeedCore, type SeedGrantNode, type SeedState, type SeedSystemRole } from "./seed-core-port.ts";
+import {
+  requireUid,
+  type SeedCore,
+  type SeedGrantNode,
+  type SeedState,
+  type SeedSystemRole,
+} from "./seed-core-port.ts";
 import { upsertOwnerUser } from "./seed-owner-user.ts";
 import type { SeedTarget } from "./seed-target.ts";
 
-type MemberGrant = { readonly user: "member" | "viewer"; readonly role: SeedSystemRole; readonly at: "organization" | "first-project" };
+type MemberGrant = {
+  readonly user: "member" | "viewer";
+  readonly role: SeedSystemRole;
+  readonly at: "organization" | "first-project";
+};
 
 /** `member` holds `member` on the first project; `viewer` holds `viewer` on the organization. */
 export const SEED_MEMBER_GRANTS: readonly MemberGrant[] = [
@@ -14,8 +24,11 @@ export const SEED_MEMBER_GRANTS: readonly MemberGrant[] = [
 const nodeOf = (state: SeedState, at: MemberGrant["at"]): SeedGrantNode => {
   const organizationId = state.demoOrganizationId;
   const projectId = state.firstProjectId;
-  if (organizationId === undefined || projectId === undefined) throw new Error("seed step order: tenancy must be seeded first");
-  return at === "organization" ? { level: "organization", organizationId } : { level: "project", organizationId, projectId };
+  if (organizationId === undefined || projectId === undefined)
+    throw new Error("seed step order: tenancy must be seeded first");
+  return at === "organization"
+    ? { level: "organization", organizationId }
+    : { level: "project", organizationId, projectId };
 };
 
 /**
@@ -25,7 +38,12 @@ const nodeOf = (state: SeedState, at: MemberGrant["at"]): SeedGrantNode => {
  * the project-level member included (decision 0030 A5).
  * Idempotent: an existing grant on the node is left as it is.
  */
-export const seedMembers = async (args: { core: SeedCore; auth: AuthAdmin; target: SeedTarget; state: SeedState }): Promise<string> => {
+export const seedMembers = async (args: {
+  core: SeedCore;
+  auth: AuthAdmin;
+  target: SeedTarget;
+  state: SeedState;
+}): Promise<string> => {
   const { core, auth, target, state } = args;
   for (const key of ["member", "viewer", "invitee"] as const) {
     const { user } = await upsertOwnerUser(auth, target.users[key]);

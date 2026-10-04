@@ -32,6 +32,7 @@ export function QuerySection<T>({ query, loadingLabel, loading, notFound, childr
     if (notFound !== undefined && isApiErrorStatus(query.error, 404)) return notFound;
     return <ApiErrorState error={query.error} onRetry={retry} retrying={query.isFetching} />;
   }
-  if (query.data === undefined || query.data === null) return notFound ?? <ApiErrorState error={query.error} onRetry={retry} retrying={query.isFetching} />;
+  if (query.data === undefined || query.data === null)
+    return notFound ?? <ApiErrorState error={query.error} onRetry={retry} retrying={query.isFetching} />;
   return children(query.data);
 }

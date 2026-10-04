@@ -19,8 +19,10 @@ const statusPillVariants = cva(
         amber: "border-amber/30 bg-amber/14 text-amber-foreground [&_[data-slot=status-mark]]:text-amber",
         cyan: "border-cyan/30 bg-cyan/14 text-cyan-foreground [&_[data-slot=status-mark]]:text-cyan",
         violet: "border-violet/30 bg-violet/14 text-violet-foreground [&_[data-slot=status-mark]]:text-violet",
-        danger: "border-destructive/32 bg-destructive/14 text-destructive-text [&_[data-slot=status-mark]]:text-destructive",
-        neutral: "border-border bg-muted text-muted-foreground-strong [&_[data-slot=status-mark]]:text-muted-foreground",
+        danger:
+          "border-destructive/32 bg-destructive/14 text-destructive-text [&_[data-slot=status-mark]]:text-destructive",
+        neutral:
+          "border-border bg-muted text-muted-foreground-strong [&_[data-slot=status-mark]]:text-muted-foreground",
       },
     },
     defaultVariants: { tone: "neutral" },

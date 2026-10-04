@@ -5,4 +5,6 @@ import type { EvalExperimentSummary } from "@core/contracts";
  * decision 0040) outside `local`; a logging no-op in `local`. One row per experiment and scorer.
  * @returns the number of rows sent.
  */
-export type EvalRunSink = { readonly exportSummaries: (summaries: readonly EvalExperimentSummary[]) => Promise<number> };
+export type EvalRunSink = {
+  readonly exportSummaries: (summaries: readonly EvalExperimentSummary[]) => Promise<number>;
+};

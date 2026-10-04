@@ -5,9 +5,12 @@ import { makePurgeDeletedConversations } from "./purge-deleted-conversations.ts"
 
 const NOW = "2026-09-30T12:00:00.000Z";
 
-const memoryStore = (rows: DeletedConversation[]): DeletedConversationStore & { readonly rows: DeletedConversation[] } => ({
+const memoryStore = (
+  rows: DeletedConversation[],
+): DeletedConversationStore & { readonly rows: DeletedConversation[] } => ({
   rows,
-  listDeletedBefore: ({ before, limit }) => Promise.resolve(rows.filter((row) => row.deletedAt < before).slice(0, limit)),
+  listDeletedBefore: ({ before, limit }) =>
+    Promise.resolve(rows.filter((row) => row.deletedAt < before).slice(0, limit)),
   hardDelete: ({ id, before }) => {
     const index = rows.findIndex((row) => row.id === id && row.deletedAt < before);
     if (index === -1) return Promise.resolve(false);
@@ -25,7 +28,10 @@ describe("purgeDeletedConversations", () => {
     ]);
     const threads: string[] = [];
     const purge = makePurgeDeletedConversations({ store, clock: fixedClock(NOW) });
-    expect(await purge({ deleteThread: (id) => (threads.push(id), Promise.resolve(true)) })).toEqual({ purged: 1, failed: 0 });
+    expect(await purge({ deleteThread: (id) => (threads.push(id), Promise.resolve(true)) })).toEqual({
+      purged: 1,
+      failed: 0,
+    });
     expect(threads).toEqual(["old"]);
     expect(store.rows.map((row) => row.id)).toEqual(["edge", "recent"]);
   });

@@ -1,4 +1,4 @@
-import { AdminScheduleSchema, type AdminSchedule } from "@core/contracts";
+import { type AdminSchedule, AdminScheduleSchema } from "@core/contracts";
 import { screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it } from "vitest";
@@ -53,7 +53,9 @@ describe("ScheduleStateDialog", () => {
     renderAdmin(<StateHarness request={{ schedule: TENANT, action: "pause" }} />);
     const dialog = await screen.findByRole("alertdialog");
     setOnline(false);
-    await waitFor(() => expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Pausar agendamento" }).disabled).toBe(true));
+    await waitFor(() =>
+      expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Pausar agendamento" }).disabled).toBe(true),
+    );
     expect(within(dialog).getByText(/Você está sem conexão/u)).toBeDefined();
   });
 });
@@ -61,11 +63,15 @@ describe("ScheduleStateDialog", () => {
 describe("RunScheduleNowDialog", () => {
   it("starts an extra run of a tenant schedule as its creator, pending until the API answers", async () => {
     const held = holdResponse();
-    const { user, api } = renderAdmin(<RunNowHarness schedule={TENANT} />, { routes: { "POST /v1/admin/schedules/:scheduleId/run": held.handler } });
+    const { user, api } = renderAdmin(<RunNowHarness schedule={TENANT} />, {
+      routes: { "POST /v1/admin/schedules/:scheduleId/run": held.handler },
+    });
     const dialog = await screen.findByRole("alertdialog", { name: "Executar Relatório de uso agora?" });
     expect(dialog.textContent).toContain("em nome de quem criou o agendamento");
     await user.click(within(dialog).getByRole("button", { name: "Executar agora" }));
-    await waitFor(() => expect(within(dialog).getByRole("button", { name: "Executar agora" }).getAttribute("aria-busy")).toBe("true"));
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: "Executar agora" }).getAttribute("aria-busy")).toBe("true"),
+    );
     held.release(ok({ scheduleId: OPS_IDS.tenantSchedule }, 202));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     expect(api.callLines()).toContain(`POST /v1/admin/schedules/${OPS_IDS.tenantSchedule}/run`);
@@ -73,7 +79,9 @@ describe("RunScheduleNowDialog", () => {
   });
 
   it("says a platform job runs for every organization and shows a failure with its reference", async () => {
-    const { user } = renderAdmin(<RunNowHarness schedule={PLATFORM} />, { routes: { "POST /v1/admin/schedules/:scheduleId/run": apiError(409, "CONFLICT") } });
+    const { user } = renderAdmin(<RunNowHarness schedule={PLATFORM} />, {
+      routes: { "POST /v1/admin/schedules/:scheduleId/run": apiError(409, "CONFLICT") },
+    });
     const dialog = await screen.findByRole("alertdialog");
     expect(dialog.textContent).toContain("para todas as organizações");
     await user.click(within(dialog).getByRole("button", { name: "Executar agora" }));
@@ -84,6 +92,8 @@ describe("RunScheduleNowDialog", () => {
     renderAdmin(<RunNowHarness schedule={TENANT} />);
     const dialog = await screen.findByRole("alertdialog");
     setOnline(false);
-    await waitFor(() => expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Executar agora" }).disabled).toBe(true));
+    await waitFor(() =>
+      expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Executar agora" }).disabled).toBe(true),
+    );
   });
 });

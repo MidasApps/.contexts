@@ -11,9 +11,22 @@ export const adminListUsersEndpoint = defineEndpoint({
   path: "/v1/admin/users",
   auth: "user",
   query: PageQuerySchema.extend({
-    query: z.string().trim().min(1).max(200).optional().meta(personal("Text to find: the start of a name or of an email, or a whole user id.")),
-    by: AdminUserSearchBySchema.optional().meta(none("How to read `query`; without it: an email when it has `@`, else a user id when one matches, else a name.")),
-    ids: z.string().min(1).max(13_000).optional().meta(personal("Comma-separated user ids to look up at once (at most 100); not with `query`.")),
+    query: z
+      .string()
+      .trim()
+      .min(1)
+      .max(200)
+      .optional()
+      .meta(personal("Text to find: the start of a name or of an email, or a whole user id.")),
+    by: AdminUserSearchBySchema.optional().meta(
+      none("How to read `query`; without it: an email when it has `@`, else a user id when one matches, else a name."),
+    ),
+    ids: z
+      .string()
+      .min(1)
+      .max(13_000)
+      .optional()
+      .meta(personal("Comma-separated user ids to look up at once (at most 100); not with `query`.")),
   }),
   responses: { 200: listEnvelope(AdminUserSummarySchema) },
   errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN", "MFA_REQUIRED"] },

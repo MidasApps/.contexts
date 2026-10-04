@@ -17,7 +17,13 @@ export type AdminShellTemplateProps = {
  * `data-surface="admin"` so the admin topbar can show its surface badge. Guarding (staff + MFA)
  * happens on the server before this renders.
  */
-export function AdminShellTemplate({ sidebar, topbar, children, sidebarDefaultOpen, persistSidebarState }: AdminShellTemplateProps) {
+export function AdminShellTemplate({
+  sidebar,
+  topbar,
+  children,
+  sidebarDefaultOpen,
+  persistSidebarState,
+}: AdminShellTemplateProps) {
   return (
     <div data-surface="admin" className="contents">
       <AppShellTemplate

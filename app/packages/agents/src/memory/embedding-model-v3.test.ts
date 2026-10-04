@@ -7,7 +7,10 @@ describe("toEmbeddingModelV3", () => {
     const model = createFakeEmbeddingModel();
     const v3 = toEmbeddingModelV3(model);
     expect(v3).toMatchObject({ specificationVersion: "v3", provider: model.provider, modelId: model.modelId });
-    const [direct, viaV3] = await Promise.all([model.doEmbed({ values: ["tenant memory"] }), v3.doEmbed({ values: ["tenant memory"] })]);
+    const [direct, viaV3] = await Promise.all([
+      model.doEmbed({ values: ["tenant memory"] }),
+      v3.doEmbed({ values: ["tenant memory"] }),
+    ]);
     expect(viaV3.embeddings).toEqual(direct.embeddings);
     expect(viaV3.embeddings[0]).toHaveLength(FAKE_EMBEDDING_DIMENSIONS);
   });

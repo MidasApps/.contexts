@@ -4,8 +4,8 @@ import { stdout } from "node:process";
 import { composeCoreContracts, composeCoreEndpoints } from "../src/composition.ts";
 import { writeArtifacts } from "./catalog/artifact-files.ts";
 import { buildCatalogArtifacts } from "./catalog/artifacts.ts";
-import { loadModuleContracts, loadModuleEndpoints } from "./catalog/module-contracts.ts";
 import { findContractProblems } from "./catalog/contract-problems.ts";
+import { loadModuleContracts, loadModuleEndpoints } from "./catalog/module-contracts.ts";
 
 const main = async (): Promise<number> => {
   // Core contracts and endpoints plus those of the modules listed in app/catalog.modules.ts (decision 0015).

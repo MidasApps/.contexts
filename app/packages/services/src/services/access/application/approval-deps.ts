@@ -1,4 +1,4 @@
-import { PrincipalSchema, type ApprovalRequest, type Principal } from "@core/contracts";
+import { type ApprovalRequest, type Principal, PrincipalSchema } from "@core/contracts";
 import type { AuditWriter } from "../../audit/application/use-cases/record-audit.ts";
 import type { Clock } from "../../shared/clock/clock.ts";
 import type { UnitOfWork } from "../../shared/firestore/unit-of-work.ts";
@@ -33,7 +33,10 @@ export const requesterRefOf = (principal: Principal): ApprovalRequest["requested
  * The requester as a principal: a user or device directly, an API key with its current owner
  * (null once the key is gone or belongs to another tenant). Parsed with the contract, never cast.
  */
-export const resolveRequester = async (deps: Pick<ApprovalDeps, "principals">, request: ApprovalRequest): Promise<Principal | null> => {
+export const resolveRequester = async (
+  deps: Pick<ApprovalDeps, "principals">,
+  request: ApprovalRequest,
+): Promise<Principal | null> => {
   const { type, id } = request.requestedBy;
   const tenantId = request.tenantId;
   let candidate: unknown = null;

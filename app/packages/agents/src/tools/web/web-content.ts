@@ -43,7 +43,10 @@ export const scrapeThroughGuard = async (args: {
 }): Promise<WebPage> => {
   const guard = args.resolve === undefined ? {} : { resolve: args.resolve };
   const url = await assertPublicUrl(args.url, guard);
-  const page = await args.client.scrape({ url: url.href, ...(args.abortSignal === undefined ? {} : { abortSignal: args.abortSignal }) });
+  const page = await args.client.scrape({
+    url: url.href,
+    ...(args.abortSignal === undefined ? {} : { abortSignal: args.abortSignal }),
+  });
   await assertPublicUrl(page.url, guard);
   return page;
 };
@@ -54,7 +57,10 @@ export const scrapeThroughGuard = async (args: {
  * URL ingestion is an explicit `core.knowledge.write` action, so it needs a key but not the
  * chat opt-in `webTools.firecrawl`.
  */
-export const createFirecrawlWebContent = (deps: { readonly clients: WebClientResolver; readonly resolve?: ResolveHost }): WebContentPort => ({
+export const createFirecrawlWebContent = (deps: {
+  readonly clients: WebClientResolver;
+  readonly resolve?: ResolveHost;
+}): WebContentPort => ({
   scrape: async ({ url, tenantId, abortSignal }) => {
     const client = await deps.clients.forTenant(tenantId);
     if (client === null) throw new WebToolsUnavailableError();

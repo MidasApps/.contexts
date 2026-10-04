@@ -6,14 +6,21 @@ import { defineEndpoint } from "../src/contracts/http/endpoint.ts";
 import { ErrorEnvelopeContract } from "../src/contracts/http/envelopes.schema.ts";
 import { createContractRegistry } from "../src/contracts/registry.ts";
 import { buildCatalogArtifacts, type CatalogArtifact } from "./catalog/artifacts.ts";
-import { findContractProblems, findDanglingRefsInArtifacts, findRawMetaInArtifacts } from "./catalog/contract-problems.ts";
+import {
+  findContractProblems,
+  findDanglingRefsInArtifacts,
+  findRawMetaInArtifacts,
+} from "./catalog/contract-problems.ts";
 import { findCatalogDrift } from "./catalog/drift.ts";
 import { findRawMetaKeys } from "./catalog/json-schema.ts";
 
 const buildContracts = () => {
   const contact = defineContract(
     z.object({
-      id: z.string().min(1).meta({ description: "Automatic id.", pii: "none", ui: { widget: "hidden" } }),
+      id: z
+        .string()
+        .min(1)
+        .meta({ description: "Automatic id.", pii: "none", ui: { widget: "hidden" } }),
       email: z.email().meta({ description: "Contact e-mail.", pii: "personal", examples: ["ana@example.com"] }),
       taxId: z.string().meta({ description: "Tax id.", pii: "sensitive" }).optional(),
     }),
@@ -45,7 +52,9 @@ const getContact = defineEndpoint({
   path: "/v1/contacts/{contactId}",
   auth: "user",
   params: z.object({ contactId: z.string().min(1) }),
-  responses: { 200: z.object({ data: z.object({ email: z.email().meta({ description: "E-mail.", pii: "personal" }) }) }) },
+  responses: {
+    200: z.object({ data: z.object({ email: z.email().meta({ description: "E-mail.", pii: "personal" }) }) }),
+  },
   errors: { 404: ["NOT_FOUND"] },
   summary: "Reads a contact.",
 });
@@ -90,7 +99,10 @@ describe("buildCatalogArtifacts", () => {
 
   it("writes meta keys as x-* in JSON Schema and leaves no raw meta key", () => {
     const artifacts = buildCatalogArtifacts(buildContracts());
-    const schema = JSON.parse(findArtifact(artifacts, "docs/catalog/people/Contact.schema.json")) as Record<string, unknown>;
+    const schema = JSON.parse(findArtifact(artifacts, "docs/catalog/people/Contact.schema.json")) as Record<
+      string,
+      unknown
+    >;
     expect(schema).toMatchObject({ "x-pii": "sensitive", "x-kind": "entity", "x-tenancyScope": "organization" });
     expect(schema).toMatchObject({ properties: { email: { "x-pii": "personal" } } });
     expect(findRawMetaKeys(schema)).toEqual([]);
@@ -105,8 +117,15 @@ describe("buildCatalogArtifacts", () => {
   });
 
   it("emits a valid OpenAPI 3.1 document with contracts as components", () => {
-    const openapi = parseYaml(findArtifact(buildCatalogArtifacts(buildContracts()), "docs/openapi/v1.yaml")) as Record<string, unknown>;
-    expect(openapi).toMatchObject({ openapi: "3.1.0", paths: {}, components: { schemas: { "people.Contact": { type: "object" } } } });
+    const openapi = parseYaml(findArtifact(buildCatalogArtifacts(buildContracts()), "docs/openapi/v1.yaml")) as Record<
+      string,
+      unknown
+    >;
+    expect(openapi).toMatchObject({
+      openapi: "3.1.0",
+      paths: {},
+      components: { schemas: { "people.Contact": { type: "object" } } },
+    });
     expect(findRawMetaKeys(openapi["components"])).toEqual([]);
   });
 
@@ -141,7 +160,7 @@ describe("findCatalogDrift", () => {
 
   it("reports changed, missing and stale files", () => {
     const onDisk = new Map([
-      ["docs/catalog/catalog.json", "{ \"edited\": true }\n"],
+      ["docs/catalog/catalog.json", '{ "edited": true }\n'],
       ["docs/catalog/old/Removed.md", "# gone\n"],
     ]);
     expect(findCatalogDrift({ expected, onDisk })).toEqual([
@@ -180,9 +199,14 @@ describe("findDanglingRefsInArtifacts", () => {
 describe("findRawMetaInArtifacts", () => {
   it("reports custom meta keys that were not renamed to x-*", () => {
     const artifacts: CatalogArtifact[] = [
-      { path: "docs/catalog/a/B.schema.json", content: JSON.stringify({ properties: { pii: { type: "string", pii: "none" } } }) },
+      {
+        path: "docs/catalog/a/B.schema.json",
+        content: JSON.stringify({ properties: { pii: { type: "string", pii: "none" } } }),
+      },
     ];
-    expect(findRawMetaInArtifacts(artifacts)).toEqual(["raw meta key: docs/catalog/a/B.schema.json #/properties/pii/pii"]);
+    expect(findRawMetaInArtifacts(artifacts)).toEqual([
+      "raw meta key: docs/catalog/a/B.schema.json #/properties/pii/pii",
+    ]);
   });
 
   it("finds no raw keys in generated artifacts", () => {

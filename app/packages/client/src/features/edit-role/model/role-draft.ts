@@ -7,7 +7,9 @@ export type RoleDraftProblems = { name?: "required" | "tooLong"; permissions?: b
 const NAME_MAX = 80;
 
 export const draftOf = (role: Role | null): RoleDraft =>
-  role === null ? { name: "", description: "", permissions: [] } : { name: role.name, description: role.description, permissions: [...role.permissions] };
+  role === null
+    ? { name: "", description: "", permissions: [] }
+    : { name: role.name, description: role.description, permissions: [...role.permissions] };
 
 /** Client checks (the API validates again): a name up to 80 chars and at least one permission. */
 export const validateRoleDraft = (draft: RoleDraft): RoleDraftProblems => {
@@ -18,7 +20,8 @@ export const validateRoleDraft = (draft: RoleDraft): RoleDraftProblems => {
   };
 };
 
-const samePermissions = (a: readonly string[], b: readonly string[]): boolean => a.length === b.length && [...a].sort().join() === [...b].sort().join();
+const samePermissions = (a: readonly string[], b: readonly string[]): boolean =>
+  a.length === b.length && [...a].sort().join() === [...b].sort().join();
 
 /** `PATCH` body with only the changed fields, or `null` when nothing changed. */
 export const changedRole = (role: Role, draft: RoleDraft): UpdateRoleInput | null => {

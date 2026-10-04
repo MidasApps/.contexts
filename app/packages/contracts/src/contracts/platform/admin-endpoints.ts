@@ -6,11 +6,16 @@ import { none } from "../field-docs.ts";
 import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.schema.ts";
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
+import { OrganizationStatusSchema } from "../tenancy/organization.schema.ts";
 import { OrganizationQuerySchema } from "../workflows/endpoints.ts";
 import { AdminOverviewSchema } from "./admin-overview.schema.ts";
 import { AdminUsageSchema, UsageDaySchema } from "./admin-usage.schema.ts";
-import { OrganizationStatusSchema } from "../tenancy/organization.schema.ts";
-import { OrganizationAdminDetailSchema, OrganizationAdminSummarySchema, SetTenantBudgetInputSchema, UpdateOrganizationAdminInputSchema } from "./organization-admin.schema.ts";
+import {
+  OrganizationAdminDetailSchema,
+  OrganizationAdminSummarySchema,
+  SetTenantBudgetInputSchema,
+  UpdateOrganizationAdminInputSchema,
+} from "./organization-admin.schema.ts";
 import { PlanIdSchema, PlanSchema, UpsertPlanInputSchema } from "./plan.schema.ts";
 
 const STAFF_ERRORS = { 403: ["FORBIDDEN", "MFA_REQUIRED"] } as const;
@@ -55,7 +60,17 @@ export const listOrganizationsAdminEndpoint = defineEndpoint({
   path: "/v1/admin/organizations",
   auth: "user",
   query: PageQuerySchema.extend({
-    query: z.string().trim().min(1).max(200).optional().meta(none("Words the name or id must contain (case and accents ignored); an exact organization id always comes first.")),
+    query: z
+      .string()
+      .trim()
+      .min(1)
+      .max(200)
+      .optional()
+      .meta(
+        none(
+          "Words the name or id must contain (case and accents ignored); an exact organization id always comes first.",
+        ),
+      ),
     status: OrganizationStatusSchema.optional().meta(none("Only organizations in this status.")),
   }),
   responses: { 200: listEnvelope(OrganizationAdminSummarySchema) },
@@ -72,7 +87,8 @@ export const getOrganizationAdminEndpoint = defineEndpoint({
   params: organizationParams,
   responses: { 200: dataEnvelope(OrganizationAdminDetailSchema) },
   errors: { ...STAFF_ERRORS, 404: ["NOT_FOUND"] },
-  summary: "Reads one live organization with plan, budget, cost month to date and member count (staff, platform.organization.read).",
+  summary:
+    "Reads one live organization with plan, budget, cost month to date and member count (staff, platform.organization.read).",
 });
 
 export const updateOrganizationAdminEndpoint = defineEndpoint({
@@ -138,13 +154,20 @@ export const getAdminUsageEndpoint = defineEndpoint({
   path: "/v1/admin/usage",
   auth: "user",
   query: z.object({
-    from: UsageDaySchema.optional().meta(none("First UTC day (`2026-09-01`); default: the first day of the month of `to`.")),
-    to: UsageDaySchema.optional().meta(none("Last UTC day, included; default: today (UTC). At most 92 days after `from`.")),
-    organizationId: OrganizationIdSchema.optional().meta(none("Only this organization; without it, every live organization.")),
+    from: UsageDaySchema.optional().meta(
+      none("First UTC day (`2026-09-01`); default: the first day of the month of `to`."),
+    ),
+    to: UsageDaySchema.optional().meta(
+      none("Last UTC day, included; default: today (UTC). At most 92 days after `from`."),
+    ),
+    organizationId: OrganizationIdSchema.optional().meta(
+      none("Only this organization; without it, every live organization."),
+    ),
   }),
   responses: { 200: dataEnvelope(AdminUsageSchema) },
   errors: { 400: ["VALIDATION_FAILED"], ...STAFF_ERRORS, 404: ["NOT_FOUND"] },
-  summary: "Model usage and cost by UTC day and by model from the usage ledger, of every live organization or of one (staff, platform.usage.read).",
+  summary:
+    "Model usage and cost by UTC day and by model from the usage ledger, of every live organization or of one (staff, platform.usage.read).",
 });
 
 export const getAgentSettingsEndpoint = defineEndpoint({
@@ -167,7 +190,8 @@ export const updateAgentSettingsEndpoint = defineEndpoint({
   body: UpdateAgentSettingsInputSchema,
   responses: { 200: dataEnvelope(AgentSettingsSchema) },
   errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"] },
-  summary: "Changes the organization's agent settings; its own budget cap may only be lower than the plan's (core.agent-settings.update).",
+  summary:
+    "Changes the organization's agent settings; its own budget cap may only be lower than the plan's (core.agent-settings.update).",
 });
 
 export const ADMIN_PLATFORM_ENDPOINTS: readonly EndpointDefinition[] = [

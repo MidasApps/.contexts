@@ -2,11 +2,11 @@ import {
   type AdminWorkflowRun,
   AdminWorkflowRunSchema,
   type WorkflowEvent,
-  type WorkflowRun as WorkflowRunView,
   type WorkflowRunFailure,
   WorkflowRunSchema,
   type WorkflowRunStatus,
   WorkflowRunStatusSchema,
+  type WorkflowRun as WorkflowRunView,
 } from "@core/contracts";
 
 /**
@@ -46,7 +46,8 @@ type Snapshot = {
   readonly requestContext: Readonly<Record<string, unknown>>;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const parseSnapshot = (raw: unknown): Snapshot => {
   const value = typeof raw === "string" ? (JSON.parse(raw) as unknown) : raw;
@@ -55,9 +56,16 @@ const parseSnapshot = (raw: unknown): Snapshot => {
   const context = isRecord(snapshot["context"]) ? snapshot["context"] : {};
   // `input` is the run input, not a step; steps without a start time never ran.
   const steps = Object.entries(context)
-    .filter((entry): entry is [string, StepRecord] => entry[0] !== "input" && isRecord(entry[1]) && typeof entry[1]["startedAt"] === "number")
+    .filter(
+      (entry): entry is [string, StepRecord] =>
+        entry[0] !== "input" && isRecord(entry[1]) && typeof entry[1]["startedAt"] === "number",
+    )
     .sort((a, b) => (a[1].startedAt as number) - (b[1].startedAt as number) || a[0].localeCompare(b[0]));
-  return { status: status.success ? status.data : "pending", steps, requestContext: isRecord(snapshot["requestContext"]) ? snapshot["requestContext"] : {} };
+  return {
+    status: status.success ? status.data : "pending",
+    steps,
+    requestContext: isRecord(snapshot["requestContext"]) ? snapshot["requestContext"] : {},
+  };
 };
 
 /** Whether the run belongs to the tenant (`resourceId` = `tenantId:uid`). */
@@ -87,14 +95,17 @@ const STOPPING_STEP = new Set(["failed", "tripwire"]);
  */
 const failureOf = (snapshot: Snapshot): WorkflowRunFailure | null => {
   if (snapshot.status !== "failed" && snapshot.status !== "tripwire") return null;
-  const stopped = snapshot.steps.findLast(([, step]) => (typeof step.status === "string" && STOPPING_STEP.has(step.status)) || step.tripwire !== undefined);
+  const stopped = snapshot.steps.findLast(
+    ([, step]) => (typeof step.status === "string" && STOPPING_STEP.has(step.status)) || step.tripwire !== undefined,
+  );
   const stepId = stopped?.[0] ?? null;
   if (snapshot.status === "tripwire") return { code: "TRIPWIRE", stepId };
   return stepId === null ? { code: "RUN_FAILED", stepId: null } : { code: "STEP_FAILED", stepId };
 };
 
 /** The approval request a run suspended in the HITL step waits for, or `null`. */
-export const waitingApprovalRequestIdOf = (run: Pick<StoredRun, "snapshot">): string | null => approvalRequestIdOf(parseSnapshot(run.snapshot).steps);
+export const waitingApprovalRequestIdOf = (run: Pick<StoredRun, "snapshot">): string | null =>
+  approvalRequestIdOf(parseSnapshot(run.snapshot).steps);
 
 const viewFieldsOf = (run: StoredRun, tenantId: string | null) => {
   const snapshot = parseSnapshot(run.snapshot);
@@ -128,19 +139,32 @@ export const toAdminWorkflowRunView = (run: StoredRun): AdminWorkflowRun | null 
 
 type Draft = Omit<WorkflowEvent, "index">;
 
-const at = (value: unknown, fallback: Date): string => new Date(typeof value === "number" ? value : fallback.getTime()).toISOString();
+const at = (value: unknown, fallback: Date): string =>
+  new Date(typeof value === "number" ? value : fallback.getTime()).toISOString();
 
 const FINISHED_STEP = new Set(["success", "failed", "canceled", "skipped"]);
 
 const stepEvents = (stepId: string, step: StepRecord, fallback: Date): Draft[] => {
   const status = WorkflowRunStatusSchema.safeParse(step.status);
-  const events: Draft[] = [{ type: "workflow-step-start", stepId, status: "running", occurredAt: at(step.startedAt, fallback) }];
+  const events: Draft[] = [
+    { type: "workflow-step-start", stepId, status: "running", occurredAt: at(step.startedAt, fallback) },
+  ];
   // A step that suspended once keeps its suspended event after it resumes, so indexes never move.
   if (typeof step.suspendedAt === "number" || step.status === "suspended") {
-    events.push({ type: "workflow-step-suspended", stepId, status: "suspended", occurredAt: at(step.suspendedAt, fallback) });
+    events.push({
+      type: "workflow-step-suspended",
+      stepId,
+      status: "suspended",
+      occurredAt: at(step.suspendedAt, fallback),
+    });
   }
   if (typeof step.status === "string" && FINISHED_STEP.has(step.status)) {
-    events.push({ type: "workflow-step-result", stepId, status: status.success ? status.data : null, occurredAt: at(step.endedAt, fallback) });
+    events.push({
+      type: "workflow-step-result",
+      stepId,
+      status: status.success ? status.data : null,
+      occurredAt: at(step.endedAt, fallback),
+    });
   }
   return events;
 };
@@ -158,10 +182,13 @@ export const isSettledStatus = (status: WorkflowRunStatus): boolean => TERMINAL[
 /** Progress events of a run, oldest first, numbered from 0. */
 export const eventsOfRun = (run: StoredRun): WorkflowEvent[] => {
   const snapshot = parseSnapshot(run.snapshot);
-  const drafts: Draft[] = [{ type: "workflow-start", stepId: null, status: "running", occurredAt: run.createdAt.toISOString() }];
+  const drafts: Draft[] = [
+    { type: "workflow-start", stepId: null, status: "running", occurredAt: run.createdAt.toISOString() },
+  ];
   for (const [stepId, step] of snapshot.steps) drafts.push(...stepEvents(stepId, step, run.updatedAt));
   const terminal = TERMINAL[snapshot.status];
-  if (terminal !== undefined) drafts.push({ type: terminal, stepId: null, status: snapshot.status, occurredAt: run.updatedAt.toISOString() });
+  if (terminal !== undefined)
+    drafts.push({ type: terminal, stepId: null, status: snapshot.status, occurredAt: run.updatedAt.toISOString() });
   return drafts.map((draft, index) => ({ index, ...draft }));
 };
 

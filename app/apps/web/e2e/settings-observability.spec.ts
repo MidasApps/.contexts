@@ -50,8 +50,14 @@ test.describe("usage and budget", () => {
     await page.reload();
     await expect(page.getByRole("region", { name: "Orçamento" }).getByText(/de US\$\s?12,50/)).toBeVisible();
 
-    await page.getByRole("region", { name: "Limite próprio da organização" }).getByRole("button", { name: "Remover limite próprio" }).click();
-    await page.getByRole("alertdialog", { name: "Remover o limite próprio da organização?" }).getByRole("button", { name: "Remover limite" }).click();
+    await page
+      .getByRole("region", { name: "Limite próprio da organização" })
+      .getByRole("button", { name: "Remover limite próprio" })
+      .click();
+    await page
+      .getByRole("alertdialog", { name: "Remover o limite próprio da organização?" })
+      .getByRole("button", { name: "Remover limite" })
+      .click();
     await expect(toast(page, /Limite próprio removido/)).toBeVisible();
     await page.reload();
     await expect(page.getByRole("region", { name: "Orçamento" }).getByText(/de US\$\s?50,00/)).toBeVisible();
@@ -72,7 +78,10 @@ test.describe("traces", () => {
       await page.reload();
       await expect(table.getByRole("link", { name: /^Abrir o rastro/ }).first()).toBeVisible({ timeout: 5_000 });
     }).toPass({ timeout: 90_000 });
-    await table.getByRole("link", { name: /^Abrir o rastro/ }).first().click();
+    await table
+      .getByRole("link", { name: /^Abrir o rastro/ })
+      .first()
+      .click();
     await expect(page.getByRole("heading", { level: 1, name: "Rastro" })).toBeVisible();
     await expect(page.getByText("Id do rastro")).toBeVisible();
     await page.getByRole("link", { name: "Voltar aos rastros" }).click();
@@ -99,7 +108,9 @@ test.describe("evals", () => {
     // The organization's experiments: empty, or the instructions eval of settings-agents when that
     // file ran first on this worker's organization.
     // Nine columns do not fit the settings column at 1280 px, so the list may render as cards.
-    const experiments = page.getByRole("table", { name: `Experimentos de ${sp5Org.name}` }).or(page.getByRole("list", { name: `Experimentos de ${sp5Org.name}` }));
+    const experiments = page
+      .getByRole("table", { name: `Experimentos de ${sp5Org.name}` })
+      .or(page.getByRole("list", { name: `Experimentos de ${sp5Org.name}` }));
     await expect(page.getByRole("heading", { name: "Nenhum experimento ainda" }).or(experiments).first()).toBeVisible();
     await page.getByRole("tab", { name: "Conjuntos de dados" }).click();
     await expect(page.getByRole("tabpanel", { name: "Conjuntos de dados" })).toBeVisible();

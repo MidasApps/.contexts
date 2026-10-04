@@ -59,7 +59,13 @@ export const refuseImpersonation = (actor: UserPrincipal): Result<void, AccessDe
 /** Audit entry of a session change; sessions have no tenant, so they go to the platform log. */
 export const recordSessionAudit = (
   deps: Pick<SessionDeps, "audit">,
-  args: { action: "SESSION_REVOKED" | "ALL_SESSIONS_REVOKED" | "DESKTOP_SESSION_REUSE_DETECTED"; uid: string; targetId: string; requestId: string; actorType?: "user" | "system" },
+  args: {
+    action: "SESSION_REVOKED" | "ALL_SESSIONS_REVOKED" | "DESKTOP_SESSION_REUSE_DETECTED";
+    uid: string;
+    targetId: string;
+    requestId: string;
+    actorType?: "user" | "system";
+  },
 ): Promise<unknown> =>
   deps.audit.record({
     log: "platform",

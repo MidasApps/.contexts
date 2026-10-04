@@ -2,7 +2,10 @@
 export type HeaderEntry = { key: string; value: string };
 
 /** Firebase Auth endpoints the browser SDK calls (decision 0016). */
-export const FIREBASE_AUTH_ORIGINS = ["https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com"] as const;
+export const FIREBASE_AUTH_ORIGINS = [
+  "https://identitytoolkit.googleapis.com",
+  "https://securetoken.googleapis.com",
+] as const;
 
 /**
  * Where the browser sends upload bytes: the V4 signed URL of `POST /v1/organizations/{id}/files`
@@ -38,8 +41,16 @@ const scriptSources = ({ isDevelopment, nonce }: PageCspOptions): string[] => [
  * fetches from `/v1/voice/speech` (decision 0034); recordings and previews never load remote media.
  */
 export const buildPageContentSecurityPolicy = (options: PageCspOptions): string => {
-  const emulatorOrigins = [options.authEmulatorOrigin, options.storageEmulatorOrigin].filter((origin): origin is string => origin !== undefined);
-  const connectSrc = ["'self'", ...FIREBASE_AUTH_ORIGINS, FILE_UPLOAD_ORIGIN, ...emulatorOrigins, ...(options.isDevelopment ? ["ws:"] : [])];
+  const emulatorOrigins = [options.authEmulatorOrigin, options.storageEmulatorOrigin].filter(
+    (origin): origin is string => origin !== undefined,
+  );
+  const connectSrc = [
+    "'self'",
+    ...FIREBASE_AUTH_ORIGINS,
+    FILE_UPLOAD_ORIGIN,
+    ...emulatorOrigins,
+    ...(options.isDevelopment ? ["ws:"] : []),
+  ];
   const directives = [
     "default-src 'self'",
     `script-src ${scriptSources(options).join(" ")}`,

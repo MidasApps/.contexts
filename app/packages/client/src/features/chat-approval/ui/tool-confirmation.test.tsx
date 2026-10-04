@@ -34,7 +34,16 @@ const request = { toolCallId: "call-1", toolName: "command_tenancy_CreateProject
 const setup = (props: Partial<ToolConfirmationProps> = {}) => {
   const onRespond = vi.fn();
   const tree = (extra: Partial<ToolConfirmationProps> = {}): ReactElement => (
-    <ToolConfirmation tool={tool("approval-requested")} preview={preview} request={request} onRespond={onRespond} interactive diff={<p>diff da alteração</p>} {...props} {...extra} />
+    <ToolConfirmation
+      tool={tool("approval-requested")}
+      preview={preview}
+      request={request}
+      onRespond={onRespond}
+      interactive
+      diff={<p>diff da alteração</p>}
+      {...props}
+      {...extra}
+    />
   );
   return { ...renderWithProviders(tree()), onRespond, tree };
 };
@@ -107,7 +116,11 @@ describe("ToolConfirmation", () => {
     ["approved and executed", tool("output-available", { approved: true }), "Aprovado e executado."],
     ["approved but failed", tool("output-error", { approved: true }), "Aprovado, mas a execução falhou."],
     ["declined", tool("approval-responded", { approved: false }), "Recusado."],
-    ["declined with a reason", tool("output-denied", { approved: false, reason: "Nome errado" }), "Recusado: Nome errado"],
+    [
+      "declined with a reason",
+      tool("output-denied", { approved: false, reason: "Nome errado" }),
+      "Recusado: Nome errado",
+    ],
   ])("shows the result when %s, without the buttons", async (_name, part, text) => {
     const { container } = setup({ tool: part });
     expect(screen.getByText(text)).toBeTruthy();

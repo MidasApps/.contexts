@@ -1,29 +1,36 @@
-import { PROFILE_SECTIONS, SETTINGS_SECTIONS, useRouter, type ProfileSection, type SettingsSection } from "@core/client/shared/lib/router";
+import {
+  PROFILE_SECTIONS,
+  type ProfileSection,
+  SETTINGS_SECTIONS,
+  type SettingsSection,
+  useRouter,
+} from "@core/client/shared/lib/router";
 import { NotFoundView } from "@core/client/views/not-found";
 import { ProfileAccountView } from "@core/client/views/profile-account";
 import { ProfileNotificationsView } from "@core/client/views/profile-notifications";
 import { ProfilePreferencesView } from "@core/client/views/profile-preferences";
 import { ProfileSecurityView } from "@core/client/views/profile-security";
 import { ProfileSessionsView } from "@core/client/views/profile-sessions";
-import { SettingsApiKeysView } from "@core/client/views/settings-api-keys";
-import { SettingsDevicesView } from "@core/client/views/settings-devices";
-import { SettingsGeneralView } from "@core/client/views/settings-general";
-import { SettingsInvitationsView } from "@core/client/views/settings-invitations";
-import { SettingsMembersView } from "@core/client/views/settings-members";
-import { SettingsRolesView } from "@core/client/views/settings-roles";
-import { SettingsUnitsView } from "@core/client/views/settings-units";
 import { SettingsAgentsView } from "@core/client/views/settings-agents";
-import { SettingsSkillsView } from "@core/client/views/settings-skills";
-import { SettingsKnowledgeView } from "@core/client/views/settings-knowledge";
-import { SettingsConnectorsView } from "@core/client/views/settings-connectors";
-import { SettingsWorkflowsView } from "@core/client/views/settings-workflows";
+import { SettingsApiKeysView } from "@core/client/views/settings-api-keys";
 import { SettingsApprovalsView } from "@core/client/views/settings-approvals";
-import { SettingsUsageView } from "@core/client/views/settings-usage";
-import { SettingsTracesView } from "@core/client/views/settings-traces";
+import { SettingsConnectorsView } from "@core/client/views/settings-connectors";
+import { SettingsDevicesView } from "@core/client/views/settings-devices";
 import { SettingsEvalsView } from "@core/client/views/settings-evals";
 import { SettingsFlagsView } from "@core/client/views/settings-flags";
+import { SettingsGeneralView } from "@core/client/views/settings-general";
+import { SettingsInvitationsView } from "@core/client/views/settings-invitations";
+import { SettingsKnowledgeView } from "@core/client/views/settings-knowledge";
+import { SettingsMembersView } from "@core/client/views/settings-members";
+import { SettingsRolesView } from "@core/client/views/settings-roles";
+import { SettingsSkillsView } from "@core/client/views/settings-skills";
+import { SettingsTracesView } from "@core/client/views/settings-traces";
+import { SettingsUnitsView } from "@core/client/views/settings-units";
+import { SettingsUsageView } from "@core/client/views/settings-usage";
+import { SettingsWorkflowsView } from "@core/client/views/settings-workflows";
 
-const isOneOf = <T extends string>(values: readonly T[], value: string): value is T => (values as readonly string[]).includes(value);
+const isOneOf = <T extends string>(values: readonly T[], value: string): value is T =>
+  (values as readonly string[]).includes(value);
 
 function KnownSettingsSection({ section }: { section: SettingsSection }) {
   switch (section) {
@@ -85,7 +92,11 @@ export function SettingsSectionPage() {
   // The shared route map decides (as on web): an unknown section, or a tail under a section
   // without detail pages (`members/whatever`), has no params and reads as not found.
   const section = useRouter().useRouteParams()["section"];
-  return section !== undefined && isOneOf(SETTINGS_SECTIONS, section) ? <KnownSettingsSection section={section} /> : <NotFoundView />;
+  return section !== undefined && isOneOf(SETTINGS_SECTIONS, section) ? (
+    <KnownSettingsSection section={section} />
+  ) : (
+    <NotFoundView />
+  );
 }
 
 /** `/profile/:section` (SP2 spec §8); a section outside the route map is not found. */

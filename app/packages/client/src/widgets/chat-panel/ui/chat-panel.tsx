@@ -3,13 +3,18 @@
 import { CORE_CONTRACTS, type ContractDefinition } from "@core/contracts";
 import type { ChatTransport, UIMessage } from "ai";
 import { SquarePenIcon } from "lucide-react";
-import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useId, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { agentNameOf, ASSISTANT_AGENT_ID, useChatAgents } from "#/entities/chat-agent/index.ts";
+import { ASSISTANT_AGENT_ID, agentNameOf, useChatAgents } from "#/entities/chat-agent/index.ts";
 import { AgentPicker } from "#/features/chat-agent-picker/index.ts";
 import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
 import type { ComposerVoiceProps, ReadAloudActionProps } from "#/features/chat-voice/index.ts";
-import { CORE_UI_COMPONENTS, createUiRegistry, type UiRegistry, type UiRegistryEntry } from "#/features/generative-ui/index.ts";
+import {
+  CORE_UI_COMPONENTS,
+  createUiRegistry,
+  type UiRegistry,
+  type UiRegistryEntry,
+} from "#/features/generative-ui/index.ts";
 import { ApiError } from "#/shared/api/api-error.ts";
 import type { ChatScope } from "#/shared/api/chat-transport.ts";
 import { cn } from "#/shared/lib/cn.ts";
@@ -18,7 +23,7 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { ErrorState } from "#/shared/ui/molecules/ErrorState/ErrorState.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { useConversationThread } from "../model/use-conversation-thread.ts";
-import { ChatThread, type ChatSuggestion } from "./chat-thread.tsx";
+import { type ChatSuggestion, ChatThread } from "./chat-thread.tsx";
 
 export type ChatPanelProps = {
   /** Organization (and project) a new conversation belongs to. */
@@ -67,7 +72,14 @@ type Thread = {
   readonly attempt: number;
 };
 
-const threadFor = (key: number, conversationId: string | undefined): Thread => ({ key, conversationId, storedId: conversationId, prop: conversationId, fresh: false, attempt: 0 });
+const threadFor = (key: number, conversationId: string | undefined): Thread => ({
+  key,
+  conversationId,
+  storedId: conversationId,
+  prop: conversationId,
+  fresh: false,
+  attempt: 0,
+});
 
 const CORE_SUGGESTIONS = ["capabilities", "knowledge", "data", "create"] as const;
 
@@ -90,7 +102,11 @@ type StoredThreadProps = {
 
 function StoredThread(props: StoredThreadProps) {
   const t = useTranslations("chat");
-  const history = useConversationThread({ organizationId: props.panel.scope.organizationId, conversationId: props.conversationId, attempt: props.thread.attempt });
+  const history = useConversationThread({
+    organizationId: props.panel.scope.organizationId,
+    conversationId: props.conversationId,
+    attempt: props.thread.attempt,
+  });
   const loadedAgent = history.data?.agentId;
   const { onAgent } = props;
   useEffect(() => {
@@ -151,7 +167,15 @@ function StoredThread(props: StoredThreadProps) {
  * new, its name once it exists (the server keeps the agent of a stored conversation) — and
  * "new conversation".
  */
-function ChatPanelHeader(props: { titleId: string; organizationId: string; agentId: string; fixed: boolean; agentName: string; onPick: (agentId: string) => void; onNew: () => void }) {
+function ChatPanelHeader(props: {
+  titleId: string;
+  organizationId: string;
+  agentId: string;
+  fixed: boolean;
+  agentName: string;
+  onPick: (agentId: string) => void;
+  onNew: () => void;
+}) {
   const t = useTranslations("chat");
   return (
     <header className="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border px-4 py-1.5">
@@ -187,7 +211,10 @@ export function ChatPanel(props: ChatPanelProps) {
   const titleId = useId();
   const { uiComponents, contracts } = props;
   const environment = useMemo<ThreadEnvironment>(
-    () => ({ uiRegistry: createUiRegistry(CORE_UI_COMPONENTS, uiComponents ?? {}), contracts: [...CORE_CONTRACTS, ...(contracts ?? [])] }),
+    () => ({
+      uiRegistry: createUiRegistry(CORE_UI_COMPONENTS, uiComponents ?? {}),
+      contracts: [...CORE_CONTRACTS, ...(contracts ?? [])],
+    }),
     [uiComponents, contracts],
   );
   const [thread, setThread] = useState<Thread>(() => threadFor(0, conversationId));
@@ -198,7 +225,10 @@ export function ChatPanel(props: ChatPanelProps) {
   const agentName = knownName ?? t("agents.unknown");
   // Messages carry the agent's own name; the assistant's keep their usual label.
   const assistantName = agentId === ASSISTANT_AGENT_ID ? undefined : agentName;
-  const newScope = useMemo(() => (agentId === ASSISTANT_AGENT_ID ? props.scope : { ...props.scope, agentId }), [agentId, props.scope]);
+  const newScope = useMemo(
+    () => (agentId === ASSISTANT_AGENT_ID ? props.scope : { ...props.scope, agentId }),
+    [agentId, props.scope],
+  );
 
   // The owner of the URL moved to another conversation: start that thread. When it only caught
   // up with the id this thread got from the server, nothing remounts (the answer is streaming).
@@ -220,12 +250,30 @@ export function ChatPanel(props: ChatPanelProps) {
     onConversationChange?.(undefined);
   };
 
-  const recover = () => setThread((current) => ({ ...current, key: current.key + 1, storedId: current.conversationId, fresh: false, attempt: current.attempt + 1 }));
+  const recover = () =>
+    setThread((current) => ({
+      ...current,
+      key: current.key + 1,
+      storedId: current.conversationId,
+      fresh: false,
+      attempt: current.attempt + 1,
+    }));
 
-  const suggestions = props.suggestions ?? CORE_SUGGESTIONS.map((id) => ({ id, title: t(`panel.suggestions.${id}.title`), description: t(`panel.suggestions.${id}.description`), prompt: t(`panel.suggestions.${id}.prompt`) }));
+  const suggestions =
+    props.suggestions ??
+    CORE_SUGGESTIONS.map((id) => ({
+      id,
+      title: t(`panel.suggestions.${id}.title`),
+      description: t(`panel.suggestions.${id}.description`),
+      prompt: t(`panel.suggestions.${id}.prompt`),
+    }));
 
   return (
-    <section data-slot="chat-panel" aria-labelledby={titleId} className={cn("@container/chat flex h-full min-h-0 flex-col bg-background", props.className)}>
+    <section
+      data-slot="chat-panel"
+      aria-labelledby={titleId}
+      className={cn("@container/chat flex h-full min-h-0 flex-col bg-background", props.className)}
+    >
       <ChatPanelHeader
         titleId={titleId}
         organizationId={props.scope.organizationId}

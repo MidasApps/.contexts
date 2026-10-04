@@ -9,7 +9,10 @@ const MINT_TIMEOUT_MS = 10_000;
 export type RealtimeSession = { readonly clientSecret: string; readonly expiresAt: string; readonly model: string };
 
 export type RealtimeMinter = {
-  readonly mint: (input: { readonly requestContext: RequestContext<unknown> | undefined; readonly abortSignal?: AbortSignal }) => Promise<RealtimeSession>;
+  readonly mint: (input: {
+    readonly requestContext: RequestContext<unknown> | undefined;
+    readonly abortSignal?: AbortSignal;
+  }) => Promise<RealtimeSession>;
 };
 
 /** The provider answered without a usable secret (status or shape); the route answers 502. */
@@ -40,8 +43,16 @@ export const createOpenAiRealtimeMinter = (options: {
   readonly fetch?: typeof fetch;
 }): RealtimeMinter => ({
   mint: async ({ requestContext, abortSignal }) => {
-    const session = { type: "realtime", model: options.model, instructions: await options.instructions(requestContext), tools: [] };
-    const signal = abortSignal === undefined ? AbortSignal.timeout(MINT_TIMEOUT_MS) : AbortSignal.any([abortSignal, AbortSignal.timeout(MINT_TIMEOUT_MS)]);
+    const session = {
+      type: "realtime",
+      model: options.model,
+      instructions: await options.instructions(requestContext),
+      tools: [],
+    };
+    const signal =
+      abortSignal === undefined
+        ? AbortSignal.timeout(MINT_TIMEOUT_MS)
+        : AbortSignal.any([abortSignal, AbortSignal.timeout(MINT_TIMEOUT_MS)]);
     const response = await (options.fetch ?? fetch)(CLIENT_SECRETS_URL, {
       method: "POST",
       headers: { authorization: `Bearer ${options.apiKey}`, "content-type": "application/json" },
@@ -54,6 +65,10 @@ export const createOpenAiRealtimeMinter = (options: {
     }
     const parsed = ClientSecretSchema.safeParse(await response.json().catch(() => undefined));
     if (!parsed.success) throw new RealtimeMintError(response.status);
-    return { clientSecret: parsed.data.value, expiresAt: new Date(parsed.data.expires_at * 1000).toISOString(), model: options.model };
+    return {
+      clientSecret: parsed.data.value,
+      expiresAt: new Date(parsed.data.expires_at * 1000).toISOString(),
+      model: options.model,
+    };
   },
 });

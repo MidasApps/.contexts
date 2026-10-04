@@ -12,7 +12,11 @@ import type { AgentModule } from "../runtime/agent-module.ts";
  * `AgentModule.skills` and reach a tenant only when it enabled the module.
  */
 
-export const CORE_SKILLS = { dataCatalog: "data-catalog", knowledgeCitations: "knowledge-citations", safeActions: "safe-actions" } as const;
+export const CORE_SKILLS = {
+  dataCatalog: "data-catalog",
+  knowledgeCitations: "knowledge-citations",
+  safeActions: "safe-actions",
+} as const;
 
 /** Boot error: a skill is missing or its SKILL.md is invalid. */
 export class SkillLoadError extends Error {
@@ -27,7 +31,10 @@ export class SkillLoadError extends Error {
 }
 
 /** Bundle copy first (`<bundle>/skills`), then the package source folder. */
-export const CORE_SKILL_DIRS: readonly string[] = [path.join(import.meta.dirname, "skills"), path.join(import.meta.dirname, "..", "..", "skills")];
+export const CORE_SKILL_DIRS: readonly string[] = [
+  path.join(import.meta.dirname, "skills"),
+  path.join(import.meta.dirname, "..", "..", "skills"),
+];
 
 const readSkillFile = (name: string, dirs: readonly string[]): string => {
   let lastError: unknown;
@@ -55,7 +62,8 @@ export const skillFromContent = (content: string, directoryName: string): Inline
 };
 
 /** @throws {SkillLoadError} for an unknown or invalid skill (boot error). */
-export const loadSkill = (name: string, dirs: readonly string[] = CORE_SKILL_DIRS): InlineSkill => skillFromContent(readSkillFile(name, dirs), name);
+export const loadSkill = (name: string, dirs: readonly string[] = CORE_SKILL_DIRS): InlineSkill =>
+  skillFromContent(readSkillFile(name, dirs), name);
 
 /** A module is enabled for a tenant when `enabledAgents` names it or one of its agents (`<module>-<agent>`). */
 export const isModuleEnabled = (moduleId: string, enabledAgents: ReadonlySet<string>): boolean =>
@@ -74,7 +82,9 @@ export const createSkillsResolver = (args: {
   return async ({ requestContext }) => {
     if (moduleSkills.length === 0) return [...args.core];
     const { enabledAgents } = await args.settings(requestContext);
-    const enabled = moduleSkills.filter((module) => isModuleEnabled(module.id, enabledAgents)).flatMap((module) => module.skills ?? []);
+    const enabled = moduleSkills
+      .filter((module) => isModuleEnabled(module.id, enabledAgents))
+      .flatMap((module) => module.skills ?? []);
     return [...args.core, ...enabled];
   };
 };

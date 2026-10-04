@@ -7,12 +7,12 @@ import { useProjects } from "#/entities/project/index.ts";
 import { useCurrentNode, useMyOrganizations } from "#/entities/session/index.ts";
 import { useSignOut } from "#/features/sign-out/index.ts";
 import { useIsSwitchingOrganization, useSwitchOrganization } from "#/features/switch-organization/index.ts";
+import { useSaveThemePreference } from "#/features/update-preferences/index.ts";
 import type { NodeParams } from "#/shared/api/core-queries.ts";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
 import { navItemRoute } from "#/shared/lib/shell/nav-item-route.ts";
 import { useNavigationRegistry } from "#/shared/lib/shell/shell-registry-context.tsx";
 import { useThemePreference } from "#/shared/lib/theme/use-theme-preference.ts";
-import { useSaveThemePreference } from "#/features/update-preferences/index.ts";
 import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
 
 export type PaletteGroup = "navigation" | "organizations" | "projects" | "actions";
@@ -42,7 +42,16 @@ const useNavigationCommands = (node: NodeParams | null): PaletteCommand[] => {
       const route = navItemRoute(item.target, node ?? {});
       if (route === null) return [];
       const label = t(item.labelKey);
-      return [{ id: `nav:${item.id}`, group: "navigation", label, icon: item.icon, keywords: [label, t(`shell.commandPalette.slots.${slot}`)], run: () => router.navigate(route) }];
+      return [
+        {
+          id: `nav:${item.id}`,
+          group: "navigation",
+          label,
+          icon: item.icon,
+          keywords: [label, t(`shell.commandPalette.slots.${slot}`)],
+          run: () => router.navigate(route),
+        },
+      ];
     }),
   );
 };
@@ -58,7 +67,13 @@ const useTenantCommands = (node: NodeParams | null) => {
     .filter((organization) => organization.id !== node?.organizationId)
     .map((organization): PaletteCommand => {
       const label = t("switchOrganization", { name: organization.name });
-      return { id: `organization:${organization.id}`, group: "organizations", label, icon: "building", keywords: [organization.name], run: () => {
+      return {
+        id: `organization:${organization.id}`,
+        group: "organizations",
+        label,
+        icon: "building",
+        keywords: [organization.name],
+        run: () => {
           // A second switch while one runs would refetch every query twice.
           if (!switching) switchOrganization.mutate(organization.id);
         },
@@ -69,14 +84,16 @@ const useTenantCommands = (node: NodeParams | null) => {
       ? []
       : (projects.data ?? [])
           .filter((project) => project.id !== node.projectId)
-          .map((project): PaletteCommand => ({
-            id: `project:${project.id}`,
-            group: "projects",
-            label: t("openProject", { name: project.name }),
-            icon: "folder",
-            keywords: [project.name],
-            run: () => router.navigate({ id: "project", organizationId: node.organizationId, projectId: project.id }),
-          }));
+          .map(
+            (project): PaletteCommand => ({
+              id: `project:${project.id}`,
+              group: "projects",
+              label: t("openProject", { name: project.name }),
+              icon: "folder",
+              keywords: [project.name],
+              run: () => router.navigate({ id: "project", organizationId: node.organizationId, projectId: project.id }),
+            }),
+          );
   return {
     commands: [...organizationCommands, ...projectCommands],
     status: { organizations: organizations.status, projects: node === null ? ("success" as const) : projects.status },
@@ -89,12 +106,23 @@ const useActionCommands = (node: NodeParams | null, onCreateProject: () => void)
   const theme = useThemePreference();
   const saveTheme = useSaveThemePreference().save;
   const { signOut } = useSignOut();
-  const canCreateProject = usePermissions(node === null ? null : { organizationId: node.organizationId }).can("core.project.create");
-  const action = (name: string, icon: IconName, run: () => void): PaletteCommand => ({ id: `action:${name}`, group: "actions", label: t(name), icon, keywords: [t(name)], run });
+  const canCreateProject = usePermissions(node === null ? null : { organizationId: node.organizationId }).can(
+    "core.project.create",
+  );
+  const action = (name: string, icon: IconName, run: () => void): PaletteCommand => ({
+    id: `action:${name}`,
+    group: "actions",
+    label: t(name),
+    icon,
+    keywords: [t(name)],
+    run,
+  });
   return [
     action("createOrganization", "plus", () => router.navigate({ id: "organizations" })),
     ...(node !== null && canCreateProject ? [action("createProject", "plus", onCreateProject)] : []),
-    action("toggleTheme", theme.resolved === "dark" ? "sun" : "moon", () => saveTheme(theme.resolved === "dark" ? "light" : "dark")),
+    action("toggleTheme", theme.resolved === "dark" ? "sun" : "moon", () =>
+      saveTheme(theme.resolved === "dark" ? "light" : "dark"),
+    ),
     action("changeLanguage", "languages", () => router.navigate({ id: "profile", section: "preferences" })),
     action("openProfile", "user", () => router.navigate({ id: "profile", section: "account" })),
     action("signOut", "log-out", () => void signOut()),
@@ -106,7 +134,9 @@ const useActionCommands = (node: NodeParams | null, onCreateProject: () => void)
  * switching organization or project, creating an organization or (with permission) a project,
  * theme, language, profile and sign-out.
  */
-export const usePaletteCommands = (args: { onCreateProject: () => void }): { commands: PaletteCommand[]; status: Record<"organizations" | "projects", PaletteGroupStatus> } => {
+export const usePaletteCommands = (args: {
+  onCreateProject: () => void;
+}): { commands: PaletteCommand[]; status: Record<"organizations" | "projects", PaletteGroupStatus> } => {
   const node = useCurrentNode();
   const navigation = useNavigationCommands(node);
   const tenant = useTenantCommands(node);

@@ -9,7 +9,6 @@ export {
   usePromptSeed,
   usePromptVersions,
 } from "./api/prompt-version-queries.ts";
-export { PromptVerdictPill } from "./ui/PromptVerdictPill.tsx";
 // Tenant side (SP5 Task 14): the organization's own instructions (addendum) of an agent.
 export {
   addendumActivationsQuery,
@@ -19,3 +18,4 @@ export {
   useAddendumActivations,
   useAddendumVersions,
 } from "./api/tenant-addendum-queries.ts";
+export { PromptVerdictPill } from "./ui/PromptVerdictPill.tsx";

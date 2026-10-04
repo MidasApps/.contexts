@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type { Locator, Page } from "@playwright/test";
 import type { V1Client } from "@core/e2e/api";
-import { watchConsole, type ConsoleGuard } from "@core/e2e/console-guard";
-import { showSidebar, signInThroughUi } from "@core/e2e/sign-in";
+import { type ConsoleGuard, watchConsole } from "@core/e2e/console-guard";
 import type { RoleRef, World } from "@core/e2e/seed-users";
-import { expect, test as base, type FreshUser } from "./web-test.ts";
+import { showSidebar, signInThroughUi } from "@core/e2e/sign-in";
+import type { Locator, Page } from "@playwright/test";
+import { test as base, expect, type FreshUser } from "./web-test.ts";
 
 type ChatFixtures = {
   /** Fails the journey when the browser console shows an error or a warning it did not declare. */
@@ -28,15 +28,18 @@ export const test = base.extend<ChatFixtures>({
   ],
   signInFresh: async ({ page, world, createUser }, provide) => {
     await provide(async (args = {}) => {
-      const user = await createUser({ label: args.label ?? "Chat", organizations: [{ id: world.alpha.id, ...(args.roles === undefined ? {} : { roles: args.roles }) }] });
+      const user = await createUser({
+        label: args.label ?? "Chat",
+        organizations: [{ id: world.alpha.id, ...(args.roles === undefined ? {} : { roles: args.roles }) }],
+      });
       await signInThroughUi(page, user);
       return user;
     });
   },
 });
 
-export { expect };
 export type { FreshUser };
+export { expect };
 
 /** Journeys that sign their own user in start without the owner's session. */
 export const SIGNED_OUT = { cookies: [], origins: [] };
@@ -61,7 +64,8 @@ export const chatPanel = (page: Page): Locator => page.locator('[data-slot="chat
 /** The status line; its `data-phase` names the state the words describe. */
 export const chatStatus = (page: Page): Locator => chatPanel(page).locator('[data-slot="chat-status"]');
 
-export const messageLog = (page: Page): Locator => chatPanel(page).getByRole("log", { name: "Conversa com o assistente" });
+export const messageLog = (page: Page): Locator =>
+  chatPanel(page).getByRole("log", { name: "Conversa com o assistente" });
 
 export const composer = (page: Page): Locator => chatPanel(page).getByRole("textbox", { name: "Mensagem" });
 
@@ -112,7 +116,10 @@ export const seedTurns = async (api: V1Client, world: World, texts: readonly str
   let conversationId: string | undefined;
   for (const text of texts) {
     const message = { id: randomUUID(), role: "user", parts: [{ type: "text", text }] };
-    const body = conversationId === undefined ? { organizationId: world.alpha.id, projectId: world.alpha.projects.launch.id, message } : { conversationId, message };
+    const body =
+      conversationId === undefined
+        ? { organizationId: world.alpha.id, projectId: world.alpha.projects.launch.id, message }
+        : { conversationId, message };
     for (let attempt = 1; ; attempt += 1) {
       const response = await api.raw("POST", "/v1/chat", body);
       if (response.status === 429 && attempt < CHAT_TURN_ATTEMPTS) {

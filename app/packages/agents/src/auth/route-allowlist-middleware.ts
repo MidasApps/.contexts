@@ -7,7 +7,8 @@ const POST = new Set(["POST"]);
 const DELETE = new Set(["DELETE"]);
 
 /** Agent actions `/v1` uses through the gateway (spec §4.1); model changes, clones and direct tool runs stay closed. */
-const AGENT_ACTIONS = "generate|stream|approve-tool-call|decline-tool-call|approve-tool-call-generate|decline-tool-call-generate|resume-stream";
+const AGENT_ACTIONS =
+  "generate|stream|approve-tool-call|decline-tool-call|approve-tool-call-generate|decline-tool-call-generate|resume-stream";
 
 /**
  * Built-in Mastra routes the core serves (spec §4.3), relative to the API prefix.
@@ -50,7 +51,10 @@ export const isAllowedRoute = (method: string, path: string, hiddenAgentIds: rea
 };
 
 const notFound = (): Response =>
-  new Response(JSON.stringify({ error: "Not Found" }), { status: 404, headers: { "content-type": "application/json" } });
+  new Response(JSON.stringify({ error: "Not Found" }), {
+    status: 404,
+    headers: { "content-type": "application/json" },
+  });
 
 /**
  * 404 for every built-in route outside `ALLOWED_ROUTES` (spec §4.3). Custom API
@@ -58,14 +62,18 @@ const notFound = (): Response =>
  * @param options.apiPrefix Mastra `server.apiPrefix` (default `/api`).
  * @param options.hiddenAgentIds agents reachable only through the chat routes (`/chat/*`).
  */
-export const createRouteAllowlistMiddleware = (options: { readonly apiPrefix?: string; readonly hiddenAgentIds?: readonly string[] }): AgentMiddleware => {
+export const createRouteAllowlistMiddleware = (options: {
+  readonly apiPrefix?: string;
+  readonly hiddenAgentIds?: readonly string[];
+}): AgentMiddleware => {
   const prefix = normalizeApiPrefix(options.apiPrefix);
   return {
     path: apiPathPattern(prefix),
     handler: async (context, next) => {
       const { pathname } = new URL(context.req.raw.url);
       const relative = pathname.startsWith(`${prefix}/`) ? pathname.slice(prefix.length) : undefined;
-      if (relative === undefined || !isAllowedRoute(context.req.raw.method, relative, options.hiddenAgentIds)) return notFound();
+      if (relative === undefined || !isAllowedRoute(context.req.raw.method, relative, options.hiddenAgentIds))
+        return notFound();
       await next();
       return undefined;
     },

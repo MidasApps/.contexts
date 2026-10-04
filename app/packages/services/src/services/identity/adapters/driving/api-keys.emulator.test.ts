@@ -1,7 +1,13 @@
 import { OrganizationIdSchema, UserIdSchema } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { buildEmulatorServer, clearCoreCollections, emulatorFirebase, ensureAuthUser, seedActiveUser } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import {
+  buildEmulatorServer,
+  clearCoreCollections,
+  emulatorFirebase,
+  ensureAuthUser,
+  seedActiveUser,
+} from "../../../shared/testing/core-server-emulator.fixture.ts";
 
 const firebase = emulatorFirebase();
 const { firestore, auth } = firebase;
@@ -39,7 +45,11 @@ const createKey = (scopes: readonly string[]) =>
 const withKey = (endpointId: string, path: string, key: string) => {
   const handler = harness.server.routes[endpointId];
   if (handler === undefined) throw new Error(`no handler for ${endpointId}`);
-  return handler(new Request(`http://localhost${path}`, { headers: { authorization: `Bearer ${key}`, "x-forwarded-for": "198.51.100.7" } }));
+  return handler(
+    new Request(`http://localhost${path}`, {
+      headers: { authorization: `Bearer ${key}`, "x-forwarded-for": "198.51.100.7" },
+    }),
+  );
 };
 
 beforeEach(async () => {
@@ -58,20 +68,31 @@ beforeEach(async () => {
 }, 30_000);
 
 describe("API keys routes (emulator)", () => {
-  it("returns the secret once, lists without it, and authenticates the key within its scopes", { timeout: 30_000 }, async () => {
+  it("returns the secret once, lists without it, and authenticates the key within its scopes", {
+    timeout: 30_000,
+  }, async () => {
     const response = await createKey(["core.organization.read"]);
     expect(response.status).toBe(201);
     const created = (await response.json()) as Created;
     const key = created.data?.secret ?? "";
     expect(response.headers.get("location")).toBe(`/v1/api-keys/${created.data?.apiKey.id}`);
 
-    const listed = await harness.call("identity.listApiKeys", { method: "GET", path: `/v1/organizations/${tenantId}/api-keys`, as: "ak-admin" });
+    const listed = await harness.call("identity.listApiKeys", {
+      method: "GET",
+      path: `/v1/organizations/${tenantId}/api-keys`,
+      as: "ak-admin",
+    });
     const listedText = await listed.text();
     expect(listed.status).toBe(200);
     expect(listedText).toContain(created.data?.apiKey.publicId ?? "?");
     expect(listedText).not.toContain(key);
     expect(listedText).not.toContain("secretHash");
-    const stored = (await firestore.collection(CORE_COLLECTIONS.apiKeys).doc(created.data?.apiKey.id ?? "").get()).data();
+    const stored = (
+      await firestore
+        .collection(CORE_COLLECTIONS.apiKeys)
+        .doc(created.data?.apiKey.id ?? "")
+        .get()
+    ).data();
     expect(JSON.stringify(stored)).not.toContain(key.split("_").slice(2).join("_"));
 
     const read = await withKey("tenancy.getOrganization", `/v1/organizations/${tenantId}`, key);
@@ -82,7 +103,11 @@ describe("API keys routes (emulator)", () => {
 
   it("answers 401 once the owner is removed from the organization (keys revoked)", { timeout: 30_000 }, async () => {
     const key = ((await (await createKey(["core.organization.read"])).json()) as Created).data?.secret ?? "";
-    const removed = await harness.call("access.removeMember", { method: "DELETE", path: `/v1/organizations/${tenantId}/members/ak-admin`, as: "ak-owner" });
+    const removed = await harness.call("access.removeMember", {
+      method: "DELETE",
+      path: `/v1/organizations/${tenantId}/members/ak-admin`,
+      as: "ak-owner",
+    });
     expect(removed.status).toBe(204);
     const keys = await firestore.collection(CORE_COLLECTIONS.apiKeys).where("ownerUid", "==", "ak-admin").get();
     expect(keys.docs.map((doc) => doc.data())).toMatchObject([{ status: "revoked", revokedReason: "owner-removed" }]);
@@ -91,7 +116,15 @@ describe("API keys routes (emulator)", () => {
 
   it("answers 401 after the key expires (clock) and 401 to a tampered secret", { timeout: 30_000 }, async () => {
     const key = ((await (await createKey(["core.organization.read"])).json()) as Created).data?.secret ?? "";
-    expect((await withKey("tenancy.getOrganization", `/v1/organizations/${tenantId}`, `${key.slice(0, -1)}${key.endsWith("A") ? "B" : "A"}`)).status).toBe(401);
+    expect(
+      (
+        await withKey(
+          "tenancy.getOrganization",
+          `/v1/organizations/${tenantId}`,
+          `${key.slice(0, -1)}${key.endsWith("A") ? "B" : "A"}`,
+        )
+      ).status,
+    ).toBe(401);
     now = new Date("2026-12-30T12:00:00.000Z");
     expect((await withKey("tenancy.getOrganization", `/v1/organizations/${tenantId}`, key)).status).toBe(401);
   });

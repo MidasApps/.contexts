@@ -1,14 +1,24 @@
 import { z } from "zod";
 import { defineContract } from "../contract.ts";
 import { none, personal } from "../field-docs.ts";
-import { SpanIdSchema, TRACE_SUMMARY_EXAMPLE, traceMetricsShape, TraceStatusSchema, TraceSummarySchema } from "./trace-summary.schema.ts";
+import {
+  SpanIdSchema,
+  TRACE_SUMMARY_EXAMPLE,
+  TraceStatusSchema,
+  TraceSummarySchema,
+  traceMetricsShape,
+} from "./trace-summary.schema.ts";
 
 /** One span of a trace; parents make the tree (the viewer nests them). */
 export const TraceSpanSchema = z.strictObject({
   spanId: SpanIdSchema.meta(none("Span id.")),
   parentSpanId: SpanIdSchema.nullable().meta(none("Parent span; null for the root.")),
   name: z.string().min(1).max(200).meta(none("Span name (operation).")),
-  type: z.string().min(1).max(60).meta(none("Mastra span type (agent_run, model_generation, tool_call, workflow_step, ...).")),
+  type: z
+    .string()
+    .min(1)
+    .max(60)
+    .meta(none("Mastra span type (agent_run, model_generation, tool_call, workflow_step, ...).")),
   status: TraceStatusSchema.meta(none("Span status.")),
   model: z.string().min(1).nullable().meta(none("Model of a generation span.")),
   // Already redacted by SensitiveDataFilter; fields with pii `sensitive` never reach this contract.

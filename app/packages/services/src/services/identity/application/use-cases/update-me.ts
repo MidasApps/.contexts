@@ -13,7 +13,10 @@ export type UpdateMe = (command: UpdateMeCommand) => Promise<Result<Me, AccessDe
 const REGIONAL_KEYS = ["locale", "timeZone", "currency"] as const;
 
 /** New preferences: `null` removes a regional preference (fall back to the node's). */
-export const applyPreferencesPatch = (current: UserPreferences, patch: NonNullable<UpdateMeInput["preferences"]>): UserPreferences => {
+export const applyPreferencesPatch = (
+  current: UserPreferences,
+  patch: NonNullable<UpdateMeInput["preferences"]>,
+): UserPreferences => {
   const next: UserPreferences = { ...current, notifications: { ...current.notifications } };
   for (const key of REGIONAL_KEYS) {
     const value = patch[key];
@@ -21,14 +24,17 @@ export const applyPreferencesPatch = (current: UserPreferences, patch: NonNullab
     else if (value !== undefined) Object.assign(next, { [key]: value });
   }
   if (patch.theme !== undefined) next.theme = patch.theme;
-  if (patch.notifications !== undefined) next.notifications = { ...next.notifications, productUpdates: patch.notifications.productUpdates };
+  if (patch.notifications !== undefined)
+    next.notifications = { ...next.notifications, productUpdates: patch.notifications.productUpdates };
   return next;
 };
 
 const profilePatchOf = (user: User, input: UpdateMeInput): UserProfilePatch => ({
   ...(input.displayName === undefined ? {} : { displayName: input.displayName }),
   ...(input.photoUrl === undefined ? {} : { photoUrl: input.photoUrl }),
-  ...(input.preferences === undefined ? {} : { preferences: applyPreferencesPatch(user.preferences, input.preferences) }),
+  ...(input.preferences === undefined
+    ? {}
+    : { preferences: applyPreferencesPatch(user.preferences, input.preferences) }),
 });
 
 const applied = (user: User, patch: UserProfilePatch, updatedAt: string): User => {
@@ -44,7 +50,12 @@ const applied = (user: User, patch: UserProfilePatch, updatedAt: string): User =
  * IANA name, validated at the boundary). Refused under impersonation (read-only).
  */
 export const makeUpdateMe =
-  (deps: Pick<MeDeps, "users" | "accounts" | "staff" | "clock" | "unitOfWork" | "access" | "mayCreateOrganization" | "membership">): UpdateMe =>
+  (
+    deps: Pick<
+      MeDeps,
+      "users" | "accounts" | "staff" | "clock" | "unitOfWork" | "access" | "mayCreateOrganization" | "membership"
+    >,
+  ): UpdateMe =>
   async ({ actor, input }) => {
     if (actor.impersonation !== undefined) return err(new AccessDeniedError("IMPERSONATION_READ_ONLY"));
     const loaded = await loadMe(deps, actor);

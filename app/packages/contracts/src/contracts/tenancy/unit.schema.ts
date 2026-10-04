@@ -22,7 +22,11 @@ export const UnitFieldsSchema = z.object({
     .array(UnitIdSchema)
     .max(MAX_UNIT_DEPTH)
     .meta(none("Ids of every ancestor unit, root first; length equals depth.")),
-  depth: z.int().min(0).max(MAX_UNIT_DEPTH).meta(none(`Number of ancestors, 0-${MAX_UNIT_DEPTH}.`)),
+  depth: z
+    .int()
+    .min(0)
+    .max(MAX_UNIT_DEPTH)
+    .meta(none(`Number of ancestors, 0-${MAX_UNIT_DEPTH}.`)),
   type: UnitTypeIdSchema.meta(none("Registered unit type, `<module>.<type>`.")),
   name: NodeNameSchema.meta(none("Display name of the unit.")),
   settings: z.object(NodeRegionalOverridesSchema.shape).meta(none("Regional overrides of the unit.")),
@@ -41,7 +45,11 @@ const checkTreeFields = (unit: UnitFields, ctx: z.RefinementCtx): void => {
     ctx.addIssue({ code: "custom", path: ["parentUnitId"], message: "parentUnitId must be the last ancestor." });
   }
   if (new Set([...unit.ancestorIds, unit.id]).size !== unit.ancestorIds.length + 1) {
-    ctx.addIssue({ code: "custom", path: ["ancestorIds"], message: "ancestorIds must be unique and exclude the unit." });
+    ctx.addIssue({
+      code: "custom",
+      path: ["ancestorIds"],
+      message: "ancestorIds must be unique and exclude the unit.",
+    });
   }
 };
 

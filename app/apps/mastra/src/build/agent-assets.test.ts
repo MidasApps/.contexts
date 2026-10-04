@@ -12,7 +12,10 @@ const write = (file: string) => {
 describe("bundled agent assets", () => {
   it("copies the eval datasets and baselines next to the bundle, like instructions and skills", () => {
     expect(AGENT_ASSETS.map((asset) => asset.bundled)).toEqual(["instructions", "skills", "evals"]);
-    expect(AGENT_ASSETS.find((asset) => asset.bundled === "evals")).toMatchObject({ source: "../../packages/agents/evals", target: "src/mastra/public/evals" });
+    expect(AGENT_ASSETS.find((asset) => asset.bundled === "evals")).toMatchObject({
+      source: "../../packages/agents/evals",
+      target: "src/mastra/public/evals",
+    });
   });
 
   it("names every source file the output lacks, and nothing once the copy is complete", () => {
@@ -24,7 +27,9 @@ describe("bundled agent assets", () => {
       write(path.join(source, "datasets", "data.v1.jsonl"));
       write(path.join(source, "baselines", "data.json"));
       write(path.join(output, "evals", "datasets", "data.v1.jsonl"));
-      expect(missingBundledAssets({ assets, outputDir: output })).toEqual([path.join("evals", "baselines", "data.json")]);
+      expect(missingBundledAssets({ assets, outputDir: output })).toEqual([
+        path.join("evals", "baselines", "data.json"),
+      ]);
       write(path.join(output, "evals", "baselines", "data.json"));
       expect(missingBundledAssets({ assets, outputDir: output })).toEqual([]);
     } finally {

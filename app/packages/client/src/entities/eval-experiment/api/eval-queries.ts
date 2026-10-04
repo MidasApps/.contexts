@@ -1,6 +1,12 @@
 "use client";
 
-import { adminGetExperimentEndpoint, adminListDatasetsEndpoint, adminListExperimentsEndpoint, type EvalDataset, type EvalExperimentSummary } from "@core/contracts";
+import {
+  adminGetExperimentEndpoint,
+  adminListDatasetsEndpoint,
+  adminListExperimentsEndpoint,
+  type EvalDataset,
+  type EvalExperimentSummary,
+} from "@core/contracts";
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -11,7 +17,10 @@ import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 
 export const EXPERIMENTS_PAGE_SIZE = 20;
 
-export type ExperimentPage = { readonly data: readonly EvalExperimentSummary[]; readonly meta: { readonly hasMore: boolean } };
+export type ExperimentPage = {
+  readonly data: readonly EvalExperimentSummary[];
+  readonly meta: { readonly hasMore: boolean };
+};
 
 export const evalKeys = {
   all: (): QueryKey => ["admin", "evals"],
@@ -24,11 +33,14 @@ export const evalKeys = {
 export const adminExperimentsQuery = (callEndpoint: CallEndpoint, page: number) =>
   queryOptions({
     queryKey: evalKeys.experiments(page),
-    queryFn: ({ signal }): Promise<ExperimentPage> => callEndpoint(adminListExperimentsEndpoint, { query: { page: page - 1, perPage: EXPERIMENTS_PAGE_SIZE }, signal }),
+    queryFn: ({ signal }): Promise<ExperimentPage> =>
+      callEndpoint(adminListExperimentsEndpoint, { query: { page: page - 1, perPage: EXPERIMENTS_PAGE_SIZE }, signal }),
   });
 
 /** Polls a page of experiments while one of them is still pending or running. */
-export const pollLiveExperiments = pollWhilePageLive<EvalExperimentSummary>((experiment) => experiment.status === "pending" || experiment.status === "running");
+export const pollLiveExperiments = pollWhilePageLive<EvalExperimentSummary>(
+  (experiment) => experiment.status === "pending" || experiment.status === "running",
+);
 
 export const useAdminExperiments = (page: number, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
@@ -46,14 +58,17 @@ export const adminExperimentQuery = (callEndpoint: CallEndpoint, experimentId: s
   queryOptions({
     queryKey: evalKeys.experiment(experimentId),
     queryFn: ({ signal }): Promise<EvalExperimentSummary | null> =>
-      nullOnNotFound(async () => (await callEndpoint(adminGetExperimentEndpoint, { params: { experimentId }, signal })).data),
+      nullOnNotFound(
+        async () => (await callEndpoint(adminGetExperimentEndpoint, { params: { experimentId }, signal })).data,
+      ),
   });
 
 /** `GET /v1/admin/datasets` (staff): platform and organization datasets. */
 export const adminDatasetsQuery = (callEndpoint: CallEndpoint) =>
   queryOptions({
     queryKey: evalKeys.datasets(),
-    queryFn: async ({ signal }): Promise<EvalDataset[]> => (await callEndpoint(adminListDatasetsEndpoint, { signal })).data,
+    queryFn: async ({ signal }): Promise<EvalDataset[]> =>
+      (await callEndpoint(adminListDatasetsEndpoint, { signal })).data,
   });
 
 export const useAdminDatasets = (options: { enabled?: boolean } = {}) => {

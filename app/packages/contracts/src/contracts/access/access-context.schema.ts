@@ -11,14 +11,16 @@ import { RegionalSettingsSchema } from "../tenancy/regional-settings.schema.ts";
 import { UnitFieldsSchema } from "../tenancy/unit.schema.ts";
 
 /** `GET /v1/me/context?organizationId&projectId&unitId`: the node to resolve. */
-export const AccessContextQuerySchema = z.object({
-  organizationId: OrganizationIdSchema.meta(none("Organization of the node.")),
-  projectId: ProjectIdSchema.optional().meta(none("Project of the node; absent for the organization itself.")),
-  unitId: UnitIdSchema.optional().meta(none("Unit of the node; requires projectId.")),
-}).refine((query) => query.unitId === undefined || query.projectId !== undefined, {
-  error: "unitId requires projectId.",
-  path: ["projectId"],
-});
+export const AccessContextQuerySchema = z
+  .object({
+    organizationId: OrganizationIdSchema.meta(none("Organization of the node.")),
+    projectId: ProjectIdSchema.optional().meta(none("Project of the node; absent for the organization itself.")),
+    unitId: UnitIdSchema.optional().meta(none("Unit of the node; requires projectId.")),
+  })
+  .refine((query) => query.unitId === undefined || query.projectId !== undefined, {
+    error: "unitId requires projectId.",
+    path: ["projectId"],
+  });
 export type AccessContextQuery = z.infer<typeof AccessContextQuerySchema>;
 
 /**
@@ -31,7 +33,9 @@ export const AccessContextSchema = z.object({
   project: z.object(ProjectSchema.shape).optional().meta(personal("The project, when the node is a project or unit.")),
   unit: z.object(UnitFieldsSchema.shape).optional().meta(none("The unit, when the node is a unit.")),
   permissions: z.array(PermissionSchema).meta(none("Effective permissions of the caller at the node, sorted.")),
-  regional: z.object(RegionalSettingsSchema.shape).meta(none("Locale, time zones and currency resolved for the caller at the node.")),
+  regional: z
+    .object(RegionalSettingsSchema.shape)
+    .meta(none("Locale, time zones and currency resolved for the caller at the node.")),
 });
 export type AccessContext = z.infer<typeof AccessContextSchema>;
 
@@ -45,7 +49,12 @@ export const AccessContextContract = defineContract(AccessContextSchema, {
       organization: ORGANIZATION_EXAMPLE,
       project: PROJECT_EXAMPLE,
       permissions: ["core.organization.read", "core.project.read", "core.unit.read"],
-      regional: { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Manaus", currency: "BRL" },
+      regional: {
+        locale: "pt-BR",
+        displayTimeZone: "America/Sao_Paulo",
+        nodeTimeZone: "America/Manaus",
+        currency: "BRL",
+      },
     },
   ],
   pii: "personal",

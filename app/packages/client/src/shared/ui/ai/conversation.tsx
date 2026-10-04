@@ -1,9 +1,9 @@
 "use client";
 
 import { ArrowDownIcon } from "lucide-react";
-import { createContext, use, useMemo, type ComponentProps, type ReactNode, type RefObject } from "react";
-import { useStickToBottom } from "use-stick-to-bottom";
+import { type ComponentProps, createContext, type ReactNode, type RefObject, use, useMemo } from "react";
 import { useTranslations } from "use-intl";
+import { useStickToBottom } from "use-stick-to-bottom";
 import { cn } from "#/shared/lib/cn.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 
@@ -27,8 +27,14 @@ export type ConversationProps = Omit<ComponentProps<"div">, "aria-label"> & {
  * reading every streamed token aloud would be unusable.
  */
 export function Conversation({ label, overlay, scrollElementRef, className, children, ...props }: ConversationProps) {
-  const { scrollRef, contentRef, isAtBottom, scrollToBottom } = useStickToBottom({ initial: "instant", resize: "smooth" });
-  const context = useMemo(() => ({ isAtBottom, scrollToBottom: () => void scrollToBottom() }), [isAtBottom, scrollToBottom]);
+  const { scrollRef, contentRef, isAtBottom, scrollToBottom } = useStickToBottom({
+    initial: "instant",
+    resize: "smooth",
+  });
+  const context = useMemo(
+    () => ({ isAtBottom, scrollToBottom: () => void scrollToBottom() }),
+    [isAtBottom, scrollToBottom],
+  );
   return (
     <ConversationContext value={context}>
       <div data-slot="conversation" className={cn("relative flex min-h-0 flex-1 flex-col", className)} {...props}>
@@ -67,11 +73,25 @@ export type ConversationEmptyStateProps = Omit<ComponentProps<"div">, "title"> &
 };
 
 /** chat.html "launcher state": mark, greeting and (as children) the suggestion cards. */
-export function ConversationEmptyState({ title, description, icon, className, children, ...props }: ConversationEmptyStateProps) {
+export function ConversationEmptyState({
+  title,
+  description,
+  icon,
+  className,
+  children,
+  ...props
+}: ConversationEmptyStateProps) {
   return (
-    <div data-slot="conversation-empty" className={cn("flex flex-1 flex-col items-center justify-center gap-5 py-8 text-center", className)} {...props}>
+    <div
+      data-slot="conversation-empty"
+      className={cn("flex flex-1 flex-col items-center justify-center gap-5 py-8 text-center", className)}
+      {...props}
+    >
       {icon === undefined ? null : (
-        <div aria-hidden="true" className="grid size-12 place-items-center rounded-lg border border-border bg-card text-muted-foreground">
+        <div
+          aria-hidden="true"
+          className="grid size-12 place-items-center rounded-lg border border-border bg-card text-muted-foreground"
+        >
           {icon}
         </div>
       )}
@@ -95,7 +115,10 @@ export function ConversationScrollButton({ className, ...props }: Omit<Component
       variant="outline"
       size="sm"
       onClick={scrollToBottom}
-      className={cn("absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full shadow-modal animate-in fade-in-0", className)}
+      className={cn(
+        "absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full shadow-modal animate-in fade-in-0",
+        className,
+      )}
       {...props}
     >
       <ArrowDownIcon aria-hidden="true" />

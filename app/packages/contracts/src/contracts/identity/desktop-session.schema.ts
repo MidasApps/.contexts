@@ -6,7 +6,9 @@ import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
 import { SessionIdSchema } from "./ids.schema.ts";
 
 /** 256-bit random secret, base64url without padding (43 chars); stored only as sha256 (decision 0007). */
-export const DesktopSessionSecretSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/, { error: "Expected a 43-char base64url secret." });
+export const DesktopSessionSecretSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{43}$/, { error: "Expected a 43-char base64url secret." });
 
 /** Firebase custom token (a signed JWT) for `signInWithCustomToken`. */
 export const CustomTokenSchema = z.string().min(1).max(4096);

@@ -15,7 +15,13 @@ const SCHEMA = {
   required: ["days", "dryRun", "mode"],
 };
 
-function Harness({ schema, onRead }: { schema: Record<string, unknown> | null; onRead: (value: Record<string, unknown> | null) => void }) {
+function Harness({
+  schema,
+  onRead,
+}: {
+  schema: Record<string, unknown> | null;
+  onRead: (value: Record<string, unknown> | null) => void;
+}) {
   const input = useJsonSchemaInput(schema);
   return (
     <form
@@ -25,7 +31,14 @@ function Harness({ schema, onRead }: { schema: Record<string, unknown> | null; o
         onRead(input.read());
       }}
     >
-      <JsonSchemaFields plan={input.plan} draft={input.draft} onDraftChange={input.setDraft} problems={input.problems} labelOf={(field) => field.title ?? field.name} jsonHint="hint" />
+      <JsonSchemaFields
+        plan={input.plan}
+        draft={input.draft}
+        onDraftChange={input.setDraft}
+        problems={input.problems}
+        labelOf={(field) => field.title ?? field.name}
+        jsonHint="hint"
+      />
       <button type="submit">send</button>
     </form>
   );
@@ -55,7 +68,12 @@ describe("JsonSchemaFields", () => {
 
   it("edits shapes a form cannot hold as JSON, with no way back to fields", async () => {
     const reads: (Record<string, unknown> | null)[] = [];
-    const { user } = renderWithProviders(<Harness schema={{ type: "object", properties: { tags: { type: "array" } } }} onRead={(value) => reads.push(value)} />);
+    const { user } = renderWithProviders(
+      <Harness
+        schema={{ type: "object", properties: { tags: { type: "array" } } }}
+        onRead={(value) => reads.push(value)}
+      />,
+    );
     expect(screen.queryByRole("button", { name: "Editar como formulário" })).toBeNull();
     const json = screen.getByRole("textbox", { name: "Dados de entrada (JSON)" });
     await user.click(json);

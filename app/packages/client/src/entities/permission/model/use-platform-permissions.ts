@@ -9,7 +9,10 @@ import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 import type { PermissionsState } from "./use-can.ts";
 
 const PLATFORM_ROLES_BY_PERMISSION: ReadonlyMap<string, readonly string[]> = new Map(
-  CORE_PERMISSIONS.filter((definition) => definition.scope === "platform").map((definition) => [definition.id, definition.defaultRoles]),
+  CORE_PERMISSIONS.filter((definition) => definition.scope === "platform").map((definition) => [
+    definition.id,
+    definition.defaultRoles,
+  ]),
 );
 
 /**
@@ -32,5 +35,10 @@ export const usePlatformPermissions = (): PermissionsState => {
   const role = query.data?.platformRole;
   const can = useCallback((permission: Permission) => platformRoleCan(role, permission), [role]);
   const { refetch } = query;
-  return { status: query.status, can: query.data === undefined ? denyAll : can, error: query.error, refetch: () => void refetch() };
+  return {
+    status: query.status,
+    can: query.data === undefined ? denyAll : can,
+    error: query.error,
+    refetch: () => void refetch(),
+  };
 };

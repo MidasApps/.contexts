@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 /** Field problems as `auth.validation.*` keys; empty when the credentials can be submitted. */
-export type CredentialProblems = { readonly email?: "emailRequired" | "emailInvalid"; readonly password?: "passwordRequired" };
+export type CredentialProblems = {
+  readonly email?: "emailRequired" | "emailInvalid";
+  readonly password?: "passwordRequired";
+};
 
 const EmailSchema = z.email();
 
@@ -11,7 +14,8 @@ const EmailSchema = z.email();
  */
 export const validateCredentials = (input: { email: string; password: string }): CredentialProblems => {
   const email = input.email.trim();
-  const emailProblem = email === "" ? "emailRequired" : EmailSchema.safeParse(email).success ? undefined : "emailInvalid";
+  const emailProblem =
+    email === "" ? "emailRequired" : EmailSchema.safeParse(email).success ? undefined : "emailInvalid";
   return {
     ...(emailProblem === undefined ? {} : { email: emailProblem }),
     ...(input.password === "" ? { password: "passwordRequired" as const } : {}),

@@ -68,9 +68,7 @@ function Preview({ request }: Pick<ApprovalRequestItemProps, "request">) {
         <div>
           <dt className="text-sm font-medium">{t("after")}</dt>
           <dd>
-            <pre className="rounded-md bg-muted p-2 text-xs break-words whitespace-pre-wrap">
-              {json(preview.after)}
-            </pre>
+            <pre className="rounded-md bg-muted p-2 text-xs break-words whitespace-pre-wrap">{json(preview.after)}</pre>
           </dd>
         </div>
       </dl>
@@ -90,7 +88,9 @@ function FailureDetails({ failure }: { failure: ApprovalFailure }) {
   return (
     <>
       <p className="text-sm">{t(`failureReason.${failureReasonOf(failure.code)}`)}</p>
-      <p className="font-mono text-caption break-all text-muted-foreground">{t("failureReference", { requestId: failure.requestId, code: failure.code })}</p>
+      <p className="font-mono text-caption break-all text-muted-foreground">
+        {t("failureReference", { requestId: failure.requestId, code: failure.code })}
+      </p>
     </>
   );
 }
@@ -99,13 +99,23 @@ function FailureDetails({ failure }: { failure: ApprovalFailure }) {
  * One approval request (SP5 spec §3.4): summary, status, requester, node, expiry and the preview of
  * its action kind. Decisions are passed in as `actions`, so the entity stays read-only.
  */
-export function ApprovalRequestItem({ request, requesterName, node, titleRoute, headingLevel = 3, actions }: ApprovalRequestItemProps) {
+export function ApprovalRequestItem({
+  request,
+  requesterName,
+  node,
+  titleRoute,
+  headingLevel = 3,
+  actions,
+}: ApprovalRequestItemProps) {
   const t = useTranslations("common.approvals");
   const formatDateTime = useFormatDateTime();
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const settled = request.status !== "pending";
   return (
-    <article className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4" aria-labelledby={`approval-${request.id}`}>
+    <article
+      className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
+      aria-labelledby={`approval-${request.id}`}
+    >
       <header className="flex flex-wrap items-start justify-between gap-2">
         <Heading id={`approval-${request.id}`} className="min-w-0 text-title font-medium break-words">
           {titleRoute === undefined ? (
@@ -131,13 +141,21 @@ export function ApprovalRequestItem({ request, requesterName, node, titleRoute, 
         )}
         <div className="flex gap-1.5">
           <dt className="sr-only">{t("item.when")}</dt>
-          <dd>{settled ? t("item.updated", { when: formatDateTime(request.updatedAt) }) : t("item.expires", { when: formatDateTime(request.expiresAt) })}</dd>
+          <dd>
+            {settled
+              ? t("item.updated", { when: formatDateTime(request.updatedAt) })
+              : t("item.expires", { when: formatDateTime(request.expiresAt) })}
+          </dd>
         </div>
       </dl>
       {request.reason === null ? null : <p className="text-sm">{t("item.reason", { reason: request.reason })}</p>}
       {/* Approved but not done: said where the request stays (history, its page), not only in a toast. */}
-      {request.status === "failed" ? <p className="text-sm font-medium text-destructive-text">{t("item.failed")}</p> : null}
-      {request.status === "failed" && request.failure !== undefined ? <FailureDetails failure={request.failure} /> : null}
+      {request.status === "failed" ? (
+        <p className="text-sm font-medium text-destructive-text">{t("item.failed")}</p>
+      ) : null}
+      {request.status === "failed" && request.failure !== undefined ? (
+        <FailureDetails failure={request.failure} />
+      ) : null}
       <Preview request={request} />
       {actions === undefined || actions === null ? null : <footer className="flex flex-col gap-2">{actions}</footer>}
     </article>

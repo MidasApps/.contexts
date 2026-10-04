@@ -22,7 +22,8 @@ const repository = (spend: UsageTotals = ZERO): UsageRepository & { rows: LlmCal
   };
 };
 
-const bind = (repo: UsageRepository) => bindUsagePort(createUsageServices({ repository: repo, clock: fixedClock("2026-09-30T00:00:00.000Z") }));
+const bind = (repo: UsageRepository) =>
+  bindUsagePort(createUsageServices({ repository: repo, clock: fixedClock("2026-09-30T00:00:00.000Z") }));
 
 describe("usage port binding", () => {
   it("records contract-valid rows", async () => {
@@ -60,6 +61,9 @@ describe("usage port binding", () => {
   });
 
   it("answers the budget check from the ledger", async () => {
-    expect(await bind(repository({ ...ZERO, costMicroUsd: 1000 })).checkTenantBudget({ tenantId: "t1" })).toEqual({ allowed: false, reason: "BUDGET_EXCEEDED" });
+    expect(await bind(repository({ ...ZERO, costMicroUsd: 1000 })).checkTenantBudget({ tenantId: "t1" })).toEqual({
+      allowed: false,
+      reason: "BUDGET_EXCEEDED",
+    });
   });
 });

@@ -1,7 +1,7 @@
 // Test world of the approval use cases: the access write world (org-a > p1) with a module
 // permission that requires approval (held by members), a recording test handler, an
 // in-memory approval store and audit log, and a movable clock.
-import { OrganizationIdSchema, UserIdSchema, type PermissionDefinition, type UserPrincipal } from "@core/contracts";
+import { OrganizationIdSchema, type PermissionDefinition, UserIdSchema, type UserPrincipal } from "@core/contracts";
 import { z } from "zod";
 import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
 import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
@@ -26,7 +26,13 @@ export const DELETE_INVOICE: PermissionDefinition = {
   defaultRoles: ["member"],
 };
 
-const READ_INVOICE: PermissionDefinition = { ...DELETE_INVOICE, id: "sample.invoice.read", descriptionKey: "permissions.sample.invoice.read", kind: "read", requiresApproval: false };
+const READ_INVOICE: PermissionDefinition = {
+  ...DELETE_INVOICE,
+  id: "sample.invoice.read",
+  descriptionKey: "permissions.sample.invoice.read",
+  kind: "read",
+  requiresApproval: false,
+};
 
 export const as = (uid: string): UserPrincipal => ({ type: "user", uid: UserIdSchema.parse(uid), mfa: false });
 

@@ -8,7 +8,9 @@ import { FileUploadRequestSchema } from "./file-upload-request.schema.ts";
 import { FileReadUrlSchema, FileUploadTicketSchema } from "./file-upload-ticket.schema.ts";
 import { FileIdSchema, StoredFileSchema } from "./stored-file.schema.ts";
 
-const organizationParams = z.object({ organizationId: OrganizationIdSchema.meta(none("Organization the file belongs to.")) });
+const organizationParams = z.object({
+  organizationId: OrganizationIdSchema.meta(none("Organization the file belongs to.")),
+});
 const fileParams = z.object({ fileId: FileIdSchema.meta(none("File id.")) });
 
 export const requestFileUploadEndpoint = defineEndpoint({
@@ -21,7 +23,8 @@ export const requestFileUploadEndpoint = defineEndpoint({
   responses: { 201: dataEnvelope(FileUploadTicketSchema) },
   errors: { 403: ["FORBIDDEN"] },
   idempotency: "optional",
-  summary: "Registers a pending file and returns a 15-minute signed upload URL (core.file.upload; type and size per purpose).",
+  summary:
+    "Registers a pending file and returns a 15-minute signed upload URL (core.file.upload; type and size per purpose).",
 });
 
 export const getFileEndpoint = defineEndpoint({
@@ -46,4 +49,8 @@ export const getFileReadUrlEndpoint = defineEndpoint({
   summary: "Returns a 5-minute signed download URL of a ready file (same access as files.getFile; 409 until ready).",
 });
 
-export const FILES_ENDPOINTS: readonly EndpointDefinition[] = [requestFileUploadEndpoint, getFileEndpoint, getFileReadUrlEndpoint];
+export const FILES_ENDPOINTS: readonly EndpointDefinition[] = [
+  requestFileUploadEndpoint,
+  getFileEndpoint,
+  getFileReadUrlEndpoint,
+];

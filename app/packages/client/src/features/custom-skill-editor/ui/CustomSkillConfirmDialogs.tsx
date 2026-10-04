@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteCustomSkillEndpoint, updateCustomSkillEndpoint, type CustomSkill } from "@core/contracts";
+import { type CustomSkill, deleteCustomSkillEndpoint, updateCustomSkillEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -53,7 +53,11 @@ export function ToggleCustomSkillDialog({ organizationId, skill, onOpenChange }:
   const action = useConfirmedAction(
     async () => {
       if (skill === null) return;
-      await callEndpoint(updateCustomSkillEndpoint, { params: { skillId: skill.id }, query: { organizationId }, body: { enabled: !disabling } });
+      await callEndpoint(updateCustomSkillEndpoint, {
+        params: { skillId: skill.id },
+        query: { organizationId },
+        body: { enabled: !disabling },
+      });
       await invalidateSkillData(queryClient, organizationId);
     },
     () => notify.success(t(disabling ? "doneDisabled" : "doneEnabled", { name: skill?.name ?? "" })),

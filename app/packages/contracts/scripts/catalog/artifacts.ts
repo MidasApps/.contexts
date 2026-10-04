@@ -34,8 +34,14 @@ export const buildCatalogArtifacts = (
   const aiEntries = buildAiCatalog(entries);
   return [
     ...entries.flatMap(perContractArtifacts),
-    { path: `${CATALOG_DIR}/catalog.json`, content: stableStringify({ catalogVersion: CATALOG_VERSION, contracts: entries }) },
-    { path: `${CATALOG_DIR}/catalog.ai.json`, content: stableStringify({ catalogVersion: CATALOG_VERSION, contracts: aiEntries }) },
+    {
+      path: `${CATALOG_DIR}/catalog.json`,
+      content: stableStringify({ catalogVersion: CATALOG_VERSION, contracts: entries }),
+    },
+    {
+      path: `${CATALOG_DIR}/catalog.ai.json`,
+      content: stableStringify({ catalogVersion: CATALOG_VERSION, contracts: aiEntries }),
+    },
     { path: OPENAPI_PATH, content: renderOpenApi({ schemas, contracts, endpoints }) },
   ].sort(comparePaths);
 };

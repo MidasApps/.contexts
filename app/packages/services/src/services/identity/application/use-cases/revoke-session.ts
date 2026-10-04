@@ -4,7 +4,11 @@ import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { SessionNotFoundError } from "../../domain/errors/session-errors.ts";
 import { recordSessionAudit, refuseImpersonation, type SessionDeps } from "../session-deps.ts";
 
-export type RevokeSession = (command: { actor: UserPrincipal; sessionId: SessionId; requestId: string }) => Promise<Result<void, SessionNotFoundError | AccessDeniedError>>;
+export type RevokeSession = (command: {
+  actor: UserPrincipal;
+  sessionId: SessionId;
+  requestId: string;
+}) => Promise<Result<void, SessionNotFoundError | AccessDeniedError>>;
 
 /**
  * `DELETE /v1/me/sessions/{sessionId}`: closes one of the caller's own sessions (404 for

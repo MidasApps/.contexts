@@ -9,20 +9,34 @@ const never = (): Agent => {
 };
 
 const definitions: AgentDefinition[] = [
-  { id: "ping", ceiling: ["core.chat.use"], role: "entry", create: never, catalog: { tools: ["catalog.listEntities"], skills: [] } },
+  {
+    id: "ping",
+    ceiling: ["core.chat.use"],
+    role: "entry",
+    create: never,
+    catalog: { tools: ["catalog.listEntities"], skills: [] },
+  },
   {
     id: "data",
     ceiling: ["core.chat.use", "core.catalog.read"],
     role: "subagent",
     create: never,
-    catalog: { tools: ["sql.querySemanticSql", "catalog.listEntities"], skills: ["data-catalog"], perOrganizationTools: true },
+    catalog: {
+      tools: ["sql.querySemanticSql", "catalog.listEntities"],
+      skills: ["data-catalog"],
+      perOrganizationTools: true,
+    },
   },
   { id: "example-notes", ceiling: ["example.note.read"], create: never },
 ];
 
 const source = {
   definitions,
-  built: { assistant: built("Assistant", "Plans and delegates."), ping: built("Ping", "Answers a health check."), data: built("Data", "Explains the data catalog.") },
+  built: {
+    assistant: built("Assistant", "Plans and delegates."),
+    ping: built("Ping", "Answers a health check."),
+    data: built("Data", "Explains the data catalog."),
+  },
   isEntry: (definition: AgentDefinition) => definition.role === "entry",
   supervisor: { id: "assistant", ceiling: ["core.chat.use"] },
 };
@@ -36,7 +50,13 @@ describe("agent catalog (decision 0044)", () => {
       ["data", "subagent", "per-organization"],
       ["example-notes", "subagent", "per-organization"],
     ]);
-    expect(catalog[0]).toMatchObject({ name: "Assistant", subagents: ["data", "example-notes"], tools: [], toolsVaryByOrganization: true, permissions: ["core.chat.use"] });
+    expect(catalog[0]).toMatchObject({
+      name: "Assistant",
+      subagents: ["data", "example-notes"],
+      tools: [],
+      toolsVaryByOrganization: true,
+      permissions: ["core.chat.use"],
+    });
     expect(catalog[2]).toMatchObject({
       name: "Data",
       description: "Explains the data catalog.",

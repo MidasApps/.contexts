@@ -1,7 +1,14 @@
 import { FORWARDED_HEADERS } from "@core/contracts";
 import { getWebRequest, MastraAuthProvider, type MastraAuthRequest } from "@mastra/core/server";
 import type { AccessContext, AccessPort, AccessPrincipal, NodeRef } from "../runtime/runtime-ports.ts";
-import { type AgentPrincipal, buildAgentPrincipal, type ForwardedScope, nodeFromScope, principalIdentity, resourceIdOf } from "./agent-principal.ts";
+import {
+  type AgentPrincipal,
+  buildAgentPrincipal,
+  type ForwardedScope,
+  nodeFromScope,
+  principalIdentity,
+  resourceIdOf,
+} from "./agent-principal.ts";
 import { readBearerToken, readForwardedHeader, readRequestPath, requiresRevocationCheck } from "./bearer-only.ts";
 
 export type FirebaseMastraAuthOptions = {
@@ -32,8 +39,10 @@ const mcpPathPrefix = (apiPrefix: string): string => `${apiPrefix.replace(/\/+$/
  * Permission a route needs: `core.mcp.use` on the MCP server, `core.chat.use` elsewhere.
  * @param apiPrefix the Mastra `server.apiPrefix` the routes are served under.
  */
-export const requiredPermissionFor = (path: string | undefined, apiPrefix: string = DEFAULT_MASTRA_API_PREFIX): string =>
-  path?.startsWith(mcpPathPrefix(apiPrefix)) === true ? MCP_PERMISSION : CHAT_PERMISSION;
+export const requiredPermissionFor = (
+  path: string | undefined,
+  apiPrefix: string = DEFAULT_MASTRA_API_PREFIX,
+): string => (path?.startsWith(mcpPathPrefix(apiPrefix)) === true ? MCP_PERMISSION : CHAT_PERMISSION);
 
 /** An API key acts only in its own tenant; any other forwarded tenant names no node (fail-closed). */
 const nodeForPrincipal = (principal: AccessPrincipal, scope: ForwardedScope): NodeRef | null => {
@@ -63,7 +72,10 @@ export class FirebaseMastraAuth extends MastraAuthProvider<AgentPrincipal> {
   readonly #apiPrefix: string;
   // One verification per HTTP request: the context middleware and Mastra's route
   // auth both authenticate it. Keyed by the raw Request, so nothing outlives it.
-  readonly #perRequest = new WeakMap<Request, { readonly token: string; readonly result: Promise<AgentPrincipal | null> }>();
+  readonly #perRequest = new WeakMap<
+    Request,
+    { readonly token: string; readonly result: Promise<AgentPrincipal | null> }
+  >();
 
   constructor(options: FirebaseMastraAuthOptions) {
     super({ name: "firebase", mapUserToResourceId: resourceIdOf });

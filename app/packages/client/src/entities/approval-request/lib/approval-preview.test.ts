@@ -12,7 +12,9 @@ describe("approvalPreviewOf", () => {
       runId: "run-1",
       runRoute: { id: "settings", organizationId: "OrgAaaaaaaaaaaaaaaaaa", section: "workflows", rest: "runs/run-1" },
     });
-    expect(preview.kind === "workflow-resume" ? routeHref(preview.runRoute) : "").toBe("/o/OrgAaaaaaaaaaaaaaaaaa/settings/workflows/runs/run-1");
+    expect(preview.kind === "workflow-resume" ? routeHref(preview.runRoute) : "").toBe(
+      "/o/OrgAaaaaaaaaaaaaaaaaa/settings/workflows/runs/run-1",
+    );
   });
 
   it("addresses one request under its organization's settings", () => {
@@ -21,13 +23,31 @@ describe("approvalPreviewOf", () => {
 
   it("shows the before/after of an agent-command request", () => {
     const request = buildApprovalRequest({
-      action: { kind: "agent-command", input: { commandId: "tenancy.CreateProjectInput", preview: { before: null, after: { name: "Alpha" } } }, summary: "Create project Alpha" },
+      action: {
+        kind: "agent-command",
+        input: { commandId: "tenancy.CreateProjectInput", preview: { before: null, after: { name: "Alpha" } } },
+        summary: "Create project Alpha",
+      },
     });
-    expect(approvalPreviewOf(request)).toEqual({ kind: "agent-command", commandId: "tenancy.CreateProjectInput", before: null, after: { name: "Alpha" }, hasDiff: true });
+    expect(approvalPreviewOf(request)).toEqual({
+      kind: "agent-command",
+      commandId: "tenancy.CreateProjectInput",
+      before: null,
+      after: { name: "Alpha" },
+      hasDiff: true,
+    });
   });
 
   it("falls back to the summary for other kinds and malformed inputs", () => {
-    expect(approvalPreviewOf(buildApprovalRequest({ action: { kind: "sample-delete-invoice", input: {}, summary: "Delete invoice 42" } }))).toEqual({ kind: "summary", summary: "Delete invoice 42" });
-    expect(approvalPreviewOf(buildApprovalRequest({ action: { kind: "workflow-resume", input: { runId: 5 }, summary: "Broken" } }))).toEqual({ kind: "summary", summary: "Broken" });
+    expect(
+      approvalPreviewOf(
+        buildApprovalRequest({ action: { kind: "sample-delete-invoice", input: {}, summary: "Delete invoice 42" } }),
+      ),
+    ).toEqual({ kind: "summary", summary: "Delete invoice 42" });
+    expect(
+      approvalPreviewOf(
+        buildApprovalRequest({ action: { kind: "workflow-resume", input: { runId: 5 }, summary: "Broken" } }),
+      ),
+    ).toEqual({ kind: "summary", summary: "Broken" });
   });
 });

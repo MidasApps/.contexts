@@ -7,7 +7,15 @@ import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "#/shared/ui/atoms/Select/Select.tsx";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
 
 export type SectionNavItem = {
@@ -120,10 +128,18 @@ function PillList({ items, className }: { items: readonly SectionNavItem[]; clas
   const listRef = useRef<HTMLUListElement>(null);
   useEffect(() => {
     // `nearest`: never scrolls the page vertically, only the pill row when the current pill is off it.
-    listRef.current?.querySelector<HTMLElement>("[aria-current='page']")?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+    listRef.current
+      ?.querySelector<HTMLElement>("[aria-current='page']")
+      ?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
   }, [items]);
   return (
-    <ul ref={listRef} className={cn("-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0", className)}>
+    <ul
+      ref={listRef}
+      className={cn(
+        "-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0",
+        className,
+      )}
+    >
       {items.map((item) => (
         <li key={item.id} className="shrink-0">
           <SectionLink item={item} />
@@ -149,7 +165,8 @@ export function SectionNav({ items, loading = false, loadingLabel, pickerLabel, 
       </div>
     );
   }
-  if (pickerLabel === undefined || !items.some((item) => item.group !== undefined)) return <PillList items={items} className={className} />;
+  if (pickerLabel === undefined || !items.some((item) => item.group !== undefined))
+    return <PillList items={items} className={className} />;
   const groups = groupsOf(items);
   return (
     <div className={className}>

@@ -4,7 +4,13 @@ import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { ConnectorNotFoundError, InvalidConnectorError } from "../../domain/connector-errors.ts";
 import { connectorHostIssues } from "../../domain/connector-policy.ts";
-import { authorizeConnectors, CONNECTOR_WRITE_PERMISSION, type ConnectorsCommand, type ConnectorsDeps, recordConnectorAudit } from "../connectors-deps.ts";
+import {
+  authorizeConnectors,
+  CONNECTOR_WRITE_PERMISSION,
+  type ConnectorsCommand,
+  type ConnectorsDeps,
+  recordConnectorAudit,
+} from "../connectors-deps.ts";
 
 export type UpdateConnectorError = AccessDeniedError | ConnectorNotFoundError | InvalidConnectorError;
 
@@ -13,10 +19,21 @@ export type UpdateConnector = (
 ) => Promise<Result<Connector, UpdateConnectorError>>;
 
 // The patched connector must still be a valid connector of the same type; issues name fields only.
-const applyPatch = (current: Connector, input: UpdateConnectorInput, updatedAt: string): Result<Connector, InvalidConnectorError> => {
+const applyPatch = (
+  current: Connector,
+  input: UpdateConnectorInput,
+  updatedAt: string,
+): Result<Connector, InvalidConnectorError> => {
   const parsed = ConnectorSchema.safeParse({ ...current, ...input, config: input.config ?? current.config, updatedAt });
   if (!parsed.success) {
-    return err(new InvalidConnectorError(parsed.error.issues.map((issue) => ({ field: issue.path.map(String).join(".") || "(body)", issue: issue.code.toUpperCase() }))));
+    return err(
+      new InvalidConnectorError(
+        parsed.error.issues.map((issue) => ({
+          field: issue.path.map(String).join(".") || "(body)",
+          issue: issue.code.toUpperCase(),
+        })),
+      ),
+    );
   }
   const issues = connectorHostIssues(parsed.data);
   return issues.length > 0 ? err(new InvalidConnectorError(issues)) : ok(parsed.data);
@@ -41,7 +58,12 @@ export const makeUpdateConnector =
       const next = applyPatch(current, command.input, now);
       if (!next.ok) return next;
       deps.connectors.replace(tx, { connector: next.data, actorId: auditActorOf(command.actor).id });
-      await recordConnectorAudit(deps, command, { action: "CONNECTOR_UPDATED", connectorId: current.id, changes: changedFieldsOf(command.input) }, tx);
+      await recordConnectorAudit(
+        deps,
+        command,
+        { action: "CONNECTOR_UPDATED", connectorId: current.id, changes: changedFieldsOf(command.input) },
+        tx,
+      );
       return ok(next.data);
     });
   };

@@ -22,7 +22,10 @@ export function OrganizationStatusAction({ organization }: { organization: Organ
   const suspending = organization.status === "active";
   const action = useConfirmedAction(
     async () => void (await writes.update({ status: suspending ? "suspended" : "active" })),
-    () => notify.success(suspending ? t("suspended", { name: organization.name }) : t("reactivated", { name: organization.name })),
+    () =>
+      notify.success(
+        suspending ? t("suspended", { name: organization.name }) : t("reactivated", { name: organization.name }),
+      ),
   );
   return (
     <>
@@ -35,7 +38,11 @@ export function OrganizationStatusAction({ organization }: { organization: Organ
           if (!next) action.reset();
           setOpen(next);
         }}
-        title={suspending ? t("suspendTitle", { name: organization.name }) : t("reactivateTitle", { name: organization.name })}
+        title={
+          suspending
+            ? t("suspendTitle", { name: organization.name })
+            : t("reactivateTitle", { name: organization.name })
+        }
         description={suspending ? t("suspendDescription") : t("reactivateDescription")}
         confirmLabel={suspending ? t("suspendConfirm") : t("reactivateConfirm")}
         destructive={suspending}

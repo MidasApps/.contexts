@@ -29,7 +29,8 @@ describe("UnitSchema", () => {
   });
 
   it(`accepts every depth up to ${MAX_UNIT_DEPTH}`, () => {
-    for (let depth = 0; depth <= MAX_UNIT_DEPTH; depth += 1) expect(UnitSchema.safeParse(atDepth(depth)).success).toBe(true);
+    for (let depth = 0; depth <= MAX_UNIT_DEPTH; depth += 1)
+      expect(UnitSchema.safeParse(atDepth(depth)).success).toBe(true);
   });
 
   it("rejects a depth above the maximum", () => {
@@ -49,7 +50,10 @@ describe("UnitSchema", () => {
 
   it("rejects a unit that is its own ancestor or repeats one", () => {
     expect(UnitSchema.safeParse({ ...atDepth(2), ancestorIds: ["leaf", "ancestor-1"] }).success).toBe(false);
-    expect(UnitSchema.safeParse({ ...atDepth(2), ancestorIds: ["ancestor-1", "ancestor-1"], parentUnitId: "ancestor-1" }).success).toBe(false);
+    expect(
+      UnitSchema.safeParse({ ...atDepth(2), ancestorIds: ["ancestor-1", "ancestor-1"], parentUnitId: "ancestor-1" })
+        .success,
+    ).toBe(false);
   });
 
   it("rejects a type that is not <module>.<type>", () => {

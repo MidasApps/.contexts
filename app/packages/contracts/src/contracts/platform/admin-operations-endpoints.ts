@@ -6,12 +6,27 @@ import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.s
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
 import { WorkflowIdSchema } from "../workflows/human-approval-resume.schema.ts";
 import { WorkflowRunStatusSchema } from "../workflows/workflow-run.schema.ts";
-import { AdminScheduleSchema, AdminWorkflowRunSchema, LogLevelSchema, LogLineSchema } from "./admin-operations.schema.ts";
+import {
+  AdminScheduleSchema,
+  AdminWorkflowRunSchema,
+  LogLevelSchema,
+  LogLineSchema,
+} from "./admin-operations.schema.ts";
 
 const STAFF = { 403: ["FORBIDDEN", "MFA_REQUIRED"] } as const;
 const UPSTREAM = { 502: ["UPSTREAM_UNAVAILABLE"] } as const;
-const runParams = z.object({ runId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).meta(none("Workflow run id.")) });
-const scheduleParams = z.object({ scheduleId: z.string().regex(/^schedule_[a-z0-9-]{1,120}$/).meta(none("Schedule id.")) });
+const runParams = z.object({
+  runId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{1,128}$/)
+    .meta(none("Workflow run id.")),
+});
+const scheduleParams = z.object({
+  scheduleId: z
+    .string()
+    .regex(/^schedule_[a-z0-9-]{1,120}$/)
+    .meta(none("Schedule id.")),
+});
 
 export const adminListWorkflowRunsEndpoint = defineEndpoint({
   id: "admin.listWorkflowRuns",
@@ -25,7 +40,8 @@ export const adminListWorkflowRunsEndpoint = defineEndpoint({
   }),
   responses: { 200: listEnvelope(AdminWorkflowRunSchema) },
   errors: { 400: ["VALIDATION_FAILED"], ...STAFF, ...UPSTREAM },
-  summary: "Lists workflow runs of every organization and of the platform, newest first (staff, platform.workflow.manage).",
+  summary:
+    "Lists workflow runs of every organization and of the platform, newest first (staff, platform.workflow.manage).",
 });
 
 export const adminCancelWorkflowRunEndpoint = defineEndpoint({
@@ -45,7 +61,9 @@ export const adminListSchedulesEndpoint = defineEndpoint({
   path: "/v1/admin/schedules",
   auth: "user",
   query: z.object({
-    organizationId: OrganizationIdSchema.optional().meta(none("Only the schedules of this organization; without it, platform schedules are listed too.")),
+    organizationId: OrganizationIdSchema.optional().meta(
+      none("Only the schedules of this organization; without it, platform schedules are listed too."),
+    ),
   }),
   responses: { 200: dataEnvelope(z.array(AdminScheduleSchema)) },
   errors: { ...STAFF, ...UPSTREAM },
@@ -64,8 +82,14 @@ const adminScheduleActionEndpoint = <A extends "pause" | "resume">(action: A, su
     summary,
   });
 
-export const adminPauseScheduleEndpoint = adminScheduleActionEndpoint("pause", "Pauses any schedule (staff, platform.workflow.manage; audited).");
-export const adminResumeScheduleEndpoint = adminScheduleActionEndpoint("resume", "Resumes any schedule from now on (staff, platform.workflow.manage; audited).");
+export const adminPauseScheduleEndpoint = adminScheduleActionEndpoint(
+  "pause",
+  "Pauses any schedule (staff, platform.workflow.manage; audited).",
+);
+export const adminResumeScheduleEndpoint = adminScheduleActionEndpoint(
+  "resume",
+  "Resumes any schedule from now on (staff, platform.workflow.manage; audited).",
+);
 
 export const adminRunScheduleNowEndpoint = defineEndpoint({
   id: "admin.runScheduleNow",
@@ -73,9 +97,14 @@ export const adminRunScheduleNowEndpoint = defineEndpoint({
   path: "/v1/admin/schedules/{scheduleId}/run",
   auth: "user",
   params: scheduleParams,
-  responses: { 202: dataEnvelope(z.strictObject({ scheduleId: z.string().min(1).meta(none("Schedule that will start a run now.")) })) },
+  responses: {
+    202: dataEnvelope(
+      z.strictObject({ scheduleId: z.string().min(1).meta(none("Schedule that will start a run now.")) }),
+    ),
+  },
   errors: { ...STAFF, 404: ["NOT_FOUND"], ...UPSTREAM },
-  summary: "Starts a run of any schedule now; a tenant schedule still re-authorizes its creator (staff, platform.workflow.manage; audited).",
+  summary:
+    "Starts a run of any schedule now; a tenant schedule still re-authorizes its creator (staff, platform.workflow.manage; audited).",
 });
 
 export const adminListConnectorsEndpoint = defineEndpoint({
@@ -84,7 +113,9 @@ export const adminListConnectorsEndpoint = defineEndpoint({
   path: "/v1/admin/connectors",
   auth: "user",
   query: PageQuerySchema.extend({
-    organizationId: OrganizationIdSchema.optional().meta(none("Organization whose connectors to list; required (400 without it).")),
+    organizationId: OrganizationIdSchema.optional().meta(
+      none("Organization whose connectors to list; required (400 without it)."),
+    ),
   }),
   responses: { 200: listEnvelope(ConnectorSchema) },
   errors: { 400: ["VALIDATION_FAILED"], ...STAFF },
@@ -101,11 +132,18 @@ export const adminListLogsEndpoint = defineEndpoint({
     q: z.string().min(1).max(200).optional().meta(none("Text the message contains.")),
     traceId: z.string().min(1).max(128).optional().meta(none("Only lines of this trace.")),
     requestId: z.string().min(1).max(128).optional().meta(none("Only lines of this request.")),
-    limit: z.coerce.number().int().min(1).max(500).default(200).meta(none("Most lines to return, 1-500 (default 200).")),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(500)
+      .default(200)
+      .meta(none("Most lines to return, 1-500 (default 200).")),
   }),
   responses: { 200: dataEnvelope(z.array(LogLineSchema)) },
   errors: { 400: ["VALIDATION_FAILED"], ...STAFF, 404: ["NOT_FOUND"] },
-  summary: "Latest structured log lines of the web process, newest first; local environment only, 404 elsewhere (staff, platform.trace.read).",
+  summary:
+    "Latest structured log lines of the web process, newest first; local environment only, 404 elsewhere (staff, platform.trace.read).",
 });
 
 export const ADMIN_OPERATIONS_ENDPOINTS: readonly EndpointDefinition[] = [

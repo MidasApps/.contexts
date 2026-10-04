@@ -22,21 +22,48 @@ import { OrganizationAgents } from "./OrganizationAgents.tsx";
 // The supervisor is not a subagent of the catalog, but it has a versioned prompt of its own.
 const SUPERVISOR_KEY = "assistant";
 
-type Viewer = { readonly canUpdate: boolean; readonly prompt: { readonly canRead: boolean; readonly canWrite: boolean } };
+type Viewer = {
+  readonly canUpdate: boolean;
+  readonly prompt: { readonly canRead: boolean; readonly canWrite: boolean };
+};
 
-function AgentList({ organizationId, catalog, settings, viewer }: { organizationId: string; catalog: readonly AgentCatalogEntry[]; settings: AgentSettings; viewer: Viewer }) {
+function AgentList({
+  organizationId,
+  catalog,
+  settings,
+  viewer,
+}: {
+  organizationId: string;
+  catalog: readonly AgentCatalogEntry[];
+  settings: AgentSettings;
+  viewer: Viewer;
+}) {
   const t = useTranslations("settings.agents");
   return (
     <div className="flex flex-col gap-4">
       {viewer.prompt.canRead ? (
         <AgentCard
           organizationId={organizationId}
-          agent={{ key: SUPERVISOR_KEY, name: t("assistant.name"), description: t("assistant.description"), source: "core", moduleId: null, tools: [], skills: [] }}
+          agent={{
+            key: SUPERVISOR_KEY,
+            name: t("assistant.name"),
+            description: t("assistant.description"),
+            source: "core",
+            moduleId: null,
+            tools: [],
+            skills: [],
+          }}
           prompt={viewer.prompt}
         />
       ) : null}
       {catalog.length === 0 ? (
-        <EmptyState frame="plain" headingLevel={3} icon="bot" title={t("catalog.emptyTitle")} description={t("catalog.emptyDescription")} />
+        <EmptyState
+          frame="plain"
+          headingLevel={3}
+          icon="bot"
+          title={t("catalog.emptyTitle")}
+          description={t("catalog.emptyDescription")}
+        />
       ) : (
         catalog.map((agent) => (
           <AgentCard
@@ -44,7 +71,14 @@ function AgentList({ organizationId, catalog, settings, viewer }: { organization
             organizationId={organizationId}
             agent={agent}
             prompt={viewer.prompt}
-            status={<AgentEnabledSwitch organizationId={organizationId} agent={agent} settings={settings} canUpdate={viewer.canUpdate} />}
+            status={
+              <AgentEnabledSwitch
+                organizationId={organizationId}
+                agent={agent}
+                settings={settings}
+                canUpdate={viewer.canUpdate}
+              />
+            }
           />
         ))
       )}
@@ -65,7 +99,9 @@ function AgentsContent({ organizationId, viewer }: { organizationId: string; vie
           <span>{t("intro")}</span>
           <span className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" asChild>
-              <RouteLink to={{ id: "settings", organizationId, section: "connectors" }}>{t("connectorsLink")}</RouteLink>
+              <RouteLink to={{ id: "settings", organizationId, section: "connectors" }}>
+                {t("connectorsLink")}
+              </RouteLink>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <RouteLink to={{ id: "settings", organizationId, section: "skills" }}>{t("skillsLink")}</RouteLink>
@@ -79,15 +115,28 @@ function AgentsContent({ organizationId, viewer }: { organizationId: string; vie
             <QuerySection query={catalog} loadingLabel={t("loading")}>
               {(catalogData) => (
                 <>
-                  <OrganizationAgents organizationId={organizationId} agents={catalogData.filter((agent) => agent.source === "custom")} canUpdate={viewer.canUpdate} />
+                  <OrganizationAgents
+                    organizationId={organizationId}
+                    agents={catalogData.filter((agent) => agent.source === "custom")}
+                    canUpdate={viewer.canUpdate}
+                  />
                   <SectionCard title={t("catalog.title")} description={t("catalog.description")}>
-                    <AgentList organizationId={organizationId} catalog={catalogData.filter((agent) => agent.source !== "custom")} settings={settingsData} viewer={viewer} />
+                    <AgentList
+                      organizationId={organizationId}
+                      catalog={catalogData.filter((agent) => agent.source !== "custom")}
+                      settings={settingsData}
+                      viewer={viewer}
+                    />
                   </SectionCard>
                 </>
               )}
             </QuerySection>
             <SectionCard title={t("organization.title")} description={t("organization.description")}>
-              <OrganizationAgentRules organizationId={organizationId} settings={settingsData} canUpdate={viewer.canUpdate} />
+              <OrganizationAgentRules
+                organizationId={organizationId}
+                settings={settingsData}
+                canUpdate={viewer.canUpdate}
+              />
             </SectionCard>
           </>
         )}
@@ -107,7 +156,13 @@ function SettingsAgents({ context }: { context: AccessContext }) {
     <SettingsPageFrame
       organizationId={organization.id}
       allowed={permissions.includes("core.agent-settings.read")}
-      header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} description={t("description")} />}
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow", { organization: organization.name })}
+          title={t("title")}
+          description={t("description")}
+        />
+      }
     >
       <AgentsContent organizationId={organization.id} viewer={viewer} />
     </SettingsPageFrame>

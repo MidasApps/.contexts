@@ -10,7 +10,11 @@ const ResponseSchema = z.object({ data: PromptEvalResultSchema });
 const UNAVAILABLE: PromptEvalError = { code: "UPSTREAM_UNAVAILABLE", status: 503 };
 
 const errorOf = (status: number): PromptEvalError =>
-  status === 404 ? { code: "NOT_FOUND", status: 404 } : status === 422 ? { code: "EVAL_DATASET_MISSING", status: 422 } : { code: "UPSTREAM_UNAVAILABLE", status: 502 };
+  status === 404
+    ? { code: "NOT_FOUND", status: 404 }
+    : status === 422
+      ? { code: "EVAL_DATASET_MISSING", status: 422 }
+      : { code: "UPSTREAM_UNAVAILABLE", status: 502 };
 
 /**
  * `PromptEvalGateway` over the Mastra route `POST /prompt-evals/:versionId` (a custom route outside
@@ -33,9 +37,16 @@ export const createMastraPromptEvalGateway = (options: {
         const headers: Record<string, string> = {
           "content-type": "application/json",
           [FORWARDED_HEADERS.requestId]: requestId,
-          ...(options.serverlessToken === null ? {} : { [FORWARDED_HEADERS.serverlessAuthorization]: await options.serverlessToken.headerValue() }),
+          ...(options.serverlessToken === null
+            ? {}
+            : { [FORWARDED_HEADERS.serverlessAuthorization]: await options.serverlessToken.headerValue() }),
         };
-        const response = await fetchFn(`${baseUrl}/prompt-evals/${encodeURIComponent(versionId)}`, { method: "POST", headers, body: JSON.stringify({ tenantId }), signal });
+        const response = await fetchFn(`${baseUrl}/prompt-evals/${encodeURIComponent(versionId)}`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ tenantId }),
+          signal,
+        });
         if (!response.ok) {
           await response.body?.cancel();
           return { ok: false, error: errorOf(response.status) };

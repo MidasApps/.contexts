@@ -1,5 +1,7 @@
 // Test world of the session use cases: in-memory sessions, a fake Firebase Auth, staff docs
 // and an in-memory audit log, with a movable clock.
+
+import type { SessionId, UserId } from "@core/contracts";
 import type { PlatformStaffRecord } from "../../../access/application/ports/driven/principal-status-reader.ts";
 import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
 import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
@@ -9,7 +11,6 @@ import { createFakeFirebaseAuth } from "../../adapters/driven/fake-firebase-auth
 import { createInMemoryImpersonationSessionRepository } from "../../adapters/driven/in-memory-platform-repositories.ts";
 import { createInMemorySessionRepository } from "../../adapters/driven/in-memory-session-repository.ts";
 import { createSessionServices } from "../../session-composition.ts";
-import type { SessionId, UserId } from "@core/contracts";
 
 export const WORLD_NOW = "2026-09-30T12:00:00.000Z";
 
@@ -42,7 +43,10 @@ export const buildSessionWorld = () => {
   });
   let tokens = 0;
   /** A web session for `uid` created from a fresh sign-in. */
-  const webSession = async (uid: UserId, options: { mfa: boolean }): Promise<{ cookie: string; sessionId: SessionId }> => {
+  const webSession = async (
+    uid: UserId,
+    options: { mfa: boolean },
+  ): Promise<{ cookie: string; sessionId: SessionId }> => {
     tokens += 1;
     const idToken = `id-${tokens}`;
     auth.addIdToken(idToken, { uid, authTimeSeconds: now.getTime() / 1000, mfa: options.mfa });

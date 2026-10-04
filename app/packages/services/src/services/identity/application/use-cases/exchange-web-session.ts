@@ -5,7 +5,10 @@ import type { SessionDeps } from "../session-deps.ts";
 import { loadWebSession } from "./require-web-session.ts";
 import { restoreWebSessionToken } from "./web-session-impersonation.ts";
 
-export type ExchangeWebSession = (command: { cookie: string | undefined; requestId?: string | undefined }) => Promise<Result<{ customToken: string }, SessionInvalidError>>;
+export type ExchangeWebSession = (command: {
+  cookie: string | undefined;
+  requestId?: string | undefined;
+}) => Promise<Result<{ customToken: string }, SessionInvalidError>>;
 
 /**
  * `exchangeSession()` (SP1 spec §3.3 step 3): an open web session yields a custom token

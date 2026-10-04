@@ -5,7 +5,6 @@ import { none } from "../field-docs.ts";
 import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.schema.ts";
 import { OrganizationQuerySchema } from "../workflows/endpoints.ts";
-import { ChatAgentOptionContract, ChatAgentOptionSchema, CustomAgentOptionsContract, CustomAgentOptionsSchema } from "./custom-agent-options.schema.ts";
 import {
   CreateCustomAgentInputContract,
   CreateCustomAgentInputSchema,
@@ -15,6 +14,12 @@ import {
   UpdateCustomAgentInputContract,
   UpdateCustomAgentInputSchema,
 } from "./custom-agent.schema.ts";
+import {
+  ChatAgentOptionContract,
+  ChatAgentOptionSchema,
+  CustomAgentOptionsContract,
+  CustomAgentOptionsSchema,
+} from "./custom-agent-options.schema.ts";
 import {
   CreateCustomSkillInputContract,
   CreateCustomSkillInputSchema,
@@ -41,7 +46,8 @@ export const createCustomAgentEndpoint = defineEndpoint({
   responses: { 201: dataEnvelope(CustomAgentSchema) },
   errors: { 403: FORBIDDEN, 422: LIMIT },
   idempotency: "optional",
-  summary: "Creates an agent of the organization (core.agent-settings.update); the plan caps how many and how long their instructions are.",
+  summary:
+    "Creates an agent of the organization (core.agent-settings.update); the plan caps how many and how long their instructions are.",
 });
 
 export const getCustomAgentEndpoint = defineEndpoint({
@@ -89,7 +95,8 @@ export const getCustomAgentOptionsEndpoint = defineEndpoint({
   query: OrganizationQuerySchema,
   responses: { 200: dataEnvelope(CustomAgentOptionsSchema) },
   errors: { 403: FORBIDDEN },
-  summary: "Reads the models, tools and platform skills an agent may select, with the plan limits and their use (core.agent-settings.read).",
+  summary:
+    "Reads the models, tools and platform skills an agent may select, with the plan limits and their use (core.agent-settings.read).",
 });
 
 export const listChatAgentsEndpoint = defineEndpoint({
@@ -100,7 +107,8 @@ export const listChatAgentsEndpoint = defineEndpoint({
   query: OrganizationQuerySchema,
   responses: { 200: dataEnvelope(z.array(ChatAgentOptionSchema)) },
   errors: { 403: FORBIDDEN },
-  summary: "Lists the agents the caller can chat with: the assistant and the organization's enabled agents (core.chat.use).",
+  summary:
+    "Lists the agents the caller can chat with: the assistant and the organization's enabled agents (core.chat.use).",
 });
 
 export const listCustomSkillsEndpoint = defineEndpoint({

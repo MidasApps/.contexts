@@ -1,17 +1,31 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildE2eEnv, buildEmulatorExecArgs, DEFAULT_E2E_COMMAND, E2E_DATABASE_NAME, E2E_PROJECT_ID, InvalidE2eEnvError, joinCommandArgs } from "./e2e-env.ts";
+import {
+  buildE2eEnv,
+  buildEmulatorExecArgs,
+  DEFAULT_E2E_COMMAND,
+  E2E_DATABASE_NAME,
+  E2E_PROJECT_ID,
+  InvalidE2eEnvError,
+  joinCommandArgs,
+} from "./e2e-env.ts";
 
-const firebaseConfig: unknown = JSON.parse(readFileSync(path.resolve(import.meta.dirname, "../../../firebase.e2e.json"), "utf8"));
-const devConfig: unknown = JSON.parse(readFileSync(path.resolve(import.meta.dirname, "../../../firebase.json"), "utf8"));
+const firebaseConfig: unknown = JSON.parse(
+  readFileSync(path.resolve(import.meta.dirname, "../../../firebase.e2e.json"), "utf8"),
+);
+const devConfig: unknown = JSON.parse(
+  readFileSync(path.resolve(import.meta.dirname, "../../../firebase.json"), "utf8"),
+);
 
 // Hub, logging and Firestore websocket defaults the dev config does not list.
 const DEV_DEFAULT_PORTS = [4400, 4500, 9150];
 
 const ports = (config: unknown): number[] => {
   const emulators = (config as { emulators: Record<string, { port?: number; websocketPort?: number }> }).emulators;
-  return Object.values(emulators).flatMap((entry) => [entry.port, entry.websocketPort].filter((port) => port !== undefined));
+  return Object.values(emulators).flatMap((entry) =>
+    [entry.port, entry.websocketPort].filter((port) => port !== undefined),
+  );
 };
 
 describe("buildE2eEnv", () => {
@@ -33,7 +47,11 @@ describe("buildE2eEnv", () => {
 
   it("moves the web and desktop origins together when the ports are overridden", () => {
     const env = buildE2eEnv({ firebaseConfig, overrides: { E2E_WEB_PORT: "3110", E2E_DESKTOP_PORT: "1421" } });
-    expect(env).toMatchObject({ WEB_PORT: "3110", VITE_API_URL: "http://localhost:3110", CORS_ALLOWED_ORIGINS: "http://localhost:1421,http://tauri.localhost,tauri://localhost" });
+    expect(env).toMatchObject({
+      WEB_PORT: "3110",
+      VITE_API_URL: "http://localhost:3110",
+      CORS_ALLOWED_ORIGINS: "http://localhost:1421,http://tauri.localhost,tauri://localhost",
+    });
   });
 
   it("refuses port 3000 and invalid ports, naming the variable", () => {
@@ -50,7 +68,14 @@ describe("buildE2eEnv", () => {
 describe("buildEmulatorExecArgs", () => {
   it("runs the command inside the e2e project's auth, firestore, storage and functions emulators", () => {
     expect(buildEmulatorExecArgs("pnpm x")).toEqual([
-      "--config", "firebase.e2e.json", "emulators:exec", "--project", E2E_PROJECT_ID, "--only", "auth,firestore,storage,functions", "pnpm x",
+      "--config",
+      "firebase.e2e.json",
+      "emulators:exec",
+      "--project",
+      E2E_PROJECT_ID,
+      "--only",
+      "auth,firestore,storage,functions",
+      "pnpm x",
     ]);
   });
 });

@@ -24,7 +24,16 @@ export type ErrorStateProps = Omit<ComponentProps<typeof StatePanel>, "icon" | "
  * Failed to load or act (SP2 spec §9 "error states with requestId"). Announced once as an alert,
  * with the request reference in mono and an optional retry. Never shows raw API messages.
  */
-export function ErrorState({ title, description, requestId, onRetry, retrying = false, action, children, ...props }: ErrorStateProps) {
+export function ErrorState({
+  title,
+  description,
+  requestId,
+  onRetry,
+  retrying = false,
+  action,
+  children,
+  ...props
+}: ErrorStateProps) {
   const t = useTranslations("common");
   return (
     <StatePanel

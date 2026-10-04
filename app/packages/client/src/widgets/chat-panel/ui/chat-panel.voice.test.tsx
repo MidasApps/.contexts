@@ -2,11 +2,11 @@ import { act, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { createFakeMicrophone } from "#/features/chat-voice/testing/fake-microphone.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, createFakeApi, ok, type FakeApi } from "#/shared/testing/fake-api.ts";
+import { apiError, createFakeApi, type FakeApi, ok } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { renderWithClient } from "#/shared/testing/render-client.tsx";
 import { TooltipProvider } from "#/shared/ui/atoms/Tooltip/Tooltip.tsx";
-import { createFakeChatTransport, textChunks, type FakeChatTransport } from "../testing/fake-chat-transport.ts";
+import { createFakeChatTransport, type FakeChatTransport, textChunks } from "../testing/fake-chat-transport.ts";
 import { ChatPanel, type ChatPanelProps } from "./chat-panel.tsx";
 
 const SCOPE = { organizationId: IDS.organization, projectId: IDS.project };
@@ -31,7 +31,10 @@ const setup = (api: FakeApi, granted: ReadonlySet<string> = VOICE, props: Partia
         scope={SCOPE}
         can={(permission) => granted.has(permission)}
         voiceSeams={{ getUserMedia: microphone.getUserMedia, createRecorder: microphone.createRecorder }}
-        speechSeams={{ createUrl: () => `blob:speech-${(urls.created += 1)}`, revokeUrl: (url) => void urls.revoked.push(url) }}
+        speechSeams={{
+          createUrl: () => `blob:speech-${(urls.created += 1)}`,
+          revokeUrl: (url) => void urls.revoked.push(url),
+        }}
         {...props}
         transport={transport}
       />
@@ -119,10 +122,14 @@ describe("ChatPanel voice (flag gated)", () => {
   it("says that the microphone is blocked when permission is denied", async () => {
     const api = voiceApi({ voice: true, realtime: false });
     const denied = createFakeMicrophone({ refuse: "NotAllowedError" });
-    const { user } = setup(api, VOICE, { voiceSeams: { getUserMedia: denied.getUserMedia, createRecorder: denied.createRecorder } });
+    const { user } = setup(api, VOICE, {
+      voiceSeams: { getUserMedia: denied.getUserMedia, createRecorder: denied.createRecorder },
+    });
     (await talkButton()).focus();
     await user.keyboard("{Enter}");
-    expect(await screen.findByText("Microfone bloqueado. Permita o acesso ao microfone nas configurações do navegador.")).toBeTruthy();
+    expect(
+      await screen.findByText("Microfone bloqueado. Permita o acesso ao microfone nas configurações do navegador."),
+    ).toBeTruthy();
   });
 
   it("sends the transcript at once with auto-send on", async () => {
@@ -137,7 +144,10 @@ describe("ChatPanel voice (flag gated)", () => {
     await screen.findByRole("button", { name: "Parar a gravação e transcrever" });
     await user.keyboard("{Enter}");
     await waitFor(() => expect(transport.streams).toHaveLength(1));
-    expect(transport.streams[0]?.messages.at(-1)).toMatchObject({ role: "user", parts: [{ type: "text", text: "qual é o prazo" }] });
+    expect(transport.streams[0]?.messages.at(-1)).toMatchObject({
+      role: "user",
+      parts: [{ type: "text", text: "qual é o prazo" }],
+    });
   });
 
   it("says the organization's AI budget ran out when transcription or read aloud answers BUDGET_EXCEEDED", async () => {
@@ -193,9 +203,13 @@ describe("ChatPanel voice (flag gated)", () => {
 
   it("shows the realtime conversation live, and a failed start in visible words", async () => {
     const api = voiceApi({ voice: true, realtime: true });
-    api.route("POST /v1/voice/realtime-sessions", ok({ clientSecret: "ek_test", expiresAt: "2026-10-01T12:01:00.000Z", model: "gpt-realtime" }, 201));
+    api.route(
+      "POST /v1/voice/realtime-sessions",
+      ok({ clientSecret: "ek_test", expiresAt: "2026-10-01T12:01:00.000Z", model: "gpt-realtime" }, 201),
+    );
     let fail = false;
-    const connectRealtime = () => (fail ? Promise.reject(new Error("webrtc failed")) : Promise.resolve({ close: () => undefined }));
+    const connectRealtime = () =>
+      fail ? Promise.reject(new Error("webrtc failed")) : Promise.resolve({ close: () => undefined });
     const { user } = setup(api, VOICE, { voiceSeams: { connectRealtime } });
     await user.click(await screen.findByRole("button", { name: "Iniciar conversa por voz (experimental)" }, LOADED));
     const status = () => document.querySelector("[data-slot=realtime-status]") as HTMLElement;

@@ -51,19 +51,33 @@ const fields = {
     .string()
     .min(1)
     .max(MAX_CUSTOM_INSTRUCTION_CHARS)
-    .meta(personal("Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.")),
+    .meta(
+      personal(
+        "Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.",
+      ),
+    ),
   model: CustomAgentModelSchema.meta(none("Model role the agent runs on, from the platform's allowlist.")),
   tools: z
     .array(z.string().min(1).max(200))
     .max(MAX_CUSTOM_AGENT_TOOLS)
     .refine(hasUniqueItems, unique)
-    .meta(none("Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).")),
-  connectorTools: z.boolean().meta(none("Whether the agent also gets the read-only tools of the organization's connectors.")),
+    .meta(
+      none(
+        "Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).",
+      ),
+    ),
+  connectorTools: z
+    .boolean()
+    .meta(none("Whether the agent also gets the read-only tools of the organization's connectors.")),
   coreSkills: z
     .array(z.string().min(1).max(100))
     .max(MAX_CUSTOM_AGENT_SKILLS)
     .refine(hasUniqueItems, unique)
-    .meta(none("Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.")),
+    .meta(
+      none(
+        "Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.",
+      ),
+    ),
   customSkills: z
     .array(CustomSkillIdSchema)
     .max(MAX_CUSTOM_AGENT_SKILLS)
@@ -162,7 +176,9 @@ export const UpdateCustomAgentInputSchema = z
     knowledgeScope: fields.knowledgeScope.optional(),
     enabled: fields.enabled.optional(),
   })
-  .refine((input) => Object.values(input).some((value) => value !== undefined), { error: "Change at least one field." });
+  .refine((input) => Object.values(input).some((value) => value !== undefined), {
+    error: "Change at least one field.",
+  });
 export type UpdateCustomAgentInput = z.infer<typeof UpdateCustomAgentInputSchema>;
 
 export const UpdateCustomAgentInputContract = defineContract(UpdateCustomAgentInputSchema, {

@@ -1,6 +1,6 @@
 "use client";
 
-import { createUnitEndpoint, deleteUnitEndpoint, updateUnitEndpoint, type Unit } from "@core/contracts";
+import { createUnitEndpoint, deleteUnitEndpoint, type Unit, updateUnitEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { unitKeys } from "#/entities/unit/index.ts";
@@ -18,9 +18,18 @@ export const useUnitMutations = ({ organizationId, projectId }: ProjectRef) => {
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const idempotency = useIdempotencyKey();
-  const refresh = useCallback(() => queryClient.invalidateQueries({ queryKey: unitKeys.all(organizationId) }), [organizationId, queryClient]);
+  const refresh = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: unitKeys.all(organizationId) }),
+    [organizationId, queryClient],
+  );
   const create = async (input: { name: string; type: string; parentUnitId: string | null }): Promise<Unit> => {
-    const unit = (await callEndpoint(createUnitEndpoint, { params: { projectId }, body: input, idempotencyKey: idempotency.keyFor(input) })).data;
+    const unit = (
+      await callEndpoint(createUnitEndpoint, {
+        params: { projectId },
+        body: input,
+        idempotencyKey: idempotency.keyFor(input),
+      })
+    ).data;
     idempotency.reset();
     await refresh();
     return unit;

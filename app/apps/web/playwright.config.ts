@@ -1,8 +1,8 @@
-import { defineConfig, devices } from "@playwright/test";
-import { readE2eEnv } from "@core/e2e/e2e-env";
 import path from "node:path";
+import { readE2eEnv } from "@core/e2e/e2e-env";
 import { e2eMastraServer } from "@core/e2e/mastra-server";
 import { e2eWebServer } from "@core/e2e/web-server";
+import { defineConfig, devices } from "@playwright/test";
 import { authFile } from "./e2e/web-test.ts";
 
 // Run through root `pnpm test:e2e` (scripts/e2e.ts): it starts the e2e emulators and exports the
@@ -38,18 +38,50 @@ export default defineConfig({
   },
   projects: [
     { name: "setup", testMatch: /global\.setup\.ts/ },
-    { name: "chromium", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
-    { name: "firefox", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Desktop Firefox"], storageState: owner }, dependencies: ["setup"] },
-    { name: "webkit", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Desktop Safari"], storageState: owner }, dependencies: ["setup"] },
-    { name: "mobile-chrome", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Pixel 7"], storageState: owner }, dependencies: ["setup"] },
+    {
+      name: "chromium",
+      testIgnore: SINGLE_BROWSER_SPECS,
+      use: { ...devices["Desktop Chrome"], storageState: owner },
+      dependencies: ["setup"],
+    },
+    {
+      name: "firefox",
+      testIgnore: SINGLE_BROWSER_SPECS,
+      use: { ...devices["Desktop Firefox"], storageState: owner },
+      dependencies: ["setup"],
+    },
+    {
+      name: "webkit",
+      testIgnore: SINGLE_BROWSER_SPECS,
+      use: { ...devices["Desktop Safari"], storageState: owner },
+      dependencies: ["setup"],
+    },
+    {
+      name: "mobile-chrome",
+      testIgnore: SINGLE_BROWSER_SPECS,
+      use: { ...devices["Pixel 7"], storageState: owner },
+      dependencies: ["setup"],
+    },
     // One at a time too: an eval or a chat turn of one journey held the single local agent runtime
     // and the next journey's Mastra-backed pages loaded past their timeouts; serially 53 of 53 pass.
-    { name: "console", workers: 1, testMatch: CONSOLE_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
+    {
+      name: "console",
+      workers: 1,
+      testMatch: CONSOLE_SPECS,
+      use: { ...devices["Desktop Chrome"], storageState: owner },
+      dependencies: ["setup"],
+    },
     // The chat journeys (SP4) run once, on chromium: each one streams through the agent runtime,
     // and the browser matrix above already covers the shell they are mounted in. One at a time:
     // with two or four streams on one local runtime next to the browsers and emulators, some
     // turns never started streaming before their timeouts; serially all of them pass (follow-up #80).
-    { name: "chat", workers: 1, testMatch: CHAT_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
+    {
+      name: "chat",
+      workers: 1,
+      testMatch: CHAT_SPECS,
+      use: { ...devices["Desktop Chrome"], storageState: owner },
+      dependencies: ["setup"],
+    },
   ],
   webServer: [
     e2eWebServer(env, { webAppDir: import.meta.dirname }),

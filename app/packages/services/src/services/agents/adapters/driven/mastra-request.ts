@@ -1,6 +1,20 @@
 import { FORWARDED_HEADERS } from "@core/contracts";
-import type { AgentCallScope, AgentRunOptions, GatewayError, GatewayResult, GatewayStream, McpGatewayResponse } from "../../application/ports/agent-runtime-gateway.ts";
-import { bodyOfClientError, errorBodyOf, mapMastraError, statusOfClientError, UPSTREAM_TIMEOUT, UPSTREAM_UNAVAILABLE } from "./mastra-error-mapper.ts";
+import type {
+  AgentCallScope,
+  AgentRunOptions,
+  GatewayError,
+  GatewayResult,
+  GatewayStream,
+  McpGatewayResponse,
+} from "../../application/ports/agent-runtime-gateway.ts";
+import {
+  bodyOfClientError,
+  errorBodyOf,
+  mapMastraError,
+  statusOfClientError,
+  UPSTREAM_TIMEOUT,
+  UPSTREAM_UNAVAILABLE,
+} from "./mastra-error-mapper.ts";
 import type { ServerlessIdTokenSource } from "./serverless-id-token.ts";
 
 /** How the gateway reaches Mastra; built once per process. */
@@ -16,7 +30,15 @@ export type MastraConnection = {
 
 // Keys Mastra must derive itself (context middleware, memory scoping, run id = requestId,
 // tracing options from traceparent: caller-set ones could override span metadata).
-const SERVER_OWNED_KEYS = new Set(["requestContext", "runId", "resourceId", "threadId", "resource", "thread", "tracingOptions"]);
+const SERVER_OWNED_KEYS = new Set([
+  "requestContext",
+  "runId",
+  "resourceId",
+  "threadId",
+  "resource",
+  "thread",
+  "tracingOptions",
+]);
 
 /** Run options without the keys only the server may set (the client `requestContext` above all). */
 export const stripServerOwnedKeys = (options: AgentRunOptions | undefined): Record<string, unknown> =>
@@ -37,7 +59,10 @@ const optionalHeaders = (scope: AgentCallScope): Record<string, string> => {
  * Headers of every Mastra call (SP3 spec §4.1), names from `FORWARDED_HEADERS`.
  * @throws {ServerlessIdTokenError} when the Cloud Run ID token cannot be minted.
  */
-export const buildForwardedHeaders = async (connection: MastraConnection, scope: AgentCallScope): Promise<Record<string, string>> => ({
+export const buildForwardedHeaders = async (
+  connection: MastraConnection,
+  scope: AgentCallScope,
+): Promise<Record<string, string>> => ({
   [FORWARDED_HEADERS.authorization]: `Bearer ${scope.bearer}`,
   [FORWARDED_HEADERS.tenantId]: scope.tenantId,
   [FORWARDED_HEADERS.locale]: scope.regional.locale,
@@ -46,7 +71,9 @@ export const buildForwardedHeaders = async (connection: MastraConnection, scope:
   [FORWARDED_HEADERS.currency]: scope.regional.currency,
   [FORWARDED_HEADERS.requestId]: scope.requestId,
   ...optionalHeaders(scope),
-  ...(connection.serverlessToken === null ? {} : { [FORWARDED_HEADERS.serverlessAuthorization]: await connection.serverlessToken.headerValue() }),
+  ...(connection.serverlessToken === null
+    ? {}
+    : { [FORWARDED_HEADERS.serverlessAuthorization]: await connection.serverlessToken.headerValue() }),
 });
 
 /**
@@ -55,7 +82,8 @@ export const buildForwardedHeaders = async (connection: MastraConnection, scope:
  * gateway keeps only the body and `/v1` awaits other work before reading it, so a collection in
  * between ended the stream with no bytes. A pipe holds the body from here until it is read.
  */
-export const holdUpstreamBody = (body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> => body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>());
+export const holdUpstreamBody = (body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> =>
+  body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>());
 
 /** A non-2xx Mastra answer of a raw call, already mapped to its `/v1` error (`mapMastraError`). */
 class UpstreamStatusError extends Error {
@@ -69,8 +97,16 @@ class UpstreamStatusError extends Error {
 }
 
 /** Reads a non-2xx answer's envelope code (`mapMastraError`) and throws it as `UpstreamStatusError`. */
-const throwUpstream = async (response: Response, mapStatus?: (status: number) => GatewayError | undefined): Promise<never> => {
-  const mapped = mapMastraError({ status: response.status, body: await errorBodyOf(response), retryAfter: response.headers.get("retry-after"), mapStatus });
+const throwUpstream = async (
+  response: Response,
+  mapStatus?: (status: number) => GatewayError | undefined,
+): Promise<never> => {
+  const mapped = mapMastraError({
+    status: response.status,
+    body: await errorBodyOf(response),
+    retryAfter: response.headers.get("retry-after"),
+    mapStatus,
+  });
   throw new UpstreamStatusError(response.status, mapped);
 };
 
@@ -86,7 +122,11 @@ class DeadlineExceeded extends Error {
  * `GatewayError`. The caller's own abort is not an error to map: it rejects
  * with the caller's reason, so `/v1` stops streaming to a client that left.
  */
-export const withDeadline = async <T>(scope: AgentCallScope, deadlineMs: number, run: (signal: AbortSignal) => Promise<T>): Promise<GatewayResult<T>> => {
+export const withDeadline = async <T>(
+  scope: AgentCallScope,
+  deadlineMs: number,
+  run: (signal: AbortSignal) => Promise<T>,
+): Promise<GatewayResult<T>> => {
   const deadline = new AbortController();
   const timer = setTimeout(() => deadline.abort(new DeadlineExceeded()), deadlineMs);
   const signal = scope.signal === undefined ? deadline.signal : AbortSignal.any([deadline.signal, scope.signal]);
@@ -97,7 +137,10 @@ export const withDeadline = async <T>(scope: AgentCallScope, deadlineMs: number,
     if (deadline.signal.aborted) return { ok: false, error: UPSTREAM_TIMEOUT };
     if (error instanceof UpstreamStatusError) return { ok: false, error: error.mapped };
     const status = statusOfClientError(error);
-    return { ok: false, error: status === undefined ? UPSTREAM_UNAVAILABLE : mapMastraError({ status, body: bodyOfClientError(error) }) };
+    return {
+      ok: false,
+      error: status === undefined ? UPSTREAM_UNAVAILABLE : mapMastraError({ status, body: bodyOfClientError(error) }),
+    };
   } finally {
     clearTimeout(timer);
   }
@@ -117,7 +160,11 @@ export const postForStream = (args: {
 }): Promise<GatewayResult<GatewayStream>> => {
   const { connection, scope } = args;
   return withDeadline(scope, connection.timeouts.streamConnectMs, async (signal) => {
-    const headers = { ...(await buildForwardedHeaders(connection, scope)), "content-type": "application/json", ...(args.accept === undefined ? {} : { accept: args.accept }) };
+    const headers = {
+      ...(await buildForwardedHeaders(connection, scope)),
+      "content-type": "application/json",
+      ...(args.accept === undefined ? {} : { accept: args.accept }),
+    };
     const response = await connection.fetch(`${connection.baseUrl}${connection.apiPrefix}${args.path}`, {
       method: "POST",
       headers,
@@ -141,13 +188,26 @@ export const postForStream = (args: {
  * `Mcp-Session-Id` is forwarded verbatim both ways; the 2.x server is stateless and never
  * issues one, so no instance affinity is needed (decision 0027).
  */
-export const MCP_REQUEST_HEADERS: readonly string[] = ["accept", "mcp-method", "mcp-name", "mcp-protocol-version", "mcp-session-id", "last-event-id"];
+export const MCP_REQUEST_HEADERS: readonly string[] = [
+  "accept",
+  "mcp-method",
+  "mcp-name",
+  "mcp-protocol-version",
+  "mcp-session-id",
+  "last-event-id",
+];
 const MCP_PARAM_HEADER = /^mcp-param-[a-z0-9-]{1,64}$/;
-const MCP_RESPONSE_HEADERS: readonly string[] = ["mcp-session-id", "mcp-protocol-version", FORWARDED_HEADERS.conversationId];
+const MCP_RESPONSE_HEADERS: readonly string[] = [
+  "mcp-session-id",
+  "mcp-protocol-version",
+  FORWARDED_HEADERS.conversationId,
+];
 
 /** The MCP headers of a client request (lower-cased), nothing else. */
 export const mcpHeadersOf = (headers: Headers): Record<string, string> =>
-  Object.fromEntries([...headers.entries()].filter(([name]) => MCP_REQUEST_HEADERS.includes(name) || MCP_PARAM_HEADER.test(name)));
+  Object.fromEntries(
+    [...headers.entries()].filter(([name]) => MCP_REQUEST_HEADERS.includes(name) || MCP_PARAM_HEADER.test(name)),
+  );
 
 /**
  * Raw POST of one MCP message: our forwarded scope headers win over the client's MCP headers,
@@ -163,14 +223,29 @@ export const postMcp = (args: {
 }): Promise<GatewayResult<McpGatewayResponse>> => {
   const { connection, scope } = args;
   return withDeadline(scope, connection.timeouts.streamConnectMs, async (signal) => {
-    const headers = { accept: "application/json, text/event-stream", ...args.headers, ...(await buildForwardedHeaders(connection, scope)), "content-type": "application/json" };
-    const response = await connection.fetch(`${connection.baseUrl}${connection.apiPrefix}${args.path}`, { method: "POST", headers, body: JSON.stringify(args.body), signal });
+    const headers = {
+      accept: "application/json, text/event-stream",
+      ...args.headers,
+      ...(await buildForwardedHeaders(connection, scope)),
+      "content-type": "application/json",
+    };
+    const response = await connection.fetch(`${connection.baseUrl}${connection.apiPrefix}${args.path}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(args.body),
+      signal,
+    });
     if (!response.ok) return throwUpstream(response);
     const passed = MCP_RESPONSE_HEADERS.flatMap((name) => {
       const value = response.headers.get(name);
       return value === null ? [] : [[name, value] as const];
     });
-    return { status: response.status, body: response.body === null ? null : holdUpstreamBody(response.body), contentType: response.headers.get("content-type"), headers: Object.fromEntries(passed) };
+    return {
+      status: response.status,
+      body: response.body === null ? null : holdUpstreamBody(response.body),
+      contentType: response.headers.get("content-type"),
+      headers: Object.fromEntries(passed),
+    };
   });
 };
 
@@ -192,7 +267,11 @@ export type RawRouteCall = {
  * it. `204` is a success without a body; any other non-2xx answer is mapped by `mapMastraError`:
  * a core code of its envelope passes (503 `FEATURE_DISABLED`), anything else goes by status.
  */
-export const callRawRoute = (args: { connection: MastraConnection; scope: AgentCallScope; call: RawRouteCall }): Promise<GatewayResult<Response>> => {
+export const callRawRoute = (args: {
+  connection: MastraConnection;
+  scope: AgentCallScope;
+  call: RawRouteCall;
+}): Promise<GatewayResult<Response>> => {
   const { connection, scope, call } = args;
   return withDeadline(scope, connection.timeouts.streamConnectMs, async (signal) => {
     const headers: Record<string, string> = {
@@ -200,7 +279,12 @@ export const callRawRoute = (args: { connection: MastraConnection; scope: AgentC
       ...(call.contentType === undefined ? {} : { "content-type": call.contentType }),
       ...(call.accept === undefined ? {} : { accept: call.accept }),
     };
-    const response = await connection.fetch(`${connection.baseUrl}${call.path}`, { method: call.method, headers, ...(call.body === undefined ? {} : { body: call.body }), signal });
+    const response = await connection.fetch(`${connection.baseUrl}${call.path}`, {
+      method: call.method,
+      headers,
+      ...(call.body === undefined ? {} : { body: call.body }),
+      signal,
+    });
     if (response.ok) return response;
     return throwUpstream(response, call.mapStatus);
   });

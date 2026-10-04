@@ -1,6 +1,6 @@
 import { InvalidEnvError } from "@core/services";
 import { describe, expect, it } from "vitest";
-import { AgentEnvSchema, findAgentEnvIssues, resolveAgentEnv, type AgentRuntimeFlags } from "./agent-env.schema.ts";
+import { AgentEnvSchema, type AgentRuntimeFlags, findAgentEnvIssues, resolveAgentEnv } from "./agent-env.schema.ts";
 
 type Source = Record<string, string | undefined>;
 
@@ -96,7 +96,11 @@ describe("provider keys in real mode", () => {
   });
 
   it("requires the key of an overridden text role and of a configured fallback", () => {
-    const source = { ...PROD_SOURCE, AI_MODEL_FAST: "anthropic/claude-haiku-5", AI_MODEL_CHAT_FALLBACK: "openai/gpt-5.5" };
+    const source = {
+      ...PROD_SOURCE,
+      AI_MODEL_FAST: "anthropic/claude-haiku-5",
+      AI_MODEL_CHAT_FALLBACK: "openai/gpt-5.5",
+    };
 
     expect(issueFields(source, PROD_REAL)).toEqual(["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]);
   });
@@ -124,7 +128,9 @@ describe("provider keys in real mode", () => {
 
 describe("remote-only requirements", () => {
   it("requires an MCP request state key of at least 32 bytes outside local", () => {
-    expect(issueFields({ ...PROD_SOURCE, MCP_REQUEST_STATE_KEY: undefined }, PROD_REAL)).toEqual(["MCP_REQUEST_STATE_KEY"]);
+    expect(issueFields({ ...PROD_SOURCE, MCP_REQUEST_STATE_KEY: undefined }, PROD_REAL)).toEqual([
+      "MCP_REQUEST_STATE_KEY",
+    ]);
     expect(issueFields({ ...PROD_SOURCE, MCP_REQUEST_STATE_KEY: "k".repeat(31) }, PROD_REAL)).toEqual([
       "MCP_REQUEST_STATE_KEY",
     ]);
@@ -146,12 +152,19 @@ describe("remote-only requirements", () => {
     expect(load({})).toMatchObject({ AI_VOICE_ENABLED: true, AI_VOICE_REALTIME_ENABLED: false });
     expect(load(PROD_SOURCE, PROD_REAL)).toMatchObject({ AI_VOICE_ENABLED: false, AI_VOICE_REALTIME_ENABLED: false });
     expect(load({ ...PROD_SOURCE, AI_VOICE_ENABLED: "true" }, PROD_REAL).AI_VOICE_ENABLED).toBe(true);
-    expect(load({ AI_VOICE_ENABLED: "false", AI_VOICE_REALTIME_ENABLED: "true" })).toMatchObject({ AI_VOICE_ENABLED: false, AI_VOICE_REALTIME_ENABLED: true });
+    expect(load({ AI_VOICE_ENABLED: "false", AI_VOICE_REALTIME_ENABLED: "true" })).toMatchObject({
+      AI_VOICE_ENABLED: false,
+      AI_VOICE_REALTIME_ENABLED: true,
+    });
   });
 
   it("accepts a plain-http Firecrawl URL only in local (a self-hosted Firecrawl on the developer machine)", () => {
-    expect(issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "http://firecrawl.internal.example.com" }, PROD_REAL)).toEqual(["FIRECRAWL_API_URL"]);
-    expect(issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "https://firecrawl.internal.example.com" }, PROD_REAL)).toEqual([]);
+    expect(
+      issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "http://firecrawl.internal.example.com" }, PROD_REAL),
+    ).toEqual(["FIRECRAWL_API_URL"]);
+    expect(
+      issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "https://firecrawl.internal.example.com" }, PROD_REAL),
+    ).toEqual([]);
     expect(issueFields({ FIRECRAWL_API_URL: "http://localhost:3002" }, LOCAL_FAKE)).toEqual([]);
   });
 });

@@ -4,7 +4,7 @@ import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, createFakeApi, ok } from "#/shared/testing/fake-api.ts";
 import { buildOrganization, IDS } from "#/shared/testing/fixtures.ts";
 import { renderClientHook, renderWithClient } from "#/shared/testing/render-client.tsx";
-import { orderByLastUsed, organizationKeys, OrganizationAvatar, useOrganization } from "./index.ts";
+import { OrganizationAvatar, orderByLastUsed, organizationKeys, useOrganization } from "./index.ts";
 
 describe("organization entity", () => {
   it("reads an organization under its own key and returns null for a hidden one (404)", async () => {
@@ -14,7 +14,9 @@ describe("organization entity", () => {
     });
     const visible = renderClientHook(() => useOrganization(IDS.organization), { api });
     await waitFor(() => expect(visible.result.current.data?.name).toBe("Northwind"));
-    expect(visible.queryClient.getQueryData(organizationKeys.detail(IDS.organization))).toMatchObject({ id: IDS.organization });
+    expect(visible.queryClient.getQueryData(organizationKeys.detail(IDS.organization))).toMatchObject({
+      id: IDS.organization,
+    });
     expect(organizationKeys.detail(IDS.organization).slice(0, 2)).toEqual(["organizations", IDS.organization]);
 
     const hidden = renderClientHook(() => useOrganization(IDS.otherOrganization), { api });

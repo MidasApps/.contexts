@@ -17,6 +17,9 @@ export type ApiKeyRepository = {
   /** Newest first (`createdAt desc`, id desc). */
   readonly list: (args: { tenantId: TenantId; page: PageRequest }) => Promise<Page<ApiKey>>;
   readonly listActiveOfOwner: (args: { tenantId: TenantId; ownerUid: UserId }) => Promise<readonly ApiKey[]>;
-  readonly revoke: (tx: Transaction, args: { id: ApiKeyId; reason: ApiKeyRevokedReason; updatedAt: string; actorId: string }) => void;
+  readonly revoke: (
+    tx: Transaction,
+    args: { id: ApiKeyId; reason: ApiKeyRevokedReason; updatedAt: string; actorId: string },
+  ) => void;
   readonly touchLastUsed: (args: { id: ApiKeyId; lastUsedAt: string }) => Promise<void>;
 };

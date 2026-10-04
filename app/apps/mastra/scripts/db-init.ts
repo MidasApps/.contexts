@@ -9,7 +9,11 @@ import path from "node:path";
 import { MEMORY_VECTOR_DIMENSIONS, MEMORY_VECTOR_INDEX } from "@core/agents";
 import { PgVector, PostgresStore } from "@mastra/pg";
 import { buildMemoryVectorConfig, buildStorageConfig } from "../src/mastra/mastra-options.ts";
-import { assertStorageInitConfirmed, loadStorageInitEnv, MASTRA_RUNTIME_GRANTS_SQL } from "../src/storage/storage-init-target.ts";
+import {
+  assertStorageInitConfirmed,
+  loadStorageInitEnv,
+  MASTRA_RUNTIME_GRANTS_SQL,
+} from "../src/storage/storage-init-target.ts";
 
 const ENV_FILE = path.resolve(import.meta.dirname, "../../../.env.local");
 
@@ -28,7 +32,12 @@ const main = async (): Promise<void> => {
   try {
     await store.init();
     // Same parameters as Memory.createEmbeddingIndex, so the runtime finds it and never runs DDL.
-    await vector.createIndex({ indexName: MEMORY_VECTOR_INDEX, dimension: MEMORY_VECTOR_DIMENSIONS, metric: "cosine", metadataIndexes: ["thread_id", "resource_id"] });
+    await vector.createIndex({
+      indexName: MEMORY_VECTOR_INDEX,
+      dimension: MEMORY_VECTOR_DIMENSIONS,
+      metric: "cosine",
+      metadataIndexes: ["thread_id", "resource_id"],
+    });
     await store.db.none(MASTRA_RUNTIME_GRANTS_SQL);
     print(`mastra storage ready (APP_ENV=${env.APP_ENV})`);
   } finally {

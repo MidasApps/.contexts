@@ -1,19 +1,27 @@
 "use client";
 
-import { useTable, type RowData } from "@tanstack/react-table";
+import { type RowData, useTable } from "@tanstack/react-table";
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
+import { isApiErrorStatus } from "#/shared/api/cursor-list.ts";
 import { cn } from "#/shared/lib/cn.ts";
 import { useElementWidth } from "#/shared/lib/media/use-element-width.ts";
 import { useIsMobile } from "#/shared/lib/media/use-media-query.ts";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/shared/ui/atoms/Table/Table.tsx";
-import { isApiErrorStatus } from "#/shared/api/cursor-list.ts";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "#/shared/ui/atoms/Table/Table.tsx";
 import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
 import { NoAccessState } from "#/shared/ui/molecules/NoAccessState/NoAccessState.tsx";
-import { dataTableFeatures, type DataTableColumn, type DataTableFeatures } from "./data-table-columns.ts";
-import type { DataTableStatus } from "./data-table-status.ts";
 import { DataTablePagination, type DataTablePaginationProps } from "./DataTablePagination.tsx";
+import { type DataTableColumn, type DataTableFeatures, dataTableFeatures } from "./data-table-columns.ts";
+import type { DataTableStatus } from "./data-table-status.ts";
 
 export type { DataTableStatus } from "./data-table-status.ts";
 
@@ -76,7 +84,15 @@ function SkeletonRows({ rows, columnIds }: { rows: number; columnIds: string[] }
   ));
 }
 
-function DataRows<TData extends RowData>({ table, empty, columnCount }: { table: Instance<TData>; empty: ReactNode; columnCount: number }) {
+function DataRows<TData extends RowData>({
+  table,
+  empty,
+  columnCount,
+}: {
+  table: Instance<TData>;
+  empty: ReactNode;
+  columnCount: number;
+}) {
   const rows = table.getRowModel().rows;
   if (rows.length === 0) {
     return (
@@ -90,7 +106,10 @@ function DataRows<TData extends RowData>({ table, empty, columnCount }: { table:
   return rows.map((row) => (
     <TableRow key={row.id}>
       {row.getAllCells().map((cell) => (
-        <TableCell key={cell.id} className={cn(cell.column.columnDef.meta?.numeric === true && "text-right font-mono tabular-nums")}>
+        <TableCell
+          key={cell.id}
+          className={cn(cell.column.columnDef.meta?.numeric === true && "text-right font-mono tabular-nums")}
+        >
           <table.FlexRender cell={cell} />
         </TableCell>
       ))}
@@ -118,9 +137,23 @@ function HeaderRows<TData extends RowData>({ table }: { table: Instance<TData> }
 }
 
 /** A failed list: no-access for a 403 (retrying cannot help), else the copy of the error code with its reference and retry. */
-function TableError({ status, headingLevel }: { status: Extract<DataTableStatus, { kind: "error" }>; headingLevel: 2 | 3 }) {
+function TableError({
+  status,
+  headingLevel,
+}: {
+  status: Extract<DataTableStatus, { kind: "error" }>;
+  headingLevel: 2 | 3;
+}) {
   if (isApiErrorStatus(status.error, 403)) return <NoAccessState frame="plain" headingLevel={headingLevel} />;
-  return <ApiErrorState frame="plain" headingLevel={headingLevel} error={status.error} onRetry={status.onRetry} retrying={status.retrying ?? false} />;
+  return (
+    <ApiErrorState
+      frame="plain"
+      headingLevel={headingLevel}
+      error={status.error}
+      onRetry={status.onRetry}
+      retrying={status.retrying ?? false}
+    />
+  );
 }
 
 type CardListProps<TData extends RowData> = {
@@ -136,7 +169,17 @@ type CardListProps<TData extends RowData> = {
 };
 
 /** The mobile form of the table: caption as a heading-less label, one card per row. */
-function CardList<TData extends RowData>({ caption, captionHidden, data, getRowId, renderCard, status, empty, loadingRows, headingLevel }: CardListProps<TData>) {
+function CardList<TData extends RowData>({
+  caption,
+  captionHidden,
+  data,
+  getRowId,
+  renderCard,
+  status,
+  empty,
+  loadingRows,
+  headingLevel,
+}: CardListProps<TData>) {
   const t = useTranslations("common.states");
   if (status.kind === "error") return <TableError status={status} headingLevel={headingLevel} />;
   if (status.kind === "loading") {
@@ -191,14 +234,37 @@ export function DataTable<TData extends RowData>({
   className,
 }: DataTableProps<TData>) {
   const t = useTranslations("common.states");
-  const [observeWidth, cards] = useCardLayout(renderCard !== undefined, minTableWidth ?? Math.max(TABLE_MIN_WIDTH, columns.length * COLUMN_MIN_WIDTH));
-  const table = useTable({ features: dataTableFeatures, columns: [...columns], data, getRowId: (row) => getRowId(row) });
+  const [observeWidth, cards] = useCardLayout(
+    renderCard !== undefined,
+    minTableWidth ?? Math.max(TABLE_MIN_WIDTH, columns.length * COLUMN_MIN_WIDTH),
+  );
+  const table = useTable({
+    features: dataTableFeatures,
+    columns: [...columns],
+    data,
+    getRowId: (row) => getRowId(row),
+  });
   const columnIds = table.getAllLeafColumns().map((column) => column.id);
   const busy = status.kind === "loading";
   if (cards && renderCard !== undefined) {
     return (
-      <div ref={observeWidth} data-slot="data-table" data-layout="cards" className={cn("flex flex-col gap-3", className)}>
-        <CardList caption={caption} captionHidden={captionHidden} data={data} getRowId={getRowId} renderCard={renderCard} status={status} empty={empty} loadingRows={loadingRows} headingLevel={headingLevel} />
+      <div
+        ref={observeWidth}
+        data-slot="data-table"
+        data-layout="cards"
+        className={cn("flex flex-col gap-3", className)}
+      >
+        <CardList
+          caption={caption}
+          captionHidden={captionHidden}
+          data={data}
+          getRowId={getRowId}
+          renderCard={renderCard}
+          status={status}
+          empty={empty}
+          loadingRows={loadingRows}
+          headingLevel={headingLevel}
+        />
         {pagination === undefined || status.kind === "error" ? null : <DataTablePagination {...pagination} />}
       </div>
     );

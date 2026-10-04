@@ -31,7 +31,14 @@ export type ReauthorizeScheduleCreatorOptions<TInput extends z.ZodType> = {
   readonly permission?: string;
 };
 
-const stopSchedule = async (args: { mastra: Mastra | undefined; notifications: NotificationPort; scheduleId: string; tenantId: string | null; recipientUid: string | null; workflowId: string }) => {
+const stopSchedule = async (args: {
+  mastra: Mastra | undefined;
+  notifications: NotificationPort;
+  scheduleId: string;
+  tenantId: string | null;
+  recipientUid: string | null;
+  workflowId: string;
+}) => {
   await args.mastra?.schedules.pause(args.scheduleId);
   if (args.tenantId !== null) {
     await args.notifications.notify({
@@ -54,7 +61,9 @@ const stringOf = (value: unknown): string | null => (typeof value === "string" &
  * schedule is paused, the creator is notified and the run fails `FORBIDDEN`. Runs not started by
  * a tenant schedule (platform schedules, manual starts) pass through.
  */
-export const createReauthorizeScheduleCreatorStep = <TInput extends z.ZodType>(options: ReauthorizeScheduleCreatorOptions<TInput>) =>
+export const createReauthorizeScheduleCreatorStep = <TInput extends z.ZodType>(
+  options: ReauthorizeScheduleCreatorOptions<TInput>,
+) =>
   createStep({
     id: REAUTHORIZE_SCHEDULE_CREATOR_STEP_ID,
     description: "Re-authorizes the creator of the tenant schedule that started the run.",
@@ -65,13 +74,19 @@ export const createReauthorizeScheduleCreatorStep = <TInput extends z.ZodType>(o
       if (scheduleId === null) return inputData;
       const stop = { mastra, notifications: options.notifications, scheduleId, workflowId: options.workflowId };
       const snapshot = readAgentContext(requestContext);
-      if (!snapshot.ok) return stopSchedule({ ...stop, tenantId: stringOf(requestContext.get("tenantId")), recipientUid: stringOf(requestContext.get("userId")) });
+      if (!snapshot.ok)
+        return stopSchedule({
+          ...stop,
+          tenantId: stringOf(requestContext.get("tenantId")),
+          recipientUid: stringOf(requestContext.get("userId")),
+        });
       const { context, principal } = snapshot.data;
       const node = nodeOfContext(context);
       const required = [SCHEDULE_WRITE_PERMISSION, ...(options.permission === undefined ? [] : [options.permission])];
       for (const permission of required) {
         const decision = await options.access.authorize({ principal, permission, node });
-        if (!decision.allowed) return stopSchedule({ ...stop, tenantId: context.tenantId, recipientUid: context.userId });
+        if (!decision.allowed)
+          return stopSchedule({ ...stop, tenantId: context.tenantId, recipientUid: context.userId });
       }
       const current = await options.access.resolveAccessContext({ principal, node });
       if (current === null) return stopSchedule({ ...stop, tenantId: context.tenantId, recipientUid: context.userId });

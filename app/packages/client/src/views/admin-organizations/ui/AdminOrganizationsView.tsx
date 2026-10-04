@@ -3,7 +3,13 @@
 import type { OrganizationAdminSummary, Plan } from "@core/contracts";
 import { useId, useMemo } from "react";
 import { useTranslations } from "use-intl";
-import { ADMIN_ORGANIZATIONS_PAGE_LIMIT, BudgetUsagePill, OrganizationStatusPill, useAdminOrganizationSearch, type AdminOrganizationSearchFilter } from "#/entities/admin-organization/index.ts";
+import {
+  ADMIN_ORGANIZATIONS_PAGE_LIMIT,
+  type AdminOrganizationSearchFilter,
+  BudgetUsagePill,
+  OrganizationStatusPill,
+  useAdminOrganizationSearch,
+} from "#/entities/admin-organization/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { usePlans } from "#/entities/plan/index.ts";
 import { useFormatMicroUsd } from "#/shared/lib/format/use-format-micro-usd.ts";
@@ -38,7 +44,10 @@ function OpenLink({ organization }: { organization: OrganizationAdminSummary }) 
   const t = useTranslations("admin.organizations");
   return (
     <Button variant="outline" size="sm" asChild>
-      <RouteLink to={{ id: "admin", rest: `organizations/${organization.id}` }} aria-label={t("openNamed", { name: organization.name })}>
+      <RouteLink
+        to={{ id: "admin", rest: `organizations/${organization.id}` }}
+        aria-label={t("openNamed", { name: organization.name })}
+      >
         {t("open")}
       </RouteLink>
     </Button>
@@ -58,10 +67,21 @@ const useColumns = (planName: (organization: OrganizationAdminSummary) => string
   const formatCost = useFormatMicroUsd();
   return useMemo(
     () => [
-      column.display({ id: "name", header: () => t("columns.organization"), cell: ({ row }) => <OrganizationName organization={row.original} /> }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <OrganizationStatusPill status={getValue()} /> }),
+      column.display({
+        id: "name",
+        header: () => t("columns.organization"),
+        cell: ({ row }) => <OrganizationName organization={row.original} />,
+      }),
+      column.accessor("status", {
+        header: () => t("columns.status"),
+        cell: ({ getValue }) => <OrganizationStatusPill status={getValue()} />,
+      }),
       column.display({ id: "plan", header: () => t("columns.plan"), cell: ({ row }) => planName(row.original) }),
-      column.accessor("costMtdMicroUsd", { header: () => t("columns.costMtd"), meta: { numeric: true }, cell: ({ getValue }) => formatCost(getValue()) }),
+      column.accessor("costMtdMicroUsd", {
+        header: () => t("columns.costMtd"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => formatCost(getValue()),
+      }),
       column.display({
         id: "cap",
         header: () => t("columns.cap"),
@@ -69,18 +89,38 @@ const useColumns = (planName: (organization: OrganizationAdminSummary) => string
         cell: ({ row }) => (
           <span className="flex flex-col items-end">
             <span>{formatCost(row.original.budget.caps.monthlyMicroUsd)}</span>
-            <span className="font-sans text-caption text-muted-foreground">{t(`budgetSource.${row.original.budget.source}`)}</span>
+            <span className="font-sans text-caption text-muted-foreground">
+              {t(`budgetSource.${row.original.budget.source}`)}
+            </span>
           </span>
         ),
       }),
-      column.display({ id: "usage", header: () => t("columns.usage"), meta: { numeric: true }, cell: ({ row }) => <BudgetUsagePill organization={row.original} /> }),
-      column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <OpenLink organization={row.original} /> }),
+      column.display({
+        id: "usage",
+        header: () => t("columns.usage"),
+        meta: { numeric: true },
+        cell: ({ row }) => <BudgetUsagePill organization={row.original} />,
+      }),
+      column.display({
+        id: "actions",
+        header: () => t("columns.actions"),
+        meta: { headerHidden: true },
+        cell: ({ row }) => <OpenLink organization={row.original} />,
+      }),
     ],
     [formatCost, planName, t],
   );
 };
 
-function Filters({ query, status, onChange }: { query: string; status: string | undefined; onChange: (patch: { q?: string | undefined; status?: string | undefined }) => void }) {
+function Filters({
+  query,
+  status,
+  onChange,
+}: {
+  query: string;
+  status: string | undefined;
+  onChange: (patch: { q?: string | undefined; status?: string | undefined }) => void;
+}) {
   const t = useTranslations("admin.organizations");
   const statusId = useId();
   return (
@@ -95,7 +135,10 @@ function Filters({ query, status, onChange }: { query: string; status: string | 
       />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={statusId}>{t("filters.status")}</Label>
-        <Select value={status ?? ANY_STATUS} onValueChange={(value) => onChange({ status: value === ANY_STATUS ? undefined : value })}>
+        <Select
+          value={status ?? ANY_STATUS}
+          onValueChange={(value) => onChange({ status: value === ANY_STATUS ? undefined : value })}
+        >
           <SelectTrigger id={statusId} className="w-full sm:w-48">
             <SelectValue />
           </SelectTrigger>
@@ -110,7 +153,17 @@ function Filters({ query, status, onChange }: { query: string; status: string | 
   );
 }
 
-function Results({ filter, filtering, plans, onClear }: { filter: AdminOrganizationSearchFilter; filtering: boolean; plans: readonly Plan[] | undefined; onClear: () => void }) {
+function Results({
+  filter,
+  filtering,
+  plans,
+  onClear,
+}: {
+  filter: AdminOrganizationSearchFilter;
+  filtering: boolean;
+  plans: readonly Plan[] | undefined;
+  onClear: () => void;
+}) {
   const t = useTranslations("admin.organizations");
   const formatCost = useFormatMicroUsd();
   const permissions = usePlatformPermissions();
@@ -137,7 +190,10 @@ function Results({ filter, filtering, plans, onClear }: { filter: AdminOrganizat
               </span>
               <span className="text-body">{planName(organization)}</span>
               <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                {t("cardCost", { cost: formatCost(organization.costMtdMicroUsd), cap: formatCost(organization.budget.caps.monthlyMicroUsd) })}
+                {t("cardCost", {
+                  cost: formatCost(organization.costMtdMicroUsd),
+                  cap: formatCost(organization.budget.caps.monthlyMicroUsd),
+                })}
                 <BudgetUsagePill organization={organization} />
               </span>
               <span className="self-start">
@@ -179,7 +235,8 @@ function Results({ filter, filtering, plans, onClear }: { filter: AdminOrganizat
 function OrganizationsList({ plans }: { plans: readonly Plan[] | undefined }) {
   const search = useAdminSearch(["q", "status"]);
   const typed = search.values.q ?? "";
-  const status = search.values.status === "active" || search.values.status === "suspended" ? search.values.status : undefined;
+  const status =
+    search.values.status === "active" || search.values.status === "suspended" ? search.values.status : undefined;
   const debounced = useDebouncedValue(typed, SEARCH_DELAY_MS);
   // Clearing the box applies at once; only typing waits for the pause.
   const settled = (typed === "" ? "" : debounced).trim().slice(0, MAX_QUERY);
@@ -188,7 +245,13 @@ function OrganizationsList({ plans }: { plans: readonly Plan[] | undefined }) {
     <div className="flex flex-col gap-4">
       <Filters query={typed} status={status} onChange={search.set} />
       {/* A new filter starts from its first page. */}
-      <Results key={`${status ?? ANY_STATUS}:${settled}`} filter={filter} filtering={typed !== "" || status !== undefined} plans={plans} onClear={() => search.set({ q: undefined, status: undefined })} />
+      <Results
+        key={`${status ?? ANY_STATUS}:${settled}`}
+        filter={filter}
+        filtering={typed !== "" || status !== undefined}
+        plans={plans}
+        onClear={() => search.set({ q: undefined, status: undefined })}
+      />
     </div>
   );
 }

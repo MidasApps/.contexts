@@ -19,7 +19,13 @@ const Fruit = () => {
         searchLabel="Buscar fruta"
         emptyText="Nada"
         groups={[
-          { heading: "Cítricas", options: [{ value: "lemon", label: "Limão" }, { value: "orange", label: "Laranja" }] },
+          {
+            heading: "Cítricas",
+            options: [
+              { value: "lemon", label: "Limão" },
+              { value: "orange", label: "Laranja" },
+            ],
+          },
           { heading: "Outras", options: [{ value: "apple", label: "Maçã", keywords: ["apple"] }] },
         ]}
       />

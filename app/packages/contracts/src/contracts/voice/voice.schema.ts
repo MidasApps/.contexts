@@ -53,7 +53,13 @@ export const SpeechRequestContract = defineContract(SpeechRequestSchema, {
  */
 export const VoiceAvailabilitySchema = z.strictObject({
   voice: z.boolean().meta(none("Push-to-talk and read aloud are on for the organization (flag chat.voice).")),
-  realtime: z.boolean().meta(none("Realtime sessions are on too (flag chat.voice.realtime); the session route still needs real mode and a provider key.")),
+  realtime: z
+    .boolean()
+    .meta(
+      none(
+        "Realtime sessions are on too (flag chat.voice.realtime); the session route still needs real mode and a provider key.",
+      ),
+    ),
 });
 export type VoiceAvailability = z.infer<typeof VoiceAvailabilitySchema>;
 
@@ -73,7 +79,11 @@ export const VoiceAvailabilityContract = defineContract(VoiceAvailabilitySchema,
 
 /** `201` of `POST /v1/voice/realtime-sessions`: an ephemeral WebRTC client secret (≤ 60 s). */
 export const RealtimeSessionSchema = z.strictObject({
-  clientSecret: z.string().min(1).max(4096).meta(sensitive("Ephemeral client secret for the provider's WebRTC endpoint.")),
+  clientSecret: z
+    .string()
+    .min(1)
+    .max(4096)
+    .meta(sensitive("Ephemeral client secret for the provider's WebRTC endpoint.")),
   expiresAt: IsoDateTimeSchema.meta(none("When the secret stops working (UTC, at most 60 s ahead).")),
   model: z.string().min(1).max(200).meta(none("Realtime model id.")),
 });

@@ -20,7 +20,12 @@ export type IndexOutcome =
 /** Embeds chunks and replaces the document's chunks in one transaction (vectors never leave this call). */
 export const embedAndStoreChunks = async (
   deps: KnowledgeIndexingDeps,
-  input: { readonly tenantId: string; readonly documentId: string; readonly chunks: readonly DocumentChunk[]; readonly abortSignal?: AbortSignal },
+  input: {
+    readonly tenantId: string;
+    readonly documentId: string;
+    readonly chunks: readonly DocumentChunk[];
+    readonly abortSignal?: AbortSignal;
+  },
 ): Promise<number> => {
   const vectors = await embedChunks({
     model: deps.embedding(),
@@ -50,11 +55,19 @@ export const embedAndStoreChunks = async (
  */
 export const indexDocumentText = async (
   deps: KnowledgeIndexingDeps,
-  input: { readonly document: Omit<KnowledgeDocumentInput, "contentHash">; readonly text: string; readonly format: ChunkFormat; readonly abortSignal?: AbortSignal },
+  input: {
+    readonly document: Omit<KnowledgeDocumentInput, "contentHash">;
+    readonly text: string;
+    readonly format: ChunkFormat;
+    readonly abortSignal?: AbortSignal;
+  },
 ): Promise<IndexOutcome> => {
   const chunks = chunkDocument(input.text, { format: input.format });
   if (chunks.length === 0) return { status: "empty" };
-  const { document, unchanged } = await deps.knowledge.registerDocument({ ...input.document, contentHash: contentHashOf(input.text) });
+  const { document, unchanged } = await deps.knowledge.registerDocument({
+    ...input.document,
+    contentHash: contentHashOf(input.text),
+  });
   if (unchanged) return { status: "unchanged", documentId: document.id };
   const chunkCount = await embedAndStoreChunks(deps, {
     tenantId: input.document.tenantId,

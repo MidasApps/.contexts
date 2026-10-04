@@ -1,13 +1,20 @@
 import { streamWorkflowRunEndpoint, type WorkflowEvent, type WorkflowRunStatus } from "@core/contracts";
 import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
 import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
+import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import type { WorkflowRuntimeGateway } from "../../application/ports/workflow-runtime-gateway.ts";
 import { type GetRunEvents, makeGetRunEvents } from "../../application/use-cases/get-run.ts";
-import { encodeDone, encodeError, encodeWorkflowEvent, HEARTBEAT, resumeIndexOf, SSE_HEADERS } from "../driven/workflow-event-sse.ts";
-import { WORKFLOW_RUN_PERMISSIONS } from "./workflow-runs-route-handler.ts";
+import {
+  encodeDone,
+  encodeError,
+  encodeWorkflowEvent,
+  HEARTBEAT,
+  resumeIndexOf,
+  SSE_HEADERS,
+} from "../driven/workflow-event-sse.ts";
 import { workflowCallScope, workflowGatewayErrorResponse } from "./workflow-call-scope.ts";
+import { WORKFLOW_RUN_PERMISSIONS } from "./workflow-runs-route-handler.ts";
 
 /** Poll interval of the run's events, heartbeat interval and longest stream (the client reconnects with `Last-Event-Id`). */
 export const STREAM_TIMING = { pollMs: 1_000, heartbeatMs: 15_000, maxDurationMs: 5 * 60_000 } as const;
@@ -26,10 +33,14 @@ export type WorkflowRunStreamDeps = {
 const defaultWait = (ms: number, signal: AbortSignal): Promise<void> =>
   new Promise((resolve) => {
     const timer = setTimeout(resolve, ms);
-    signal.addEventListener("abort", () => {
-      clearTimeout(timer);
-      resolve();
-    }, { once: true });
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true },
+    );
   });
 
 type StreamState = { last: number; status: WorkflowRunStatus };
@@ -70,7 +81,13 @@ const pump = async (args: PumpArgs, write: (text: string) => void): Promise<void
     }
     const next = await args.getRunEvents(args.scope, args.runId);
     if (!next.ok) {
-      write(encodeError({ code: next.error.code, message: "The run progress is unavailable.", requestId: args.scope.requestId }));
+      write(
+        encodeError({
+          code: next.error.code,
+          message: "The run progress is unavailable.",
+          requestId: args.scope.requestId,
+        }),
+      );
       return;
     }
     state.status = next.data.run.status;
@@ -88,7 +105,14 @@ const sseResponse = (args: PumpArgs): Response => {
         await pump(args, write);
       } catch {
         // The client left (the gateway rethrows its abort) or the runtime failed mid-stream.
-        if (!args.signal.aborted) write(encodeError({ code: "UPSTREAM_UNAVAILABLE", message: "The run progress is unavailable.", requestId: args.scope.requestId }));
+        if (!args.signal.aborted)
+          write(
+            encodeError({
+              code: "UPSTREAM_UNAVAILABLE",
+              message: "The run progress is unavailable.",
+              requestId: args.scope.requestId,
+            }),
+          );
       }
       controller.close();
     },
@@ -107,7 +131,12 @@ export const buildWorkflowRunStreamRoutes = (deps: WorkflowRunStreamDeps): Recor
   const timing = { ...STREAM_TIMING, ...deps.timing };
   return {
     [streamWorkflowRunEndpoint.id]: withApiRoute(streamWorkflowRunEndpoint, deps.pipeline, async (ctx) => {
-      const scope = await workflowCallScope({ ctx, organizationId: ctx.input.query.organizationId, permission: WORKFLOW_RUN_PERMISSIONS.read, resolveAccessContext: deps.resolveAccessContext });
+      const scope = await workflowCallScope({
+        ctx,
+        organizationId: ctx.input.query.organizationId,
+        permission: WORKFLOW_RUN_PERMISSIONS.read,
+        resolveAccessContext: deps.resolveAccessContext,
+      });
       if (scope instanceof Response) return scope;
       const runId = ctx.input.params.runId;
       const first = await getRunEvents(scope, runId);

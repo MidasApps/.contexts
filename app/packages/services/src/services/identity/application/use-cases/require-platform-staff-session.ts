@@ -4,9 +4,15 @@ import { NotPlatformStaffError, type SessionInvalidError } from "../../domain/er
 import type { SessionDeps } from "../session-deps.ts";
 import { loadWebSession } from "./require-web-session.ts";
 
-export type StaffSession = { readonly principal: UserPrincipal; readonly sessionId: SessionId; readonly role: PlatformRole };
+export type StaffSession = {
+  readonly principal: UserPrincipal;
+  readonly sessionId: SessionId;
+  readonly role: PlatformRole;
+};
 
-export type RequirePlatformStaffSession = (command: { cookie: string | undefined }) => Promise<Result<StaffSession, SessionInvalidError | NotPlatformStaffError>>;
+export type RequirePlatformStaffSession = (command: {
+  cookie: string | undefined;
+}) => Promise<Result<StaffSession, SessionInvalidError | NotPlatformStaffError>>;
 
 /**
  * RSC guard of `/admin` (SP1 spec §3.4): an open web session whose user has an active
@@ -20,7 +26,11 @@ export const makeRequirePlatformStaffSession =
     const loaded = await loadWebSession(deps, cookie);
     if (!loaded.ok) return loaded;
     const { principal, sessionId } = loaded.data;
-    const [staff, user] = await Promise.all([deps.principals.getPlatformStaff(principal.uid), deps.principals.getUser(principal.uid)]);
-    if (staff === null || !staff.isActive || user?.status !== "active" || !principal.mfa) return err(new NotPlatformStaffError());
+    const [staff, user] = await Promise.all([
+      deps.principals.getPlatformStaff(principal.uid),
+      deps.principals.getUser(principal.uid),
+    ]);
+    if (staff === null || !staff.isActive || user?.status !== "active" || !principal.mfa)
+      return err(new NotPlatformStaffError());
     return ok({ principal, sessionId, role: staff.role });
   };

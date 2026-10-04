@@ -45,7 +45,11 @@ export const backfillUserSearchNames = async (args: {
       for (const doc of stale) batch.update(doc.ref, { [USER_SEARCH_NAME_FIELD]: searchNameOf(doc) });
       await batch.commit();
     }
-    progress = { scanned: progress.scanned + snapshot.size, updated: progress.updated + stale.length, lastId: snapshot.docs.at(-1)?.id ?? progress.lastId };
+    progress = {
+      scanned: progress.scanned + snapshot.size,
+      updated: progress.updated + stale.length,
+      lastId: snapshot.docs.at(-1)?.id ?? progress.lastId,
+    };
     args.onBatch?.(progress);
     if (snapshot.size < size) return progress;
   }

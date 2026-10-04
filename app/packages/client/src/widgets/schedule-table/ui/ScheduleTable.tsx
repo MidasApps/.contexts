@@ -1,13 +1,18 @@
 "use client";
 
 import { EllipsisIcon } from "lucide-react";
-import { createContext, use, useMemo, type ReactNode } from "react";
+import { createContext, type ReactNode, use, useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { scheduleSlugOf } from "#/entities/schedule/index.ts";
 import { FireTime as Fire, useDescribeCron } from "#/features/schedule-editor/index.ts";
 import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
@@ -62,7 +67,10 @@ export type ScheduleTableProps<Row extends ScheduleRow> = {
   empty: ReactNode;
 };
 
-type TableState = Pick<ScheduleTableProps<ScheduleRow>, "ownerLabel" | "canManage" | "disabled" | "pendingId" | "onPause" | "onResume" | "onRunNow" | "rowMenuItems">;
+type TableState = Pick<
+  ScheduleTableProps<ScheduleRow>,
+  "ownerLabel" | "canManage" | "disabled" | "pendingId" | "onPause" | "onResume" | "onRunNow" | "rowMenuItems"
+>;
 
 // Cells read the changing state from context so the column definitions never change identity
 // (TanStack remounts cells when they do, which drops clicks made while data loads).
@@ -89,9 +97,15 @@ function Workflow({ schedule }: { schedule: ScheduleRow }) {
     <span className="flex min-w-0 flex-col gap-0.5">
       <span className="flex flex-wrap items-center gap-2">
         <span className="font-medium">{workflow}</span>
-        {schedule.scope === undefined ? null : <StatusPill tone={schedule.scope === "platform" ? "violet" : "blue"}>{t(`scope.${schedule.scope}`)}</StatusPill>}
+        {schedule.scope === undefined ? null : (
+          <StatusPill tone={schedule.scope === "platform" ? "violet" : "blue"}>
+            {t(`scope.${schedule.scope}`)}
+          </StatusPill>
+        )}
       </span>
-      {ownerLabel === undefined ? null : <span className="text-body text-muted-foreground">{ownerLabel(schedule)}</span>}
+      {ownerLabel === undefined ? null : (
+        <span className="text-body text-muted-foreground">{ownerLabel(schedule)}</span>
+      )}
       {slug === null ? null : <span className="font-mono text-caption text-muted-foreground">{slug}</span>}
     </span>
   );
@@ -103,7 +117,9 @@ function Cron({ schedule }: { schedule: ScheduleRow }) {
   return (
     <span className="flex flex-col">
       {description === null ? null : <span>{description}</span>}
-      <code className={description === null ? "font-mono text-body" : "font-mono text-caption text-muted-foreground"}>{schedule.cron}</code>
+      <code className={description === null ? "font-mono text-body" : "font-mono text-caption text-muted-foreground"}>
+        {schedule.cron}
+      </code>
       <span className="text-caption text-muted-foreground">{schedule.timezone}</span>
     </span>
   );
@@ -125,7 +141,13 @@ function MoreActions({ items, label }: { items: readonly ScheduleRowMenuItem[]; 
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {items.map((item) => (
-          <DropdownMenuItem key={item.id} variant={item.destructive === true ? "destructive" : "default"} disabled={item.disabled === true} {...(item.accessibleLabel === undefined ? {} : { "aria-label": item.accessibleLabel })} onSelect={item.onSelect}>
+          <DropdownMenuItem
+            key={item.id}
+            variant={item.destructive === true ? "destructive" : "default"}
+            disabled={item.disabled === true}
+            {...(item.accessibleLabel === undefined ? {} : { "aria-label": item.accessibleLabel })}
+            onSelect={item.onSelect}
+          >
             {item.label}
           </DropdownMenuItem>
         ))}
@@ -147,15 +169,35 @@ function Actions({ schedule }: { schedule: ScheduleRow }) {
   return (
     <span className="flex flex-wrap items-center justify-end gap-2">
       {schedule.status === "active" ? (
-        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onPause(schedule)} aria-label={labelOf("pause")}>
+        <Button
+          variant="outline"
+          size="sm"
+          pending={pending}
+          disabled={blocked}
+          onClick={() => onPause(schedule)}
+          aria-label={labelOf("pause")}
+        >
           {t("pause")}
         </Button>
       ) : (
-        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onResume(schedule)} aria-label={labelOf("resume")}>
+        <Button
+          variant="outline"
+          size="sm"
+          pending={pending}
+          disabled={blocked}
+          onClick={() => onResume(schedule)}
+          aria-label={labelOf("resume")}
+        >
           {t("resume")}
         </Button>
       )}
-      <Button variant="outline" size="sm" disabled={blocked} onClick={() => onRunNow(schedule)} aria-label={labelOf("runNow")}>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={blocked}
+        onClick={() => onRunNow(schedule)}
+        aria-label={labelOf("runNow")}
+      >
         {t("runNow")}
       </Button>
       <MoreActions items={rowMenuItems?.(schedule) ?? []} label={labelOf("moreActions")} />
@@ -167,12 +209,36 @@ const useColumns = () => {
   const t = useTranslations("common.scheduleTable");
   return useMemo(
     () => [
-      column.display({ id: "workflow", header: () => t("columns.workflow"), cell: ({ row }) => <Workflow schedule={row.original} /> }),
-      column.display({ id: "cron", header: () => t("columns.cron"), cell: ({ row }) => <Cron schedule={row.original} /> }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <Status status={getValue()} /> }),
-      column.display({ id: "next", header: () => t("columns.nextFire"), cell: ({ row }) => <Fire iso={row.original.nextFireAt} timezone={row.original.timezone} /> }),
-      column.display({ id: "last", header: () => t("columns.lastFire"), cell: ({ row }) => <Fire iso={row.original.lastFireAt} timezone={row.original.timezone} /> }),
-      column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <Actions schedule={row.original} /> }),
+      column.display({
+        id: "workflow",
+        header: () => t("columns.workflow"),
+        cell: ({ row }) => <Workflow schedule={row.original} />,
+      }),
+      column.display({
+        id: "cron",
+        header: () => t("columns.cron"),
+        cell: ({ row }) => <Cron schedule={row.original} />,
+      }),
+      column.accessor("status", {
+        header: () => t("columns.status"),
+        cell: ({ getValue }) => <Status status={getValue()} />,
+      }),
+      column.display({
+        id: "next",
+        header: () => t("columns.nextFire"),
+        cell: ({ row }) => <Fire iso={row.original.nextFireAt} timezone={row.original.timezone} />,
+      }),
+      column.display({
+        id: "last",
+        header: () => t("columns.lastFire"),
+        cell: ({ row }) => <Fire iso={row.original.lastFireAt} timezone={row.original.timezone} />,
+      }),
+      column.display({
+        id: "actions",
+        header: () => t("columns.actions"),
+        meta: { headerHidden: true },
+        cell: ({ row }) => <Actions schedule={row.original} />,
+      }),
     ],
     [t],
   );
@@ -184,7 +250,12 @@ const useColumns = () => {
  * something in its zone). Pause, resume and run-now are callbacks: the caller owns the endpoints,
  * the confirmation and the toasts. Phones get cards.
  */
-export function ScheduleTable<Row extends ScheduleRow>({ caption, schedules, empty, ...state }: ScheduleTableProps<Row>) {
+export function ScheduleTable<Row extends ScheduleRow>({
+  caption,
+  schedules,
+  empty,
+  ...state
+}: ScheduleTableProps<Row>) {
   const t = useTranslations("common.scheduleTable");
   const columns = useColumns();
   return (

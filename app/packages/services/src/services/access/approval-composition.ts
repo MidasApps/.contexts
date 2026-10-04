@@ -3,13 +3,11 @@ import type { Firestore } from "firebase-admin/firestore";
 import { createFirestoreUnitOfWork } from "../shared/firestore/unit-of-work.ts";
 import { createFirestoreApprovalRequestRepository } from "./adapters/driven/firestore-approval-request-repository.ts";
 import type { ApprovalDeps } from "./application/approval-deps.ts";
-import { createApprovalHandlerRegistry, type ApprovalHandlerRegistry } from "./application/approval-handler-registry.ts";
+import {
+  type ApprovalHandlerRegistry,
+  createApprovalHandlerRegistry,
+} from "./application/approval-handler-registry.ts";
 import type { ApprovalActionHandler } from "./application/ports/driven/approval-action-handler.ts";
-import { makeApproveRequest, type ApproveRequest } from "./application/use-cases/approve-request.ts";
-import { makeListApprovalRequests, type ListApprovalRequests } from "./application/use-cases/list-approval-requests.ts";
-import { makeReadApprovalRequest, type ReadApprovalRequest } from "./application/use-cases/read-approval-request.ts";
-import { makeRejectRequest, type RejectRequest } from "./application/use-cases/reject-request.ts";
-import { makeRequestApproval, type RequestApproval } from "./application/use-cases/request-approval.ts";
 import {
   type CancelApprovalRequest,
   type ExpireApprovalRequests,
@@ -20,6 +18,11 @@ import {
   makeFailInterruptedApprovals,
   makeGetApprovalRequest,
 } from "./application/use-cases/approval-sweeps.ts";
+import { type ApproveRequest, makeApproveRequest } from "./application/use-cases/approve-request.ts";
+import { type ListApprovalRequests, makeListApprovalRequests } from "./application/use-cases/list-approval-requests.ts";
+import { makeReadApprovalRequest, type ReadApprovalRequest } from "./application/use-cases/read-approval-request.ts";
+import { makeRejectRequest, type RejectRequest } from "./application/use-cases/reject-request.ts";
+import { makeRequestApproval, type RequestApproval } from "./application/use-cases/request-approval.ts";
 
 export type ApprovalServices = {
   /** Route and in-process entry (SP3 tool approvals, SP5 workflow HITL). */
@@ -60,7 +63,10 @@ export const createApprovalServices = (deps: ApprovalDeps): ApprovalServices => 
  * @throws {ApprovalHandlerRegistryError} for duplicate or malformed handler kinds.
  */
 export const createFirestoreApprovalServices = (
-  deps: Omit<ApprovalDeps, "approvals" | "handlers" | "unitOfWork"> & { firestore: Firestore; handlers?: readonly ApprovalActionHandler[] | undefined },
+  deps: Omit<ApprovalDeps, "approvals" | "handlers" | "unitOfWork"> & {
+    firestore: Firestore;
+    handlers?: readonly ApprovalActionHandler[] | undefined;
+  },
 ): ApprovalServices => {
   const { firestore, handlers, ...rest } = deps;
   return createApprovalServices({

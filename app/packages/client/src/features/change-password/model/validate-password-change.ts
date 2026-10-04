@@ -4,7 +4,9 @@ export const MIN_PASSWORD_LENGTH = 8;
 export type PasswordChange = { current: string; next: string; confirmation: string };
 
 /** Problems per field, as `profile.security.password.errors.*` keys. */
-export type PasswordChangeProblems = Partial<Record<keyof PasswordChange, "required" | "tooShort" | "sameAsCurrent" | "mismatch">>;
+export type PasswordChangeProblems = Partial<
+  Record<keyof PasswordChange, "required" | "tooShort" | "sameAsCurrent" | "mismatch">
+>;
 
 /** Client checks before any network call; the first problem field receives focus. */
 export const validatePasswordChange = ({ current, next, confirmation }: PasswordChange): PasswordChangeProblems => {

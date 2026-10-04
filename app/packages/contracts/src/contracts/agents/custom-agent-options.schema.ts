@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { defineContract } from "../contract.ts";
-import { none } from "../field-docs.ts";
 import { ChatAgentIdSchema } from "../conversations/conversation.schema.ts";
+import { none } from "../field-docs.ts";
 import { CustomAgentModelSchema, EXAMPLE_CUSTOM_AGENT_ID } from "./custom-agent.schema.ts";
 
 /**
@@ -59,11 +59,19 @@ export type CustomAgentOptions = z.infer<typeof CustomAgentOptionsSchema>;
 export const CustomAgentOptionsContract = defineContract(CustomAgentOptionsSchema, {
   id: "agents.CustomAgentOptions",
   kind: "view",
-  description: "The models, tools and platform skills an organization's agent may select, with the plan limits and their use.",
+  description:
+    "The models, tools and platform skills an organization's agent may select, with the plan limits and their use.",
   examples: [
     {
       models: ["chat", "reasoning"],
-      tools: [{ id: "catalog.listEntities", kind: "read", source: "core", description: "Lists the data entities the caller may read." }],
+      tools: [
+        {
+          id: "catalog.listEntities",
+          kind: "read",
+          source: "core",
+          description: "Lists the data entities the caller may read.",
+        },
+      ],
       coreSkills: [{ name: "knowledge-citations", description: "How to cite knowledge base passages." }],
       limits: { maxAgents: 5, maxSkills: 10, maxInstructionChars: 8000 },
       usage: { agents: 1, skills: 2 },
@@ -89,8 +97,18 @@ export const ChatAgentOptionContract = defineContract(ChatAgentOptionSchema, {
   kind: "view",
   description: "An agent a member of the organization can start a conversation with.",
   examples: [
-    { id: "assistant", name: "Assistant", description: "Plans the work and delegates to the organization's specialists.", source: "core" },
-    { id: EXAMPLE_CUSTOM_AGENT_ID, name: "Onboarding guide", description: "Answers questions of new members.", source: "custom" },
+    {
+      id: "assistant",
+      name: "Assistant",
+      description: "Plans the work and delegates to the organization's specialists.",
+      source: "core",
+    },
+    {
+      id: EXAMPLE_CUSTOM_AGENT_ID,
+      name: "Onboarding guide",
+      description: "Answers questions of new members.",
+      source: "custom",
+    },
   ],
   pii: "none",
   tenancyScope: "organization",

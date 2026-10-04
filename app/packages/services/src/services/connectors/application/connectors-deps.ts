@@ -1,7 +1,7 @@
 import type { AuditAction, ConnectorId, Principal, TenantId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { RequestAccess } from "../../access/composition.ts";
 import { requirePermission } from "../../access/application/grant-checks.ts";
+import type { RequestAccess } from "../../access/composition.ts";
 import type { AccessDeniedError } from "../../access/domain/errors/access-denied-error.ts";
 import type { AuditWriter } from "../../audit/application/use-cases/record-audit.ts";
 import { auditActorOf } from "../../audit/domain/audit-actor.ts";
@@ -35,7 +35,12 @@ export const authorizeConnectors = (
   command: Pick<ConnectorsCommand, "actor" | "access" | "tenantId">,
   permission: typeof CONNECTOR_READ_PERMISSION | typeof CONNECTOR_WRITE_PERMISSION,
 ): Promise<Result<void, AccessDeniedError>> =>
-  requirePermission({ access: command.access, actor: command.actor, permission, node: { level: "organization", tenantId: command.tenantId } });
+  requirePermission({
+    access: command.access,
+    actor: command.actor,
+    permission,
+    node: { level: "organization", tenantId: command.tenantId },
+  });
 
 /** One audit entry per connector change; field names only in `changes`, never values or secrets. */
 export const recordConnectorAudit = async (

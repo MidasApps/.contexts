@@ -4,12 +4,19 @@ import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { buildUnit, IDS } from "#/shared/testing/fixtures.ts";
 import { UNIT_TYPES } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsUnitsView } from "./SettingsUnitsView.tsx";
 
-const UNIT_ADMIN: Permission[] = ["core.organization.read", "core.project.read", "core.unit.read", "core.unit.create", "core.unit.update", "core.unit.delete"];
+const UNIT_ADMIN: Permission[] = [
+  "core.organization.read",
+  "core.project.read",
+  "core.unit.read",
+  "core.unit.create",
+  "core.unit.update",
+  "core.unit.delete",
+];
 const SITE_A = buildUnit({ id: "site-1", name: "Site A", type: "sample.site" });
 const SITE_B = buildUnit({ id: "site-2", name: "Site B", type: "sample.site" });
 const FLOOR = buildUnit({ id: "floor-1", name: "Floor 2", type: "sample.room", ancestorIds: ["site-1"] });
@@ -27,7 +34,11 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     </main>,
     {
       path: `/o/${IDS.organization}/settings/units`,
-      routes: shellRoutes(permissions, { "GET /v1/unit-types": page(UNIT_TYPES), "GET /v1/projects/:projectId/units": unitsRoute, ...routes }),
+      routes: shellRoutes(permissions, {
+        "GET /v1/unit-types": page(UNIT_TYPES),
+        "GET /v1/projects/:projectId/units": unitsRoute,
+        ...routes,
+      }),
     },
   );
 
@@ -63,7 +74,7 @@ describe("SettingsUnitsView", () => {
     expect(bodies[0]?.body).toEqual({ name: "Room 9", type: "sample.room", parentUnitId: "site-2" });
   });
 
-  it("moves a unit through the \"Move to…\" dialog and keeps INVALID_UNIT_PARENT in it", async () => {
+  it('moves a unit through the "Move to…" dialog and keeps INVALID_UNIT_PARENT in it', async () => {
     const { user, api } = renderView({ "PATCH /v1/units/:unitId": apiError(422, "INVALID_UNIT_PARENT") });
     const tree = await screen.findByRole("tree", { name: "Unidades de Launch" });
     within(tree).getByRole("treeitem", { name: "Site A" }).focus();
@@ -74,7 +85,9 @@ describe("SettingsUnitsView", () => {
     await user.click(within(dialog).getByRole("combobox", { name: "Destino" }));
     await user.click(await screen.findByRole("option", { name: "Site B" }));
     await user.click(within(dialog).getByRole("button", { name: "Mover" }));
-    expect((await within(dialog).findByRole("alert")).textContent).toContain("Esta unidade não pode ficar dentro da unidade escolhida.");
+    expect((await within(dialog).findByRole("alert")).textContent).toContain(
+      "Esta unidade não pode ficar dentro da unidade escolhida.",
+    );
     expect(api.calls.find((call) => call.method === "PATCH")?.body).toEqual({ parentUnitId: "site-2" });
   });
 
@@ -91,7 +104,10 @@ describe("SettingsUnitsView", () => {
 
   it("does not offer a sub-unit under a type that allows none, and says why", async () => {
     const room = buildUnit({ id: "room-1", name: "Room 1", type: "sample.room" });
-    const { user, container } = renderView({ "GET /v1/projects/:projectId/units": (request: FakeRequest) => page(request.query.get("parentUnitId") === null ? [SITE_A, room] : []) });
+    const { user, container } = renderView({
+      "GET /v1/projects/:projectId/units": (request: FakeRequest) =>
+        page(request.query.get("parentUnitId") === null ? [SITE_A, room] : []),
+    });
     await selectUnit(user, "Room 1");
     const create = screen.getByRole("button", { name: "Nova subunidade" });
     expect(create.hasAttribute("disabled")).toBe(true);

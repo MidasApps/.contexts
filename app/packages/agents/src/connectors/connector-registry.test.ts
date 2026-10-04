@@ -1,16 +1,22 @@
 import { type Connector, ConnectorSchema } from "@core/contracts";
-import { createTool } from "@mastra/core/tools";
 import { RequestContext } from "@mastra/core/request-context";
+import { createTool } from "@mastra/core/tools";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { buildAgentContextEntries, TEST_TENANT } from "../testing/agent-context-fixture.ts";
 import { createFakeAccessPort, createFakeApprovalPort, createFakeAuditPort } from "../testing/fake-ports.ts";
 import { type CoreToolDefinition, defineCoreTool } from "../tools/define-core-tool.ts";
+import { type ConnectorLoaders, createConnectorToolResolver } from "./connector-registry.ts";
 import { McpConnectorError, type McpTool } from "./mcp/mcp-connector.ts";
 import { OpenApiConnectorError } from "./openapi/openapi-document.ts";
-import { type ConnectorLoaders, createConnectorToolResolver } from "./connector-registry.ts";
 
-const base = { tenantId: TEST_TENANT, status: "active", createdBy: "uA1b2C3d4E5f6G7h8I9j", createdAt: "2026-09-30T12:00:00.000Z", updatedAt: "2026-09-30T12:00:00.000Z" };
+const base = {
+  tenantId: TEST_TENANT,
+  status: "active",
+  createdBy: "uA1b2C3d4E5f6G7h8I9j",
+  createdAt: "2026-09-30T12:00:00.000Z",
+  updatedAt: "2026-09-30T12:00:00.000Z",
+};
 const openapi = ConnectorSchema.parse({
   ...base,
   id: "Cn0000000000000000A1",
@@ -18,7 +24,12 @@ const openapi = ConnectorSchema.parse({
   type: "openapi",
   secretRef: "connector-secret-a",
   toolPolicy: { allow: ["listIssues", "createIssue"], readOnly: ["listIssues"] },
-  config: { specUrl: "https://api.example.com/openapi.json", allowedHosts: ["api.example.com"], auth: "bearer", apiKeyHeader: null },
+  config: {
+    specUrl: "https://api.example.com/openapi.json",
+    allowedHosts: ["api.example.com"],
+    auth: "bearer",
+    apiKeyHeader: null,
+  },
 });
 const browser = ConnectorSchema.parse({
   ...base,
@@ -40,8 +51,22 @@ const docsMcp = ConnectorSchema.parse({
 });
 
 const coreTool = (id: string, kind: "read" | "mutation"): CoreToolDefinition =>
-  defineCoreTool({ id, description: "Connector tool for registry tests.", kind, permission: "core.chat.use", inputSchema: z.strictObject({}), outputSchema: z.strictObject({}), execute: () => Promise.resolve({}) });
-const mcpTool = (id: string): McpTool => createTool({ id, description: "MCP tool for registry tests.", inputSchema: z.object({}), execute: () => Promise.resolve({}) });
+  defineCoreTool({
+    id,
+    description: "Connector tool for registry tests.",
+    kind,
+    permission: "core.chat.use",
+    inputSchema: z.strictObject({}),
+    outputSchema: z.strictObject({}),
+    execute: () => Promise.resolve({}),
+  });
+const mcpTool = (id: string): McpTool =>
+  createTool({
+    id,
+    description: "MCP tool for registry tests.",
+    inputSchema: z.object({}),
+    execute: () => Promise.resolve({}),
+  });
 
 const setup = (connectors: readonly Connector[] = [openapi, browser, docsMcp]) => {
   const loads: string[] = [];
@@ -51,18 +76,26 @@ const setup = (connectors: readonly Connector[] = [openapi, browser, docsMcp]) =
     openApiTools: (connector, secret) => {
       loads.push(connector.name);
       secretsSeen.push(secret);
-      return Promise.resolve([coreTool("api.issues-api.listIssues", "read"), coreTool("api.issues-api.createIssue", "mutation")]);
+      return Promise.resolve([
+        coreTool("api.issues-api.listIssues", "read"),
+        coreTool("api.issues-api.createIssue", "mutation"),
+      ]);
     },
     mcpToolset: (connector) => {
       loads.push(connector.name);
-      const tools = connector.type === "browser" ? { mcp_browser_browser_navigate: mcpTool("browser_navigate") } : { mcp_docs_search: mcpTool("search"), mcp_docs_deleteDoc: mcpTool("deleteDoc") };
+      const tools =
+        connector.type === "browser"
+          ? { mcp_browser_browser_navigate: mcpTool("browser_navigate") }
+          : { mcp_docs_search: mcpTool("search"), mcp_docs_deleteDoc: mcpTool("deleteDoc") };
       return Promise.resolve({ tools, disconnect: () => Promise.resolve(void disconnected.push(connector.name)) });
     },
     postgresTools: () => [],
   };
   let clock = 0;
   const resolver = createConnectorToolResolver({
-    connectors: { listActive: ({ tenantId }) => Promise.resolve(connectors.filter((connector) => connector.tenantId === tenantId)) },
+    connectors: {
+      listActive: ({ tenantId }) => Promise.resolve(connectors.filter((connector) => connector.tenantId === tenantId)),
+    },
     secrets: { get: (ref) => Promise.resolve(ref === "connector-secret-a" ? "tok" : null) },
     toolDeps: { access: createFakeAccessPort({}), audit: createFakeAuditPort(), approvals: createFakeApprovalPort() },
     loaders,
@@ -77,8 +110,16 @@ const context = (tenantId = TEST_TENANT) => new RequestContext<unknown>(buildAge
 describe("connector tool resolver", () => {
   it("gives each agent its slice: supervisor reads, action everything but browser, web the browser", async () => {
     const { resolver, secretsSeen } = setup();
-    expect(Object.keys(await resolver(context(), "supervisor")).sort()).toEqual(["api.issues-api.listIssues", "mcp_docs_search"]);
-    expect(Object.keys(await resolver(context(), "action")).sort()).toEqual(["api.issues-api.createIssue", "api.issues-api.listIssues", "mcp_docs_deleteDoc", "mcp_docs_search"]);
+    expect(Object.keys(await resolver(context(), "supervisor")).sort()).toEqual([
+      "api.issues-api.listIssues",
+      "mcp_docs_search",
+    ]);
+    expect(Object.keys(await resolver(context(), "action")).sort()).toEqual([
+      "api.issues-api.createIssue",
+      "api.issues-api.listIssues",
+      "mcp_docs_deleteDoc",
+      "mcp_docs_search",
+    ]);
     expect(Object.keys(await resolver(context(), "web"))).toEqual(["mcp_browser_browser_navigate"]);
     expect(secretsSeen).toEqual(["tok"]);
   });
@@ -114,7 +155,12 @@ describe("connector tool resolver", () => {
       connectors: { listActive: () => Promise.resolve([openapi, docsMcp]) },
       secrets: { get: () => Promise.resolve(null) },
       toolDeps: { access: createFakeAccessPort({}), audit: createFakeAuditPort(), approvals: createFakeApprovalPort() },
-      loaders: { openApiTools: () => Promise.reject(new Error("spec down")), mcpToolset: () => Promise.resolve({ tools: { mcp_docs_search: mcpTool("search") }, disconnect: () => Promise.resolve() }), postgresTools: () => [] },
+      loaders: {
+        openApiTools: () => Promise.reject(new Error("spec down")),
+        mcpToolset: () =>
+          Promise.resolve({ tools: { mcp_docs_search: mcpTool("search") }, disconnect: () => Promise.resolve() }),
+        postgresTools: () => [],
+      },
     });
     expect(Object.keys(await failing(context(), "action"))).toEqual(["mcp_docs_search"]);
     await resolver.close();
@@ -132,7 +178,12 @@ describe("connector load errors", () => {
       },
       secrets: { get: (ref) => Promise.resolve(ref === "connector-secret-a" ? "tok" : null) },
       toolDeps: { access: createFakeAccessPort({}), audit: createFakeAuditPort(), approvals: createFakeApprovalPort() },
-      loaders: { openApiTools: () => Promise.resolve([]), mcpToolset: () => Promise.resolve({ tools: {}, disconnect: () => Promise.resolve() }), postgresTools: () => [], ...loaders },
+      loaders: {
+        openApiTools: () => Promise.resolve([]),
+        mcpToolset: () => Promise.resolve({ tools: {}, disconnect: () => Promise.resolve() }),
+        postgresTools: () => [],
+        ...loaders,
+      },
       now: () => Date.UTC(2026, 9, 1, 10, 0, 0),
     });
     return { resolver, recorded };
@@ -142,16 +193,22 @@ describe("connector load errors", () => {
   it("records why a connector failed to load, as a code, and keeps the others' tools", async () => {
     const { resolver, recorded } = record([openapi, docsMcp], {
       openApiTools: () => Promise.reject(new OpenApiConnectorError("SPEC_UNAVAILABLE")),
-      mcpToolset: () => Promise.resolve({ tools: { mcp_docs_search: mcpTool("search") }, disconnect: () => Promise.resolve() }),
+      mcpToolset: () =>
+        Promise.resolve({ tools: { mcp_docs_search: mcpTool("search") }, disconnect: () => Promise.resolve() }),
     });
     expect(Object.keys(await resolver(context(), "supervisor"))).toEqual(["mcp_docs_search"]);
-    await vi.waitFor(() => expect(recorded).toEqual([{ tenantId: TEST_TENANT, connectorId: openapi.id, lastError: { code: "SPEC_UNAVAILABLE", at: AT } }]));
+    await vi.waitFor(() =>
+      expect(recorded).toEqual([
+        { tenantId: TEST_TENANT, connectorId: openapi.id, lastError: { code: "SPEC_UNAVAILABLE", at: AT } },
+      ]),
+    );
   });
 
   it("classifies a missing secret, an MCP refusal and anything else", async () => {
     const noSecret = ConnectorSchema.parse({ ...openapi, id: "Cn0000000000000000D4", secretRef: null });
     const { resolver, recorded } = record([noSecret, docsMcp, browser], {
-      mcpToolset: (connector) => Promise.reject(connector.type === "mcp" ? new McpConnectorError("CONNECT_FAILED") : new Error("boom")),
+      mcpToolset: (connector) =>
+        Promise.reject(connector.type === "mcp" ? new McpConnectorError("CONNECT_FAILED") : new Error("boom")),
     });
     await resolver(context(), "action");
     await vi.waitFor(() => expect(recorded).toHaveLength(3));
@@ -163,9 +220,14 @@ describe("connector load errors", () => {
   });
 
   it("clears a past error once the connector loads, and writes nothing when nothing changed", async () => {
-    const healed = ConnectorSchema.parse({ ...docsMcp, lastError: { code: "CONNECT_FAILED", at: "2026-09-30T10:00:00.000Z" } });
+    const healed = ConnectorSchema.parse({
+      ...docsMcp,
+      lastError: { code: "CONNECT_FAILED", at: "2026-09-30T10:00:00.000Z" },
+    });
     const { resolver, recorded } = record([healed, openapi], {});
     await resolver(context(), "action");
-    await vi.waitFor(() => expect(recorded).toEqual([{ tenantId: TEST_TENANT, connectorId: healed.id, lastError: null }]));
+    await vi.waitFor(() =>
+      expect(recorded).toEqual([{ tenantId: TEST_TENANT, connectorId: healed.id, lastError: null }]),
+    );
   });
 });

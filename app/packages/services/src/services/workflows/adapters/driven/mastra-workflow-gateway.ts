@@ -1,20 +1,47 @@
-import { AgentCatalogEntrySchema, CustomAgentRuntimeOptionsSchema, SchedulePreviewSchema, ScheduleSchema, WorkflowCatalogEntrySchema, WorkflowEventSchema, WorkflowRunSchema } from "@core/contracts";
+import {
+  AgentCatalogEntrySchema,
+  CustomAgentRuntimeOptionsSchema,
+  SchedulePreviewSchema,
+  ScheduleSchema,
+  WorkflowCatalogEntrySchema,
+  WorkflowEventSchema,
+  WorkflowRunSchema,
+} from "@core/contracts";
 import { z } from "zod";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import { mapMastraStatus, UPSTREAM_TIMEOUT, UPSTREAM_UNAVAILABLE } from "../../../agents/adapters/driven/mastra-error-mapper.ts";
+import {
+  mapMastraStatus,
+  UPSTREAM_TIMEOUT,
+  UPSTREAM_UNAVAILABLE,
+} from "../../../agents/adapters/driven/mastra-error-mapper.ts";
 import { buildForwardedHeaders, type MastraConnection } from "../../../agents/adapters/driven/mastra-request.ts";
 import type { ServerlessIdTokenSource } from "../../../agents/adapters/driven/serverless-id-token.ts";
-import type { WorkflowGatewayError, WorkflowGatewayResult, WorkflowRuntimeGateway } from "../../application/ports/workflow-runtime-gateway.ts";
+import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+import type {
+  WorkflowGatewayError,
+  WorkflowGatewayResult,
+  WorkflowRuntimeGateway,
+} from "../../application/ports/workflow-runtime-gateway.ts";
 
 export const DEFAULT_WORKFLOW_GATEWAY_TIMEOUT_MS = 30_000;
 
 /** Codes of our own Mastra routes that reach `/v1` as they are (`workflow-route-http.ts`). */
-const PASSED_CODES = new Set(["VALIDATION_FAILED", "FORBIDDEN", "NOT_FOUND", "CONFLICT", "WORKFLOW_NOT_STARTABLE", "WORKFLOW_NOT_SCHEDULABLE", "SCHEDULE_INTERVAL_TOO_SHORT"]);
+const PASSED_CODES = new Set([
+  "VALIDATION_FAILED",
+  "FORBIDDEN",
+  "NOT_FOUND",
+  "CONFLICT",
+  "WORKFLOW_NOT_STARTABLE",
+  "WORKFLOW_NOT_SCHEDULABLE",
+  "SCHEDULE_INTERVAL_TOO_SHORT",
+]);
 
 const ErrorBodySchema = z.object({
   error: z.object({
     code: z.string(),
-    details: z.array(z.object({ field: z.string().max(200), issue: z.string().max(100) })).max(100).optional(),
+    details: z
+      .array(z.object({ field: z.string().max(200), issue: z.string().max(100) }))
+      .max(100)
+      .optional(),
   }),
 });
 
@@ -63,15 +90,30 @@ export const createMastraWorkflowGateway = (options: MastraWorkflowGatewayOption
     baseUrl: options.baseUrl.replace(/\/+$/, ""),
     apiPrefix: "",
     fetch: options.fetch ?? fetch,
-    timeouts: { jsonMs: options.timeoutMs ?? DEFAULT_WORKFLOW_GATEWAY_TIMEOUT_MS, streamConnectMs: options.timeoutMs ?? DEFAULT_WORKFLOW_GATEWAY_TIMEOUT_MS },
+    timeouts: {
+      jsonMs: options.timeoutMs ?? DEFAULT_WORKFLOW_GATEWAY_TIMEOUT_MS,
+      streamConnectMs: options.timeoutMs ?? DEFAULT_WORKFLOW_GATEWAY_TIMEOUT_MS,
+    },
     serverlessToken: options.serverlessToken,
   };
-  const send = async <T>(scope: AgentCallScope, call: Call, schema: z.ZodType<T> | null): Promise<WorkflowGatewayResult<T>> => {
+  const send = async <T>(
+    scope: AgentCallScope,
+    call: Call,
+    schema: z.ZodType<T> | null,
+  ): Promise<WorkflowGatewayResult<T>> => {
     const deadline = AbortSignal.timeout(connection.timeouts.jsonMs);
     const signal = scope.signal === undefined ? deadline : AbortSignal.any([deadline, scope.signal]);
     try {
-      const headers = { ...(await buildForwardedHeaders(connection, scope)), ...(call.body === undefined ? {} : { "content-type": "application/json" }) };
-      const init = { method: call.method, headers, signal, ...(call.body === undefined ? {} : { body: JSON.stringify(call.body) }) };
+      const headers = {
+        ...(await buildForwardedHeaders(connection, scope)),
+        ...(call.body === undefined ? {} : { "content-type": "application/json" }),
+      };
+      const init = {
+        method: call.method,
+        headers,
+        signal,
+        ...(call.body === undefined ? {} : { body: JSON.stringify(call.body) }),
+      };
       const response = await connection.fetch(`${connection.baseUrl}${call.path}`, init);
       if (!response.ok) return { ok: false, error: await errorOf(response) };
       if (schema === null) {
@@ -85,31 +127,89 @@ export const createMastraWorkflowGateway = (options: MastraWorkflowGatewayOption
       return { ok: false, error: deadline.aborted ? UPSTREAM_TIMEOUT : UPSTREAM_UNAVAILABLE };
     }
   };
-  const map = async <T, U>(result: Promise<WorkflowGatewayResult<T>>, pick: (value: T) => U): Promise<WorkflowGatewayResult<U>> => {
+  const map = async <T, U>(
+    result: Promise<WorkflowGatewayResult<T>>,
+    pick: (value: T) => U,
+  ): Promise<WorkflowGatewayResult<U>> => {
     const resolved = await result;
     return resolved.ok ? { ok: true, data: pick(resolved.data) } : resolved;
   };
   return {
     listRuns: (scope, query) => {
       const params = new URLSearchParams({ limit: String(query.limit) });
-      for (const [key, value] of [["workflowId", query.workflowId], ["status", query.status], ["cursor", query.cursor]] as const) if (value !== undefined) params.set(key, value);
-      return map(send(scope, { method: "GET", path: `/workflow-runs?${params.toString()}` }, RunListSchema), (body) => ({ runs: body.data, page: body.meta.page }));
+      for (const [key, value] of [
+        ["workflowId", query.workflowId],
+        ["status", query.status],
+        ["cursor", query.cursor],
+      ] as const)
+        if (value !== undefined) params.set(key, value);
+      return map(
+        send(scope, { method: "GET", path: `/workflow-runs?${params.toString()}` }, RunListSchema),
+        (body) => ({ runs: body.data, page: body.meta.page }),
+      );
     },
-    getRun: (scope, runId) => map(send(scope, { method: "GET", path: `/workflow-runs/${segment(runId)}` }, RunSchema), (body) => body.data),
-    getRunEvents: (scope, runId) => map(send(scope, { method: "GET", path: `/workflow-runs/${segment(runId)}/events` }, EventsSchema), (body) => body.data),
+    getRun: (scope, runId) =>
+      map(send(scope, { method: "GET", path: `/workflow-runs/${segment(runId)}` }, RunSchema), (body) => body.data),
+    getRunEvents: (scope, runId) =>
+      map(
+        send(scope, { method: "GET", path: `/workflow-runs/${segment(runId)}/events` }, EventsSchema),
+        (body) => body.data,
+      ),
     cancelRun: (scope, runId) => send(scope, { method: "POST", path: `/workflow-runs/${segment(runId)}/cancel` }, null),
     startRun: (scope, input) =>
-      map(send(scope, { method: "POST", path: `/workflow-runs/start/${segment(input.workflowId)}`, body: { inputData: input.inputData } }, StartedSchema), (body) => body.data),
-    listSchedules: (scope) => map(send(scope, { method: "GET", path: "/tenant-schedules" }, ScheduleListSchema), (body) => body.data),
-    getSchedule: (scope, id) => map(send(scope, { method: "GET", path: `/tenant-schedules/${segment(id)}` }, ScheduleOneSchema), (body) => body.data),
-    createSchedule: (scope, input) => map(send(scope, { method: "POST", path: "/tenant-schedules", body: input }, ScheduleOneSchema), (body) => body.data),
-    updateSchedule: (scope, id, input) => map(send(scope, { method: "PATCH", path: `/tenant-schedules/${segment(id)}`, body: input }, ScheduleOneSchema), (body) => body.data),
-    actOnSchedule: (scope, id, action) => map(send(scope, { method: "POST", path: `/tenant-schedules/${segment(id)}/${action}` }, ScheduleActedSchema), (body) => body.data),
+      map(
+        send(
+          scope,
+          {
+            method: "POST",
+            path: `/workflow-runs/start/${segment(input.workflowId)}`,
+            body: { inputData: input.inputData },
+          },
+          StartedSchema,
+        ),
+        (body) => body.data,
+      ),
+    listSchedules: (scope) =>
+      map(send(scope, { method: "GET", path: "/tenant-schedules" }, ScheduleListSchema), (body) => body.data),
+    getSchedule: (scope, id) =>
+      map(
+        send(scope, { method: "GET", path: `/tenant-schedules/${segment(id)}` }, ScheduleOneSchema),
+        (body) => body.data,
+      ),
+    createSchedule: (scope, input) =>
+      map(
+        send(scope, { method: "POST", path: "/tenant-schedules", body: input }, ScheduleOneSchema),
+        (body) => body.data,
+      ),
+    updateSchedule: (scope, id, input) =>
+      map(
+        send(scope, { method: "PATCH", path: `/tenant-schedules/${segment(id)}`, body: input }, ScheduleOneSchema),
+        (body) => body.data,
+      ),
+    actOnSchedule: (scope, id, action) =>
+      map(
+        send(scope, { method: "POST", path: `/tenant-schedules/${segment(id)}/${action}` }, ScheduleActedSchema),
+        (body) => body.data,
+      ),
     deleteSchedule: (scope, id) => send(scope, { method: "DELETE", path: `/tenant-schedules/${segment(id)}` }, null),
-    previewSchedule: (scope, input) => map(send(scope, { method: "POST", path: "/tenant-schedules/preview", body: input }, SchedulePreviewBodySchema), (body) => body.data),
-    listAgentCatalog: (scope) => map(send(scope, { method: "GET", path: "/tenant-catalog/agents" }, AgentCatalogSchema), (body) => body.data),
-    listWorkflowCatalog: (scope) => map(send(scope, { method: "GET", path: "/tenant-catalog/workflows" }, WorkflowCatalogSchema), (body) => body.data),
-    getCustomAgentOptions: (scope) => map(send(scope, { method: "GET", path: "/tenant-catalog/agent-options" }, AgentOptionsSchema), (body) => body.data),
-    invalidateCustomAgents: (scope) => send(scope, { method: "POST", path: "/tenant-catalog/custom-agents/invalidate" }, null),
+    previewSchedule: (scope, input) =>
+      map(
+        send(scope, { method: "POST", path: "/tenant-schedules/preview", body: input }, SchedulePreviewBodySchema),
+        (body) => body.data,
+      ),
+    listAgentCatalog: (scope) =>
+      map(send(scope, { method: "GET", path: "/tenant-catalog/agents" }, AgentCatalogSchema), (body) => body.data),
+    listWorkflowCatalog: (scope) =>
+      map(
+        send(scope, { method: "GET", path: "/tenant-catalog/workflows" }, WorkflowCatalogSchema),
+        (body) => body.data,
+      ),
+    getCustomAgentOptions: (scope) =>
+      map(
+        send(scope, { method: "GET", path: "/tenant-catalog/agent-options" }, AgentOptionsSchema),
+        (body) => body.data,
+      ),
+    invalidateCustomAgents: (scope) =>
+      send(scope, { method: "POST", path: "/tenant-catalog/custom-agents/invalidate" }, null),
   };
 };

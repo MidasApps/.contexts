@@ -3,7 +3,13 @@ import { createLogRing, disableProcessLogBuffer, LOG_BUFFER_CAPACITY, readProces
 import type { LogRecord } from "./logger.ts";
 import { configureProcessLogger, createProcessLogger } from "./process-logger.ts";
 
-const record = (index: number): LogRecord => ({ timestamp: "2026-10-01T12:00:00.000Z", level: "info", message: `line_${String(index)}`, service: "web", env: "local" });
+const record = (index: number): LogRecord => ({
+  timestamp: "2026-10-01T12:00:00.000Z",
+  level: "info",
+  message: `line_${String(index)}`,
+  service: "web",
+  env: "local",
+});
 
 afterEach(() => {
   disableProcessLogBuffer();
@@ -27,7 +33,9 @@ describe("process log buffer", () => {
     const logger = createProcessLogger({ sink: (line) => void written.push(line) });
     configureProcessLogger({ service: "web", env: "local" });
     logger.info("order_placed", { requestId: "r1" });
-    expect(readProcessLogBuffer()?.map((line) => [line.message, line.service, line["requestId"]])).toEqual([["order_placed", "web", "r1"]]);
+    expect(readProcessLogBuffer()?.map((line) => [line.message, line.service, line["requestId"]])).toEqual([
+      ["order_placed", "web", "r1"],
+    ]);
     expect(written.map((line) => line.message)).toEqual(["order_placed"]);
   });
 

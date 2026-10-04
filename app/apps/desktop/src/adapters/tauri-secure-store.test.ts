@@ -32,7 +32,13 @@ describe("createTauriSecureStore", () => {
     await store.delete();
     await expect(store.get()).resolves.toBeNull();
 
-    expect(calls.map((call) => call.cmd)).toEqual(["secure_store_get", "secure_store_set", "secure_store_get", "secure_store_delete", "secure_store_get"]);
+    expect(calls.map((call) => call.cmd)).toEqual([
+      "secure_store_get",
+      "secure_store_set",
+      "secure_store_get",
+      "secure_store_delete",
+      "secure_store_get",
+    ]);
     expect(calls[1]?.args).toEqual({ secret: "record" });
   });
 
@@ -43,7 +49,11 @@ describe("createTauriSecureStore", () => {
   });
 
   it("maps every other rejection (invalid argument, missing permission, unknown) to SECURE_STORE_FAILED", async () => {
-    for (const reject of [{ code: "SECURE_STORE_INVALID_ARGUMENT" }, "secure_store_set not allowed by ACL", new Error("boom")]) {
+    for (const reject of [
+      { code: "SECURE_STORE_INVALID_ARGUMENT" },
+      "secure_store_set not allowed by ACL",
+      new Error("boom"),
+    ]) {
       const store = createTauriSecureStore(fakeInvoke({ reject }));
       const error: unknown = await store.set("record").catch((thrown: unknown) => thrown);
 

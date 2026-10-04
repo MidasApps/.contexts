@@ -6,7 +6,7 @@ import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
-import { diffLines, diffStats, type DiffLine } from "../lib/line-diff.ts";
+import { type DiffLine, diffLines, diffStats } from "../lib/line-diff.ts";
 
 export type PromptDiffProps = {
   /** Versions to choose from, newest first. */
@@ -24,7 +24,19 @@ export type PromptDiffProps = {
 const MARKS = { same: " ", added: "+", removed: "−" } as const;
 const ROW_TONES = { same: "", added: "bg-emerald/14", removed: "bg-destructive/14" } as const;
 
-function VersionPicker({ label, versions, value, onChange, activeId }: { label: string; versions: readonly PromptVersion[]; value: string | undefined; onChange: (id: string) => void; activeId: string | undefined }) {
+function VersionPicker({
+  label,
+  versions,
+  value,
+  onChange,
+  activeId,
+}: {
+  label: string;
+  versions: readonly PromptVersion[];
+  value: string | undefined;
+  onChange: (id: string) => void;
+  activeId: string | undefined;
+}) {
   const t = useTranslations("admin.prompts.diff");
   const id = useId();
   return (
@@ -37,7 +49,9 @@ function VersionPicker({ label, versions, value, onChange, activeId }: { label: 
         <SelectContent>
           {versions.map((version) => (
             <SelectItem key={version.id} value={version.id}>
-              {version.id === activeId ? t("versionActive", { version: version.version }) : t("version", { version: version.version })}
+              {version.id === activeId
+                ? t("versionActive", { version: version.version })
+                : t("version", { version: version.version })}
             </SelectItem>
           ))}
         </SelectContent>
@@ -72,13 +86,28 @@ export function PromptDiff({ versions, baseId, compareId, onBaseChange, onCompar
   const t = useTranslations("admin.prompts.diff");
   const base = versions.find((version) => version.id === baseId);
   const compare = versions.find((version) => version.id === compareId);
-  const lines = useMemo(() => (base === undefined || compare === undefined ? [] : diffLines(base.body, compare.body)), [base, compare]);
+  const lines = useMemo(
+    () => (base === undefined || compare === undefined ? [] : diffLines(base.body, compare.body)),
+    [base, compare],
+  );
   const stats = diffStats(lines);
   return (
     <div data-slot="prompt-diff" className="flex flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <VersionPicker label={t("base")} versions={versions} value={base?.id} onChange={onBaseChange} activeId={activeId} />
-        <VersionPicker label={t("compare")} versions={versions} value={compare?.id} onChange={onCompareChange} activeId={activeId} />
+        <VersionPicker
+          label={t("base")}
+          versions={versions}
+          value={base?.id}
+          onChange={onBaseChange}
+          activeId={activeId}
+        />
+        <VersionPicker
+          label={t("compare")}
+          versions={versions}
+          value={compare?.id}
+          onChange={onCompareChange}
+          activeId={activeId}
+        />
       </div>
       {base === undefined || compare === undefined ? (
         <p className="text-sm text-muted-foreground">{t("pickBoth")}</p>
@@ -92,8 +121,13 @@ export function PromptDiff({ versions, baseId, compareId, onBaseChange, onCompar
             {t("summary", { added: stats.added, removed: stats.removed })}
           </p>
           {/* A scrollable region must be reachable by keyboard (WCAG 2.1.1), hence the tab stop. */}
-          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
-          <div role="region" aria-label={t("regionLabel", { base: base.version, compare: compare.version })} tabIndex={0} className="max-h-96 overflow-auto rounded-lg border border-border bg-card py-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
+          <div
+            role="region"
+            aria-label={t("regionLabel", { base: base.version, compare: compare.version })}
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- see the comment above
+            tabIndex={0}
+            className="max-h-96 overflow-auto rounded-lg border border-border bg-card py-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          >
             <DiffRows lines={lines} />
           </div>
         </>

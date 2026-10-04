@@ -1,7 +1,7 @@
 "use client";
 
 import type { ContractDefinition } from "@core/contracts";
-import { createContext, use, useMemo, type ReactNode } from "react";
+import { createContext, type ReactNode, use, useMemo } from "react";
 import type { UiSubmission } from "#/entities/message/index.ts";
 import type { UiRegistry } from "./ui-registry.ts";
 
@@ -35,7 +35,15 @@ const defaultApprovalHref = (approvalId: string): string => `/approvals/${encode
 const GenerativeUiContext = createContext<GenerativeUiEnvironment | null>(null);
 
 /** Gives generative components their registry, the contracts they may render and the way to answer. */
-export function GenerativeUiProvider({ registry, contracts, submit, approvalHref, can, defaultCurrency, children }: GenerativeUiProviderProps) {
+export function GenerativeUiProvider({
+  registry,
+  contracts,
+  submit,
+  approvalHref,
+  can,
+  defaultCurrency,
+  children,
+}: GenerativeUiProviderProps) {
   const byId = useMemo(() => new Map(contracts.map((contract) => [contract.id, contract])), [contracts]);
   const environment: GenerativeUiEnvironment = {
     registry,

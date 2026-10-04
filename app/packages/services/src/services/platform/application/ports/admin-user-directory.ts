@@ -7,9 +7,15 @@ import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
  */
 export type AdminUserDirectory = {
   /** Users whose normalized name starts with `prefix`, by name then id. */
-  readonly searchByName: (args: { readonly prefix: string; readonly page: PageRequest }) => Promise<Page<AdminUserSummary>>;
+  readonly searchByName: (args: {
+    readonly prefix: string;
+    readonly page: PageRequest;
+  }) => Promise<Page<AdminUserSummary>>;
   /** Users whose email starts with `prefix` (lowercase), by email then id. */
-  readonly searchByEmail: (args: { readonly prefix: string; readonly page: PageRequest }) => Promise<Page<AdminUserSummary>>;
+  readonly searchByEmail: (args: {
+    readonly prefix: string;
+    readonly page: PageRequest;
+  }) => Promise<Page<AdminUserSummary>>;
   /** The users of these ids in one read, in the order given; unknown ids are absent. */
   readonly getMany: (ids: readonly string[]) => Promise<readonly AdminUserSummary[]>;
 };

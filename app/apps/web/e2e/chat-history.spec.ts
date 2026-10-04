@@ -10,9 +10,9 @@ import {
   history,
   messageLog,
   openChat,
+  SIGNED_OUT,
   seedTurns,
   send,
-  SIGNED_OUT,
   test,
 } from "./chat-test.ts";
 
@@ -22,13 +22,22 @@ import {
 
 test.use({ storageState: SIGNED_OUT });
 
-const row = (page: Parameters<typeof history>[0], title: string) => history(page).getByRole("listitem").filter({ has: page.getByRole("link", { name: title, exact: true }) });
+const row = (page: Parameters<typeof history>[0], title: string) =>
+  history(page)
+    .getByRole("listitem")
+    .filter({ has: page.getByRole("link", { name: title, exact: true }) });
 
 const openActions = async (page: Parameters<typeof history>[0], title: string) => {
-  await history(page).getByRole("button", { name: `Ações de ${title}` }).click();
+  await history(page)
+    .getByRole("button", { name: `Ações de ${title}` })
+    .click();
 };
 
-test("lists a new conversation under its generated title, and stops saying it is answering once it ends", async ({ page, world, signInFresh }) => {
+test("lists a new conversation under its generated title, and stops saying it is answering once it ends", async ({
+  page,
+  world,
+  signInFresh,
+}) => {
   await signInFresh();
   await openChat(page, world);
   await expect(history(page).locator('[data-slot="history-count"]')).toHaveText("Nenhuma conversa");
@@ -36,7 +45,10 @@ test("lists a new conversation under its generated title, and stops saying it is
   await expectAnswered(page);
   const conversationId = await conversationIdOf(page);
   const item = history(page).locator(`[data-conversation-id="${conversationId}"]`);
-  await expect(item.getByRole("link", { name: "Plan the onboarding of a new member" })).toHaveAttribute("aria-current", "page");
+  await expect(item.getByRole("link", { name: "Plan the onboarding of a new member" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
   await expect(item.getByText("Respondendo")).toHaveCount(0);
   await expect(history(page).locator('[data-slot="history-count"]')).toHaveText("1 conversa");
   await expectNoAxeViolations(page);
@@ -95,7 +107,11 @@ test("renames, pins, searches, archives, restores and deletes conversations", as
   await expect(history(page).locator('[data-slot="history-count"]')).toHaveText("1 conversa");
 });
 
-test("reopens a long conversation, loads earlier messages and keeps the reading position", async ({ page, world, signInFresh }) => {
+test("reopens a long conversation, loads earlier messages and keeps the reading position", async ({
+  page,
+  world,
+  signInFresh,
+}) => {
   test.setTimeout(240_000);
   const user = await signInFresh();
   // 26 turns = 52 messages: one more page than the 50 the thread loads first.
@@ -122,13 +138,24 @@ test("reopens a long conversation, loads earlier messages and keeps the reading 
   await expect(messageLog(page).getByRole("article")).toHaveCount(54);
 });
 
-test("says when the history cannot be read, with a reference and a way to try again", async ({ page, world, signInFresh, consoleGuard }) => {
+test("says when the history cannot be read, with a reference and a way to try again", async ({
+  page,
+  world,
+  signInFresh,
+  consoleGuard,
+}) => {
   consoleGuard.allow(FAILED_REQUEST);
   await signInFresh();
   let failing = true;
   await page.route(/\/v1\/conversations\?/, async (route) => {
     if (!failing) return route.continue();
-    return route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: { code: "UPSTREAM_UNAVAILABLE", message: "Unavailable.", requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" } }) });
+    return route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error: { code: "UPSTREAM_UNAVAILABLE", message: "Unavailable.", requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" },
+      }),
+    });
   });
   await page.goto(chatPath(world));
   await expect(history(page).getByText("01J8Z3K4M5N6P7Q8R9S0T1V2W3")).toBeVisible();

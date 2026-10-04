@@ -3,8 +3,8 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
-import { findByTypeahead, visibleNodes, type TreeNode } from "./tree-model.ts";
 import { TreeView } from "./TreeView.tsx";
+import { findByTypeahead, type TreeNode, visibleNodes } from "./tree-model.ts";
 
 const NODES: TreeNode[] = [
   {
@@ -39,7 +39,13 @@ const focused = (): string | null | undefined => document.activeElement?.textCon
 describe("tree-model", () => {
   it("lists visible nodes depth-first and finds by first letter", () => {
     const visible = visibleNodes(NODES, new Set(["north"]));
-    expect(visible.map((entry) => `${entry.node.id}@${entry.level}`)).toEqual(["north@1", "store-1@2", "store-2@2", "south@1", "hq@1"]);
+    expect(visible.map((entry) => `${entry.node.id}@${entry.level}`)).toEqual([
+      "north@1",
+      "store-1@2",
+      "store-2@2",
+      "south@1",
+      "hq@1",
+    ]);
     expect(findByTypeahead(visible, "north", "m", "pt-BR")).toBe("hq");
     expect(findByTypeahead(visible, "hq", "n", "pt-BR")).toBe("north");
   });

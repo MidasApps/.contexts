@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentProps } from "react";
+import { type ComponentProps, useState } from "react";
 import { useLocale } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { textControlClasses } from "#/shared/ui/atoms/Input/input-styles.ts";
@@ -21,7 +21,16 @@ export type IntegerInputProps = Omit<ComponentProps<"input">, "value" | "default
  * large caps read at a glance. Mono, tabular digits like `MoneyInput`. Messages belong to the
  * surrounding field.
  */
-export function IntegerInput({ value, onValueChange, onParseError, className, onBlur, onChange, "aria-invalid": ariaInvalid, ...props }: IntegerInputProps) {
+export function IntegerInput({
+  value,
+  onValueChange,
+  onParseError,
+  className,
+  onBlur,
+  onChange,
+  "aria-invalid": ariaInvalid,
+  ...props
+}: IntegerInputProps) {
   const locale = useLocale();
   const [text, setText] = useState(() => (value === null ? "" : formatIntegerInputText(value, locale)));
   const [parseFailed, setParseFailed] = useState(false);

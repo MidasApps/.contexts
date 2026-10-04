@@ -3,7 +3,13 @@
 import type { OrganizationAdminSummary } from "@core/contracts";
 import { useId, useMemo } from "react";
 import { useFormatter, useTranslations } from "use-intl";
-import { BUDGET_ALERT_RATIO, budgetUsage, BudgetUsagePill, useCollectedAdminOrganizations, type BudgetLevel } from "#/entities/admin-organization/index.ts";
+import {
+  BUDGET_ALERT_RATIO,
+  type BudgetLevel,
+  BudgetUsagePill,
+  budgetUsage,
+  useCollectedAdminOrganizations,
+} from "#/entities/admin-organization/index.ts";
 import { useAdminOverview } from "#/entities/admin-overview/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { useFormatMicroUsd } from "#/shared/lib/format/use-format-micro-usd.ts";
@@ -35,14 +41,23 @@ function AdjustLink({ organization }: { organization: OrganizationAdminSummary }
   const t = useTranslations("admin.costs");
   return (
     <Button variant="outline" size="sm" asChild>
-      <RouteLink to={{ id: "admin", rest: `organizations/${organization.id}` }} aria-label={t("adjustNamed", { name: organization.name })}>
+      <RouteLink
+        to={{ id: "admin", rest: `organizations/${organization.id}` }}
+        aria-label={t("adjustNamed", { name: organization.name })}
+      >
         {t("adjust")}
       </RouteLink>
     </Button>
   );
 }
 
-function Kpis({ organizations, totalCostMicroUsd }: { organizations: readonly OrganizationAdminSummary[]; totalCostMicroUsd: number }) {
+function Kpis({
+  organizations,
+  totalCostMicroUsd,
+}: {
+  organizations: readonly OrganizationAdminSummary[];
+  totalCostMicroUsd: number;
+}) {
   const t = useTranslations("admin.costs.kpi");
   const format = useFormatter();
   const formatCost = useFormatMicroUsd();
@@ -54,8 +69,16 @@ function Kpis({ organizations, totalCostMicroUsd }: { organizations: readonly Or
       </h2>
       <dl className="grid gap-3 sm:grid-cols-3">
         <KpiCard label={t("total")} value={formatCost(totalCostMicroUsd)} hint={t("totalHint")} />
-        <KpiCard label={t("alert", { threshold })} value={format.number(organizations.filter((organization) => levelOf(organization) !== "ok").length)} hint={t("alertHint")} />
-        <KpiCard label={t("over")} value={format.number(organizations.filter((organization) => levelOf(organization) === "over").length)} hint={t("overHint")} />
+        <KpiCard
+          label={t("alert", { threshold })}
+          value={format.number(organizations.filter((organization) => levelOf(organization) !== "ok").length)}
+          hint={t("alertHint")}
+        />
+        <KpiCard
+          label={t("over")}
+          value={format.number(organizations.filter((organization) => levelOf(organization) === "over").length)}
+          hint={t("overHint")}
+        />
       </dl>
     </section>
   );
@@ -72,18 +95,25 @@ function Attention({ organizations }: { organizations: readonly OrganizationAdmi
   const search = useAdminSearch(["level"]);
   const flagged = organizations
     .filter((organization) => levelOf(organization) !== "ok")
-    .sort((a, b) => (budgetUsage(b).ratio ?? Number.POSITIVE_INFINITY) - (budgetUsage(a).ratio ?? Number.POSITIVE_INFINITY));
+    .sort(
+      (a, b) => (budgetUsage(b).ratio ?? Number.POSITIVE_INFINITY) - (budgetUsage(a).ratio ?? Number.POSITIVE_INFINITY),
+    );
   const shown = flagged.slice(0, ATTENTION_ROWS);
   const showAll = (): void => {
     search.set({ level: "alert" });
     document.getElementById(BUDGETS_SECTION_ID)?.scrollIntoView?.({ block: "start" });
   };
   return (
-    <section aria-labelledby="costs-attention-title" className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4">
+    <section
+      aria-labelledby="costs-attention-title"
+      className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4"
+    >
       <h2 id="costs-attention-title" className="text-sm font-medium">
         {t("title")}
       </h2>
-      <p className="text-xs text-muted-foreground">{t("description", { threshold: format.number(BUDGET_ALERT_RATIO, { style: "percent" }) })}</p>
+      <p className="text-xs text-muted-foreground">
+        {t("description", { threshold: format.number(BUDGET_ALERT_RATIO, { style: "percent" }) })}
+      </p>
       {flagged.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("none")}</p>
       ) : (
@@ -93,7 +123,10 @@ function Attention({ organizations }: { organizations: readonly OrganizationAdmi
               <span className="flex min-w-0 flex-col">
                 <span className="truncate font-medium">{organization.name}</span>
                 <span className="font-mono text-caption text-muted-foreground tabular-nums">
-                  {t("costOfCap", { cost: formatCost(organization.costMtdMicroUsd), cap: formatCost(organization.budget.caps.monthlyMicroUsd) })}
+                  {t("costOfCap", {
+                    cost: formatCost(organization.costMtdMicroUsd),
+                    cap: formatCost(organization.budget.caps.monthlyMicroUsd),
+                  })}
                 </span>
               </span>
               <span className="flex items-center gap-2">
@@ -122,13 +155,44 @@ const useColumns = () => {
   const formatCost = useFormatMicroUsd();
   return useMemo(
     () => [
-      column.accessor("name", { header: () => t("costs.columns.organization"), cell: ({ getValue }) => <span className="font-medium">{getValue()}</span> }),
-      column.accessor("costMtdMicroUsd", { header: () => t("costs.columns.costMtd"), meta: { numeric: true }, cell: ({ getValue }) => formatCost(getValue()) }),
-      column.display({ id: "cap", header: () => t("costs.columns.cap"), meta: { numeric: true }, cell: ({ row }) => formatCost(row.original.budget.caps.monthlyMicroUsd) }),
-      column.display({ id: "tokens", header: () => t("costs.columns.tokensCap"), meta: { numeric: true }, cell: ({ row }) => format.number(row.original.budget.caps.monthlyTokens) }),
-      column.display({ id: "source", header: () => t("costs.columns.source"), cell: ({ row }) => t(`organizations.budgetSource.${row.original.budget.source}`) }),
-      column.display({ id: "usage", header: () => t("costs.columns.usage"), meta: { numeric: true }, cell: ({ row }) => <BudgetUsagePill organization={row.original} /> }),
-      column.display({ id: "actions", header: () => t("costs.columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <AdjustLink organization={row.original} /> }),
+      column.accessor("name", {
+        header: () => t("costs.columns.organization"),
+        cell: ({ getValue }) => <span className="font-medium">{getValue()}</span>,
+      }),
+      column.accessor("costMtdMicroUsd", {
+        header: () => t("costs.columns.costMtd"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => formatCost(getValue()),
+      }),
+      column.display({
+        id: "cap",
+        header: () => t("costs.columns.cap"),
+        meta: { numeric: true },
+        cell: ({ row }) => formatCost(row.original.budget.caps.monthlyMicroUsd),
+      }),
+      column.display({
+        id: "tokens",
+        header: () => t("costs.columns.tokensCap"),
+        meta: { numeric: true },
+        cell: ({ row }) => format.number(row.original.budget.caps.monthlyTokens),
+      }),
+      column.display({
+        id: "source",
+        header: () => t("costs.columns.source"),
+        cell: ({ row }) => t(`organizations.budgetSource.${row.original.budget.source}`),
+      }),
+      column.display({
+        id: "usage",
+        header: () => t("costs.columns.usage"),
+        meta: { numeric: true },
+        cell: ({ row }) => <BudgetUsagePill organization={row.original} />,
+      }),
+      column.display({
+        id: "actions",
+        header: () => t("costs.columns.actions"),
+        meta: { headerHidden: true },
+        cell: ({ row }) => <AdjustLink organization={row.original} />,
+      }),
     ],
     [format, formatCost, t],
   );
@@ -171,12 +235,19 @@ function Budgets({ organizations }: { organizations: readonly OrganizationAdminS
         columns={columns}
         data={rows}
         getRowId={(organization) => organization.id}
-        pagination={numberedPagination(search, { hasMore: filtered.length > search.page * PAGE_SIZE, pending: false }, t("pagination"))}
+        pagination={numberedPagination(
+          search,
+          { hasMore: filtered.length > search.page * PAGE_SIZE, pending: false },
+          t("pagination"),
+        )}
         renderCard={(organization) => (
           <div className="flex flex-col gap-2">
             <span className="font-medium">{organization.name}</span>
             <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              {t("attention.costOfCap", { cost: formatCost(organization.costMtdMicroUsd), cap: formatCost(organization.budget.caps.monthlyMicroUsd) })}
+              {t("attention.costOfCap", {
+                cost: formatCost(organization.costMtdMicroUsd),
+                cap: formatCost(organization.budget.caps.monthlyMicroUsd),
+              })}
               <BudgetUsagePill organization={organization} />
             </span>
             <span className="self-start">
@@ -215,7 +286,11 @@ function TruncatedNotice({ count }: { count: number }) {
   );
 }
 
-type CostsContentProps = { organizations: readonly OrganizationAdminSummary[]; truncated: boolean; overviewTotal: number | undefined };
+type CostsContentProps = {
+  organizations: readonly OrganizationAdminSummary[];
+  truncated: boolean;
+  overviewTotal: number | undefined;
+};
 
 function CostsContent({ organizations, truncated, overviewTotal }: CostsContentProps) {
   const t = useTranslations("admin.costs");
@@ -244,7 +319,12 @@ function CostsContent({ organizations, truncated, overviewTotal }: CostsContentP
       <CostCharts
         rowHeader={t("columns.organization")}
         totalCostMicroUsd={total}
-        rows={organizations.map((organization) => ({ id: organization.id, label: organization.name, costMicroUsd: organization.costMtdMicroUsd, capMicroUsd: organization.budget.caps.monthlyMicroUsd }))}
+        rows={organizations.map((organization) => ({
+          id: organization.id,
+          label: organization.name,
+          costMicroUsd: organization.costMtdMicroUsd,
+          capMicroUsd: organization.budget.caps.monthlyMicroUsd,
+        }))}
       />
       <UsageBreakdown />
       <Budgets organizations={organizations} />
@@ -267,7 +347,13 @@ export function AdminCostsView() {
   return (
     <AdminPageFrame permission="platform.usage.read" title={t("title")} description={t("description")}>
       <AdminQuerySection query={organizations} loadingLabel={t("loading")}>
-        {(data) => <CostsContent organizations={data.items} truncated={data.truncated} overviewTotal={overview.data?.costMtdMicroUsd} />}
+        {(data) => (
+          <CostsContent
+            organizations={data.items}
+            truncated={data.truncated}
+            overviewTotal={overview.data?.costMtdMicroUsd}
+          />
+        )}
       </AdminQuerySection>
     </AdminPageFrame>
   );

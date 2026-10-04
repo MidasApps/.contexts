@@ -1,5 +1,12 @@
 import { type Note, type NoteId, NoteIdSchema, NoteSchema, type TenantId } from "@core/contracts";
-import { CORE_SCHEMA_VERSION, CorruptDocumentError, type CursorPosition, type Page, pageFromOverfetch, type PageRequest } from "@core/services";
+import {
+  CORE_SCHEMA_VERSION,
+  CorruptDocumentError,
+  type CursorPosition,
+  type Page,
+  type PageRequest,
+  pageFromOverfetch,
+} from "@core/services";
 import { type DocumentData, FieldPath, type Firestore, Timestamp, type Transaction } from "firebase-admin/firestore";
 
 /** Top-level collection of the module's notes; Security Rules deny every client (`firestore.rules`). */
@@ -18,25 +25,37 @@ export type NoteRepository = {
 
 const positionOf = (note: Note): CursorPosition => [note.createdAt, note.id];
 
-const TIMESTAMP_FIELDS =["createdAt", "updatedAt", "archivedAt"] as const;
+const TIMESTAMP_FIELDS = ["createdAt", "updatedAt", "archivedAt"] as const;
 
 const toDocument = (note: Note): DocumentData => {
   const { id, ...fields } = note;
   void id;
-  const timestamps = Object.fromEntries(TIMESTAMP_FIELDS.flatMap((key) => (note[key] === undefined ? [] : [[key, Timestamp.fromDate(new Date(note[key]))]])));
+  const timestamps = Object.fromEntries(
+    TIMESTAMP_FIELDS.flatMap((key) =>
+      note[key] === undefined ? [] : [[key, Timestamp.fromDate(new Date(note[key]))]],
+    ),
+  );
   return { ...fields, ...timestamps, schemaVersion: CORE_SCHEMA_VERSION };
 };
 
 /** @throws {CorruptDocumentError} when the stored document does not match `example.Note`. */
-const fromSnapshot = (snapshot: { id: string; ref: { path: string }; data: () => DocumentData | undefined }): Note | null => {
+const fromSnapshot = (snapshot: {
+  id: string;
+  ref: { path: string };
+  data: () => DocumentData | undefined;
+}): Note | null => {
   const data = snapshot.data();
   if (data === undefined) return null;
   const { schemaVersion, ...fields } = data;
   void schemaVersion;
-  for (const key of TIMESTAMP_FIELDS) if (fields[key] instanceof Timestamp) fields[key] = fields[key].toDate().toISOString();
+  for (const key of TIMESTAMP_FIELDS)
+    if (fields[key] instanceof Timestamp) fields[key] = fields[key].toDate().toISOString();
   const parsed = NoteSchema.safeParse({ ...fields, id: snapshot.id });
   if (parsed.success) return parsed.data;
-  throw new CorruptDocumentError({ documentPath: snapshot.ref.path, issuePaths: [...new Set(parsed.error.issues.map((issue) => issue.path.map(String).join(".")))] });
+  throw new CorruptDocumentError({
+    documentPath: snapshot.ref.path,
+    issuePaths: [...new Set(parsed.error.issues.map((issue) => issue.path.map(String).join(".")))],
+  });
 };
 
 /**
@@ -53,8 +72,12 @@ export const createFirestoreNoteRepository = (deps: { firestore: Firestore }): N
       return note?.tenantId === tenantId ? note : null;
     },
     list: async ({ tenantId, page }) => {
-      let query = collection().where("tenantId", "==", tenantId).orderBy("createdAt", "desc").orderBy(FieldPath.documentId(), "desc");
-      if (page.after !== undefined) query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
+      let query = collection()
+        .where("tenantId", "==", tenantId)
+        .orderBy("createdAt", "desc")
+        .orderBy(FieldPath.documentId(), "desc");
+      if (page.after !== undefined)
+        query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
       const fetched = (await query.limit(page.limit + 1).get()).docs.flatMap((doc) => fromSnapshot(doc) ?? []);
       return pageFromOverfetch({ fetched, limit: page.limit, positionOf });
     },
@@ -83,8 +106,12 @@ export const createInMemoryNoteRepository = (): InMemoryNoteRepository => {
     // Same order and cursor as Firestore: `(createdAt, id)` descending, starting after `page.after`.
     list: ({ tenantId, page }) => {
       const { after } = page;
-      const own = [...notes.values()].filter((note) => note.tenantId === tenantId && (after === undefined || compareDescending(positionOf(note), after) > 0));
-      const fetched = own.sort((left, right) => compareDescending(positionOf(left), positionOf(right))).slice(0, page.limit + 1);
+      const own = [...notes.values()].filter(
+        (note) => note.tenantId === tenantId && (after === undefined || compareDescending(positionOf(note), after) > 0),
+      );
+      const fetched = own
+        .sort((left, right) => compareDescending(positionOf(left), positionOf(right)))
+        .slice(0, page.limit + 1);
       return Promise.resolve(pageFromOverfetch({ fetched, limit: page.limit, positionOf }));
     },
     create: (_tx, note) => void notes.set(note.id, note),

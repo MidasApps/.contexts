@@ -1,6 +1,6 @@
 "use client";
 
-import { updateAgentSettingsEndpoint, type AgentSettings, type UpdateAgentSettingsInput } from "@core/contracts";
+import { type AgentSettings, type UpdateAgentSettingsInput, updateAgentSettingsEndpoint } from "@core/contracts";
 import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { agentCatalogKeys } from "#/entities/agent-catalog/index.ts";
@@ -9,7 +9,11 @@ import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 
-export type AgentSettingsChange = { readonly patch: UpdateAgentSettingsInput; readonly next: AgentSettings; readonly done: string };
+export type AgentSettingsChange = {
+  readonly patch: UpdateAgentSettingsInput;
+  readonly next: AgentSettings;
+  readonly done: string;
+};
 export type AgentSettingsFailure = { readonly message: string; readonly requestId: string | undefined };
 
 const saveKey = (organizationId: string) => ["agent-settings-save", organizationId] as const;
@@ -31,7 +35,8 @@ export const useSaveTenantAgentSettings = (organizationId: string) => {
   const saving = useIsMutating({ mutationKey: saveKey(organizationId) }) > 0;
   const mutation = useMutation({
     mutationKey: saveKey(organizationId),
-    mutationFn: async (patch: UpdateAgentSettingsInput) => (await callEndpoint(updateAgentSettingsEndpoint, { query: { organizationId }, body: patch })).data,
+    mutationFn: async (patch: UpdateAgentSettingsInput) =>
+      (await callEndpoint(updateAgentSettingsEndpoint, { query: { organizationId }, body: patch })).data,
   });
 
   const save = async (current: AgentSettings, change: AgentSettingsChange): Promise<void> => {

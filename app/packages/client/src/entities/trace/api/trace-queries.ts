@@ -51,18 +51,26 @@ export const adminTracesQuery = (callEndpoint: CallEndpoint, filters: AdminTrace
 export const useAdminTraces = (filters: AdminTraceFilters, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...adminTracesQuery(callEndpoint, filters), placeholderData: keepPreviousData, enabled: signedIn && options.enabled !== false });
+  return useQuery({
+    ...adminTracesQuery(callEndpoint, filters),
+    placeholderData: keepPreviousData,
+    enabled: signedIn && options.enabled !== false,
+  });
 };
 
 /** `GET /v1/admin/traces/{traceId}` (staff): the trace with its spans. */
 export const adminTraceQuery = (callEndpoint: CallEndpoint, traceId: string) =>
   queryOptions({
     queryKey: traceKeys.detail(traceId),
-    queryFn: async ({ signal }): Promise<TraceDetail> => (await callEndpoint(adminGetTraceEndpoint, { params: { traceId }, signal })).data,
+    queryFn: async ({ signal }): Promise<TraceDetail> =>
+      (await callEndpoint(adminGetTraceEndpoint, { params: { traceId }, signal })).data,
   });
 
 export const useAdminTrace = (traceId: string, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...adminTraceQuery(callEndpoint, traceId), enabled: signedIn && traceId !== "" && options.enabled !== false });
+  return useQuery({
+    ...adminTraceQuery(callEndpoint, traceId),
+    enabled: signedIn && traceId !== "" && options.enabled !== false,
+  });
 };

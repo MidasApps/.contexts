@@ -43,7 +43,11 @@ export const createFirebaseSessionVertical = (args: {
   clock: Clock;
   logger: Logger;
   randomBytes: RandomBytes;
-  env: { readonly SESSION_MAX_AGE_DAYS?: number; readonly DESKTOP_SESSION_MAX_AGE_DAYS?: number; readonly NEXT_PUBLIC_APP_URL?: string };
+  env: {
+    readonly SESSION_MAX_AGE_DAYS?: number;
+    readonly DESKTOP_SESSION_MAX_AGE_DAYS?: number;
+    readonly NEXT_PUBLIC_APP_URL?: string;
+  };
 }): FirebaseSessionVertical => {
   const { firestore, auth } = args.firebase;
   const customTokens = createFirebaseCustomTokenIssuer({ auth });

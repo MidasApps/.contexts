@@ -17,7 +17,12 @@ export function FireTime({ iso, timezone }: { iso: string | null; timezone: stri
     <span className="flex flex-col">
       <span>{t("inZone", { when: inSchedule, zone: timezone })}</span>
       {viewerZone === timezone ? null : (
-        <span className="text-caption text-muted-foreground">{t("inYourZone", { when: formatDateTime(iso, { locale, timeZone: viewerZone, style: "datetime" }), zone: viewerZone })}</span>
+        <span className="text-caption text-muted-foreground">
+          {t("inYourZone", {
+            when: formatDateTime(iso, { locale, timeZone: viewerZone, style: "datetime" }),
+            zone: viewerZone,
+          })}
+        </span>
       )}
     </span>
   );

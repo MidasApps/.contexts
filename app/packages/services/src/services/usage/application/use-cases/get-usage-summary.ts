@@ -18,7 +18,9 @@ export type GetUsageSummaryInput = z.input<typeof GetUsageSummaryInputSchema>;
 
 export type GetUsageSummary = (
   input: GetUsageSummaryInput,
-) => Promise<{ readonly ok: true; readonly data: UsageSummary } | { readonly ok: false; readonly error: UsageValidationError }>;
+) => Promise<
+  { readonly ok: true; readonly data: UsageSummary } | { readonly ok: false; readonly error: UsageValidationError }
+>;
 
 /**
  * Month-to-date usage of a tenant against its caps, per model, day, agent and user (contract
@@ -28,14 +30,26 @@ export const makeGetUsageSummary =
   (deps: { readonly repository: UsageRepository; readonly clock: Clock }): GetUsageSummary =>
   async (input) => {
     const parsed = GetUsageSummaryInputSchema.safeParse(input);
-    if (!parsed.success) return { ok: false, error: { code: "VALIDATION_FAILED", details: validationDetailsOf(parsed.error.issues) } };
+    if (!parsed.success)
+      return { ok: false, error: { code: "VALIDATION_FAILED", details: validationDetailsOf(parsed.error.issues) } };
     const { tenantId } = parsed.data;
-    const monthStart = parsed.data.month === undefined ? utcMonthStart(deps.clock.now()) : monthStartOfKey(parsed.data.month);
+    const monthStart =
+      parsed.data.month === undefined ? utcMonthStart(deps.clock.now()) : monthStartOfKey(parsed.data.month);
     const [totals, byModel, breakdowns, stored] = await Promise.all([
       deps.repository.getMonthSpend({ tenantId, monthStart }),
       deps.repository.getMonthByModel({ tenantId, monthStart }),
       deps.repository.getMonthBreakdowns({ tenantId, monthStart }),
       deps.repository.getTenantBudget({ tenantId }),
     ]);
-    return { ok: true, data: UsageSummarySchema.parse({ tenantId, month: monthKeyOf(monthStart), totals, budget: resolveBudget(stored), byModel, ...breakdowns }) };
+    return {
+      ok: true,
+      data: UsageSummarySchema.parse({
+        tenantId,
+        month: monthKeyOf(monthStart),
+        totals,
+        budget: resolveBudget(stored),
+        byModel,
+        ...breakdowns,
+      }),
+    };
   };

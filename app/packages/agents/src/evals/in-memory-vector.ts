@@ -25,16 +25,20 @@ export class UnsupportedVectorFilterError extends Error {
   }
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 // Memory filters by `resource_id` / `thread_id` equality; anything richer fails loudly.
 const matches = (metadata: Record<string, unknown>, filter: VectorFilter | undefined): boolean => {
   if (filter === undefined || filter === null) return true;
   if (!isRecord(filter)) throw new UnsupportedVectorFilterError(filter);
   return Object.entries(filter).every(([key, expected]) => {
-    if (key === "$and" && Array.isArray(expected)) return expected.every((part) => matches(metadata, part as VectorFilter));
-    if (isRecord(expected) && Object.keys(expected).length === 1 && "$eq" in expected) return metadata[key] === expected.$eq;
-    if (isRecord(expected) || Array.isArray(expected) || key.startsWith("$")) throw new UnsupportedVectorFilterError(filter);
+    if (key === "$and" && Array.isArray(expected))
+      return expected.every((part) => matches(metadata, part as VectorFilter));
+    if (isRecord(expected) && Object.keys(expected).length === 1 && "$eq" in expected)
+      return metadata[key] === expected.$eq;
+    if (isRecord(expected) || Array.isArray(expected) || key.startsWith("$"))
+      throw new UnsupportedVectorFilterError(filter);
     return metadata[key] === expected;
   });
 };
@@ -76,7 +80,8 @@ export class InMemoryVector extends MastraVector {
   createIndex({ indexName, dimension }: CreateIndexParams): Promise<void> {
     return Promise.try(() => {
       const existing = this.indexes.get(indexName);
-      if (existing !== undefined && existing.dimension !== dimension) throw new Error(`vector index ${indexName} has dimension ${existing.dimension}, not ${dimension}`);
+      if (existing !== undefined && existing.dimension !== dimension)
+        throw new Error(`vector index ${indexName} has dimension ${existing.dimension}, not ${dimension}`);
       if (existing === undefined) this.indexes.set(indexName, { dimension, metric: "cosine", entries: new Map() });
     });
   }
@@ -101,7 +106,8 @@ export class InMemoryVector extends MastraVector {
   upsert({ indexName, vectors, metadata = [], ids, deleteFilter }: UpsertVectorParams): Promise<string[]> {
     return Promise.try(() => {
       const index = this.indexOf(indexName);
-      if (deleteFilter !== undefined) for (const [id, entry] of index.entries) if (matches(entry.metadata, deleteFilter)) index.entries.delete(id);
+      if (deleteFilter !== undefined)
+        for (const [id, entry] of index.entries) if (matches(entry.metadata, deleteFilter)) index.entries.delete(id);
       return vectors.map((vector, position) => {
         const id = ids?.[position] ?? randomUUID();
         index.entries.set(id, { vector: [...vector], metadata: { ...(metadata[position] ?? {}) } });
@@ -110,11 +116,22 @@ export class InMemoryVector extends MastraVector {
     });
   }
 
-  query({ indexName, queryVector, topK = 10, filter, includeVector = false }: QueryVectorParams): Promise<QueryResult[]> {
+  query({
+    indexName,
+    queryVector,
+    topK = 10,
+    filter,
+    includeVector = false,
+  }: QueryVectorParams): Promise<QueryResult[]> {
     return Promise.try(() =>
       [...this.indexOf(indexName).entries]
         .filter(([, entry]) => matches(entry.metadata, filter))
-        .map(([id, entry]) => ({ id, score: queryVector === undefined ? 0 : cosine(queryVector, entry.vector), metadata: entry.metadata, ...(includeVector ? { vector: entry.vector } : {}) }))
+        .map(([id, entry]) => ({
+          id,
+          score: queryVector === undefined ? 0 : cosine(queryVector, entry.vector),
+          metadata: entry.metadata,
+          ...(includeVector ? { vector: entry.vector } : {}),
+        }))
         .sort((a, b) => b.score - a.score)
         .slice(0, topK),
     );
@@ -123,7 +140,10 @@ export class InMemoryVector extends MastraVector {
   updateVector(params: UpdateVectorParams): Promise<void> {
     return Promise.try(() => {
       const index = this.indexOf(params.indexName);
-      const targets = params.id === undefined ? [...index.entries.values()].filter((entry) => matches(entry.metadata, params.filter)) : [index.entries.get(params.id)];
+      const targets =
+        params.id === undefined
+          ? [...index.entries.values()].filter((entry) => matches(entry.metadata, params.filter))
+          : [index.entries.get(params.id)];
       for (const entry of targets) {
         if (entry === undefined) continue;
         if (params.update.vector !== undefined) entry.vector = [...params.update.vector];
@@ -142,7 +162,8 @@ export class InMemoryVector extends MastraVector {
     return Promise.try(() => {
       const index = this.indexOf(params.indexName);
       if (params.ids !== undefined) for (const id of params.ids) index.entries.delete(id);
-      if (params.filter !== undefined) for (const [id, entry] of index.entries) if (matches(entry.metadata, params.filter)) index.entries.delete(id);
+      if (params.filter !== undefined)
+        for (const [id, entry] of index.entries) if (matches(entry.metadata, params.filter)) index.entries.delete(id);
     });
   }
 }

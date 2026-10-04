@@ -29,13 +29,21 @@ export type VoiceEnv = {
 // Agent instructions may be a string, a system message or a list of them.
 const textOf = (instructions: unknown): string => {
   if (typeof instructions === "string") return instructions;
-  if (Array.isArray(instructions)) return (instructions as unknown[]).map(textOf).filter((text) => text !== "").join("\n");
+  if (Array.isArray(instructions))
+    return (instructions as unknown[])
+      .map(textOf)
+      .filter((text) => text !== "")
+      .join("\n");
   if (typeof instructions !== "object" || instructions === null || !("content" in instructions)) return "";
   return typeof instructions.content === "string" ? instructions.content : "";
 };
 
 /** A minter only in real mode with an OpenAI realtime model and key; each call also needs both voice flags. */
-const realtimeMinterOf = (args: { env: VoiceEnv; models: AgentModels; supervisor: Agent | undefined }): RealtimeMinter | undefined => {
+const realtimeMinterOf = (args: {
+  env: VoiceEnv;
+  models: AgentModels;
+  supervisor: Agent | undefined;
+}): RealtimeMinter | undefined => {
   const { env } = args;
   if (env.AI_MODEL_REALTIME === undefined) return undefined;
   const { provider, model } = parseModelId(env.AI_MODEL_REALTIME);
@@ -45,7 +53,8 @@ const realtimeMinterOf = (args: { env: VoiceEnv; models: AgentModels; supervisor
   return createOpenAiRealtimeMinter({
     apiKey: env.OPENAI_API_KEY,
     model,
-    instructions: async (requestContext: RequestContext<unknown> | undefined) => textOf(await supervisor.getInstructions(requestContext === undefined ? {} : { requestContext })),
+    instructions: async (requestContext: RequestContext<unknown> | undefined) =>
+      textOf(await supervisor.getInstructions(requestContext === undefined ? {} : { requestContext })),
   });
 };
 
@@ -64,8 +73,25 @@ export const composeVoice = (args: {
   const voice = createVoice({ models: args.models });
   // Per tenant, cached 30 s; a store failure with nothing cached keeps voice off (fail closed).
   const isEnabled: Parameters<typeof createVoiceGovernance>[0]["isEnabled"] = ({ tenantId, feature }) =>
-    args.flags.isEnabled({ key: feature === "voice" ? CORE_FLAG_KEYS.voice : CORE_FLAG_KEYS.voiceRealtime, tenantId, fallback: false });
-  const governance = createVoiceGovernance({ isEnabled, usage: args.ports.usage, audit: args.ports.audit, logger: args.logger });
+    args.flags.isEnabled({
+      key: feature === "voice" ? CORE_FLAG_KEYS.voice : CORE_FLAG_KEYS.voiceRealtime,
+      tenantId,
+      fallback: false,
+    });
+  const governance = createVoiceGovernance({
+    isEnabled,
+    usage: args.ports.usage,
+    audit: args.ports.audit,
+    logger: args.logger,
+  });
   const realtime = realtimeMinterOf({ env: args.env, models: args.models, supervisor: args.supervisor });
-  return { voice, routes: createVoiceRoutes({ voice, logger: args.logger, governance, ...(realtime === undefined ? {} : { realtime }) }) };
+  return {
+    voice,
+    routes: createVoiceRoutes({
+      voice,
+      logger: args.logger,
+      governance,
+      ...(realtime === undefined ? {} : { realtime }),
+    }),
+  };
 };

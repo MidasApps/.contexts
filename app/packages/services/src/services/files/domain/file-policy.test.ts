@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { checkUpload, contentMatchesDeclared, dispositionOf, parseStoragePath, resolveUploadRule } from "./file-policy.ts";
+import {
+  checkUpload,
+  contentMatchesDeclared,
+  dispositionOf,
+  parseStoragePath,
+  resolveUploadRule,
+} from "./file-policy.ts";
 
 const MIB = 1024 * 1024;
 
@@ -14,7 +20,11 @@ describe("upload policy", () => {
     ["knowledge", "text/csv", 25 * MIB],
   ] as const)("%s accepts %s up to %d bytes", (purpose, contentType, maxBytes) => {
     expect(checkUpload({ purpose, contentType, sizeBytes: maxBytes })).toMatchObject({ ok: true, rule: { maxBytes } });
-    expect(checkUpload({ purpose, contentType, sizeBytes: maxBytes + 1 })).toEqual({ ok: false, reason: "TOO_LARGE", field: "sizeBytes" });
+    expect(checkUpload({ purpose, contentType, sizeBytes: maxBytes + 1 })).toEqual({
+      ok: false,
+      reason: "TOO_LARGE",
+      field: "sizeBytes",
+    });
   });
 
   it.each([
@@ -24,11 +34,18 @@ describe("upload policy", () => {
     ["chat-attachment", "image/svg+xml"],
     ["chat-attachment", "application/zip"],
   ] as const)("%s refuses %s", (purpose, contentType) => {
-    expect(checkUpload({ purpose, contentType, sizeBytes: 1 })).toEqual({ ok: false, reason: "TYPE_NOT_ALLOWED", field: "contentType" });
+    expect(checkUpload({ purpose, contentType, sizeBytes: 1 })).toEqual({
+      ok: false,
+      reason: "TYPE_NOT_ALLOWED",
+      field: "contentType",
+    });
   });
 
   it("normalizes parameters and case of the declared type", () => {
-    expect(resolveUploadRule("knowledge", "Text/Markdown; charset=utf-8")).toMatchObject({ contentType: "text/markdown", category: "document" });
+    expect(resolveUploadRule("knowledge", "Text/Markdown; charset=utf-8")).toMatchObject({
+      contentType: "text/markdown",
+      category: "document",
+    });
   });
 });
 
@@ -45,9 +62,23 @@ describe("contentMatchesDeclared", () => {
   it("requires UTF-8 without NUL bytes for text types, tolerating a character cut at the end", () => {
     const text = new TextEncoder().encode("olá mundo");
     expect(contentMatchesDeclared({ declared: "text/plain", detected: undefined, sample: text })).toBe(true);
-    expect(contentMatchesDeclared({ declared: "text/plain", detected: undefined, sample: text.slice(0, 3) })).toBe(true);
-    expect(contentMatchesDeclared({ declared: "text/csv", detected: undefined, sample: Uint8Array.from([0x61, 0x00, 0x62]) })).toBe(false);
-    expect(contentMatchesDeclared({ declared: "application/json", detected: undefined, sample: Uint8Array.from([0xff, 0xfe, 0x41]) })).toBe(false);
+    expect(contentMatchesDeclared({ declared: "text/plain", detected: undefined, sample: text.slice(0, 3) })).toBe(
+      true,
+    );
+    expect(
+      contentMatchesDeclared({
+        declared: "text/csv",
+        detected: undefined,
+        sample: Uint8Array.from([0x61, 0x00, 0x62]),
+      }),
+    ).toBe(false);
+    expect(
+      contentMatchesDeclared({
+        declared: "application/json",
+        detected: undefined,
+        sample: Uint8Array.from([0xff, 0xfe, 0x41]),
+      }),
+    ).toBe(false);
     expect(contentMatchesDeclared({ declared: "text/plain", detected: "application/pdf", sample: text })).toBe(false);
   });
 });

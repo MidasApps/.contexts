@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, ok } from "#/shared/testing/fake-api.ts";
 import { buildMe } from "#/shared/testing/fixtures.ts";
 import { ProfileNotificationsView } from "./ProfileNotificationsView.tsx";
 
@@ -20,7 +20,9 @@ describe("ProfileNotificationsView", () => {
     const { user, container } = renderView({
       "PATCH /v1/me": (request: FakeRequest) => {
         bodies.push(request.body);
-        return ok(buildMe({ preferences: { theme: "system", notifications: { productUpdates: true, securityAlerts: true } } }));
+        return ok(
+          buildMe({ preferences: { theme: "system", notifications: { productUpdates: true, securityAlerts: true } } }),
+        );
       },
     });
     const product = await screen.findByRole("switch", { name: "Novidades do produto" });
@@ -41,7 +43,17 @@ describe("ProfileNotificationsView", () => {
     const { user } = renderView({
       "PATCH /v1/me": () => {
         calls += 1;
-        return new Promise((resolve) => (finish = () => resolve(ok(buildMe({ preferences: { theme: "system", notifications: { productUpdates: true, securityAlerts: true } } })))));
+        return new Promise(
+          (resolve) =>
+            (finish = () =>
+              resolve(
+                ok(
+                  buildMe({
+                    preferences: { theme: "system", notifications: { productUpdates: true, securityAlerts: true } },
+                  }),
+                ),
+              )),
+        );
       },
     });
     const product = await screen.findByRole("switch", { name: "Novidades do produto" });
@@ -67,6 +79,8 @@ describe("ProfileNotificationsView", () => {
     const { auth } = renderView();
     auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
     expect(await screen.findByText(/Modo suporte: este perfil é somente leitura/u)).toBeDefined();
-    await waitFor(() => expect(screen.getByRole("switch", { name: "Novidades do produto" }).matches(":disabled")).toBe(true));
+    await waitFor(() =>
+      expect(screen.getByRole("switch", { name: "Novidades do produto" }).matches(":disabled")).toBe(true),
+    );
   });
 });

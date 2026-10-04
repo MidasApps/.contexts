@@ -38,9 +38,17 @@ type Preferences = Pick<UserPreferences, "locale" | "timeZone" | "currency">;
 
 /** Regional settings of a user at a loaded node (SP1 spec §4). Pure. */
 export const regionalSettingsAt = (details: NodeDetails, preferences?: Preferences): RegionalSettings =>
-  resolveRegionalSettings({ organization: details.organization, project: details.project, units: details.units, user: preferences });
+  resolveRegionalSettings({
+    organization: details.organization,
+    project: details.project,
+    units: details.units,
+    user: preferences,
+  });
 
-export type ResolveNodeRegionalSettings = (args: { node: TenantNodeRef; preferences?: Preferences | undefined }) => Promise<RegionalSettings | null>;
+export type ResolveNodeRegionalSettings = (args: {
+  node: TenantNodeRef;
+  preferences?: Preferences | undefined;
+}) => Promise<RegionalSettings | null>;
 
 /**
  * Loads the node chain (organization, project, unit ancestors, unit) and resolves the
@@ -48,11 +56,12 @@ export type ResolveNodeRegionalSettings = (args: { node: TenantNodeRef; preferen
  * (`resolveAccessContext`, SP1 Task 12).
  * @returns null when a node of the chain is missing or deleted.
  */
-export const makeResolveNodeRegionalSettings =
-  (deps: Pick<TenancyDeps, "organizations" | "projects" | "units">): ResolveNodeRegionalSettings => {
-    const loadNode = makeLoadNode(deps);
-    return async ({ node, preferences }) => {
-      const details = await loadNode(node);
-      return details === null ? null : regionalSettingsAt(details, preferences);
-    };
+export const makeResolveNodeRegionalSettings = (
+  deps: Pick<TenancyDeps, "organizations" | "projects" | "units">,
+): ResolveNodeRegionalSettings => {
+  const loadNode = makeLoadNode(deps);
+  return async ({ node, preferences }) => {
+    const details = await loadNode(node);
+    return details === null ? null : regionalSettingsAt(details, preferences);
   };
+};

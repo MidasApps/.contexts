@@ -6,7 +6,10 @@ const VALID_ULID = "01K6BZ3YQ8X4M7N2P5R9T0V1W2";
 
 const makeHandler = () => {
   const records: LogRecord[] = [];
-  const logger = createLogger({ context: { service: "functions", env: "local" }, sink: (record) => records.push(record) });
+  const logger = createLogger({
+    context: { service: "functions", env: "local" },
+    sink: (record) => records.push(record),
+  });
   return { healthz: makeHealthzHandler({ logger }), records };
 };
 

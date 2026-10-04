@@ -21,7 +21,10 @@ const toDataset = (record: DatasetRecord): EvalDataset | null => {
 
 /** Datasets of a tenant (its own only) or all of them (`null`, staff). */
 export const listDatasets = async (datasets: Datasets, tenantId: string | null): Promise<EvalDataset[]> => {
-  const listed = await datasets.list({ perPage: 100, ...(tenantId === null ? {} : { filters: { organizationId: tenantId } }) });
+  const listed = await datasets.list({
+    perPage: 100,
+    ...(tenantId === null ? {} : { filters: { organizationId: tenantId } }),
+  });
   return listed.datasets
     .filter((record) => tenantId === null || record.organizationId === tenantId)
     .map(toDataset)
@@ -30,11 +33,17 @@ export const listDatasets = async (datasets: Datasets, tenantId: string | null):
 
 /** The tenant's `feedback` dataset, created on first use (target: the assistant). */
 export const feedbackDatasetOf = async (datasets: Datasets, tenantId: string) => {
-  const found = (await datasets.list({ perPage: 1, filters: { organizationId: tenantId, name: FEEDBACK_DATASET_NAME } })).datasets.find(
-    (record) => record.organizationId === tenantId && record.name === FEEDBACK_DATASET_NAME,
-  );
+  const found = (
+    await datasets.list({ perPage: 1, filters: { organizationId: tenantId, name: FEEDBACK_DATASET_NAME } })
+  ).datasets.find((record) => record.organizationId === tenantId && record.name === FEEDBACK_DATASET_NAME);
   if (found !== undefined) return datasets.get({ id: found.id, organizationId: tenantId });
-  return datasets.create({ name: FEEDBACK_DATASET_NAME, description: "Rated assistant turns (production to dataset).", organizationId: tenantId, targetType: "agent", targetIds: ["assistant"] });
+  return datasets.create({
+    name: FEEDBACK_DATASET_NAME,
+    description: "Rated assistant turns (production to dataset).",
+    organizationId: tenantId,
+    targetType: "agent",
+    targetIds: ["assistant"],
+  });
 };
 
 /**
@@ -43,7 +52,14 @@ export const feedbackDatasetOf = async (datasets: Datasets, tenantId: string) =>
  */
 export const addFeedbackItem = async (
   datasets: Datasets,
-  input: { readonly tenantId: string; readonly feedbackKey: string; readonly conversationId: string; readonly messageId: string; readonly rating: "up" | "down"; readonly comment: string | null },
+  input: {
+    readonly tenantId: string;
+    readonly feedbackKey: string;
+    readonly conversationId: string;
+    readonly messageId: string;
+    readonly rating: "up" | "down";
+    readonly comment: string | null;
+  },
 ): Promise<{ readonly datasetId: string; readonly itemId: string }> => {
   const dataset = await feedbackDatasetOf(datasets, input.tenantId);
   const item = await dataset.addItem({
@@ -57,7 +73,8 @@ export const addFeedbackItem = async (
 type DatasetItemRecord = Awaited<ReturnType<Awaited<ReturnType<Datasets["get"]>>["addItem"]>>;
 
 // Mastra keeps input and ground truth as free JSON; the view shows text (JSON for anything else).
-const textOf = (value: unknown): string | null => (value === undefined || value === null ? null : typeof value === "string" ? value : JSON.stringify(value));
+const textOf = (value: unknown): string | null =>
+  value === undefined || value === null ? null : typeof value === "string" ? value : JSON.stringify(value);
 
 const toItem = (record: DatasetItemRecord): EvalDatasetItem => ({
   id: record.id,
@@ -94,17 +111,29 @@ export const listDatasetItems = async (
 /** Adds a manual item (input and optional expected answer), or `null` (not the tenant's dataset). */
 export const addDatasetItem = async (
   datasets: Datasets,
-  input: { readonly tenantId: string; readonly datasetId: string; readonly input: string; readonly expectedOutput?: string | undefined },
+  input: {
+    readonly tenantId: string;
+    readonly datasetId: string;
+    readonly input: string;
+    readonly expectedOutput?: string | undefined;
+  },
 ): Promise<EvalDatasetItem | null> => {
   const dataset = await tenantDatasetOf(datasets, input.tenantId, input.datasetId);
   if (dataset === null) return null;
   // A string input is what an agent target receives as its message (like the platform eval cases).
-  const item = await dataset.addItem({ input: input.input, ...(input.expectedOutput === undefined ? {} : { groundTruth: input.expectedOutput }), metadata: { origin: "manual" } });
+  const item = await dataset.addItem({
+    input: input.input,
+    ...(input.expectedOutput === undefined ? {} : { groundTruth: input.expectedOutput }),
+    metadata: { origin: "manual" },
+  });
   return toItem(item);
 };
 
 /** Deletes an item of the tenant's dataset; `false` when the dataset or the item is not there. */
-export const deleteDatasetItem = async (datasets: Datasets, input: { readonly tenantId: string; readonly datasetId: string; readonly itemId: string }): Promise<boolean> => {
+export const deleteDatasetItem = async (
+  datasets: Datasets,
+  input: { readonly tenantId: string; readonly datasetId: string; readonly itemId: string },
+): Promise<boolean> => {
   const dataset = await tenantDatasetOf(datasets, input.tenantId, input.datasetId);
   if (dataset === null) return false;
   const item = await dataset.getItem({ itemId: input.itemId });
@@ -123,7 +152,12 @@ export const createTenantDataset = async (
 ): Promise<{ readonly ok: true; readonly data: EvalDataset } | { readonly ok: false; readonly code: "CONFLICT" }> => {
   const taken = (await listDatasets(datasets, input.tenantId)).some((dataset) => dataset.name === input.name);
   if (taken) return { ok: false, code: "CONFLICT" };
-  const created = await datasets.create({ name: input.name, organizationId: input.tenantId, targetType: "agent", targetIds: ["assistant"] });
+  const created = await datasets.create({
+    name: input.name,
+    organizationId: input.tenantId,
+    targetType: "agent",
+    targetIds: ["assistant"],
+  });
   const dataset = toDataset(await created.getDetails());
   if (dataset === null) throw new Error("created dataset does not match the contract");
   return { ok: true, data: dataset };

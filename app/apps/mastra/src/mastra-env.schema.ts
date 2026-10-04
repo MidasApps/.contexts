@@ -7,11 +7,17 @@ const MAX_SERVER_TIMEOUT_MS = 3_600_000;
 /** 15 min: well past Mastra's 180 s default, short enough to reap stuck streams. */
 const DEFAULT_SERVER_TIMEOUT_MS = 900_000;
 /** Local dev clients: web (`next dev`), desktop (Vite dev server, Tauri webview). */
-const DEFAULT_LOCAL_CORS_ORIGINS = "http://localhost:3000,http://localhost:1420,tauri://localhost,http://tauri.localhost";
+const DEFAULT_LOCAL_CORS_ORIGINS =
+  "http://localhost:3000,http://localhost:1420,tauri://localhost,http://tauri.localhost";
 
 const OriginListSchema = z
   .string()
-  .transform((value) => value.split(",").map((origin) => origin.trim()).filter(Boolean))
+  .transform((value) =>
+    value
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  )
   .pipe(z.array(z.url()));
 
 /** Variables only the Mastra server reads, on top of the services env. */
@@ -34,7 +40,10 @@ export const MastraOnlyEnvSchema = z.object({
   MASTRA_CORS_ORIGINS: OriginListSchema.prefault(DEFAULT_LOCAL_CORS_ORIGINS),
   // Cloud Storage bucket of uploads read by knowledge ingestion (SP3 files context);
   // local defaults to the emulator's default bucket, required outside local.
-  FILES_BUCKET: z.string().regex(/^[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]$/, { error: "expected a bucket name" }).optional(),
+  FILES_BUCKET: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]$/, { error: "expected a bucket name" })
+    .optional(),
 });
 
 /** Mastra server variables plus the agent runtime env (spec §15, decision 0021). */

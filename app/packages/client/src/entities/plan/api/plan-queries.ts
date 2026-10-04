@@ -11,7 +11,10 @@ export const planKeys = { all: (): QueryKey => ["admin", "plans"] };
 
 /** `GET /v1/admin/plans` (staff, platform.plan.manage): the whole catalog, it is short. */
 export const plansQuery = (callEndpoint: CallEndpoint) =>
-  queryOptions({ queryKey: planKeys.all(), queryFn: async ({ signal }): Promise<Plan[]> => (await callEndpoint(listPlansEndpoint, { signal })).data });
+  queryOptions({
+    queryKey: planKeys.all(),
+    queryFn: async ({ signal }): Promise<Plan[]> => (await callEndpoint(listPlansEndpoint, { signal })).data,
+  });
 
 export const usePlans = (options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();

@@ -1,4 +1,4 @@
-import { AuditLogEntryIdSchema, type AuditLogEntry, type PlatformAuditLogEntry } from "@core/contracts";
+import { type AuditLogEntry, AuditLogEntryIdSchema, type PlatformAuditLogEntry } from "@core/contracts";
 import type { AuditLogWriter, AuditTransaction } from "../../application/ports/driven/audit-log-writer.ts";
 
 export type InMemoryAuditLogWriter = AuditLogWriter & {
@@ -16,7 +16,8 @@ export const createInMemoryAuditLogWriter = (): InMemoryAuditLogWriter => {
   const platform: PlatformAuditLogEntry[] = [];
   const transactions: AuditTransaction[] = [];
   let sequence = 0;
-  const entries = ((log: "tenant" | "platform") => (log === "tenant" ? [...tenant] : [...platform])) as InMemoryAuditLogWriter["entries"];
+  const entries = ((log: "tenant" | "platform") =>
+    log === "tenant" ? [...tenant] : [...platform]) as InMemoryAuditLogWriter["entries"];
   return {
     append: (record, tx) => {
       sequence += 1;

@@ -1,5 +1,18 @@
-import { IsoDateTimeSchema, MembershipIdSchema, MembershipSchema, type Membership, type RoleRef } from "@core/contracts";
-import { FieldPath, Timestamp, type DocumentData, type Firestore, type Query, type Transaction } from "firebase-admin/firestore";
+import {
+  IsoDateTimeSchema,
+  type Membership,
+  MembershipIdSchema,
+  MembershipSchema,
+  type RoleRef,
+} from "@core/contracts";
+import {
+  type DocumentData,
+  FieldPath,
+  type Firestore,
+  type Query,
+  Timestamp,
+  type Transaction,
+} from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
@@ -69,27 +82,46 @@ export const createFirestoreMembershipRepository = (deps: { firestore: Firestore
       readAll(tx, live().where("tenantId", "==", tenantId).where("principalId", "==", principalId)),
     listOfPrincipals: async ({ tenantId, principalIds }) => {
       const chunks = chunksOf([...new Set(principalIds)], IN_FILTER_LIMIT);
-      const snapshots = await Promise.all(chunks.map((ids) => live().where("tenantId", "==", tenantId).where("principalId", "in", ids).get()));
+      const snapshots = await Promise.all(
+        chunks.map((ids) => live().where("tenantId", "==", tenantId).where("principalId", "in", ids).get()),
+      );
       return snapshots.flatMap((snapshot) => snapshot.docs.flatMap((doc) => liveOnly(doc.data()) ?? []));
     },
     list: async ({ tenantId, principalId, page }) => {
       let query = live().where("tenantId", "==", tenantId);
       if (principalId !== undefined) query = query.where("principalId", "==", principalId);
       query = query.orderBy("createdAt").orderBy(FieldPath.documentId());
-      if (page.after !== undefined) query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
+      if (page.after !== undefined)
+        query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
       const fetched = (await query.limit(page.limit + 1).get()).docs.flatMap((doc) => liveOnly(doc.data()) ?? []);
-      return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (membership) => [membership.createdAt, membership.id] });
+      return pageFromOverfetch({
+        fetched,
+        limit: page.limit,
+        positionOf: (membership) => [membership.createdAt, membership.id],
+      });
     },
     listOrganizationOwners: async (tx, tenantId) => {
-      const query = live().where("tenantId", "==", tenantId).where("nodeId", "==", tenantId).where("principalType", "==", "user");
+      const query = live()
+        .where("tenantId", "==", tenantId)
+        .where("nodeId", "==", tenantId)
+        .where("principalType", "==", "user");
       return (await readAll(tx, query)).filter((membership) => holdsOwner(membership.roles));
     },
     isRoleInUse: async (tx, { tenantId, roleId }) =>
-      !(await tx.get(live().where("tenantId", "==", tenantId).where("customRoleIds", "array-contains", roleId).limit(1))).empty,
-    create: (tx, { membership, actorId }) => void tx.create(raw().doc(membership.id), membershipDocument(membership, actorId)),
+      !(
+        await tx.get(live().where("tenantId", "==", tenantId).where("customRoleIds", "array-contains", roleId).limit(1))
+      ).empty,
+    create: (tx, { membership, actorId }) =>
+      void tx.create(raw().doc(membership.id), membershipDocument(membership, actorId)),
     updateRoles: (tx, { id, roles, updatedAt, actorId }) =>
-      void tx.update(raw().doc(id), toFirestoreUpdate(stored, { ...rolesUpdate(roles), updatedAt, updatedBy: actorId })),
+      void tx.update(
+        raw().doc(id),
+        toFirestoreUpdate(stored, { ...rolesUpdate(roles), updatedAt, updatedBy: actorId }),
+      ),
     softDelete: (tx, { id, deletedAt, actorId }) =>
-      void tx.update(raw().doc(id), toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId })),
+      void tx.update(
+        raw().doc(id),
+        toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId }),
+      ),
   };
 };

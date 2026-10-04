@@ -13,7 +13,10 @@ import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog
 
 /** A schedule action that needs a confirmation first. */
 export type ScheduleAction = "pause" | "run" | "delete";
-export type ScheduleActionTarget = { readonly action: ScheduleAction; readonly schedule: Pick<Schedule, "id" | "workflowId"> };
+export type ScheduleActionTarget = {
+  readonly action: ScheduleAction;
+  readonly schedule: Pick<Schedule, "id" | "workflowId">;
+};
 
 export type ScheduleActionDialogProps = {
   organizationId: string;
@@ -50,7 +53,9 @@ export function ScheduleActionDialog({ organizationId, target, onOpenChange }: S
       else await callEndpoint(deleteScheduleEndpoint, request);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: tenantScheduleKeys.all(organizationId) }),
-        ...(target.action === "run" ? [queryClient.invalidateQueries({ queryKey: tenantWorkflowRunKeys.all(organizationId) })] : []),
+        ...(target.action === "run"
+          ? [queryClient.invalidateQueries({ queryKey: tenantWorkflowRunKeys.all(organizationId) })]
+          : []),
       ]);
     },
     () => notify.success(t(copy.done, { workflow })),

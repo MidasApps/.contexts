@@ -34,7 +34,13 @@ export const WorkflowEventContract = defineContract(WorkflowEventSchema, {
   description: "A progress event of a workflow run, streamed as server-sent events.",
   examples: [
     { index: 0, type: "workflow-start", stepId: null, status: "running", occurredAt: "2026-09-30T12:00:00.000Z" },
-    { index: 3, type: "workflow-step-suspended", stepId: "request-human-approval", status: "suspended", occurredAt: "2026-09-30T12:00:01.000Z" },
+    {
+      index: 3,
+      type: "workflow-step-suspended",
+      stepId: "request-human-approval",
+      status: "suspended",
+      occurredAt: "2026-09-30T12:00:01.000Z",
+    },
   ],
   pii: "personal",
   tenancyScope: "organization",

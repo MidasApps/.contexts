@@ -1,11 +1,11 @@
-import { Timestamp, type DocumentReference, type Firestore } from "firebase-admin/firestore";
+import { type DocumentReference, type Firestore, Timestamp } from "firebase-admin/firestore";
 import { z } from "zod";
-import { systemClock, type Clock } from "../clock/clock.ts";
+import { type Clock, systemClock } from "../clock/clock.ts";
 import { CorruptDocumentError } from "../firestore/corrupt-document-error.ts";
 import { runInTransaction } from "../firestore/transaction-runner.ts";
 import { applyFixedWindow, applyFixedWindowRefund, type BucketState, type RateLimitDecision } from "./fixed-window.ts";
 import { getRateLimitPolicy, RATE_LIMIT_POLICIES, type RateLimitPolicy } from "./rate-limit-policies.ts";
-import { rateLimitBucketId, type RateLimiter } from "./rate-limiter.ts";
+import { type RateLimiter, rateLimitBucketId } from "./rate-limiter.ts";
 
 /** One document per policy + subject (decision 0009 §1); `expiresAt` carries a TTL policy. */
 export const RATE_LIMIT_BUCKETS_COLLECTION = "rate-limit-buckets";
@@ -70,7 +70,11 @@ export const createFirestoreRateLimiter = (deps: {
       return runInTransaction(
         deps.firestore,
         async (tx): Promise<RateLimitDecision | null> => {
-          const refunded = applyFixedWindowRefund({ bucket: readBucket(ref, (await tx.get(ref)).data()), policy, consumed });
+          const refunded = applyFixedWindowRefund({
+            bucket: readBucket(ref, (await tx.get(ref)).data()),
+            policy,
+            consumed,
+          });
           if (refunded === null) return null;
           tx.set(ref, toStored(refunded.next, policy));
           return refunded.decision;

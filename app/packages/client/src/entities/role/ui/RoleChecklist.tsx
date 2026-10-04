@@ -1,6 +1,6 @@
 "use client";
 
-import { MAX_ROLES_PER_GRANT, roleRefKey, type RoleRef } from "@core/contracts";
+import { MAX_ROLES_PER_GRANT, type RoleRef, roleRefKey } from "@core/contracts";
 import { useId } from "react";
 import { useTranslations } from "use-intl";
 import { Checkbox } from "#/shared/ui/atoms/Checkbox/Checkbox.tsx";
@@ -31,7 +31,10 @@ export function RoleChecklist({ legend, options, value, onChange, error }: RoleC
     onChange(checked ? [...value, option.ref] : value.filter((ref) => roleRefKey(ref) !== option.key));
   };
   return (
-    <FieldSet aria-describedby={error === undefined ? `${id}-hint` : `${id}-hint ${id}-error`} aria-invalid={error === undefined ? undefined : true}>
+    <FieldSet
+      aria-describedby={error === undefined ? `${id}-hint` : `${id}-hint ${id}-error`}
+      aria-invalid={error === undefined ? undefined : true}
+    >
       <FieldLegend>{legend}</FieldLegend>
       <p id={`${id}-hint`} className="text-xs text-muted-foreground">
         {t("checklistHint", { max: MAX_ROLES_PER_GRANT })}

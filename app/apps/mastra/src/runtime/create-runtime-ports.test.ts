@@ -15,7 +15,12 @@ const ENV = {
 const TENANT = "Jd8sK2lPq0WnR5tYu3bV";
 const MEMBER = { type: "user", uid: "member-uid", mfa: false } as const;
 const ORG = { level: "organization", tenantId: TENANT } as const;
-const REGIONAL = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" } as never;
+const REGIONAL = {
+  locale: "pt-BR",
+  displayTimeZone: "America/Sao_Paulo",
+  nodeTimeZone: "America/Sao_Paulo",
+  currency: "BRL",
+} as never;
 
 // No emulator host and no credentials: nothing below may reach Firebase or Postgres
 // (access decisions use in-memory SP1 readers; the Firestore ones need the emulator).
@@ -31,7 +36,12 @@ describe("createRuntimePorts (default bindings)", () => {
     const store = createInMemoryAccessStore();
     store.putOrganization({ id: TENANT });
     store.putUser("member-uid");
-    store.putGrant({ tenantId: TENANT, principalId: "member-uid", nodeId: TENANT, roles: [{ kind: "system", key: "member" }] });
+    store.putGrant({
+      tenantId: TENANT,
+      principalId: "member-uid",
+      nodeId: TENANT,
+      roles: [{ kind: "system", key: "member" }],
+    });
     const bound = createRuntimePorts({
       env: ENV,
       firebase: createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: {} }),
@@ -39,12 +49,24 @@ describe("createRuntimePorts (default bindings)", () => {
       adapters: {
         accessReaders: store,
         resolveAccessContext: ({ principal, node }) =>
-          Promise.resolve(node.level === "organization" ? { tenantId: node.tenantId, principal, permissions: ["core.chat.use"], regional: REGIONAL } : null),
+          Promise.resolve(
+            node.level === "organization"
+              ? { tenantId: node.tenantId, principal, permissions: ["core.chat.use"], regional: REGIONAL }
+              : null,
+          ),
       },
     });
-    expect(await bound.access.resolveAccessContext({ principal: MEMBER, node: ORG })).toEqual({ tenantId: TENANT, principal: MEMBER, permissions: ["core.chat.use"], regional: REGIONAL });
+    expect(await bound.access.resolveAccessContext({ principal: MEMBER, node: ORG })).toEqual({
+      tenantId: TENANT,
+      principal: MEMBER,
+      permissions: ["core.chat.use"],
+      regional: REGIONAL,
+    });
     expect(await bound.access.resolveAccessContext({ principal: MEMBER, node: { level: "platform" } })).toBeNull();
-    expect(await bound.access.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG })).toEqual({ allowed: true, requiresApproval: false });
+    expect(await bound.access.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG })).toEqual({
+      allowed: true,
+      requiresApproval: false,
+    });
     // The first binding pays the cold import of every runtime adapter (SP3 concern 7: 5 s flakes under turbo).
   }, 30_000);
 
@@ -52,7 +74,12 @@ describe("createRuntimePorts (default bindings)", () => {
     const store = createInMemoryAccessStore();
     store.putOrganization({ id: TENANT });
     store.putUser("member-uid");
-    store.putGrant({ tenantId: TENANT, principalId: "member-uid", nodeId: TENANT, roles: [{ kind: "system", key: "owner" }] });
+    store.putGrant({
+      tenantId: TENANT,
+      principalId: "member-uid",
+      nodeId: TENANT,
+      roles: [{ kind: "system", key: "owner" }],
+    });
     const bound = createRuntimePorts({
       env: ENV,
       firebase: createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: {} }),
@@ -74,14 +101,24 @@ describe("createRuntimePorts (default bindings)", () => {
       summary: "Create the project",
       preview: null,
     } as never;
-    const pending = bound.approvals.requestApproval({ principal: MEMBER, node: ORG, permission: "core.project.create", action, requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" });
+    const pending = bound.approvals.requestApproval({
+      principal: MEMBER,
+      node: ORG,
+      permission: "core.project.create",
+      action,
+      requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+    });
     await expect(pending).rejects.toMatchObject({ code: "APPROVAL_NOT_REQUIRED" });
   });
 
   it("binds knowledge URL sources to Firecrawl: fixture pages in fake mode, private targets refused", async () => {
     const bound = ports();
-    expect(await bound.webContent.scrape({ url: "https://docs.example.com/getting-started", tenantId: TENANT })).toMatchObject({ title: "Getting started" });
-    await expect(bound.webContent.scrape({ url: "https://127.0.0.1/", tenantId: TENANT })).rejects.toMatchObject({ code: "URL_REJECTED" });
+    expect(
+      await bound.webContent.scrape({ url: "https://docs.example.com/getting-started", tenantId: TENANT }),
+    ).toMatchObject({ title: "Getting started" });
+    await expect(bound.webContent.scrape({ url: "https://127.0.0.1/", tenantId: TENANT })).rejects.toMatchObject({
+      code: "URL_REJECTED",
+    });
   });
 
   it("binds the semantic runner with no registered view, so every view is refused before the database", async () => {
@@ -93,8 +130,8 @@ describe("createRuntimePorts (default bindings)", () => {
   });
 
   it("binds knowledge search to the use case, which rejects a bad vector before the database", async () => {
-    await expect(ports().knowledge.searchChunks({ tenantId: TENANT, namespaces: ["tenant"], embedding: [1, 2], topK: 1 })).rejects.toBeInstanceOf(
-      KnowledgeSearchRejectedError,
-    );
+    await expect(
+      ports().knowledge.searchChunks({ tenantId: TENANT, namespaces: ["tenant"], embedding: [1, 2], topK: 1 }),
+    ).rejects.toBeInstanceOf(KnowledgeSearchRejectedError);
   });
 });

@@ -28,7 +28,10 @@ describe("RoleRefListSchema", () => {
     expect(RoleRefListSchema.safeParse([owner, custom]).success).toBe(true);
     expect(RoleRefListSchema.safeParse([]).success).toBe(false);
     expect(RoleRefListSchema.safeParse([owner, { ...owner }]).success).toBe(false);
-    const eleven = Array.from({ length: MAX_ROLES_PER_GRANT + 1 }, (_, index) => ({ kind: "custom", roleId: `role-${index}` }));
+    const eleven = Array.from({ length: MAX_ROLES_PER_GRANT + 1 }, (_, index) => ({
+      kind: "custom",
+      roleId: `role-${index}`,
+    }));
     expect(RoleRefListSchema.safeParse(eleven).success).toBe(false);
   });
 });

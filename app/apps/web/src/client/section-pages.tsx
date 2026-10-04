@@ -1,6 +1,12 @@
 "use client";
 
-import { useRouter, PROFILE_SECTIONS, SETTINGS_SECTIONS, type ProfileSection, type SettingsSection } from "@core/client/shared/lib/router";
+import {
+  PROFILE_SECTIONS,
+  type ProfileSection,
+  SETTINGS_SECTIONS,
+  type SettingsSection,
+  useRouter,
+} from "@core/client/shared/lib/router";
 import { AdminAgentPromptsView } from "@core/client/views/admin-agent-prompts";
 import { AdminAgentsView } from "@core/client/views/admin-agents";
 import { AdminConnectorsView } from "@core/client/views/admin-connectors";
@@ -12,35 +18,35 @@ import { AdminOrganizationDetailView } from "@core/client/views/admin-organizati
 import { AdminOrganizationsView } from "@core/client/views/admin-organizations";
 import { AdminOverviewView } from "@core/client/views/admin-overview";
 import { AdminPlansView } from "@core/client/views/admin-plans";
+import { AdminSlotView } from "@core/client/views/admin-slot";
 import { AdminTraceDetailView } from "@core/client/views/admin-trace-detail";
 import { AdminTracesView } from "@core/client/views/admin-traces";
 import { AdminUsersView } from "@core/client/views/admin-users";
 import { AdminWorkflowsView } from "@core/client/views/admin-workflows";
-import { AdminSlotView } from "@core/client/views/admin-slot";
 import { NotFoundView } from "@core/client/views/not-found";
 import { ProfileAccountView } from "@core/client/views/profile-account";
 import { ProfileNotificationsView } from "@core/client/views/profile-notifications";
 import { ProfilePreferencesView } from "@core/client/views/profile-preferences";
 import { ProfileSecurityView } from "@core/client/views/profile-security";
 import { ProfileSessionsView } from "@core/client/views/profile-sessions";
-import { SettingsApiKeysView } from "@core/client/views/settings-api-keys";
-import { SettingsDevicesView } from "@core/client/views/settings-devices";
-import { SettingsGeneralView } from "@core/client/views/settings-general";
-import { SettingsInvitationsView } from "@core/client/views/settings-invitations";
-import { SettingsMembersView } from "@core/client/views/settings-members";
-import { SettingsRolesView } from "@core/client/views/settings-roles";
-import { SettingsUnitsView } from "@core/client/views/settings-units";
 import { SettingsAgentsView } from "@core/client/views/settings-agents";
-import { SettingsSkillsView } from "@core/client/views/settings-skills";
-import { SettingsKnowledgeView } from "@core/client/views/settings-knowledge";
-import { SettingsConnectorsView } from "@core/client/views/settings-connectors";
-import { SettingsWorkflowsView } from "@core/client/views/settings-workflows";
+import { SettingsApiKeysView } from "@core/client/views/settings-api-keys";
 import { SettingsApprovalsView } from "@core/client/views/settings-approvals";
-import { SettingsUsageView } from "@core/client/views/settings-usage";
-import { SettingsTracesView } from "@core/client/views/settings-traces";
+import { SettingsConnectorsView } from "@core/client/views/settings-connectors";
+import { SettingsDevicesView } from "@core/client/views/settings-devices";
 import { SettingsEvalsView } from "@core/client/views/settings-evals";
 import { SettingsFlagsView } from "@core/client/views/settings-flags";
-import { createElement, type ComponentType } from "react";
+import { SettingsGeneralView } from "@core/client/views/settings-general";
+import { SettingsInvitationsView } from "@core/client/views/settings-invitations";
+import { SettingsKnowledgeView } from "@core/client/views/settings-knowledge";
+import { SettingsMembersView } from "@core/client/views/settings-members";
+import { SettingsRolesView } from "@core/client/views/settings-roles";
+import { SettingsSkillsView } from "@core/client/views/settings-skills";
+import { SettingsTracesView } from "@core/client/views/settings-traces";
+import { SettingsUnitsView } from "@core/client/views/settings-units";
+import { SettingsUsageView } from "@core/client/views/settings-usage";
+import { SettingsWorkflowsView } from "@core/client/views/settings-workflows";
+import { type ComponentType, createElement } from "react";
 
 /** The shared view of each `/o/:organizationId/settings/:section` (SP2 spec §8). */
 export const SETTINGS_SECTION_VIEWS: Readonly<Record<SettingsSection, ComponentType>> = {
@@ -73,7 +79,8 @@ export const PROFILE_SECTION_VIEWS: Readonly<Record<ProfileSection, ComponentTyp
   notifications: ProfileNotificationsView,
 };
 
-const isOneOf = <T extends string>(values: readonly T[], value: string | undefined): value is T => value !== undefined && (values as readonly string[]).includes(value);
+const isOneOf = <T extends string>(values: readonly T[], value: string | undefined): value is T =>
+  value !== undefined && (values as readonly string[]).includes(value);
 
 /** `[section]/[[...rest]]` of the settings route: the section's view (it reads the `rest` tail), not-found for an unknown one. */
 export function SettingsSectionPage() {
@@ -94,13 +101,19 @@ export function ProfileSectionPage() {
  * the area. `null` falls through to `AdminSlotView` (module areas, or not-found).
  */
 const only = (View: ComponentType) => (segments: readonly string[]) => (segments.length === 0 ? View : null);
-const withDetail = (List: ComponentType, Detail: ComponentType) => (segments: readonly string[]) => (segments.length === 0 ? List : segments.length === 1 ? Detail : null);
+const withDetail = (List: ComponentType, Detail: ComponentType) => (segments: readonly string[]) =>
+  segments.length === 0 ? List : segments.length === 1 ? Detail : null;
 
 const ADMIN_AREA_VIEWS: Readonly<Record<string, (segments: readonly string[]) => ComponentType | null>> = {
   organizations: withDetail(AdminOrganizationsView, AdminOrganizationDetailView),
   plans: only(AdminPlansView),
   users: only(AdminUsersView),
-  agents: (segments) => (segments.length === 0 ? AdminAgentsView : segments.length === 2 && segments[1] === "prompts" ? AdminAgentPromptsView : null),
+  agents: (segments) =>
+    segments.length === 0
+      ? AdminAgentsView
+      : segments.length === 2 && segments[1] === "prompts"
+        ? AdminAgentPromptsView
+        : null,
   connectors: only(AdminConnectorsView),
   evals: only(AdminEvalsView),
   traces: withDetail(AdminTracesView, AdminTraceDetailView),

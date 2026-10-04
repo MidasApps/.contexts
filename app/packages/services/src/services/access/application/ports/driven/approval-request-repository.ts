@@ -1,4 +1,11 @@
-import type { ApprovalFailure, ApprovalRequest, ApprovalRequestId, ApprovalStatus, TenantId, UserId } from "@core/contracts";
+import type {
+  ApprovalFailure,
+  ApprovalRequest,
+  ApprovalRequestId,
+  ApprovalStatus,
+  TenantId,
+  UserId,
+} from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
 
@@ -20,7 +27,11 @@ export type ApprovalRequestRepository = {
   readonly create: (tx: Transaction, args: { request: ApprovalRequest; actorId: string }) => void;
   readonly get: (tx: Transaction | undefined, id: ApprovalRequestId) => Promise<ApprovalRequest | null>;
   /** Newest first (`createdAt desc`, id desc); `statuses` filters the stored status. */
-  readonly list: (args: { tenantId: TenantId; statuses?: readonly ApprovalStatus[] | undefined; page: PageRequest }) => Promise<Page<ApprovalRequest>>;
+  readonly list: (args: {
+    tenantId: TenantId;
+    statuses?: readonly ApprovalStatus[] | undefined;
+    page: PageRequest;
+  }) => Promise<Page<ApprovalRequest>>;
   readonly setStatus: (tx: Transaction, change: ApprovalStatusChange) => void;
   /**
    * Platform sweeps (decision 0036): requests of every tenant in `status` whose `field` is at or

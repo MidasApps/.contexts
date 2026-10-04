@@ -7,7 +7,9 @@ const sdkError = (code: string) => Object.assign(new Error(`Firebase: Error (${c
 const fakeSdk = (overrides: Partial<FirebaseAccountSdk> = {}) => {
   const user = { uid: "new-user" };
   const sdk: FirebaseAccountSdk = {
-    createUserWithEmailAndPassword: vi.fn(() => Promise.resolve({ user })) as unknown as FirebaseAccountSdk["createUserWithEmailAndPassword"],
+    createUserWithEmailAndPassword: vi.fn(() =>
+      Promise.resolve({ user }),
+    ) as unknown as FirebaseAccountSdk["createUserWithEmailAndPassword"],
     updateProfile: vi.fn(() => Promise.resolve()),
     sendPasswordResetEmail: vi.fn(() => Promise.resolve()),
     ...overrides,
@@ -19,7 +21,11 @@ const fakeSdk = (overrides: Partial<FirebaseAccountSdk> = {}) => {
 describe("createAccount", () => {
   it("creates the account, sets its display name and answers signed in", async () => {
     const { sdk, auth, user } = fakeSdk();
-    const result = await createFirebaseAccountActions(sdk, auth).createAccount({ email: "ana@example.com", password: "long-password", displayName: "Ana Souza" });
+    const result = await createFirebaseAccountActions(sdk, auth).createAccount({
+      email: "ana@example.com",
+      password: "long-password",
+      displayName: "Ana Souza",
+    });
     expect(result).toEqual({ kind: "signed-in" });
     expect(sdk.createUserWithEmailAndPassword).toHaveBeenCalledWith(auth, "ana@example.com", "long-password");
     expect(sdk.updateProfile).toHaveBeenCalledWith(user, { displayName: "Ana Souza" });
@@ -33,7 +39,13 @@ describe("createAccount", () => {
     ["auth/network-request-failed", "NETWORK_ERROR"],
   ])("maps %s to %s", async (code, expected) => {
     const { sdk, auth } = fakeSdk({ createUserWithEmailAndPassword: vi.fn(() => Promise.reject(sdkError(code))) });
-    await expect(createFirebaseAccountActions(sdk, auth).createAccount({ email: "ana@example.com", password: "x", displayName: "Ana" })).rejects.toMatchObject({ code: expected });
+    await expect(
+      createFirebaseAccountActions(sdk, auth).createAccount({
+        email: "ana@example.com",
+        password: "x",
+        displayName: "Ana",
+      }),
+    ).rejects.toMatchObject({ code: expected });
   });
 });
 
@@ -45,13 +57,22 @@ describe("sendPasswordReset", () => {
     expect(auth.languageCode).toBe("es-419");
   });
 
-  it.each(["auth/user-not-found", "auth/invalid-email", "auth/user-disabled"])("answers like a success for %s, so it never tells which accounts exist", async (code) => {
-    const { sdk, auth } = fakeSdk({ sendPasswordResetEmail: vi.fn(() => Promise.reject(sdkError(code))) });
-    await expect(createFirebaseAccountActions(sdk, auth).sendPasswordReset("ghost@example.com", "pt-BR")).resolves.toBeUndefined();
-  });
+  it.each(["auth/user-not-found", "auth/invalid-email", "auth/user-disabled"])(
+    "answers like a success for %s, so it never tells which accounts exist",
+    async (code) => {
+      const { sdk, auth } = fakeSdk({ sendPasswordResetEmail: vi.fn(() => Promise.reject(sdkError(code))) });
+      await expect(
+        createFirebaseAccountActions(sdk, auth).sendPasswordReset("ghost@example.com", "pt-BR"),
+      ).resolves.toBeUndefined();
+    },
+  );
 
   it("still reports failures the user can act on", async () => {
-    const { sdk, auth } = fakeSdk({ sendPasswordResetEmail: vi.fn(() => Promise.reject(sdkError("auth/too-many-requests"))) });
-    await expect(createFirebaseAccountActions(sdk, auth).sendPasswordReset("ana@example.com", "pt-BR")).rejects.toMatchObject({ code: "RATE_LIMITED" });
+    const { sdk, auth } = fakeSdk({
+      sendPasswordResetEmail: vi.fn(() => Promise.reject(sdkError("auth/too-many-requests"))),
+    });
+    await expect(
+      createFirebaseAccountActions(sdk, auth).sendPasswordReset("ana@example.com", "pt-BR"),
+    ).rejects.toMatchObject({ code: "RATE_LIMITED" });
   });
 });

@@ -44,7 +44,14 @@ export const voiceScopeOf = async (args: {
   const bearer = BEARER.exec(request.headers.get(FORWARDED_HEADERS.authorization) ?? "")?.[1];
   if (context === null || bearer === undefined) return apiError(403, "FORBIDDEN", requestId);
   const traceparent = request.headers.get(FORWARDED_HEADERS.traceparent);
-  return { bearer, tenantId, regional: context.regional, requestId, ...(traceparent === null ? {} : { traceparent }), signal: request.signal };
+  return {
+    bearer,
+    tenantId,
+    regional: context.regional,
+    requestId,
+    ...(traceparent === null ? {} : { traceparent }),
+    signal: request.signal,
+  };
 };
 
 /** Magic bytes of the accepted recordings (decision 0034): the declared type is never trusted. */

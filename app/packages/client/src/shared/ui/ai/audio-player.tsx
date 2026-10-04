@@ -13,6 +13,15 @@ export type AudioPlayerProps = Omit<ComponentProps<"audio">, "aria-label" | "con
  * because the text being read is the message right above the player.
  */
 export function AudioPlayer({ label, className, ...props }: AudioPlayerProps) {
-  // eslint-disable-next-line jsx-a11y/media-has-caption -- read-aloud of the visible message: the message text is the transcript
-  return <audio data-slot="audio-player" controls aria-label={label} preload="none" className={cn("h-9 w-full max-w-sm", className)} {...props} />;
+  return (
+    // eslint-disable-next-line jsx-a11y/media-has-caption -- read-aloud of the visible message: the message text is the transcript
+    <audio
+      data-slot="audio-player"
+      controls
+      aria-label={label}
+      preload="none"
+      className={cn("h-9 w-full max-w-sm", className)}
+      {...props}
+    />
+  );
 }

@@ -16,8 +16,12 @@ const PromptBodySchema = z.string().trim().min(1).max(50_000);
 const NoteSchema = z.string().trim().min(1).max(500);
 
 /** Tenant scope names its organization; platform scope never does. */
-export const scopeMatchesTenant = (row: { scope: PromptScope; tenantId: string | null }): boolean => (row.scope === "tenant") === (row.tenantId !== null);
-export const SCOPE_TENANT_ERROR = { error: "tenantId is required for tenant scope and forbidden for platform scope.", path: ["tenantId"] };
+export const scopeMatchesTenant = (row: { scope: PromptScope; tenantId: string | null }): boolean =>
+  (row.scope === "tenant") === (row.tenantId !== null);
+export const SCOPE_TENANT_ERROR = {
+  error: "tenantId is required for tenant scope and forbidden for platform scope.",
+  path: ["tenantId"],
+};
 
 /** An immutable prompt version (`agents.prompt_versions`, append-only). */
 export const PromptVersionSchema = z
@@ -28,7 +32,10 @@ export const PromptVersionSchema = z
     tenantId: TenantIdSchema.nullable().meta(none("Organization of a tenant addendum; null for platform scope.")),
     version: z.int().positive().meta(none("1-based version number per agent, scope and tenant.")),
     body: PromptBodySchema.meta(personal("Prompt text; may mention people or internal policies.")),
-    bodySha256: z.string().regex(/^[0-9a-f]{64}$/).meta(none("SHA-256 hex of the body.")),
+    bodySha256: z
+      .string()
+      .regex(/^[0-9a-f]{64}$/)
+      .meta(none("SHA-256 hex of the body.")),
     note: NoteSchema.nullable().meta(personal("Author's note about the change.")),
     evalExperimentId: z.string().min(1).nullable().meta(none("Experiment that evaluated this version.")),
     evalVerdict: z.enum(["passed", "failed"]).nullable().meta(none("Verdict of that experiment.")),

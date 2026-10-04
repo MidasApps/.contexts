@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, use, type ReactNode } from "react";
-import { useStore, type StoreApi } from "zustand";
+import { createContext, type ReactNode, use } from "react";
+import { type StoreApi, useStore } from "zustand";
 
 /**
  * UI preferences without server origin (decision 0011 §5): command palette recents only.

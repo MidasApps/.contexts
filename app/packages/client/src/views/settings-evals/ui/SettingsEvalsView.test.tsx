@@ -5,7 +5,7 @@ import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildDataset, buildExperiment, numberedPage } from "#/shared/testing/admin-observability-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, ok, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, FAKE_REQUEST_ID, type FakeRequest, type FakeRoutes, ok } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsEvalsView } from "./SettingsEvalsView.tsx";
 
@@ -23,7 +23,12 @@ const CANDIDATE = buildExperiment({
     { scorer: "tenant-leak", mean: 1, baseline: 1 },
   ],
 });
-const FEEDBACK = buildDataset({ id: "ds_feedback", name: "feedback", tenantId: IDS.organization, targetIds: ["assistant"] });
+const FEEDBACK = buildDataset({
+  id: "ds_feedback",
+  name: "feedback",
+  tenantId: IDS.organization,
+  targetIds: ["assistant"],
+});
 const SETTINGS = {
   tenantId: IDS.organization,
   enabledAgents: ["knowledge", "data"],
@@ -52,7 +57,8 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     },
   );
 
-const organizationOf = (call: { query: string } | undefined): string | null => new URLSearchParams(call?.query).get("organizationId");
+const organizationOf = (call: { query: string } | undefined): string | null =>
+  new URLSearchParams(call?.query).get("organizationId");
 
 // The suite shares the machine with other suites: typing and dialogs need more than the defaults.
 vi.setConfig({ testTimeout: 20_000 });
@@ -75,7 +81,9 @@ describe("SettingsEvalsView", () => {
   it("compares two experiments chosen on the page, shown above the list", async () => {
     const { user } = renderView();
     const table = await screen.findByRole("table", { name: "Experimentos de Northwind" });
-    expect(screen.getByText("Escolha dois experimentos, de qualquer página, para comparar as notas por avaliador.")).toBeDefined();
+    expect(
+      screen.getByText("Escolha dois experimentos, de qualquer página, para comparar as notas por avaliador."),
+    ).toBeDefined();
     const comparison = screen.getByRole("region", { name: /Comparação de experimentos/u });
     expect(comparison.compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Comparar o experimento exp_base" }));
@@ -88,14 +96,24 @@ describe("SettingsEvalsView", () => {
   });
 
   it("keeps a chosen experiment across pages and reads it by id for the organization", async () => {
-    const OLDER = buildExperiment({ experimentId: "exp_older", datasetId: "ds_feedback", scores: [{ scorer: "tool-routing", mean: 0.7, baseline: 0.9 }] });
+    const OLDER = buildExperiment({
+      experimentId: "exp_older",
+      datasetId: "ds_feedback",
+      scores: [{ scorer: "tool-routing", mean: 0.7, baseline: 0.9 }],
+    });
     const { user, api } = renderView({
-      "GET /v1/evals/experiments": (request: FakeRequest) => (request.query.get("page") === "0" ? numberedPage([BASE, CANDIDATE], true) : numberedPage([OLDER])),
-      "GET /v1/evals/experiments/:experimentId": (request: FakeRequest) => (request.params["experimentId"] === "exp_candidate" ? ok(CANDIDATE) : apiError(404, "NOT_FOUND")),
+      "GET /v1/evals/experiments": (request: FakeRequest) =>
+        request.query.get("page") === "0" ? numberedPage([BASE, CANDIDATE], true) : numberedPage([OLDER]),
+      "GET /v1/evals/experiments/:experimentId": (request: FakeRequest) =>
+        request.params["experimentId"] === "exp_candidate" ? ok(CANDIDATE) : apiError(404, "NOT_FOUND"),
     });
     await screen.findByRole("table", { name: "Experimentos de Northwind" });
     await user.click(screen.getByRole("button", { name: "Comparar o experimento exp_candidate" }));
-    await user.click(within(screen.getByRole("navigation", { name: "Páginas de experimentos" })).getByRole("button", { name: "Próxima" }));
+    await user.click(
+      within(screen.getByRole("navigation", { name: "Páginas de experimentos" })).getByRole("button", {
+        name: "Próxima",
+      }),
+    );
     await user.click(await screen.findByRole("button", { name: "Comparar o experimento exp_older" }));
     const verdicts = await screen.findByRole("list", { name: "Resultado por avaliador" });
     expect(within(verdicts).getByText(/tool-routing: B pior que A/u)).toBeDefined();
@@ -109,7 +127,9 @@ describe("SettingsEvalsView", () => {
     const table = await screen.findByRole("table", { name: "Conjuntos de dados de Northwind" });
     const row = within(table).getByRole("row", { name: /feedback/u });
     expect(within(row).getByText("ds_feedback")).toBeDefined();
-    expect(within(within(row).getByRole("list", { name: "Agentes avaliados por feedback" })).getByText("assistant")).toBeDefined();
+    expect(
+      within(within(row).getByRole("list", { name: "Agentes avaliados por feedback" })).getByText("assistant"),
+    ).toBeDefined();
     expect(organizationOf(api.calls.find((call) => call.path === "/v1/evals/datasets"))).toBe(IDS.organization);
   });
 
@@ -136,7 +156,11 @@ describe("SettingsEvalsView", () => {
   });
 
   it("shows a refused agent on its field and another failure with its reference", async () => {
-    const { user, api } = renderView({ "POST /v1/evals/experiments": apiError(400, "VALIDATION_FAILED", [{ field: "agentId", issue: "AGENT_NOT_ENABLED" }]) });
+    const { user, api } = renderView({
+      "POST /v1/evals/experiments": apiError(400, "VALIDATION_FAILED", [
+        { field: "agentId", issue: "AGENT_NOT_ENABLED" },
+      ]),
+    });
     await user.click(await screen.findByRole("button", { name: "Iniciar experimento" }));
     const dialog = await screen.findByRole("dialog", { name: "Iniciar experimento" });
     await user.click(await within(dialog).findByRole("button", { name: "Iniciar" }));

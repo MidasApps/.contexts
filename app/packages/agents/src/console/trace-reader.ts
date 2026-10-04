@@ -1,4 +1,10 @@
-import { type TraceDetail, TraceDetailSchema, type TraceSpan, type TraceSummary, TraceSummarySchema } from "@core/contracts";
+import {
+  type TraceDetail,
+  TraceDetailSchema,
+  type TraceSpan,
+  type TraceSummary,
+  TraceSummarySchema,
+} from "@core/contracts";
 import { SENSITIVE_FIELDS } from "../observability/create-observability.ts";
 
 /** The parts of a stored Mastra span the console reads (`mastra_ai_spans`, decision 0040). */
@@ -39,7 +45,11 @@ const isSensitiveKey = (key: string): boolean => SENSITIVE.has(key.toLowerCase()
 export const dropSensitive = (value: unknown, depth = 0): unknown => {
   if (depth > 20 || value === null || typeof value !== "object") return value ?? null;
   if (Array.isArray(value)) return value.map((item) => dropSensitive(item, depth + 1));
-  return Object.fromEntries(Object.entries(value).filter(([key]) => !isSensitiveKey(key)).map(([key, item]) => [key, dropSensitive(item, depth + 1)]));
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !isSensitiveKey(key))
+      .map(([key, item]) => [key, dropSensitive(item, depth + 1)]),
+  );
 };
 
 const tenantOf = (span: StoredSpan): string | null => {
@@ -49,11 +59,15 @@ const tenantOf = (span: StoredSpan): string | null => {
 
 const numberAt = (record: Readonly<Record<string, unknown>> | null | undefined, path: readonly string[]): number => {
   let current: unknown = record;
-  for (const key of path) current = typeof current === "object" && current !== null ? (current as Record<string, unknown>)[key] : undefined;
+  for (const key of path)
+    current = typeof current === "object" && current !== null ? (current as Record<string, unknown>)[key] : undefined;
   return typeof current === "number" && Number.isFinite(current) && current >= 0 ? Math.round(current) : 0;
 };
 
-const durationOf = (span: StoredSpan): number | null => (span.endedAt === undefined || span.endedAt === null ? null : Math.max(0, span.endedAt.getTime() - span.startedAt.getTime()));
+const durationOf = (span: StoredSpan): number | null =>
+  span.endedAt === undefined || span.endedAt === null
+    ? null
+    : Math.max(0, span.endedAt.getTime() - span.startedAt.getTime());
 const failed = (span: StoredSpan): boolean => span.error !== undefined && span.error !== null;
 const truncate = (text: string): string => (text.length > 200 ? text.slice(0, 200) : text === "" ? "span" : text);
 
@@ -109,12 +123,21 @@ export type TraceQuery = {
 const startedAtFilter = (query: TraceQuery): { startedAt?: { start?: Date; end?: Date; endExclusive: true } } =>
   query.startedAfter === undefined && query.startedBefore === undefined
     ? {}
-    : { startedAt: { ...(query.startedAfter === undefined ? {} : { start: query.startedAfter }), ...(query.startedBefore === undefined ? {} : { end: query.startedBefore }), endExclusive: true } };
+    : {
+        startedAt: {
+          ...(query.startedAfter === undefined ? {} : { start: query.startedAfter }),
+          ...(query.startedBefore === undefined ? {} : { end: query.startedBefore }),
+          endExclusive: true,
+        },
+      };
 
 // Checked again per trace, like the tenant: a store that ignores the range never widens the answer.
 const inRange = (query: TraceQuery, startedAt: string): boolean => {
   const at = Date.parse(startedAt);
-  return (query.startedAfter === undefined || at >= query.startedAfter.getTime()) && (query.startedBefore === undefined || at < query.startedBefore.getTime());
+  return (
+    (query.startedAfter === undefined || at >= query.startedAfter.getTime()) &&
+    (query.startedBefore === undefined || at < query.startedBefore.getTime())
+  );
 };
 
 /**
@@ -132,8 +155,18 @@ export const createTraceReader = (store: TraceStore) => ({
     };
     const listed = await store.listTraces({ filters, pagination: { page: query.page, perPage: query.perPage } });
     const roots = listed.spans.filter((span) => query.tenantId === null || tenantOf(span) === query.tenantId);
-    const traces = await Promise.all(roots.map(async (root) => summarizeTrace((await store.getTrace({ traceId: root.traceId }))?.spans ?? [root])));
-    return { traces: traces.filter((trace): trace is TraceSummary => trace !== null && (query.tenantId === null || trace.tenantId === query.tenantId) && inRange(query, trace.startedAt)), hasMore: listed.pagination?.hasMore ?? false };
+    const traces = await Promise.all(
+      roots.map(async (root) => summarizeTrace((await store.getTrace({ traceId: root.traceId }))?.spans ?? [root])),
+    );
+    return {
+      traces: traces.filter(
+        (trace): trace is TraceSummary =>
+          trace !== null &&
+          (query.tenantId === null || trace.tenantId === query.tenantId) &&
+          inRange(query, trace.startedAt),
+      ),
+      hasMore: listed.pagination?.hasMore ?? false,
+    };
   },
   get: async (input: { readonly traceId: string; readonly tenantId: string | null }): Promise<TraceDetail | null> => {
     const trace = await store.getTrace({ traceId: input.traceId });

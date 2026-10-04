@@ -5,7 +5,9 @@ describe("assertNoEscalation", () => {
   const actor = new Set(["core.project.read", "core.project.update", "core.unit.read"]);
 
   it("allows granting a subset of the actor's effective permissions", () => {
-    expect(assertNoEscalation({ requested: ["core.project.read", "core.unit.read"], actorEffective: actor })).toEqual({ ok: true });
+    expect(assertNoEscalation({ requested: ["core.project.read", "core.unit.read"], actorEffective: actor })).toEqual({
+      ok: true,
+    });
     expect(assertNoEscalation({ requested: [], actorEffective: actor })).toEqual({ ok: true });
   });
 
@@ -19,6 +21,9 @@ describe("assertNoEscalation", () => {
   });
 
   it("denies everything to an actor with no permissions", () => {
-    expect(assertNoEscalation({ requested: ["core.unit.read"], actorEffective: new Set() })).toEqual({ ok: false, missing: ["core.unit.read"] });
+    expect(assertNoEscalation({ requested: ["core.unit.read"], actorEffective: new Set() })).toEqual({
+      ok: false,
+      missing: ["core.unit.read"],
+    });
   });
 });

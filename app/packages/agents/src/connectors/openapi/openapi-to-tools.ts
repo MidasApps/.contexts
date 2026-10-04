@@ -21,7 +21,13 @@ export const MAX_RESPONSE_BYTES = 100 * 1024;
 type OpenApiConnector = Extract<Connector, { type: "openapi" }>;
 type JsonSchema = Record<string, unknown>;
 type Parameter = { name: string; in: string; required?: boolean; description?: string; schema?: JsonSchema };
-type Operation = { operationId?: string; summary?: string; description?: string; parameters?: Parameter[]; requestBody?: { required?: boolean; content?: Record<string, { schema?: JsonSchema }> } };
+type Operation = {
+  operationId?: string;
+  summary?: string;
+  description?: string;
+  parameters?: Parameter[];
+  requestBody?: { required?: boolean; content?: Record<string, { schema?: JsonSchema }> };
+};
 
 const METHODS = ["get", "head", "post", "put", "patch", "delete"] as const;
 type Method = (typeof METHODS)[number];
@@ -39,20 +45,26 @@ const idPart = (value: string): string => {
   return /^[A-Za-z]/.test(cleaned) ? cleaned : `x${cleaned}`;
 };
 
-export const openApiToolId = (connectorName: string, operationId: string): string => `api.${idPart(connectorName)}.${idPart(operationId)}`;
+export const openApiToolId = (connectorName: string, operationId: string): string =>
+  `api.${idPart(connectorName)}.${idPart(operationId)}`;
 
 /** The base URL every request uses: the spec's first server, https inside the allowlist. */
 const serverBaseOf = (connector: OpenApiConnector, document: OpenApiDocument): URL => {
   const raw = document.servers?.[0]?.url;
   if (raw === undefined) throw new OpenApiConnectorError("SERVER_NOT_ALLOWED");
   const base = new URL(raw);
-  if (base.protocol !== "https:" || base.port !== "" || !connector.config.allowedHosts.includes(base.hostname.toLowerCase())) {
+  if (
+    base.protocol !== "https:" ||
+    base.port !== "" ||
+    !connector.config.allowedHosts.includes(base.hostname.toLowerCase())
+  ) {
     throw new OpenApiConnectorError("SERVER_NOT_ALLOWED");
   }
   return base;
 };
 
-const schemaOf = (schema: JsonSchema | undefined): z.ZodType => (schema === undefined ? z.string() : z.fromJSONSchema(schema));
+const schemaOf = (schema: JsonSchema | undefined): z.ZodType =>
+  schema === undefined ? z.string() : z.fromJSONSchema(schema);
 
 // Path and query values are scalars in practice; anything else is sent as JSON text.
 const scalarText = (value: unknown): string => (typeof value === "string" ? value : (JSON.stringify(value) ?? ""));
@@ -93,9 +105,12 @@ export const OpenApiResultSchema = z.strictObject({
 type CallInput = { path?: Record<string, unknown>; query?: Record<string, unknown>; body?: unknown };
 
 const buildUrl = (base: URL, template: string, input: CallInput): URL => {
-  const path = template.replace(/\{([^}]+)\}/g, (_match, name: string) => encodeURIComponent(scalarText(input.path?.[name] ?? "")));
+  const path = template.replace(/\{([^}]+)\}/g, (_match, name: string) =>
+    encodeURIComponent(scalarText(input.path?.[name] ?? "")),
+  );
   const url = new URL(`${base.pathname.replace(/\/$/, "")}${path}`, base);
-  for (const [key, value] of Object.entries(input.query ?? {})) if (value !== undefined) url.searchParams.set(key, scalarText(value));
+  for (const [key, value] of Object.entries(input.query ?? {}))
+    if (value !== undefined) url.searchParams.set(key, scalarText(value));
   return url;
 };
 
@@ -105,7 +120,18 @@ const authHeaders = (connector: OpenApiConnector, secret: string | null): Record
   return { [connector.config.apiKeyHeader ?? "x-api-key"]: secret };
 };
 
-const callOperation = async (args: { options: OpenApiToolOptions; connector: OpenApiConnector; base: URL; method: Method; template: string; toolId: string }, input: CallInput, signal: AbortSignal) => {
+const callOperation = async (
+  args: {
+    options: OpenApiToolOptions;
+    connector: OpenApiConnector;
+    base: URL;
+    method: Method;
+    template: string;
+    toolId: string;
+  },
+  input: CallInput,
+  signal: AbortSignal,
+) => {
   const { options, connector } = args;
   const hasBody = input.body !== undefined && args.method !== "get" && args.method !== "head";
   try {
@@ -113,7 +139,11 @@ const callOperation = async (args: { options: OpenApiToolOptions; connector: Ope
       allowedHosts: connector.config.allowedHosts,
       init: {
         method: args.method.toUpperCase(),
-        headers: { accept: "application/json", ...(hasBody ? { "content-type": "application/json" } : {}), ...authHeaders(connector, options.secret) },
+        headers: {
+          accept: "application/json",
+          ...(hasBody ? { "content-type": "application/json" } : {}),
+          ...authHeaders(connector, options.secret),
+        },
         ...(hasBody ? { body: JSON.stringify(input.body) } : {}),
         signal: AbortSignal.any([signal, AbortSignal.timeout(API_TIMEOUT_MS)]),
       },
@@ -121,14 +151,27 @@ const callOperation = async (args: { options: OpenApiToolOptions; connector: Ope
       ...(options.resolve === undefined ? {} : { resolve: options.resolve }),
     });
     const { text, truncated } = await readCappedText(response, MAX_RESPONSE_BYTES);
-    return { status: response.status, contentType: response.headers.get("content-type"), body: `<untrusted_api_response>\n${text}\n</untrusted_api_response>`, truncated };
+    return {
+      status: response.status,
+      contentType: response.headers.get("content-type"),
+      body: `<untrusted_api_response>\n${text}\n</untrusted_api_response>`,
+      truncated,
+    };
   } catch (error: unknown) {
-    if (error instanceof UrlGuardError) throw toolFailure(args.toolId, "URL_REJECTED", "The API host is not allowed.", { reason: error.reason });
+    if (error instanceof UrlGuardError)
+      throw toolFailure(args.toolId, "URL_REJECTED", "The API host is not allowed.", { reason: error.reason });
     throw error;
   }
 };
 
-const toolOf = (args: { options: OpenApiToolOptions; connector: OpenApiConnector; base: URL; method: Method; template: string; operation: Operation & { operationId: string } }): CoreToolDefinition => {
+const toolOf = (args: {
+  options: OpenApiToolOptions;
+  connector: OpenApiConnector;
+  base: URL;
+  method: Method;
+  template: string;
+  operation: Operation & { operationId: string };
+}): CoreToolDefinition => {
   const { connector, operation, method } = args;
   const toolId = openApiToolId(connector.name, operation.operationId);
   const summary = operation.summary ?? operation.description ?? `${method.toUpperCase()} ${args.template}`;
@@ -162,7 +205,9 @@ export const openApiToTools = (options: OpenApiToolOptions): CoreToolDefinition[
       if (operation === undefined || operationId === undefined || !allowed.has(operationId)) return [];
       // Path-level parameters apply to every operation of the path.
       const parameters = [...(pathItem?.parameters ?? []), ...(operation.parameters ?? [])];
-      return [toolOf({ options, connector, base, method, template, operation: { ...operation, parameters, operationId } })];
+      return [
+        toolOf({ options, connector, base, method, template, operation: { ...operation, parameters, operationId } }),
+      ];
     }),
   );
 };

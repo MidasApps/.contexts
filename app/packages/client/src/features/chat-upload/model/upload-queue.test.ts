@@ -1,10 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEndpointCaller } from "#/shared/api/call-endpoint.ts";
 import { createHttpClient } from "#/shared/api/http-client.ts";
-import { apiError, createFakeApi, ok, type FakeApi } from "#/shared/testing/fake-api.ts";
+import { apiError, createFakeApi, type FakeApi, ok } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
-import { createFakeTransfers, routeFilesApi, source, storedFile, type FilesApiScript } from "../testing/fake-upload.ts";
-import { createUploadQueue, hasUploadProblems, hasUploadsInFlight, type UploadItem, type UploadQueueDeps } from "./upload-queue.ts";
+import { createFakeTransfers, type FilesApiScript, routeFilesApi, source, storedFile } from "../testing/fake-upload.ts";
+import {
+  createUploadQueue,
+  hasUploadProblems,
+  hasUploadsInFlight,
+  type UploadItem,
+  type UploadQueueDeps,
+} from "./upload-queue.ts";
 
 const FILE_A = "FileA000000000000001";
 const FILE_B = "FileB000000000000002";
@@ -14,7 +20,9 @@ const setup = (script?: FilesApiScript, deps: Partial<UploadQueueDeps> = {}, api
   routeFilesApi(api, [FILE_A, FILE_B], script);
   api.route(`POST ${SOURCES_PATH}`, { status: 202, body: { data: { runId: "run-1" } } });
   const { transfers, createRequest } = createFakeTransfers();
-  const callEndpoint = createEndpointCaller(createHttpClient({ baseUrl: "", getIdToken: () => Promise.resolve("token"), fetch: api.fetch }));
+  const callEndpoint = createEndpointCaller(
+    createHttpClient({ baseUrl: "", getIdToken: () => Promise.resolve("token"), fetch: api.fetch }),
+  );
   let id = 0;
   const revoked: string[] = [];
   const queue = createUploadQueue({
@@ -44,25 +52,47 @@ const setup = (script?: FilesApiScript, deps: Partial<UploadQueueDeps> = {}, api
 
 describe("upload queue", () => {
   it("goes pending → uploading (with progress) → validating → ready and sends the bytes as the ticket says", async () => {
-    const { api, queue, transfer, item, seen } = setup({ files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "pending" })), ok(storedFile(FILE_A, { purpose: "chat-attachment", contentType: "image/png", sizeBytes: 5 }))] } });
+    const { api, queue, transfer, item, seen } = setup({
+      files: {
+        [FILE_A]: [
+          ok(storedFile(FILE_A, { status: "pending" })),
+          ok(storedFile(FILE_A, { purpose: "chat-attachment", contentType: "image/png", sizeBytes: 5 })),
+        ],
+      },
+    });
     queue.add([source("diagram.png", "image/png")], "chat-attachment");
-    expect(item()).toMatchObject({ status: "pending", name: "diagram.png", purpose: "chat-attachment", previewUrl: "blob:preview" });
+    expect(item()).toMatchObject({
+      status: "pending",
+      name: "diagram.png",
+      purpose: "chat-attachment",
+      previewUrl: "blob:preview",
+    });
     const sent = await transfer();
     expect(item()).toMatchObject({ status: "uploading", progress: 0, fileId: FILE_A });
-    expect(sent).toMatchObject({ method: "PUT", headers: { "content-type": "image/png", "x-goog-content-length-range": "0,5" } });
+    expect(sent).toMatchObject({
+      method: "PUT",
+      headers: { "content-type": "image/png", "x-goog-content-length-range": "0,5" },
+    });
     expect(sent.headers).not.toHaveProperty("authorization");
     sent.progress(2, 5);
     expect(item().progress).toBeCloseTo(0.4);
     sent.finish();
     await vi.waitFor(() => expect(item().status).toBe("ready"));
     expect(seen.map((statuses) => statuses[0])).toEqual(["pending", "uploading", "uploading", "validating", "ready"]);
-    expect(api.calls.find((call) => call.method === "POST")?.body).toEqual({ purpose: "chat-attachment", fileName: "diagram.png", contentType: "image/png", sizeBytes: 5 });
+    expect(api.calls.find((call) => call.method === "POST")?.body).toEqual({
+      purpose: "chat-attachment",
+      fileName: "diagram.png",
+      contentType: "image/png",
+      sizeBytes: 5,
+    });
     expect(api.callLines().filter((line) => line === `GET /v1/files/${FILE_A}`)).toHaveLength(2);
     expect(hasUploadsInFlight(queue.getSnapshot())).toBe(false);
   });
 
   it("marks a file the server refuses after the upload as rejected with the reason, and never hands it to the message", async () => {
-    const { queue, transfer, item } = setup({ files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "rejected", rejectionReason: "CONTENT_MISMATCH" }))] } });
+    const { queue, transfer, item } = setup({
+      files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "rejected", rejectionReason: "CONTENT_MISMATCH" }))] },
+    });
     queue.add([source("renamed.png", "image/png")], "chat-attachment");
     (await transfer()).finish();
     await vi.waitFor(() => expect(item()).toMatchObject({ status: "rejected", problem: "CONTENT_MISMATCH" }));
@@ -76,7 +106,10 @@ describe("upload queue", () => {
   it("marks a declared type or size the server refuses as rejected before any byte is sent", async () => {
     const api = createFakeApi();
     const { queue, transfers, item } = setup(undefined, {}, api);
-    api.route(`POST /v1/organizations/${IDS.organization}/files`, apiError(400, "VALIDATION_FAILED", [{ field: "contentType", issue: "TYPE_NOT_ALLOWED" }]));
+    api.route(
+      `POST /v1/organizations/${IDS.organization}/files`,
+      apiError(400, "VALIDATION_FAILED", [{ field: "contentType", issue: "TYPE_NOT_ALLOWED" }]),
+    );
     queue.add([source("tool.exe", "application/octet-stream")], "chat-attachment");
     await vi.waitFor(() => expect(item()).toMatchObject({ status: "rejected", problem: "TYPE_NOT_ALLOWED" }));
     expect(transfers).toHaveLength(0);
@@ -114,8 +147,23 @@ describe("upload queue", () => {
     let release!: () => void;
     const hold = new Promise<void>((resolve) => (release = resolve));
     const { queue, transfer, item } = setup(
-      { files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "pending" })), ok(storedFile(FILE_A, { status: "pending" })), ok(storedFile(FILE_A, { status: "pending" })), ok(storedFile(FILE_A, { status: "pending" })), ok(storedFile(FILE_A))] } },
-      { wait: { now: () => now, sleep: () => (now >= 30_000 ? hold : Promise.resolve()).then(() => void (now += 10_000)) } },
+      {
+        files: {
+          [FILE_A]: [
+            ok(storedFile(FILE_A, { status: "pending" })),
+            ok(storedFile(FILE_A, { status: "pending" })),
+            ok(storedFile(FILE_A, { status: "pending" })),
+            ok(storedFile(FILE_A, { status: "pending" })),
+            ok(storedFile(FILE_A)),
+          ],
+        },
+      },
+      {
+        wait: {
+          now: () => now,
+          sleep: () => (now >= 30_000 ? hold : Promise.resolve()).then(() => void (now += 10_000)),
+        },
+      },
     );
     queue.add([source("notes.txt", "text/plain")], "chat-attachment");
     (await transfer()).finish();
@@ -126,7 +174,10 @@ describe("upload queue", () => {
 
   it("fails with a timeout when validation takes longer than the limit", async () => {
     let now = 0;
-    const { queue, transfer, item } = setup({ files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "pending" }))] } }, { wait: { now: () => now, sleep: () => Promise.resolve().then(() => void (now += 10_000)), timeoutMs: 30_000 } });
+    const { queue, transfer, item } = setup(
+      { files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "pending" }))] } },
+      { wait: { now: () => now, sleep: () => Promise.resolve().then(() => void (now += 10_000)), timeoutMs: 30_000 } },
+    );
     queue.add([source("notes.txt", "text/plain")], "chat-attachment");
     (await transfer()).finish();
     await vi.waitFor(() => expect(item()).toMatchObject({ status: "failed", problem: "timeout" }));
@@ -144,7 +195,10 @@ describe("upload queue", () => {
 
   it("takes the ready chat attachments out of the queue as message attachments", async () => {
     const { queue, transfer } = setup({
-      files: { [FILE_A]: [ok(storedFile(FILE_A, { fileName: "a.png", contentType: "image/png", sizeBytes: 5 }))], [FILE_B]: [ok(storedFile(FILE_B, { status: "pending" }))] },
+      files: {
+        [FILE_A]: [ok(storedFile(FILE_A, { fileName: "a.png", contentType: "image/png", sizeBytes: 5 }))],
+        [FILE_B]: [ok(storedFile(FILE_B, { status: "pending" }))],
+      },
     });
     queue.add([source("a.png", "image/png"), source("b.pdf", "application/pdf")], "chat-attachment");
     (await transfer(0)).finish();
@@ -166,7 +220,9 @@ describe("upload queue", () => {
     await vi.waitFor(() => expect(item().status).toBe("ready"));
     const posted = api.calls.find((call) => call.path === SOURCES_PATH);
     expect(posted?.body).toEqual({ kind: "file", fileId: FILE_A });
-    expect(api.calls.find((call) => call.method === "POST" && call.path.endsWith("/files"))?.body).toMatchObject({ purpose: "knowledge" });
+    expect(api.calls.find((call) => call.method === "POST" && call.path.endsWith("/files"))?.body).toMatchObject({
+      purpose: "knowledge",
+    });
     expect(queue.take()).toEqual([]);
     expect(item().purpose).toBe("knowledge");
   });

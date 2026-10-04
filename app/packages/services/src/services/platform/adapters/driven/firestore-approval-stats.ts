@@ -17,7 +17,11 @@ export const createFirestoreApprovalStats = (deps: { readonly firestore: Firesto
     countDecidedSince: async (since) => {
       const from = Timestamp.fromDate(since);
       const [approved, rejected] = await Promise.all([
-        requests().where("status", "in", [...APPROVED_STATUSES]).where("updatedAt", ">=", from).count().get(),
+        requests()
+          .where("status", "in", [...APPROVED_STATUSES])
+          .where("updatedAt", ">=", from)
+          .count()
+          .get(),
         requests().where("status", "==", "rejected").where("updatedAt", ">=", from).count().get(),
       ]);
       return { approved: approved.data().count, rejected: rejected.data().count };

@@ -36,7 +36,8 @@ const readFlags = (argv: readonly string[]): { values: Map<string, string>; dryR
       dryRun = true;
       continue;
     }
-    if (!(VALUE_FLAGS as readonly string[]).includes(flag)) throw new BackfillSearchNamesArgsError(`unknown argument ${flag.startsWith("--") ? flag : "(value)"}`);
+    if (!(VALUE_FLAGS as readonly string[]).includes(flag))
+      throw new BackfillSearchNamesArgsError(`unknown argument ${flag.startsWith("--") ? flag : "(value)"}`);
     if (values.has(flag)) throw new BackfillSearchNamesArgsError(`${flag} given twice`);
     const value = argv[index + 1];
     if (value === undefined || value.startsWith("--")) throw new BackfillSearchNamesArgsError(`${flag} needs a value`);
@@ -49,8 +50,10 @@ const readFlags = (argv: readonly string[]): { values: Map<string, string>; dryR
 // Local runs only reach an emulator project; remote runs never target one (processes/environments.md).
 const checkEnvironment = (appEnv: BackfillSearchNamesArgs["appEnv"], projectId: string): void => {
   const emulator = projectId.startsWith("demo-");
-  if (appEnv === "local" && !emulator) throw new BackfillSearchNamesArgsError("APP_ENV=local only targets a demo-* emulator project");
-  if (appEnv !== "local" && emulator) throw new BackfillSearchNamesArgsError(`APP_ENV=${appEnv} cannot target a demo-* emulator project`);
+  if (appEnv === "local" && !emulator)
+    throw new BackfillSearchNamesArgsError("APP_ENV=local only targets a demo-* emulator project");
+  if (appEnv !== "local" && emulator)
+    throw new BackfillSearchNamesArgsError(`APP_ENV=${appEnv} cannot target a demo-* emulator project`);
 };
 
 /**
@@ -58,11 +61,15 @@ const checkEnvironment = (appEnv: BackfillSearchNamesArgs["appEnv"], projectId: 
  * `--confirm` must repeat `--project` (no silent cross-project writes).
  * @throws {BackfillSearchNamesArgsError} naming the offending flag or variable.
  */
-export const parseBackfillSearchNamesArgs = (argv: readonly string[], env: Readonly<Record<string, string | undefined>>): BackfillSearchNamesArgs => {
+export const parseBackfillSearchNamesArgs = (
+  argv: readonly string[],
+  env: Readonly<Record<string, string | undefined>>,
+): BackfillSearchNamesArgs => {
   const { values, dryRun } = readFlags(argv);
   const projectId = values.get("--project");
   if (projectId === undefined) throw new BackfillSearchNamesArgsError("missing --project");
-  if (!ProjectIdSchema.safeParse(projectId).success) throw new BackfillSearchNamesArgsError("--project is not a Firebase project id");
+  if (!ProjectIdSchema.safeParse(projectId).success)
+    throw new BackfillSearchNamesArgsError("--project is not a Firebase project id");
   if (values.get("--confirm") !== projectId) throw new BackfillSearchNamesArgsError("--confirm must equal --project");
   const appEnv = AppEnvSchema.safeParse(env["APP_ENV"]);
   if (!appEnv.success) throw new BackfillSearchNamesArgsError("APP_ENV must be local, dev, staging or prod");

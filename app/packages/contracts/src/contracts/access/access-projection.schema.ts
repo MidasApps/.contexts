@@ -8,7 +8,8 @@ import { ProjectIdSchema, UnitIdSchema } from "../tenancy/ids.schema.ts";
 import { GrantPrincipalTypeSchema } from "./membership.schema.ts";
 
 /** Document id of an access projection: `<tenantId>_<principalId>`. */
-export const accessProjectionId = (args: { tenantId: string; principalId: string }): string => `${args.tenantId}_${args.principalId}`;
+export const accessProjectionId = (args: { tenantId: string; principalId: string }): string =>
+  `${args.tenantId}_${args.principalId}`;
 
 /**
  * Read model of a principal's grants in one tenant (SP1 spec §5.4), rebuilt in the

@@ -33,7 +33,10 @@ export function KpiCard({ label, value, hint, area }: KpiCardProps) {
         {area === undefined ? (
           label
         ) : (
-          <RouteLink to={{ id: "admin", rest: area }} className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none">
+          <RouteLink
+            to={{ id: "admin", rest: area }}
+            className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none"
+          >
             {label}
           </RouteLink>
         )}
@@ -44,7 +47,11 @@ export function KpiCard({ label, value, hint, area }: KpiCardProps) {
   );
 }
 
-const EVAL_TONES: Record<AdminOverview["evalStatus"], StatusTone> = { passed: "emerald", failed: "danger", unknown: "neutral" };
+const EVAL_TONES: Record<AdminOverview["evalStatus"], StatusTone> = {
+  passed: "emerald",
+  failed: "danger",
+  unknown: "neutral",
+};
 const EVAL_ICONS = { passed: "circle-check", failed: "circle-x", unknown: "info" } as const;
 
 export type AdminKpiCardsProps = { overview: AdminOverview };
@@ -81,15 +88,31 @@ export function AdminKpiCards({ overview }: AdminKpiCardsProps) {
         <h2 id="admin-kpi-title" className="text-sm font-medium text-muted-foreground">
           {t("title")}
         </h2>
-        <p className="text-xs text-muted-foreground">{t("generatedAt", { when: formatDateTime(overview.generatedAt) })}</p>
+        <p className="text-xs text-muted-foreground">
+          {t("generatedAt", { when: formatDateTime(overview.generatedAt) })}
+        </p>
       </div>
       <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <KpiCard label={t("organizations")} value={format.number(overview.organizations)} hint={t("organizationsHint")} area={areaOf("organizations")} />
+        <KpiCard
+          label={t("organizations")}
+          value={format.number(overview.organizations)}
+          hint={t("organizationsHint")}
+          area={areaOf("organizations")}
+        />
         <KpiCard label={t("activeUsers")} value={format.number(overview.activeUsers7d)} hint={t("last7Days")} />
-        <KpiCard label={t("costMtd")} value={formatCost(overview.costMtdMicroUsd)} hint={t("costMtdHint")} area={areaOf("costMtd")} />
+        <KpiCard
+          label={t("costMtd")}
+          value={formatCost(overview.costMtdMicroUsd)}
+          hint={t("costMtdHint")}
+          area={areaOf("costMtd")}
+        />
         {/* Never shown as a measurement while the API lists it as unmeasured (follow-up 57). */}
         {overview.unmeasured.includes("tripwireRate") ? (
-          <KpiCard label={t("tripwireRate")} value={<span className="font-sans text-base font-medium text-muted-foreground">{t("notMeasured")}</span>} hint={t("tripwireUnmeasuredHint")} />
+          <KpiCard
+            label={t("tripwireRate")}
+            value={<span className="font-sans text-base font-medium text-muted-foreground">{t("notMeasured")}</span>}
+            hint={t("tripwireUnmeasuredHint")}
+          />
         ) : (
           <KpiCard label={t("tripwireRate")} value={percent(overview.tripwireRate)} hint={t("tripwireHint")} />
         )}
@@ -97,7 +120,11 @@ export function AdminKpiCards({ overview }: AdminKpiCardsProps) {
         <KpiCard
           label={t("evalStatus")}
           value={
-            <StatusPill tone={EVAL_TONES[overview.evalStatus]} icon={EVAL_ICONS[overview.evalStatus]} className="font-sans">
+            <StatusPill
+              tone={EVAL_TONES[overview.evalStatus]}
+              icon={EVAL_ICONS[overview.evalStatus]}
+              className="font-sans"
+            >
               {t(`eval.${overview.evalStatus}`)}
             </StatusPill>
           }

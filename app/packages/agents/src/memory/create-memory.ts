@@ -1,5 +1,5 @@
-import type { MastraVector } from "@mastra/core/vector";
 import type { MastraCompositeStore } from "@mastra/core/storage";
+import type { MastraVector } from "@mastra/core/vector";
 import { Memory } from "@mastra/memory";
 import type { AgentModels } from "../models/model-factory.ts";
 import type { AgentEnvInput } from "../runtime/agent-env.schema.ts";
@@ -39,7 +39,9 @@ export type CreateMemoryArgs = {
 // Observational Memory stays off until its comparative eval (Task 28); when enabled, its
 // model is the fast role explicitly (Mastra would otherwise pick a Gemini default).
 const observationalMemoryOf = (args: CreateMemoryArgs) =>
-  args.env.AI_MEMORY_OBSERVATIONAL ? { enabled: true, model: args.models.language("fast", { agentId: "memory" }), scope: "resource" as const } : false;
+  args.env.AI_MEMORY_OBSERVATIONAL
+    ? { enabled: true, model: args.models.language("fast", { agentId: "memory" }), scope: "resource" as const }
+    : false;
 
 /** The memory the supervisor (Task 20) and chat agents share; one instance per runtime. */
 export const createMemory = (args: CreateMemoryArgs): Memory =>

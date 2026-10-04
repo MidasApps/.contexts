@@ -13,12 +13,22 @@ export type ApprovalRequestId = z.infer<typeof ApprovalRequestIdSchema>;
 export const APPROVAL_TTL_DAYS = 7;
 
 /** pending → approved|rejected|cancelled|expired; approved → executed|failed (SP1 spec §6.5). */
-export const APPROVAL_STATUSES = ["pending", "approved", "rejected", "cancelled", "expired", "executed", "failed"] as const;
+export const APPROVAL_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+  "expired",
+  "executed",
+  "failed",
+] as const;
 export const ApprovalStatusSchema = z.enum(APPROVAL_STATUSES);
 export type ApprovalStatus = z.infer<typeof ApprovalStatusSchema>;
 
 /** Kind of an `ApprovalActionHandler` (kebab-case), e.g. `agent-command`. */
-export const ApprovalActionKindSchema = z.string().regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/, { error: "Expected a kebab-case kind." });
+export const ApprovalActionKindSchema = z
+  .string()
+  .regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/, { error: "Expected a kebab-case kind." });
 
 const ReasonSchema = z.string().trim().min(1).max(500);
 
@@ -37,7 +47,9 @@ export const ApprovalRequesterSchema = z.object({
 });
 
 /** A stable SCREAMING_SNAKE code; free text (an SDK message, a host) never fits it. */
-export const ApprovalFailureCodeSchema = z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/, { error: "Expected a SCREAMING_SNAKE code." });
+export const ApprovalFailureCodeSchema = z
+  .string()
+  .regex(/^[A-Z][A-Z0-9_]{0,63}$/, { error: "Expected a SCREAMING_SNAKE code." });
 
 /**
  * The safe part of a failed execution (decision 0067): the handler's code, or a core code
@@ -69,7 +81,11 @@ export const ApprovalRequestSchema = z.object({
 export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
 
 const NODE_EXAMPLE = { level: "project", tenantId: EXAMPLE_IDS.organization, projectId: EXAMPLE_IDS.project } as const;
-const ACTION_EXAMPLE = { kind: "sample-delete-invoice", input: { invoiceId: "Iq2wE4rT6yU8iO0pA1sD" }, summary: "Delete invoice 42" };
+const ACTION_EXAMPLE = {
+  kind: "sample-delete-invoice",
+  input: { invoiceId: "Iq2wE4rT6yU8iO0pA1sD" },
+  summary: "Delete invoice 42",
+};
 
 export const ApprovalRequestContract = defineContract(ApprovalRequestSchema, {
   id: "access.ApprovalRequest",

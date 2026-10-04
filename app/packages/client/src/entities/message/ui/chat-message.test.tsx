@@ -8,7 +8,12 @@ import { ChatMessage } from "./chat-message.tsx";
 
 const KB = "kb:01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f#3";
 
-const assistant = (parts: unknown[], metadata?: unknown): UIMessage => ({ id: "a-1", role: "assistant", metadata, parts: parts as UIMessage["parts"] });
+const assistant = (parts: unknown[], metadata?: unknown): UIMessage => ({
+  id: "a-1",
+  role: "assistant",
+  metadata,
+  parts: parts as UIMessage["parts"],
+});
 
 const delegation = {
   type: "tool-agent-knowledge",
@@ -22,7 +27,18 @@ const delegation = {
         toolName: "knowledge_searchKnowledge",
         toolCallId: "s-1",
         args: { query: "prazo" },
-        result: { results: [{ citationId: KB, documentId: "d", title: "Guia de entregas", sourceUrl: "https://docs.example.com/entregas", snippet: "Entregas em até 30 dias.", score: 0.9 }] },
+        result: {
+          results: [
+            {
+              citationId: KB,
+              documentId: "d",
+              title: "Guia de entregas",
+              sourceUrl: "https://docs.example.com/entregas",
+              snippet: "Entregas em até 30 dias.",
+              score: 0.9,
+            },
+          ],
+        },
       },
     ],
   },
@@ -30,13 +46,19 @@ const delegation = {
 
 describe("ChatMessage", () => {
   it("renders a member turn as plain text in an article named by its author", () => {
-    renderWithProviders(<ChatMessage message={{ id: "u-1", role: "user", parts: [{ type: "text", text: "**não** é markdown\nlinha 2" }] }} />);
+    renderWithProviders(
+      <ChatMessage
+        message={{ id: "u-1", role: "user", parts: [{ type: "text", text: "**não** é markdown\nlinha 2" }] }}
+      />,
+    );
     const article = screen.getByRole("article", { name: "Você" });
     expect(within(article).getByText(/\*\*não\*\* é markdown/)).toBeTruthy();
   });
 
   it("shows a delegation as an agent card with the subagent, collapsed, and its steps on demand", async () => {
-    const { user } = renderWithProviders(<ChatMessage message={assistant([delegation, { type: "text", text: "O prazo é de 30 dias." }])} />);
+    const { user } = renderWithProviders(
+      <ChatMessage message={assistant([delegation, { type: "text", text: "O prazo é de 30 dias." }])} />,
+    );
     const card = screen.getByRole("button", { name: /Delegado para Agente de conhecimento/ });
     expect(card.getAttribute("aria-expanded")).toBe("false");
     expect(within(card).getByText("Concluído")).toBeTruthy();
@@ -48,12 +70,21 @@ describe("ChatMessage", () => {
   });
 
   it("names an unknown subagent by its id", () => {
-    renderWithProviders(<ChatMessage message={assistant([{ type: "tool-agent-billing", toolCallId: "c-9", state: "input-available", input: { prompt: "x" } }])} />);
+    renderWithProviders(
+      <ChatMessage
+        message={assistant([
+          { type: "tool-agent-billing", toolCallId: "c-9", state: "input-available", input: { prompt: "x" } },
+        ])}
+      />,
+    );
     expect(screen.getByRole("button", { name: /Delegado para Agente billing/ })).toBeTruthy();
   });
 
   it("keeps reasoning collapsed and hides it when the tenant turns it off", async () => {
-    const message = assistant([{ type: "reasoning", text: "Vou consultar a base.", state: "done" }, { type: "text", text: "Pronto." }]);
+    const message = assistant([
+      { type: "reasoning", text: "Vou consultar a base.", state: "done" },
+      { type: "text", text: "Pronto." },
+    ]);
     const { user, rerender } = renderWithProviders(<ChatMessage message={message} />);
     expect(screen.queryByText("Vou consultar a base.")).toBeNull();
     await user.click(screen.getByRole("button", { name: /Raciocínio/ }));
@@ -63,14 +94,22 @@ describe("ChatMessage", () => {
   });
 
   it("renders a plain tool call collapsed with its state", () => {
-    renderWithProviders(<ChatMessage message={assistant([{ type: "tool-catalog_listEntities", toolCallId: "c-2", state: "input-available", input: {} }])} />);
+    renderWithProviders(
+      <ChatMessage
+        message={assistant([
+          { type: "tool-catalog_listEntities", toolCallId: "c-2", state: "input-available", input: {} },
+        ])}
+      />,
+    );
     const tool = screen.getByRole("button", { name: /Ferramenta: Listar os dados do catálogo/ });
     expect(tool.getAttribute("aria-expanded")).toBe("false");
     expect(within(tool).getByText("Executando")).toBeTruthy();
   });
 
   it("numbers citations, resolves them against the passages of the turn and lists the sources", async () => {
-    const { user } = renderWithProviders(<ChatMessage message={assistant([delegation, { type: "text", text: `O prazo é de 30 dias [${KB}].` }])} />);
+    const { user } = renderWithProviders(
+      <ChatMessage message={assistant([delegation, { type: "text", text: `O prazo é de 30 dias [${KB}].` }])} />,
+    );
     expect(screen.queryByText(/kb:/)).toBeNull();
     await user.click(screen.getByRole("button", { name: "Fonte 1: Guia de entregas" }));
     expect(screen.getByText("Entregas em até 30 dias.")).toBeTruthy();
@@ -81,10 +120,23 @@ describe("ChatMessage", () => {
   });
 
   it("shows a tripwire as an alert with the reason of its processor, and a default for unknown ones", () => {
-    const { rerender } = renderWithProviders(<ChatMessage message={assistant([{ type: "data-tripwire", data: { reason: "BUDGET_EXCEEDED", metadata: { processorId: "tenant-budget-guard" } } }])} />);
+    const { rerender } = renderWithProviders(
+      <ChatMessage
+        message={assistant([
+          {
+            type: "data-tripwire",
+            data: { reason: "BUDGET_EXCEEDED", metadata: { processorId: "tenant-budget-guard" } },
+          },
+        ])}
+      />,
+    );
     expect(screen.getByText("Resposta bloqueada")).toBeTruthy();
     expect(screen.getByText("O orçamento de IA da organização acabou. Fale com um administrador.")).toBeTruthy();
-    rerender(<ChatMessage message={assistant([{ type: "data-tripwire", data: { reason: "x", processorId: "some-new-processor" } }])} />);
+    rerender(
+      <ChatMessage
+        message={assistant([{ type: "data-tripwire", data: { reason: "x", processorId: "some-new-processor" } }])}
+      />,
+    );
     expect(screen.getByText("Uma regra de segurança interrompeu esta resposta.")).toBeTruthy();
   });
 
@@ -106,9 +158,22 @@ describe("ChatMessage", () => {
   });
 
   it("lists the attachments of a member turn and shows a form submission as a chip", () => {
-    const text = formatUiSubmission({ kind: "schema-form", commandId: "example.CreateNoteCommand", contractId: "example.Note", mode: "create", values: { title: "Kickoff" } });
+    const text = formatUiSubmission({
+      kind: "schema-form",
+      commandId: "example.CreateNoteCommand",
+      contractId: "example.Note",
+      mode: "create",
+      values: { title: "Kickoff" },
+    });
     renderWithProviders(
-      <ChatMessage message={{ id: "u-1", role: "user", metadata: { attachments: [{ fileId: "f-1", name: "diagrama.png", mediaType: "image/png", sizeBytes: 1 }] }, parts: [{ type: "text", text }] }} />,
+      <ChatMessage
+        message={{
+          id: "u-1",
+          role: "user",
+          metadata: { attachments: [{ fileId: "f-1", name: "diagrama.png", mediaType: "image/png", sizeBytes: 1 }] },
+          parts: [{ type: "text", text }],
+        }}
+      />,
     );
     expect(screen.getByText("Formulário enviado: example.CreateNoteCommand")).toBeTruthy();
     expect(screen.queryByText(/Kickoff/)).toBeNull();
@@ -140,7 +205,13 @@ describe("ChatMessage", () => {
           [
             { type: "reasoning", text: "Pensando.", state: "done" },
             delegation,
-            { type: "tool-web_search", toolCallId: "c-3", state: "output-error", input: { query: "x" }, errorText: "Tempo esgotado." },
+            {
+              type: "tool-web_search",
+              toolCallId: "c-3",
+              state: "output-error",
+              input: { query: "x" },
+              errorText: "Tempo esgotado.",
+            },
             { type: "data-tripwire", data: { processorId: "moderation" } },
             { type: "text", text: `Resposta com fonte [${KB}].` },
           ],

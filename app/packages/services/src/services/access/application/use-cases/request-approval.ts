@@ -1,11 +1,21 @@
-import { APPROVAL_TTL_DAYS, type ApprovalRequest, type CreateApprovalRequestInput, type Principal, type TenantId } from "@core/contracts";
+import {
+  APPROVAL_TTL_DAYS,
+  type ApprovalRequest,
+  type CreateApprovalRequestInput,
+  type Principal,
+  type TenantId,
+} from "@core/contracts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { sha256Hex } from "../../../shared/crypto/sha256.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
-import { ApprovalInputInvalidError, ApprovalNotRequiredError, UnknownApprovalActionError } from "../../domain/errors/approval-errors.ts";
-import { requesterRefOf, type ApprovalDeps } from "../approval-deps.ts";
+import {
+  ApprovalInputInvalidError,
+  ApprovalNotRequiredError,
+  UnknownApprovalActionError,
+} from "../../domain/errors/approval-errors.ts";
+import { type ApprovalDeps, requesterRefOf } from "../approval-deps.ts";
 
 export type RequestApprovalCommand = {
   readonly principal: Principal;
@@ -17,7 +27,11 @@ export type RequestApprovalCommand = {
   readonly requestId: string;
 };
 
-export type RequestApprovalError = AccessDeniedError | ApprovalNotRequiredError | UnknownApprovalActionError | ApprovalInputInvalidError;
+export type RequestApprovalError =
+  | AccessDeniedError
+  | ApprovalNotRequiredError
+  | UnknownApprovalActionError
+  | ApprovalInputInvalidError;
 
 /**
  * Creates a pending approval request (SP3 tool approvals, SP5 workflow HITL).
@@ -25,24 +39,39 @@ export type RequestApprovalError = AccessDeniedError | ApprovalNotRequiredError 
  *   `UNKNOWN_APPROVAL_ACTION` (422) or the handler's input issues (400).
  * @throws on infrastructure failures (fail-closed: nothing is created).
  */
-export type RequestApproval = (command: RequestApprovalCommand) => Promise<Result<ApprovalRequest, RequestApprovalError>>;
+export type RequestApproval = (
+  command: RequestApprovalCommand,
+) => Promise<Result<ApprovalRequest, RequestApprovalError>>;
 
 const DAY_MS = 86_400_000;
 
-const inputIssues = (deps: ApprovalDeps, action: CreateApprovalRequestInput["action"]): ApprovalInputInvalidError | UnknownApprovalActionError | null => {
+const inputIssues = (
+  deps: ApprovalDeps,
+  action: CreateApprovalRequestInput["action"],
+): ApprovalInputInvalidError | UnknownApprovalActionError | null => {
   const handler = deps.handlers.get(action.kind);
   if (handler === undefined) return new UnknownApprovalActionError();
   const issues = handler.check(action.input);
   if (issues.length === 0) return null;
-  return new ApprovalInputInvalidError(issues.map((issue) => ({ field: ["action", "input", ...issue.path.map(String)].join("."), issue: issue.code.toUpperCase() })));
+  return new ApprovalInputInvalidError(
+    issues.map((issue) => ({
+      field: ["action", "input", ...issue.path.map(String)].join("."),
+      issue: issue.code.toUpperCase(),
+    })),
+  );
 };
 
 // Steps before any write: tenant of the path, read-only impersonation, the caller's own
 // right to the action, the permission's `requiresApproval`, a handler and a valid input.
-const checkRequest = async (deps: ApprovalDeps, command: RequestApprovalCommand): Promise<RequestApprovalError | null> => {
+const checkRequest = async (
+  deps: ApprovalDeps,
+  command: RequestApprovalCommand,
+): Promise<RequestApprovalError | null> => {
   const { principal, input } = command;
-  if (command.tenantId !== undefined && input.node.tenantId !== command.tenantId) return new AccessDeniedError("NODE_NOT_FOUND");
-  if (principal.type === "user" && principal.impersonation !== undefined) return new AccessDeniedError("IMPERSONATION_READ_ONLY");
+  if (command.tenantId !== undefined && input.node.tenantId !== command.tenantId)
+    return new AccessDeniedError("NODE_NOT_FOUND");
+  if (principal.type === "user" && principal.impersonation !== undefined)
+    return new AccessDeniedError("IMPERSONATION_READ_ONLY");
   const access = command.access ?? deps.accessCore.forRequest();
   const decision = await access.authorize({ principal, permission: input.permission, node: input.node });
   if (!decision.allowed) return new AccessDeniedError(decision.reason);

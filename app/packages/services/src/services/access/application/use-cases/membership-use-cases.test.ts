@@ -28,18 +28,32 @@ describe("grantMembership", () => {
     const result = await world.services.grantMembership(grantCommand(world));
 
     expect(result).toMatchObject({ ok: true, data: { principalId: "u2", node: nodes.p1, grantedBy: "owner-1" } });
-    expect(world.writes.projectionOf("org-a", "u2")).toMatchObject({ orgWide: false, projectIds: ["p1"], visibleProjectIds: ["p1"], isRevoked: false, version: 1 });
+    expect(world.writes.projectionOf("org-a", "u2")).toMatchObject({
+      orgWide: false,
+      projectIds: ["p1"],
+      visibleProjectIds: ["p1"],
+      isRevoked: false,
+      version: 1,
+    });
     expect(world.writes.userOf("u2")?.accessVersion).toBe(4);
-    expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "MEMBERSHIP_GRANTED", actor: { type: "user", id: "owner-1" }, node: nodes.p1 });
+    expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({
+      action: "MEMBERSHIP_GRANTED",
+      actor: { type: "user", id: "owner-1" },
+      node: nodes.p1,
+    });
     expect(world.writes.claims.claimsOf("u2")).toEqual({ accessVersion: 4 });
-    const decision = await world.access().authorize({ principal: user("u2"), permission: "core.unit.read", node: nodes.u1 });
+    const decision = await world
+      .access()
+      .authorize({ principal: user("u2"), permission: "core.unit.read", node: nodes.u1 });
     expect(decision.allowed).toBe(true);
   });
 
   it("refuses a second grant for the same principal and node (409 MEMBERSHIP_EXISTS)", async () => {
     const world = await setup();
     await world.services.grantMembership(grantCommand(world));
-    const again = await world.services.grantMembership(grantCommand(world, { access: world.access(), roles: [system("viewer")] }));
+    const again = await world.services.grantMembership(
+      grantCommand(world, { access: world.access(), roles: [system("viewer")] }),
+    );
     expect(again).toMatchObject({ ok: false, error: { code: "MEMBERSHIP_EXISTS" } });
     expect(world.writes.allMemberships().filter((m) => m.principalId === "u2")).toHaveLength(1);
   });
@@ -47,9 +61,13 @@ describe("grantMembership", () => {
   it("refuses roles beyond the actor's own permissions (escalation)", async () => {
     const world = await setup();
     await world.grant("admin-1", nodes.p1, [system("admin")]);
-    const result = await world.services.grantMembership(grantCommand(world, { actor: user("admin-1"), roles: [system("owner")] }));
+    const result = await world.services.grantMembership(
+      grantCommand(world, { actor: user("admin-1"), roles: [system("owner")] }),
+    );
     expect(result).toMatchObject({ ok: false, error: { code: "ESCALATION_FORBIDDEN" } });
-    expect(result.ok ? [] : (result.error as unknown as { missing: string[] }).missing).toContain("core.organization.delete");
+    expect(result.ok ? [] : (result.error as unknown as { missing: string[] }).missing).toContain(
+      "core.organization.delete",
+    );
   });
 
   it("refuses an actor without core.member.update at the node", async () => {
@@ -61,7 +79,9 @@ describe("grantMembership", () => {
 
   it("refuses a grantee without a users doc (404), so no grant points at nobody", async () => {
     const world = await setup();
-    const result = await world.services.grantMembership(grantCommand(world, { principal: { type: "user", id: "ghost" } }));
+    const result = await world.services.grantMembership(
+      grantCommand(world, { principal: { type: "user", id: "ghost" } }),
+    );
     expect(result).toMatchObject({ ok: false, error: { code: "NOT_FOUND", resource: "user" } });
     expect(world.writes.allMemberships().some((m) => m.principalId === "ghost")).toBe(false);
   });
@@ -74,7 +94,9 @@ describe("grantMembership", () => {
 
   it("refuses an unknown custom role", async () => {
     const world = await setup();
-    const result = await world.services.grantMembership(grantCommand(world, { roles: [{ kind: "custom", roleId: RoleIdSchema.parse("missing") }] }));
+    const result = await world.services.grantMembership(
+      grantCommand(world, { roles: [{ kind: "custom", roleId: RoleIdSchema.parse("missing") }] }),
+    );
     expect(result).toMatchObject({ ok: false, error: { code: "UNKNOWN_ROLE", roleIds: ["missing"] } });
   });
 
@@ -92,7 +114,13 @@ describe("updateMembership", () => {
     const world = await setup();
     const granted = await world.services.grantMembership(grantCommand(world));
     if (!granted.ok) throw granted.error;
-    const result = await world.services.updateMembership({ actor: user("owner-1"), access: world.access(), membershipId: granted.data.id, roles: [system("viewer")], requestId: REQUEST_ID });
+    const result = await world.services.updateMembership({
+      actor: user("owner-1"),
+      access: world.access(),
+      membershipId: granted.data.id,
+      roles: [system("viewer")],
+      requestId: REQUEST_ID,
+    });
     expect(result).toMatchObject({ ok: true, data: { roles: [system("viewer")] } });
     expect(world.writes.projectionOf("org-a", "u2")?.version).toBe(2);
     expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "MEMBERSHIP_UPDATED", changes: ["roles"] });
@@ -100,14 +128,26 @@ describe("updateMembership", () => {
 
   it("refuses to demote the last owner (422 LAST_OWNER)", async () => {
     const world = await setup();
-    const result = await world.services.updateMembership({ actor: user("owner-1"), access: world.access(), membershipId: world.owner.id, roles: [system("admin")], requestId: REQUEST_ID });
+    const result = await world.services.updateMembership({
+      actor: user("owner-1"),
+      access: world.access(),
+      membershipId: world.owner.id,
+      roles: [system("admin")],
+      requestId: REQUEST_ID,
+    });
     expect(result).toMatchObject({ ok: false, error: { code: "LAST_OWNER" } });
   });
 
   it("allows demoting an owner while another owner remains", async () => {
     const world = await setup();
     await world.grant("owner-2", nodes.orgA, [system("owner")]);
-    const result = await world.services.updateMembership({ actor: user("owner-2"), access: world.access(), membershipId: world.owner.id, roles: [system("admin")], requestId: REQUEST_ID });
+    const result = await world.services.updateMembership({
+      actor: user("owner-2"),
+      access: world.access(),
+      membershipId: world.owner.id,
+      roles: [system("admin")],
+      requestId: REQUEST_ID,
+    });
     expect(result.ok).toBe(true);
   });
 
@@ -117,13 +157,30 @@ describe("updateMembership", () => {
     await world.grant("admin-1", nodes.orgA, [system("admin")]);
     const asAdmin = { actor: user("admin-1"), requestId: REQUEST_ID };
 
-    const demoted = await world.services.updateMembership({ ...asAdmin, access: world.access(), membershipId: second.id, roles: [system("viewer")] });
-    const revoked = await world.services.revokeMembership({ ...asAdmin, access: world.access(), membershipId: second.id });
+    const demoted = await world.services.updateMembership({
+      ...asAdmin,
+      access: world.access(),
+      membershipId: second.id,
+      roles: [system("viewer")],
+    });
+    const revoked = await world.services.revokeMembership({
+      ...asAdmin,
+      access: world.access(),
+      membershipId: second.id,
+    });
     expect(demoted).toMatchObject({ ok: false, error: { code: "ESCALATION_FORBIDDEN" } });
     expect(revoked).toMatchObject({ ok: false, error: { code: "ESCALATION_FORBIDDEN" } });
-    expect(world.writes.allMemberships().find((m) => m.id === second.id)).toMatchObject({ roles: [system("owner")], deletedAt: null });
+    expect(world.writes.allMemberships().find((m) => m.id === second.id)).toMatchObject({
+      roles: [system("owner")],
+      deletedAt: null,
+    });
 
-    const byOwner = await world.services.revokeMembership({ actor: user("owner-1"), access: world.access(), membershipId: second.id, requestId: REQUEST_ID });
+    const byOwner = await world.services.revokeMembership({
+      actor: user("owner-1"),
+      access: world.access(),
+      membershipId: second.id,
+      requestId: REQUEST_ID,
+    });
     expect(byOwner.ok).toBe(true);
   });
 
@@ -131,13 +188,25 @@ describe("updateMembership", () => {
     const world = await setup();
     await world.grant("admin-1", nodes.orgA, [system("admin")]);
     const member = await world.grant("member-1", nodes.p1, [system("member")]);
-    const result = await world.services.updateMembership({ actor: user("admin-1"), access: world.access(), membershipId: member.id, roles: [system("viewer")], requestId: REQUEST_ID });
+    const result = await world.services.updateMembership({
+      actor: user("admin-1"),
+      access: world.access(),
+      membershipId: member.id,
+      roles: [system("viewer")],
+      requestId: REQUEST_ID,
+    });
     expect(result.ok).toBe(true);
   });
 
   it("answers not found for a missing membership", async () => {
     const world = await setup();
-    const result = await world.services.updateMembership({ actor: user("owner-1"), access: world.access(), membershipId: MembershipIdSchema.parse("nope"), roles: [system("viewer")], requestId: REQUEST_ID });
+    const result = await world.services.updateMembership({
+      actor: user("owner-1"),
+      access: world.access(),
+      membershipId: MembershipIdSchema.parse("nope"),
+      roles: [system("viewer")],
+      requestId: REQUEST_ID,
+    });
     expect(result).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 });
@@ -147,13 +216,22 @@ describe("revokeMembership", () => {
     const world = await setup();
     const granted = await world.services.grantMembership(grantCommand(world));
     if (!granted.ok) throw granted.error;
-    const result = await world.services.revokeMembership({ actor: user("owner-1"), access: world.access(), membershipId: granted.data.id, requestId: REQUEST_ID });
+    const result = await world.services.revokeMembership({
+      actor: user("owner-1"),
+      access: world.access(),
+      membershipId: granted.data.id,
+      requestId: REQUEST_ID,
+    });
 
     expect(result.ok).toBe(true);
-    expect(world.writes.allMemberships().find((m) => m.id === granted.data.id)?.deletedAt).toBe("2026-09-30T12:00:00.000Z");
+    expect(world.writes.allMemberships().find((m) => m.id === granted.data.id)?.deletedAt).toBe(
+      "2026-09-30T12:00:00.000Z",
+    );
     expect(world.writes.projectionOf("org-a", "u2")).toMatchObject({ isRevoked: true, projectIds: [] });
     expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "MEMBERSHIP_REVOKED" });
-    const decision = await world.access().authorize({ principal: user("u2"), permission: "core.project.read", node: nodes.p1 });
+    const decision = await world
+      .access()
+      .authorize({ principal: user("u2"), permission: "core.project.read", node: nodes.p1 });
     expect(decision).toEqual({ allowed: false, reason: "NOT_A_MEMBER" });
   });
 
@@ -165,16 +243,33 @@ describe("revokeMembership", () => {
     const deleted = createAccessServices({ ...world.deps, tenantGuard: { isLive: () => Promise.resolve(false) } });
 
     const again = await deleted.grantMembership(grantCommand(world, { access: world.access(), node: nodes.u1 }));
-    const updated = await deleted.updateMembership({ actor: user("owner-1"), access: world.access(), membershipId: granted.data.id, roles: [system("viewer")], requestId: REQUEST_ID });
-    const revoked = await deleted.revokeMembership({ actor: user("owner-1"), access: world.access(), membershipId: granted.data.id, requestId: REQUEST_ID });
+    const updated = await deleted.updateMembership({
+      actor: user("owner-1"),
+      access: world.access(),
+      membershipId: granted.data.id,
+      roles: [system("viewer")],
+      requestId: REQUEST_ID,
+    });
+    const revoked = await deleted.revokeMembership({
+      actor: user("owner-1"),
+      access: world.access(),
+      membershipId: granted.data.id,
+      requestId: REQUEST_ID,
+    });
 
-    for (const result of [again, updated, revoked]) expect(result).toMatchObject({ ok: false, error: { code: "NOT_FOUND", resource: "organization" } });
+    for (const result of [again, updated, revoked])
+      expect(result).toMatchObject({ ok: false, error: { code: "NOT_FOUND", resource: "organization" } });
     expect(world.writes.projectionOf("org-a", "u2")).toMatchObject({ projectIds: ["p1"], unitIds: [], version: 1 });
   });
 
   it("refuses to remove the last owner grant", async () => {
     const world = await setup();
-    const result = await world.services.revokeMembership({ actor: user("owner-1"), access: world.access(), membershipId: world.owner.id, requestId: REQUEST_ID });
+    const result = await world.services.revokeMembership({
+      actor: user("owner-1"),
+      access: world.access(),
+      membershipId: world.owner.id,
+      requestId: REQUEST_ID,
+    });
     expect(result).toMatchObject({ ok: false, error: { code: "LAST_OWNER" } });
     expect(world.writes.projectionOf("org-a", "owner-1")?.isRevoked).toBe(false);
   });

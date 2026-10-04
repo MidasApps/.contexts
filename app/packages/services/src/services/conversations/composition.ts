@@ -24,7 +24,10 @@ export type ConversationsServices = {
 };
 
 /** Binds the conversations use cases to a repository (tests pass the in-memory one). */
-export const createConversationsServices = (deps: { readonly conversations: ConversationRepository; readonly clock?: Clock }): ConversationsServices => {
+export const createConversationsServices = (deps: {
+  readonly conversations: ConversationRepository;
+  readonly clock?: Clock;
+}): ConversationsServices => {
   const clock = deps.clock ?? systemClock;
   const { conversations } = deps;
   return {
@@ -40,5 +43,11 @@ export const createConversationsServices = (deps: { readonly conversations: Conv
 };
 
 /** The conversations services over Firestore `conversations`. */
-export const createFirestoreConversationsServices = (deps: { readonly firestore: Firestore; readonly clock?: Clock }): ConversationsServices =>
-  createConversationsServices({ conversations: createFirestoreConversationRepository({ firestore: deps.firestore }), ...(deps.clock === undefined ? {} : { clock: deps.clock }) });
+export const createFirestoreConversationsServices = (deps: {
+  readonly firestore: Firestore;
+  readonly clock?: Clock;
+}): ConversationsServices =>
+  createConversationsServices({
+    conversations: createFirestoreConversationRepository({ firestore: deps.firestore }),
+    ...(deps.clock === undefined ? {} : { clock: deps.clock }),
+  });

@@ -14,7 +14,10 @@ const optionalValue = <TSchema extends z.ZodType>(schema: TSchema) =>
 
 // Boolean env values are the literal strings "true"/"false"; anything else is a typo.
 const booleanFlag = (fallback: boolean) =>
-  z.enum(["true", "false"]).transform((value) => value === "true").default(fallback);
+  z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .default(fallback);
 
 const ModelIdSchema = z.string().regex(MODEL_ID_PATTERN, { error: "expected <provider>/<model>" });
 const modelRole = (role: keyof typeof MODEL_ROLES) => ModelIdSchema.default(MODEL_ROLES[role].defaultModel);
@@ -141,7 +144,8 @@ const remoteOnlyIssues = (env: AgentEnvInput): EnvIssue[] => {
   // The runtime role has no DDL outside local; `db:init` creates Mastra's tables.
   if (env.MASTRA_STORAGE_INIT === "auto") issues.push({ field: "MASTRA_STORAGE_INIT", issue: "SKIP_OUTSIDE_LOCAL" });
   // A self-hosted Firecrawl receives tenant URLs and keys: TLS outside the developer machine.
-  if (env.FIRECRAWL_API_URL?.startsWith("http:") === true) issues.push({ field: "FIRECRAWL_API_URL", issue: "HTTPS_OUTSIDE_LOCAL" });
+  if (env.FIRECRAWL_API_URL?.startsWith("http:") === true)
+    issues.push({ field: "FIRECRAWL_API_URL", issue: "HTTPS_OUTSIDE_LOCAL" });
   return issues;
 };
 

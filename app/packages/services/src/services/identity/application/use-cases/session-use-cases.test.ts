@@ -18,25 +18,42 @@ describe("web sessions", () => {
 
   it("refuses an unknown or revoked ID token", async () => {
     const world = buildSessionWorld();
-    expect(await world.services.createWebSession({ idToken: "nope", userAgent: null })).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
+    expect(await world.services.createWebSession({ idToken: "nope", userAgent: null })).toMatchObject({
+      ok: false,
+      error: { code: "UNAUTHORIZED" },
+    });
   });
 
   it("creates a cookie session and exchanges it for a custom token carrying smfa", async () => {
     const world = buildSessionWorld();
     world.auth.addIdToken("id-fresh", { uid, authTimeSeconds: nowSeconds - 10, mfa: true });
-    const created = await world.services.createWebSession({ idToken: "id-fresh", userAgent: "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0" });
+    const created = await world.services.createWebSession({
+      idToken: "id-fresh",
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0",
+    });
     if (!created.ok) throw created.error;
     expect(created.data.maxAgeSeconds).toBe(5 * 86_400);
-    expect(world.repository.all()[0]).toMatchObject({ kind: "web", mfa: true, userAgent: "Firefox on Linux", cookieHash: hashSessionSecret(created.data.cookie) });
+    expect(world.repository.all()[0]).toMatchObject({
+      kind: "web",
+      mfa: true,
+      userAgent: "Firefox on Linux",
+      cookieHash: hashSessionSecret(created.data.cookie),
+    });
     const exchanged = await world.services.exchangeWebSession({ cookie: created.data.cookie });
-    expect(exchanged).toEqual({ ok: true, data: { customToken: `custom:${uid}:{"smfa":true,"sessionId":"${created.data.sessionId}"}` } });
+    expect(exchanged).toEqual({
+      ok: true,
+      data: { customToken: `custom:${uid}:{"smfa":true,"sessionId":"${created.data.sessionId}"}` },
+    });
   });
 
   it("refuses to exchange a signed-out (revoked) session", async () => {
     const world = buildSessionWorld();
     const { cookie } = await world.webSession(uid, { mfa: false });
     await world.services.signOutWebSession({ cookie, requestId: "r2" });
-    expect(await world.services.exchangeWebSession({ cookie })).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
+    expect(await world.services.exchangeWebSession({ cookie })).toMatchObject({
+      ok: false,
+      error: { code: "UNAUTHORIZED" },
+    });
     expect(await world.services.requireWebSession({ cookie })).toMatchObject({ ok: false });
   });
 
@@ -58,19 +75,36 @@ describe("web sessions", () => {
     const page = await world.services.listSessions({ actor, page: { after: undefined, limit: 20 } });
     expect(page.items.map((item) => item.id)).toEqual([own.sessionId]);
     expect(page.items[0]?.current).toBe(false);
-    const fromSession = await world.services.listSessions({ actor: { ...actor, sessionId: own.sessionId }, page: { after: undefined, limit: 20 } });
+    const fromSession = await world.services.listSessions({
+      actor: { ...actor, sessionId: own.sessionId },
+      page: { after: undefined, limit: 20 },
+    });
     expect(fromSession.items[0]?.current).toBe(true);
     expect(JSON.stringify(page.items)).not.toContain("Hash");
-    expect(await world.services.revokeSession({ actor, sessionId: other.sessionId, requestId: "r" })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
-    expect(await world.services.revokeSession({ actor, sessionId: own.sessionId, requestId: "r" })).toEqual({ ok: true, data: undefined });
+    expect(await world.services.revokeSession({ actor, sessionId: other.sessionId, requestId: "r" })).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND" },
+    });
+    expect(await world.services.revokeSession({ actor, sessionId: own.sessionId, requestId: "r" })).toEqual({
+      ok: true,
+      data: undefined,
+    });
     expect((await world.services.listSessions({ actor, page: { after: undefined, limit: 20 } })).items).toHaveLength(0);
   });
 
   it("refuses session writes under impersonation", async () => {
     const world = buildSessionWorld();
-    const impersonated: UserPrincipal = { ...actor, impersonation: { sessionId: ImpersonationSessionIdSchema.parse("imp-1"), staffUid: UserIdSchema.parse("staff") } };
-    expect(await world.services.revokeAllSessions({ actor: impersonated, requestId: "r" })).toMatchObject({ ok: false, error: { reason: "IMPERSONATION_READ_ONLY" } });
-    expect(await world.services.createDesktopSession({ actor: impersonated, userAgent: null })).toMatchObject({ ok: false });
+    const impersonated: UserPrincipal = {
+      ...actor,
+      impersonation: { sessionId: ImpersonationSessionIdSchema.parse("imp-1"), staffUid: UserIdSchema.parse("staff") },
+    };
+    expect(await world.services.revokeAllSessions({ actor: impersonated, requestId: "r" })).toMatchObject({
+      ok: false,
+      error: { reason: "IMPERSONATION_READ_ONLY" },
+    });
+    expect(await world.services.createDesktopSession({ actor: impersonated, userAgent: null })).toMatchObject({
+      ok: false,
+    });
     expect(world.auth.revokedUids()).toEqual([]);
   });
 });
@@ -89,7 +123,9 @@ describe("desktop sessions", () => {
     expect(reuse).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
     expect(world.repository.all()[0]?.revokedAt).not.toBeNull();
     expect(world.audited()).toContain("DESKTOP_SESSION_REUSE_DETECTED");
-    expect(await world.services.exchangeDesktopSession({ secret: first.data.secret, requestId: "r" })).toMatchObject({ ok: false });
+    expect(await world.services.exchangeDesktopSession({ secret: first.data.secret, requestId: "r" })).toMatchObject({
+      ok: false,
+    });
   });
 
   it("slides the expiry forward on every exchange", async () => {
@@ -106,9 +142,13 @@ describe("desktop sessions", () => {
     const created = await world.services.createDesktopSession({ actor, userAgent: null });
     if (!created.ok) throw created.error;
     world.auth.setState(uid, { disabled: false, tokensValidAfter: "2026-09-30T12:00:01.000Z" });
-    expect(await world.services.exchangeDesktopSession({ secret: created.data.secret, requestId: "r" })).toMatchObject({ ok: false });
+    expect(await world.services.exchangeDesktopSession({ secret: created.data.secret, requestId: "r" })).toMatchObject({
+      ok: false,
+    });
     world.auth.setState(uid, { disabled: true, tokensValidAfter: null });
-    expect(await world.services.exchangeDesktopSession({ secret: created.data.secret, requestId: "r" })).toMatchObject({ ok: false });
+    expect(await world.services.exchangeDesktopSession({ secret: created.data.secret, requestId: "r" })).toMatchObject({
+      ok: false,
+    });
   });
 
   it("refuses an expired session (30 days without exchange)", async () => {
@@ -116,7 +156,9 @@ describe("desktop sessions", () => {
     const created = await world.services.createDesktopSession({ actor, userAgent: null });
     if (!created.ok) throw created.error;
     world.setNow("2026-10-30T12:00:01.000Z");
-    expect(await world.services.exchangeDesktopSession({ secret: created.data.secret, requestId: "r" })).toMatchObject({ ok: false });
+    expect(await world.services.exchangeDesktopSession({ secret: created.data.secret, requestId: "r" })).toMatchObject({
+      ok: false,
+    });
   });
 });
 
@@ -124,13 +166,25 @@ describe("platform staff guard", () => {
   it("requires an active staff doc and MFA (sign_in_second_factor or smfa)", async () => {
     const world = buildSessionWorld();
     const plain = await world.webSession(uid, { mfa: false });
-    expect(await world.services.requirePlatformStaffSession({ cookie: plain.cookie })).toMatchObject({ ok: false, error: { code: "NOT_PLATFORM_STAFF" } });
+    expect(await world.services.requirePlatformStaffSession({ cookie: plain.cookie })).toMatchObject({
+      ok: false,
+      error: { code: "NOT_PLATFORM_STAFF" },
+    });
     world.staff.set(uid, { role: "platform-admin", isActive: true });
-    expect(await world.services.requirePlatformStaffSession({ cookie: plain.cookie })).toMatchObject({ ok: false, error: { code: "NOT_PLATFORM_STAFF" } });
+    expect(await world.services.requirePlatformStaffSession({ cookie: plain.cookie })).toMatchObject({
+      ok: false,
+      error: { code: "NOT_PLATFORM_STAFF" },
+    });
     const strong = await world.webSession(uid, { mfa: true });
-    expect(await world.services.requirePlatformStaffSession({ cookie: strong.cookie })).toMatchObject({ ok: true, data: { role: "platform-admin", principal: { uid, mfa: true } } });
+    expect(await world.services.requirePlatformStaffSession({ cookie: strong.cookie })).toMatchObject({
+      ok: true,
+      data: { role: "platform-admin", principal: { uid, mfa: true } },
+    });
     world.staff.set(uid, { role: "platform-admin", isActive: false });
     expect(await world.services.requirePlatformStaffSession({ cookie: strong.cookie })).toMatchObject({ ok: false });
-    expect(await world.services.requirePlatformStaffSession({ cookie: undefined })).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
+    expect(await world.services.requirePlatformStaffSession({ cookie: undefined })).toMatchObject({
+      ok: false,
+      error: { code: "UNAUTHORIZED" },
+    });
   });
 });

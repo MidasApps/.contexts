@@ -2,7 +2,7 @@ import type { NodeRef, Principal } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import type { AccessReaders } from "../ports/driven/access-readers.ts";
 import { createRequestScope } from "../request-scope.ts";
-import { createAccessWorld, nodes, principals, type AccessWorld } from "./access-world.fixture.ts";
+import { type AccessWorld, createAccessWorld, nodes, principals } from "./access-world.fixture.ts";
 import { makeAuthorize } from "./authorize.ts";
 
 const { user, device, service, impersonated } = principals;
@@ -35,7 +35,12 @@ describe("authorize: inheritance organization → project → unit → sub-unit"
     const decision = await decide(user("editor-u1"), "core.unit.update", nodes.unit("u1a"));
     expect(decision).toMatchObject({ allowed: true, requiresApproval: false });
     expect(decision.allowed && decision.grantedVia).toEqual([
-      { kind: "membership", membershipId: expect.any(String) as string, nodeId: "u1", roles: [{ kind: "custom", roleId: "role-editor" }] },
+      {
+        kind: "membership",
+        membershipId: expect.any(String) as string,
+        nodeId: "u1",
+        roles: [{ kind: "custom", roleId: "role-editor" }],
+      },
     ]);
     expect(await reasonOf(user("editor-u1"), "core.unit.update", nodes.unit("u1"))).toBe("ALLOWED");
   });
@@ -88,16 +93,23 @@ describe("authorize: roles, grants and nodes from the source", () => {
   it("denies deleted nodes: unit, ancestor, project and organization", async () => {
     expect(await reasonOf(user("owner-a"), "core.unit.read", nodes.unit("u1-gone"))).toBe("NODE_NOT_FOUND");
     expect(await reasonOf(user("owner-a"), "core.unit.read", nodes.unit("u1-gone-child"))).toBe("NODE_NOT_FOUND");
-    expect(await reasonOf(user("owner-a"), "core.project.read", { ...nodes.p1, projectId: "p-deleted" } as NodeRef)).toBe("NODE_NOT_FOUND");
-    expect(await reasonOf(user("owner-a"), "core.organization.read", { level: "organization", tenantId: "org-deleted" } as NodeRef)).toBe(
-      "NODE_NOT_FOUND",
-    );
+    expect(
+      await reasonOf(user("owner-a"), "core.project.read", { ...nodes.p1, projectId: "p-deleted" } as NodeRef),
+    ).toBe("NODE_NOT_FOUND");
+    expect(
+      await reasonOf(user("owner-a"), "core.organization.read", {
+        level: "organization",
+        tenantId: "org-deleted",
+      } as NodeRef),
+    ).toBe("NODE_NOT_FOUND");
   });
 
   it("denies a node that does not exist or does not match its parents", async () => {
     expect(await reasonOf(user("owner-a"), "core.unit.read", nodes.unit("nope"))).toBe("NODE_NOT_FOUND");
     expect(await reasonOf(user("owner-a"), "core.unit.read", nodes.unit("u2", "p1"))).toBe("NODE_NOT_FOUND");
-    expect(await reasonOf(user("owner-a"), "core.project.read", { ...nodes.pb, tenantId: "org-a" } as NodeRef)).toBe("NODE_NOT_FOUND");
+    expect(await reasonOf(user("owner-a"), "core.project.read", { ...nodes.pb, tenantId: "org-a" } as NodeRef)).toBe(
+      "NODE_NOT_FOUND",
+    );
     expect(await reasonOf(user("owner-a"), "core.unit.read", nodes.unit("ub", "pb", "org-a"))).toBe("NODE_NOT_FOUND");
   });
 
@@ -118,7 +130,10 @@ describe("authorize: roles, grants and nodes from the source", () => {
   });
 
   it("copies requiresApproval from the definition", async () => {
-    expect(await decide(user("owner-a"), "sample.invoice.delete", nodes.p1)).toMatchObject({ allowed: true, requiresApproval: true });
+    expect(await decide(user("owner-a"), "sample.invoice.delete", nodes.p1)).toMatchObject({
+      allowed: true,
+      requiresApproval: true,
+    });
   });
 });
 
@@ -158,7 +173,9 @@ describe("authorize: service principal (API key)", () => {
   });
 
   it("intersects scopes with the owner's current grants", async () => {
-    expect(await reasonOf(service("key-viewer", "viewer-p1"), "core.project.update", nodes.p1)).toBe("PERMISSION_NOT_GRANTED");
+    expect(await reasonOf(service("key-viewer", "viewer-p1"), "core.project.update", nodes.p1)).toBe(
+      "PERMISSION_NOT_GRANTED",
+    );
     expect(await reasonOf(service("key-orphan", "orphan-owner"), "core.project.read", nodes.p1)).toBe("NOT_A_MEMBER");
   });
 
@@ -166,7 +183,9 @@ describe("authorize: service principal (API key)", () => {
     expect(await reasonOf(service("key-expired"), "core.project.read", nodes.p1)).toBe("KEY_EXPIRED");
     expect(await reasonOf(service("key-now"), "core.project.read", nodes.p1)).toBe("KEY_EXPIRED");
     expect(await reasonOf(service("key-revoked"), "core.project.read", nodes.p1)).toBe("PRINCIPAL_INACTIVE");
-    expect(await reasonOf(service("key-disabled-owner", "disabled"), "core.project.read", nodes.p1)).toBe("PRINCIPAL_INACTIVE");
+    expect(await reasonOf(service("key-disabled-owner", "disabled"), "core.project.read", nodes.p1)).toBe(
+      "PRINCIPAL_INACTIVE",
+    );
   });
 
   it("denies a key whose expiry cannot be parsed (fail-closed)", async () => {
@@ -180,7 +199,9 @@ describe("authorize: service principal (API key)", () => {
 
   it("denies a key whose claims do not match the stored key", async () => {
     expect(await reasonOf(service("key-1", "viewer-p1"), "core.project.read", nodes.p1)).toBe("PRINCIPAL_INACTIVE");
-    expect(await reasonOf(service("key-1", "owner-a", "org-b"), "core.project.read", nodes.p1)).toBe("PRINCIPAL_INACTIVE");
+    expect(await reasonOf(service("key-1", "owner-a", "org-b"), "core.project.read", nodes.p1)).toBe(
+      "PRINCIPAL_INACTIVE",
+    );
     expect(await reasonOf(service("key-missing"), "core.project.read", nodes.p1)).toBe("PRINCIPAL_INACTIVE");
   });
 });
@@ -200,7 +221,9 @@ describe("authorize: platform staff", () => {
 
   it("limits platform-support to reads and impersonation", async () => {
     expect(await reasonOf(user("staff-support", true), "platform.user.read", nodes.platform)).toBe("ALLOWED");
-    expect(await reasonOf(user("staff-support", true), "platform.staff.manage", nodes.platform)).toBe("PERMISSION_NOT_GRANTED");
+    expect(await reasonOf(user("staff-support", true), "platform.staff.manage", nodes.platform)).toBe(
+      "PERMISSION_NOT_GRANTED",
+    );
   });
 
   it("denies inactive staff, non-staff and non-user principals", async () => {
@@ -217,35 +240,51 @@ describe("authorize: impersonation (read-only, time-boxed)", () => {
   });
 
   it("denies writes even when the target could", async () => {
-    expect(await reasonOf(impersonated("owner-a", "imp-owner"), "core.project.update", nodes.p1)).toBe("IMPERSONATION_READ_ONLY");
+    expect(await reasonOf(impersonated("owner-a", "imp-owner"), "core.project.update", nodes.p1)).toBe(
+      "IMPERSONATION_READ_ONLY",
+    );
   });
 
   it("denies an expired, ended, unknown or mismatched session", async () => {
-    expect(await reasonOf(impersonated("owner-a", "imp-expired"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
-    expect(await reasonOf(impersonated("owner-a", "imp-ended"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
-    expect(await reasonOf(impersonated("owner-a", "imp-missing"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
-    expect(await reasonOf(impersonated("owner-a", "imp-other-tenant"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
-    expect(await reasonOf(impersonated("owner-a", "imp-other-target"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
+    expect(await reasonOf(impersonated("owner-a", "imp-expired"), "core.project.read", nodes.p1)).toBe(
+      "IMPERSONATION_EXPIRED",
+    );
+    expect(await reasonOf(impersonated("owner-a", "imp-ended"), "core.project.read", nodes.p1)).toBe(
+      "IMPERSONATION_EXPIRED",
+    );
+    expect(await reasonOf(impersonated("owner-a", "imp-missing"), "core.project.read", nodes.p1)).toBe(
+      "IMPERSONATION_EXPIRED",
+    );
+    expect(await reasonOf(impersonated("owner-a", "imp-other-tenant"), "core.project.read", nodes.p1)).toBe(
+      "IMPERSONATION_EXPIRED",
+    );
+    expect(await reasonOf(impersonated("owner-a", "imp-other-target"), "core.project.read", nodes.p1)).toBe(
+      "IMPERSONATION_EXPIRED",
+    );
   });
 
   it("denies a session whose expiry cannot be parsed (fail-closed)", async () => {
-    expect(await reasonOf(impersonated("owner-a", "imp-bad-expiry"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
+    expect(await reasonOf(impersonated("owner-a", "imp-bad-expiry"), "core.project.read", nodes.p1)).toBe(
+      "IMPERSONATION_EXPIRED",
+    );
   });
 
   it("denies when the staff member is no longer active staff or no longer an active user", async () => {
-    expect(await reasonOf(impersonated("owner-a", "imp-by-staff-off", "staff-off"), "core.project.read", nodes.p1)).toBe(
-      "IMPERSONATION_EXPIRED",
-    );
-    expect(await reasonOf(impersonated("owner-a", "imp-by-disabled-staff", "staff-disabled"), "core.project.read", nodes.p1)).toBe(
-      "IMPERSONATION_EXPIRED",
-    );
-    expect(await reasonOf(impersonated("owner-a", "imp-by-non-staff", "viewer-p1"), "core.project.read", nodes.p1)).toBe(
-      "IMPERSONATION_EXPIRED",
-    );
+    expect(
+      await reasonOf(impersonated("owner-a", "imp-by-staff-off", "staff-off"), "core.project.read", nodes.p1),
+    ).toBe("IMPERSONATION_EXPIRED");
+    expect(
+      await reasonOf(impersonated("owner-a", "imp-by-disabled-staff", "staff-disabled"), "core.project.read", nodes.p1),
+    ).toBe("IMPERSONATION_EXPIRED");
+    expect(
+      await reasonOf(impersonated("owner-a", "imp-by-non-staff", "viewer-p1"), "core.project.read", nodes.p1),
+    ).toBe("IMPERSONATION_EXPIRED");
   });
 
   it("never grants platform permissions through impersonation", async () => {
-    expect(await reasonOf(impersonated("staff-admin", "imp-owner"), "platform.user.read", nodes.platform)).toBe("PERMISSION_NOT_GRANTED");
+    expect(await reasonOf(impersonated("staff-admin", "imp-owner"), "platform.user.read", nodes.platform)).toBe(
+      "PERMISSION_NOT_GRANTED",
+    );
   });
 });
 
@@ -254,11 +293,15 @@ describe("authorize: agent ceiling", () => {
     const ceiling = new Set(["core.project.read"]);
     expect(await reasonOf(user("owner-a"), "core.project.update", nodes.p1, ceiling)).toBe("CEILING_EXCLUDES");
     expect(await reasonOf(user("owner-a"), "core.project.read", nodes.p1, ceiling)).toBe("ALLOWED");
-    expect(await reasonOf(user("staff-admin", true), "platform.user.read", nodes.platform, new Set())).toBe("CEILING_EXCLUDES");
+    expect(await reasonOf(user("staff-admin", true), "platform.user.read", nodes.platform, new Set())).toBe(
+      "CEILING_EXCLUDES",
+    );
   });
 
   it("still reports a missing grant before the ceiling", async () => {
-    expect(await reasonOf(user("viewer-p1"), "core.project.update", nodes.p1, new Set(["core.project.update"]))).toBe("PERMISSION_NOT_GRANTED");
+    expect(await reasonOf(user("viewer-p1"), "core.project.update", nodes.p1, new Set(["core.project.update"]))).toBe(
+      "PERMISSION_NOT_GRANTED",
+    );
   });
 });
 
@@ -270,13 +313,16 @@ describe("authorize: fail-closed and per-request reads", () => {
     return { ...world.store, principals: { ...world.store.principals, getUser: boom } };
   };
 
-  it.each(["grants", "nodeChains", "principals"] as const)("rejects (never allows) when the %s reader throws", async (port) => {
-    const world = createAccessWorld();
-    const authorize = authorizeIn(world, failing(world, port));
-    await expect(authorize({ principal: user("owner-a"), permission: "core.project.read", node: nodes.p1 })).rejects.toThrow(
-      "firestore unavailable",
-    );
-  });
+  it.each(["grants", "nodeChains", "principals"] as const)(
+    "rejects (never allows) when the %s reader throws",
+    async (port) => {
+      const world = createAccessWorld();
+      const authorize = authorizeIn(world, failing(world, port));
+      await expect(
+        authorize({ principal: user("owner-a"), permission: "core.project.read", node: nodes.p1 }),
+      ).rejects.toThrow("firestore unavailable");
+    },
+  );
 
   it("reads each source once per request scope, and again in a new scope", async () => {
     const world = createAccessWorld();
@@ -285,7 +331,10 @@ describe("authorize: fail-closed and per-request reads", () => {
     await scoped({ principal: user("owner-a"), permission: "core.project.update", node: nodes.p1 });
     expect(world.store.callCount("loadChain")).toBe(1);
     expect(world.store.callCount("listGrants")).toBe(1);
-    await authorizeIn(world, createRequestScope(world.store))({ principal: user("owner-a"), permission: "core.project.read", node: nodes.p1 });
+    await authorizeIn(
+      world,
+      createRequestScope(world.store),
+    )({ principal: user("owner-a"), permission: "core.project.read", node: nodes.p1 });
     expect(world.store.callCount("loadChain")).toBe(2);
   });
 
@@ -294,6 +343,9 @@ describe("authorize: fail-closed and per-request reads", () => {
     const request = { principal: user("viewer-p1"), permission: "core.project.read", node: nodes.p1 } as const;
     expect((await authorizeIn(world, createRequestScope(world.store))(request)).allowed).toBe(true);
     world.store.putUser("viewer-p1", "disabled");
-    expect(await authorizeIn(world, createRequestScope(world.store))(request)).toEqual({ allowed: false, reason: "PRINCIPAL_INACTIVE" });
+    expect(await authorizeIn(world, createRequestScope(world.store))(request)).toEqual({
+      allowed: false,
+      reason: "PRINCIPAL_INACTIVE",
+    });
   });
 });

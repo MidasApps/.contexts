@@ -4,12 +4,20 @@ import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildRole, PERMISSION_REGISTRY } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsRolesView } from "./SettingsRolesView.tsx";
 
-const ROLE_ADMIN: Permission[] = ["core.organization.read", "core.role.read", "core.role.create", "core.role.update", "core.role.delete", "core.project.read", "core.unit.read"];
+const ROLE_ADMIN: Permission[] = [
+  "core.organization.read",
+  "core.role.read",
+  "core.role.create",
+  "core.role.update",
+  "core.role.delete",
+  "core.project.read",
+  "core.unit.read",
+];
 
 const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] = ROLE_ADMIN) =>
   renderApp(
@@ -18,7 +26,11 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     </main>,
     {
       path: `/o/${IDS.organization}/settings/roles`,
-      routes: shellRoutes(permissions, { "GET /v1/organizations/:organizationId/roles": page([buildRole()]), "GET /v1/permissions": page(PERMISSION_REGISTRY), ...routes }),
+      routes: shellRoutes(permissions, {
+        "GET /v1/organizations/:organizationId/roles": page([buildRole()]),
+        "GET /v1/permissions": page(PERMISSION_REGISTRY),
+        ...routes,
+      }),
     },
   );
 
@@ -26,7 +38,9 @@ describe("SettingsRolesView", () => {
   it("lists custom roles and the system roles", async () => {
     const { container } = renderView();
     await screen.findByText("Project editor");
-    expect(screen.getByRole("table", { name: "Papéis personalizados da organização" }).textContent).toContain("2 permissões");
+    expect(screen.getByRole("table", { name: "Papéis personalizados da organização" }).textContent).toContain(
+      "2 permissões",
+    );
     expect(screen.getByText("Administrador")).toBeDefined();
     await expectNoAxeViolations(container);
   });
@@ -42,7 +56,11 @@ describe("SettingsRolesView", () => {
     await user.click(await screen.findByRole("button", { name: "Novo papel" }));
     const dialog = await screen.findByRole("dialog", { name: "Novo papel" });
     expect(within(dialog).getByRole("group", { name: /Plataforma/u })).toBeDefined();
-    expect(within(dialog).getByRole("checkbox", { name: /Ver membros/u }).hasAttribute("disabled")).toBe(true);
+    expect(
+      within(dialog)
+        .getByRole("checkbox", { name: /Ver membros/u })
+        .hasAttribute("disabled"),
+    ).toBe(true);
     await user.click(within(dialog).getByRole("button", { name: "Criar papel" }));
     expect(await within(dialog).findByText("Dê um nome ao papel.")).toBeDefined();
     await user.type(within(dialog).getByRole("textbox", { name: "Nome" }), "Auditor");
@@ -74,7 +92,9 @@ describe("SettingsRolesView", () => {
     await user.click(await screen.findByRole("button", { name: "Excluir papel Project editor" }));
     const confirm = await screen.findByRole("alertdialog", { name: "Excluir o papel Project editor?" });
     await user.click(within(confirm).getByRole("button", { name: "Excluir papel" }));
-    expect((await within(confirm).findByRole("alert")).textContent).toContain("Este papel ainda está atribuído a membros.");
+    expect((await within(confirm).findByRole("alert")).textContent).toContain(
+      "Este papel ainda está atribuído a membros.",
+    );
   });
 
   it("explains a failed permission catalog inside the editor and recovers on retry", async () => {
@@ -98,7 +118,10 @@ describe("SettingsRolesView", () => {
   });
 
   it("keeps every create and edit entry point waiting while the permission catalog loads", async () => {
-    renderView({ "GET /v1/permissions": () => new Promise(() => undefined), "GET /v1/organizations/:organizationId/roles": page([]) });
+    renderView({
+      "GET /v1/permissions": () => new Promise(() => undefined),
+      "GET /v1/organizations/:organizationId/roles": page([]),
+    });
     await screen.findByText("Nenhum papel personalizado");
     const create = screen.getAllByRole("button", { name: "Novo papel" });
     expect(create.length).toBe(2);
@@ -107,7 +130,9 @@ describe("SettingsRolesView", () => {
 
   it("disables row edits while the permission catalog loads", async () => {
     renderView({ "GET /v1/permissions": () => new Promise(() => undefined) });
-    expect((await screen.findByRole("button", { name: "Editar papel Project editor" })).hasAttribute("disabled")).toBe(true);
+    expect((await screen.findByRole("button", { name: "Editar papel Project editor" })).hasAttribute("disabled")).toBe(
+      true,
+    );
   });
 
   it("offers no create/edit/delete without the write permissions", async () => {

@@ -1,7 +1,7 @@
 import { Slot } from "radix-ui";
 import type { ComponentProps } from "react";
 import { cn } from "#/shared/lib/cn.ts";
-import { badgeVariants, type BadgeVariantProps } from "./badge-variants.ts";
+import { type BadgeVariantProps, badgeVariants } from "./badge-variants.ts";
 
 export type BadgeProps = ComponentProps<"span"> & BadgeVariantProps & { asChild?: boolean };
 
@@ -11,5 +11,12 @@ export type BadgeProps = ComponentProps<"span"> & BadgeVariantProps & { asChild?
  */
 export function Badge({ className, variant = "default", asChild = false, ...props }: BadgeProps) {
   const Component = asChild ? Slot.Root : "span";
-  return <Component data-slot="badge" data-variant={variant} className={cn(badgeVariants({ variant }), className)} {...props} />;
+  return (
+    <Component
+      data-slot="badge"
+      data-variant={variant}
+      className={cn(badgeVariants({ variant }), className)}
+      {...props}
+    />
+  );
 }

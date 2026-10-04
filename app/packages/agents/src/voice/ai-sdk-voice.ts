@@ -10,7 +10,11 @@ import { sniffAudioMediaType } from "./audio-format.ts";
  * directly would be treated as a provider without `listen`/`speak`.
  */
 
-export type Transcript = { readonly text: string; readonly language: string | null; readonly durationInSeconds: number | null };
+export type Transcript = {
+  readonly text: string;
+  readonly language: string | null;
+  readonly durationInSeconds: number | null;
+};
 export type SynthesizedAudio = { readonly audio: Uint8Array; readonly mediaType: string };
 type CallOptions = { readonly abortSignal?: AbortSignal };
 
@@ -18,7 +22,11 @@ export const transcribeAudio = async (
   model: TranscriptionModelV4,
   input: { readonly audio: Uint8Array } & CallOptions,
 ): Promise<Transcript> => {
-  const result = await transcribe({ model, audio: input.audio, ...(input.abortSignal === undefined ? {} : { abortSignal: input.abortSignal }) });
+  const result = await transcribe({
+    model,
+    audio: input.audio,
+    ...(input.abortSignal === undefined ? {} : { abortSignal: input.abortSignal }),
+  });
   return { text: result.text, language: result.language ?? null, durationInSeconds: result.durationInSeconds ?? null };
 };
 
@@ -40,11 +48,13 @@ const readStream = async (input: unknown): Promise<Uint8Array> => {
   if (input instanceof Uint8Array) return input;
   if (typeof input === "string") return new Uint8Array(Buffer.from(input, "base64"));
   const chunks: Buffer[] = [];
-  for await (const chunk of input as AsyncIterable<unknown>) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as Uint8Array));
+  for await (const chunk of input as AsyncIterable<unknown>)
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as Uint8Array));
   return new Uint8Array(Buffer.concat(chunks));
 };
 
-const unsupported = (what: string): Promise<never> => Promise.reject(new Error(`${what} is not supported by this voice provider`));
+const unsupported = (what: string): Promise<never> =>
+  Promise.reject(new Error(`${what} is not supported by this voice provider`));
 
 /** Speech-to-text provider (Mastra requires a class). */
 export class AiSdkTranscriptionVoice extends MastraVoice {
@@ -57,7 +67,12 @@ export class AiSdkTranscriptionVoice extends MastraVoice {
 
   async listen(audioStream: unknown, options?: CallOptions): Promise<string> {
     const audio = await readStream(audioStream);
-    return (await transcribeAudio(this.#model, { audio, ...(options?.abortSignal === undefined ? {} : { abortSignal: options.abortSignal }) })).text;
+    return (
+      await transcribeAudio(this.#model, {
+        audio,
+        ...(options?.abortSignal === undefined ? {} : { abortSignal: options.abortSignal }),
+      })
+    ).text;
   }
 
   speak(): Promise<never> {
@@ -82,7 +97,10 @@ export class AiSdkSpeechVoice extends MastraVoice {
     this.#model = model;
   }
 
-  async speak(input: string | NodeJS.ReadableStream, options?: { speaker?: string } & CallOptions): Promise<NodeJS.ReadableStream> {
+  async speak(
+    input: string | NodeJS.ReadableStream,
+    options?: { speaker?: string } & CallOptions,
+  ): Promise<NodeJS.ReadableStream> {
     const text = typeof input === "string" ? input : Buffer.from(await readStream(input)).toString("utf8");
     const { audio } = await synthesizeSpeech(this.#model, {
       text,

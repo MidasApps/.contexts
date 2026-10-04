@@ -33,11 +33,15 @@ describe("toWebClientConfig", () => {
   });
 
   it("splits and de-duplicates the factor list", () => {
-    expect(toWebClientConfig({ ...LOCAL, NEXT_PUBLIC_MFA_FACTORS: "totp, phone,totp" }).mfaFactors).toEqual(["totp", "phone"]);
+    expect(toWebClientConfig({ ...LOCAL, NEXT_PUBLIC_MFA_FACTORS: "totp, phone,totp" }).mfaFactors).toEqual([
+      "totp",
+      "phone",
+    ]);
   });
 
   it("names every invalid field, never a value", () => {
-    const build = () => toWebClientConfig({ ...LOCAL, NEXT_PUBLIC_APP_ENV: "qa", NEXT_PUBLIC_FIREBASE_API_KEY: undefined });
+    const build = () =>
+      toWebClientConfig({ ...LOCAL, NEXT_PUBLIC_APP_ENV: "qa", NEXT_PUBLIC_FIREBASE_API_KEY: undefined });
 
     expect(build).toThrow(ClientConfigError);
     expect(build).toThrow(/appEnv.*firebase\.apiKey/);

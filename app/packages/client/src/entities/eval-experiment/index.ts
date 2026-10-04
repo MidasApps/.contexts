@@ -3,13 +3,12 @@ export {
   adminDatasetsQuery,
   adminExperimentQuery,
   adminExperimentsQuery,
-  evalKeys,
   EXPERIMENTS_PAGE_SIZE,
+  type ExperimentPage,
+  evalKeys,
   useAdminDatasets,
   useAdminExperiments,
-  type ExperimentPage,
 } from "./api/eval-queries.ts";
-export { compareExperiments, type ScoreComparison, type ScoreOutcome } from "./lib/compare-experiments.ts";
 // SP5 Task 14: an organization's own datasets and experiments (`/v1/evals/*`).
 export {
   DATASET_ITEMS_PAGE_SIZE,
@@ -23,6 +22,9 @@ export {
   useTenantDatasets,
   useTenantExperiments,
 } from "./api/tenant-eval-queries.ts";
+export { compareExperiments, type ScoreComparison, type ScoreOutcome } from "./lib/compare-experiments.ts";
+// UX review B9: experiments named by agent, dataset and start instead of their ids.
+export { type ExperimentLabel, useExperimentLabel } from "./model/use-experiment-label.ts";
 // Decision 0049: the chosen experiments of a comparison, from the page or read by id.
 export {
   type ChosenExperiment,
@@ -32,5 +34,3 @@ export {
   useAdminExperimentPair,
   useTenantExperimentPair,
 } from "./model/use-experiment-pair.ts";
-// UX review B9: experiments named by agent, dataset and start instead of their ids.
-export { type ExperimentLabel, useExperimentLabel } from "./model/use-experiment-label.ts";

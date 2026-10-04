@@ -15,7 +15,8 @@ import { type CitationConfidence, guardCitations } from "../processors/citation-
 /** Stream name of the knowledge delegation tool (`agent-<subagent id>`). */
 export const KNOWLEDGE_DELEGATION_TOOL = `agent-${KNOWLEDGE_AGENT_ID}`;
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 /** Confidence of one knowledge delegation output (`{ text, subAgentToolResults }`), or `undefined` for another shape. */
 export const confidenceOfDelegation = (output: unknown): CitationConfidence | undefined => {
@@ -25,7 +26,10 @@ export const confidenceOfDelegation = (output: unknown): CitationConfidence | un
 };
 
 /** Several delegations in one answer: grounded once any of them is (the guard's own rule per message). */
-export const mergeConfidence = (current: CitationConfidence | undefined, next: CitationConfidence | undefined): CitationConfidence | undefined => {
+export const mergeConfidence = (
+  current: CitationConfidence | undefined,
+  next: CitationConfidence | undefined,
+): CitationConfidence | undefined => {
   if (next === undefined) return current;
   return current === "normal" || next === "normal" ? "normal" : "low";
 };
@@ -35,7 +39,10 @@ type LoosePart = { readonly type: string; readonly [key: string]: unknown };
 const confidenceOfMessage = (message: UIMessage): CitationConfidence | undefined =>
   (message.parts as readonly LoosePart[])
     .filter((part) => part.type === `tool-${KNOWLEDGE_DELEGATION_TOOL}` && part["state"] === "output-available")
-    .reduce<CitationConfidence | undefined>((confidence, part) => mergeConfidence(confidence, confidenceOfDelegation(part["output"])), undefined);
+    .reduce<CitationConfidence | undefined>(
+      (confidence, part) => mergeConfidence(confidence, confidenceOfDelegation(part["output"])),
+      undefined,
+    );
 
 /** Stored assistant messages with `metadata.confidence` set from their knowledge delegations. */
 export const withAnswerConfidence = (messages: readonly UIMessage[]): UIMessage[] =>

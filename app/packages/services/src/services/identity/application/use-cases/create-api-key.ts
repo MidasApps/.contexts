@@ -1,4 +1,11 @@
-import { apiKeyExpiryIssue, type ApiKey, type CreateApiKeyInput, type CreateApiKeyResponse, type TenantId, type UserPrincipal } from "@core/contracts";
+import {
+  type ApiKey,
+  apiKeyExpiryIssue,
+  type CreateApiKeyInput,
+  type CreateApiKeyResponse,
+  type TenantId,
+  type UserPrincipal,
+} from "@core/contracts";
 import { requireNoEscalation, requirePermission } from "../../../access/application/grant-checks.ts";
 import type { RequestAccess } from "../../../access/composition.ts";
 import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
@@ -32,9 +39,19 @@ export const makeCreateApiKey =
   async (command) => {
     const { actor, input, tenantId } = command;
     if (input.node.tenantId !== tenantId) return err(new AccessDeniedError("NODE_NOT_FOUND"));
-    const allowed = await requirePermission({ access: command.access, actor, permission: "core.api-key.create", node: input.node });
+    const allowed = await requirePermission({
+      access: command.access,
+      actor,
+      permission: "core.api-key.create",
+      node: input.node,
+    });
     if (!allowed.ok) return allowed;
-    const within = await requireNoEscalation({ access: command.access, actor, node: input.node, requested: input.scopes });
+    const within = await requireNoEscalation({
+      access: command.access,
+      actor,
+      node: input.node,
+      requested: input.scopes,
+    });
     if (!within.ok) return within;
     const now = deps.clock.now();
     const issue = apiKeyExpiryIssue({ expiresAt: input.expiresAt, now });
@@ -58,7 +75,16 @@ export const makeCreateApiKey =
     await deps.unitOfWork.run(async (tx) => {
       deps.apiKeys.create(tx, { apiKey, secretHash: deps.hashSecret(secret), actorId: auditActor.id });
       await deps.audit.record(
-        { log: "tenant", tenantId, action: "API_KEY_CREATED", actor: auditActor, target: { type: "api-key", id: apiKey.id }, node: input.node, outcome: "success", requestId: command.requestId },
+        {
+          log: "tenant",
+          tenantId,
+          action: "API_KEY_CREATED",
+          actor: auditActor,
+          target: { type: "api-key", id: apiKey.id },
+          node: input.node,
+          outcome: "success",
+          requestId: command.requestId,
+        },
         tx,
       );
     });

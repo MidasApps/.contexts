@@ -13,10 +13,16 @@ type StartedRun = { runId: string };
 test.describe("flags", () => {
   test("sets an organization override and removes it", async ({ staffPage, sp5Org }) => {
     await staffPage.goto("admin/flags");
-    await chooseOrganization(staffPage, staffPage.getByRole("combobox", { name: "Ajuste por organização" }), sp5Org.name);
+    await chooseOrganization(
+      staffPage,
+      staffPage.getByRole("combobox", { name: "Ajuste por organização" }),
+      sp5Org.name,
+    );
     await expect(staffPage).toHaveURL(new RegExp(`organizationId=${sp5Org.id}`));
     await expect(staffPage.getByText("Remova o ajuste para ela voltar a seguir o valor do ambiente.")).toBeVisible();
-    const row = staffPage.getByRole("row").filter({ has: staffPage.getByRole("switch", { name: "Valor de chat.voice no ambiente", exact: true }) });
+    const row = staffPage
+      .getByRole("row")
+      .filter({ has: staffPage.getByRole("switch", { name: "Valor de chat.voice no ambiente", exact: true }) });
     await expect(row).toContainText("Sem ajuste");
     await expect(row).toContainText("Valor efetivo: ligada");
 
@@ -41,10 +47,16 @@ test.describe("flags", () => {
 
 test.describe("workflow runs", () => {
   test("lists a suspended run of an organization and cancels it", async ({ staffPage, ownerApi, sp5Org }) => {
-    const { runId } = await ownerApi.post<StartedRun>(`/v1/workflows/approval-demo/runs?organizationId=${sp5Org.id}`, { inputData: { title: unique("Admin cancel") } });
+    const { runId } = await ownerApi.post<StartedRun>(`/v1/workflows/approval-demo/runs?organizationId=${sp5Org.id}`, {
+      inputData: { title: unique("Admin cancel") },
+    });
     await staffPage.goto("admin/workflows");
     const filters = staffPage.getByRole("search", { name: "Filtrar execuções" });
-    await chooseOrganization(staffPage, filters.getByRole("combobox", { name: "Organização", exact: true }), sp5Org.name);
+    await chooseOrganization(
+      staffPage,
+      filters.getByRole("combobox", { name: "Organização", exact: true }),
+      sp5Org.name,
+    );
     await filters.getByRole("button", { name: "Aguardando aprovação" }).click();
     const run = staffPage.getByRole("row").filter({ hasText: runId });
     await expect(run).toContainText("Suspensa", { timeout: 30_000 });
@@ -81,7 +93,10 @@ test.describe("schedules", () => {
     await staffPage.goto("admin/workflows");
     await staffPage.getByRole("tab", { name: "Agendamentos" }).click();
     // A platform schedule has no slug: its workflow's label names it.
-    const row = staffPage.getByRole("tabpanel", { name: "Agendamentos" }).getByRole("row").filter({ hasText: CATALOG_REINDEX });
+    const row = staffPage
+      .getByRole("tabpanel", { name: "Agendamentos" })
+      .getByRole("row")
+      .filter({ hasText: CATALOG_REINDEX });
     await expect(row).toContainText("Ativo");
     await expect(row).toContainText("0 3 * * *");
 
@@ -111,7 +126,11 @@ test.describe("connectors", () => {
     });
     await staffPage.goto("admin/connectors");
     await expect(staffPage.getByRole("heading", { name: "Escolha uma organização" })).toBeVisible();
-    await chooseOrganization(staffPage, staffPage.getByRole("combobox", { name: "Organização", exact: true }), sp5Org.name);
+    await chooseOrganization(
+      staffPage,
+      staffPage.getByRole("combobox", { name: "Organização", exact: true }),
+      sp5Org.name,
+    );
     const row = staffPage.getByRole("row").filter({ hasText: name });
     await expect(row).toContainText("Servidor MCP");
     await expect(row).toContainText("mcp.example.com");

@@ -9,7 +9,11 @@ import type { AccessReaders } from "./ports/driven/access-readers.ts";
 import { resolveTenantSubject, type TenantSubject } from "./principal-subject.ts";
 
 /** What the access use cases need; built per request by `createAccessCore().forRequest()`. */
-export type AccessDeps = { readonly registry: PermissionRegistry; readonly readers: AccessReaders; readonly clock: Clock };
+export type AccessDeps = {
+  readonly registry: PermissionRegistry;
+  readonly readers: AccessReaders;
+  readonly clock: Clock;
+};
 
 export type TenantAccess =
   | { readonly ok: true; readonly subject: TenantSubject; readonly effective: EffectivePermissions }
@@ -48,12 +52,23 @@ export const loadTenantAccess = async (args: {
   const precheckIssue = args.precheck?.(resolved.subject) ?? null;
   if (precheckIssue !== null) return deniedAccess(precheckIssue);
   const nodeIds = chainNodeIds(chain);
-  const grants = await deps.readers.grants.listGrants({ tenantId: node.tenantId, principalId: resolved.subject.principalId, nodeIds });
-  const live = grants.filter((grant) => !grant.isDeleted && grant.tenantId === node.tenantId && nodeIds.includes(grant.nodeId));
+  const grants = await deps.readers.grants.listGrants({
+    tenantId: node.tenantId,
+    principalId: resolved.subject.principalId,
+    nodeIds,
+  });
+  const live = grants.filter(
+    (grant) => !grant.isDeleted && grant.tenantId === node.tenantId && nodeIds.includes(grant.nodeId),
+  );
   if (live.length === 0) return deniedAccess("NOT_A_MEMBER");
   const roleIds = customRoleIds(live);
-  const customRoles = roleIds.length === 0 ? [] : await deps.readers.roles.getRoles({ tenantId: node.tenantId, roleIds });
-  return { ok: true, subject: resolved.subject, effective: computeEffectivePermissions({ grants: live, chain, customRoles, registry: deps.registry }) };
+  const customRoles =
+    roleIds.length === 0 ? [] : await deps.readers.roles.getRoles({ tenantId: node.tenantId, roleIds });
+  return {
+    ok: true,
+    subject: resolved.subject,
+    effective: computeEffectivePermissions({ grants: live, chain, customRoles, registry: deps.registry }),
+  };
 };
 
 /** Applies the subject's limits: API key scopes, and `read` only under impersonation. */
@@ -65,7 +80,8 @@ export const limitToSubject = (args: {
   const { subject, registry } = args;
   return new Set(
     [...args.permissions].filter(
-      (permission) => (subject.scopes?.has(permission) ?? true) && (!subject.readOnly || registry.get(permission)?.kind === "read"),
+      (permission) =>
+        (subject.scopes?.has(permission) ?? true) && (!subject.readOnly || registry.get(permission)?.kind === "read"),
     ),
   );
 };

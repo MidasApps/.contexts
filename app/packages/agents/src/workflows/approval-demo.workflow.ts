@@ -1,8 +1,17 @@
 import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 import { nodeOfContext, readAgentContext } from "../context/agent-request-context.ts";
-import type { AccessPort, AccessPrincipal, WorkflowApprovalPort, WorkflowCommandPort } from "../runtime/runtime-ports.ts";
-import { createRequestHumanApprovalStep, HumanApprovalOutcomeSchema, REQUEST_HUMAN_APPROVAL_STEP_ID } from "./steps/request-human-approval.step.ts";
+import type {
+  AccessPort,
+  AccessPrincipal,
+  WorkflowApprovalPort,
+  WorkflowCommandPort,
+} from "../runtime/runtime-ports.ts";
+import {
+  createRequestHumanApprovalStep,
+  HumanApprovalOutcomeSchema,
+  REQUEST_HUMAN_APPROVAL_STEP_ID,
+} from "./steps/request-human-approval.step.ts";
 
 export const APPROVAL_DEMO_WORKFLOW_ID = "approval-demo";
 /** Four-eyes permission of the demo action (`requiresApproval`, decision 0036). */
@@ -45,10 +54,26 @@ const collectInputStep = (deps: ApprovalDemoDeps) =>
       const { inputData, requestContext } = params;
       const bail = (result: ApprovalDemoResult) => params.bail(result);
       const snapshot = readAgentContext(requestContext);
-      if (!snapshot.ok) return bail({ outcome: "failed", approvalRequestId: null, decidedBy: null, code: "CONTEXT_MISSING" } satisfies ApprovalDemoResult);
+      if (!snapshot.ok)
+        return bail({
+          outcome: "failed",
+          approvalRequestId: null,
+          decidedBy: null,
+          code: "CONTEXT_MISSING",
+        } satisfies ApprovalDemoResult);
       const { context, principal } = snapshot.data;
-      const decision = await deps.access.authorize({ principal, permission: APPROVAL_DEMO_PERMISSION, node: nodeOfContext(context) });
-      if (!decision.allowed) return bail({ outcome: "failed", approvalRequestId: null, decidedBy: null, code: "FORBIDDEN" } satisfies ApprovalDemoResult);
+      const decision = await deps.access.authorize({
+        principal,
+        permission: APPROVAL_DEMO_PERMISSION,
+        node: nodeOfContext(context),
+      });
+      if (!decision.allowed)
+        return bail({
+          outcome: "failed",
+          approvalRequestId: null,
+          decidedBy: null,
+          code: "FORBIDDEN",
+        } satisfies ApprovalDemoResult);
       return { title: inputData.title.trim(), ...(inputData.body === undefined ? {} : { body: inputData.body }) };
     },
   });
@@ -78,7 +103,8 @@ const applyStep = (deps: ApprovalDemoDeps) =>
       if (!snapshot.ok) return { outcome: "failed" as const, ...base, code: "CONTEXT_MISSING" };
       const { context, principal } = snapshot.data;
       // The restored context must be the requester's: a resume under another caller's context never acts.
-      if (!isRequester(principal, approval.requestedBy)) return { outcome: "failed" as const, ...base, code: "REQUESTER_MISMATCH" };
+      if (!isRequester(principal, approval.requestedBy))
+        return { outcome: "failed" as const, ...base, code: "REQUESTER_MISMATCH" };
       const result = await deps.commands.run({
         principal,
         tenantId: context.tenantId,
@@ -88,7 +114,9 @@ const applyStep = (deps: ApprovalDemoDeps) =>
         idempotencyKey: runId,
         requestId: context.requestId,
       });
-      return result.ok ? { outcome: "applied" as const, ...base, code: null } : { outcome: "failed" as const, ...base, code: result.code };
+      return result.ok
+        ? { outcome: "applied" as const, ...base, code: null }
+        : { outcome: "failed" as const, ...base, code: result.code };
     },
   });
 
@@ -101,7 +129,12 @@ const recordStep = () =>
     execute: ({ inputData }) => {
       const { approval } = inputData;
       const outcome = approval.decision === "approved" ? "failed" : approval.decision;
-      return Promise.resolve({ outcome, approvalRequestId: approval.approvalRequestId, decidedBy: approval.decidedBy, code: null });
+      return Promise.resolve({
+        outcome,
+        approvalRequestId: approval.approvalRequestId,
+        decidedBy: approval.decidedBy,
+        code: null,
+      });
     },
   });
 
@@ -112,7 +145,15 @@ const finishStep = () =>
     inputSchema: z.object({ apply: ApprovalDemoResultSchema.optional(), record: ApprovalDemoResultSchema.optional() }),
     outputSchema: ApprovalDemoResultSchema,
     execute: ({ inputData }) =>
-      Promise.resolve(inputData.apply ?? inputData.record ?? { outcome: "failed" as const, approvalRequestId: null, decidedBy: null, code: "NO_BRANCH" }),
+      Promise.resolve(
+        inputData.apply ??
+          inputData.record ?? {
+            outcome: "failed" as const,
+            approvalRequestId: null,
+            decidedBy: null,
+            code: "NO_BRANCH",
+          },
+      ),
   });
 
 /**

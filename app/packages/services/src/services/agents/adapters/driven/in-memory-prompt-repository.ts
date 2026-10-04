@@ -1,11 +1,17 @@
-import { type PromptActivation, PromptActivationSchema, type PromptVersion, PromptVersionSchema } from "@core/contracts";
+import {
+  type PromptActivation,
+  PromptActivationSchema,
+  type PromptVersion,
+  PromptVersionSchema,
+} from "@core/contracts";
 import type { PromptKey, PromptRepository } from "../../application/ports/prompt-repository.ts";
 
 const sameKey = (row: { agentId: string; scope: string; tenantId: string | null }, key: PromptKey) =>
   row.agentId === key.agentId && row.scope === key.scope && row.tenantId === key.tenantId;
 
 // Like the row level security policy: platform rows to everyone, tenant rows to their tenant.
-const visible = (row: { tenantId: string | null }, tenantId: string | null) => row.tenantId === null || row.tenantId === tenantId;
+const visible = (row: { tenantId: string | null }, tenantId: string | null) =>
+  row.tenantId === null || row.tenantId === tenantId;
 
 /** In-memory prompt store for unit tests (append-only like the Postgres one). */
 export const createInMemoryPromptRepository = (options: { readonly now?: () => Date } = {}) => {
@@ -39,7 +45,8 @@ export const createInMemoryPromptRepository = (options: { readonly now?: () => D
       return Promise.resolve(version);
     },
     listVersions: (key) => Promise.resolve(versions.filter((row) => sameKey(row, key))),
-    getVersion: ({ versionId, tenantId }) => Promise.resolve(versions.find((row) => row.id === versionId && visible(row, tenantId)) ?? null),
+    getVersion: ({ versionId, tenantId }) =>
+      Promise.resolve(versions.find((row) => row.id === versionId && visible(row, tenantId)) ?? null),
     recordEval: ({ versionId, tenantId, experimentId, verdict }) => {
       const index = versions.findIndex((row) => row.id === versionId && visible(row, tenantId));
       const current = versions[index];
@@ -63,7 +70,10 @@ export const createInMemoryPromptRepository = (options: { readonly now?: () => D
     },
     listActivations: (key) => Promise.resolve(activations.filter((row) => sameKey(row, key))),
     getActive: ({ agentId, tenantId }) =>
-      Promise.resolve({ platform: latestActive(agentId, "platform", null), addendum: tenantId === null ? null : latestActive(agentId, "tenant", tenantId) }),
+      Promise.resolve({
+        platform: latestActive(agentId, "platform", null),
+        addendum: tenantId === null ? null : latestActive(agentId, "tenant", tenantId),
+      }),
   };
   return { repository, versions, activations };
 };

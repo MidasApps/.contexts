@@ -10,6 +10,7 @@ import { navItemRoute } from "#/shared/lib/shell/nav-item-route.ts";
 import { useNavigationRegistry } from "#/shared/lib/shell/shell-registry-context.tsx";
 import { THEME_PREFERENCES, type ThemePreference } from "#/shared/lib/theme/theme-provider.tsx";
 import { Avatar } from "#/shared/ui/atoms/Avatar/Avatar.tsx";
+import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
@@ -27,7 +28,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
-import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
 import { useSidebar } from "#/shared/ui/organisms/Sidebar/sidebar-context.tsx";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "#/shared/ui/organisms/Sidebar/sidebar-menu.tsx";
 
@@ -45,10 +45,13 @@ function ThemeSubmenu() {
         {t("theme")}
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
-        <DropdownMenuRadioGroup value={theme.preference} onValueChange={(value) => {
+        <DropdownMenuRadioGroup
+          value={theme.preference}
+          onValueChange={(value) => {
             const preference = THEME_PREFERENCES.find((candidate) => candidate === value);
             if (preference !== undefined) theme.save(preference);
-          }}>
+          }}
+        >
           {THEME_PREFERENCES.map((preference) => (
             <DropdownMenuRadioItem key={preference} value={preference}>
               {t(`themes.${preference}`)}
@@ -65,7 +68,10 @@ function ApprovalsMenuItem({ organizationId, count }: { organizationId: string; 
   const t = useTranslations("common.approvals.menu");
   return (
     <DropdownMenuItem asChild>
-      <RouteLink to={{ id: "settings", organizationId, section: "approvals" }} aria-label={count > 0 ? t("labelWithWaiting", { count }) : t("label")}>
+      <RouteLink
+        to={{ id: "settings", organizationId, section: "approvals" }}
+        aria-label={count > 0 ? t("labelWithWaiting", { count }) : t("label")}
+      >
         <Icon name="inbox" />
         {t("label")}
         {count > 0 ? (
@@ -100,10 +106,29 @@ export function UserMenu() {
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton size="lg" tooltip={name} aria-label={waiting > 0 ? t("common.approvals.menu.triggerWithWaiting", { name, count: waiting }) : t("shell.userMenu.trigger", { name })} className="data-[state=open]:bg-sidebar-accent">
+            <SidebarMenuButton
+              size="lg"
+              tooltip={name}
+              aria-label={
+                waiting > 0
+                  ? t("common.approvals.menu.triggerWithWaiting", { name, count: waiting })
+                  : t("shell.userMenu.trigger", { name })
+              }
+              className="data-[state=open]:bg-sidebar-accent"
+            >
               <span className="relative">
-                {me.data === undefined ? <Skeleton className="size-8 rounded-full" /> : <Avatar name={name} size="sm" decorative className="size-8" />}
-                {waiting > 0 ? <span aria-hidden="true" data-slot="approvals-dot" className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-sidebar bg-amber" /> : null}
+                {me.data === undefined ? (
+                  <Skeleton className="size-8 rounded-full" />
+                ) : (
+                  <Avatar name={name} size="sm" decorative className="size-8" />
+                )}
+                {waiting > 0 ? (
+                  <span
+                    aria-hidden="true"
+                    data-slot="approvals-dot"
+                    className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-sidebar bg-amber"
+                  />
+                ) : null}
               </span>
               <span className="grid min-w-0 flex-1 text-left leading-tight">
                 {me.data === undefined ? (
@@ -121,7 +146,9 @@ export function UserMenu() {
           <DropdownMenuContent side={isMobile ? "top" : "right"} align="end" sideOffset={4} className="min-w-60">
             <DropdownMenuLabel className="normal-case tracking-normal">
               <span className="block truncate text-body font-medium text-foreground">{name}</span>
-              {me.data === undefined ? null : <span className="block truncate font-sans text-xs text-muted-foreground">{me.data.email}</span>}
+              {me.data === undefined ? null : (
+                <span className="block truncate font-sans text-xs text-muted-foreground">{me.data.email}</span>
+              )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -137,7 +164,9 @@ export function UserMenu() {
                   </DropdownMenuItem>
                 );
               })}
-              {approvals === null ? null : <ApprovalsMenuItem organizationId={approvals.organizationId} count={approvals.count} />}
+              {approvals === null ? null : (
+                <ApprovalsMenuItem organizationId={approvals.organizationId} count={approvals.count} />
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <ThemeSubmenu />

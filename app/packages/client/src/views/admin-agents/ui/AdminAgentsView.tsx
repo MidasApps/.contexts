@@ -10,19 +10,34 @@ import { AgentEnablementPanel } from "#/features/admin-agent-enablement/index.ts
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
-import { AdminOrganizationFilter, AdminPageFrame, AdminQuerySection, useAdminSearch } from "#/widgets/admin-nav/index.ts";
+import {
+  AdminOrganizationFilter,
+  AdminPageFrame,
+  AdminQuerySection,
+  useAdminSearch,
+} from "#/widgets/admin-nav/index.ts";
 import { AgentCatalogSection } from "./AgentCatalogSection.tsx";
 
 function OrganizationAgents({ organizationId }: { organizationId: string }) {
   const t = useTranslations("admin.agents");
   const settings = useAdminAgentSettings(organizationId);
   const organizations = useAllAdminOrganizations();
-  const organizationName = organizations.data?.find((organization) => organization.id === organizationId)?.name ?? organizationId;
+  const organizationName =
+    organizations.data?.find((organization) => organization.id === organizationId)?.name ?? organizationId;
   // Every registered subagent can be switched on, a module's too (the catalog is already cached by the section above).
-  const subagents = useAdminAgentCatalog().data?.filter((agent) => agent.role === "subagent").map((agent) => agent.id);
+  const subagents = useAdminAgentCatalog()
+    .data?.filter((agent) => agent.role === "subagent")
+    .map((agent) => agent.id);
   return (
     <AdminQuerySection query={settings} loadingLabel={t("organization.loading")} rows={6}>
-      {(data) => <AgentEnablementPanel organizationId={organizationId} organizationName={organizationName} settings={data} registeredAgents={subagents} />}
+      {(data) => (
+        <AgentEnablementPanel
+          organizationId={organizationId}
+          organizationName={organizationName}
+          settings={data}
+          registeredAgents={subagents}
+        />
+      )}
     </AdminQuerySection>
   );
 }
@@ -36,7 +51,11 @@ function OrganizationSection() {
   return (
     <SectionCard title={t("organization.title")} description={t("organization.description")}>
       <div ref={picker} className="sm:max-w-sm">
-        <AdminOrganizationFilter required value={organizationId} onValueChange={(next) => search.set({ organizationId: next })} />
+        <AdminOrganizationFilter
+          required
+          value={organizationId}
+          onValueChange={(next) => search.set({ organizationId: next })}
+        />
       </div>
       {organizationId === undefined ? (
         <EmptyState

@@ -12,7 +12,9 @@ export type ReadApprovalRequestCommand = {
   readonly approvalRequestId: ApprovalRequestId;
 };
 
-export type ReadApprovalRequest = (command: ReadApprovalRequestCommand) => Promise<Result<ApprovalRequest, ApprovalNotFoundError>>;
+export type ReadApprovalRequest = (
+  command: ReadApprovalRequestCommand,
+) => Promise<Result<ApprovalRequest, ApprovalNotFoundError>>;
 
 /**
  * `GET /v1/approval-requests/{approvalRequestId}` (SP5 Task 14, the inbox detail page): one
@@ -25,6 +27,11 @@ export const makeReadApprovalRequest =
   async ({ actor, access, approvalRequestId }) => {
     const request = await deps.approvals.get(undefined, approvalRequestId);
     if (request === null) return err(new ApprovalNotFoundError());
-    const allowed = await requirePermission({ actor, access, permission: "core.approval.read", node: { level: "organization", tenantId: request.tenantId } });
+    const allowed = await requirePermission({
+      actor,
+      access,
+      permission: "core.approval.read",
+      node: { level: "organization", tenantId: request.tenantId },
+    });
     return allowed.ok ? ok(approvalView(request, deps.clock.now())) : err(new ApprovalNotFoundError());
   };

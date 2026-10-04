@@ -38,7 +38,12 @@ describe("createSupervisor", () => {
   it("kills each child together with its grandchildren", async () => {
     supervisor = createSupervisor({ log: () => undefined });
     const lines: string[] = [];
-    const child = supervisor.start({ name: "parent", command: process.execPath, args: ["-e", PARENT_WITH_GRANDCHILD], onStdoutLine: (line) => lines.push(line) });
+    const child = supervisor.start({
+      name: "parent",
+      command: process.execPath,
+      args: ["-e", PARENT_WITH_GRANDCHILD],
+      onStdoutLine: (line) => lines.push(line),
+    });
     expect(await waitUntil(() => lines.length > 0, 5_000)).toBe(true);
     const grandchildPid = Number(lines[0]);
 
@@ -49,7 +54,11 @@ describe("createSupervisor", () => {
 
   it("waits for children that exit on their own within the grace period", async () => {
     supervisor = createSupervisor({ log: () => undefined });
-    const child = supervisor.start({ name: "short", command: process.execPath, args: ["-e", "setTimeout(() => {}, 200)"] });
+    const child = supervisor.start({
+      name: "short",
+      command: process.execPath,
+      args: ["-e", "setTimeout(() => {}, 200)"],
+    });
     const startedAt = Date.now();
     await supervisor.stopAll({ graceMs: 5_000, signal: "SIGINT" });
     expect(isAlive(child.pid)).toBe(false);
@@ -75,6 +84,8 @@ describe("createSupervisor", () => {
   it("refuses to start a child once a stop has begun", async () => {
     supervisor = createSupervisor({ log: () => undefined });
     await supervisor.stopAll({ graceMs: 0 });
-    expect(() => supervisor?.start({ name: "late", command: process.execPath, args: ["-e", "setInterval(() => {}, 1000)"] })).toThrow(/stopping/);
+    expect(() =>
+      supervisor?.start({ name: "late", command: process.execPath, args: ["-e", "setInterval(() => {}, 1000)"] }),
+    ).toThrow(/stopping/);
   });
 });

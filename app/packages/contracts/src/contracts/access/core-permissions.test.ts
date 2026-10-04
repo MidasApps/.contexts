@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { PermissionSchema } from "../primitives/catalog-meta.schema.ts";
 import { AGENT_PERMISSIONS } from "../agents/agent-permissions.ts";
 import { CHAT_PERMISSIONS } from "../conversations/chat-permissions.ts";
+import { PermissionSchema } from "../primitives/catalog-meta.schema.ts";
 import { CORE_PERMISSIONS, SP1_PERMISSIONS, SP5_PERMISSIONS } from "./core-permissions.ts";
 import { PermissionDefinitionSchema } from "./permission-definition.schema.ts";
 
@@ -24,23 +24,50 @@ describe("CORE_PERMISSIONS", () => {
   it("lists exactly the permissions of SP1 spec §5.1", () => {
     expect([...sp1Ids].sort()).toEqual(
       [
-        "core.organization.read", "core.organization.update", "core.organization.delete",
-        "core.project.read", "core.project.create", "core.project.update", "core.project.delete",
-        "core.unit.read", "core.unit.create", "core.unit.update", "core.unit.delete",
-        "core.member.read", "core.member.invite", "core.member.update", "core.member.remove",
-        "core.role.read", "core.role.create", "core.role.update", "core.role.delete",
-        "core.api-key.read", "core.api-key.create", "core.api-key.revoke",
-        "core.device.read", "core.device.create", "core.device.revoke",
-        "core.audit-log.read", "core.approval.read", "core.approval.decide",
-        "platform.organization.read", "platform.user.read", "platform.audit-log.read",
-        "platform.user.impersonate", "platform.staff.manage",
+        "core.organization.read",
+        "core.organization.update",
+        "core.organization.delete",
+        "core.project.read",
+        "core.project.create",
+        "core.project.update",
+        "core.project.delete",
+        "core.unit.read",
+        "core.unit.create",
+        "core.unit.update",
+        "core.unit.delete",
+        "core.member.read",
+        "core.member.invite",
+        "core.member.update",
+        "core.member.remove",
+        "core.role.read",
+        "core.role.create",
+        "core.role.update",
+        "core.role.delete",
+        "core.api-key.read",
+        "core.api-key.create",
+        "core.api-key.revoke",
+        "core.device.read",
+        "core.device.create",
+        "core.device.revoke",
+        "core.audit-log.read",
+        "core.approval.read",
+        "core.approval.decide",
+        "platform.organization.read",
+        "platform.user.read",
+        "platform.audit-log.read",
+        "platform.user.impersonate",
+        "platform.staff.manage",
       ].sort(),
     );
   });
 
   it("includes every agent runtime (SP3 spec §2.2) and chat (SP4) permission unchanged", () => {
     const added = [...AGENT_PERMISSIONS, ...CHAT_PERMISSIONS];
-    expect(ids).toEqual([...sp1Ids, ...added.map((permission) => permission.id), ...SP5_PERMISSIONS.map((permission) => permission.id)]);
+    expect(ids).toEqual([
+      ...sp1Ids,
+      ...added.map((permission) => permission.id),
+      ...SP5_PERMISSIONS.map((permission) => permission.id),
+    ]);
     for (const agent of added) expect(CORE_PERMISSIONS.find((permission) => permission.id === agent.id)).toEqual(agent);
   });
 
@@ -52,21 +79,33 @@ describe("CORE_PERMISSIONS", () => {
   });
 
   it("gives admin every tenant permission except deleting the organization", () => {
-    const withoutAdmin = tenantPermissions.filter((permission) => !permission.defaultRoles.includes("admin")).map((p) => p.id);
+    const withoutAdmin = tenantPermissions
+      .filter((permission) => !permission.defaultRoles.includes("admin"))
+      .map((p) => p.id);
     expect(withoutAdmin).toEqual(["core.organization.delete"]);
   });
 
   it("keeps member and viewer to the rows of the spec", () => {
     const holders = (role: "member" | "viewer") =>
-      sp1TenantPermissions.filter((permission) => permission.defaultRoles.includes(role)).map((permission) => permission.id).sort();
+      sp1TenantPermissions
+        .filter((permission) => permission.defaultRoles.includes(role))
+        .map((permission) => permission.id)
+        .sort();
     expect(holders("viewer")).toEqual(["core.organization.read", "core.project.read", "core.unit.read"]);
-    expect(holders("member")).toEqual(
-      ["core.approval.read", "core.member.read", "core.organization.read", "core.project.read", "core.role.read", "core.unit.read"],
-    );
+    expect(holders("member")).toEqual([
+      "core.approval.read",
+      "core.member.read",
+      "core.organization.read",
+      "core.project.read",
+      "core.role.read",
+      "core.unit.read",
+    ]);
   });
 
   it("gives the device role only what /v1/me/context needs (decision 0030 A1)", () => {
-    const holders = sp1TenantPermissions.filter((permission) => permission.defaultRoles.includes("device")).map((permission) => permission.id);
+    const holders = sp1TenantPermissions
+      .filter((permission) => permission.defaultRoles.includes("device"))
+      .map((permission) => permission.id);
     expect(holders).toEqual(["core.organization.read"]);
   });
 
@@ -91,12 +130,29 @@ describe("SP5_PERMISSIONS (SP5 spec §2.1)", () => {
   it("adds the tenant and platform permissions of the spec", () => {
     expect(SP5_PERMISSIONS.map((permission) => permission.id).sort()).toEqual(
       [
-        "core.workflow-run.read", "core.workflow-run.start", "core.workflow-run.cancel", "core.workflow-run.approve-demo",
-        "core.schedule.read", "core.schedule.write", "core.trace.read", "core.eval.read", "core.eval.write",
-        "core.prompt.read", "core.prompt.write", "core.flag.read", "core.flag.write",
-        "platform.plan.manage", "platform.organization.update", "platform.agent.manage", "platform.prompt.manage",
-        "platform.connector.read", "platform.eval.manage", "platform.trace.read", "platform.usage.read",
-        "platform.workflow.manage", "platform.flag.manage",
+        "core.workflow-run.read",
+        "core.workflow-run.start",
+        "core.workflow-run.cancel",
+        "core.workflow-run.approve-demo",
+        "core.schedule.read",
+        "core.schedule.write",
+        "core.trace.read",
+        "core.eval.read",
+        "core.eval.write",
+        "core.prompt.read",
+        "core.prompt.write",
+        "core.flag.read",
+        "core.flag.write",
+        "platform.plan.manage",
+        "platform.organization.update",
+        "platform.agent.manage",
+        "platform.prompt.manage",
+        "platform.connector.read",
+        "platform.eval.manage",
+        "platform.trace.read",
+        "platform.usage.read",
+        "platform.workflow.manage",
+        "platform.flag.manage",
       ].sort(),
     );
   });
@@ -109,8 +165,14 @@ describe("SP5_PERMISSIONS (SP5 spec §2.1)", () => {
   });
 
   it("makes the approval-demo action a four-eyes permission (decision 0036)", () => {
-    expect(sp5("core.workflow-run.approve-demo")).toMatchObject({ kind: "write", requiresApproval: true, defaultRoles: ["owner", "admin", "member"] });
-    expect(SP5_PERMISSIONS.filter((permission) => permission.requiresApproval === true).map((permission) => permission.id)).toEqual(["core.workflow-run.approve-demo"]);
+    expect(sp5("core.workflow-run.approve-demo")).toMatchObject({
+      kind: "write",
+      requiresApproval: true,
+      defaultRoles: ["owner", "admin", "member"],
+    });
+    expect(
+      SP5_PERMISSIONS.filter((permission) => permission.requiresApproval === true).map((permission) => permission.id),
+    ).toEqual(["core.workflow-run.approve-demo"]);
   });
 
   it("gives platform reads to support and platform writes to platform-admin only", () => {
@@ -123,12 +185,23 @@ describe("SP5_PERMISSIONS (SP5 spec §2.1)", () => {
 });
 
 describe("PermissionDefinitionSchema", () => {
-  const base = { id: "sample.thing.read", descriptionKey: "permissions.sample.thing.read", kind: "read", scope: "tenant", defaultRoles: ["member"] };
+  const base = {
+    id: "sample.thing.read",
+    descriptionKey: "permissions.sample.thing.read",
+    kind: "read",
+    scope: "tenant",
+    defaultRoles: ["member"],
+  };
 
   it("rejects platform roles on a tenant permission and tenant roles on a platform permission", () => {
     expect(PermissionDefinitionSchema.safeParse({ ...base, defaultRoles: ["platform-admin"] }).success).toBe(false);
     expect(
-      PermissionDefinitionSchema.safeParse({ ...base, id: "platform.thing.read", scope: "platform", defaultRoles: ["owner"] }).success,
+      PermissionDefinitionSchema.safeParse({
+        ...base,
+        id: "platform.thing.read",
+        scope: "platform",
+        defaultRoles: ["owner"],
+      }).success,
     ).toBe(false);
   });
 
@@ -138,6 +211,13 @@ describe("PermissionDefinitionSchema", () => {
   });
 
   it("accepts a module permission with approval", () => {
-    expect(PermissionDefinitionSchema.safeParse({ ...base, kind: "write", id: "sample.thing.delete", requiresApproval: true }).success).toBe(true);
+    expect(
+      PermissionDefinitionSchema.safeParse({
+        ...base,
+        kind: "write",
+        id: "sample.thing.delete",
+        requiresApproval: true,
+      }).success,
+    ).toBe(true);
   });
 });

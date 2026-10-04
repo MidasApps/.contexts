@@ -1,6 +1,6 @@
 "use client";
 
-import { PROMPT_AGENT_IDS, type AdminAgent } from "@core/contracts";
+import { type AdminAgent, PROMPT_AGENT_IDS } from "@core/contracts";
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { useAdminAgentCatalog } from "#/entities/admin-agent/index.ts";
@@ -57,12 +57,17 @@ function AgentRow({ agent, canManagePrompts }: { agent: AdminAgent; canManagePro
               <StatusPill tone={ROLE_TONES[agent.role]}>{t(`catalog.role.${agent.role}`)}</StatusPill>
             </span>
             {description === "" ? null : <span className="text-sm text-muted-foreground">{description}</span>}
-            <span className="text-body-sm text-muted-foreground">{t(agent.enablement === "always" ? "catalog.enablement.always" : "catalog.enablement.perOrganization")}</span>
+            <span className="text-body-sm text-muted-foreground">
+              {t(agent.enablement === "always" ? "catalog.enablement.always" : "catalog.enablement.perOrganization")}
+            </span>
           </span>
         </span>
         {canManagePrompts && hasPrompt(agent.id) ? (
           <Button variant="outline" size="sm" asChild className="self-start">
-            <RouteLink to={{ id: "admin", rest: `agents/${agent.id}/prompts` }} aria-label={t("openPromptsNamed", { agent: name })}>
+            <RouteLink
+              to={{ id: "admin", rest: `agents/${agent.id}/prompts` }}
+              aria-label={t("openPromptsNamed", { agent: name })}
+            >
               {t("openPrompts")}
             </RouteLink>
           </Button>
@@ -75,7 +80,11 @@ function AgentRow({ agent, canManagePrompts }: { agent: AdminAgent; canManagePro
           </Detail>
         ) : null}
         <Detail label={t("catalog.tools")}>
-          <IdList ids={agent.tools} empty={t("catalog.none")} more={agent.toolsVaryByOrganization ? t("catalog.toolsOfOrganization") : undefined} />
+          <IdList
+            ids={agent.tools}
+            empty={t("catalog.none")}
+            more={agent.toolsVaryByOrganization ? t("catalog.toolsOfOrganization") : undefined}
+          />
         </Detail>
         <Detail label={t("catalog.skills")}>
           <IdList ids={agent.skills} empty={t("catalog.none")} />

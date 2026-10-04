@@ -60,12 +60,19 @@ const nestedCallsOf = (result: unknown): ToolCallView[] => {
 };
 
 // A delegation suspended by its subagent's approval: `suspendedTools[callId].suspendPayload.toolName`.
-const SuspendedToolsSchema = z.record(z.string(), z.looseObject({ suspendPayload: z.looseObject({ toolName: z.string().optional() }).optional() }));
+const SuspendedToolsSchema = z.record(
+  z.string(),
+  z.looseObject({ suspendPayload: z.looseObject({ toolName: z.string().optional() }).optional() }),
+);
 
 const suspendedCallsOf = (metadata: Record<string, unknown> | undefined): Map<string, string> => {
   const parsed = SuspendedToolsSchema.safeParse(metadata?.["suspendedTools"] ?? {});
   if (!parsed.success) return new Map();
-  return new Map(Object.entries(parsed.data).flatMap(([callId, entry]) => (entry.suspendPayload?.toolName === undefined ? [] : [[callId, entry.suspendPayload.toolName] as const])));
+  return new Map(
+    Object.entries(parsed.data).flatMap(([callId, entry]) =>
+      entry.suspendPayload?.toolName === undefined ? [] : [[callId, entry.suspendPayload.toolName] as const],
+    ),
+  );
 };
 
 const isAwaitingApproval = (metadata: Record<string, unknown> | undefined): boolean =>
@@ -98,8 +105,16 @@ export const viewAgentRun = (output: unknown): AgentRunView => {
       const invocation = part.toolInvocation;
       if (part.type === "tool-invocation" && invocation !== undefined) {
         const waiting = suspended.get(invocation.toolCallId ?? "");
-        const nested = [...nestedCallsOf(invocation.result), ...(waiting === undefined ? [] : [{ toolName: waiting, state: "call", result: undefined, nested: [] }])];
-        toolCalls.push({ toolName: invocation.toolName, state: invocation.state ?? "result", result: invocation.result, nested });
+        const nested = [
+          ...nestedCallsOf(invocation.result),
+          ...(waiting === undefined ? [] : [{ toolName: waiting, state: "call", result: undefined, nested: [] }]),
+        ];
+        toolCalls.push({
+          toolName: invocation.toolName,
+          state: invocation.state ?? "result",
+          result: invocation.result,
+          nested,
+        });
       }
     }
   }
@@ -107,7 +122,8 @@ export const viewAgentRun = (output: unknown): AgentRunView => {
 };
 
 /** Every tool call of the run, delegations first, then the subagents' calls. */
-export const allToolCalls = (view: AgentRunView): ToolCallView[] => view.toolCalls.flatMap((call) => [call, ...call.nested]);
+export const allToolCalls = (view: AgentRunView): ToolCallView[] =>
+  view.toolCalls.flatMap((call) => [call, ...call.nested]);
 
 /** Mastra sends tool names to the model sanitized (`catalog.listEntities` → `catalog_listEntities`). */
 export const sanitizeToolName = (name: string): string => name.replace(/[^A-Za-z0-9_-]/g, "_");

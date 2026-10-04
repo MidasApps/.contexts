@@ -1,10 +1,10 @@
 import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderWidget } from "#/app-shell/testing/render-widget.tsx";
+import { SHELL_ORGANIZATIONS } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
-import { SHELL_ORGANIZATIONS } from "#/app-shell/testing/shell-routes.ts";
 import { OrganizationSwitcher } from "./OrganizationSwitcher.tsx";
 
 describe("OrganizationSwitcher", () => {
@@ -14,7 +14,9 @@ describe("OrganizationSwitcher", () => {
     const current = await screen.findByRole("menuitemradio", { name: "Northwind" });
     expect(current.getAttribute("aria-checked")).toBe("true");
     expect(screen.getByRole("menuitemradio", { name: "Contoso" }).getAttribute("aria-checked")).toBe("false");
-    expect(screen.getByRole("menuitem", { name: "Ver todas ou criar organização" }).getAttribute("href")).toBe("/organizations");
+    expect(screen.getByRole("menuitem", { name: "Ver todas ou criar organização" }).getAttribute("href")).toBe(
+      "/organizations",
+    );
     await expectNoAxeViolations(document.body);
   });
 
@@ -40,7 +42,9 @@ describe("OrganizationSwitcher", () => {
     items.forEach((item) => expect(item.getAttribute("aria-disabled")).toBe("true"));
     await user.keyboard("{Escape}");
     finish();
-    await waitFor(() => expect(screen.getByRole("button", { name: /trocar de organização/u }).getAttribute("aria-busy")).toBeNull());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /trocar de organização/u }).getAttribute("aria-busy")).toBeNull(),
+    );
     expect(calls).toHaveLength(1);
   });
 
@@ -48,10 +52,16 @@ describe("OrganizationSwitcher", () => {
     let fail = true;
     const { user } = renderWidget(<OrganizationSwitcher />, {
       path: "/profile/account",
-      routes: { "GET /v1/me/organizations": () => (fail ? apiError(500, "INTERNAL_ERROR") : page(SHELL_ORGANIZATIONS)) },
+      routes: {
+        "GET /v1/me/organizations": () => (fail ? apiError(500, "INTERNAL_ERROR") : page(SHELL_ORGANIZATIONS)),
+      },
     });
     await user.click(await screen.findByRole("button", { name: "Escolher organização, trocar de organização" }));
-    const retry = await screen.findByRole("menuitem", { name: "Não foi possível carregar. Tentar novamente" }, { timeout: 8000 });
+    const retry = await screen.findByRole(
+      "menuitem",
+      { name: "Não foi possível carregar. Tentar novamente" },
+      { timeout: 8000 },
+    );
     fail = false;
     await user.click(retry);
     await waitFor(() => expect(screen.getByRole("menuitemradio", { name: "Contoso" })).toBeDefined());

@@ -33,7 +33,13 @@ const sink: UsageSink = {
 };
 const writer = createInMemoryAuditLogWriter();
 const clock = fixedClock("2026-09-30T12:00:00.000Z");
-const reportTenant = makeReportTenantUsage({ repository, reports: createPostgresUsageReportRepository(sql), sink, audit: makeRecordAudit({ writer, clock }), clock });
+const reportTenant = makeReportTenantUsage({
+  repository,
+  reports: createPostgresUsageReportRepository(sql),
+  sink,
+  audit: makeRecordAudit({ writer, clock }),
+  clock,
+});
 const notifications = createRecordingNotificationPort();
 const workflow = createUsageReportWorkflow({
   access: createFakeAccessPort({}),
@@ -93,20 +99,27 @@ describe("usage-report workflow (Postgres)", () => {
     const first = await runPlatform();
     expect(first.status).toBe("success");
     expect(first.status === "success" ? first.result : undefined).toEqual({ tenants: 2, failed: 0, alerts: 1 });
-    expect(notifications.sent).toEqual([{ tenantId: TENANT_A, recipientUid: null, kind: "BUDGET_ALERT", data: { thresholdPercent: 80, usedPercent: 85 } }]);
+    expect(notifications.sent).toEqual([
+      { tenantId: TENANT_A, recipientUid: null, kind: "BUDGET_ALERT", data: { thresholdPercent: 80, usedPercent: 85 } },
+    ]);
     expect(exported.map((row) => row.tenantId).sort()).toEqual([TENANT_A, TENANT_B]);
 
     const second = await runPlatform();
     expect(second.status === "success" ? second.result : undefined).toEqual({ tenants: 2, failed: 0, alerts: 0 });
     expect(notifications.sent).toHaveLength(1);
     expect(exported).toHaveLength(2);
-    const [rollups] = await sql<{ count: string }[]>`SELECT count(*) FROM usage.daily_rollups WHERE tenant_id IN (${TENANT_A}, ${TENANT_B})`;
+    const [rollups] = await sql<
+      { count: string }[]
+    >`SELECT count(*) FROM usage.daily_rollups WHERE tenant_id IN (${TENANT_A}, ${TENANT_B})`;
     expect(rollups?.count).toBe("2");
   }, 30_000);
 
   it("reports only the schedule's tenant when a tenant schedule starts it", async () => {
     const run = await mastra.getWorkflow(USAGE_REPORT_WORKFLOW_ID).createRun();
-    const result = await run.start({ inputData: {}, requestContext: new RequestContext<unknown>(buildAgentContextEntries({ tenantId: TENANT_B })) });
+    const result = await run.start({
+      inputData: {},
+      requestContext: new RequestContext<unknown>(buildAgentContextEntries({ tenantId: TENANT_B })),
+    });
     expect(result.status === "success" ? result.result : undefined).toEqual({ tenants: 1, failed: 0, alerts: 0 });
   }, 30_000);
 });

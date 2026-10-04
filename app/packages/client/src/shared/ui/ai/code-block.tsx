@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon, CopyIcon } from "lucide-react";
-import { useEffect, useState, type ComponentProps } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -37,15 +37,24 @@ export function CodeBlock({ code, language, label, className, ...props }: CodeBl
     );
   };
   return (
-    <div data-slot="code-block" className={cn("relative rounded-sm border border-border bg-muted", className)} {...props}>
+    <div
+      data-slot="code-block"
+      className={cn("relative rounded-sm border border-border bg-muted", className)}
+      {...props}
+    >
       <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-1">
         <span className="font-mono text-label text-muted-foreground-strong">{language ?? ""}</span>
         <Button variant="ghost" size="icon-xs" aria-label={copied ? t("copied") : t("copyCode")} onClick={copy}>
           {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
         </Button>
       </div>
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a scrollable region must be reachable by keyboard (WCAG 2.1.1) */}
-      <pre role="region" aria-label={label} tabIndex={0} className="max-h-64 overflow-auto p-3 font-mono text-body-sm leading-relaxed text-foreground">
+      <pre
+        role="region"
+        aria-label={label}
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a scrollable region must be reachable by keyboard (WCAG 2.1.1)
+        tabIndex={0}
+        className="max-h-64 overflow-auto p-3 font-mono text-body-sm leading-relaxed text-foreground"
+      >
         <code>{code}</code>
       </pre>
       <span role="status" className="sr-only">

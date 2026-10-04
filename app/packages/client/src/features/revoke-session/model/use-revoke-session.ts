@@ -19,7 +19,9 @@ export const useRevokeSession = (): ((sessionId: string) => Promise<void>) => {
   const queryClient = useQueryClient();
   return useCallback(
     async (sessionId: string) => {
-      const rollback = await patchCachedLists<SessionSummary>(queryClient, sessionKeys.all(), (items) => items.filter((item) => item.id !== sessionId));
+      const rollback = await patchCachedLists<SessionSummary>(queryClient, sessionKeys.all(), (items) =>
+        items.filter((item) => item.id !== sessionId),
+      );
       try {
         await callEndpoint(revokeSessionEndpoint, { params: { sessionId } });
       } catch (error: unknown) {

@@ -16,7 +16,9 @@ const CITATION_ID_PATTERN = new RegExp(`kb:${UUID}#\\d+`, "gi");
 export const citationIdOf = (documentId: string, chunkIndex: number): string => `kb:${documentId}#${chunkIndex}`;
 
 /** Every distinct citation id in a text, lowercased, in order of first appearance. */
-export const extractCitationIds = (text: string): string[] => [...new Set([...text.matchAll(CITATION_ID_PATTERN)].map((match) => match[0].toLowerCase()))];
+export const extractCitationIds = (text: string): string[] => [
+  ...new Set([...text.matchAll(CITATION_ID_PATTERN)].map((match) => match[0].toLowerCase())),
+];
 
 /** SHA-256 hex of the extracted text: unchanged content is not re-embedded (`content_hash`). */
 export const contentHashOf = (text: string): string => createHash("sha256").update(text).digest("hex");

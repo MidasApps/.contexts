@@ -38,11 +38,22 @@ export const makeAuditImpersonatedRequest =
       target: { type: "impersonation-session", id: request.principal.impersonation.sessionId },
       outcome: outcomeOf(request.status),
       requestId: request.requestId,
-      metadata: { endpointId: request.endpointId, ...(request.denyReason === undefined ? {} : { errorCode: request.denyReason }) },
+      metadata: {
+        endpointId: request.endpointId,
+        ...(request.denyReason === undefined ? {} : { errorCode: request.denyReason }),
+      },
     } as const;
     await deps.unitOfWork.run(async (tx) => {
-      await deps.audit.record({ log: "platform", ...entry, ...(session === null ? {} : { targetTenantId: session.tenantId }) }, tx);
+      await deps.audit.record(
+        { log: "platform", ...entry, ...(session === null ? {} : { targetTenantId: session.tenantId }) },
+        tx,
+      );
       if (session !== null) await deps.audit.record({ log: "tenant", ...entry, tenantId: session.tenantId }, tx);
     });
-    deps.logger.info("impersonated_request", { requestId: request.requestId, endpointId: request.endpointId, status: request.status, reason: request.denyReason ?? null });
+    deps.logger.info("impersonated_request", {
+      requestId: request.requestId,
+      endpointId: request.endpointId,
+      status: request.status,
+      reason: request.denyReason ?? null,
+    });
   };

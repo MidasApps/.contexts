@@ -13,7 +13,10 @@ const SYSTEM = { type: "system", id: "system" } as const;
 export type GetApprovalRequest = (id: ApprovalRequestId) => Promise<ApprovalRequest | null>;
 export type ExpireApprovalRequests = (args: { requestId: string; limit?: number }) => Promise<{ expired: number }>;
 export type FailInterruptedApprovals = (args: { requestId: string; limit?: number }) => Promise<{ failed: number }>;
-export type CancelApprovalRequest = (args: { id: ApprovalRequestId; requestId: string }) => Promise<{ cancelled: boolean }>;
+export type CancelApprovalRequest = (args: {
+  id: ApprovalRequestId;
+  requestId: string;
+}) => Promise<{ cancelled: boolean }>;
 
 /**
  * System read of one request with its effective status (decision 0036). The workflow HITL step
@@ -37,13 +40,24 @@ export const makeExpireApprovalRequests =
   (deps: ApprovalDeps): ExpireApprovalRequests =>
   async ({ requestId, limit = APPROVAL_SWEEP_BATCH }) => {
     const now = deps.clock.now();
-    const candidates = await deps.approvals.listByStatusBefore({ status: "pending", field: "expiresAt", before: now.toISOString(), limit });
+    const candidates = await deps.approvals.listByStatusBefore({
+      status: "pending",
+      field: "expiresAt",
+      before: now.toISOString(),
+      limit,
+    });
     let expired = 0;
     for (const candidate of candidates) {
       const changed = await deps.unitOfWork.run(async (tx) => {
         const current = await deps.approvals.get(tx, candidate.id);
-        if (current === null || current.status !== "pending" || effectiveApprovalStatus(current, now) !== "expired") return false;
-        deps.approvals.setStatus(tx, { id: current.id, status: "expired", updatedAt: now.toISOString(), actorId: SYSTEM.id });
+        if (current === null || current.status !== "pending" || effectiveApprovalStatus(current, now) !== "expired")
+          return false;
+        deps.approvals.setStatus(tx, {
+          id: current.id,
+          status: "expired",
+          updatedAt: now.toISOString(),
+          actorId: SYSTEM.id,
+        });
         await deps.audit.record(
           {
             log: "tenant",
@@ -81,7 +95,16 @@ export const makeCancelApprovalRequest =
       if (status === null) return { cancelled: false };
       deps.approvals.setStatus(tx, { id: current.id, status, updatedAt: now.toISOString(), actorId: SYSTEM.id });
       await deps.audit.record(
-        { log: "tenant", tenantId: current.tenantId, action: "APPROVAL_CANCELLED", actor: SYSTEM, target: { type: "approval-request", id: current.id }, node: current.node, outcome: "success", requestId },
+        {
+          log: "tenant",
+          tenantId: current.tenantId,
+          action: "APPROVAL_CANCELLED",
+          actor: SYSTEM,
+          target: { type: "approval-request", id: current.id },
+          node: current.node,
+          outcome: "success",
+          requestId,
+        },
         tx,
       );
       return { cancelled: true };
@@ -98,7 +121,12 @@ export const makeFailInterruptedApprovals =
   async ({ requestId, limit = APPROVAL_SWEEP_BATCH }) => {
     const now = deps.clock.now();
     const cutoff = new Date(now.getTime() - INTERRUPTED_AFTER_MS).toISOString();
-    const candidates = await deps.approvals.listByStatusBefore({ status: "approved", field: "updatedAt", before: cutoff, limit });
+    const candidates = await deps.approvals.listByStatusBefore({
+      status: "approved",
+      field: "updatedAt",
+      before: cutoff,
+      limit,
+    });
     let failed = 0;
     for (const candidate of candidates) {
       const changed = await deps.unitOfWork.run(async (tx) => {
@@ -108,7 +136,13 @@ export const makeFailInterruptedApprovals =
         if (status === null) return false;
         // Decision 0067: the request itself says why, not only the audit entry.
         const failure = { code: EXECUTION_INTERRUPTED, requestId };
-        deps.approvals.setStatus(tx, { id: current.id, status, failure, updatedAt: now.toISOString(), actorId: SYSTEM.id });
+        deps.approvals.setStatus(tx, {
+          id: current.id,
+          status,
+          failure,
+          updatedAt: now.toISOString(),
+          actorId: SYSTEM.id,
+        });
         await deps.audit.record(
           {
             log: "tenant",

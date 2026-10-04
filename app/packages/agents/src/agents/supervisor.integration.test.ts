@@ -1,15 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { createFakeProjectCommands } from "../testing/fake-ports.ts";
-import { SUPERVISOR_AGENT_ID, SUPERVISOR_MAX_STEPS } from "./supervisor-agent.ts";
 import { buildSupervisorHarness, collectChunks, memberContext, toolNamesCalled } from "./supervisor.fixture.ts";
+import { SUPERVISOR_AGENT_ID, SUPERVISOR_MAX_STEPS } from "./supervisor-agent.ts";
 
-const supervisorOf = (harness: ReturnType<typeof buildSupervisorHarness>) => harness.mastra.getAgent(SUPERVISOR_AGENT_ID);
+const supervisorOf = (harness: ReturnType<typeof buildSupervisorHarness>) =>
+  harness.mastra.getAgent(SUPERVISOR_AGENT_ID);
 
 // Each case boots Mastra runs with several fake model calls; slow machines need more than the default.
 describe("assistant supervisor (fake mode, in-process Mastra)", { timeout: 30_000 }, () => {
   it("is the entry agent over the knowledge, data, action and web subagents", async () => {
     const { runtime } = buildSupervisorHarness();
-    expect(Object.keys(runtime.agents).sort()).toEqual([SUPERVISOR_AGENT_ID, "assistant-chat", "conversation-summarizer", "custom-agent", "custom-agent-chat", "ping"]);
+    expect(Object.keys(runtime.agents).sort()).toEqual([
+      SUPERVISOR_AGENT_ID,
+      "assistant-chat",
+      "conversation-summarizer",
+      "custom-agent",
+      "custom-agent-chat",
+      "ping",
+    ]);
     expect(Object.keys(runtime.subagents).sort()).toEqual(["action", "data", "knowledge", "web"]);
     const supervisor = runtime.agents[SUPERVISOR_AGENT_ID];
     const options = await supervisor?.getDefaultOptions({ requestContext: memberContext() });
@@ -19,15 +27,21 @@ describe("assistant supervisor (fake mode, in-process Mastra)", { timeout: 30_00
 
   it("delegates a question to the knowledge subagent", async () => {
     const harness = buildSupervisorHarness();
-    const chunks = await collectChunks(await supervisorOf(harness).stream("What is our onboarding policy?", { requestContext: memberContext() }));
+    const chunks = await collectChunks(
+      await supervisorOf(harness).stream("What is our onboarding policy?", { requestContext: memberContext() }),
+    );
     expect(toolNamesCalled(chunks)).toContain("agent-knowledge");
-    expect(chunks.some((chunk) => chunk.type === "tool-result" && chunk.payload?.toolName === "agent-knowledge")).toBe(true);
+    expect(chunks.some((chunk) => chunk.type === "tool-result" && chunk.payload?.toolName === "agent-knowledge")).toBe(
+      true,
+    );
   });
 
   it("asks the data subagent to render the form of a create request", async () => {
     // The note command belongs to the example module, so the organization enables it (decision 0064).
     const harness = buildSupervisorHarness({ settings: { enabledAgents: ["knowledge", "data", "action", "example"] } });
-    const result = await supervisorOf(harness).generate("Please create a note for me", { requestContext: memberContext() });
+    const result = await supervisorOf(harness).generate("Please create a note for me", {
+      requestContext: memberContext(),
+    });
     const serialized = JSON.stringify(result.steps);
     expect(serialized).toContain("agent-data");
     expect(serialized).toContain("schema-form");
@@ -38,12 +52,18 @@ describe("assistant supervisor (fake mode, in-process Mastra)", { timeout: 30_00
     const projects = createFakeProjectCommands();
     const harness = buildSupervisorHarness({ ports: { commandRegistry: projects.commands } });
     const supervisor = supervisorOf(harness);
-    const stream = await supervisor.stream('Confirm: create the project named "Launch"', { requestContext: memberContext() });
+    const stream = await supervisor.stream('Confirm: create the project named "Launch"', {
+      requestContext: memberContext(),
+    });
     const chunks = await collectChunks(stream);
     const approval = chunks.find((chunk) => chunk.type === "tool-call-approval");
     expect(String(approval?.payload?.toolName)).toMatch(/^command[._]tenancy[._]CreateProjectInput$/);
     expect(projects.created).toEqual([]);
-    const resumed = await supervisor.approveToolCall({ runId: stream.runId, toolCallId: String(approval?.payload?.toolCallId), requestContext: memberContext() });
+    const resumed = await supervisor.approveToolCall({
+      runId: stream.runId,
+      toolCallId: String(approval?.payload?.toolCallId),
+      requestContext: memberContext(),
+    });
     await collectChunks(resumed);
     expect(projects.created.map((call) => call.input.name)).toEqual(["Launch"]);
   });
@@ -52,7 +72,9 @@ describe("assistant supervisor (fake mode, in-process Mastra)", { timeout: 30_00
     const projects = createFakeProjectCommands();
     const harness = buildSupervisorHarness({ ports: { commandRegistry: projects.commands } });
     const supervisor = supervisorOf(harness);
-    const stream = await supervisor.stream('Confirm: create the project named "Launch"', { requestContext: memberContext() });
+    const stream = await supervisor.stream('Confirm: create the project named "Launch"', {
+      requestContext: memberContext(),
+    });
     const approval = (await collectChunks(stream)).find((chunk) => chunk.type === "tool-call-approval");
     const declined = await supervisor.declineToolCall({
       runId: stream.runId,

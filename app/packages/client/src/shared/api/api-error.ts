@@ -37,4 +37,5 @@ export class ApiError extends Error {
 }
 
 /** Client errors (4xx) do not heal by retrying; network, timeout and 5xx may. */
-export const isClientError = (error: unknown): boolean => error instanceof ApiError && error.status >= 400 && error.status < 500;
+export const isClientError = (error: unknown): boolean =>
+  error instanceof ApiError && error.status >= 400 && error.status < 500;

@@ -1,5 +1,5 @@
-import { ApiKeyIdSchema, ApiKeySchema, type ApiKey } from "@core/contracts";
-import { FieldPath, Timestamp, type Firestore } from "firebase-admin/firestore";
+import { type ApiKey, ApiKeyIdSchema, ApiKeySchema } from "@core/contracts";
+import { FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
 import { z } from "zod";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
@@ -22,29 +22,55 @@ export const createFirestoreApiKeyRepository = (deps: { firestore: Firestore }):
   return {
     newId: () => ApiKeyIdSchema.parse(raw().doc().id),
     create: (tx, { apiKey, secretHash, actorId }) =>
-      void tx.create(raw().doc(apiKey.id), { ...converter.toFirestore(apiKey), secretHash, createdBy: actorId, updatedBy: actorId, schemaVersion: CORE_SCHEMA_VERSION }),
+      void tx.create(raw().doc(apiKey.id), {
+        ...converter.toFirestore(apiKey),
+        secretHash,
+        createdBy: actorId,
+        updatedBy: actorId,
+        schemaVersion: CORE_SCHEMA_VERSION,
+      }),
     get: async (tx, id) => {
       const ref = typed().doc(id);
       return (tx === undefined ? await ref.get() : await tx.get(ref)).data() ?? null;
     },
     findByPublicId: async (publicId) => {
-      const stored = (await raw().withConverter(storedConverter).where("publicId", "==", publicId).limit(1).get()).docs[0]?.data();
+      const stored = (
+        await raw().withConverter(storedConverter).where("publicId", "==", publicId).limit(1).get()
+      ).docs[0]?.data();
       if (stored === undefined) return null;
       const { secretHash, ...apiKey } = stored;
       return { apiKey, secretHash };
     },
     list: async ({ tenantId, page }) => {
-      let query = typed().where("tenantId", "==", tenantId).orderBy("createdAt", "desc").orderBy(FieldPath.documentId(), "desc");
-      if (page.after !== undefined) query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
+      let query = typed()
+        .where("tenantId", "==", tenantId)
+        .orderBy("createdAt", "desc")
+        .orderBy(FieldPath.documentId(), "desc");
+      if (page.after !== undefined)
+        query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
       const fetched = (await query.limit(page.limit + 1).get()).docs.map((doc) => doc.data());
       return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (key: ApiKey) => [key.createdAt, key.id] });
     },
     listActiveOfOwner: async ({ tenantId, ownerUid }) =>
-      (await typed().where("tenantId", "==", tenantId).where("ownerUid", "==", ownerUid).where("status", "==", "active").get()).docs.map((doc) => doc.data()),
+      (
+        await typed()
+          .where("tenantId", "==", tenantId)
+          .where("ownerUid", "==", ownerUid)
+          .where("status", "==", "active")
+          .get()
+      ).docs.map((doc) => doc.data()),
     revoke: (tx, { id, reason, updatedAt, actorId }) =>
-      void tx.update(raw().doc(id), toFirestoreUpdate({ schema: ApiKeySchema }, { status: "revoked", revokedReason: reason, updatedAt, updatedBy: actorId })),
+      void tx.update(
+        raw().doc(id),
+        toFirestoreUpdate(
+          { schema: ApiKeySchema },
+          { status: "revoked", revokedReason: reason, updatedAt, updatedBy: actorId },
+        ),
+      ),
     touchLastUsed: async ({ id, lastUsedAt }) => {
-      await raw().doc(id).update(toFirestoreUpdate({ schema: ApiKeySchema }, { lastUsedAt }));
+      await raw()
+        .doc(id)
+        .update(toFirestoreUpdate({ schema: ApiKeySchema }, { lastUsedAt }));
     },
   };
 };

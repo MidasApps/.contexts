@@ -4,19 +4,23 @@ import {
   ApiKeyIdSchema,
   DeviceIdSchema,
   ImpersonationSessionIdSchema,
-  OrganizationIdSchema,
-  ProjectIdSchema,
-  RoleIdSchema,
-  UnitIdSchema,
-  UserIdSchema,
   type NodeRef,
+  OrganizationIdSchema,
   type PermissionDefinition,
   type Principal,
+  ProjectIdSchema,
+  RoleIdSchema,
   type TenantNodeRef,
+  UnitIdSchema,
+  UserIdSchema,
 } from "@core/contracts";
-import { createInMemoryAccessStore, type InMemoryAccessStore } from "../../adapters/driven/in-memory-access-store.ts";
 import { fixedClock } from "../../../shared/clock/clock.ts";
-import { CORE_PERMISSION_SOURCE, createPermissionRegistry, type PermissionRegistry } from "../../domain/permission-registry.ts";
+import { createInMemoryAccessStore, type InMemoryAccessStore } from "../../adapters/driven/in-memory-access-store.ts";
+import {
+  CORE_PERMISSION_SOURCE,
+  createPermissionRegistry,
+  type PermissionRegistry,
+} from "../../domain/permission-registry.ts";
 
 export const NOW = "2026-09-29T12:00:00.000Z";
 const LATER = "2026-12-01T00:00:00.000Z";
@@ -48,7 +52,11 @@ export const principals = {
     mfa: false,
     impersonation: { sessionId: ImpersonationSessionIdSchema.parse(sessionId), staffUid: UserIdSchema.parse(staffUid) },
   }),
-  device: (deviceId: string, tenantId = "org-a"): Principal => ({ type: "device", deviceId: DeviceIdSchema.parse(deviceId), tenantId: tenant(tenantId) }),
+  device: (deviceId: string, tenantId = "org-a"): Principal => ({
+    type: "device",
+    deviceId: DeviceIdSchema.parse(deviceId),
+    tenantId: tenant(tenantId),
+  }),
   service: (apiKeyId: string, ownerUid = "owner-a", tenantId = "org-a"): Principal => ({
     type: "service",
     apiKeyId: ApiKeyIdSchema.parse(apiKeyId),
@@ -88,14 +96,34 @@ const seedTree = (store: InMemoryAccessStore): void => {
 };
 
 const seedUsers = (store: InMemoryAccessStore): void => {
-  for (const uid of ["owner-a", "viewer-p1", "editor-u1", "member-u1a", "multi", "odd-role", "gone-role", "deleted-grant"]) store.putUser(uid);
-  for (const uid of ["staff-admin", "staff-support", "staff-off", "suspended-owner", "orphan-owner"]) store.putUser(uid);
+  for (const uid of [
+    "owner-a",
+    "viewer-p1",
+    "editor-u1",
+    "member-u1a",
+    "multi",
+    "odd-role",
+    "gone-role",
+    "deleted-grant",
+  ])
+    store.putUser(uid);
+  for (const uid of ["staff-admin", "staff-support", "staff-off", "suspended-owner", "orphan-owner"])
+    store.putUser(uid);
   store.putUser("disabled", "disabled");
   store.putUser("staff-disabled", "disabled");
-  const grant = (principalId: string, tenantId: string, nodeId: string, key: "owner" | "member" | "viewer" | "device") =>
-    store.putGrant({ tenantId, principalId, nodeId, roles: [{ kind: "system", key }] });
+  const grant = (
+    principalId: string,
+    tenantId: string,
+    nodeId: string,
+    key: "owner" | "member" | "viewer" | "device",
+  ) => store.putGrant({ tenantId, principalId, nodeId, roles: [{ kind: "system", key }] });
   const custom = (principalId: string, nodeId: string, roleId: string) =>
-    store.putGrant({ tenantId: "org-a", principalId, nodeId, roles: [{ kind: "custom", roleId: RoleIdSchema.parse(roleId) }] });
+    store.putGrant({
+      tenantId: "org-a",
+      principalId,
+      nodeId,
+      roles: [{ kind: "custom", roleId: RoleIdSchema.parse(roleId) }],
+    });
   grant("owner-a", "org-a", "org-a", "owner");
   grant("viewer-p1", "org-a", "p1", "viewer");
   grant("member-u1a", "org-a", "u1a", "member");
@@ -106,9 +134,19 @@ const seedUsers = (store: InMemoryAccessStore): void => {
   custom("editor-u1", "u1", "role-editor");
   custom("odd-role", "p1", "role-odd");
   custom("gone-role", "p1", "role-gone");
-  store.putGrant({ tenantId: "org-a", principalId: "deleted-grant", nodeId: "org-a", roles: [{ kind: "system", key: "owner" }], isDeleted: true });
+  store.putGrant({
+    tenantId: "org-a",
+    principalId: "deleted-grant",
+    nodeId: "org-a",
+    roles: [{ kind: "system", key: "owner" }],
+    isDeleted: true,
+  });
   store.putRole({ id: "role-editor", tenantId: "org-a", permissions: ["core.unit.read", "core.unit.update"] });
-  store.putRole({ id: "role-odd", tenantId: "org-a", permissions: ["core.fake.read", "platform.user.read", "core.unit.read"] });
+  store.putRole({
+    id: "role-odd",
+    tenantId: "org-a",
+    permissions: ["core.fake.read", "platform.user.read", "core.unit.read"],
+  });
   store.putRole({ id: "role-gone", tenantId: "org-a", permissions: ["core.project.read"], isDeleted: true });
   store.putRole({ id: "role-device", tenantId: "org-a", permissions: ["core.project.read"] });
 };
@@ -117,8 +155,18 @@ const seedDevices = (store: InMemoryAccessStore): void => {
   store.putDevice("dev-1", { tenantId: tenant("org-a"), status: "active" });
   store.putDevice("dev-revoked", { tenantId: tenant("org-a"), status: "revoked" });
   store.putDevice("dev-b", { tenantId: tenant("org-b"), status: "active" });
-  store.putGrant({ tenantId: "org-a", principalId: "dev-1", nodeId: "p1", roles: [{ kind: "custom", roleId: RoleIdSchema.parse("role-device") }] });
-  store.putGrant({ tenantId: "org-a", principalId: "dev-revoked", nodeId: "p1", roles: [{ kind: "custom", roleId: RoleIdSchema.parse("role-device") }] });
+  store.putGrant({
+    tenantId: "org-a",
+    principalId: "dev-1",
+    nodeId: "p1",
+    roles: [{ kind: "custom", roleId: RoleIdSchema.parse("role-device") }],
+  });
+  store.putGrant({
+    tenantId: "org-a",
+    principalId: "dev-revoked",
+    nodeId: "p1",
+    roles: [{ kind: "custom", roleId: RoleIdSchema.parse("role-device") }],
+  });
 };
 
 const seedApiKeys = (store: InMemoryAccessStore): void => {
@@ -170,7 +218,11 @@ const seedStaff = (store: InMemoryAccessStore): void => {
   session("imp-by-non-staff", "owner-a", { staffUid: "viewer-p1" });
 };
 
-export type AccessWorld = { store: InMemoryAccessStore; registry: PermissionRegistry; clock: ReturnType<typeof fixedClock> };
+export type AccessWorld = {
+  store: InMemoryAccessStore;
+  registry: PermissionRegistry;
+  clock: ReturnType<typeof fixedClock>;
+};
 
 /** Builds a fresh, fully seeded world. */
 export const createAccessWorld = (): AccessWorld => {
@@ -180,6 +232,9 @@ export const createAccessWorld = (): AccessWorld => {
   seedDevices(store);
   seedApiKeys(store);
   seedStaff(store);
-  const registry = createPermissionRegistry([CORE_PERMISSION_SOURCE, { moduleId: "sample", permissions: [APPROVAL_PERMISSION] }]);
+  const registry = createPermissionRegistry([
+    CORE_PERMISSION_SOURCE,
+    { moduleId: "sample", permissions: [APPROVAL_PERMISSION] },
+  ]);
   return { store, registry, clock: fixedClock(NOW) };
 };

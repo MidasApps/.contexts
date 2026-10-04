@@ -42,7 +42,10 @@ const makeNodeResponse = () => {
 
 const makeServe = (handler: (request: Request) => Promise<Response>) => {
   const records: LogRecord[] = [];
-  const logger = createLogger({ context: { service: "functions", env: "local" }, sink: (record) => records.push(record) });
+  const logger = createLogger({
+    context: { service: "functions", env: "local" },
+    sink: (record) => records.push(record),
+  });
   return { serve: serveWebHandler({ operation: "healthz", logger }, handler), records };
 };
 
@@ -67,7 +70,9 @@ describe("serveWebHandler", () => {
   it("copies status, headers and body of the web response", async () => {
     const { response, sent } = makeNodeResponse();
     const { serve } = makeServe(() =>
-      Promise.resolve(Response.json({ data: { status: "ok" } }, { status: 201, headers: { "cache-control": "no-store" } })),
+      Promise.resolve(
+        Response.json({ data: { status: "ok" } }, { status: 201, headers: { "cache-control": "no-store" } }),
+      ),
     );
 
     await serve(makeNodeRequest(), response);

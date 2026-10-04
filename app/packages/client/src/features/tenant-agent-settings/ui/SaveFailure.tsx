@@ -12,7 +12,9 @@ export function SaveFailure({ failure }: { failure: AgentSettingsFailure | null 
     <Alert variant="destructive">
       <AlertTitle>{t("settings.agents.saveFailed")}</AlertTitle>
       <AlertDescription>
-        {failure.requestId === undefined ? failure.message : t("common.errorState.messageWithReference", { message: failure.message, requestId: failure.requestId })}
+        {failure.requestId === undefined
+          ? failure.message
+          : t("common.errorState.messageWithReference", { message: failure.message, requestId: failure.requestId })}
       </AlertDescription>
     </Alert>
   );

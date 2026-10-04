@@ -1,9 +1,9 @@
 "use client";
 
-import { updateAgentSettingsEndpoint, type BudgetCaps } from "@core/contracts";
+import { type BudgetCaps, updateAgentSettingsEndpoint } from "@core/contracts";
 import type { MoneyValue } from "@core/i18n";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
 import { tenantAgentSettingsKeys } from "#/entities/agent-settings/index.ts";
 import { usageKeys } from "#/entities/usage/index.ts";
@@ -13,7 +13,14 @@ import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { microUsdToMoney, moneyToMicroUsd, useFormatMicroUsd } from "#/shared/lib/format/use-format-micro-usd.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { IntegerInput } from "#/shared/ui/molecules/IntegerInput/IntegerInput.tsx";
 import { MoneyInput } from "#/shared/ui/molecules/MoneyInput/MoneyInput.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
@@ -37,9 +44,15 @@ function CapSource({ caps, ownBudget }: { caps: BudgetCaps; ownBudget: BudgetCap
   const t = useTranslations("settings.usage.ownCap.source");
   const format = useFormatter();
   const formatCost = useFormatMicroUsd();
-  if (ownBudget === null) return <p role="status" className="text-sm text-muted-foreground">{t("plan")}</p>;
+  if (ownBudget === null)
+    return (
+      <p role="status" className="text-sm text-muted-foreground">
+        {t("plan")}
+      </p>
+    );
   const values = { spend: formatCost(ownBudget.monthlyMicroUsd), tokens: format.number(ownBudget.monthlyTokens) };
-  const ownInForce = ownBudget.monthlyMicroUsd === caps.monthlyMicroUsd && ownBudget.monthlyTokens === caps.monthlyTokens;
+  const ownInForce =
+    ownBudget.monthlyMicroUsd === caps.monthlyMicroUsd && ownBudget.monthlyTokens === caps.monthlyTokens;
   return (
     <p role="status" className="text-sm">
       {t(ownInForce ? "own" : "mixed", values)}
@@ -49,7 +62,9 @@ function CapSource({ caps, ownBudget }: { caps: BudgetCaps; ownBudget: BudgetCap
 
 /** The API answers 400 `VALIDATION_FAILED` with issue `ABOVE_PLAN` when the own cap exceeds the plan. */
 const isAbovePlan = (error: unknown): boolean =>
-  error instanceof ApiError && error.code === "VALIDATION_FAILED" && (error.details ?? []).some((detail) => detail.issue === "ABOVE_PLAN");
+  error instanceof ApiError &&
+  error.code === "VALIDATION_FAILED" &&
+  (error.details ?? []).some((detail) => detail.issue === "ABOVE_PLAN");
 
 /**
  * The organization's own monthly cap (`PATCH /v1/agent-settings { budget }`,
@@ -85,7 +100,13 @@ export function UsageCapForm({ organizationId, caps, ownBudget, disabled = false
       return true;
     } catch (error: unknown) {
       const described = describe(error);
-      setFailure(isAbovePlan(error) ? t("abovePlan") : described.requestId === undefined ? described.message : t("failureWithReference", { message: described.message, requestId: described.requestId }));
+      setFailure(
+        isAbovePlan(error)
+          ? t("abovePlan")
+          : described.requestId === undefined
+            ? described.message
+            : t("failureWithReference", { message: described.message, requestId: described.requestId }),
+      );
       return false;
     } finally {
       setPending(null);
@@ -95,7 +116,10 @@ export function UsageCapForm({ organizationId, caps, ownBudget, disabled = false
   const submit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     if (pending !== null) return;
-    const found = { ...(spend === null ? { spend: true as const } : {}), ...(tokens === null || tokensInvalid ? { tokens: true as const } : {}) };
+    const found = {
+      ...(spend === null ? { spend: true as const } : {}),
+      ...(tokens === null || tokensInvalid ? { tokens: true as const } : {}),
+    };
     setProblems(found);
     if (spend === null || tokens === null || found.tokens === true) return;
     void send({ monthlyMicroUsd: moneyToMicroUsd(spend), monthlyTokens: tokens }, "save");
@@ -121,7 +145,13 @@ export function UsageCapForm({ organizationId, caps, ownBudget, disabled = false
         <Field>
           <FieldLabel>{t("tokens")}</FieldLabel>
           <FieldControl>
-            <IntegerInput value={tokens} disabled={disabled} onValueChange={setTokens} onParseError={setTokensInvalid} className="sm:w-64" />
+            <IntegerInput
+              value={tokens}
+              disabled={disabled}
+              onValueChange={setTokens}
+              onParseError={setTokensInvalid}
+              className="sm:w-64"
+            />
           </FieldControl>
           <FieldDescription>{t("tokensHint")}</FieldDescription>
           <FieldError errors={[problems.tokens === true ? t("problems.tokens") : undefined]} />
@@ -132,7 +162,13 @@ export function UsageCapForm({ organizationId, caps, ownBudget, disabled = false
           {t("save")}
         </Button>
         {ownBudget === null ? null : (
-          <Button type="button" variant="outline" pending={pending === "remove"} disabled={disabled || pending === "save"} onClick={() => setConfirmingRemove(true)}>
+          <Button
+            type="button"
+            variant="outline"
+            pending={pending === "remove"}
+            disabled={disabled || pending === "save"}
+            onClick={() => setConfirmingRemove(true)}
+          >
             {t("remove")}
           </Button>
         )}

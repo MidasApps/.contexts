@@ -14,7 +14,9 @@ export const createFirestoreRoleReader = (deps: { firestore: Firestore }): RoleR
     const snapshots = await Promise.all(refs.map((ref) => ref.get()));
     return snapshots.flatMap((snapshot) => {
       const role = snapshot.data();
-      return role === undefined ? [] : [{ id: role.id, tenantId: role.tenantId, permissions: role.permissions, isDeleted: role.deletedAt !== null }];
+      return role === undefined
+        ? []
+        : [{ id: role.id, tenantId: role.tenantId, permissions: role.permissions, isDeleted: role.deletedAt !== null }];
     });
   },
 });

@@ -24,7 +24,10 @@ export type TenantUsageReport = {
   readonly usedPercent: number;
 };
 
-export type ReportTenantUsage = (input: { readonly tenantId: string; readonly requestId: string }) => Promise<TenantUsageReport>;
+export type ReportTenantUsage = (input: {
+  readonly tenantId: string;
+  readonly requestId: string;
+}) => Promise<TenantUsageReport>;
 
 export type ReportTenantUsageDeps = {
   readonly repository: Pick<UsageRepository, "getMonthSpend" | "getTenantBudget">;
@@ -43,7 +46,12 @@ const exportCalls = async (deps: ReportTenantUsageDeps, tenantId: string, until:
   let exported = 0;
   let afterKey: { occurredAt: string; id: string } | null = null;
   for (;;) {
-    const page = await deps.reports.listCallsForExport({ tenantId, after, until, page: { afterKey, limit: EXPORT_PAGE } });
+    const page = await deps.reports.listCallsForExport({
+      tenantId,
+      after,
+      until,
+      page: { afterKey, limit: EXPORT_PAGE },
+    });
     if (page.length > 0) await deps.sink.exportCalls(page);
     exported += page.length;
     const last = page.at(-1);
@@ -54,8 +62,10 @@ const exportCalls = async (deps: ReportTenantUsageDeps, tenantId: string, until:
   return exported;
 };
 
-const usedPercentOf = (spend: { costMicroUsd: number; tokens: number }, budget: { monthlyMicroUsd: number; monthlyTokens: number }): number =>
-  Math.max((spend.costMicroUsd * 100) / budget.monthlyMicroUsd, (spend.tokens * 100) / budget.monthlyTokens);
+const usedPercentOf = (
+  spend: { costMicroUsd: number; tokens: number },
+  budget: { monthlyMicroUsd: number; monthlyTokens: number },
+): number => Math.max((spend.costMicroUsd * 100) / budget.monthlyMicroUsd, (spend.tokens * 100) / budget.monthlyTokens);
 
 /**
  * One tenant of the `usage-report` workflow (SP5 spec §3.2, decision 0039): rebuilds yesterday's and
@@ -68,17 +78,27 @@ export const makeReportTenantUsage =
   (deps: ReportTenantUsageDeps): ReportTenantUsage =>
   async ({ tenantId, requestId }) => {
     const now = deps.clock.now();
-    const rollups = await deps.reports.upsertDailyRollups({ tenantId, days: [dayOf(new Date(now.getTime() - DAY_MS)), dayOf(now)] });
+    const rollups = await deps.reports.upsertDailyRollups({
+      tenantId,
+      days: [dayOf(new Date(now.getTime() - DAY_MS)), dayOf(now)],
+    });
     if (rollups.length > 0) await deps.sink.exportRollups(rollups);
     const exportedCalls = await exportCalls(deps, tenantId, new Date(now.getTime() - EXPORT_LAG_MS));
     const monthStart = utcMonthStart(now);
-    const [stored, spend] = await Promise.all([deps.repository.getTenantBudget({ tenantId }), deps.repository.getMonthSpend({ tenantId, monthStart })]);
+    const [stored, spend] = await Promise.all([
+      deps.repository.getTenantBudget({ tenantId }),
+      deps.repository.getMonthSpend({ tenantId, monthStart }),
+    ]);
     const budget = resolveBudget(stored);
-    const usedPercent = usedPercentOf({ costMicroUsd: spend.costMicroUsd, tokens: spend.inputTokens + spend.outputTokens }, budget);
+    const usedPercent = usedPercentOf(
+      { costMicroUsd: spend.costMicroUsd, tokens: spend.inputTokens + spend.outputTokens },
+      budget,
+    );
     const newAlerts: BudgetAlertThreshold[] = [];
     for (const threshold of BUDGET_ALERT_THRESHOLDS) {
       if (usedPercent < threshold) continue;
-      if (!(await deps.reports.recordBudgetAlert({ tenantId, month: dayOf(monthStart), thresholdPercent: threshold }))) continue;
+      if (!(await deps.reports.recordBudgetAlert({ tenantId, month: dayOf(monthStart), thresholdPercent: threshold })))
+        continue;
       newAlerts.push(threshold);
       const tenant = TenantIdSchema.parse(tenantId);
       await deps.audit.record({

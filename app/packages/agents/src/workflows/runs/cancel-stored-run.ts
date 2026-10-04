@@ -17,16 +17,31 @@ export type CancelStoredRunOptions = {
  * The run cancel cannot be undone, so a failed request cancel is logged, not thrown; the request
  * then expires on its own (approval-expiry-sweep) and its settle is skipped the same way.
  */
-export const cancelStoredRun = async (mastra: Mastra, run: StoredRun, options: CancelStoredRunOptions): Promise<{ readonly approvalRequestCancelled: boolean }> => {
-  const live = await mastra.getWorkflow(run.workflowName).createRun({ runId: run.runId, ...(run.resourceId === undefined ? {} : { resourceId: run.resourceId }) });
+export const cancelStoredRun = async (
+  mastra: Mastra,
+  run: StoredRun,
+  options: CancelStoredRunOptions,
+): Promise<{ readonly approvalRequestCancelled: boolean }> => {
+  const live = await mastra
+    .getWorkflow(run.workflowName)
+    .createRun({ runId: run.runId, ...(run.resourceId === undefined ? {} : { resourceId: run.resourceId }) });
   await live.cancel();
   const approvalRequestId = waitingApprovalRequestIdOf(run);
   if (approvalRequestId === null) return { approvalRequestCancelled: false };
   try {
-    const { cancelled } = await options.approvals.cancelWorkflowApproval({ approvalRequestId, runId: run.runId, requestId: options.requestId });
+    const { cancelled } = await options.approvals.cancelWorkflowApproval({
+      approvalRequestId,
+      runId: run.runId,
+      requestId: options.requestId,
+    });
     return { approvalRequestCancelled: cancelled };
   } catch (error: unknown) {
-    options.logger.error("workflow_run_approval_cancel_failed", { requestId: options.requestId, runId: run.runId, approvalRequestId, err: error });
+    options.logger.error("workflow_run_approval_cancel_failed", {
+      requestId: options.requestId,
+      runId: run.runId,
+      approvalRequestId,
+      err: error,
+    });
     return { approvalRequestCancelled: false };
   }
 };

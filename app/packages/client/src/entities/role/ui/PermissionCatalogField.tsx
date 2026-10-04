@@ -32,7 +32,15 @@ export function PermissionCatalogField({ grants, ...picker }: PermissionCatalogF
   const t = useTranslations("settings.roles.picker");
   const catalog = usePermissionsCatalog();
   if (catalog.isError) {
-    return <ApiErrorState frame="plain" title={t("loadError")} error={catalog.error} onRetry={() => void catalog.refetch()} retrying={catalog.isFetching} />;
+    return (
+      <ApiErrorState
+        frame="plain"
+        title={t("loadError")}
+        error={catalog.error}
+        onRetry={() => void catalog.refetch()}
+        retrying={catalog.isFetching}
+      />
+    );
   }
   if (grants?.status === "error") {
     return <ApiErrorState frame="plain" title={t("grantsError")} error={grants.error} onRetry={grants.refetch} />;

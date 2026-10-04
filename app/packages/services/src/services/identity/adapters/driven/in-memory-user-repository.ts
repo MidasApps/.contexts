@@ -16,7 +16,16 @@ export const createInMemoryUserRepository = (): InMemoryUserRepository => {
     ensure: ({ uid, profile, now }) => {
       const existing = users.get(uid);
       if (existing !== undefined) return Promise.resolve(existing);
-      const created: User = { id: uid, ...profile, preferences: DEFAULT_USER_PREFERENCES, lastContext: {}, accessVersion: 0, status: "active", createdAt: now, updatedAt: now };
+      const created: User = {
+        id: uid,
+        ...profile,
+        preferences: DEFAULT_USER_PREFERENCES,
+        lastContext: {},
+        accessVersion: 0,
+        status: "active",
+        createdAt: now,
+        updatedAt: now,
+      };
       users.set(uid, created);
       return Promise.resolve(created);
     },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -89,7 +89,12 @@ export function ConfirmDialog({
         )}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>{cancelLabel ?? t("cancel")}</AlertDialogCancel>
-          <Button variant={destructive ? "destructive" : "default"} pending={pending} disabled={!online} onClick={() => void confirm()}>
+          <Button
+            variant={destructive ? "destructive" : "default"}
+            pending={pending}
+            disabled={!online}
+            onClick={() => void confirm()}
+          >
             {confirmLabel}
           </Button>
         </AlertDialogFooter>

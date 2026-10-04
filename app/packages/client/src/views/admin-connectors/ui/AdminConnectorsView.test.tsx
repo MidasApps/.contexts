@@ -4,7 +4,7 @@ import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
 import { buildConnector } from "#/shared/testing/admin-operations-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, page, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, FAKE_REQUEST_ID, type FakeRoutes, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { AdminConnectorsView } from "./AdminConnectorsView.tsx";
 
@@ -19,13 +19,17 @@ const WAREHOUSE = buildConnector({
 });
 
 const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
-  "GET /v1/admin/organizations": page([buildOrganizationSummary(), buildOrganizationSummary({ id: IDS.otherOrganization, name: "Contoso" })]),
+  "GET /v1/admin/organizations": page([
+    buildOrganizationSummary(),
+    buildOrganizationSummary({ id: IDS.otherOrganization, name: "Contoso" }),
+  ]),
   "GET /v1/admin/connectors": page([buildConnector(), WAREHOUSE]),
   ...overrides,
 });
 
 const WITH_ORGANIZATION = `/admin/connectors?organizationId=${IDS.organization}`;
-const render = (options: Parameters<typeof renderAdmin>[1] = {}) => renderAdmin(<AdminConnectorsView />, { path: WITH_ORGANIZATION, routes: routes(), ...options });
+const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
+  renderAdmin(<AdminConnectorsView />, { path: WITH_ORGANIZATION, routes: routes(), ...options });
 
 describe("AdminConnectorsView", () => {
   it("asks for an organization first and never calls the API without one", async () => {
@@ -37,7 +41,11 @@ describe("AdminConnectorsView", () => {
     await user.click(screen.getByRole("combobox", { name: "Organização" }));
     await user.click(await screen.findByRole("option", { name: "Contoso" }));
     expect(router.current()).toBe(`/admin/connectors?organizationId=${IDS.otherOrganization}`);
-    await waitFor(() => expect(api.calls.find((call) => call.path === "/v1/admin/connectors")?.query).toBe(`?limit=20&organizationId=${IDS.otherOrganization}`));
+    await waitFor(() =>
+      expect(api.calls.find((call) => call.path === "/v1/admin/connectors")?.query).toBe(
+        `?limit=20&organizationId=${IDS.otherOrganization}`,
+      ),
+    );
   });
 
   it("lists the connectors of the organization without any secret material", async () => {
@@ -55,16 +63,29 @@ describe("AdminConnectorsView", () => {
     expect(within(warehouse).getByText("e mais 1")).toBeDefined();
     expect(within(warehouse).getByText("Sem segredo")).toBeDefined();
     expect(container.textContent).not.toContain("connector-secret-name");
-    expect(screen.getByText(/Somente leitura: a equipe da plataforma não altera nem desativa conectores/u)).toBeDefined();
+    expect(
+      screen.getByText(/Somente leitura: a equipe da plataforma não altera nem desativa conectores/u),
+    ).toBeDefined();
     expect(within(table).queryByRole("button")).toBeNull();
     await expectNoAxeViolations(container);
   });
 
   it("pages by cursor", async () => {
-    const first = Array.from({ length: 20 }, (_, index) => buildConnector({ id: `Cn${String(index).padStart(18, "0")}`, name: `api-${String(index)}` }));
-    const { user } = render({ routes: routes({ "GET /v1/admin/connectors": (request) => (request.query.get("cursor") === "c2" ? page([WAREHOUSE]) : page(first, { cursor: "c2", limit: 20 })) }) });
+    const first = Array.from({ length: 20 }, (_, index) =>
+      buildConnector({ id: `Cn${String(index).padStart(18, "0")}`, name: `api-${String(index)}` }),
+    );
+    const { user } = render({
+      routes: routes({
+        "GET /v1/admin/connectors": (request) =>
+          request.query.get("cursor") === "c2" ? page([WAREHOUSE]) : page(first, { cursor: "c2", limit: 20 }),
+      }),
+    });
     await screen.findByRole("table", { name: "Conectores da organização" });
-    await user.click(within(screen.getByRole("navigation", { name: "Páginas de conectores" })).getByRole("button", { name: "Próxima" }));
+    await user.click(
+      within(screen.getByRole("navigation", { name: "Páginas de conectores" })).getByRole("button", {
+        name: "Próxima",
+      }),
+    );
     expect(await screen.findByRole("row", { name: /warehouse/u })).toBeDefined();
   });
 
@@ -77,7 +98,9 @@ describe("AdminConnectorsView", () => {
   });
 
   it("shows an error with the request reference and retries", async () => {
-    const { user, api, container } = render({ routes: routes({ "GET /v1/admin/connectors": apiError(409, "CONFLICT") }) });
+    const { user, api, container } = render({
+      routes: routes({ "GET /v1/admin/connectors": apiError(409, "CONFLICT") }),
+    });
     expect(await screen.findByRole("alert")).toBeDefined();
     expect(screen.getByText(new RegExp(FAKE_REQUEST_ID, "u"))).toBeDefined();
     await expectNoAxeViolations(container);

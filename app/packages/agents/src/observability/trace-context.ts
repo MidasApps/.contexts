@@ -31,10 +31,12 @@ export const parseTraceparent = (header: string | null | undefined): TraceContex
   return { traceId, parentSpanId };
 };
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const readJsonObject = async (request: Request): Promise<Record<string, unknown> | null> => {
-  if (!BODY_METHODS.has(request.method) || !(request.headers.get("content-type") ?? "").includes("application/json")) return null;
+  if (!BODY_METHODS.has(request.method) || !(request.headers.get("content-type") ?? "").includes("application/json"))
+    return null;
   try {
     const body: unknown = JSON.parse(await request.clone().text());
     return isPlainObject(body) ? body : null;
@@ -77,7 +79,8 @@ export const withServerTracingOptions = async (request: Request): Promise<Reques
   const owned = Object.keys(body).some((key) => SERVER_OWNED_RUN_OPTIONS.has(key));
   if (!owned && trace === null) return request;
   const rest = Object.fromEntries(Object.entries(body).filter(([key]) => !SERVER_OWNED_RUN_OPTIONS.has(key)));
-  const next = trace === null ? rest : { ...rest, tracingOptions: { traceId: trace.traceId, parentSpanId: trace.parentSpanId } };
+  const next =
+    trace === null ? rest : { ...rest, tracingOptions: { traceId: trace.traceId, parentSpanId: trace.parentSpanId } };
   const headers = new Headers(request.headers);
   headers.delete("content-length");
   return new Request(request, { body: JSON.stringify(next), headers });

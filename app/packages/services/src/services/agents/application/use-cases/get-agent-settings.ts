@@ -18,5 +18,11 @@ export const makeGetAgentSettings =
     const stored = await deps.agentSettings.get(tenantId);
     if (stored !== null) return agentSettingsOf(stored);
     const base = await baseCapsOf(deps, tenantId);
-    return agentSettingsOf(await storedSettingsOf(deps, tenantId, resolveTenantCaps({ plan: base.plan, override: base.override, selfCap: null }).caps));
+    return agentSettingsOf(
+      await storedSettingsOf(
+        deps,
+        tenantId,
+        resolveTenantCaps({ plan: base.plan, override: base.override, selfCap: null }).caps,
+      ),
+    );
   };

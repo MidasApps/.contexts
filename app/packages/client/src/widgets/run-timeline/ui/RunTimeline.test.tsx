@@ -14,10 +14,15 @@ const RUN: RunTimelineRun = {
   updatedAt: "2026-09-29T15:00:00.000Z",
 };
 
-const steps = (): string[] => within(screen.getByRole("list", { name: "Linha do tempo" })).getAllByRole("listitem").map((item) => item.textContent ?? "");
+const steps = (): string[] =>
+  within(screen.getByRole("list", { name: "Linha do tempo" }))
+    .getAllByRole("listitem")
+    .map((item) => item.textContent ?? "");
 
 const render = (run: Partial<RunTimelineRun>, props: Partial<Parameters<typeof RunTimeline>[0]> = {}) =>
-  renderWithProviders(<RunTimeline run={{ ...RUN, ...run }} label="Linha do tempo" {...props} />, { timeZone: "America/Sao_Paulo" });
+  renderWithProviders(<RunTimeline run={{ ...RUN, ...run }} label="Linha do tempo" {...props} />, {
+    timeZone: "America/Sao_Paulo",
+  });
 
 describe("RunTimeline", () => {
   it("shows who started the run and its current status since the last change", async () => {
@@ -32,7 +37,10 @@ describe("RunTimeline", () => {
   });
 
   it("says a schedule started it in words, never by its id, and the platform when nobody did", () => {
-    const scheduled = render({ scheduleId: "schedule_3fa9c0e1b2d4a6f8-daily-usage" }, { scheduleLabel: "todo dia às 09:00" });
+    const scheduled = render(
+      { scheduleId: "schedule_3fa9c0e1b2d4a6f8-daily-usage" },
+      { scheduleLabel: "todo dia às 09:00" },
+    );
     expect(steps()[0]).toContain("Por um agendamento: todo dia às 09:00");
     scheduled.unmount();
     const anySchedule = render({ scheduleId: "schedule_3fa9c0e1b2d4a6f8-daily-usage" });
@@ -44,10 +52,15 @@ describe("RunTimeline", () => {
   });
 
   it("shows the approval a suspended run waits for, through the caller's link", () => {
-    render({ status: "suspended", approvalRequestId: "Ap1rQ2sT3uV4wX5yZ6aB" }, { renderApproval: (id) => <a href={`/approvals/${id}`}>Abrir aprovação</a> });
+    render(
+      { status: "suspended", approvalRequestId: "Ap1rQ2sT3uV4wX5yZ6aB" },
+      { renderApproval: (id) => <a href={`/approvals/${id}`}>Abrir aprovação</a> },
+    );
     expect(steps()).toHaveLength(3);
     expect(steps()[1]).toContain("Aguarda aprovação");
-    expect(screen.getByRole("link", { name: "Abrir aprovação" }).getAttribute("href")).toBe("/approvals/Ap1rQ2sT3uV4wX5yZ6aB");
+    expect(screen.getByRole("link", { name: "Abrir aprovação" }).getAttribute("href")).toBe(
+      "/approvals/Ap1rQ2sT3uV4wX5yZ6aB",
+    );
   });
 
   it("says why a run failed by its code and step, never the error itself", () => {

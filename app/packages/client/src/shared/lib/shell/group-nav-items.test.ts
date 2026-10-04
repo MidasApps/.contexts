@@ -10,7 +10,12 @@ describe("groupNavItems", () => {
       { id: "usage", group: "operations" },
       { id: "keys", group: "access" },
     ] as const;
-    expect(groupNavItems(items, (item) => item.group).map(({ group, items: entries }) => [group, entries.map((entry) => entry.id)])).toEqual([
+    expect(
+      groupNavItems(items, (item) => item.group).map(({ group, items: entries }) => [
+        group,
+        entries.map((entry) => entry.id),
+      ]),
+    ).toEqual([
       ["organization", ["general"]],
       ["access", ["keys"]],
       ["operations", ["traces", "usage"]],

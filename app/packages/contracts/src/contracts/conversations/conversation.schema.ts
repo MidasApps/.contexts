@@ -1,11 +1,11 @@
 import { z } from "zod";
+import { CustomAgentIdSchema } from "../agents/custom-agent.schema.ts";
 import { defineContract } from "../contract.ts";
 import { EXAMPLE_IDS, EXAMPLE_TIMES } from "../example-values.ts";
 import { none, personal } from "../field-docs.ts";
 import { TenantIdSchema, UserIdSchema } from "../primitives/ids.schema.ts";
 import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
 import { ProjectIdSchema } from "../tenancy/ids.schema.ts";
-import { CustomAgentIdSchema } from "../agents/custom-agent.schema.ts";
 
 /**
  * Conversation id: a Firestore automatic id that is also the Mastra memory thread id
@@ -40,7 +40,11 @@ export const ConversationSchema = z.strictObject({
   projectId: ProjectIdSchema.nullable().meta(none("Project the conversation runs in; null at organization level.")),
   ownerId: UserIdSchema.meta(personal("Uid of the member who owns the conversation.")),
   agentId: ChatAgentIdSchema.meta(none("Chat agent that answers.")),
-  title: z.string().max(MAX_TITLE_CHARS).nullable().meta(personal("Title; generated after the first turn or set by the owner.")),
+  title: z
+    .string()
+    .max(MAX_TITLE_CHARS)
+    .nullable()
+    .meta(personal("Title; generated after the first turn or set by the owner.")),
   titleSource: z.enum(["auto", "user"]).meta(none("auto until the owner renames it.")),
   summary: z.string().max(MAX_SUMMARY_CHARS).nullable().meta(personal("Summary made on request; may mention people.")),
   pinned: z.boolean().meta(none("Pinned conversations are listed first.")),
@@ -64,7 +68,8 @@ export const EXAMPLE_CONVERSATION_ID = "Cv3xZ5aB7nM9qW1eR2tY";
 export const ConversationContract = defineContract(ConversationSchema, {
   id: "conversations.Conversation",
   kind: "entity",
-  description: "A chat conversation of a member: title, summary, pin and archive state; the messages live in agent memory.",
+  description:
+    "A chat conversation of a member: title, summary, pin and archive state; the messages live in agent memory.",
   examples: [
     {
       id: EXAMPLE_CONVERSATION_ID,

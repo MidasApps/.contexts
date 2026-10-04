@@ -12,7 +12,7 @@ const DEVICE: AccessPrincipal = { type: "device", deviceId: "device-1", tenantId
 
 const createAuth = () => {
   const access = createFakeAccessPort({
-    credentials: { "member-token": MEMBER, "viewer-token": VIEWER, "core_live_key": API_KEY, "device-token": DEVICE },
+    credentials: { "member-token": MEMBER, "viewer-token": VIEWER, core_live_key: API_KEY, "device-token": DEVICE },
     memberships: [
       { tenantId: TENANT, uid: "member-uid", permissions: ["core.chat.use", "core.mcp.use", "core.knowledge.read"] },
       { tenantId: TENANT, uid: "viewer-uid", permissions: ["core.knowledge.read"] },
@@ -24,7 +24,11 @@ const createAuth = () => {
 type RequestInput = { method?: string; path?: string; headers?: Record<string, string> };
 
 /** Same shape Mastra's auth middleware passes (`adaptToMastraAuthRequest`). */
-const mastraRequest = ({ method = "POST", path = "/api/agents/assistant/stream", headers = {} }: RequestInput): MastraAuthRequest => {
+const mastraRequest = ({
+  method = "POST",
+  path = "/api/agents/assistant/stream",
+  headers = {},
+}: RequestInput): MastraAuthRequest => {
   const raw = new Request(`http://mastra.internal${path}`, { method, headers });
   return { raw, headers: raw.headers, header: (name: string) => raw.headers.get(name) ?? undefined };
 };
@@ -38,14 +42,19 @@ const withBearer = (token: string, extra: Record<string, string> = {}) => ({
 describe("FirebaseMastraAuth.authenticateToken", () => {
   it("rejects a token that only came from ?apiKey= (no Authorization header)", async () => {
     const { auth, access } = createAuth();
-    const request = mastraRequest({ path: "/api/agents/assistant/stream?apiKey=member-token", headers: { "x-tenant-id": TENANT } });
+    const request = mastraRequest({
+      path: "/api/agents/assistant/stream?apiKey=member-token",
+      headers: { "x-tenant-id": TENANT },
+    });
     expect(await auth.authenticateToken("member-token", request)).toBeNull();
     expect(access.verifyCalls).toEqual([]);
   });
 
   it("rejects a token that differs from the Authorization header", async () => {
     const { auth } = createAuth();
-    expect(await auth.authenticateToken("member-token", mastraRequest({ headers: withBearer("viewer-token") }))).toBeNull();
+    expect(
+      await auth.authenticateToken("member-token", mastraRequest({ headers: withBearer("viewer-token") })),
+    ).toBeNull();
   });
 
   it("rejects a non-Bearer scheme", async () => {
@@ -72,7 +81,10 @@ describe("FirebaseMastraAuth.authenticateToken", () => {
   it("checks revocation on POST and skips it on GET", async () => {
     const { auth, access } = createAuth();
     await auth.authenticateToken("member-token", mastraRequest({ method: "GET", headers: withBearer("member-token") }));
-    await auth.authenticateToken("member-token", mastraRequest({ method: "POST", headers: withBearer("member-token") }));
+    await auth.authenticateToken(
+      "member-token",
+      mastraRequest({ method: "POST", headers: withBearer("member-token") }),
+    );
     expect(access.verifyCalls.map((call) => call.checkRevoked)).toEqual([false, true]);
   });
 
@@ -83,18 +95,26 @@ describe("FirebaseMastraAuth.authenticateToken", () => {
 
   it("resolves an API key bearer into a service principal acting as the key owner", async () => {
     const { auth } = createAuth();
-    const principal = await auth.authenticateToken("core_live_key", mastraRequest({ headers: withBearer("core_live_key") }));
+    const principal = await auth.authenticateToken(
+      "core_live_key",
+      mastraRequest({ headers: withBearer("core_live_key") }),
+    );
     expect(principal).toMatchObject({ kind: "service", uid: "member-uid", tenantId: TENANT, isMember: true });
   });
 
   it("does not accept device credentials for agent runs", async () => {
     const { auth } = createAuth();
-    expect(await auth.authenticateToken("device-token", mastraRequest({ headers: withBearer("device-token") }))).toBeNull();
+    expect(
+      await auth.authenticateToken("device-token", mastraRequest({ headers: withBearer("device-token") })),
+    ).toBeNull();
   });
 
   it("gives a principal without tenant header no membership and no permissions", async () => {
     const { auth } = createAuth();
-    const principal = await auth.authenticateToken("member-token", mastraRequest({ headers: { authorization: "Bearer member-token" } }));
+    const principal = await auth.authenticateToken(
+      "member-token",
+      mastraRequest({ headers: { authorization: "Bearer member-token" } }),
+    );
     expect(principal).toMatchObject({ tenantId: null, isMember: false });
     expect(principal?.permissions.size).toBe(0);
   });
@@ -108,13 +128,19 @@ describe("FirebaseMastraAuth.authenticateToken", () => {
 
   it("treats a unit without a project as no membership", async () => {
     const { auth } = createAuth();
-    const principal = await auth.authenticateToken("member-token", mastraRequest({ headers: withBearer("member-token", { "x-unit-id": "unit-1" }) }));
+    const principal = await auth.authenticateToken(
+      "member-token",
+      mastraRequest({ headers: withBearer("member-token", { "x-unit-id": "unit-1" }) }),
+    );
     expect(principal?.isMember).toBe(false);
   });
 
   it("also reads a plain Web Request", async () => {
     const { auth } = createAuth();
-    const raw = new Request("http://mastra.internal/api/agents", { method: "GET", headers: withBearer("member-token") });
+    const raw = new Request("http://mastra.internal/api/agents", {
+      method: "GET",
+      headers: withBearer("member-token"),
+    });
     expect(await auth.authenticateToken("member-token", raw)).toMatchObject({ uid: "member-uid" });
   });
 });
@@ -173,7 +199,10 @@ describe("FirebaseMastraAuth with API keys", () => {
 
   it("gives no membership to a key forwarded with another tenant", async () => {
     const key: AccessPrincipal = { type: "service", apiKeyId: "key-2", tenantId: TENANT, ownerUid: "member-uid" };
-    const access = { ...laxAccess(key, OWNER_PERMISSIONS), resolveAccessContext: vi.fn(laxAccess(key, OWNER_PERMISSIONS).resolveAccessContext) };
+    const access = {
+      ...laxAccess(key, OWNER_PERMISSIONS),
+      resolveAccessContext: vi.fn(laxAccess(key, OWNER_PERMISSIONS).resolveAccessContext),
+    };
     const auth = new FirebaseMastraAuth({ access });
     const request = mastraRequest({ headers: { authorization: "Bearer core_live_key", "x-tenant-id": OTHER_TENANT } });
     const principal = await auth.authenticateToken("core_live_key", request);
@@ -192,7 +221,9 @@ describe("FirebaseMastraAuth with API keys", () => {
     if (principal === null) throw new Error("expected a principal");
     expect([...principal.permissions]).toEqual(["core.mcp.use"]);
     expect(auth.authorizeUser(principal, chat)).toBe(false);
-    expect(auth.authorizeUser(principal, mastraRequest({ path: "/api/mcp/core/mcp", headers: withBearer("core_live_key") }))).toBe(true);
+    expect(
+      auth.authorizeUser(principal, mastraRequest({ path: "/api/mcp/core/mcp", headers: withBearer("core_live_key") })),
+    ).toBe(true);
   });
 
   it("applies the scopes of the fake access port like SP1", async () => {
@@ -201,7 +232,10 @@ describe("FirebaseMastraAuth with API keys", () => {
       memberships: [{ tenantId: TENANT, uid: "member-uid", permissions: OWNER_PERMISSIONS }],
       apiKeyScopes: { "key-1": ["core.knowledge.read"] },
     });
-    const principal = await new FirebaseMastraAuth({ access }).authenticateToken("core_live_key", mastraRequest({ headers: withBearer("core_live_key") }));
+    const principal = await new FirebaseMastraAuth({ access }).authenticateToken(
+      "core_live_key",
+      mastraRequest({ headers: withBearer("core_live_key") }),
+    );
     expect([...(principal?.permissions ?? [])]).toEqual(["core.knowledge.read"]);
   });
 });
@@ -234,14 +268,20 @@ describe("FirebaseMastraAuth.mapUserToResourceId", () => {
 
   it("maps a principal to tenantId:uid", async () => {
     const { auth } = createAuth();
-    const principal = await auth.authenticateToken("member-token", mastraRequest({ headers: withBearer("member-token") }));
+    const principal = await auth.authenticateToken(
+      "member-token",
+      mastraRequest({ headers: withBearer("member-token") }),
+    );
     if (principal === null) throw new Error("expected a principal");
     expect(auth.mapUserToResourceId?.(principal)).toBe(`${TENANT}:member-uid`);
   });
 
   it("maps a principal without tenant to a resource no tenant can own", async () => {
     const { auth } = createAuth();
-    const principal = await auth.authenticateToken("member-token", mastraRequest({ headers: { authorization: "Bearer member-token" } }));
+    const principal = await auth.authenticateToken(
+      "member-token",
+      mastraRequest({ headers: { authorization: "Bearer member-token" } }),
+    );
     if (principal === null) throw new Error("expected a principal");
     expect(auth.mapUserToResourceId?.(principal)).toBe("unscoped:member-uid");
   });
@@ -250,9 +290,16 @@ describe("FirebaseMastraAuth.mapUserToResourceId", () => {
 describe("FirebaseMastraAuth per-request memo", () => {
   it("verifies a request once when the context middleware and the route auth both authenticate it", async () => {
     const { auth, access } = createAuth();
-    const raw = new Request("http://mastra.internal/api/agents/ping/generate", { method: "POST", headers: withBearer("member-token") });
+    const raw = new Request("http://mastra.internal/api/agents/ping/generate", {
+      method: "POST",
+      headers: withBearer("member-token"),
+    });
     const first = await auth.authenticateToken("member-token", raw);
-    const second = await auth.authenticateToken("member-token", { raw, headers: raw.headers, header: (name: string) => raw.headers.get(name) ?? undefined });
+    const second = await auth.authenticateToken("member-token", {
+      raw,
+      headers: raw.headers,
+      header: (name: string) => raw.headers.get(name) ?? undefined,
+    });
     expect(second).toBe(first);
     expect(access.verifyCalls).toHaveLength(1);
   });

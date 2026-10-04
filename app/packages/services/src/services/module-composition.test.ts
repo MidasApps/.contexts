@@ -18,7 +18,9 @@ describe("createCoreServer with module manifests (SP2 Task 9)", () => {
       logger,
       modules: [{ id: moduleId, permissions: SAMPLE_PERMISSIONS, settings, unitTypes: [unitType] }, { id: "plain" }],
     });
-    expect(Object.keys(server.routes)).toEqual(expect.arrayContaining(["modules.getModuleSettings", "modules.updateModuleSettings"]));
+    expect(Object.keys(server.routes)).toEqual(
+      expect.arrayContaining(["modules.getModuleSettings", "modules.updateModuleSettings"]),
+    );
     expect(server.moduleSettings.registry.get("sample")?.updatePermission).toBe("sample.item.write");
     expect(server.moduleSettings.registry.get("plain")).toBeUndefined();
     expect(server.moduleUnitTypes).toEqual([unitType]);

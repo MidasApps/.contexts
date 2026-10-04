@@ -10,32 +10,46 @@ import { WorkflowIdSchema } from "./human-approval-resume.schema.ts";
 
 // One cron field: numbers, ranges, steps, lists, `*`, `?` and month/day names. Croner checks
 // the semantics and the minimum interval on the server (decision 0037).
-const CRON_FIELD = /^(?:\*|\?|[0-9A-Za-z]+(?:-[0-9A-Za-z]+)?)(?:\/[0-9]+)?(?:,(?:\*|[0-9A-Za-z]+(?:-[0-9A-Za-z]+)?)(?:\/[0-9]+)?)*$/;
+const CRON_FIELD =
+  /^(?:\*|\?|[0-9A-Za-z]+(?:-[0-9A-Za-z]+)?)(?:\/[0-9]+)?(?:,(?:\*|[0-9A-Za-z]+(?:-[0-9A-Za-z]+)?)(?:\/[0-9]+)?)*$/;
 
 /** A 5-field cron expression (minute hour day-of-month month day-of-week); no seconds, no years, no macros. */
 export const CronExpressionSchema = z
   .string()
   .max(120)
-  .refine((value) => {
-    const fields = value.trim().split(/\s+/);
-    return fields.length === 5 && fields.every((field) => CRON_FIELD.test(field));
-  }, { error: "Expected a 5-field cron expression." });
+  .refine(
+    (value) => {
+      const fields = value.trim().split(/\s+/);
+      return fields.length === 5 && fields.every((field) => CRON_FIELD.test(field));
+    },
+    { error: "Expected a 5-field cron expression." },
+  );
 
 /** Slug of a tenant schedule: its id is `schedule_<tenant key>-<slug>` (decision 0037 amendment). */
-export const ScheduleSlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { error: "Expected a kebab-case slug." }).max(60);
+export const ScheduleSlugSchema = z
+  .string()
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { error: "Expected a kebab-case slug." })
+  .max(60);
 
 export const ScheduleStatusSchema = z.enum(["active", "paused"]);
 export type ScheduleStatus = z.infer<typeof ScheduleStatusSchema>;
 
 // Opaque here; the workflow's input schema validates it through the gateway (SP5 spec §3.5).
-const inputDataField = () => z.record(z.string(), z.unknown()).meta(personal("Workflow input; validated by the workflow's own schema on the server."));
+const inputDataField = () =>
+  z
+    .record(z.string(), z.unknown())
+    .meta(personal("Workflow input; validated by the workflow's own schema on the server."));
 
 /** A tenant schedule of a schedulable workflow (Mastra Schedules, decision 0037). */
 export const ScheduleSchema = z.strictObject({
   id: z
     .string()
     .regex(/^schedule_[a-f0-9]{16}-[a-z0-9]+(?:-[a-z0-9]+)*$/)
-    .meta(none("`schedule_<tenant key>-<slug>`; the tenant key is the first 16 hex digits of SHA-256(tenantId), because Mastra slugifies ids.")),
+    .meta(
+      none(
+        "`schedule_<tenant key>-<slug>`; the tenant key is the first 16 hex digits of SHA-256(tenantId), because Mastra slugifies ids.",
+      ),
+    ),
   tenantId: TenantIdSchema.meta(none("Organization that owns the schedule.")),
   workflowId: WorkflowIdSchema.meta(none("Scheduled workflow.")),
   cron: CronExpressionSchema.meta(none("5-field cron expression, evaluated in `timezone`.")),
@@ -89,7 +103,15 @@ export const CreateScheduleInputContract = defineContract(CreateScheduleInputSch
   id: "workflows.CreateScheduleInput",
   kind: "command",
   description: "Creates a tenant schedule for a schedulable workflow.",
-  examples: [{ workflowId: "usage-report", slug: "daily-usage", cron: "0 9 * * *", timezone: "America/Sao_Paulo", inputData: {} }],
+  examples: [
+    {
+      workflowId: "usage-report",
+      slug: "daily-usage",
+      cron: "0 9 * * *",
+      timezone: "America/Sao_Paulo",
+      inputData: {},
+    },
+  ],
   pii: "personal",
   tenancyScope: "organization",
   relations: [],
@@ -117,7 +139,10 @@ export const SchedulePreviewInputContract = defineContract(SchedulePreviewInputS
 });
 
 export const SchedulePreviewSchema = z.strictObject({
-  nextFireTimes: z.array(IsoDateTimeSchema).max(SCHEDULE_PREVIEW_FIRES).meta(none("The next five fires from now (UTC), computed by the scheduler's own cron engine.")),
+  nextFireTimes: z
+    .array(IsoDateTimeSchema)
+    .max(SCHEDULE_PREVIEW_FIRES)
+    .meta(none("The next five fires from now (UTC), computed by the scheduler's own cron engine.")),
 });
 export type SchedulePreview = z.infer<typeof SchedulePreviewSchema>;
 
@@ -125,18 +150,30 @@ export const SchedulePreviewContract = defineContract(SchedulePreviewSchema, {
   id: "workflows.SchedulePreview",
   kind: "view",
   description: "The next fires of a cron expression in its time zone, as the scheduler would fire them.",
-  examples: [{ nextFireTimes: ["2026-10-01T12:00:00.000Z", "2026-10-02T12:00:00.000Z", "2026-10-05T12:00:00.000Z", "2026-10-06T12:00:00.000Z", "2026-10-07T12:00:00.000Z"] }],
+  examples: [
+    {
+      nextFireTimes: [
+        "2026-10-01T12:00:00.000Z",
+        "2026-10-02T12:00:00.000Z",
+        "2026-10-05T12:00:00.000Z",
+        "2026-10-06T12:00:00.000Z",
+        "2026-10-07T12:00:00.000Z",
+      ],
+    },
+  ],
   pii: "none",
   tenancyScope: "organization",
   relations: [],
   permission: "core.schedule.read",
 });
 
-export const UpdateScheduleInputSchema = z.strictObject({
-  cron: CronExpressionSchema.optional().meta(none("New cron expression.")),
-  timezone: TimeZoneSchema.optional().meta(none("New IANA time zone.")),
-  inputData: inputDataField().optional(),
-}).refine(hasAnyField, HAS_ANY_FIELD_ERROR);
+export const UpdateScheduleInputSchema = z
+  .strictObject({
+    cron: CronExpressionSchema.optional().meta(none("New cron expression.")),
+    timezone: TimeZoneSchema.optional().meta(none("New IANA time zone.")),
+    inputData: inputDataField().optional(),
+  })
+  .refine(hasAnyField, HAS_ANY_FIELD_ERROR);
 export type UpdateScheduleInput = z.infer<typeof UpdateScheduleInputSchema>;
 
 export const UpdateScheduleInputContract = defineContract(UpdateScheduleInputSchema, {

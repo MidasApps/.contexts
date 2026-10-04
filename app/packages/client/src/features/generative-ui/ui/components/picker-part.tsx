@@ -1,7 +1,7 @@
 "use client";
 
 import type { PickerProps } from "@core/contracts";
-import { useId, useState, type FormEvent } from "react";
+import { type FormEvent, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Checkbox } from "#/shared/ui/atoms/Checkbox/Checkbox.tsx";
@@ -28,7 +28,9 @@ export function PickerPart({ props, toolCallId, toolName, interactive }: Generat
 
   const toggle = (value: string, on: boolean) => {
     setMissing(false);
-    setChosen((current) => (on ? [...current.filter((item) => item !== value), value] : current.filter((item) => item !== value)));
+    setChosen((current) =>
+      on ? [...current.filter((item) => item !== value), value] : current.filter((item) => item !== value),
+    );
   };
 
   const confirm = async (event: FormEvent<HTMLFormElement>) => {
@@ -41,7 +43,10 @@ export function PickerPart({ props, toolCallId, toolName, interactive }: Generat
     const picked = props.options.filter((option) => chosen.includes(option.value));
     setPending(true);
     try {
-      await submit({ kind: "picker", values: picked.map((option) => option.value), labels: picked.map((option) => option.label) }, { toolCallId, toolName });
+      await submit(
+        { kind: "picker", values: picked.map((option) => option.value), labels: picked.map((option) => option.label) },
+        { toolCallId, toolName },
+      );
       setSubmitted(true);
     } finally {
       setPending(false);
@@ -49,13 +54,25 @@ export function PickerPart({ props, toolCallId, toolName, interactive }: Generat
   };
 
   return (
-    <form data-slot="picker-part" noValidate onSubmit={(event) => void confirm(event)} className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
+    <form
+      data-slot="picker-part"
+      noValidate
+      onSubmit={(event) => void confirm(event)}
+      className="flex flex-col gap-3 rounded-md border border-border bg-card p-4"
+    >
       <fieldset disabled={locked} aria-describedby={missing ? errorId : undefined} className="flex flex-col gap-3">
-        <legend id={`${baseId}-legend`} className="mb-3 text-sm font-semibold text-foreground">{props.multiple ? t("legendMultiple") : t("legend")}</legend>
+        <legend id={`${baseId}-legend`} className="mb-3 text-sm font-semibold text-foreground">
+          {props.multiple ? t("legendMultiple") : t("legend")}
+        </legend>
         {props.multiple ? (
           props.options.map((option, index) => (
             <div key={option.value} className="flex items-center gap-2.5">
-              <Checkbox id={`${baseId}-${index}`} checked={chosen.includes(option.value)} onCheckedChange={(state) => toggle(option.value, state === true)} disabled={locked} />
+              <Checkbox
+                id={`${baseId}-${index}`}
+                checked={chosen.includes(option.value)}
+                onCheckedChange={(state) => toggle(option.value, state === true)}
+                disabled={locked}
+              />
               <Label htmlFor={`${baseId}-${index}`}>{option.label}</Label>
             </div>
           ))

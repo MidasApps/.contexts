@@ -1,4 +1,4 @@
-import { TenantNodeRefSchema, type MyGrant, type TenantNodeRef } from "@core/contracts";
+import { type MyGrant, type TenantNodeRef, TenantNodeRefSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { grantCoversNode } from "./use-my-grants.ts";
@@ -10,7 +10,8 @@ const U1 = IDS.unit;
 const U2 = IDS.unitRoot;
 const organization = TenantNodeRefSchema.parse({ level: "organization", tenantId: ORG });
 const project = (projectId: string) => TenantNodeRefSchema.parse({ level: "project", tenantId: ORG, projectId });
-const unit = (projectId: string, unitId: string) => TenantNodeRefSchema.parse({ level: "unit", tenantId: ORG, projectId, unitId });
+const unit = (projectId: string, unitId: string) =>
+  TenantNodeRefSchema.parse({ level: "unit", tenantId: ORG, projectId, unitId });
 const grantAt = (node: TenantNodeRef): Pick<MyGrant, "node"> => ({ node });
 
 describe("grantCoversNode", () => {
@@ -19,7 +20,9 @@ describe("grantCoversNode", () => {
     expect(grantCoversNode(grants, organization)).toBe(true);
     expect(grantCoversNode(grants, project(P1))).toBe(true);
     expect(grantCoversNode(grants, unit(P1, U1))).toBe(true);
-    expect(grantCoversNode(grants, TenantNodeRefSchema.parse({ level: "organization", tenantId: IDS.otherOrganization }))).toBe(false);
+    expect(
+      grantCoversNode(grants, TenantNodeRefSchema.parse({ level: "organization", tenantId: IDS.otherOrganization })),
+    ).toBe(false);
   });
 
   it("a project grant covers its project and units, not the organization or another project", () => {

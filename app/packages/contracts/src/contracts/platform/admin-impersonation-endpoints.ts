@@ -14,11 +14,19 @@ export const adminListImpersonationSessionsEndpoint = defineEndpoint({
   path: "/v1/admin/impersonation-sessions",
   auth: "user",
   query: PageQuerySchema.extend({
-    status: z.enum(["active"]).optional().meta(none("`active`: only sessions still open, soonest expiry first, in one page; without it, every session, newest first.")),
+    status: z
+      .enum(["active"])
+      .optional()
+      .meta(
+        none(
+          "`active`: only sessions still open, soonest expiry first, in one page; without it, every session, newest first.",
+        ),
+      ),
   }),
   responses: { 200: listEnvelope(AdminImpersonationSessionSchema) },
   errors: { 400: ["VALIDATION_FAILED"], ...STAFF },
-  summary: "Lists impersonation sessions of every staff member, active or recent, with their status (staff, platform.user.read).",
+  summary:
+    "Lists impersonation sessions of every staff member, active or recent, with their status (staff, platform.user.read).",
 });
 
 export const adminEndImpersonationSessionEndpoint = defineEndpoint({
@@ -29,7 +37,11 @@ export const adminEndImpersonationSessionEndpoint = defineEndpoint({
   params: z.object({ sessionId: ImpersonationSessionIdSchema.meta(none("Impersonation session id.")) }),
   responses: { 204: null },
   errors: { ...STAFF, 404: ["NOT_FOUND"] },
-  summary: "Ends any staff member's impersonation session early; idempotent (staff, platform.user.impersonate; audited on both logs with targetTenantId).",
+  summary:
+    "Ends any staff member's impersonation session early; idempotent (staff, platform.user.impersonate; audited on both logs with targetTenantId).",
 });
 
-export const ADMIN_IMPERSONATION_ENDPOINTS: readonly EndpointDefinition[] = [adminListImpersonationSessionsEndpoint, adminEndImpersonationSessionEndpoint];
+export const ADMIN_IMPERSONATION_ENDPOINTS: readonly EndpointDefinition[] = [
+  adminListImpersonationSessionsEndpoint,
+  adminEndImpersonationSessionEndpoint,
+];

@@ -21,7 +21,10 @@ export function Command({ className, label, ...props }: CommandProps) {
     <CommandPrimitive
       data-slot="command"
       label={label}
-      className={cn("flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground", className)}
+      className={cn(
+        "flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground",
+        className,
+      )}
       {...props}
     />
   );
@@ -65,7 +68,13 @@ export function CommandList({ className, label, ...props }: CommandListProps) {
 
 /** Shown when the filter matches nothing; cmdk renders it inside the listbox. */
 export function CommandEmpty({ className, ...props }: ComponentProps<typeof CommandPrimitive.Empty>) {
-  return <CommandPrimitive.Empty data-slot="command-empty" className={cn("py-6 text-center text-sm text-muted-foreground", className)} {...props} />;
+  return (
+    <CommandPrimitive.Empty
+      data-slot="command-empty"
+      className={cn("py-6 text-center text-sm text-muted-foreground", className)}
+      {...props}
+    />
+  );
 }
 
 /** Group with a heading in mono uppercase (navegacao.html section labels). */
@@ -85,7 +94,13 @@ export function CommandGroup({ className, ...props }: ComponentProps<typeof Comm
 }
 
 export function CommandSeparator({ className, ...props }: ComponentProps<typeof CommandPrimitive.Separator>) {
-  return <CommandPrimitive.Separator data-slot="command-separator" className={cn("-mx-1 h-px bg-border", className)} {...props} />;
+  return (
+    <CommandPrimitive.Separator
+      data-slot="command-separator"
+      className={cn("-mx-1 h-px bg-border", className)}
+      {...props}
+    />
+  );
 }
 
 /**

@@ -1,12 +1,17 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { checkCatalogs, type CatalogEntry } from "./check-catalogs.ts";
+import { type CatalogEntry, checkCatalogs } from "./check-catalogs.ts";
 import { readCoreCatalogs, readModuleCatalogs } from "./read-catalogs.ts";
 
 const LOCALES = ["pt-BR", "en-US", "es-419"] as const;
 
 const entries = (namespace: string, byLocale: Record<string, unknown>): CatalogEntry[] =>
-  Object.entries(byLocale).map(([locale, messages]) => ({ namespace, locale, messages, file: `${namespace}/${locale}` }));
+  Object.entries(byLocale).map(([locale, messages]) => ({
+    namespace,
+    locale,
+    messages,
+    file: `${namespace}/${locale}`,
+  }));
 
 const check = (catalogs: CatalogEntry[]): string[] =>
   checkCatalogs(catalogs, { supportedLocales: LOCALES, sourceLocale: "pt-BR" });
@@ -27,10 +32,7 @@ describe("checkCatalogs", () => {
       "en-US": { a: "A", extra: "X" },
       "es-419": { a: "A", nested: { b: "B" } },
     });
-    expect(check(catalogs)).toEqual([
-      "common/en-US: missing key nested.b",
-      "common/en-US: key extra is not in pt-BR",
-    ]);
+    expect(check(catalogs)).toEqual(["common/en-US: missing key nested.b", "common/en-US: key extra is not in pt-BR"]);
   });
 
   it("reports a placeholder mismatch", () => {

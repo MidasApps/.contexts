@@ -58,10 +58,14 @@ export function AdminPageFrame({ permission, title, description, back, meta, act
             </RouteLink>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="min-w-0 text-2xl leading-tight font-semibold tracking-tight break-words [overflow-wrap:anywhere]">{title}</h1>
+            <h1 className="min-w-0 text-2xl leading-tight font-semibold tracking-tight break-words [overflow-wrap:anywhere]">
+              {title}
+            </h1>
             {meta}
           </div>
-          {description === undefined ? null : <p className="max-w-prose text-sm text-muted-foreground">{description}</p>}
+          {description === undefined ? null : (
+            <p className="max-w-prose text-sm text-muted-foreground">{description}</p>
+          )}
         </div>
         {actions === undefined ? null : allowed ? (
           <div data-slot="page-actions" className="flex shrink-0 flex-wrap items-center gap-2">

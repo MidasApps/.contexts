@@ -8,7 +8,7 @@ import { defineClientModule } from "#/app-shell/modules/define-client-module.ts"
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { MEMBER_PERMISSIONS, shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { ok, page, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { type FakeRoutes, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildConversation } from "#/widgets/chat-history-sidebar/testing/conversations-api.fixture.ts";
 import { CHAT_SHELL_SLOTS, useChatEnvironment } from "#/widgets/chat-panel/index.ts";
@@ -16,7 +16,12 @@ import { ChatView } from "./chat-view.tsx";
 
 const A = "CvA000000000000000001";
 const PATH = `/o/${IDS.organization}/p/${IDS.project}/chat`;
-const CHAT_PERMISSIONS = [...MEMBER_PERMISSIONS, "core.conversation.send", "core.conversation.read", "core.file.upload"];
+const CHAT_PERMISSIONS = [
+  ...MEMBER_PERMISSIONS,
+  "core.conversation.send",
+  "core.conversation.read",
+  "core.file.upload",
+];
 const LOADED = { timeout: 5000 };
 
 const stored: UIMessage[] = [
@@ -63,7 +68,9 @@ describe("ChatView", () => {
     const { user, router } = renderView();
     await user.click(await screen.findByRole("link", { name: "Plano de integração" }, LOADED));
     expect(await screen.findByText("O prazo é de 30 dias.", {}, LOADED)).toBeTruthy();
-    await user.click(within(screen.getByRole("navigation", { name: "Conversas" })).getByRole("link", { name: "Nova conversa" }));
+    await user.click(
+      within(screen.getByRole("navigation", { name: "Conversas" })).getByRole("link", { name: "Nova conversa" }),
+    );
     await waitFor(() => expect(screen.getByRole("heading", { name: "Como posso ajudar?" })).toBeTruthy());
     expect(router.current()).toBe(PATH);
   });
@@ -119,18 +126,26 @@ describe("chat in the shell's right panel", () => {
 });
 
 describe("useChatEnvironment (SP0 follow-up #41)", () => {
-  const NoteCommand = defineContract(z.strictObject({ title: z.string().min(1).meta({ description: "Title.", pii: "none" }) }), {
-    id: "samplenotes.CreateNoteCommand",
-    kind: "command",
-    description: "Creates a sample note.",
-    examples: [{ title: "A" }],
-    pii: "none",
-    tenancyScope: "organization",
-    relations: [],
-    permission: "samplenotes.note.create",
-  });
+  const NoteCommand = defineContract(
+    z.strictObject({ title: z.string().min(1).meta({ description: "Title.", pii: "none" }) }),
+    {
+      id: "samplenotes.CreateNoteCommand",
+      kind: "command",
+      description: "Creates a sample note.",
+      examples: [{ title: "A" }],
+      pii: "none",
+      tenancyScope: "organization",
+      relations: [],
+      permission: "samplenotes.note.create",
+    },
+  );
   const sampleModule = defineClientModule({
-    manifest: defineModule({ id: "samplenotes", labelKey: "samplenotes.module.name", permissions: [], messages: { "pt-BR": { module: { name: "Notas" } } } }),
+    manifest: defineModule({
+      id: "samplenotes",
+      labelKey: "samplenotes.module.name",
+      permissions: [],
+      messages: { "pt-BR": { module: { name: "Notas" } } },
+    }),
     pages: {},
     contracts: [NoteCommand],
   });

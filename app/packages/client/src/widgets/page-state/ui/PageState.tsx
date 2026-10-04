@@ -20,7 +20,11 @@ type PageStateLayoutProps = {
   role?: "alert" | undefined;
 };
 
-const TONES = { neutral: "bg-muted text-muted-foreground", amber: "bg-amber/14 text-amber", destructive: "bg-destructive/14 text-destructive" } as const;
+const TONES = {
+  neutral: "bg-muted text-muted-foreground",
+  amber: "bg-amber/14 text-amber",
+  destructive: "bg-destructive/14 text-destructive",
+} as const;
 
 function PageStateLayout({ icon, tone, title, description, reference, actions, role }: PageStateLayoutProps) {
   return (
@@ -30,7 +34,9 @@ function PageStateLayout({ icon, tone, title, description, reference, actions, r
       </span>
       <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-      {reference === undefined ? null : <p className="mt-2 font-mono text-caption text-muted-foreground">{reference}</p>}
+      {reference === undefined ? null : (
+        <p className="mt-2 font-mono text-caption text-muted-foreground">{reference}</p>
+      )}
       <div className="mt-5 flex flex-wrap justify-center gap-2">{actions}</div>
     </div>
   );
@@ -82,7 +88,15 @@ export function PageNotFound() {
 /** Signed in but without the permission for this page (API 403, SP2 spec §4). */
 export function PageForbidden() {
   const t = useTranslations("shell.pageState");
-  return <PageStateLayout icon="lock" tone="amber" title={t("forbiddenTitle")} description={t("forbiddenDescription")} actions={<HomeAction />} />;
+  return (
+    <PageStateLayout
+      icon="lock"
+      tone="amber"
+      title={t("forbiddenTitle")}
+      description={t("forbiddenDescription")}
+      actions={<HomeAction />}
+    />
+  );
 }
 
 /**
@@ -115,7 +129,15 @@ export function PageRenderError({ reference, onRetry }: { reference: string | un
  * A page whose main data failed to load (not 403/404): the copy of the error code, its request
  * reference and a retry, plus a way home. A lost session (401) offers signing in again instead.
  */
-export function PageError({ error, onRetry, retrying = false }: { error: unknown; onRetry: () => void; retrying?: boolean }) {
+export function PageError({
+  error,
+  onRetry,
+  retrying = false,
+}: {
+  error: unknown;
+  onRetry: () => void;
+  retrying?: boolean;
+}) {
   const t = useTranslations();
   const described = useDescribeError()(error);
   return (
@@ -125,7 +147,11 @@ export function PageError({ error, onRetry, retrying = false }: { error: unknown
       tone="destructive"
       title={t("common.errorState.title")}
       description={described.message}
-      reference={described.requestId === undefined ? undefined : t("common.errorState.reference", { requestId: described.requestId })}
+      reference={
+        described.requestId === undefined
+          ? undefined
+          : t("common.errorState.reference", { requestId: described.requestId })
+      }
       actions={
         isSessionLost(error) ? (
           <SignInAgainButton />

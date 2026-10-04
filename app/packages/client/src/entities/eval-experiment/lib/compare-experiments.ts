@@ -34,6 +34,12 @@ export const compareExperiments = (a: EvalExperimentSummary, b: EvalExperimentSu
     const inB = b.scores.find((score) => score.scorer === scorer);
     const meanA = inA?.mean ?? null;
     const meanB = inB?.mean ?? null;
-    return { scorer, a: meanA, b: meanB, baseline: inB?.baseline ?? inA?.baseline ?? null, outcome: outcomeOf(meanA, meanB) };
+    return {
+      scorer,
+      a: meanA,
+      b: meanB,
+      baseline: inB?.baseline ?? inA?.baseline ?? null,
+      outcome: outcomeOf(meanA, meanB),
+    };
   });
 };

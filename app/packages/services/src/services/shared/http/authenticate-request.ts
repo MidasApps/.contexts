@@ -1,5 +1,10 @@
 import type { Principal } from "@core/contracts";
-import { isApiKeyCredential, parseBearer, requiresRevocationCheck, type VerifyBearer } from "../../identity/application/use-cases/resolve-principal.ts";
+import {
+  isApiKeyCredential,
+  parseBearer,
+  requiresRevocationCheck,
+  type VerifyBearer,
+} from "../../identity/application/use-cases/resolve-principal.ts";
 import type { RateLimitDecision } from "../rate-limit/fixed-window.ts";
 import { getRateLimitPolicy, type RateLimitPolicy } from "../rate-limit/rate-limit-policies.ts";
 import type { RateLimiter } from "../rate-limit/rate-limiter.ts";

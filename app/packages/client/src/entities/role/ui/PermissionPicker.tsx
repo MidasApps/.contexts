@@ -22,7 +22,8 @@ export type PermissionPickerProps = {
 /** A translated description when the registry key has copy, else the permission id itself. */
 const usePermissionLabel = () => {
   const t = useTranslations();
-  return (definition: PermissionDefinition): string => (t.has(definition.descriptionKey) ? t(definition.descriptionKey) : definition.id);
+  return (definition: PermissionDefinition): string =>
+    t.has(definition.descriptionKey) ? t(definition.descriptionKey) : definition.id;
 };
 
 const useModuleLabel = () => {
@@ -52,7 +53,8 @@ function ModuleGroup({ group, label, selected, grantable, onToggle }: ModuleGrou
   return (
     <FieldSet className="rounded-lg border border-border p-4">
       <FieldLegend className="px-1">
-        {label} <span className="font-normal text-muted-foreground">{t("selectedCount", { count, total: ids.length })}</span>
+        {label}{" "}
+        <span className="font-normal text-muted-foreground">{t("selectedCount", { count, total: ids.length })}</span>
       </FieldLegend>
       {group.resources.map((resource) => (
         <div key={resource.resource} className="flex flex-col gap-2">
@@ -90,7 +92,14 @@ const allowAll = (): boolean => true;
  * labelled with each permission's `descriptionKey` and its id in mono. Permissions outside
  * `grantable` stay disabled.
  */
-export function PermissionPicker({ legend, permissions, value, onChange, grantable = allowAll, error }: PermissionPickerProps) {
+export function PermissionPicker({
+  legend,
+  permissions,
+  value,
+  onChange,
+  grantable = allowAll,
+  error,
+}: PermissionPickerProps) {
   const id = useId();
   const moduleLabel = useModuleLabel();
   const groups = useMemo(() => groupPermissionsByModule(permissions), [permissions]);
@@ -99,10 +108,20 @@ export function PermissionPicker({ legend, permissions, value, onChange, grantab
     onChange(checked ? [...value, permission] : value.filter((current) => current !== permission));
   };
   return (
-    <FieldSet aria-describedby={error === undefined ? undefined : `${id}-error`} aria-invalid={error === undefined ? undefined : true}>
+    <FieldSet
+      aria-describedby={error === undefined ? undefined : `${id}-error`}
+      aria-invalid={error === undefined ? undefined : true}
+    >
       <FieldLegend>{legend}</FieldLegend>
       {groups.map((group) => (
-        <ModuleGroup key={group.moduleId} group={group} label={moduleLabel(group.moduleId)} selected={selected} grantable={grantable} onToggle={toggle} />
+        <ModuleGroup
+          key={group.moduleId}
+          group={group}
+          label={moduleLabel(group.moduleId)}
+          selected={selected}
+          grantable={grantable}
+          onToggle={toggle}
+        />
       ))}
       {error === undefined ? null : (
         <p id={`${id}-error`} className="text-xs font-medium text-destructive-text">

@@ -1,5 +1,5 @@
-import type { CoreToolDefinition } from "../define-core-tool.ts";
 import type { FormCommand } from "../catalog/render-form.tool.ts";
+import type { CoreToolDefinition } from "../define-core-tool.ts";
 
 /**
  * A command the action agent may run (spec §8.4): a mutation tool `command.<contractId>`

@@ -8,7 +8,7 @@ import { TenancyNotFoundError } from "../domain/errors/tenancy-not-found-error.t
 import { UnitTreeBusyError } from "../domain/errors/unit-tree-busy-error.ts";
 import { MAX_SUBTREE_REWRITE, planMove } from "../domain/unit-tree.ts";
 import type { TreeLock, TreeOperation } from "./ports/driven/unit-tree-lock-store.ts";
-import { unitNode, type TenancyDeps } from "./tenancy-deps.ts";
+import { type TenancyDeps, unitNode } from "./tenancy-deps.ts";
 
 /** A holder that dies keeps the tree for at most this long. */
 export const TREE_LOCK_LEASE_MS = 120_000;
@@ -18,22 +18,33 @@ type Deps = Pick<TenancyDeps, "treeLocks" | "units" | "unitOfWork" | "clock" | "
 type LockScope = { readonly tenantId: TenantId; readonly projectId: ProjectId };
 
 const sameOperation = (left: TreeOperation, right: TreeOperation): boolean =>
-  left.kind === right.kind && left.unitId === right.unitId && (left.kind !== "move" || (right.kind === "move" && left.parentUnitId === right.parentUnitId));
+  left.kind === right.kind &&
+  left.unitId === right.unitId &&
+  (left.kind !== "move" || (right.kind === "move" && left.parentUnitId === right.parentUnitId));
 
 const isExpired = (lock: TreeLock, now: Date): boolean => Date.parse(lock.expiresAt) <= now.getTime();
 
 const sameTree = (left: Unit, right: Unit): boolean =>
   left.parentUnitId === right.parentUnitId && left.ancestorIds.join("/") === right.ancestorIds.join("/");
 
-type Attempt = { readonly kind: "acquired"; readonly lock: TreeLock } | { readonly kind: "busy" } | { readonly kind: "abandoned"; readonly lock: TreeLock };
+type Attempt =
+  | { readonly kind: "acquired"; readonly lock: TreeLock }
+  | { readonly kind: "busy" }
+  | { readonly kind: "abandoned"; readonly lock: TreeLock };
 
 // A retry of the same operation takes the lock over (and heals what the first try left).
 const tryAcquire = (deps: Deps, scope: LockScope, operation: TreeOperation): Promise<Attempt> =>
   deps.unitOfWork.run(async (tx): Promise<Attempt> => {
     const now = deps.clock.now();
     const current = await deps.treeLocks.get(tx, scope.projectId);
-    if (current !== null && !sameOperation(current.operation, operation)) return isExpired(current, now) ? { kind: "abandoned", lock: current } : { kind: "busy" };
-    const lock: TreeLock = { ...scope, lockId: deps.treeLocks.newLockId(), operation, expiresAt: new Date(now.getTime() + TREE_LOCK_LEASE_MS).toISOString() };
+    if (current !== null && !sameOperation(current.operation, operation))
+      return isExpired(current, now) ? { kind: "abandoned", lock: current } : { kind: "busy" };
+    const lock: TreeLock = {
+      ...scope,
+      lockId: deps.treeLocks.newLockId(),
+      operation,
+      expiresAt: new Date(now.getTime() + TREE_LOCK_LEASE_MS).toISOString(),
+    };
     deps.treeLocks.put(tx, lock);
     return { kind: "acquired", lock };
   });
@@ -52,9 +63,15 @@ export const releaseTreeLock = (deps: Deps, lock: TreeLock): Promise<void> =>
  * Final transaction of a move or delete: the lock must still be ours and the unit unchanged
  * since `expected` was read; then `write` runs and the lock is freed atomically with it.
  */
-export const commitTreeChange = (deps: Deps, args: { lock: TreeLock; expected: Unit; write: (tx: Transaction) => Promise<void> }) =>
+export const commitTreeChange = (
+  deps: Deps,
+  args: { lock: TreeLock; expected: Unit; write: (tx: Transaction) => Promise<void> },
+) =>
   deps.unitOfWork.run(async (tx): Promise<Result<void, UnitTreeBusyError | TenancyNotFoundError>> => {
-    const [held, current] = await Promise.all([holdsTreeLock(tx, deps, args.lock), deps.units.get(tx, args.expected.id)]);
+    const [held, current] = await Promise.all([
+      holdsTreeLock(tx, deps, args.lock),
+      deps.units.get(tx, args.expected.id),
+    ]);
     if (!held) return err(new UnitTreeBusyError());
     if (current === null) return err(new TenancyNotFoundError("unit"));
     if (!sameTree(current, args.expected)) return err(new UnitTreeBusyError());
@@ -70,23 +87,54 @@ const RESUME_DELETE_LIMIT = 10_000;
 
 const auditResumed = (tx: Transaction, deps: Deps, lock: TreeLock, unit: Unit, action: "UNIT_MOVED" | "UNIT_DELETED") =>
   deps.audit.record(
-    { log: "tenant", tenantId: unit.tenantId, action, actor: SYSTEM_ACTOR, target: { type: "unit", id: unit.id }, node: unitNode(unit), outcome: "success", requestId: `tree-lock:${lock.lockId}` },
+    {
+      log: "tenant",
+      tenantId: unit.tenantId,
+      action,
+      actor: SYSTEM_ACTOR,
+      target: { type: "unit", id: unit.id },
+      node: unitNode(unit),
+      outcome: "success",
+      requestId: `tree-lock:${lock.lockId}`,
+    },
     tx,
   );
 
 // Finishes a move whose holder died: re-planning heals descendants (only changed ones are
 // rewritten). A target deleted meanwhile heals in place: the subtree is rebased on the
 // unit's current placement.
-const finishMove = async (deps: Deps, lock: TreeLock, unit: Unit, parentUnitId: Unit["parentUnitId"]): Promise<void> => {
+const finishMove = async (
+  deps: Deps,
+  lock: TreeLock,
+  unit: Unit,
+  parentUnitId: Unit["parentUnitId"],
+): Promise<void> => {
   const target = parentUnitId === null ? null : await deps.units.get(undefined, parentUnitId);
   const newParent = target ?? (unit.parentUnitId === null ? null : await deps.units.get(undefined, unit.parentUnitId));
-  const descendants = await deps.units.listDescendants({ tenantId: unit.tenantId, unitId: unit.id, limit: MAX_SUBTREE_REWRITE });
+  const descendants = await deps.units.listDescendants({
+    tenantId: unit.tenantId,
+    unitId: unit.id,
+    limit: MAX_SUBTREE_REWRITE,
+  });
   const plan = planMove({ unit, newParent, descendants, maxSubtree: Number.POSITIVE_INFINITY });
   if (!plan.ok) return releaseTreeLock(deps, lock);
   const own = plan.rewrites.find((rewrite) => rewrite.id === unit.id);
   const now = deps.clock.now().toISOString();
-  await deps.units.rewriteTree({ rewrites: plan.rewrites.filter((rewrite) => rewrite.id !== unit.id), updatedAt: now, actorId: SYSTEM_ACTOR.id });
-  const placed: Unit = own === undefined ? unit : { ...unit, parentUnitId: own.parentUnitId, ancestorIds: [...own.ancestorIds], depth: own.depth, updatedAt: now };
+  await deps.units.rewriteTree({
+    rewrites: plan.rewrites.filter((rewrite) => rewrite.id !== unit.id),
+    updatedAt: now,
+    actorId: SYSTEM_ACTOR.id,
+  });
+  const placed: Unit =
+    own === undefined
+      ? unit
+      : {
+          ...unit,
+          parentUnitId: own.parentUnitId,
+          ancestorIds: [...own.ancestorIds],
+          depth: own.depth,
+          updatedAt: now,
+        };
   await commitTreeChange(deps, {
     lock,
     expected: unit,
@@ -99,8 +147,17 @@ const finishMove = async (deps: Deps, lock: TreeLock, unit: Unit, parentUnitId: 
 
 const finishDelete = async (deps: Deps, lock: TreeLock, unit: Unit): Promise<void> => {
   const now = deps.clock.now().toISOString();
-  const descendants = await deps.units.listDescendants({ tenantId: unit.tenantId, unitId: unit.id, limit: RESUME_DELETE_LIMIT });
-  if (descendants.length > 0) await deps.units.softDeleteMany({ ids: descendants.map((entry) => entry.id), deletedAt: now, actorId: SYSTEM_ACTOR.id });
+  const descendants = await deps.units.listDescendants({
+    tenantId: unit.tenantId,
+    unitId: unit.id,
+    limit: RESUME_DELETE_LIMIT,
+  });
+  if (descendants.length > 0)
+    await deps.units.softDeleteMany({
+      ids: descendants.map((entry) => entry.id),
+      deletedAt: now,
+      actorId: SYSTEM_ACTOR.id,
+    });
   await commitTreeChange(deps, {
     lock,
     expected: unit,
@@ -118,7 +175,9 @@ const resumeAbandoned = async (deps: Deps, abandoned: TreeLock): Promise<void> =
   const { lock } = taken;
   const unit = await deps.units.get(undefined, lock.operation.unitId);
   if (unit === null) return releaseTreeLock(deps, lock);
-  return lock.operation.kind === "delete" ? finishDelete(deps, lock, unit) : finishMove(deps, lock, unit, lock.operation.parentUnitId);
+  return lock.operation.kind === "delete"
+    ? finishDelete(deps, lock, unit)
+    : finishMove(deps, lock, unit, lock.operation.parentUnitId);
 };
 
 const ATTEMPTS = 3;
@@ -127,7 +186,11 @@ const ATTEMPTS = 3;
  * Acquires the project's tree lock for `operation`, finishing an abandoned change first.
  * @returns 409 CONFLICT while another live change holds it.
  */
-export const acquireTreeLock = async (deps: Deps, scope: LockScope, operation: TreeOperation): Promise<Result<TreeLock, UnitTreeBusyError>> => {
+export const acquireTreeLock = async (
+  deps: Deps,
+  scope: LockScope,
+  operation: TreeOperation,
+): Promise<Result<TreeLock, UnitTreeBusyError>> => {
   for (let attempt = 0; attempt < ATTEMPTS; attempt += 1) {
     const result = await tryAcquire(deps, scope, operation);
     if (result.kind === "acquired") return ok(result.lock);
@@ -152,5 +215,8 @@ export const ensureTreeIdle = async (deps: Deps, scope: LockScope): Promise<Resu
 };
 
 /** Inside the create transaction: still no lock (read before the writes). */
-export const isTreeIdle = async (tx: Transaction, deps: Pick<Deps, "treeLocks">, projectId: ProjectId): Promise<boolean> =>
-  (await deps.treeLocks.get(tx, projectId)) === null;
+export const isTreeIdle = async (
+  tx: Transaction,
+  deps: Pick<Deps, "treeLocks">,
+  projectId: ProjectId,
+): Promise<boolean> => (await deps.treeLocks.get(tx, projectId)) === null;

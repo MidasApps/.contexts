@@ -32,7 +32,8 @@ const readFlags = (argv: readonly string[]): Record<Flag, string> => {
   for (let index = 0; index < argv.length; index += 2) {
     const flag = argv[index] ?? "";
     const value = argv[index + 1];
-    if (!(FLAGS as readonly string[]).includes(flag)) throw new GrantStaffArgsError(`unknown argument ${flag.startsWith("--") ? flag : "(value)"}`);
+    if (!(FLAGS as readonly string[]).includes(flag))
+      throw new GrantStaffArgsError(`unknown argument ${flag.startsWith("--") ? flag : "(value)"}`);
     if (values.has(flag)) throw new GrantStaffArgsError(`${flag} given twice`);
     if (value === undefined || value.startsWith("--")) throw new GrantStaffArgsError(`${flag} needs a value`);
     values.set(flag, value);
@@ -45,8 +46,10 @@ const readFlags = (argv: readonly string[]): Record<Flag, string> => {
 // Local runs only reach an emulator project; remote runs never target one (processes/environments.md).
 const checkEnvironment = (appEnv: GrantStaffArgs["appEnv"], projectId: string): void => {
   const emulator = EmulatorProjectSchema.safeParse(projectId).success;
-  if (appEnv === "local" && !emulator) throw new GrantStaffArgsError("APP_ENV=local only targets a demo-* emulator project");
-  if (appEnv !== "local" && emulator) throw new GrantStaffArgsError(`APP_ENV=${appEnv} cannot target a demo-* emulator project`);
+  if (appEnv === "local" && !emulator)
+    throw new GrantStaffArgsError("APP_ENV=local only targets a demo-* emulator project");
+  if (appEnv !== "local" && emulator)
+    throw new GrantStaffArgsError(`APP_ENV=${appEnv} cannot target a demo-* emulator project`);
 };
 
 /**
@@ -54,9 +57,13 @@ const checkEnvironment = (appEnv: GrantStaffArgs["appEnv"], projectId: string): 
  * --confirm <id>`; `--confirm` must repeat `--project` (no silent cross-project writes).
  * @throws {GrantStaffArgsError} naming the offending flag or variable.
  */
-export const parseGrantStaffArgs = (argv: readonly string[], env: Readonly<Record<string, string | undefined>>): GrantStaffArgs => {
+export const parseGrantStaffArgs = (
+  argv: readonly string[],
+  env: Readonly<Record<string, string | undefined>>,
+): GrantStaffArgs => {
   const flags = readFlags(argv);
-  if (!ProjectIdSchema.safeParse(flags["--project"]).success) throw new GrantStaffArgsError("--project is not a Firebase project id");
+  if (!ProjectIdSchema.safeParse(flags["--project"]).success)
+    throw new GrantStaffArgsError("--project is not a Firebase project id");
   if (flags["--confirm"] !== flags["--project"]) throw new GrantStaffArgsError("--confirm must equal --project");
   if (!z.email().safeParse(flags["--email"]).success) throw new GrantStaffArgsError("--email is not an email address");
   const role = z.enum(PLATFORM_ROLES).safeParse(flags["--role"]);

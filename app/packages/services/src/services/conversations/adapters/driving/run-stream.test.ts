@@ -21,14 +21,14 @@ const upstreamOf = (chunks: string[], options: { fail?: boolean } = {}) => {
 describe("trackRunStream", () => {
   it("passes the bytes through unchanged and reports the upstream end once, before the client sees it", async () => {
     const events: string[] = [];
-    const upstream = upstreamOf(["data: {\"type\":\"start\"}\n\n", "data: [DONE]\n\n"]);
+    const upstream = upstreamOf(['data: {"type":"start"}\n\n', "data: [DONE]\n\n"]);
     const tracked = trackRunStream(upstream.stream, () => {
       events.push("ended");
       return Promise.resolve();
     });
     const text = await new Response(tracked).text();
     events.push("client-done");
-    expect(text).toBe("data: {\"type\":\"start\"}\n\ndata: [DONE]\n\n");
+    expect(text).toBe('data: {"type":"start"}\n\ndata: [DONE]\n\n');
     expect(events).toEqual(["ended", "client-done"]);
   });
 

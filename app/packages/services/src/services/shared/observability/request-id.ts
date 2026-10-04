@@ -1,4 +1,4 @@
-import { RequestIdSchema, type RequestId } from "@core/contracts";
+import { type RequestId, RequestIdSchema } from "@core/contracts";
 import { ulid } from "ulid";
 
 /** Correlation header set at the edge (web `src/proxy.ts`) and echoed on every response. */

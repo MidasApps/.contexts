@@ -9,7 +9,11 @@ import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts"
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
-export type DeleteRoleDialogProps = { organizationId: string; customRole: Role | null; onOpenChange: (open: boolean) => void };
+export type DeleteRoleDialogProps = {
+  organizationId: string;
+  customRole: Role | null;
+  onOpenChange: (open: boolean) => void;
+};
 
 /**
  * Deletes a custom role (`DELETE /v1/roles/{id}`, core.role.delete). A role still granted answers

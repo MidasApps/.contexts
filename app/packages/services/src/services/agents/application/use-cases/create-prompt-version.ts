@@ -26,6 +26,13 @@ export const makeCreatePromptVersion =
       note: command.input.note ?? null,
       createdBy: command.actor.uid,
     });
-    await recordPromptAudit(deps, { action: "PROMPT_VERSION_CREATED", actor: command.actor, key: command.key, targetId: version.id, requestId: command.requestId, fingerprint: bodySha256 });
+    await recordPromptAudit(deps, {
+      action: "PROMPT_VERSION_CREATED",
+      actor: command.actor,
+      key: command.key,
+      targetId: version.id,
+      requestId: command.requestId,
+      fingerprint: bodySha256,
+    });
     return version;
   };

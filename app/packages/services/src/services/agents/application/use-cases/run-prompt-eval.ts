@@ -21,10 +21,24 @@ export const makeRunPromptEval =
   (deps: PromptDeps): RunPromptEval =>
   async (command) => {
     const version = await deps.prompts.getVersion({ versionId: command.versionId, tenantId: command.key.tenantId });
-    const owned = version !== null && version.agentId === command.key.agentId && version.scope === command.key.scope && version.tenantId === command.key.tenantId;
+    const owned =
+      version !== null &&
+      version.agentId === command.key.agentId &&
+      version.scope === command.key.scope &&
+      version.tenantId === command.key.tenantId;
     if (!owned) return err({ code: "NOT_FOUND", status: 404 });
-    const result = await deps.evals.evaluate({ versionId: command.versionId, tenantId: command.key.tenantId, requestId: command.requestId });
+    const result = await deps.evals.evaluate({
+      versionId: command.versionId,
+      tenantId: command.key.tenantId,
+      requestId: command.requestId,
+    });
     if (!result.ok) return result;
-    await recordPromptAudit(deps, { action: "PROMPT_EVALUATED", actor: command.actor, key: command.key, targetId: command.versionId, requestId: command.requestId });
+    await recordPromptAudit(deps, {
+      action: "PROMPT_EVALUATED",
+      actor: command.actor,
+      key: command.key,
+      targetId: command.versionId,
+      requestId: command.requestId,
+    });
     return ok(result.data);
   };

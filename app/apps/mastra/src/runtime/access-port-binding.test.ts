@@ -5,15 +5,20 @@ import {
   createInMemoryAccessStore,
   fixedClock,
   makeVerifyBearer,
-  refuseAllApiKeys,
   type ResolveAccessContext,
+  refuseAllApiKeys,
 } from "@core/services";
 import { describe, expect, it } from "vitest";
 import { bindAccessPort } from "./access-port-binding.ts";
 
 const TENANT = "org-a";
 const MEMBER: AccessPrincipal = { type: "user", uid: "member-uid", mfa: false };
-const REGIONAL = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Manaus", currency: "BRL" };
+const REGIONAL = {
+  locale: "pt-BR",
+  displayTimeZone: "America/Sao_Paulo",
+  nodeTimeZone: "America/Manaus",
+  currency: "BRL",
+};
 const ORG = { level: "organization", tenantId: TENANT } as const;
 
 const setup = (resolveAccessContext?: ResolveAccessContext) => {
@@ -22,7 +27,12 @@ const setup = (resolveAccessContext?: ResolveAccessContext) => {
   store.putProject({ id: "p1", tenantId: TENANT });
   store.putUser("member-uid");
   store.putUser("outsider-uid");
-  store.putGrant({ tenantId: TENANT, principalId: "member-uid", nodeId: TENANT, roles: [{ kind: "system", key: "member" }] });
+  store.putGrant({
+    tenantId: TENANT,
+    principalId: "member-uid",
+    nodeId: TENANT,
+    roles: [{ kind: "system", key: "member" }],
+  });
   const tokenVerifier = createFakeTokenVerifier({
     tokens: { "member-token": { uid: "member-uid", claims: {}, signInProvider: "password", secondFactor: null } },
     revoked: ["member-token"],
@@ -37,7 +47,13 @@ const setup = (resolveAccessContext?: ResolveAccessContext) => {
     const effective = await access.forRequest().getEffectivePermissions(input);
     if (!effective.ok) return null;
     const projectId = input.node.level === "organization" ? {} : { projectId: input.node.projectId };
-    return { tenantId: input.node.tenantId, ...projectId, principal: input.principal, permissions: [...effective.permissions].sort(), regional: REGIONAL };
+    return {
+      tenantId: input.node.tenantId,
+      ...projectId,
+      principal: input.principal,
+      permissions: [...effective.permissions].sort(),
+      regional: REGIONAL,
+    };
   };
   return { port: bindAccessPort({ verifyBearer, access, resolveAccessContext: resolveAccessContext ?? fake }), calls };
 };
@@ -45,14 +61,20 @@ const setup = (resolveAccessContext?: ResolveAccessContext) => {
 describe("bindAccessPort", () => {
   it("verifies with SP1 and honours checkRevoked", async () => {
     const { port } = setup();
-    expect(await port.verifyBearer({ token: "member-token", checkRevoked: false })).toMatchObject({ type: "user", uid: "member-uid" });
+    expect(await port.verifyBearer({ token: "member-token", checkRevoked: false })).toMatchObject({
+      type: "user",
+      uid: "member-uid",
+    });
     expect(await port.verifyBearer({ token: "member-token", checkRevoked: true })).toBeNull();
     expect(await port.verifyBearer({ token: "garbage", checkRevoked: false })).toBeNull();
   });
 
   it("resolves the access context through SP1 resolveAccessContext with branded principal and node", async () => {
     const { port, calls } = setup();
-    const context = await port.resolveAccessContext({ principal: MEMBER, node: { level: "project", tenantId: TENANT, projectId: "p1" } });
+    const context = await port.resolveAccessContext({
+      principal: MEMBER,
+      node: { level: "project", tenantId: TENANT, projectId: "p1" },
+    });
     expect(context).toMatchObject({ tenantId: TENANT, projectId: "p1", principal: MEMBER, regional: REGIONAL });
     expect(context?.permissions).toContain("core.chat.use");
     expect(context).not.toHaveProperty("unitId");
@@ -61,8 +83,12 @@ describe("bindAccessPort", () => {
 
   it("answers null when SP1 answers null (non-member, unknown node, platform)", async () => {
     const { port } = setup();
-    expect(await port.resolveAccessContext({ principal: { type: "user", uid: "outsider-uid", mfa: false }, node: ORG })).toBeNull();
-    expect(await port.resolveAccessContext({ principal: MEMBER, node: { level: "organization", tenantId: "org-missing" } })).toBeNull();
+    expect(
+      await port.resolveAccessContext({ principal: { type: "user", uid: "outsider-uid", mfa: false }, node: ORG }),
+    ).toBeNull();
+    expect(
+      await port.resolveAccessContext({ principal: MEMBER, node: { level: "organization", tenantId: "org-missing" } }),
+    ).toBeNull();
     expect(await port.resolveAccessContext({ principal: MEMBER, node: { level: "platform" } })).toBeNull();
   });
 
@@ -73,17 +99,37 @@ describe("bindAccessPort", () => {
 
   it("authorizes through SP1 with the agent ceiling", async () => {
     const { port } = setup();
-    expect(await port.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG })).toEqual({ allowed: true, requiresApproval: false });
-    expect(await port.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG, ceiling: new Set(["core.catalog.read"]) })).toEqual({
+    expect(await port.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG })).toEqual({
+      allowed: true,
+      requiresApproval: false,
+    });
+    expect(
+      await port.authorize({
+        principal: MEMBER,
+        permission: "core.chat.use",
+        node: ORG,
+        ceiling: new Set(["core.catalog.read"]),
+      }),
+    ).toEqual({
       allowed: false,
       reason: "CEILING_EXCLUDES",
     });
-    expect(await port.authorize({ principal: MEMBER, permission: "Not A Permission", node: ORG })).toEqual({ allowed: false, reason: "UNKNOWN_PERMISSION" });
+    expect(await port.authorize({ principal: MEMBER, permission: "Not A Permission", node: ORG })).toEqual({
+      allowed: false,
+      reason: "UNKNOWN_PERMISSION",
+    });
   });
 
   it("returns effective permissions, empty when SP1 denies", async () => {
     const { port } = setup();
-    expect((await port.getEffectivePermissions({ principal: MEMBER, node: ORG, ceiling: new Set(["core.chat.use"]) })).has("core.chat.use")).toBe(true);
-    expect((await port.getEffectivePermissions({ principal: { type: "user", uid: "outsider-uid", mfa: false }, node: ORG })).size).toBe(0);
+    expect(
+      (await port.getEffectivePermissions({ principal: MEMBER, node: ORG, ceiling: new Set(["core.chat.use"]) })).has(
+        "core.chat.use",
+      ),
+    ).toBe(true);
+    expect(
+      (await port.getEffectivePermissions({ principal: { type: "user", uid: "outsider-uid", mfa: false }, node: ORG }))
+        .size,
+    ).toBe(0);
   });
 });

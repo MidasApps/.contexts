@@ -7,8 +7,14 @@ describe("importPromptSeeds", () => {
     const { repository, versions, activations } = createInMemoryPromptRepository();
     const first = await importPromptSeeds({ prompts: repository });
     expect(first.imported).toEqual(["assistant", "knowledge", "data", "action", "web"]);
-    expect(versions.map((version) => [version.agentId, version.version, version.scope])).toContainEqual(["knowledge", 1, "platform"]);
-    expect((await repository.getActive({ agentId: "assistant", tenantId: null })).platform?.body).toContain("assistant");
+    expect(versions.map((version) => [version.agentId, version.version, version.scope])).toContainEqual([
+      "knowledge",
+      1,
+      "platform",
+    ]);
+    expect((await repository.getActive({ agentId: "assistant", tenantId: null })).platform?.body).toContain(
+      "assistant",
+    );
     expect(activations.every((activation) => activation.forced && activation.reason !== null)).toBe(true);
     const again = await importPromptSeeds({ prompts: repository });
     expect(again).toEqual({ imported: [], skipped: ["assistant", "knowledge", "data", "action", "web"] });

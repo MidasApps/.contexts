@@ -13,13 +13,20 @@ function AdminSlotPage({ rest }: { rest: string }) {
   const t = useTranslations();
   const { items } = useAdminItems();
   // The area is the item whose path is `rest` or contains it (`users/42` belongs to `users`).
-  const area = items.find(({ route }) => route.id === "admin" && route.rest !== "" && (rest === route.rest || rest.startsWith(`${route.rest}/`)));
+  const area = items.find(
+    ({ route }) =>
+      route.id === "admin" && route.rest !== "" && (rest === route.rest || rest.startsWith(`${route.rest}/`)),
+  );
   if (area === undefined) return <PageNotFound />;
   const name = area.route.id === "admin" ? area.route.rest : "";
   const descriptionKey = `admin.descriptions.${name}`;
   // The same frame as every built admin page: header, eyebrow and the area's permission states.
   return (
-    <AdminPageFrame permission={area.item.permission} title={t(area.item.labelKey)} description={t.has(descriptionKey) ? t(descriptionKey) : undefined}>
+    <AdminPageFrame
+      permission={area.item.permission}
+      title={t(area.item.labelKey)}
+      description={t.has(descriptionKey) ? t(descriptionKey) : undefined}
+    >
       <EmptyState
         headingLevel={2}
         icon={area.item.icon}

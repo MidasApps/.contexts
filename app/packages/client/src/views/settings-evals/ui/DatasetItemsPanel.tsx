@@ -3,7 +3,7 @@
 import type { EvalDatasetItem } from "@core/contracts";
 import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { useTenantDatasetItems, useTenantDatasets, type DatasetItemPage } from "#/entities/eval-experiment/index.ts";
+import { type DatasetItemPage, useTenantDatasetItems, useTenantDatasets } from "#/entities/eval-experiment/index.ts";
 import { AddEvalDatasetItemDialog, DeleteEvalDatasetItemDialog } from "#/features/manage-eval-datasets/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
@@ -18,7 +18,8 @@ const column = dataTableColumnHelper<EvalDatasetItem>();
 
 /** How a row names its item for screen readers: the start of its input. */
 const PREVIEW_LENGTH = 40;
-const previewOf = (item: EvalDatasetItem): string => (item.input.length > PREVIEW_LENGTH ? `${item.input.slice(0, PREVIEW_LENGTH)}…` : item.input);
+const previewOf = (item: EvalDatasetItem): string =>
+  item.input.length > PREVIEW_LENGTH ? `${item.input.slice(0, PREVIEW_LENGTH)}…` : item.input;
 
 function ItemText({ text }: { text: string }) {
   return <span className="line-clamp-4 whitespace-pre-wrap break-words">{text}</span>;
@@ -26,13 +27,23 @@ function ItemText({ text }: { text: string }) {
 
 function ExpectedOutput({ item }: { item: EvalDatasetItem }) {
   const t = useTranslations("settings.evals.items");
-  return item.expectedOutput === null ? <span className="text-muted-foreground">{t("noExpectedOutput")}</span> : <ItemText text={item.expectedOutput} />;
+  return item.expectedOutput === null ? (
+    <span className="text-muted-foreground">{t("noExpectedOutput")}</span>
+  ) : (
+    <ItemText text={item.expectedOutput} />
+  );
 }
 
 function DeleteItemButton({ item, onDelete }: { item: EvalDatasetItem; onDelete: (item: EvalDatasetItem) => void }) {
   const t = useTranslations("settings.evals.items");
   return (
-    <Button variant="outline" size="sm" className="self-start" onClick={() => onDelete(item)} aria-label={t("deleteNamed", { input: previewOf(item) })}>
+    <Button
+      variant="outline"
+      size="sm"
+      className="self-start"
+      onClick={() => onDelete(item)}
+      aria-label={t("deleteNamed", { input: previewOf(item) })}
+    >
       <Icon name="trash" />
       {t("deleteAction")}
     </Button>
@@ -44,19 +55,42 @@ const useColumns = (onDelete: ((item: EvalDatasetItem) => void) | null) => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.display({ id: "input", header: () => t("columns.input"), cell: ({ row }) => <ItemText text={row.original.input} /> }),
-      column.display({ id: "expectedOutput", header: () => t("columns.expectedOutput"), cell: ({ row }) => <ExpectedOutput item={row.original} /> }),
-      column.accessor("createdAt", { header: () => t("columns.createdAt"), cell: ({ getValue }) => formatDateTime(getValue()) }),
+      column.display({
+        id: "input",
+        header: () => t("columns.input"),
+        cell: ({ row }) => <ItemText text={row.original.input} />,
+      }),
+      column.display({
+        id: "expectedOutput",
+        header: () => t("columns.expectedOutput"),
+        cell: ({ row }) => <ExpectedOutput item={row.original} />,
+      }),
+      column.accessor("createdAt", {
+        header: () => t("columns.createdAt"),
+        cell: ({ getValue }) => formatDateTime(getValue()),
+      }),
       ...(onDelete === null
         ? []
-        : [column.display({ id: "actions", header: () => t("columns.actions"), cell: ({ row }) => <DeleteItemButton item={row.original} onDelete={onDelete} /> })]),
+        : [
+            column.display({
+              id: "actions",
+              header: () => t("columns.actions"),
+              cell: ({ row }) => <DeleteItemButton item={row.original} onDelete={onDelete} />,
+            }),
+          ]),
     ],
     [formatDateTime, onDelete, t],
   );
 };
 
 type Paging = { page: number; setPage: (page: number) => void; pending: boolean };
-type ItemsTableProps = { datasetName: string; data: DatasetItemPage; paging: Paging; onAdd: (() => void) | null; onDelete: ((item: EvalDatasetItem) => void) | null };
+type ItemsTableProps = {
+  datasetName: string;
+  data: DatasetItemPage;
+  paging: Paging;
+  onAdd: (() => void) | null;
+  onDelete: ((item: EvalDatasetItem) => void) | null;
+};
 
 function ItemsTable({ datasetName, data, paging, onAdd, onDelete }: ItemsTableProps) {
   const t = useTranslations("settings.evals.items");
@@ -66,7 +100,14 @@ function ItemsTable({ datasetName, data, paging, onAdd, onDelete }: ItemsTablePr
   const pagination =
     page === 1 && !data.meta.hasMore
       ? undefined
-      : { hasPrevious: page > 1, hasNext: data.meta.hasMore, pending: paging.pending, onPrevious: () => setPage(page - 1), onNext: () => setPage(page + 1), label: t("pagination") };
+      : {
+          hasPrevious: page > 1,
+          hasNext: data.meta.hasMore,
+          pending: paging.pending,
+          onPrevious: () => setPage(page - 1),
+          onNext: () => setPage(page + 1),
+          label: t("pagination"),
+        };
   return (
     <DataTable
       caption={t("caption", { name: datasetName })}
@@ -115,7 +156,8 @@ export function DatasetItemsPanel({ organization, datasetId, canWrite, onBack }:
   const { page, setPage } = useSettingsSearch([]);
   const items = useTenantDatasetItems(organization.id, datasetId, page);
   // The name comes from the list the previous tab already loaded; a stale link shows the id.
-  const datasetName = useTenantDatasets(organization.id).data?.find((dataset) => dataset.id === datasetId)?.name ?? datasetId;
+  const datasetName =
+    useTenantDatasets(organization.id).data?.find((dataset) => dataset.id === datasetId)?.name ?? datasetId;
   const [adding, setAdding] = useState(false);
   const [deleting, setDeleting] = useState<EvalDatasetItem | null>(null);
   const onAdd = canWrite ? () => setAdding(true) : null;
@@ -127,9 +169,7 @@ export function DatasetItemsPanel({ organization, datasetId, canWrite, onBack }:
             <Icon name="arrow-left" />
             {t("back")}
           </Button>
-          <h2 className="text-heading-sm font-semibold">
-            {t("title", { name: datasetName })}
-          </h2>
+          <h2 className="text-heading-sm font-semibold">{t("title", { name: datasetName })}</h2>
         </div>
         {onAdd === null ? null : (
           <Button onClick={onAdd}>
@@ -139,12 +179,29 @@ export function DatasetItemsPanel({ organization, datasetId, canWrite, onBack }:
         )}
       </div>
       <QuerySection query={items} loadingLabel={t("loading")}>
-        {(data) => <ItemsTable datasetName={datasetName} data={data} paging={{ page, setPage, pending: items.isFetching }} onAdd={onAdd} onDelete={canWrite ? setDeleting : null} />}
+        {(data) => (
+          <ItemsTable
+            datasetName={datasetName}
+            data={data}
+            paging={{ page, setPage, pending: items.isFetching }}
+            onAdd={onAdd}
+            onDelete={canWrite ? setDeleting : null}
+          />
+        )}
       </QuerySection>
       {canWrite ? (
         <>
-          <AddEvalDatasetItemDialog organizationId={organization.id} dataset={{ id: datasetId, name: datasetName }} open={adding} onOpenChange={setAdding} />
-          <DeleteEvalDatasetItemDialog organizationId={organization.id} item={deleting} onOpenChange={(open) => !open && setDeleting(null)} />
+          <AddEvalDatasetItemDialog
+            organizationId={organization.id}
+            dataset={{ id: datasetId, name: datasetName }}
+            open={adding}
+            onOpenChange={setAdding}
+          />
+          <DeleteEvalDatasetItemDialog
+            organizationId={organization.id}
+            item={deleting}
+            onOpenChange={(open) => !open && setDeleting(null)}
+          />
         </>
       ) : null}
     </div>

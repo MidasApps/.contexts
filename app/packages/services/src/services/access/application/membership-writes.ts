@@ -1,12 +1,12 @@
 import {
-  accessProjectionId,
-  UserIdSchema,
   type AccessProjection,
+  accessProjectionId,
   type Membership,
   type RoleRef,
   type TenantId,
   type TenantNodeRef,
   type UserId,
+  UserIdSchema,
 } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import type { AuditActor } from "../../audit/domain/audit-actor.ts";
@@ -29,7 +29,6 @@ export type PrincipalState = {
 
 type Deps = Pick<AccessWriteDeps, "memberships" | "projections" | "users" | "tenantGuard" | "audit" | "clock">;
 
-
 type PrincipalRef = { readonly tenantId: TenantId; readonly principal: ProjectionPrincipal };
 
 /**
@@ -37,7 +36,11 @@ type PrincipalRef = { readonly tenantId: TenantId; readonly principal: Projectio
  * still exists, inside `tx`. `tenantCreated` skips the organization read when the
  * organization is created in this very transaction.
  */
-export const readPrincipalState = async (tx: Transaction, deps: Deps, args: PrincipalRef & { readonly tenantCreated?: boolean }): Promise<PrincipalState> => {
+export const readPrincipalState = async (
+  tx: Transaction,
+  deps: Deps,
+  args: PrincipalRef & { readonly tenantCreated?: boolean },
+): Promise<PrincipalState> => {
   const { tenantId, principal } = args;
   const [live, projection, user, tenantLive] = await Promise.all([
     deps.memberships.listOfPrincipal(tx, { tenantId, principalId: principal.id }),
@@ -65,11 +68,24 @@ const writeUser = (tx: Transaction, deps: Deps, args: StateWrite): void => {
   const uid: UserId = UserIdSchema.parse(args.principal.id);
   const { state, tenantId, now, actorId } = args;
   if (state.user === null) {
-    if (args.newUser !== undefined) deps.users.create(tx, { uid, profile: args.newUser, accessVersion: 1, activeOrganizationId: tenantId, createdAt: now });
+    if (args.newUser !== undefined)
+      deps.users.create(tx, {
+        uid,
+        profile: args.newUser,
+        accessVersion: 1,
+        activeOrganizationId: tenantId,
+        createdAt: now,
+      });
     return;
   }
   const activate = args.newUser !== undefined && state.user.activeOrganizationId === null;
-  deps.users.bump(tx, { uid, current: state.user, updatedAt: now, actorId, ...(activate ? { activeOrganizationId: tenantId } : {}) });
+  deps.users.bump(tx, {
+    uid,
+    current: state.user,
+    updatedAt: now,
+    actorId,
+    ...(activate ? { activeOrganizationId: tenantId } : {}),
+  });
 };
 
 /**
@@ -77,7 +93,11 @@ const writeUser = (tx: Transaction, deps: Deps, args: StateWrite): void => {
  * set of live grants (SP1 spec §5.4). Call after every read of the transaction.
  */
 export const writePrincipalState = (tx: Transaction, deps: Deps, args: StateWrite): void => {
-  const built = buildAccessProjection({ tenantId: args.tenantId, principal: args.principal, grants: args.grants.map((grant) => grant.node) });
+  const built = buildAccessProjection({
+    tenantId: args.tenantId,
+    principal: args.principal,
+    grants: args.grants.map((grant) => grant.node),
+  });
   const projection: AccessProjection = {
     id: accessProjectionId({ tenantId: args.tenantId, principalId: args.principal.id }),
     ...built,
@@ -107,11 +127,16 @@ export type PrepareGrantArgs = PrincipalRef & {
  * the membership plus `commit()`, which buffers the membership, the projection, the
  * `accessVersion` bump and the audit entry. Call `commit()` after the caller's own reads.
  */
-export const prepareGrant = async (tx: Transaction, deps: Deps, args: PrepareGrantArgs): Promise<Result<GrantPlan, MembershipExistsError | AccessNotFoundError>> => {
+export const prepareGrant = async (
+  tx: Transaction,
+  deps: Deps,
+  args: PrepareGrantArgs,
+): Promise<Result<GrantPlan, MembershipExistsError | AccessNotFoundError>> => {
   const state = await readPrincipalState(tx, deps, { ...args, tenantCreated: args.organizationCreated === true });
   if (!state.tenantLive) return err(organizationGone());
   // A user grantee must exist (its users doc), unless this grant creates the doc.
-  if (args.principal.type === "user" && state.user === null && args.newUser === undefined) return err(new AccessNotFoundError("user"));
+  if (args.principal.type === "user" && state.user === null && args.newUser === undefined)
+    return err(new AccessNotFoundError("user"));
   const nodeId = nodeIdOf(args.node);
   const existing = state.live.find((grant) => nodeIdOf(grant.node) === nodeId);
   if (existing !== undefined) return err(new MembershipExistsError(existing.id));
@@ -131,7 +156,16 @@ export const prepareGrant = async (tx: Transaction, deps: Deps, args: PrepareGra
     deps.memberships.create(tx, { membership, actorId: args.actor.id });
     writePrincipalState(tx, deps, { ...args, state, grants: [...state.live, membership], actorId: args.actor.id, now });
     await deps.audit.record(
-      { log: "tenant", tenantId: args.tenantId, action: "MEMBERSHIP_GRANTED", actor: args.actor, target: { type: "membership", id: membership.id }, node: args.node, outcome: "success", requestId: args.requestId },
+      {
+        log: "tenant",
+        tenantId: args.tenantId,
+        action: "MEMBERSHIP_GRANTED",
+        actor: args.actor,
+        target: { type: "membership", id: membership.id },
+        node: args.node,
+        outcome: "success",
+        requestId: args.requestId,
+      },
       tx,
     );
   };
@@ -145,13 +179,18 @@ export type RevokeAllPlan = { readonly revoked: number; readonly commit: () => v
  * `commit()` soft-deletes the grants and rebuilds the projection as revoked. Call it after
  * the caller's own reads. A deleted organization has nothing left to revoke.
  */
-export const prepareRevokeAllGrants = async (tx: Transaction, deps: Deps, args: PrincipalRef & { readonly actorId: string }): Promise<RevokeAllPlan> => {
+export const prepareRevokeAllGrants = async (
+  tx: Transaction,
+  deps: Deps,
+  args: PrincipalRef & { readonly actorId: string },
+): Promise<RevokeAllPlan> => {
   const state = await readPrincipalState(tx, deps, args);
   const now = deps.clock.now().toISOString();
   return {
     revoked: state.live.length,
     commit: () => {
-      for (const grant of state.live) deps.memberships.softDelete(tx, { id: grant.id, deletedAt: now, actorId: args.actorId });
+      for (const grant of state.live)
+        deps.memberships.softDelete(tx, { id: grant.id, deletedAt: now, actorId: args.actorId });
       writePrincipalState(tx, deps, { ...args, state, grants: [], now });
     },
   };

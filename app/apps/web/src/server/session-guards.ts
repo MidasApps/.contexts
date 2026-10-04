@@ -25,13 +25,17 @@ const guardInputs = async (locale: SupportedLocale) => {
  * `(app)` layout guard (SP1 spec §3.3): the web session of the `__session` cookie, else a redirect
  * to `/{locale}/sign-in?next=`. Request-time (cookies): call it inside `<Suspense>`.
  */
-export const requireWebSession = async (locale: SupportedLocale): Promise<Extract<WebSessionGuardResult, { kind: "session" }>> => {
+export const requireWebSession = async (
+  locale: SupportedLocale,
+): Promise<Extract<WebSessionGuardResult, { kind: "session" }>> => {
   const { core, jar, outcomes } = await guardInputs(locale);
   return enforceWebSession(await core.sessionGuards.requireWebSession(jar), outcomes);
 };
 
 /** `/admin` layout guard (SP1 spec §3.4): staff with MFA; a non-staff user gets 404. */
-export const requirePlatformStaffSession = async (locale: SupportedLocale): Promise<Extract<StaffSessionGuardResult, { kind: "staff" }>> => {
+export const requirePlatformStaffSession = async (
+  locale: SupportedLocale,
+): Promise<Extract<StaffSessionGuardResult, { kind: "staff" }>> => {
   const { core, jar, outcomes } = await guardInputs(locale);
   return enforceStaffSession(await core.sessionGuards.requirePlatformStaffSession(jar), outcomes);
 };

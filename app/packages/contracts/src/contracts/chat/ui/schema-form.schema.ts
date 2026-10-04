@@ -17,7 +17,14 @@ export const SchemaFormPropsContract = defineContract(SchemaFormPropsSchema, {
   id: "chat.SchemaFormProps",
   kind: "ui-component",
   description: "A form for a command contract that the member reviews and submits inside the chat.",
-  examples: [{ contractId: "example.Note", commandId: "example.CreateNoteCommand", mode: "create", initialValues: { title: "Kickoff" } }],
+  examples: [
+    {
+      contractId: "example.Note",
+      commandId: "example.CreateNoteCommand",
+      mode: "create",
+      initialValues: { title: "Kickoff" },
+    },
+  ],
   pii: "personal",
   tenancyScope: "organization",
   relations: [],

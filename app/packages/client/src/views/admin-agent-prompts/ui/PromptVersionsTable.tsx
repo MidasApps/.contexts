@@ -5,14 +5,19 @@ import { useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { AdminUserRef } from "#/entities/admin-user/index.ts";
 import { PromptVerdictPill } from "#/entities/prompt-version/index.ts";
-import { canActivatePrompt, isPromptRollback, type PromptActivationRequest, type RunPromptEval } from "#/features/admin-prompt-activation/index.ts";
+import {
+  canActivatePrompt,
+  isPromptRollback,
+  type PromptActivationRequest,
+  type RunPromptEval,
+} from "#/features/admin-prompt-activation/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
-import { PROMPT_ROWS_PER_PAGE, useLocalPages } from "../model/use-local-pages.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
+import { PROMPT_ROWS_PER_PAGE, useLocalPages } from "../model/use-local-pages.ts";
 
 const column = dataTableColumnHelper<PromptVersion>();
 
@@ -30,7 +35,10 @@ export type PromptVersionsTableProps = {
   onCreate: () => void;
 };
 
-type RowContext = Pick<PromptVersionsTableProps, "activeVersion" | "evalRun" | "online" | "onActivate" | "onCompare" | "userLabel">;
+type RowContext = Pick<
+  PromptVersionsTableProps,
+  "activeVersion" | "evalRun" | "online" | "onActivate" | "onCompare" | "userLabel"
+>;
 
 function VersionLabel({ version, active }: { version: PromptVersion; active: boolean }) {
   const t = useTranslations("admin.prompts");
@@ -47,7 +55,14 @@ function VersionLabel({ version, active }: { version: PromptVersion; active: boo
 }
 
 /** Evaluate, activate (or roll back), force and compare for one version. */
-function VersionActions({ version, activeVersion, evalRun, online, onActivate, onCompare }: Omit<RowContext, "userLabel"> & { version: PromptVersion }) {
+function VersionActions({
+  version,
+  activeVersion,
+  evalRun,
+  online,
+  onActivate,
+  onCompare,
+}: Omit<RowContext, "userLabel"> & { version: PromptVersion }) {
   const t = useTranslations("admin.prompts");
   const n = version.version;
   const isActive = activeVersion?.id === version.id;
@@ -58,20 +73,46 @@ function VersionActions({ version, activeVersion, evalRun, online, onActivate, o
   return (
     <span className="flex flex-col items-start gap-1.5 lg:items-end">
       <span className="flex flex-wrap gap-1.5 lg:justify-end">
-        <Button variant="outline" size="sm" pending={evalRun.pendingId === version.id} disabled={!online || (busy && evalRun.pendingId !== version.id)} onClick={() => void evalRun.run(version)} aria-label={t("actions.evaluateNamed", { version: n })}>
+        <Button
+          variant="outline"
+          size="sm"
+          pending={evalRun.pendingId === version.id}
+          disabled={!online || (busy && evalRun.pendingId !== version.id)}
+          onClick={() => void evalRun.run(version)}
+          aria-label={t("actions.evaluateNamed", { version: n })}
+        >
           {t("actions.evaluate")}
         </Button>
         {isActive ? null : (
-          <Button size="sm" disabled={!allowed || !online || busy} onClick={() => onActivate({ version, force: false })} aria-label={rollback ? t("actions.rollbackNamed", { version: n }) : t("actions.activateNamed", { version: n })} {...(allowed ? {} : { "aria-describedby": hintId })}>
+          <Button
+            size="sm"
+            disabled={!allowed || !online || busy}
+            onClick={() => onActivate({ version, force: false })}
+            aria-label={
+              rollback ? t("actions.rollbackNamed", { version: n }) : t("actions.activateNamed", { version: n })
+            }
+            {...(allowed ? {} : { "aria-describedby": hintId })}
+          >
             {rollback ? t("actions.rollback") : t("actions.activate")}
           </Button>
         )}
         {isActive || allowed ? null : (
-          <Button variant="ghost" size="sm" disabled={!online || busy} onClick={() => onActivate({ version, force: true })} aria-label={t("actions.forceNamed", { version: n })}>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={!online || busy}
+            onClick={() => onActivate({ version, force: true })}
+            aria-label={t("actions.forceNamed", { version: n })}
+          >
             {t("actions.force")}
           </Button>
         )}
-        <Button variant="ghost" size="sm" onClick={() => onCompare(version)} aria-label={t("actions.compareNamed", { version: n })}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onCompare(version)}
+          aria-label={t("actions.compareNamed", { version: n })}
+        >
           {t("actions.compare")}
         </Button>
       </span>
@@ -90,16 +131,41 @@ const useColumns = (context: RowContext) => {
   const { activeVersion, evalRun, online, onActivate, onCompare, userLabel } = context;
   return useMemo(
     () => [
-      column.display({ id: "version", header: () => t("columns.version"), cell: ({ row }) => <VersionLabel version={row.original} active={activeVersion?.id === row.original.id} /> }),
-      column.accessor("note", { header: () => t("columns.note"), cell: ({ getValue }) => getValue() ?? <span className="text-muted-foreground">{t("noNote")}</span> }),
-      column.accessor("createdBy", { header: () => t("columns.author"), cell: ({ getValue }) => <AdminUserRef id={getValue()} label={userLabel(getValue())} /> }),
-      column.accessor("createdAt", { header: () => t("columns.createdAt"), cell: ({ getValue }) => formatDateTime(getValue()) }),
-      column.accessor("evalVerdict", { header: () => t("columns.verdict"), cell: ({ getValue }) => <PromptVerdictPill verdict={getValue()} /> }),
+      column.display({
+        id: "version",
+        header: () => t("columns.version"),
+        cell: ({ row }) => <VersionLabel version={row.original} active={activeVersion?.id === row.original.id} />,
+      }),
+      column.accessor("note", {
+        header: () => t("columns.note"),
+        cell: ({ getValue }) => getValue() ?? <span className="text-muted-foreground">{t("noNote")}</span>,
+      }),
+      column.accessor("createdBy", {
+        header: () => t("columns.author"),
+        cell: ({ getValue }) => <AdminUserRef id={getValue()} label={userLabel(getValue())} />,
+      }),
+      column.accessor("createdAt", {
+        header: () => t("columns.createdAt"),
+        cell: ({ getValue }) => formatDateTime(getValue()),
+      }),
+      column.accessor("evalVerdict", {
+        header: () => t("columns.verdict"),
+        cell: ({ getValue }) => <PromptVerdictPill verdict={getValue()} />,
+      }),
       column.display({
         id: "actions",
         header: () => t("columns.actions"),
         meta: { headerHidden: true },
-        cell: ({ row }) => <VersionActions version={row.original} activeVersion={activeVersion} evalRun={evalRun} online={online} onActivate={onActivate} onCompare={onCompare} />,
+        cell: ({ row }) => (
+          <VersionActions
+            version={row.original}
+            activeVersion={activeVersion}
+            evalRun={evalRun}
+            online={online}
+            onActivate={onActivate}
+            onCompare={onCompare}
+          />
+        ),
       }),
     ],
     [activeVersion, evalRun, formatDateTime, onActivate, onCompare, online, t, userLabel],
@@ -132,7 +198,9 @@ export function PromptVersionsTable({ agentName, versions, onCreate, ...context 
             <PromptVerdictPill verdict={version.evalVerdict} />
           </span>
           {version.note === null ? null : <span className="text-body">{version.note}</span>}
-          <span className="text-xs text-muted-foreground">{t("cardMeta", { author: context.userLabel(version.createdBy), date: formatDateTime(version.createdAt) })}</span>
+          <span className="text-xs text-muted-foreground">
+            {t("cardMeta", { author: context.userLabel(version.createdBy), date: formatDateTime(version.createdAt) })}
+          </span>
           <VersionActions version={version} {...context} />
         </div>
       )}

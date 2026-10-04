@@ -6,7 +6,10 @@ import type { FlagsDeps } from "../flags-deps.ts";
 import { environmentValueFor, toFeatureFlag } from "./list-flags.ts";
 
 /** Expected refusals of a flag write; the handler maps them to 404, 403 and 400. */
-export type SetFlagError = { readonly code: "FLAG_NOT_FOUND" } | { readonly code: "FLAG_NOT_OVERRIDABLE" } | { readonly code: "ENVIRONMENT_DISABLED" };
+export type SetFlagError =
+  | { readonly code: "FLAG_NOT_FOUND" }
+  | { readonly code: "FLAG_NOT_OVERRIDABLE" }
+  | { readonly code: "ENVIRONMENT_DISABLED" };
 
 export type SetFlagValueCommand = {
   readonly actor: UserPrincipal;
@@ -38,11 +41,20 @@ const recordChange = async (deps: FlagsDeps, command: Omit<SetFlagValueCommand, 
     changes: [command.tenantId === null ? "value" : "tenantOverride"],
   };
   if (command.by === "staff") {
-    await deps.audit.record({ log: "platform", ...common, ...(command.tenantId === null ? {} : { targetTenantId: command.tenantId }) });
+    await deps.audit.record({
+      log: "platform",
+      ...common,
+      ...(command.tenantId === null ? {} : { targetTenantId: command.tenantId }),
+    });
     return;
   }
   if (command.tenantId === null) return;
-  await deps.audit.record({ log: "tenant", ...common, tenantId: command.tenantId, node: { level: "organization", tenantId: command.tenantId } });
+  await deps.audit.record({
+    log: "tenant",
+    ...common,
+    tenantId: command.tenantId,
+    node: { level: "organization", tenantId: command.tenantId },
+  });
 };
 
 /**
@@ -56,14 +68,22 @@ export const makeSetFlagValue =
     const flag = findFlag(deps.registry, command.key);
     if (flag === undefined) return err({ code: "FLAG_NOT_FOUND" });
     if (command.by === "tenant") {
-      const refusal = command.tenantId === null ? ({ code: "FLAG_NOT_OVERRIDABLE" } as const) : await tenantRefusal(deps, flag, command.value);
+      const refusal =
+        command.tenantId === null
+          ? ({ code: "FLAG_NOT_OVERRIDABLE" } as const)
+          : await tenantRefusal(deps, flag, command.value);
       if (refusal !== null) return err(refusal);
     }
     const updatedBy = command.actor.uid;
-    if (command.tenantId === null) await deps.stores.environment.write({ key: flag.key, value: command.value, updatedBy });
-    else await deps.stores.tenants.write({ key: flag.key, tenantId: command.tenantId, value: command.value, updatedBy });
+    if (command.tenantId === null)
+      await deps.stores.environment.write({ key: flag.key, value: command.value, updatedBy });
+    else
+      await deps.stores.tenants.write({ key: flag.key, tenantId: command.tenantId, value: command.value, updatedBy });
     await recordChange(deps, command);
-    const [stored, overrides] = await Promise.all([deps.stores.environment.read(), command.tenantId === null ? Promise.resolve({}) : deps.stores.tenants.read(command.tenantId)]);
+    const [stored, overrides] = await Promise.all([
+      deps.stores.environment.read(),
+      command.tenantId === null ? Promise.resolve({}) : deps.stores.tenants.read(command.tenantId),
+    ]);
     return ok(
       toFeatureFlag(flag, {
         stored: stored[flag.key],
@@ -85,7 +105,9 @@ export type ClearFlagOverrideCommand = {
 
 export type ClearFlagOverrideError = { readonly code: "FLAG_NOT_FOUND" } | { readonly code: "FLAG_NOT_OVERRIDABLE" };
 
-export type ClearFlagOverride = (command: ClearFlagOverrideCommand) => Promise<Result<FeatureFlag, ClearFlagOverrideError>>;
+export type ClearFlagOverride = (
+  command: ClearFlagOverrideCommand,
+) => Promise<Result<FeatureFlag, ClearFlagOverrideError>>;
 
 /**
  * Removes an organization's override (decisions 0044, 0066): the environment value applies again.
@@ -100,8 +122,22 @@ export const makeClearFlagOverride =
     const flag = findFlag(deps.registry, command.key);
     if (flag === undefined) return err({ code: "FLAG_NOT_FOUND" });
     if (command.by === "tenant" && !flag.tenantOverridable) return err({ code: "FLAG_NOT_OVERRIDABLE" });
-    const removed = await deps.stores.tenants.clear({ key: flag.key, tenantId: command.tenantId, updatedBy: command.actor.uid });
+    const removed = await deps.stores.tenants.clear({
+      key: flag.key,
+      tenantId: command.tenantId,
+      updatedBy: command.actor.uid,
+    });
     if (removed) await recordChange(deps, command);
-    const [stored, overrides] = await Promise.all([deps.stores.environment.read(), deps.stores.tenants.read(command.tenantId)]);
-    return ok(toFeatureFlag(flag, { stored: stored[flag.key], environmentDefault: deps.environmentDefaults[flag.key], tenantOverride: overrides[flag.key] ?? null, now: deps.clock.now() }));
+    const [stored, overrides] = await Promise.all([
+      deps.stores.environment.read(),
+      deps.stores.tenants.read(command.tenantId),
+    ]);
+    return ok(
+      toFeatureFlag(flag, {
+        stored: stored[flag.key],
+        environmentDefault: deps.environmentDefaults[flag.key],
+        tenantOverride: overrides[flag.key] ?? null,
+        now: deps.clock.now(),
+      }),
+    );
   };

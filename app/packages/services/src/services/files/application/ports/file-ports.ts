@@ -7,7 +7,11 @@ import type { FileId, StoredFile, UploadInstructions } from "@core/contracts";
 
 export type FileSettlement =
   | { readonly status: "ready"; readonly contentType: string; readonly sizeBytes: number }
-  | { readonly status: "rejected"; readonly reason: NonNullable<StoredFile["rejectionReason"]>; readonly sizeBytes: number };
+  | {
+      readonly status: "rejected";
+      readonly reason: NonNullable<StoredFile["rejectionReason"]>;
+      readonly sizeBytes: number;
+    };
 
 export type FileRepository = {
   /** A fresh Firestore automatic id (ADR 0005). */
@@ -19,7 +23,11 @@ export type FileRepository = {
    * @returns the settled file, or `null` when it is missing or already settled
    *   (Storage events are at-least-once, so a second delivery is a no-op).
    */
-  readonly settle: (input: { readonly fileId: string; readonly settlement: FileSettlement; readonly updatedAt: string }) => Promise<StoredFile | null>;
+  readonly settle: (input: {
+    readonly fileId: string;
+    readonly settlement: FileSettlement;
+    readonly updatedAt: string;
+  }) => Promise<StoredFile | null>;
 };
 
 export type SignUploadInput = {
@@ -64,7 +72,12 @@ export type FileUploadedEvent = {
   readonly occurredAt: string;
   readonly schemaVersion: 1;
   readonly tenantId: string;
-  readonly data: { readonly fileId: string; readonly purpose: StoredFile["purpose"]; readonly contentType: string; readonly sizeBytes: number };
+  readonly data: {
+    readonly fileId: string;
+    readonly purpose: StoredFile["purpose"];
+    readonly contentType: string;
+    readonly sizeBytes: number;
+  };
 };
 
 export type FileEventPublisher = { readonly publish: (event: FileUploadedEvent) => Promise<void> };

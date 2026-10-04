@@ -1,6 +1,10 @@
 "use client";
 
-import { updateOrganizationAgentSettingsEndpoint, type AgentSettings, type UpdateAgentSettingsInput } from "@core/contracts";
+import {
+  type AgentSettings,
+  type UpdateAgentSettingsInput,
+  updateOrganizationAgentSettingsEndpoint,
+} from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 import { useTranslations } from "use-intl";
@@ -44,7 +48,10 @@ const useSaveAgentSettings = (organizationId: string) => {
     setSaving(true);
     queryClient.setQueryData(key, change.next);
     try {
-      const { data } = await callEndpoint(updateOrganizationAgentSettingsEndpoint, { params: { organizationId }, body: change.patch });
+      const { data } = await callEndpoint(updateOrganizationAgentSettingsEndpoint, {
+        params: { organizationId },
+        body: change.patch,
+      });
       queryClient.setQueryData(key, data);
       notify.success(change.done);
     } catch (error: unknown) {
@@ -58,7 +65,19 @@ const useSaveAgentSettings = (organizationId: string) => {
   return { save, saving, failure };
 };
 
-function ToggleRow({ label, description, checked, disabled, onChange }: { label: string; description?: string | undefined; checked: boolean; disabled: boolean; onChange: (checked: boolean) => void }) {
+function ToggleRow({
+  label,
+  description,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  description?: string | undefined;
+  checked: boolean;
+  disabled: boolean;
+  onChange: (checked: boolean) => void;
+}) {
   const id = useId();
   return (
     <li className="flex items-start justify-between gap-4 py-2.5">
@@ -72,7 +91,13 @@ function ToggleRow({ label, description, checked, disabled, onChange }: { label:
           </span>
         )}
       </span>
-      <Switch id={id} checked={checked} disabled={disabled} onCheckedChange={onChange} {...(description === undefined ? {} : { "aria-describedby": `${id}-hint` })} />
+      <Switch
+        id={id}
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onChange}
+        {...(description === undefined ? {} : { "aria-describedby": `${id}-hint` })}
+      />
     </li>
   );
 }
@@ -90,7 +115,15 @@ function Group({ title, description, children }: { title: string; description: s
   );
 }
 
-function PiiMode({ value, disabled, onChange }: { value: "warn" | "redact"; disabled: boolean; onChange: (mode: "warn" | "redact") => void }) {
+function PiiMode({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: "warn" | "redact";
+  disabled: boolean;
+  onChange: (mode: "warn" | "redact") => void;
+}) {
   const t = useTranslations("admin.agentSettings.pii");
   const id = useId();
   return (
@@ -98,10 +131,20 @@ function PiiMode({ value, disabled, onChange }: { value: "warn" | "redact"; disa
       <h3 id={id} className="text-sm font-medium">
         {t("title")}
       </h3>
-      <RadioGroup aria-labelledby={id} value={value} disabled={disabled} onValueChange={(next) => (next === "warn" || next === "redact") && next !== value && onChange(next)}>
+      <RadioGroup
+        aria-labelledby={id}
+        value={value}
+        disabled={disabled}
+        onValueChange={(next) => (next === "warn" || next === "redact") && next !== value && onChange(next)}
+      >
         {(["warn", "redact"] as const).map((mode) => (
           <div key={mode} className="flex items-start gap-2.5">
-            <RadioGroupItem id={`${id}-${mode}`} value={mode} className="mt-0.5" aria-describedby={`${id}-${mode}-hint`} />
+            <RadioGroupItem
+              id={`${id}-${mode}`}
+              value={mode}
+              className="mt-0.5"
+              aria-describedby={`${id}-${mode}-hint`}
+            />
             <span className="flex flex-col gap-0.5">
               <Label htmlFor={`${id}-${mode}`} className="text-sm">
                 {t(mode)}
@@ -124,7 +167,12 @@ function PiiMode({ value, disabled, onChange }: { value: "warn" | "redact"; disa
  * turning a web tool on and weakening PII from "redact" to "warn" ask first, naming the
  * organization (a misclick would send personal data or reach the web for all its members).
  */
-export function AgentEnablementPanel({ organizationId, organizationName, settings, registeredAgents }: AgentEnablementPanelProps) {
+export function AgentEnablementPanel({
+  organizationId,
+  organizationName,
+  settings,
+  registeredAgents,
+}: AgentEnablementPanelProps) {
   const t = useTranslations("admin.agentSettings");
   const names = useTranslations("admin.agents.names");
   const roles = useTranslations("admin.agents.roles");
@@ -135,8 +183,12 @@ export function AgentEnablementPanel({ organizationId, organizationName, setting
   const agentName = (key: string): string => (names.has(key) ? names(key) : key);
 
   const toggleAgent = (key: string, enabled: boolean): void => {
-    const enabledAgents = enabled ? [...settings.enabledAgents, key] : settings.enabledAgents.filter((agent) => agent !== key);
-    const done = enabled ? t("agentEnabled", { agent: agentName(key), organization: organizationName }) : t("agentDisabled", { agent: agentName(key), organization: organizationName });
+    const enabledAgents = enabled
+      ? [...settings.enabledAgents, key]
+      : settings.enabledAgents.filter((agent) => agent !== key);
+    const done = enabled
+      ? t("agentEnabled", { agent: agentName(key), organization: organizationName })
+      : t("agentDisabled", { agent: agentName(key), organization: organizationName });
     void save(settings, { patch: { enabledAgents }, next: { ...settings, enabledAgents }, done });
   };
   const toggleWebTool = (tool: "firecrawl" | "browser", enabled: boolean): void => {
@@ -145,7 +197,11 @@ export function AgentEnablementPanel({ organizationId, organizationName, setting
       return;
     }
     const webTools = { ...settings.webTools, [tool]: enabled };
-    void save(settings, { patch: { webTools }, next: { ...settings, webTools }, done: t("saved", { organization: organizationName }) });
+    void save(settings, {
+      patch: { webTools },
+      next: { ...settings, webTools },
+      done: t("saved", { organization: organizationName }),
+    });
   };
   const setPii = (pii: "warn" | "redact"): void => {
     if (pii === "warn" && risky === null) {
@@ -153,7 +209,11 @@ export function AgentEnablementPanel({ organizationId, organizationName, setting
       return;
     }
     const guardrails = { pii };
-    void save(settings, { patch: { guardrails }, next: { ...settings, guardrails }, done: t("saved", { organization: organizationName }) });
+    void save(settings, {
+      patch: { guardrails },
+      next: { ...settings, guardrails },
+      done: t("saved", { organization: organizationName }),
+    });
   };
 
   return (
@@ -161,28 +221,55 @@ export function AgentEnablementPanel({ organizationId, organizationName, setting
       {failure === null ? null : (
         <Alert variant="destructive">
           <AlertTitle>{t("failed")}</AlertTitle>
-          <AlertDescription>{failure.requestId === undefined ? failure.message : t("failedWithReference", { message: failure.message, requestId: failure.requestId })}</AlertDescription>
+          <AlertDescription>
+            {failure.requestId === undefined
+              ? failure.message
+              : t("failedWithReference", { message: failure.message, requestId: failure.requestId })}
+          </AlertDescription>
         </Alert>
       )}
       {online ? null : <p className="text-xs text-muted-foreground">{t("offline")}</p>}
       <Group title={t("agents.title")} description={t("agents.description")}>
         <ul className="divide-y divide-border">
           {listedAgentKeys(settings, registeredAgents).map((key) => (
-            <ToggleRow key={key} label={agentName(key)} description={roles.has(key) ? roles(key) : undefined} checked={settings.enabledAgents.includes(key)} disabled={disabled} onChange={(enabled) => toggleAgent(key, enabled)} />
+            <ToggleRow
+              key={key}
+              label={agentName(key)}
+              description={roles.has(key) ? roles(key) : undefined}
+              checked={settings.enabledAgents.includes(key)}
+              disabled={disabled}
+              onChange={(enabled) => toggleAgent(key, enabled)}
+            />
           ))}
         </ul>
       </Group>
       <Group title={t("webTools.title")} description={t("webTools.description")}>
         <ul className="divide-y divide-border">
-          <ToggleRow label={t("webTools.firecrawl")} description={t("webTools.firecrawlHint")} checked={settings.webTools.firecrawl} disabled={disabled} onChange={(enabled) => toggleWebTool("firecrawl", enabled)} />
-          <ToggleRow label={t("webTools.browser")} description={t("webTools.browserHint")} checked={settings.webTools.browser} disabled={disabled} onChange={(enabled) => toggleWebTool("browser", enabled)} />
+          <ToggleRow
+            label={t("webTools.firecrawl")}
+            description={t("webTools.firecrawlHint")}
+            checked={settings.webTools.firecrawl}
+            disabled={disabled}
+            onChange={(enabled) => toggleWebTool("firecrawl", enabled)}
+          />
+          <ToggleRow
+            label={t("webTools.browser")}
+            description={t("webTools.browserHint")}
+            checked={settings.webTools.browser}
+            disabled={disabled}
+            onChange={(enabled) => toggleWebTool("browser", enabled)}
+          />
         </ul>
       </Group>
       <PiiMode value={settings.guardrails.pii} disabled={disabled} onChange={setPii} />
       <ConfirmDialog
         open={risky !== null}
         onOpenChange={(open) => (open ? undefined : setRisky(null))}
-        title={risky?.kind === "web" ? t(`confirm.${risky.tool}Title`, { organization: organizationName }) : t("confirm.piiTitle", { organization: organizationName })}
+        title={
+          risky?.kind === "web"
+            ? t(`confirm.${risky.tool}Title`, { organization: organizationName })
+            : t("confirm.piiTitle", { organization: organizationName })
+        }
         description={risky?.kind === "web" ? t("confirm.webDescription") : t("confirm.piiDescription")}
         confirmLabel={risky?.kind === "web" ? t("confirm.webConfirm") : t("confirm.piiConfirm")}
         destructive={risky?.kind === "pii"}

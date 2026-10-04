@@ -105,7 +105,10 @@ describe("push-to-talk machine", () => {
   });
 
   it("maps a transcription failure through problemOf", async () => {
-    const { machine, phase, problem } = setup({}, { transcribe: () => Promise.reject(new Error("503")), problemOf: () => "unavailable" });
+    const { machine, phase, problem } = setup(
+      {},
+      { transcribe: () => Promise.reject(new Error("503")), problemOf: () => "unavailable" },
+    );
     machine.start();
     await vi.waitFor(() => expect(phase()).toBe("recording"));
     machine.stop();

@@ -10,7 +10,8 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-const clock = (container: HTMLElement): string | null | undefined => container.querySelector("[data-slot=recording-clock]")?.textContent;
+const clock = (container: HTMLElement): string | null | undefined =>
+  container.querySelector("[data-slot=recording-clock]")?.textContent;
 
 describe("RecordingClock", () => {
   it("counts the recording against its 60 s cap and announces the end once, 10 s before", () => {

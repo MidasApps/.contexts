@@ -1,6 +1,12 @@
 "use client";
 
-import { setOrganizationBudgetEndpoint, updateOrganizationAdminEndpoint, type BudgetCaps, type OrganizationAdminDetail, type OrganizationAdminSummary } from "@core/contracts";
+import {
+  type BudgetCaps,
+  type OrganizationAdminDetail,
+  type OrganizationAdminSummary,
+  setOrganizationBudgetEndpoint,
+  updateOrganizationAdminEndpoint,
+} from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { adminOrganizationKeys } from "#/entities/admin-organization/index.ts";
 import { adminOverviewKeys } from "#/entities/admin-overview/index.ts";
@@ -9,7 +15,10 @@ import type { CollectedPages } from "#/shared/api/cursor-list.ts";
 
 export type OrganizationWrites = {
   /** `PATCH /v1/admin/organizations/{id}`: the plan (`null` = platform default), the status or both. */
-  readonly update: (change: { planId?: string | null; status?: "active" | "suspended" }) => Promise<OrganizationAdminSummary>;
+  readonly update: (change: {
+    planId?: string | null;
+    status?: "active" | "suspended";
+  }) => Promise<OrganizationAdminSummary>;
   /** `PUT …/budget`: staff caps that replace the plan's; `null` returns to the plan. */
   readonly setBudget: (override: BudgetCaps | null) => Promise<OrganizationAdminSummary>;
 };
@@ -25,15 +34,23 @@ export const useOrganizationWrites = (organizationId: string): OrganizationWrite
   const queryClient = useQueryClient();
   const store = (saved: OrganizationAdminSummary): OrganizationAdminSummary => {
     queryClient.setQueryData<CollectedPages<OrganizationAdminSummary>>(adminOrganizationKeys.whole(), (whole) =>
-      whole === undefined ? whole : { ...whole, items: whole.items.map((item) => (item.id === saved.id ? saved : item)) },
+      whole === undefined
+        ? whole
+        : { ...whole, items: whole.items.map((item) => (item.id === saved.id ? saved : item)) },
     );
-    queryClient.setQueryData<OrganizationAdminDetail | null>(adminOrganizationKeys.detail(saved.id), (detail) => (detail === undefined || detail === null ? detail : { ...detail, ...saved }));
+    queryClient.setQueryData<OrganizationAdminDetail | null>(adminOrganizationKeys.detail(saved.id), (detail) =>
+      detail === undefined || detail === null ? detail : { ...detail, ...saved },
+    );
     void queryClient.invalidateQueries({ queryKey: adminOrganizationKeys.searches() });
     void queryClient.invalidateQueries({ queryKey: adminOverviewKeys.all() });
     return saved;
   };
   return {
-    update: async (change) => store((await callEndpoint(updateOrganizationAdminEndpoint, { params: { organizationId }, body: change })).data),
-    setBudget: async (override) => store((await callEndpoint(setOrganizationBudgetEndpoint, { params: { organizationId }, body: { override } })).data),
+    update: async (change) =>
+      store((await callEndpoint(updateOrganizationAdminEndpoint, { params: { organizationId }, body: change })).data),
+    setBudget: async (override) =>
+      store(
+        (await callEndpoint(setOrganizationBudgetEndpoint, { params: { organizationId }, body: { override } })).data,
+      ),
   };
 };

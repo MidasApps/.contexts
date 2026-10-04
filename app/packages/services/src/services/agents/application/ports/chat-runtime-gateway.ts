@@ -28,19 +28,43 @@ export type ChatMessagesPage = { readonly messages: readonly unknown[]; readonly
 
 export type ChatRuntimeGateway = {
   /** `POST /chat/:agentId`: one turn or an approval response. */
-  readonly send: (input: { readonly scope: AgentCallScope; readonly agentId: string; readonly body: ChatTurnBody }) => Promise<GatewayResult<ChatStreamAnswer>>;
+  readonly send: (input: {
+    readonly scope: AgentCallScope;
+    readonly agentId: string;
+    readonly body: ChatTurnBody;
+  }) => Promise<GatewayResult<ChatStreamAnswer>>;
   /** `GET /chat/:agentId/runs/:runId/observe`; `null` when Mastra has nothing to replay (204). */
-  readonly observe: (input: { readonly scope: AgentCallScope; readonly agentId: string; readonly runId: string }) => Promise<GatewayResult<ChatStreamAnswer | null>>;
+  readonly observe: (input: {
+    readonly scope: AgentCallScope;
+    readonly agentId: string;
+    readonly runId: string;
+  }) => Promise<GatewayResult<ChatStreamAnswer | null>>;
   /** `POST /chat/runs/:runId/abort` (always 204 upstream). */
   readonly abort: (input: { readonly scope: AgentCallScope; readonly runId: string }) => Promise<GatewayResult<null>>;
   /** Title Mastra generated for the memory thread (`generateTitle`), or `null`. */
-  readonly threadTitle: (input: { readonly scope: AgentCallScope; readonly agentId: string; readonly threadId: string }) => Promise<GatewayResult<string | null>>;
+  readonly threadTitle: (input: {
+    readonly scope: AgentCallScope;
+    readonly agentId: string;
+    readonly threadId: string;
+  }) => Promise<GatewayResult<string | null>>;
   /** `GET /chat/:agentId/messages`: newest page first, `page` 0-based. */
-  readonly listMessages: (input: { readonly scope: AgentCallScope; readonly agentId: string; readonly page: number; readonly perPage: number }) => Promise<GatewayResult<ChatMessagesPage>>;
+  readonly listMessages: (input: {
+    readonly scope: AgentCallScope;
+    readonly agentId: string;
+    readonly page: number;
+    readonly perPage: number;
+  }) => Promise<GatewayResult<ChatMessagesPage>>;
   /** Deletes the memory thread (the messages) of a conversation; `NOT_FOUND` when it never existed. */
-  readonly deleteThread: (input: { readonly scope: AgentCallScope; readonly agentId: string; readonly threadId: string }) => Promise<GatewayResult<null>>;
+  readonly deleteThread: (input: {
+    readonly scope: AgentCallScope;
+    readonly agentId: string;
+    readonly threadId: string;
+  }) => Promise<GatewayResult<null>>;
   /** `POST /chat/:agentId/summary`: summary of the last 100 messages with the `fast` role. */
-  readonly summarize: (input: { readonly scope: AgentCallScope; readonly agentId: string }) => Promise<GatewayResult<{ readonly summary: string }>>;
+  readonly summarize: (input: {
+    readonly scope: AgentCallScope;
+    readonly agentId: string;
+  }) => Promise<GatewayResult<{ readonly summary: string }>>;
 };
 
 /**
@@ -50,7 +74,11 @@ export type ChatRuntimeGateway = {
  */
 export type VoiceRuntimeGateway = {
   /** `POST /voice/transcriptions` with the raw audio body. */
-  readonly transcribe: (input: { readonly scope: AgentCallScope; readonly audio: Uint8Array<ArrayBuffer>; readonly mediaType: string }) => Promise<GatewayResult<unknown>>;
+  readonly transcribe: (input: {
+    readonly scope: AgentCallScope;
+    readonly audio: Uint8Array<ArrayBuffer>;
+    readonly mediaType: string;
+  }) => Promise<GatewayResult<unknown>>;
   /** `POST /voice/speech`: the audio stream and its media type. */
   readonly synthesize: (input: {
     readonly scope: AgentCallScope;

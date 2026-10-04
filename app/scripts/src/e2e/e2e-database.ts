@@ -25,10 +25,13 @@ export type E2eDatabaseTarget = { readonly name: string; readonly maintenanceUrl
  */
 export const resolveE2eDatabaseTarget = (databaseUrl: string): E2eDatabaseTarget => {
   const url = URL.canParse(databaseUrl) ? new URL(databaseUrl) : undefined;
-  if (url === undefined || !/^postgres(ql)?:$/.test(url.protocol)) throw new UnsafeE2eDatabaseError("DATABASE_URL is not a postgres URL");
-  if (!LOCAL_HOSTS.has(url.hostname)) throw new UnsafeE2eDatabaseError("DATABASE_URL is not the local Postgres container");
+  if (url === undefined || !/^postgres(ql)?:$/.test(url.protocol))
+    throw new UnsafeE2eDatabaseError("DATABASE_URL is not a postgres URL");
+  if (!LOCAL_HOSTS.has(url.hostname))
+    throw new UnsafeE2eDatabaseError("DATABASE_URL is not the local Postgres container");
   const name = url.pathname.slice(1);
-  if (!DATABASE_NAME.test(name) || name === MAINTENANCE_DATABASE) throw new UnsafeE2eDatabaseError("the database name is not a scratch name");
+  if (!DATABASE_NAME.test(name) || name === MAINTENANCE_DATABASE)
+    throw new UnsafeE2eDatabaseError("the database name is not a scratch name");
   const maintenance = new URL(url);
   maintenance.pathname = `/${MAINTENANCE_DATABASE}`;
   return { name, maintenanceUrl: maintenance.toString() };
@@ -42,7 +45,11 @@ export const resolveE2eDatabaseTarget = (databaseUrl: string): E2eDatabaseTarget
  * journeys. Migrations are a separate step (`scripts/db-migrate.ts`).
  * @returns `true` when the database was created by this call.
  */
-export const ensureE2eDatabase = async (args: { databaseUrl: string; initDir: string; fresh: boolean }): Promise<boolean> => {
+export const ensureE2eDatabase = async (args: {
+  databaseUrl: string;
+  initDir: string;
+  fresh: boolean;
+}): Promise<boolean> => {
   const target = resolveE2eDatabaseTarget(args.databaseUrl);
   const maintenance = createPostgresClient({ DATABASE_URL: target.maintenanceUrl }, { max: 1 });
   let created = false;
@@ -59,7 +66,9 @@ export const ensureE2eDatabase = async (args: { databaseUrl: string; initDir: st
   }
   const database = createPostgresClient({ DATABASE_URL: args.databaseUrl }, { max: 1 });
   try {
-    const files = readdirSync(args.initDir).filter((file) => file.endsWith(".sql")).sort();
+    const files = readdirSync(args.initDir)
+      .filter((file) => file.endsWith(".sql"))
+      .sort();
     for (const file of files) await database.unsafe(readFileSync(path.join(args.initDir, file), "utf8"));
   } finally {
     await database.end();

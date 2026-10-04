@@ -7,7 +7,11 @@ const { user, service, impersonated, device } = principals;
 
 const effective = async (principal: Principal, node: NodeRef, ceiling?: ReadonlySet<string>) => {
   const world = createAccessWorld();
-  const result = await makeGetEffectivePermissions({ registry: world.registry, readers: world.store, clock: world.clock })({ principal, node, ceiling });
+  const result = await makeGetEffectivePermissions({
+    registry: world.registry,
+    readers: world.store,
+    clock: world.clock,
+  })({ principal, node, ceiling });
   return result.ok ? [...result.permissions].sort() : result.reason;
 };
 
@@ -19,7 +23,11 @@ describe("getEffectivePermissions", () => {
   });
 
   it("returns what inherited grants give at a node", async () => {
-    expect(await effective(user("viewer-p1"), nodes.unit("u1a-i"))).toEqual(["core.organization.read", "core.project.read", "core.unit.read"]);
+    expect(await effective(user("viewer-p1"), nodes.unit("u1a-i"))).toEqual([
+      "core.organization.read",
+      "core.project.read",
+      "core.unit.read",
+    ]);
     expect(await effective(device("dev-1"), nodes.p1)).toEqual(["core.project.read"]);
   });
 
@@ -32,13 +40,22 @@ describe("getEffectivePermissions", () => {
   });
 
   it("limits an API key to its scopes intersected with its owner's permissions", async () => {
-    expect(await effective(service("key-1"), nodes.p1)).toEqual(["core.project.read", "core.project.update", "core.unit.read"]);
-    expect(await effective(service("key-viewer", "viewer-p1"), nodes.p1)).toEqual(["core.project.read", "core.unit.read"]);
+    expect(await effective(service("key-1"), nodes.p1)).toEqual([
+      "core.project.read",
+      "core.project.update",
+      "core.unit.read",
+    ]);
+    expect(await effective(service("key-viewer", "viewer-p1"), nodes.p1)).toEqual([
+      "core.project.read",
+      "core.unit.read",
+    ]);
     expect(await effective(service("key-1"), nodes.p2)).toBe("OUTSIDE_KEY_SCOPE");
   });
 
   it("applies the ceiling", async () => {
-    expect(await effective(user("owner-a"), nodes.p1, new Set(["core.project.read", "core.fake.read"]))).toEqual(["core.project.read"]);
+    expect(await effective(user("owner-a"), nodes.p1, new Set(["core.project.read", "core.fake.read"]))).toEqual([
+      "core.project.read",
+    ]);
   });
 
   it("denies an outsider (not found for the caller) and a deleted node", async () => {

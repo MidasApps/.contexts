@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SOURCE_LOCALE, SUPPORTED_LOCALES, fallbackChain, isSupportedLocale } from "./locales.ts";
+import { fallbackChain, isSupportedLocale, SOURCE_LOCALE, SUPPORTED_LOCALES } from "./locales.ts";
 
 describe("locales", () => {
   it("lists the three supported locales with pt-BR as source", () => {

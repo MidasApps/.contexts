@@ -1,6 +1,6 @@
 "use client";
 
-import { updateMeEndpoint, type Me, type UpdateMeInput } from "@core/contracts";
+import { type Me, type UpdateMeInput, updateMeEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";

@@ -9,11 +9,24 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Spinner } from "#/shared/ui/atoms/Spinner/Spinner.tsx";
 import { CommandEmpty, CommandGroup, CommandItem } from "#/shared/ui/molecules/Command/Command.tsx";
 import { CommandDialog, useCommandShortcut } from "#/shared/ui/organisms/Command/CommandDialog.tsx";
-import { usePaletteCommands, type PaletteCommand, type PaletteGroup, type PaletteGroupStatus } from "../model/use-palette-commands.ts";
+import {
+  type PaletteCommand,
+  type PaletteGroup,
+  type PaletteGroupStatus,
+  usePaletteCommands,
+} from "../model/use-palette-commands.ts";
 
 const GROUPS: readonly PaletteGroup[] = ["navigation", "organizations", "projects", "actions"];
 
-function CommandEntry({ command, value, onRun }: { command: PaletteCommand; value: string; onRun: (command: PaletteCommand) => void }) {
+function CommandEntry({
+  command,
+  value,
+  onRun,
+}: {
+  command: PaletteCommand;
+  value: string;
+  onRun: (command: PaletteCommand) => void;
+}) {
   return (
     <CommandItem value={value} keywords={[...command.keywords]} onSelect={() => onRun(command)}>
       <Icon name={command.icon} />
@@ -92,7 +105,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           );
         })}
       </CommandDialog>
-      {node === null ? null : <CreateProjectDialog organizationId={node.organizationId} open={creatingProject} onOpenChange={setCreatingProject} returnFocusTo={() => opener.current} />}
+      {node === null ? null : (
+        <CreateProjectDialog
+          organizationId={node.organizationId}
+          open={creatingProject}
+          onOpenChange={setCreatingProject}
+          returnFocusTo={() => opener.current}
+        />
+      )}
     </>
   );
 }

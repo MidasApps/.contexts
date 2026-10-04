@@ -16,7 +16,13 @@ const freshUser = async (claims: Record<string, unknown>) => {
 
 describe("Firebase claims writer", () => {
   it("replaces the core claims and keeps the claims it does not own", async () => {
-    const uid = await freshUser({ principalType: "device", smfa: true, tenantId: "old-org", accessVersion: 1, platformRole: "platform-admin" });
+    const uid = await freshUser({
+      principalType: "device",
+      smfa: true,
+      tenantId: "old-org",
+      accessVersion: 1,
+      platformRole: "platform-admin",
+    });
 
     await writer.writeClaims(uid, { accessVersion: 2, tenantId: OrganizationIdSchema.parse("org-a") });
 

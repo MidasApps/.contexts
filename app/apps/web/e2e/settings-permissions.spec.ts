@@ -18,10 +18,20 @@ const ADMIN_ONLY: { section: string; label: string; endpoint: (organizationId: s
 test.describe("a member without the admin permissions", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test("sees the no-access state on admin-only sections and the API refuses", async ({ browser, sp5Org, ownerApi, createUser }) => {
+  test("sees the no-access state on admin-only sections and the API refuses", async ({
+    browser,
+    sp5Org,
+    ownerApi,
+    createUser,
+  }) => {
     test.setTimeout(240_000);
     const member = await createUser({ label: "Member" });
-    await addMember({ owner: ownerApi, user: member, organizationId: sp5Org.id, roles: [{ kind: "system", key: "member" }] });
+    await addMember({
+      owner: ownerApi,
+      user: member,
+      organizationId: sp5Org.id,
+      roles: [{ kind: "system", key: "member" }],
+    });
 
     for (const { endpoint } of ADMIN_ONLY) {
       const refused = await member.api.get(endpoint(sp5Org.id)).then(
@@ -36,7 +46,9 @@ test.describe("a member without the admin permissions", () => {
     await signInThroughUi(session.page, member);
     for (const { section, label } of ADMIN_ONLY) {
       await session.page.goto(settingsPath(sp5Org.id, section));
-      await expect(session.page.getByRole("heading", { level: 2, name: "Você não tem acesso a esta página" })).toBeVisible();
+      await expect(
+        session.page.getByRole("heading", { level: 2, name: "Você não tem acesso a esta página" }),
+      ).toBeVisible();
       const nav = session.page.getByRole("navigation", { name: "Seções das configurações" });
       await expect(nav.getByRole("link", { name: label, exact: true })).toHaveCount(0);
     }

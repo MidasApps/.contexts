@@ -18,7 +18,9 @@ export const GrantMembershipInputContract = defineContract(GrantMembershipInputS
   id: "access.GrantMembershipInput",
   kind: "command",
   description: "Grants roles to a user at a node (core.member.update); one membership per user and node.",
-  examples: [{ userId: MEMBERSHIP_EXAMPLE.principalId, node: MEMBERSHIP_EXAMPLE.node, roles: MEMBERSHIP_EXAMPLE.roles }],
+  examples: [
+    { userId: MEMBERSHIP_EXAMPLE.principalId, node: MEMBERSHIP_EXAMPLE.node, roles: MEMBERSHIP_EXAMPLE.roles },
+  ],
   pii: "personal",
   tenancyScope: "organization",
   relations: [],

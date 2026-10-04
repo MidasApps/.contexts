@@ -2,7 +2,7 @@
 
 import type { OrganizationAdminSummary } from "@core/contracts";
 import type { MoneyValue } from "@core/i18n";
-import { useId, useState, type FormEvent } from "react";
+import { type FormEvent, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAsyncAction } from "#/shared/lib/errors/use-async-action.ts";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
@@ -69,7 +69,12 @@ export function BudgetOverrideForm({ organization }: { organization: Organizatio
   const writes = useOrganizationWrites(organization.id);
   const save = useAsyncAction();
 
-  const changed = editing || moneyInvalid || tokensInvalid || money?.amountMinor !== microUsdToMoney(start.monthlyMicroUsd)?.amountMinor || tokens !== start.monthlyTokens;
+  const changed =
+    editing ||
+    moneyInvalid ||
+    tokensInvalid ||
+    money?.amountMinor !== microUsdToMoney(start.monthlyMicroUsd)?.amountMinor ||
+    tokens !== start.monthlyTokens;
   // A field error goes away as soon as the user starts fixing it.
   const edit = (field: keyof FieldErrors) => (): void => {
     setEditing(true);
@@ -147,7 +152,9 @@ export function BudgetOverrideForm({ organization }: { organization: Organizatio
         <Button type="submit" pending={save.pending} disabled={!online || !changed}>
           {t("save")}
         </Button>
-        {organization.budget.override === null ? null : <ClearOverride organization={organization} disabled={!online || save.pending} />}
+        {organization.budget.override === null ? null : (
+          <ClearOverride organization={organization} disabled={!online || save.pending} />
+        )}
       </div>
     </form>
   );

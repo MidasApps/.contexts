@@ -15,7 +15,9 @@ export type UpdateRoleCommand = {
   readonly requestId: string;
 };
 
-export type UpdateRole = (command: UpdateRoleCommand) => Promise<Result<Role, RolePermissionError | AccessNotFoundError>>;
+export type UpdateRole = (
+  command: UpdateRoleCommand,
+) => Promise<Result<Role, RolePermissionError | AccessNotFoundError>>;
 
 const changedFields = (role: Role, input: UpdateRoleInput): string[] =>
   (["name", "description", "permissions"] as const).filter(

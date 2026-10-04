@@ -9,7 +9,10 @@ import { z } from "zod";
 export const AgentRunSchema = z.strictObject({
   id: z.uuid().brand<"AgentRunId">(),
   requestId: z.string().min(1).max(64).nullable(),
-  traceId: z.string().regex(/^[0-9a-f]{32}$/).nullable(),
+  traceId: z
+    .string()
+    .regex(/^[0-9a-f]{32}$/)
+    .nullable(),
   tenantId: TenantIdSchema,
   userId: UserIdSchema.nullable(),
   agentId: z.string().min(1).max(200),

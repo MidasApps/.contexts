@@ -18,9 +18,15 @@ export type ModuleSettingsValues = z.infer<typeof ModuleSettingsValuesSchema>;
 export const ModuleSettingsSchema = z.object({
   tenantId: TenantIdSchema.meta(none("Organization the settings belong to.")),
   moduleId: ModuleIdSchema.meta(none("Module the settings belong to.")),
-  values: ModuleSettingsValuesSchema.nullable().meta(personal("Values validated by the module's settings contract; null until first saved.")),
+  values: ModuleSettingsValuesSchema.nullable().meta(
+    personal("Values validated by the module's settings contract; null until first saved."),
+  ),
   updatedAt: IsoDateTimeSchema.nullable().meta(none("When the values last changed (UTC); null until first saved.")),
-  updatedBy: z.string().min(1).nullable().meta(personal("Actor id of the last editor (uid, device id or API key id); null until first saved.")),
+  updatedBy: z
+    .string()
+    .min(1)
+    .nullable()
+    .meta(personal("Actor id of the last editor (uid, device id or API key id); null until first saved.")),
 });
 export type ModuleSettings = z.infer<typeof ModuleSettingsSchema>;
 

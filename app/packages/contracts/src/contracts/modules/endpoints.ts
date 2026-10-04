@@ -35,4 +35,7 @@ export const updateModuleSettingsEndpoint = defineEndpoint({
   summary: "Replaces a module's settings, validated by its settings contract (the module's update permission).",
 });
 
-export const MODULES_ENDPOINTS: readonly EndpointDefinition[] = [getModuleSettingsEndpoint, updateModuleSettingsEndpoint];
+export const MODULES_ENDPOINTS: readonly EndpointDefinition[] = [
+  getModuleSettingsEndpoint,
+  updateModuleSettingsEndpoint,
+];

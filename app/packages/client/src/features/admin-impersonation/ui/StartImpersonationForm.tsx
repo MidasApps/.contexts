@@ -1,8 +1,8 @@
 "use client";
 
-import { MAX_IMPERSONATION_MINUTES, startImpersonationEndpoint, StartImpersonationInputSchema } from "@core/contracts";
+import { MAX_IMPERSONATION_MINUTES, StartImpersonationInputSchema, startImpersonationEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { type FormEvent, type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { impersonationSessionKeys } from "#/entities/impersonation-session/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -85,7 +85,14 @@ const useFocusOnPick = (targetId: string | undefined) => {
   return box;
 };
 
-export function StartImpersonationForm({ target, onTargetClear, organizationId, organizationName, organizationField, onStarted }: StartImpersonationFormProps) {
+export function StartImpersonationForm({
+  target,
+  onTargetClear,
+  organizationId,
+  organizationName,
+  organizationField,
+  onStarted,
+}: StartImpersonationFormProps) {
   const t = useTranslations("admin.impersonation.form");
   const online = useOnlineStatus();
   const callEndpoint = useCallEndpoint();
@@ -104,10 +111,17 @@ export function StartImpersonationForm({ target, onTargetClear, organizationId, 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     setFailure(undefined);
-    const parsed = StartImpersonationInputSchema.safeParse({ targetUid: target?.id, organizationId, reason, durationMinutes: Number(minutes) });
+    const parsed = StartImpersonationInputSchema.safeParse({
+      targetUid: target?.id,
+      organizationId,
+      reason,
+      durationMinutes: Number(minutes),
+    });
     if (!parsed.success) {
       const invalid = new Set(parsed.error.issues.map((issue) => String(issue.path[0])));
-      setErrors(Object.fromEntries(FIELDS.filter((field) => invalid.has(field)).map((field) => [field, t(`errors.${field}`)])));
+      setErrors(
+        Object.fromEntries(FIELDS.filter((field) => invalid.has(field)).map((field) => [field, t(`errors.${field}`)])),
+      );
       return;
     }
     setErrors({});
@@ -159,10 +173,18 @@ export function StartImpersonationForm({ target, onTargetClear, organizationId, 
           <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border px-3 py-2 sm:w-96">
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-sm font-medium">{target.label}</span>
-              {target.detail === undefined ? null : <span className="truncate text-xs text-muted-foreground">{target.detail}</span>}
+              {target.detail === undefined ? null : (
+                <span className="truncate text-xs text-muted-foreground">{target.detail}</span>
+              )}
               <span className="font-mono text-caption break-all text-muted-foreground">{target.id}</span>
             </span>
-            <Button type="button" variant="ghost" size="sm" onClick={onTargetClear} aria-label={t("targetChangeNamed", { name: target.label })}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onTargetClear}
+              aria-label={t("targetChangeNamed", { name: target.label })}
+            >
               {t("targetChange")}
             </Button>
           </div>
@@ -170,7 +192,10 @@ export function StartImpersonationForm({ target, onTargetClear, organizationId, 
         <FieldMessage id={`${ids.uid}-error`} message={target === undefined ? errors.targetUid : undefined} />
       </div>
       <div className="flex flex-col gap-1.5 sm:w-96">
-        {organizationField({ invalid: organizationError !== undefined, describedBy: organizationError === undefined ? undefined : organizationErrorId })}
+        {organizationField({
+          invalid: organizationError !== undefined,
+          describedBy: organizationError === undefined ? undefined : organizationErrorId,
+        })}
         <FieldMessage id={organizationErrorId} message={organizationError} />
       </div>
       <div className="flex flex-col gap-1.5">

@@ -12,7 +12,13 @@ export type ModelMeter = {
   readonly callsByRole: Readonly<Record<string, number>>;
 };
 
-type MeterState = { calls: number; inputTokens: number; outputTokens: number; costMicroUsd: number | null; callsByRole: Record<string, number> };
+type MeterState = {
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  costMicroUsd: number | null;
+  callsByRole: Record<string, number>;
+};
 
 const ROLE_ENV_KEY: Readonly<Record<TextModelRole, keyof ModelFactoryEnv>> = {
   chat: "AI_MODEL_CHAT",
@@ -32,7 +38,11 @@ const record = (state: MeterState, role: string, modelId: string, usage: Languag
   state.costMicroUsd = state.costMicroUsd === null || cost === null ? null : state.costMicroUsd + cost;
 };
 
-const meterModel = (model: LanguageModelV4, onUsage: (usage: LanguageModelV4Usage) => void, onPrompt: (prompt: string) => void): LanguageModelV4 => ({
+const meterModel = (
+  model: LanguageModelV4,
+  onUsage: (usage: LanguageModelV4Usage) => void,
+  onPrompt: (prompt: string) => void,
+): LanguageModelV4 => ({
   ...model,
   doGenerate: async (options) => {
     onPrompt(JSON.stringify(options.prompt));
@@ -58,7 +68,10 @@ const meterModel = (model: LanguageModelV4, onUsage: (usage: LanguageModelV4Usag
  * configured `AI_MODEL_<ROLE>` id; fake models are priced like the model they stand
  * for) and records the chat prompts, so the fake run can prove recall reached them.
  */
-export const meterModels = (models: AgentModels, env: ModelFactoryEnv): { readonly models: AgentModels; readonly meter: () => ModelMeter; readonly chatPrompts: readonly string[] } => {
+export const meterModels = (
+  models: AgentModels,
+  env: ModelFactoryEnv,
+): { readonly models: AgentModels; readonly meter: () => ModelMeter; readonly chatPrompts: readonly string[] } => {
   const state: MeterState = { calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0, callsByRole: {} };
   const chatPrompts: string[] = [];
   const language: AgentModels["language"] = (role, options) => {
@@ -66,5 +79,9 @@ export const meterModels = (models: AgentModels, env: ModelFactoryEnv): { readon
     const onPrompt = (prompt: string) => (role === "chat" ? chatPrompts.push(prompt) : undefined);
     return meterModel(models.language(role, options), (usage) => record(state, role, modelId, usage), onPrompt);
   };
-  return { models: { ...models, language }, meter: () => ({ ...state, callsByRole: { ...state.callsByRole } }), chatPrompts };
+  return {
+    models: { ...models, language },
+    meter: () => ({ ...state, callsByRole: { ...state.callsByRole } }),
+    chatPrompts,
+  };
 };

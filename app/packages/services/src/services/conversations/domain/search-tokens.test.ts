@@ -3,11 +3,21 @@ import { buildSearchTokens, MAX_QUERY_TOKENS, queryTokens } from "./search-token
 
 describe("buildSearchTokens", () => {
   it("folds accents and case, splits on punctuation and drops one-letter words", () => {
-    expect(buildSearchTokens({ title: "Ação de Integração: plano A", summary: null })).toEqual(["acao", "de", "integracao", "plano"]);
+    expect(buildSearchTokens({ title: "Ação de Integração: plano A", summary: null })).toEqual([
+      "acao",
+      "de",
+      "integracao",
+      "plano",
+    ]);
   });
 
   it("keeps title words first and removes repeats across title and summary", () => {
-    expect(buildSearchTokens({ title: "Plano trimestral", summary: "O plano cobre vendas" })).toEqual(["plano", "trimestral", "cobre", "vendas"]);
+    expect(buildSearchTokens({ title: "Plano trimestral", summary: "O plano cobre vendas" })).toEqual([
+      "plano",
+      "trimestral",
+      "cobre",
+      "vendas",
+    ]);
   });
 
   it("caps the tokens at 50", () => {

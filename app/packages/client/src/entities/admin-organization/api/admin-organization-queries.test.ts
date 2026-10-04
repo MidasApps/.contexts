@@ -9,14 +9,22 @@ const fakeCall = (asked: Query[]) =>
   ((_endpoint: unknown, input: { query: Query }) => {
     asked.push(input.query);
     const last = input.query["cursor"] === "next";
-    return Promise.resolve({ data: [{ id: last ? "OrgB" : "OrgA" }], meta: { page: { cursor: last ? null : "next", hasMore: !last, limit: 100 } } });
+    return Promise.resolve({
+      data: [{ id: last ? "OrgB" : "OrgA" }],
+      meta: { page: { cursor: last ? null : "next", hasMore: !last, limit: 100 } },
+    });
   }) as unknown as CallEndpoint;
 
 describe("admin organization queries", () => {
   it("reads every cursor page for the pickers", async () => {
     const asked: Query[] = [];
     const query = allAdminOrganizationsQuery(fakeCall(asked));
-    const all = await query.queryFn?.({ signal, queryKey: query.queryKey, meta: undefined, client: undefined as never });
+    const all = await query.queryFn?.({
+      signal,
+      queryKey: query.queryKey,
+      meta: undefined,
+      client: undefined as never,
+    });
     expect(all?.items.map((organization) => organization.id)).toEqual(["OrgA", "OrgB"]);
     expect(all?.truncated).toBe(false);
     expect(asked).toEqual([{ limit: 100 }, { limit: 100, cursor: "next" }]);
@@ -30,7 +38,10 @@ describe("admin organization queries", () => {
     await filtered.queryFn?.({ ...context, queryKey: filtered.queryKey, pageParam: undefined });
     const plain = adminOrganizationSearchQuery(call, {});
     await plain.queryFn?.({ ...context, queryKey: plain.queryKey, pageParam: "next" });
-    expect(asked).toEqual([{ limit: 20, query: "acme", status: "suspended" }, { limit: 20, cursor: "next" }]);
+    expect(asked).toEqual([
+      { limit: 20, query: "acme", status: "suspended" },
+      { limit: 20, cursor: "next" },
+    ]);
     expect(filtered.queryKey).not.toEqual(plain.queryKey);
   });
 });

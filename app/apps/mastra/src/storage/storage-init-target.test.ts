@@ -15,7 +15,9 @@ describe("loadStorageInitEnv", () => {
   });
 
   it("still enforces the database rules of the services env", () => {
-    expect(() => loadStorageInitEnv({ ...PROD_SOURCE, DATABASE_URL: "postgresql://svc@/app?host=/tmp/x" })).toThrow(InvalidEnvError);
+    expect(() => loadStorageInitEnv({ ...PROD_SOURCE, DATABASE_URL: "postgresql://svc@/app?host=/tmp/x" })).toThrow(
+      InvalidEnvError,
+    );
   });
 });
 

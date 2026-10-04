@@ -13,7 +13,9 @@ const ApiOriginSchema = z
   .url({ protocol: /^https?$/, error: "expected an http(s) URL" })
   .transform((value) => value.replace(/\/$/, ""))
   .refine(isOrigin, { error: "expected an origin without path" })
-  .refine((value) => new URL(value).protocol === "https:" || isLoopback(value), { error: "plain http is allowed for loopback only" });
+  .refine((value) => new URL(value).protocol === "https:" || isLoopback(value), {
+    error: "plain http is allowed for loopback only",
+  });
 
 // Vite env files cannot unset a variable, so an empty value means "absent".
 const emptyAsUndefined = (value: unknown): unknown => (value === "" ? undefined : value);
@@ -32,7 +34,12 @@ const EmulatorOriginSchema = z.preprocess(
 /** `totp,phone` → `["totp", "phone"]`; empty → no second factor offered. */
 const MfaFactorListSchema = z
   .string()
-  .transform((value) => value.split(",").map((factor) => factor.trim()).filter((factor) => factor !== ""))
+  .transform((value) =>
+    value
+      .split(",")
+      .map((factor) => factor.trim())
+      .filter((factor) => factor !== ""),
+  )
   .pipe(z.array(z.enum(MFA_FACTORS)));
 
 /**
@@ -53,7 +60,10 @@ export const DesktopEnvSchema = z
     VITE_STORAGE_EMULATOR_URL: EmulatorOriginSchema,
     VITE_MFA_FACTORS: MfaFactorListSchema,
     // Open sign-up page (decision 0050); unset = invitations only.
-    VITE_SELF_SERVE_SIGN_UP: z.enum(["true", "false"]).transform((value) => value === "true").optional(),
+    VITE_SELF_SERVE_SIGN_UP: z
+      .enum(["true", "false"])
+      .transform((value) => value === "true")
+      .optional(),
   })
   .refine((env) => (env.VITE_APP_ENV === "local") === (env.VITE_AUTH_EMULATOR_URL !== undefined), {
     error: "VITE_AUTH_EMULATOR_URL is required in local and forbidden elsewhere",

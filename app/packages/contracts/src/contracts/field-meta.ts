@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { FieldMetaSchema, type FieldMeta } from "./primitives/catalog-meta.schema.ts";
+import { type FieldMeta, FieldMetaSchema } from "./primitives/catalog-meta.schema.ts";
 
 export type ZodMetaRegistry = z.core.$ZodRegistry<z.core.GlobalMeta>;
 

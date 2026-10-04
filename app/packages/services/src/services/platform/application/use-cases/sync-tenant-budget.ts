@@ -22,16 +22,31 @@ export const defaultAgentSettingsOf = (tenantId: string, caps: BudgetCaps, at: s
 });
 
 /** Plan limits and staff override of a tenant: the caps above its own lower cap. */
-export const baseCapsOf = async (deps: Pick<ConsoleDeps, "organizations" | "plans">, tenantId: string): Promise<{ readonly planId: string | null; readonly override: BudgetCaps | null; readonly plan: BudgetCaps | null }> => {
+export const baseCapsOf = async (
+  deps: Pick<ConsoleDeps, "organizations" | "plans">,
+  tenantId: string,
+): Promise<{
+  readonly planId: string | null;
+  readonly override: BudgetCaps | null;
+  readonly plan: BudgetCaps | null;
+}> => {
   const assignment = await deps.organizations.getPlan(tenantId);
   const plan = assignment.planId === null ? null : await deps.plans.get(assignment.planId);
-  const limits = plan === null ? null : { monthlyMicroUsd: plan.limits.monthlyMicroUsd, monthlyTokens: plan.limits.monthlyTokens };
+  const limits =
+    plan === null ? null : { monthlyMicroUsd: plan.limits.monthlyMicroUsd, monthlyTokens: plan.limits.monthlyTokens };
   return { planId: assignment.planId, override: assignment.budgetOverride, plan: limits };
 };
 
 /** Stored settings of a tenant, or the defaults with the given caps. */
-export const storedSettingsOf = async (deps: Pick<ConsoleDeps, "agentSettings" | "clock">, tenantId: string, caps: BudgetCaps): Promise<StoredAgentSettings> =>
-  (await deps.agentSettings.get(tenantId)) ?? { settings: defaultAgentSettingsOf(tenantId, caps, deps.clock.now().toISOString()), selfCap: null };
+export const storedSettingsOf = async (
+  deps: Pick<ConsoleDeps, "agentSettings" | "clock">,
+  tenantId: string,
+  caps: BudgetCaps,
+): Promise<StoredAgentSettings> =>
+  (await deps.agentSettings.get(tenantId)) ?? {
+    settings: defaultAgentSettingsOf(tenantId, caps, deps.clock.now().toISOString()),
+    selfCap: null,
+  };
 
 /**
  * Materializes a tenant's caps (decision 0039 amendment): plan / override / self-cap resolved by
@@ -48,12 +63,17 @@ export const syncTenantBudget = async (
   const selfCap = selfCapOverride !== undefined ? selfCapOverride : (stored?.selfCap ?? null);
   const resolved = resolveTenantCaps({ plan: base.plan, override: base.override, selfCap });
   await deps.usage.setTenantBudget({ tenantId, budget: resolved.caps });
-  if (stored !== null) await deps.agentSettings.save({ settings: { ...stored.settings, budget: { ...resolved.caps } }, selfCap });
+  if (stored !== null)
+    await deps.agentSettings.save({ settings: { ...stored.settings, budget: { ...resolved.caps } }, selfCap });
   return resolved;
 };
 
 /** The three inputs of a tenant's caps (`resolveTenantCaps`): plan limits, staff override, own lower cap. */
-export type CapsInputs = { readonly plan: BudgetCaps | null; readonly override: BudgetCaps | null; readonly selfCap: BudgetCaps | null };
+export type CapsInputs = {
+  readonly plan: BudgetCaps | null;
+  readonly override: BudgetCaps | null;
+  readonly selfCap: BudgetCaps | null;
+};
 
 type BudgetDeps = Pick<ConsoleDeps, "organizations" | "plans" | "agentSettings" | "usage" | "clock">;
 
@@ -73,7 +93,11 @@ const tighterOf = (a: BudgetCaps, b: BudgetCaps): BudgetCaps => ({
  * the caps the pending change resolves to, so the guard is never looser than either while the
  * inputs (Firestore) and the final caps (Postgres) are written one after the other.
  */
-export const tightenTenantBudget = async (deps: BudgetDeps, tenantId: string, next: (current: CapsInputs) => CapsInputs): Promise<void> => {
+export const tightenTenantBudget = async (
+  deps: BudgetDeps,
+  tenantId: string,
+  next: (current: CapsInputs) => CapsInputs,
+): Promise<void> => {
   const current = await capsInputsOf(deps, tenantId);
   const before = resolveTenantCaps(current).caps;
   const after = resolveTenantCaps(next(current)).caps;
@@ -89,7 +113,11 @@ export const tightenTenantBudget = async (deps: BudgetDeps, tenantId: string, ne
  */
 export const changeTenantBudget = async (
   deps: BudgetDeps,
-  args: { readonly tenantId: string; readonly next: (current: CapsInputs) => CapsInputs; readonly write: () => Promise<void> },
+  args: {
+    readonly tenantId: string;
+    readonly next: (current: CapsInputs) => CapsInputs;
+    readonly write: () => Promise<void>;
+  },
 ): Promise<TenantCaps> => {
   await tightenTenantBudget(deps, args.tenantId, args.next);
   await args.write();

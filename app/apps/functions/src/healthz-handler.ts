@@ -17,7 +17,12 @@ export const makeHealthzHandler = (deps: { logger: Logger }): WebHandler => {
   const rejectMethod = withRouteBoundary(
     { operation: "health_method", logger: deps.logger },
     (_request, { requestId }) => {
-      const response = errorResponse({ status: 405, code: "METHOD_NOT_ALLOWED", message: "Method not allowed.", requestId });
+      const response = errorResponse({
+        status: 405,
+        code: "METHOD_NOT_ALLOWED",
+        message: "Method not allowed.",
+        requestId,
+      });
       response.headers.set("allow", ALLOW_HEADER);
       return Promise.resolve(response);
     },

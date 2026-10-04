@@ -5,15 +5,21 @@ import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildFeatureFlag } from "#/shared/testing/admin-governance-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, ok } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsFlagsView } from "./SettingsFlagsView.tsx";
 
 const READER: Permission[] = ["core.organization.read", "core.flag.read"];
 const WRITER: Permission[] = [...READER, "core.flag.write"];
-const rollout = (overrides: Record<string, unknown>) => buildFeatureFlag({ kind: "rollout", owner: "chat-team", ...overrides });
+const rollout = (overrides: Record<string, unknown>) =>
+  buildFeatureFlag({ kind: "rollout", owner: "chat-team", ...overrides });
 const VOICE = rollout({ key: "chat.voice", reason: "Voice input and output in chat.", value: true });
-const REALTIME = rollout({ key: "chat.voice.realtime", reason: "Realtime voice sessions.", value: false, tenantOverride: false });
+const REALTIME = rollout({
+  key: "chat.voice.realtime",
+  reason: "Realtime voice sessions.",
+  value: false,
+  tenantOverride: false,
+});
 const PLATFORM_OFF = rollout({ key: "chat.preview", reason: "Preview feature.", value: false });
 
 const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] = WRITER) =>
@@ -21,7 +27,10 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     <main>
       <SettingsFlagsView />
     </main>,
-    { path: `/o/${IDS.organization}/settings/flags`, routes: shellRoutes(permissions, { "GET /v1/flags": ok([VOICE, REALTIME, PLATFORM_OFF]), ...routes }) },
+    {
+      path: `/o/${IDS.organization}/settings/flags`,
+      routes: shellRoutes(permissions, { "GET /v1/flags": ok([VOICE, REALTIME, PLATFORM_OFF]), ...routes }),
+    },
   );
 
 // The whole app shell boots per test and sibling suites load the machine: the default 1 s of
@@ -103,7 +112,11 @@ describe("SettingsFlagsView", { timeout: 30_000 }, () => {
     });
     const table = await screen.findByRole("table", { name: "Recursos que Northwind pode desligar" });
     // Only a flag the organization changed offers the removal.
-    expect(within(within(table).getByRole("row", { name: /Voz no chat/u })).queryByRole("button", { name: /Seguir a plataforma/u })).toBeNull();
+    expect(
+      within(within(table).getByRole("row", { name: /Voz no chat/u })).queryByRole("button", {
+        name: /Seguir a plataforma/u,
+      }),
+    ).toBeNull();
     await user.click(within(table).getByRole("button", { name: "Seguir a plataforma em Voz em tempo real" }));
     const dialog = await screen.findByRole("alertdialog", { name: "Seguir a plataforma em Voz em tempo real?" });
     await user.click(within(dialog).getByRole("button", { name: "Seguir a plataforma" }));

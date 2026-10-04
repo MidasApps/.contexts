@@ -2,11 +2,20 @@
   "module": { "name": "Ejemplo" },
   "nav": { "home": "Ejemplo" },
   "permissions": {
-    "item": { "read": "Ver los elementos del módulo de ejemplo", "write": "Crear y modificar elementos del módulo de ejemplo" },
-    "note": { "read": "Ver las notas del módulo de ejemplo", "create": "Crear notas en el módulo de ejemplo", "archive": "Archivar notas del módulo de ejemplo (requiere la aprobación de otra persona)" }
+    "item": {
+      "read": "Ver los elementos del módulo de ejemplo",
+      "write": "Crear y modificar elementos del módulo de ejemplo"
+    },
+    "note": {
+      "read": "Ver las notas del módulo de ejemplo",
+      "create": "Crear notas en el módulo de ejemplo",
+      "archive": "Archivar notas del módulo de ejemplo (requiere la aprobación de otra persona)"
+    }
   },
   "unitTypes": { "area": "Área" },
-  "workflows": { "note-intake": { "name": "Ingreso de notas", "description": "Crea una nota en la organización de quien la pide." } },
+  "workflows": {
+    "note-intake": { "name": "Ingreso de notas", "description": "Crea una nota en la organización de quien la pide." }
+  },
   "note": { "title": "Título", "body": "Texto", "noteId": "Nota" },
   "settings": {
     "greeting": "Saludo",

@@ -1,6 +1,15 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ComponentProps, type CSSProperties } from "react";
+import {
+  type ComponentProps,
+  type CSSProperties,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { cn } from "#/shared/lib/cn.ts";
 import { useIsMobile } from "#/shared/lib/media/use-media-query.ts";
 import { useShortcut } from "#/shared/lib/shortcuts/use-shortcut.ts";
@@ -89,14 +98,31 @@ export function SidebarProvider({
   useShortcut({ key: SIDEBAR_SHORTCUT_KEY, onTrigger: toggleSidebar });
 
   const value = useMemo<SidebarContextValue>(
-    () => ({ state: open ? "expanded" : "collapsed", open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar }),
+    () => ({
+      state: open ? "expanded" : "collapsed",
+      open,
+      setOpen,
+      isMobile,
+      openMobile,
+      setOpenMobile,
+      toggleSidebar,
+    }),
     [open, setOpen, isMobile, openMobile, toggleSidebar],
   );
-  const widths = { "--sidebar-width": SIDEBAR_WIDTH, "--sidebar-width-icon": SIDEBAR_WIDTH_ICON, ...style } as CSSProperties;
+  const widths = {
+    "--sidebar-width": SIDEBAR_WIDTH,
+    "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+    ...style,
+  } as CSSProperties;
   return (
     <SidebarContext value={value}>
       <TooltipProvider delayDuration={0}>
-        <div data-slot="sidebar-wrapper" style={widths} className={cn("group/sidebar-wrapper flex min-h-svh w-full", className)} {...props}>
+        <div
+          data-slot="sidebar-wrapper"
+          style={widths}
+          className={cn("group/sidebar-wrapper flex min-h-svh w-full", className)}
+          {...props}
+        >
           {children}
         </div>
       </TooltipProvider>

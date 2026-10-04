@@ -31,7 +31,11 @@ export function AppShellSkeleton({ label, sidebarOpen = true }: AppShellSkeleton
         ))}
       </div>
       <div className="flex min-w-0 flex-1 flex-col bg-background">
-        <div aria-hidden="true" data-slot="app-topbar-skeleton" className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
+        <div
+          aria-hidden="true"
+          data-slot="app-topbar-skeleton"
+          className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4"
+        >
           <Skeleton className="size-7 rounded-sm" />
           <Skeleton className="h-4 w-40" />
         </div>

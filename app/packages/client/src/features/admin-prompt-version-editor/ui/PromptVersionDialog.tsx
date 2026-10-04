@@ -2,7 +2,7 @@
 
 import { adminCreatePromptVersionEndpoint, type PromptAgentId, type PromptVersion } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { promptVersionKeys } from "#/entities/prompt-version/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -11,7 +11,15 @@ import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
@@ -59,7 +67,8 @@ function PromptVersionForm({ agentId, initialBody, initialSource = "active", onO
   const validate = (): string | undefined => {
     if (body.trim() === "") return t("bodyRequired");
     if (body.trim().length > MAX_BODY) return t("bodyTooLong", { maximum: MAX_BODY });
-    if (initialSource === "active" && body.trim() === initialBody.trim() && initialBody !== "") return t("bodyUnchanged");
+    if (initialSource === "active" && body.trim() === initialBody.trim() && initialBody !== "")
+      return t("bodyUnchanged");
     return undefined;
   };
 
@@ -74,14 +83,21 @@ function PromptVersionForm({ agentId, initialBody, initialSource = "active", onO
     setPending(true);
     try {
       const trimmedNote = note.trim();
-      const { data } = await callEndpoint(adminCreatePromptVersionEndpoint, { params: { agentId }, body: { body, ...(trimmedNote === "" ? {} : { note: trimmedNote }) } });
+      const { data } = await callEndpoint(adminCreatePromptVersionEndpoint, {
+        params: { agentId },
+        body: { body, ...(trimmedNote === "" ? {} : { note: trimmedNote }) },
+      });
       await queryClient.invalidateQueries({ queryKey: promptVersionKeys.agent(agentId) });
       notify.success(t("created", { version: data.version }));
       onCreated?.(data);
       onOpenChange(false);
     } catch (error: unknown) {
       const described = describe(error);
-      setFailure(described.requestId === undefined ? described.message : tCommon("errorState.messageWithReference", { message: described.message, requestId: described.requestId }));
+      setFailure(
+        described.requestId === undefined
+          ? described.message
+          : tCommon("errorState.messageWithReference", { message: described.message, requestId: described.requestId }),
+      );
     } finally {
       setPending(false);
     }
@@ -97,7 +113,14 @@ function PromptVersionForm({ agentId, initialBody, initialSource = "active", onO
       <Field invalid={bodyError !== undefined}>
         <FieldLabel>{t("body")}</FieldLabel>
         <FieldControl>
-          <Textarea ref={bodyRef} value={body} onChange={(event) => setBody(event.target.value)} required rows={12} className="max-h-[50vh] font-mono text-body-sm" />
+          <Textarea
+            ref={bodyRef}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            required
+            rows={12}
+            className="max-h-[50vh] font-mono text-body-sm"
+          />
         </FieldControl>
         <FieldDescription>{t("bodyHint")}</FieldDescription>
         <FieldError>{bodyError}</FieldError>

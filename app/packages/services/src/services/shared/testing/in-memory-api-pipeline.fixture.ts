@@ -12,13 +12,26 @@ import { createInMemoryIdempotencyStore } from "../idempotency/in-memory-idempot
 import { createLogger } from "../observability/logger.ts";
 import { createInMemoryRateLimiter } from "../rate-limit/in-memory-rate-limiter.ts";
 
-export type PipelineMember = { readonly uid: string; readonly tenantId: string; readonly role: "member" | "admin" | "owner" };
+export type PipelineMember = {
+  readonly uid: string;
+  readonly tenantId: string;
+  readonly role: "member" | "admin" | "owner";
+};
 
 /** Platform staff (SP5 console tests): `mfa` is the token claim, `isActive` the staff record. */
-export type PipelineStaff = { readonly uid: string; readonly role: "platform-admin" | "platform-support"; readonly mfa: boolean; readonly isActive?: boolean };
+export type PipelineStaff = {
+  readonly uid: string;
+  readonly role: "platform-admin" | "platform-support";
+  readonly mfa: boolean;
+  readonly isActive?: boolean;
+};
 
 /** A pipeline whose `<uid>-token` Bearer authenticates each member (system role grant on the organization) and staff. */
-export const makeInMemoryPipeline = (args: { readonly now: string; readonly members: readonly PipelineMember[]; readonly staff?: readonly PipelineStaff[] }) => {
+export const makeInMemoryPipeline = (args: {
+  readonly now: string;
+  readonly members: readonly PipelineMember[];
+  readonly staff?: readonly PipelineStaff[];
+}) => {
   const clock = fixedClock(args.now);
   const store = createInMemoryAccessStore();
   const principals = new Map<string, Principal>();
@@ -52,7 +65,12 @@ export const callRoute = (
   routes: Readonly<Record<string, RouteHandler>>,
   endpointId: string,
   url: string,
-  init: { readonly method?: string; readonly as?: string; readonly body?: unknown; readonly headers?: Record<string, string> } = {},
+  init: {
+    readonly method?: string;
+    readonly as?: string;
+    readonly body?: unknown;
+    readonly headers?: Record<string, string>;
+  } = {},
 ): Promise<Response> => {
   const route = routes[endpointId];
   if (route === undefined) throw new Error(`no route ${endpointId}`);

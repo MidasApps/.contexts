@@ -12,13 +12,21 @@ const setup = async () => {
   const world = makeMeWorld();
   const organization = await world.organizationOf("owner", "Shared");
   const createProject = async (name: string) => {
-    const created = await world.tenancy.createProject({ ...world.command("owner"), tenantId: organization.id, input: { name } });
+    const created = await world.tenancy.createProject({
+      ...world.command("owner"),
+      tenantId: organization.id,
+      input: { name },
+    });
     if (!created.ok) throw created.error;
     return created.data;
   };
   const alpha = await createProject("Alpha");
   const beta = await createProject("Beta");
-  const unit = await world.tenancy.createUnit({ ...world.command("owner"), projectId: alpha.id, input: { name: "Room", type: "sample.site", parentUnitId: null } });
+  const unit = await world.tenancy.createUnit({
+    ...world.command("owner"),
+    projectId: alpha.id,
+    input: { name: "Room", type: "sample.site", parentUnitId: null },
+  });
   if (!unit.ok) throw unit.error;
   world.account("uma");
   await world.identity.getMe({ actor: userOf("uma") });
@@ -28,7 +36,12 @@ const setup = async () => {
     unit: { level: "unit", tenantId: organization.id, projectId: alpha.id, unitId: unit.data.id } as TenantNodeRef,
   };
   const list = (args: { uid?: string; access?: ReturnType<typeof world.access>; page?: typeof PAGE } = {}) =>
-    world.identity.listMyGrants({ actor: userOf(args.uid ?? "uma"), access: args.access ?? world.access(), organizationId: ids.tenant(organization.id), page: args.page ?? PAGE });
+    world.identity.listMyGrants({
+      actor: userOf(args.uid ?? "uma"),
+      access: args.access ?? world.access(),
+      organizationId: ids.tenant(organization.id),
+      page: args.page ?? PAGE,
+    });
   return { ...world, organization, beta, nodes, list };
 };
 
@@ -37,7 +50,10 @@ describe("listMyGrants (follow-up #33)", () => {
     const world = await setup();
     await world.grant("uma", world.nodes.unit, member);
 
-    expect(await world.list()).toEqual({ ok: true, data: { items: [{ node: world.nodes.unit, roles: member }], nextCursor: null } });
+    expect(await world.list()).toEqual({
+      ok: true,
+      data: { items: [{ node: world.nodes.unit, roles: member }], nextCursor: null },
+    });
   });
 
   it("lists every live grant node, widest first", async () => {
@@ -92,13 +108,18 @@ describe("listMyGrants (follow-up #33)", () => {
   it("lists an owner's organization grant", async () => {
     const world = await setup();
     const listed = await world.list({ uid: "owner" });
-    expect(listed.ok && listed.data.items).toEqual([{ node: world.nodes.organization, roles: [{ kind: "system", key: "owner" }] }]);
+    expect(listed.ok && listed.data.items).toEqual([
+      { node: world.nodes.organization, roles: [{ kind: "system", key: "owner" }] },
+    ]);
   });
 
   it("fails closed when a reader throws", async () => {
     const world = await setup();
     await world.grant("uma", world.nodes.unit, member);
-    const failing = { ...world.access(), getEffectivePermissions: () => Promise.reject(new Error("firestore unavailable")) };
+    const failing = {
+      ...world.access(),
+      getEffectivePermissions: () => Promise.reject(new Error("firestore unavailable")),
+    };
     await expect(world.list({ access: failing })).rejects.toThrow("firestore unavailable");
   });
 });

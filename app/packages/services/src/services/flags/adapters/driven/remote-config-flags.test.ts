@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { createRemoteConfigEnvironmentFlagValues, remoteConfigParameterOf, type RemoteConfigClient, type RemoteConfigTemplateLike } from "./remote-config-flags.ts";
+import {
+  createRemoteConfigEnvironmentFlagValues,
+  type RemoteConfigClient,
+  type RemoteConfigTemplateLike,
+  remoteConfigParameterOf,
+} from "./remote-config-flags.ts";
 
 /** A Remote Config project with an ETag check: a publish of a stale template is refused once. */
-const fakeRemoteConfig = (initial: RemoteConfigTemplateLike["parameters"], options: { conflictOnce?: boolean } = {}) => {
+const fakeRemoteConfig = (
+  initial: RemoteConfigTemplateLike["parameters"],
+  options: { conflictOnce?: boolean } = {},
+) => {
   let current: RemoteConfigTemplateLike = { parameters: structuredClone(initial), etag: "etag-1" };
   let conflict = options.conflictOnce ?? false;
   const published: RemoteConfigTemplateLike[] = [];
@@ -41,7 +49,10 @@ describe("Remote Config environment flag values", () => {
     const values = createRemoteConfigEnvironmentFlagValues({ client: remote.client, keys: KEYS });
     await values.write({ key: "chat.voice", value: false, updatedBy: "uid-of-staff" });
     const { parameters } = remote.current();
-    expect(parameters["core_flag_chat_voice"]).toMatchObject({ defaultValue: { value: "false" }, valueType: "BOOLEAN" });
+    expect(parameters["core_flag_chat_voice"]).toMatchObject({
+      defaultValue: { value: "false" },
+      valueType: "BOOLEAN",
+    });
     expect(parameters["unrelated"]).toEqual({ defaultValue: { value: "x" } });
     expect(JSON.stringify(parameters)).not.toContain("uid-of-staff");
     expect(await values.read()).toEqual({ "chat.voice": false });
@@ -49,7 +60,11 @@ describe("Remote Config environment flag values", () => {
 
   it("re-reads and retries once when the template changed concurrently", async () => {
     const remote = fakeRemoteConfig({}, { conflictOnce: true });
-    await createRemoteConfigEnvironmentFlagValues({ client: remote.client, keys: KEYS }).write({ key: "ai.kill-switch", value: true, updatedBy: "u" });
+    await createRemoteConfigEnvironmentFlagValues({ client: remote.client, keys: KEYS }).write({
+      key: "ai.kill-switch",
+      value: true,
+      updatedBy: "u",
+    });
     expect(remote.published).toHaveLength(1);
     expect(remote.current().parameters["core_flag_ai_kill_switch"]?.defaultValue).toEqual({ value: "true" });
   });

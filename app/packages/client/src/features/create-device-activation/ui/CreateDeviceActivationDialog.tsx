@@ -1,7 +1,7 @@
 "use client";
 
 import { createDeviceActivationEndpoint, type Role, type RoleRef } from "@core/contracts";
-import { useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { NodeSelect, type TenantNodeInput } from "#/entities/project/index.ts";
 import { DEVICE_SYSTEM_ROLES, RoleChecklist, useRoleOptions } from "#/entities/role/index.ts";
@@ -9,10 +9,24 @@ import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { ActivationCode } from "./ActivationCode.tsx";
 
 export type CreateDeviceActivationDialogProps = {
@@ -27,14 +41,23 @@ type Draft = { label: string; node: TenantNodeInput; roles: RoleRef[] };
 const DEVICE_ROLE: RoleRef[] = [{ kind: "system", key: "device" }];
 const LABEL_MAX = 80;
 const systemNow = (): Date => new Date();
-const emptyDraft = (organizationId: string): Draft => ({ label: "", node: { level: "organization", tenantId: organizationId }, roles: DEVICE_ROLE });
+const emptyDraft = (organizationId: string): Draft => ({
+  label: "",
+  node: { level: "organization", tenantId: organizationId },
+  roles: DEVICE_ROLE,
+});
 
 /**
  * Creates a one-time device activation code (`POST …/device-activations`, core.device.create):
  * device name, node and roles (no escalation). The code is shown once with a 10-minute countdown;
  * closing the dialog drops it. Devices appear in the list after they redeem the code.
  */
-function CreateDeviceActivationDialogBody({ organization, customRoles, onOpenChange, now = systemNow }: CreateDeviceActivationDialogProps) {
+function CreateDeviceActivationDialogBody({
+  organization,
+  customRoles,
+  onOpenChange,
+  now = systemNow,
+}: CreateDeviceActivationDialogProps) {
   const t = useTranslations("settings.devices.createDialog");
   const callEndpoint = useCallEndpoint();
   const idempotency = useIdempotencyKey();
@@ -61,7 +84,11 @@ function CreateDeviceActivationDialogBody({ organization, customRoles, onOpenCha
     if (pending) return;
     const label = draft.label.trim();
     const found = {
-      ...(label === "" ? { label: t("errors.labelRequired") } : label.length > LABEL_MAX ? { label: t("errors.labelTooLong", { max: LABEL_MAX }) } : {}),
+      ...(label === ""
+        ? { label: t("errors.labelRequired") }
+        : label.length > LABEL_MAX
+          ? { label: t("errors.labelTooLong", { max: LABEL_MAX }) }
+          : {}),
       ...(draft.roles.length === 0 ? { roles: t("errors.roles") } : {}),
     };
     setProblems(found);
@@ -71,7 +98,11 @@ function CreateDeviceActivationDialogBody({ organization, customRoles, onOpenCha
     const body = { label, node: draft.node, roles: draft.roles };
     setPending(true);
     try {
-      const { data } = await callEndpoint(createDeviceActivationEndpoint, { params: { organizationId: organization.id }, body, idempotencyKey: idempotency.keyFor(body) });
+      const { data } = await callEndpoint(createDeviceActivationEndpoint, {
+        params: { organizationId: organization.id },
+        body,
+        idempotencyKey: idempotency.keyFor(body),
+      });
       resetKey();
       setActivation({ label, code: data.code, expiresAt: data.expiresAt });
     } catch (error: unknown) {
@@ -83,43 +114,65 @@ function CreateDeviceActivationDialogBody({ organization, customRoles, onOpenCha
 
   return (
     <>
-        <DialogHeader>
-          <DialogTitle>{activation === null ? t("title") : t("codeTitle", { label: activation.label })}</DialogTitle>
-          <DialogDescription>{activation === null ? t("description") : t("codeDescription")}</DialogDescription>
-        </DialogHeader>
-        {activation !== null ? (
-          <ActivationCode label={activation.label} code={activation.code} expiresAt={activation.expiresAt} now={now} onAnother={reset} onDone={() => onOpenChange(false)} />
-        ) : (
-          <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
-            {failure === null ? null : <ApiErrorAlert error={failure} />}
-            <FieldGroup>
-              <Field>
-                <FieldLabel>{t("label")}</FieldLabel>
-                <FieldControl>
-                  <Input ref={labelInput} required value={draft.label} onChange={(event) => setDraft({ ...draft, label: event.target.value })} />
-                </FieldControl>
-                <FieldDescription>{t("labelHint")}</FieldDescription>
-                <FieldError errors={[problems.label]} />
-              </Field>
-              <Field>
-                <FieldLabel>{t("node")}</FieldLabel>
-                <FieldControl>
-                  <NodeSelect organization={organization} value={draft.node} onValueChange={(node) => setDraft({ ...draft, node })} />
-                </FieldControl>
-                <FieldDescription>{t("nodeHint")}</FieldDescription>
-              </Field>
-              <RoleChecklist legend={t("roles")} options={options} value={draft.roles} onChange={(roles) => setDraft({ ...draft, roles })} error={problems.roles} />
-            </FieldGroup>
-            <DialogFooter>
-              <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
-                {t("cancel")}
-              </Button>
-              <Button type="submit" pending={pending}>
-                {t("submit")}
-              </Button>
-            </DialogFooter>
-          </form>
-        )}
+      <DialogHeader>
+        <DialogTitle>{activation === null ? t("title") : t("codeTitle", { label: activation.label })}</DialogTitle>
+        <DialogDescription>{activation === null ? t("description") : t("codeDescription")}</DialogDescription>
+      </DialogHeader>
+      {activation !== null ? (
+        <ActivationCode
+          label={activation.label}
+          code={activation.code}
+          expiresAt={activation.expiresAt}
+          now={now}
+          onAnother={reset}
+          onDone={() => onOpenChange(false)}
+        />
+      ) : (
+        <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
+          {failure === null ? null : <ApiErrorAlert error={failure} />}
+          <FieldGroup>
+            <Field>
+              <FieldLabel>{t("label")}</FieldLabel>
+              <FieldControl>
+                <Input
+                  ref={labelInput}
+                  required
+                  value={draft.label}
+                  onChange={(event) => setDraft({ ...draft, label: event.target.value })}
+                />
+              </FieldControl>
+              <FieldDescription>{t("labelHint")}</FieldDescription>
+              <FieldError errors={[problems.label]} />
+            </Field>
+            <Field>
+              <FieldLabel>{t("node")}</FieldLabel>
+              <FieldControl>
+                <NodeSelect
+                  organization={organization}
+                  value={draft.node}
+                  onValueChange={(node) => setDraft({ ...draft, node })}
+                />
+              </FieldControl>
+              <FieldDescription>{t("nodeHint")}</FieldDescription>
+            </Field>
+            <RoleChecklist
+              legend={t("roles")}
+              options={options}
+              value={draft.roles}
+              onChange={(roles) => setDraft({ ...draft, roles })}
+              error={problems.roles}
+            />
+          </FieldGroup>
+          <DialogFooter>
+            <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
+              {t("cancel")}
+            </Button>
+            <Button type="submit" pending={pending}>
+              {t("submit")}
+            </Button>
+          </DialogFooter>
+        </form>
+      )}
     </>
   );
 }

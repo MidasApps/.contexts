@@ -35,9 +35,17 @@ export const makeSettleOnApprovalUpdate =
     const before = SettledDocSchema.safeParse(update.before);
     if (before.success && before.data.status === after.data.status) return "ignored";
     if (!TRIGGER_SETTLED_STATUSES.includes(after.data.status)) return "ignored";
-    const result = await deps.settler.settle({ approvalRequestId: update.approvalRequestId, requestId: update.requestId });
+    const result = await deps.settler.settle({
+      approvalRequestId: update.approvalRequestId,
+      requestId: update.requestId,
+    });
     if (!result.ok) throw new WorkflowApprovalError("UPSTREAM_UNAVAILABLE", update.approvalRequestId);
     const outcome = result.data.settled ? "settled" : "skipped";
-    deps.logger.info("workflow_approval_trigger_settled", { requestId: update.requestId, approvalRequestId: update.approvalRequestId, status: after.data.status, outcome });
+    deps.logger.info("workflow_approval_trigger_settled", {
+      requestId: update.requestId,
+      approvalRequestId: update.approvalRequestId,
+      status: after.data.status,
+      outcome,
+    });
     return outcome;
   };

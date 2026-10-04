@@ -7,7 +7,9 @@ describe("MyGrantSchema", () => {
   });
 
   it("requires at least one role", () => {
-    expect(MyGrantSchema.safeParse({ node: { level: "organization", tenantId: "Org1" }, roles: [] }).success).toBe(false);
+    expect(MyGrantSchema.safeParse({ node: { level: "organization", tenantId: "Org1" }, roles: [] }).success).toBe(
+      false,
+    );
   });
 });
 

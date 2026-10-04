@@ -4,7 +4,12 @@ import { EXAMPLE_IDS, EXAMPLE_TIMES } from "../example-values.ts";
 import { none, personal } from "../field-docs.ts";
 import { TenantIdSchema, UserIdSchema } from "../primitives/ids.schema.ts";
 import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
-import { PromptScopeSchema, PromptVersionIdSchema, SCOPE_TENANT_ERROR, scopeMatchesTenant } from "./prompt-version.schema.ts";
+import {
+  PromptScopeSchema,
+  PromptVersionIdSchema,
+  SCOPE_TENANT_ERROR,
+  scopeMatchesTenant,
+} from "./prompt-version.schema.ts";
 
 const ReasonSchema = z.string().trim().min(1).max(500);
 
@@ -54,14 +59,20 @@ export const ActivatePromptVersionInputSchema = z
     force: z.boolean().optional().meta(none("Staff only: activate without a passing eval.")),
     reason: ReasonSchema.optional().meta(personal("Required with force; kept on the activation.")),
   })
-  .refine((input) => input.force !== true || input.reason !== undefined, { error: "A forced activation needs a reason.", path: ["reason"] });
+  .refine((input) => input.force !== true || input.reason !== undefined, {
+    error: "A forced activation needs a reason.",
+    path: ["reason"],
+  });
 export type ActivatePromptVersionInput = z.infer<typeof ActivatePromptVersionInputSchema>;
 
 export const ActivatePromptVersionInputContract = defineContract(ActivatePromptVersionInputSchema, {
   id: "agents.ActivatePromptVersionInput",
   kind: "command",
   description: "Activates a prompt version (eval-gated; staff may force with a reason).",
-  examples: [{ versionId: "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f" }, { versionId: "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f", force: true, reason: "Eval dataset is being rebuilt." }],
+  examples: [
+    { versionId: "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f" },
+    { versionId: "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f", force: true, reason: "Eval dataset is being rebuilt." },
+  ],
   pii: "personal",
   tenancyScope: "organization",
   relations: [],

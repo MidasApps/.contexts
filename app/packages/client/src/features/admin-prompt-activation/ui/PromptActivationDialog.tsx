@@ -2,7 +2,7 @@
 
 import { adminActivatePromptEndpoint, type PromptAgentId, type PromptVersion } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { promptVersionKeys } from "#/entities/prompt-version/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -11,7 +11,14 @@ import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts"
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
@@ -34,25 +41,36 @@ const MIN_REASON = 1;
 const MAX_REASON = 500;
 
 /** Activation is eval-gated (decision 0038): only a version whose eval passed can be activated. */
-export const canActivatePrompt = (version: Pick<PromptVersion, "evalVerdict">): boolean => version.evalVerdict === "passed";
+export const canActivatePrompt = (version: Pick<PromptVersion, "evalVerdict">): boolean =>
+  version.evalVerdict === "passed";
 
 /** Activating a version older than the active one is a rollback (a new activation row). */
-export const isPromptRollback = (version: Pick<PromptVersion, "version">, active: Pick<PromptVersion, "version"> | undefined): boolean =>
-  active !== undefined && version.version < active.version;
+export const isPromptRollback = (
+  version: Pick<PromptVersion, "version">,
+  active: Pick<PromptVersion, "version"> | undefined,
+): boolean => active !== undefined && version.version < active.version;
 
 const useActivate = (agentId: PromptAgentId) => {
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   return async (version: PromptVersion, forced?: { reason: string }): Promise<void> => {
     try {
-      await callEndpoint(adminActivatePromptEndpoint, { params: { agentId }, body: { versionId: version.id, ...(forced === undefined ? {} : { force: true, reason: forced.reason }) } });
+      await callEndpoint(adminActivatePromptEndpoint, {
+        params: { agentId },
+        body: { versionId: version.id, ...(forced === undefined ? {} : { force: true, reason: forced.reason }) },
+      });
     } finally {
       void queryClient.invalidateQueries({ queryKey: promptVersionKeys.agent(agentId) });
     }
   };
 };
 
-type ForceProps = { agentId: PromptAgentId; agentName: string; version: PromptVersion | null; onOpenChange: (open: boolean) => void };
+type ForceProps = {
+  agentId: PromptAgentId;
+  agentName: string;
+  version: PromptVersion | null;
+  onOpenChange: (open: boolean) => void;
+};
 
 function ForceForm({ agentId, agentName, version, onOpenChange }: ForceProps & { version: PromptVersion }) {
   const t = useTranslations("admin.prompts.activation");
@@ -80,7 +98,11 @@ function ForceForm({ agentId, agentName, version, onOpenChange }: ForceProps & {
       onOpenChange(false);
     } catch (error: unknown) {
       const described = describe(error);
-      setFailure(described.requestId === undefined ? described.message : tCommon("errorState.messageWithReference", { message: described.message, requestId: described.requestId }));
+      setFailure(
+        described.requestId === undefined
+          ? described.message
+          : tCommon("errorState.messageWithReference", { message: described.message, requestId: described.requestId }),
+      );
     } finally {
       setPending(false);
     }
@@ -95,7 +117,14 @@ function ForceForm({ agentId, agentName, version, onOpenChange }: ForceProps & {
       <Field invalid={reasonError !== undefined}>
         <FieldLabel>{t("reason")}</FieldLabel>
         <FieldControl>
-          <Textarea ref={reasonRef} value={reason} onChange={(event) => setReason(event.target.value)} required maxLength={MAX_REASON} rows={3} />
+          <Textarea
+            ref={reasonRef}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            required
+            maxLength={MAX_REASON}
+            rows={3}
+          />
         </FieldControl>
         <FieldDescription>{t("reasonHint")}</FieldDescription>
         <FieldError>{reasonError}</FieldError>
@@ -133,7 +162,15 @@ function ForceActivationDialog({ agentId, agentName, version, onOpenChange }: Fo
           <DialogTitle>{t("forceTitle", { version: version?.version ?? 0 })}</DialogTitle>
           <DialogDescription>{t("forceDescription", { agent: agentName })}</DialogDescription>
         </DialogHeader>
-        {version === null ? null : <ForceForm key={version.id} agentId={agentId} agentName={agentName} version={version} onOpenChange={onOpenChange} />}
+        {version === null ? null : (
+          <ForceForm
+            key={version.id}
+            agentId={agentId}
+            agentName={agentName}
+            version={version}
+            onOpenChange={onOpenChange}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -145,14 +182,25 @@ function ForceActivationDialog({ agentId, agentName, version, onOpenChange }: Fo
  * as a rollback for an older version), or the forced path with a required reason. On failure the
  * dialog stays open with the error copy (409 `EVAL_REQUIRED` included) and its reference.
  */
-export function PromptActivationDialog({ agentId, agentName, request, activeVersion, onOpenChange }: PromptActivationDialogProps) {
+export function PromptActivationDialog({
+  agentId,
+  agentName,
+  request,
+  activeVersion,
+  onOpenChange,
+}: PromptActivationDialogProps) {
   const t = useTranslations("admin.prompts.activation");
   const activate = useActivate(agentId);
   const plain = request !== null && !request.force ? request.version : null;
   const rollback = plain !== null && isPromptRollback(plain, activeVersion);
   const action = useConfirmedAction(
     () => (plain === null ? Promise.resolve() : activate(plain)),
-    () => notify.success(rollback ? t("rollbackDone", { version: plain?.version ?? 0, agent: agentName }) : t("done", { version: plain?.version ?? 0, agent: agentName })),
+    () =>
+      notify.success(
+        rollback
+          ? t("rollbackDone", { version: plain?.version ?? 0, agent: agentName })
+          : t("done", { version: plain?.version ?? 0, agent: agentName }),
+      ),
   );
   return (
     <>
@@ -162,14 +210,25 @@ export function PromptActivationDialog({ agentId, agentName, request, activeVers
           if (!open) action.reset();
           onOpenChange(open);
         }}
-        title={rollback ? t("rollbackTitle", { version: plain?.version ?? 0 }) : t("title", { version: plain?.version ?? 0 })}
-        description={rollback ? t("rollbackDescription", { agent: agentName, active: activeVersion?.version ?? 0 }) : t("description", { agent: agentName })}
+        title={
+          rollback ? t("rollbackTitle", { version: plain?.version ?? 0 }) : t("title", { version: plain?.version ?? 0 })
+        }
+        description={
+          rollback
+            ? t("rollbackDescription", { agent: agentName, active: activeVersion?.version ?? 0 })
+            : t("description", { agent: agentName })
+        }
         confirmLabel={rollback ? t("rollbackConfirm") : t("confirm")}
         destructive={rollback}
         onConfirm={action.confirm}
         error={action.error}
       />
-      <ForceActivationDialog agentId={agentId} agentName={agentName} version={request !== null && request.force ? request.version : null} onOpenChange={onOpenChange} />
+      <ForceActivationDialog
+        agentId={agentId}
+        agentName={agentName}
+        version={request !== null && request.force ? request.version : null}
+        onOpenChange={onOpenChange}
+      />
     </>
   );
 }

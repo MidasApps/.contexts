@@ -68,7 +68,12 @@ const httpServer = (connector: McpLikeConnector, options: McpConnectorOptions) =
       ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
       ...(options.resolve === undefined ? {} : { resolve: options.resolve }),
     });
-  return { url: new URL(connector.config.url), allowedHosts: [...allowedHosts], fetch: guarded, requireToolApproval: ({ toolName }: { toolName: string }) => needsApproval(connector, toolName) };
+  return {
+    url: new URL(connector.config.url),
+    allowedHosts: [...allowedHosts],
+    fetch: guarded,
+    requireToolApproval: ({ toolName }: { toolName: string }) => needsApproval(connector, toolName),
+  };
 };
 
 /**
@@ -81,8 +86,16 @@ export const createMcpConnectorClient = (options: McpConnectorOptions): MCPClien
   const server =
     options.stdio === undefined
       ? httpServer(connector, options)
-      : { command: options.stdio.command, args: [...(options.stdio.args ?? [])], requireToolApproval: ({ toolName }: { toolName: string }) => needsApproval(connector, toolName) };
-  return new MCPClient({ id: `${connector.tenantId}:${connector.id}`, servers: { [keyPart(connector.name)]: server }, timeout: MCP_TIMEOUT_MS });
+      : {
+          command: options.stdio.command,
+          args: [...(options.stdio.args ?? [])],
+          requireToolApproval: ({ toolName }: { toolName: string }) => needsApproval(connector, toolName),
+        };
+  return new MCPClient({
+    id: `${connector.tenantId}:${connector.id}`,
+    servers: { [keyPart(connector.name)]: server },
+    timeout: MCP_TIMEOUT_MS,
+  });
 };
 
 /** Lists the connector's allowed tools; `disconnect()` closes the client (cache eviction). */

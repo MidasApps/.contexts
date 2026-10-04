@@ -66,7 +66,12 @@ export const buildConnector = (overrides: Json = {}): Json => ({
   status: "active",
   secretRef: "connector-secret-name",
   toolPolicy: { allow: ["listIssues", "createIssue"], readOnly: ["listIssues"] },
-  config: { specUrl: "https://api.example.com/openapi.json", allowedHosts: ["api.example.com"], auth: "bearer", apiKeyHeader: null },
+  config: {
+    specUrl: "https://api.example.com/openapi.json",
+    allowedHosts: ["api.example.com"],
+    auth: "bearer",
+    apiKeyHeader: null,
+  },
   createdBy: IDS.user,
   createdAt: CREATED,
   updatedAt: UPDATED,

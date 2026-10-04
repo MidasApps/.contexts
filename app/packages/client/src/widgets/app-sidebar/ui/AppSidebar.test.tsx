@@ -31,12 +31,20 @@ describe("AppSidebar", () => {
   });
 
   it("hides items without permission and offers a retry when the access context fails", async () => {
-    const only = renderSidebar(`/o/${IDS.organization}`, shellRoutes([], { "GET /v1/me/context": { status: 200, body: { data: buildAccessContext({ permissions: [] }) } } }));
+    const only = renderSidebar(
+      `/o/${IDS.organization}`,
+      shellRoutes([], {
+        "GET /v1/me/context": { status: 200, body: { data: buildAccessContext({ permissions: [] }) } },
+      }),
+    );
     await waitFor(() => expect(screen.queryByRole("status", { name: "Carregando a navegação…" })).toBeNull());
     expect(screen.queryByRole("link", { name: "Projetos" })).toBeNull();
     only.unmount();
 
-    const failing = renderSidebar(`/o/${IDS.organization}`, shellRoutes(MEMBER_PERMISSIONS, { "GET /v1/me/context": apiError(503, "INTERNAL_ERROR") }));
+    const failing = renderSidebar(
+      `/o/${IDS.organization}`,
+      shellRoutes(MEMBER_PERMISSIONS, { "GET /v1/me/context": apiError(503, "INTERNAL_ERROR") }),
+    );
     expect(await screen.findByRole("status", { name: "Carregando a navegação…" })).toBeDefined();
     expect(await screen.findByRole("button", { name: "Recarregar a navegação" }, { timeout: 8000 })).toBeDefined();
     await expectNoAxeViolations(failing.container);
@@ -65,8 +73,15 @@ describe("AppSidebar", () => {
   });
 
   it("matches sections and module sub-pages as active", () => {
-    expect(isRouteActive({ id: "settings", organizationId: "o", section: "general" }, "/o/o/settings/roles")).toBe(true);
-    expect(isRouteActive({ id: "module", organizationId: "o", projectId: "p", moduleId: "m", rest: "" }, "/o/o/p/p/m/m/items/1")).toBe(true);
+    expect(isRouteActive({ id: "settings", organizationId: "o", section: "general" }, "/o/o/settings/roles")).toBe(
+      true,
+    );
+    expect(
+      isRouteActive(
+        { id: "module", organizationId: "o", projectId: "p", moduleId: "m", rest: "" },
+        "/o/o/p/p/m/m/items/1",
+      ),
+    ).toBe(true);
     expect(isRouteActive({ id: "project", organizationId: "o", projectId: "p" }, "/o/o/p/p/m/m")).toBe(false);
     expect(isRouteActive({ id: "chat", organizationId: "o", projectId: "p" }, "/o/o/p/p/chat/c1")).toBe(true);
     expect(isRouteActive({ id: "project", organizationId: "o", projectId: "p" }, "/o/o/p/p/chat")).toBe(false);

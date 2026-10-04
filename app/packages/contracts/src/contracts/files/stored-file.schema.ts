@@ -16,7 +16,11 @@ export const StoredFileSchema = z
     tenantId: TenantIdSchema.meta(none("Owning organization.")),
     purpose: FilePurposeSchema.meta(none("What the file is for.")),
     fileName: FileNameSchema.meta({ description: "Original file name.", pii: "personal" }),
-    contentType: z.string().min(1).max(255).meta(none("Media type detected from the bytes once ready; declared type before.")),
+    contentType: z
+      .string()
+      .min(1)
+      .max(255)
+      .meta(none("Media type detected from the bytes once ready; declared type before.")),
     sizeBytes: z.int().nonnegative().max(MAX_UPLOAD_BYTES).meta(none("Size in bytes.")),
     status: z.enum(["pending", "ready", "rejected"]).meta(none("pending until the upload is validated.")),
     rejectionReason: z

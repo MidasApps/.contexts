@@ -7,15 +7,18 @@ export const DATASET_NAME_MAX = 200;
 
 export type DatasetNameProblem = "nameRequired" | "nameTaken";
 
-export const validateDatasetName = (name: string): DatasetNameProblem | undefined => (name.trim() === "" ? "nameRequired" : undefined);
+export const validateDatasetName = (name: string): DatasetNameProblem | undefined =>
+  name.trim() === "" ? "nameRequired" : undefined;
 
 /** 409: the organization already has a dataset of that name. Anything else is a general error. */
-export const datasetRefusal = (error: unknown): DatasetNameProblem | null => (error instanceof ApiError && error.status === 409 ? "nameTaken" : null);
+export const datasetRefusal = (error: unknown): DatasetNameProblem | null =>
+  error instanceof ApiError && error.status === 409 ? "nameTaken" : null;
 
 export type ItemDraft = { input: string; expectedOutput: string };
 export type ItemDraftProblems = { input?: "inputRequired" };
 
-export const validateItemDraft = (draft: ItemDraft): ItemDraftProblems => (draft.input.trim() === "" ? { input: "inputRequired" } : {});
+export const validateItemDraft = (draft: ItemDraft): ItemDraftProblems =>
+  draft.input.trim() === "" ? { input: "inputRequired" } : {};
 
 /** The request body: trimmed texts, no expected answer when the field is empty. */
 export const itemBody = (draft: ItemDraft): AddEvalDatasetItemInput => {

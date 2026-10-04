@@ -18,7 +18,9 @@ export async function exchangeSession(): Promise<SessionActionResult<{ customTok
 }
 
 /** Staff opens the app as the user of an open impersonation session; kept across reloads (decision 0047). */
-export async function enterImpersonation(input: { impersonationSessionId: string }): Promise<SessionActionResult<{ customToken: string }>> {
+export async function enterImpersonation(input: {
+  impersonationSessionId: string;
+}): Promise<SessionActionResult<{ customToken: string }>> {
   return runSessionAction("enterImpersonation", (actions, context) => actions.enterImpersonation(input, context));
 }
 

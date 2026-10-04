@@ -1,8 +1,8 @@
 import { createLogger } from "@core/services";
-import { setGlobalOptions } from "firebase-functions/v2";
 import { write } from "firebase-functions/logger";
-import { onRequest } from "firebase-functions/v2/https";
+import { setGlobalOptions } from "firebase-functions/v2";
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onRequest } from "firebase-functions/v2/https";
 import { onObjectFinalized } from "firebase-functions/v2/storage";
 import { makeOnApprovalRequestSettled } from "./approvals/on-approval-request-settled.ts";
 import { env, processEnvForFirebaseGuard } from "./env.ts";
@@ -36,7 +36,12 @@ export const healthz = onRequest(
  * infrastructure errors. The bucket must be in (or cover) `FUNCTIONS_REGION`.
  */
 export const onFileFinalized = onObjectFinalized(
-  { ...(env.FILES_BUCKET === undefined ? {} : { bucket: env.FILES_BUCKET }), memory: "512MiB", timeoutSeconds: 60, retry: true },
+  {
+    ...(env.FILES_BUCKET === undefined ? {} : { bucket: env.FILES_BUCKET }),
+    memory: "512MiB",
+    timeoutSeconds: 60,
+    retry: true,
+  },
   makeOnFileFinalized({ env, processEnv: processEnvForFirebaseGuard, logger }),
 );
 

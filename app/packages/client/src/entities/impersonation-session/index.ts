@@ -2,7 +2,7 @@
 export {
   adminImpersonationSessionsQuery,
   IMPERSONATION_SESSIONS_PAGE_LIMIT,
+  type ImpersonationSessionScope,
   impersonationSessionKeys,
   useAdminImpersonationSessions,
-  type ImpersonationSessionScope,
 } from "./api/impersonation-session-queries.ts";

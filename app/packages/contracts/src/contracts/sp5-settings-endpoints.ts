@@ -18,7 +18,8 @@ export const listAgentCatalogEndpoint = defineEndpoint({
   query: OrganizationQuerySchema,
   responses: { 200: dataEnvelope(z.array(AgentCatalogEntrySchema)) },
   errors: { 403: ["FORBIDDEN"] },
-  summary: "Lists the subagents available to the organization with their enabled state, tools and skills (core.agent-settings.read).",
+  summary:
+    "Lists the subagents available to the organization with their enabled state, tools and skills (core.agent-settings.read).",
 });
 
 export const listWorkflowCatalogEndpoint = defineEndpoint({
@@ -29,7 +30,8 @@ export const listWorkflowCatalogEndpoint = defineEndpoint({
   query: OrganizationQuerySchema,
   responses: { 200: dataEnvelope(z.array(WorkflowCatalogEntrySchema)) },
   errors: { 403: ["FORBIDDEN"] },
-  summary: "Lists the workflows the organization may start or schedule, with their input schema (core.workflow-run.read).",
+  summary:
+    "Lists the workflows the organization may start or schedule, with their input schema (core.workflow-run.read).",
 });
 
 export const getUsageSummaryEndpoint = defineEndpoint({
@@ -49,6 +51,13 @@ export const getUsageSummaryEndpoint = defineEndpoint({
   summary: "Reads the organization's model usage and cost for a month against its budget caps (core.usage.read).",
 });
 
-export const SP5_SETTINGS_ENDPOINTS: readonly EndpointDefinition[] = [listAgentCatalogEndpoint, listWorkflowCatalogEndpoint, getUsageSummaryEndpoint];
+export const SP5_SETTINGS_ENDPOINTS: readonly EndpointDefinition[] = [
+  listAgentCatalogEndpoint,
+  listWorkflowCatalogEndpoint,
+  getUsageSummaryEndpoint,
+];
 
-export const SP5_SETTINGS_CONTRACTS: readonly ContractDefinition[] = [AgentCatalogEntryContract, WorkflowCatalogEntryContract];
+export const SP5_SETTINGS_CONTRACTS: readonly ContractDefinition[] = [
+  AgentCatalogEntryContract,
+  WorkflowCatalogEntryContract,
+];

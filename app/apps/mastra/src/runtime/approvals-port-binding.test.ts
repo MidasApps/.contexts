@@ -33,26 +33,52 @@ describe("bindApprovalsPort", () => {
         return Promise.resolve({ ok: true, data: { id: "Ap1sK2lPq0WnR5tYu3bV" } } as never);
       },
     });
-    const result = await port.requestApproval({ principal: MEMBER, node: NODE, permission: "core.project.create", action: ACTION, requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" });
+    const result = await port.requestApproval({
+      principal: MEMBER,
+      node: NODE,
+      permission: "core.project.create",
+      action: ACTION,
+      requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+    });
     expect(result).toEqual({ approvalId: "Ap1sK2lPq0WnR5tYu3bV" });
     expect(calls).toEqual([
       {
         principal: MEMBER,
-        input: { node: NODE, permission: "core.project.create", action: { kind: "agent-command", input: ACTION, summary: 'Create the project "Launch"' } },
+        input: {
+          node: NODE,
+          permission: "core.project.create",
+          action: { kind: "agent-command", input: ACTION, summary: 'Create the project "Launch"' },
+        },
         requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
       },
     ]);
   });
 
   it("rejects with the SP1 code when SP1 refuses (the tool answers APPROVAL_UNAVAILABLE)", async () => {
-    const port = bindApprovalsPort({ requestApproval: () => Promise.resolve({ ok: false, error: { code: "APPROVAL_NOT_REQUIRED" } } as never) });
-    const pending = port.requestApproval({ principal: MEMBER, node: NODE, permission: "core.project.create", action: ACTION, requestId: "r" });
+    const port = bindApprovalsPort({
+      requestApproval: () => Promise.resolve({ ok: false, error: { code: "APPROVAL_NOT_REQUIRED" } } as never),
+    });
+    const pending = port.requestApproval({
+      principal: MEMBER,
+      node: NODE,
+      permission: "core.project.create",
+      action: ACTION,
+      requestId: "r",
+    });
     await expect(pending).rejects.toBeInstanceOf(ApprovalRefusedError);
     await expect(pending).rejects.toMatchObject({ code: "APPROVAL_NOT_REQUIRED" });
   });
 
   it("refuses a platform node before calling SP1", async () => {
     const port = bindApprovalsPort({ requestApproval: () => Promise.reject(new Error("must not run")) });
-    await expect(port.requestApproval({ principal: MEMBER, node: { level: "platform" }, permission: "core.project.create", action: ACTION, requestId: "r" })).rejects.toThrow(/NODE/);
+    await expect(
+      port.requestApproval({
+        principal: MEMBER,
+        node: { level: "platform" },
+        permission: "core.project.create",
+        action: ACTION,
+        requestId: "r",
+      }),
+    ).rejects.toThrow(/NODE/);
   });
 });

@@ -14,7 +14,9 @@ export type RevokeInvitationCommand = {
   readonly requestId: string;
 };
 
-export type RevokeInvitation = (command: RevokeInvitationCommand) => Promise<Result<void, AccessDeniedError | AccessNotFoundError>>;
+export type RevokeInvitation = (
+  command: RevokeInvitationCommand,
+) => Promise<Result<void, AccessDeniedError | AccessNotFoundError>>;
 
 /**
  * Revokes an invitation that was not accepted (`core.member.invite` at its node). An
@@ -33,9 +35,23 @@ export const makeRevokeInvitation =
       const current = await deps.invitations.get(tx, invitation.id);
       if (current === null || current.status === "accepted") return err(new AccessNotFoundError("invitation"));
       if (current.status === "revoked") return ok(undefined);
-      deps.invitations.setStatus(tx, { id: current.id, status: "revoked", updatedAt: deps.clock.now().toISOString(), actorId: actor.id });
+      deps.invitations.setStatus(tx, {
+        id: current.id,
+        status: "revoked",
+        updatedAt: deps.clock.now().toISOString(),
+        actorId: actor.id,
+      });
       await deps.audit.record(
-        { log: "tenant", tenantId: current.tenantId, action: "INVITATION_REVOKED", actor, target: { type: "invitation", id: current.id }, node: current.node, outcome: "success", requestId: command.requestId },
+        {
+          log: "tenant",
+          tenantId: current.tenantId,
+          action: "INVITATION_REVOKED",
+          actor,
+          target: { type: "invitation", id: current.id },
+          node: current.node,
+          outcome: "success",
+          requestId: command.requestId,
+        },
         tx,
       );
       return ok(undefined);

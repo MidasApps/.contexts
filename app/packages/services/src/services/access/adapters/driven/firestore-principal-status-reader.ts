@@ -50,6 +50,7 @@ export const createFirestorePrincipalStatusReader = (deps: { firestore: Firestor
     getDevice: (deviceId) => read(CORE_COLLECTIONS.devices, deviceId, converters.device),
     getApiKey: (apiKeyId) => read(CORE_COLLECTIONS.apiKeys, apiKeyId, converters.apiKey),
     getPlatformStaff: (uid) => read(CORE_COLLECTIONS.platformStaff, uid, converters.staff),
-    getImpersonationSession: (sessionId) => read(CORE_COLLECTIONS.impersonationSessions, sessionId, converters.impersonation),
+    getImpersonationSession: (sessionId) =>
+      read(CORE_COLLECTIONS.impersonationSessions, sessionId, converters.impersonation),
   };
 };

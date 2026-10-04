@@ -6,12 +6,31 @@ import { Checkbox } from "#/shared/ui/atoms/Checkbox/Checkbox.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "#/shared/ui/molecules/Field/Field.tsx";
-import { AUTH_MODES, CONNECTOR_TYPES, emptyConnectorDraft, splitList, type ConnectorAuth, type ConnectorDraft, type DraftField, type DraftProblems } from "../model/connector-draft.ts";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  AUTH_MODES,
+  CONNECTOR_TYPES,
+  type ConnectorAuth,
+  type ConnectorDraft,
+  type DraftField,
+  type DraftProblems,
+  emptyConnectorDraft,
+  splitList,
+} from "../model/connector-draft.ts";
 
 type FieldsProps = { draft: ConnectorDraft; setDraft: (draft: ConnectorDraft) => void; problems: DraftProblems };
 
-const isConnectorType = (value: string): value is ConnectorType => (CONNECTOR_TYPES as readonly string[]).includes(value);
+const isConnectorType = (value: string): value is ConnectorType =>
+  (CONNECTOR_TYPES as readonly string[]).includes(value);
 
 const useProblem = (problems: DraftProblems) => {
   const t = useTranslations("settings.connectors.editor.errors");
@@ -21,14 +40,27 @@ const useProblem = (problems: DraftProblems) => {
 type TextField = "name" | "specUrl" | "url" | "apiKeyHeader";
 type ListField = "allowedHosts" | "allowedRelations" | "allow";
 
-function TextInput({ field, draft, setDraft, problems, type = "text" }: FieldsProps & { field: TextField; type?: "text" | "url" }) {
+function TextInput({
+  field,
+  draft,
+  setDraft,
+  problems,
+  type = "text",
+}: FieldsProps & { field: TextField; type?: "text" | "url" }) {
   const t = useTranslations("settings.connectors.editor");
   const problem = useProblem(problems);
   return (
     <Field>
       <FieldLabel>{t(`fields.${field}`)}</FieldLabel>
       <FieldControl>
-        <Input type={type} required autoComplete="off" spellCheck={false} value={draft[field]} onChange={(event) => setDraft({ ...draft, [field]: event.target.value })} />
+        <Input
+          type={type}
+          required
+          autoComplete="off"
+          spellCheck={false}
+          value={draft[field]}
+          onChange={(event) => setDraft({ ...draft, [field]: event.target.value })}
+        />
       </FieldControl>
       <FieldDescription>{t(`hints.${field}`)}</FieldDescription>
       <FieldError errors={problem(field)} />
@@ -43,7 +75,13 @@ function ListInput({ field, draft, setDraft, problems }: FieldsProps & { field: 
     <Field>
       <FieldLabel>{t(`fields.${field}`)}</FieldLabel>
       <FieldControl>
-        <Textarea rows={3} spellCheck={false} className="font-mono text-body-sm" value={draft[field]} onChange={(event) => setDraft({ ...draft, [field]: event.target.value })} />
+        <Textarea
+          rows={3}
+          spellCheck={false}
+          className="font-mono text-body-sm"
+          value={draft[field]}
+          onChange={(event) => setDraft({ ...draft, [field]: event.target.value })}
+        />
       </FieldControl>
       <FieldDescription>{t(`hints.${field}`)}</FieldDescription>
       <FieldError errors={problem(field)} />
@@ -55,7 +93,8 @@ function TypeSelect({ draft, setDraft, locked }: Pick<FieldsProps, "draft" | "se
   const t = useTranslations("settings.connectors");
   // Changing the type starts the type-specific fields over; the name and tools stay.
   const change = (value: string): void => {
-    if (isConnectorType(value)) setDraft({ ...emptyConnectorDraft(value), name: draft.name, allow: draft.allow, readOnly: draft.readOnly });
+    if (isConnectorType(value))
+      setDraft({ ...emptyConnectorDraft(value), name: draft.name, allow: draft.allow, readOnly: draft.readOnly });
   };
   return (
     <Field>
@@ -118,7 +157,12 @@ function ReadOnlyTools({ draft, setDraft, problems }: FieldsProps) {
   const tools = splitList(draft.allow);
   if (tools.length === 0) return null;
   const toggle = (tool: string, checked: boolean): void =>
-    setDraft({ ...draft, readOnly: checked ? [...draft.readOnly.filter((name) => name !== tool), tool] : draft.readOnly.filter((name) => name !== tool) });
+    setDraft({
+      ...draft,
+      readOnly: checked
+        ? [...draft.readOnly.filter((name) => name !== tool), tool]
+        : draft.readOnly.filter((name) => name !== tool),
+    });
   return (
     <FieldSet>
       <FieldLegend>{t("fields.readOnly")}</FieldLegend>
@@ -126,7 +170,10 @@ function ReadOnlyTools({ draft, setDraft, problems }: FieldsProps) {
       {tools.map((tool) => (
         <Field key={tool} orientation="horizontal">
           <FieldControl>
-            <Checkbox checked={draft.readOnly.includes(tool)} onCheckedChange={(checked) => toggle(tool, checked === true)} />
+            <Checkbox
+              checked={draft.readOnly.includes(tool)}
+              onCheckedChange={(checked) => toggle(tool, checked === true)}
+            />
           </FieldControl>
           <FieldLabel className="font-mono text-body-sm">{tool}</FieldLabel>
         </Field>

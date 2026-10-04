@@ -1,12 +1,19 @@
 import { z } from "zod";
 import { CORE_PERMISSIONS } from "../access/core-permissions.ts";
 import { ModuleDefinitionError } from "./module-definition-error.ts";
-import { CAPABILITY_KINDS, ModuleManifestSchema, RESERVED_MODULE_IDS, type ModuleManifest } from "./module-manifest.schema.ts";
+import {
+  CAPABILITY_KINDS,
+  type ModuleManifest,
+  ModuleManifestSchema,
+  RESERVED_MODULE_IDS,
+} from "./module-manifest.schema.ts";
 
 const CORE_PERMISSION_IDS: ReadonlySet<string> = new Set(CORE_PERMISSIONS.map((permission) => permission.id));
 const RESERVED: ReadonlySet<string> = new Set(RESERVED_MODULE_IDS);
 
-const duplicates = (values: readonly string[]): string[] => [...new Set(values.filter((value, index) => values.indexOf(value) !== index))];
+const duplicates = (values: readonly string[]): string[] => [
+  ...new Set(values.filter((value, index) => values.indexOf(value) !== index)),
+];
 
 const checkIds = (manifest: ModuleManifest): string[] => {
   const { id } = manifest;
@@ -14,9 +21,13 @@ const checkIds = (manifest: ModuleManifest): string[] => {
   const unitTypeIds = (manifest.unitTypes ?? []).map((unitType) => unitType.id);
   return [
     ...(RESERVED.has(id) ? [`id ${id} is reserved (core, platform and the core message namespaces)`] : []),
-    ...permissionIds.flatMap((permissionId, index) => (permissionId.startsWith(`${id}.`) ? [] : [`permissions[${index}].id must start with ${id}.`])),
+    ...permissionIds.flatMap((permissionId, index) =>
+      permissionId.startsWith(`${id}.`) ? [] : [`permissions[${index}].id must start with ${id}.`],
+    ),
     ...duplicates(permissionIds).map((permissionId) => `duplicate permission ${permissionId}`),
-    ...unitTypeIds.flatMap((unitTypeId, index) => (unitTypeId.startsWith(`${id}.`) ? [] : [`unitTypes[${index}].id must start with ${id}.`])),
+    ...unitTypeIds.flatMap((unitTypeId, index) =>
+      unitTypeId.startsWith(`${id}.`) ? [] : [`unitTypes[${index}].id must start with ${id}.`],
+    ),
     ...duplicates(unitTypeIds).map((unitTypeId) => `duplicate unit type ${unitTypeId}`),
   ];
 };
@@ -28,7 +39,10 @@ const checkNavigation = (manifest: ModuleManifest, own: ReadonlySet<string>): st
       ? []
       : [`navigation[${index}].permission ${item.permission} is neither declared by the module nor a core permission`],
   );
-  return [...duplicates(items.map((item) => item.id)).map((itemId) => `duplicate navigation item ${itemId}`), ...unknownPermissions];
+  return [
+    ...duplicates(items.map((item) => item.id)).map((itemId) => `duplicate navigation item ${itemId}`),
+    ...unknownPermissions,
+  ];
 };
 
 const checkSettings = (manifest: ModuleManifest, own: ReadonlySet<string>): string[] => {
@@ -46,13 +60,23 @@ const checkSettings = (manifest: ModuleManifest, own: ReadonlySet<string>): stri
 /** Every message key the manifest references, with where it was declared. */
 const messageKeysOf = (manifest: ModuleManifest): { where: string; key: string }[] => [
   { where: "labelKey", key: manifest.labelKey },
-  ...manifest.permissions.map((permission, index) => ({ where: `permissions[${index}].descriptionKey`, key: permission.descriptionKey })),
-  ...(manifest.unitTypes ?? []).map((unitType, index) => ({ where: `unitTypes[${index}].labelKey`, key: unitType.labelKey })),
+  ...manifest.permissions.map((permission, index) => ({
+    where: `permissions[${index}].descriptionKey`,
+    key: permission.descriptionKey,
+  })),
+  ...(manifest.unitTypes ?? []).map((unitType, index) => ({
+    where: `unitTypes[${index}].labelKey`,
+    key: unitType.labelKey,
+  })),
   ...(manifest.navigation ?? []).map((item, index) => ({ where: `navigation[${index}].labelKey`, key: item.labelKey })),
 ];
 
 const hasMessage = (tree: unknown, path: readonly string[]): boolean => {
-  const leaf = path.reduce<unknown>((node, segment) => (typeof node === "object" && node !== null ? (node as Record<string, unknown>)[segment] : undefined), tree);
+  const leaf = path.reduce<unknown>(
+    (node, segment) =>
+      typeof node === "object" && node !== null ? (node as Record<string, unknown>)[segment] : undefined,
+    tree,
+  );
   return typeof leaf === "string" && leaf.length > 0;
 };
 
@@ -71,16 +95,22 @@ const checkCapabilities = (manifest: ModuleManifest): string[] =>
   CAPABILITY_KINDS.flatMap((kind) => {
     const ids = (manifest[kind] ?? []).map((ref) => ref.id);
     const unprefixed = ids.flatMap((refId, index) =>
-      refId.startsWith(`${manifest.id}-`) || refId.startsWith(`${manifest.id}.`) ? [] : [`${kind}[${index}].id must start with ${manifest.id}- or ${manifest.id}.`],
+      refId.startsWith(`${manifest.id}-`) || refId.startsWith(`${manifest.id}.`)
+        ? []
+        : [`${kind}[${index}].id must start with ${manifest.id}- or ${manifest.id}.`],
     );
     return [...unprefixed, ...duplicates(ids).map((refId) => `duplicate ${kind} ref ${refId}`)];
   });
 
 const schemaProblems = (error: z.ZodError): string[] =>
-  error.issues.map((issue) => `${issue.path.length === 0 ? "(manifest)" : issue.path.map(String).join(".")}: ${issue.message}`);
+  error.issues.map(
+    (issue) => `${issue.path.length === 0 ? "(manifest)" : issue.path.map(String).join(".")}: ${issue.message}`,
+  );
 
 const readModuleId = (manifest: unknown): string =>
-  typeof manifest === "object" && manifest !== null && "id" in manifest && typeof manifest.id === "string" ? manifest.id : "<unknown>";
+  typeof manifest === "object" && manifest !== null && "id" in manifest && typeof manifest.id === "string"
+    ? manifest.id
+    : "<unknown>";
 
 /**
  * Validates a module manifest (decision 0015) and returns it unchanged. Pure: nothing is
@@ -92,7 +122,8 @@ const readModuleId = (manifest: unknown): string =>
  */
 export const defineModule = <const M extends ModuleManifest>(manifest: M): M => {
   const parsed = ModuleManifestSchema.safeParse(manifest);
-  if (!parsed.success) throw new ModuleDefinitionError({ moduleId: readModuleId(manifest), problems: schemaProblems(parsed.error) });
+  if (!parsed.success)
+    throw new ModuleDefinitionError({ moduleId: readModuleId(manifest), problems: schemaProblems(parsed.error) });
   const own: ReadonlySet<string> = new Set(parsed.data.permissions.map((permission) => permission.id));
   const problems = [
     ...checkIds(parsed.data),

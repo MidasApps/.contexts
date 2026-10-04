@@ -3,10 +3,21 @@ import { readSidebarOpen, SIDEBAR_STATE_KEY, writeSidebarOpen } from "./sidebar-
 
 const storage = (initial: Record<string, string> = {}) => {
   const data = new Map(Object.entries(initial));
-  return { getItem: (key: string) => data.get(key) ?? null, setItem: (key: string, value: string) => void data.set(key, value), data };
+  return {
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => void data.set(key, value),
+    data,
+  };
 };
 
-const broken = { getItem: (): string | null => { throw new Error("denied"); }, setItem: (): void => { throw new Error("denied"); } };
+const broken = {
+  getItem: (): string | null => {
+    throw new Error("denied");
+  },
+  setItem: (): void => {
+    throw new Error("denied");
+  },
+};
 
 describe("sidebar state", () => {
   it("defaults to open and round-trips the choice", () => {

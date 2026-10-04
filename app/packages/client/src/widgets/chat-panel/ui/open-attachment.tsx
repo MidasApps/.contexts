@@ -32,7 +32,13 @@ export function OpenAttachment({ file }: { file: AttachmentView }) {
     }
   };
   return (
-    <Button variant="ghost" size="icon-xs" pending={pending} aria-label={t("openAttachment", { name: file.name })} onClick={() => void openFile()}>
+    <Button
+      variant="ghost"
+      size="icon-xs"
+      pending={pending}
+      aria-label={t("openAttachment", { name: file.name })}
+      onClick={() => void openFile()}
+    >
       <ExternalLinkIcon aria-hidden="true" />
     </Button>
   );

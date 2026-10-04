@@ -50,6 +50,8 @@ const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/
  * @returns null for another prefix or a malformed key.
  */
 export const parseApiKey = (credential: string, prefix: string): ApiKeyParts | null => {
-  const match = new RegExp(`^${escapeRegExp(prefix)}_([A-Z2-7]{${PUBLIC_ID_LENGTH}})_([A-Za-z0-9_-]{43})$`).exec(credential);
+  const match = new RegExp(`^${escapeRegExp(prefix)}_([A-Z2-7]{${PUBLIC_ID_LENGTH}})_([A-Za-z0-9_-]{43})$`).exec(
+    credential,
+  );
   return match?.[1] === undefined || match[2] === undefined ? null : { prefix, publicId: match[1], secret: match[2] };
 };

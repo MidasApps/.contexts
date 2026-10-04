@@ -2,7 +2,11 @@ import { IsoDateTimeSchema, ModuleIdSchema, TenantIdSchema } from "@core/contrac
 import type { DocumentReference, Firestore, Transaction } from "firebase-admin/firestore";
 import { z } from "zod";
 import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
-import type { ModuleSettingsKey, ModuleSettingsRepository, StoredModuleSettings } from "../../application/ports/driven/module-settings-repository.ts";
+import type {
+  ModuleSettingsKey,
+  ModuleSettingsRepository,
+  StoredModuleSettings,
+} from "../../application/ports/driven/module-settings-repository.ts";
 
 /** Top-level collection of the module settings store (decision 0015 §6); clients have no direct access (Rules). */
 export const MODULE_SETTINGS_COLLECTION = "module-settings";

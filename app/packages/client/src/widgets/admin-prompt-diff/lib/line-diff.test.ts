@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { diffLines, diffStats } from "./line-diff.ts";
 
-const compact = (before: string, after: string): string[] => diffLines(before, after).map((line) => `${line.kind === "same" ? " " : line.kind === "added" ? "+" : "-"}${line.text}`);
+const compact = (before: string, after: string): string[] =>
+  diffLines(before, after).map(
+    (line) => `${line.kind === "same" ? " " : line.kind === "added" ? "+" : "-"}${line.text}`,
+  );
 
 describe("diffLines", () => {
   it("marks a changed line as removed then added and keeps the lines around it", () => {
-    expect(compact("You are the assistant.\nBe brief.\nCite sources.", "You are the assistant.\nBe concise.\nCite sources.")).toEqual([
-      " You are the assistant.",
-      "-Be brief.",
-      "+Be concise.",
-      " Cite sources.",
-    ]);
+    expect(
+      compact("You are the assistant.\nBe brief.\nCite sources.", "You are the assistant.\nBe concise.\nCite sources."),
+    ).toEqual([" You are the assistant.", "-Be brief.", "+Be concise.", " Cite sources."]);
   });
 
   it("reports only additions and only removals", () => {

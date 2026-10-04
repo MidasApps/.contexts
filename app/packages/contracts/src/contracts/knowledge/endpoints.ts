@@ -4,12 +4,19 @@ import { none } from "../field-docs.ts";
 import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.schema.ts";
 import { OrganizationIdSchema, ProjectIdSchema } from "../tenancy/ids.schema.ts";
-import { KnowledgeDocumentIdSchema, KnowledgeDocumentSchema, KnowledgeNamespaceSchema } from "./knowledge-document.schema.ts";
+import {
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentSchema,
+  KnowledgeNamespaceSchema,
+} from "./knowledge-document.schema.ts";
 import { KnowledgeSourceSchema } from "./knowledge-source.schema.ts";
 
 const organizationId = OrganizationIdSchema.meta(none("Organization that owns the knowledge base."));
 const organizationParams = z.object({ organizationId });
-const documentParams = z.object({ organizationId, documentId: KnowledgeDocumentIdSchema.meta(none("Knowledge document id.")) });
+const documentParams = z.object({
+  organizationId,
+  documentId: KnowledgeDocumentIdSchema.meta(none("Knowledge document id.")),
+});
 
 /** Body of `202` from `POST .../knowledge/sources`: the ingestion workflow run to follow. */
 export const KnowledgeIngestionRunSchema = z.strictObject({
@@ -23,7 +30,9 @@ export const listKnowledgeDocumentsEndpoint = defineEndpoint({
   path: "/v1/organizations/{organizationId}/knowledge/documents",
   auth: "principal",
   params: organizationParams,
-  query: PageQuerySchema.extend({ namespace: KnowledgeNamespaceSchema.optional().meta(none("Only documents of this namespace.")) }),
+  query: PageQuerySchema.extend({
+    namespace: KnowledgeNamespaceSchema.optional().meta(none("Only documents of this namespace.")),
+  }),
   responses: { 200: listEnvelope(KnowledgeDocumentSchema) },
   errors: { 403: ["FORBIDDEN"] },
   summary: "Lists the organization's knowledge documents, newest first (core.knowledge.read).",
@@ -58,13 +67,18 @@ export const addKnowledgeSourceEndpoint = defineEndpoint({
   auth: "principal",
   params: organizationParams,
   query: z.object({
-    projectId: ProjectIdSchema.optional().meta(none("Project of the organization to index the source for (namespace project:<id>); the whole organization when absent.")),
+    projectId: ProjectIdSchema.optional().meta(
+      none(
+        "Project of the organization to index the source for (namespace project:<id>); the whole organization when absent.",
+      ),
+    ),
   }),
   body: KnowledgeSourceSchema,
   responses: { 202: dataEnvelope(KnowledgeIngestionRunSchema) },
   errors: { 403: ["FORBIDDEN"], 404: ["NOT_FOUND"], 409: ["CONFLICT"] },
   idempotency: "optional",
-  summary: "Starts the knowledge-ingest workflow for a ready knowledge file or a public https URL, for the organization or one of its projects (core.knowledge.write).",
+  summary:
+    "Starts the knowledge-ingest workflow for a ready knowledge file or a public https URL, for the organization or one of its projects (core.knowledge.write).",
 });
 
 export const KNOWLEDGE_ENDPOINTS: readonly EndpointDefinition[] = [

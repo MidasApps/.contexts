@@ -12,7 +12,10 @@ export type GetFlagValues = (input: { readonly tenantId: string | null }) => Pro
 export const makeGetFlagValues =
   (deps: Pick<FlagsDeps, "registry" | "stores" | "environmentDefaults">): GetFlagValues =>
   async ({ tenantId }) => {
-    const [stored, overrides] = await Promise.all([deps.stores.environment.read(), tenantId === null ? Promise.resolve({}) : deps.stores.tenants.read(tenantId)]);
+    const [stored, overrides] = await Promise.all([
+      deps.stores.environment.read(),
+      tenantId === null ? Promise.resolve({}) : deps.stores.tenants.read(tenantId),
+    ]);
     const values: Record<string, boolean> = {};
     for (const flag of deps.registry) {
       values[flag.key] = evaluateFlag(flag, {

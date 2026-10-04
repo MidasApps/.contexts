@@ -1,6 +1,6 @@
 import { type AgentRequestContext, FORWARDED_HEADERS } from "@core/contracts";
-import { MASTRA_RESOURCE_ID_KEY } from "@mastra/core/request-context";
 import { resolveRequestId } from "@core/services";
+import { MASTRA_RESOURCE_ID_KEY } from "@mastra/core/request-context";
 import { buildAgentRequestContext, clearAgentContext, writeAgentContext } from "../context/write-agent-context.ts";
 import { withServerTracingOptions } from "../observability/trace-context.ts";
 import type { AccessPrincipal } from "../runtime/runtime-ports.ts";
@@ -8,7 +8,12 @@ import { type AgentMiddleware, apiPathPattern } from "./agent-middleware.ts";
 import type { AgentPrincipal } from "./agent-principal.ts";
 import { readBearerToken } from "./bearer-only.ts";
 import { CONVERSATION_ID_PATTERN, newConversationId, startsConversationRun } from "./conversation-id.ts";
-import { checkThreadAccess, type ThreadAccess, threadIdsOfRequest, type ThreadOwnerLookup } from "./thread-ownership.ts";
+import {
+  checkThreadAccess,
+  type ThreadAccess,
+  type ThreadOwnerLookup,
+  threadIdsOfRequest,
+} from "./thread-ownership.ts";
 
 /** What the middleware needs from `FirebaseMastraAuth` (memoized per request there). */
 export type ContextAuthenticator = {
@@ -43,10 +48,17 @@ export type KillSwitch = {
   readonly isKilled: (tenantId: string) => Promise<boolean>;
 };
 
-const killedResponse = async (killSwitch: KillSwitch | undefined, request: Request, context: AgentRequestContext): Promise<Response | undefined> => {
+const killedResponse = async (
+  killSwitch: KillSwitch | undefined,
+  request: Request,
+  context: AgentRequestContext,
+): Promise<Response | undefined> => {
   if (killSwitch === undefined || !killSwitch.appliesTo(new URL(request.url).pathname)) return undefined;
   if (!(await killSwitch.isKilled(context.tenantId))) return undefined;
-  return Response.json({ error: { code: "FEATURE_DISABLED", message: "This feature is turned off.", requestId: context.requestId } }, { status: 503 });
+  return Response.json(
+    { error: { code: "FEATURE_DISABLED", message: "This feature is turned off.", requestId: context.requestId } },
+    { status: 503 },
+  );
 };
 
 const BODY_METHODS: ReadonlySet<string> = new Set(["POST", "PUT", "PATCH"]);
@@ -56,11 +68,17 @@ const bodyRefusal = (request: Request, maxBodyBytes: number | undefined): Respon
   const requestId = resolveRequestId(readHeader(request, FORWARDED_HEADERS.requestId));
   const declared = readHeader(request, "content-length");
   if (declared === undefined) {
-    return Response.json({ error: { code: "VALIDATION_FAILED", message: "Content-Length is required.", requestId } }, { status: 411 });
+    return Response.json(
+      { error: { code: "VALIDATION_FAILED", message: "Content-Length is required.", requestId } },
+      { status: 411 },
+    );
   }
   const length = Number(declared);
   if (Number.isSafeInteger(length) && length >= 0 && length <= maxBodyBytes) return undefined;
-  return Response.json({ error: { code: "PAYLOAD_TOO_LARGE", message: "The request body is too large.", requestId } }, { status: 413 });
+  return Response.json(
+    { error: { code: "PAYLOAD_TOO_LARGE", message: "The request body is too large.", requestId } },
+    { status: 413 },
+  );
 };
 
 const readHeader = (request: Request, name: string): string | undefined => {
@@ -87,13 +105,22 @@ type Snapshot = { context: AgentRequestContext; principal: AccessPrincipal; crea
  * a run that needs a memory thread (follow-up #24). A fresh id names no thread yet, so the
  * run creates it under the caller's own resource (`tenantId:uid`).
  */
-const conversationOf = (options: ContextMiddlewareOptions, request: Request): { id?: string; created: boolean } | "malformed" => {
+const conversationOf = (
+  options: ContextMiddlewareOptions,
+  request: Request,
+): { id?: string; created: boolean } | "malformed" => {
   const forwarded = readHeader(request, FORWARDED_HEADERS.conversationId);
-  if (forwarded !== undefined) return CONVERSATION_ID_PATTERN.test(forwarded) ? { id: forwarded, created: false } : "malformed";
-  return startsConversationRun(request, options.apiPrefix) ? { id: newConversationId(), created: true } : { created: false };
+  if (forwarded !== undefined)
+    return CONVERSATION_ID_PATTERN.test(forwarded) ? { id: forwarded, created: false } : "malformed";
+  return startsConversationRun(request, options.apiPrefix)
+    ? { id: newConversationId(), created: true }
+    : { created: false };
 };
 
-const resolveSnapshot = async (options: ContextMiddlewareOptions, request: Request): Promise<Snapshot | "malformed" | null> => {
+const resolveSnapshot = async (
+  options: ContextMiddlewareOptions,
+  request: Request,
+): Promise<Snapshot | "malformed" | null> => {
   const principal = await authenticate(options.auth, request);
   if (principal === null) return null;
   const conversation = conversationOf(options, request);
@@ -105,7 +132,11 @@ const resolveSnapshot = async (options: ContextMiddlewareOptions, request: Reque
     ...(conversation.id === undefined ? {} : { conversationId: conversation.id }),
   });
   if (context === null) return null;
-  return { context, principal: principal.principal, ...(conversation.created && conversation.id !== undefined ? { createdConversationId: conversation.id } : {}) };
+  return {
+    context,
+    principal: principal.principal,
+    ...(conversation.created && conversation.id !== undefined ? { createdConversationId: conversation.id } : {}),
+  };
 };
 
 const REFUSALS: Record<Exclude<ThreadAccess, "allowed">, { status: number; error: string }> = {
@@ -114,9 +145,16 @@ const REFUSALS: Record<Exclude<ThreadAccess, "allowed">, { status: number; error
 };
 
 // A thread of another resource (tenant:uid) is refused before the run (Mastra would fail it with 500).
-const refuseForeignThread = async (options: ContextMiddlewareOptions, request: Request, resourceId: unknown): Promise<Response | undefined> => {
+const refuseForeignThread = async (
+  options: ContextMiddlewareOptions,
+  request: Request,
+  resourceId: unknown,
+): Promise<Response | undefined> => {
   if (options.threadOwnerOf === undefined || typeof resourceId !== "string") return undefined;
-  const threadIds = threadIdsOfRequest({ path: new URL(request.url).pathname, conversationId: readHeader(request, FORWARDED_HEADERS.conversationId) });
+  const threadIds = threadIdsOfRequest({
+    path: new URL(request.url).pathname,
+    conversationId: readHeader(request, FORWARDED_HEADERS.conversationId),
+  });
   if (threadIds.length === 0) return undefined;
   const access = await checkThreadAccess({ lookup: options.threadOwnerOf, threadIds, resourceId });
   if (access === "allowed") return undefined;
@@ -151,7 +189,8 @@ export const createContextMiddleware = (options: ContextMiddlewareOptions): Agen
       if (killed !== undefined) return killed;
       writeAgentContext(store, snapshot);
       // Before `next()`: Hono folds headers set here into streamed answers too.
-      if (snapshot.createdConversationId !== undefined) context.header?.(FORWARDED_HEADERS.conversationId, snapshot.createdConversationId);
+      if (snapshot.createdConversationId !== undefined)
+        context.header?.(FORWARDED_HEADERS.conversationId, snapshot.createdConversationId);
       const refusal = await refuseForeignThread(options, context.req.raw, store.get(MASTRA_RESOURCE_ID_KEY));
       if (refusal !== undefined) return refusal;
     }

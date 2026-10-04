@@ -1,7 +1,7 @@
 "use client";
 
 import { listCurrencies } from "@core/i18n";
-import { useMemo, type ComponentProps } from "react";
+import { type ComponentProps, useMemo } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { Combobox } from "#/shared/ui/molecules/Combobox/Combobox.tsx";
 
@@ -11,7 +11,8 @@ export type CurrencySelectProps = Omit<
 >;
 
 /** "BRL — Real brasileiro": how the picker names a currency, also used where a currency is only shown. */
-export const currencyLabel = (code: string, locale: string): string => `${code} — ${new Intl.DisplayNames([locale], { type: "currency", fallback: "code" }).of(code) ?? code}`;
+export const currencyLabel = (code: string, locale: string): string =>
+  `${code} — ${new Intl.DisplayNames([locale], { type: "currency", fallback: "code" }).of(code) ?? code}`;
 
 /**
  * ISO 4217 currency picker (codes from `Intl.supportedValuesOf`, names in the UI locale). Search
@@ -23,7 +24,11 @@ export function CurrencySelect(props: CurrencySelectProps) {
   const groups = useMemo(
     () => [
       {
-        options: listCurrencies(locale).map(({ code, name }) => ({ value: code, label: currencyLabel(code, locale), keywords: [code, name] })),
+        options: listCurrencies(locale).map(({ code, name }) => ({
+          value: code,
+          label: currencyLabel(code, locale),
+          keywords: [code, name],
+        })),
       },
     ],
     [locale],

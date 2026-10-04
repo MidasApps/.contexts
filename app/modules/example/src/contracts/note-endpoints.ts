@@ -1,6 +1,6 @@
 // `/v1` descriptors of the example module's notes (follow-up #38, decision 0063). The web app
 // lists their ids in its route resolver and serves the handlers of `src/server/example-routes.ts`.
-import { defineEndpoint, listEnvelope, none, NoteSchema, OrganizationIdSchema, PageQuerySchema } from "@core/contracts";
+import { defineEndpoint, listEnvelope, NoteSchema, none, OrganizationIdSchema, PageQuerySchema } from "@core/contracts";
 import { z } from "zod";
 
 export const listNotesEndpoint = defineEndpoint({

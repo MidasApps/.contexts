@@ -1,7 +1,7 @@
 "use client";
 
 import type { AccessContext, Member, Role } from "@core/contracts";
-import { useMemo, useState, type ReactNode } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { MEMBERS_PAGE_LIMIT, MemberChip, useMembers } from "#/entities/member/index.ts";
 import { useRoleRefLabel, useRoles } from "#/entities/role/index.ts";
@@ -15,15 +15,20 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
-import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 
 type Grant = Member["grants"][number];
-type Actions = { canUpdate: boolean; canRemove: boolean; onEdit: (member: Member, grant: Grant) => void; onRemove: (member: Member) => void };
+type Actions = {
+  canUpdate: boolean;
+  canRemove: boolean;
+  onEdit: (member: Member, grant: Grant) => void;
+  onRemove: (member: Member) => void;
+};
 
 const column = dataTableColumnHelper<Member>();
 const memberName = (member: Member): string => (member.displayName === "" ? member.email : member.displayName);
@@ -70,15 +75,28 @@ const useColumns = (selfUid: string | undefined, roles: readonly Role[] | undefi
   const t = useTranslations("settings.members");
   return useMemo(
     () => [
-      column.display({ id: "member", header: () => t("columns.member"), cell: ({ row }) => <MemberIdentity member={row.original} isSelf={row.original.uid === selfUid} /> }),
-      column.display({ id: "access", header: () => t("columns.access"), cell: ({ row }) => <Grants member={row.original} roles={roles} actions={actions} /> }),
+      column.display({
+        id: "member",
+        header: () => t("columns.member"),
+        cell: ({ row }) => <MemberIdentity member={row.original} isSelf={row.original.uid === selfUid} />,
+      }),
+      column.display({
+        id: "access",
+        header: () => t("columns.access"),
+        cell: ({ row }) => <Grants member={row.original} roles={roles} actions={actions} />,
+      }),
       column.display({
         id: "actions",
         header: () => t("columns.actions"),
         meta: { headerHidden: true },
         cell: ({ row }) =>
           actions.canRemove ? (
-            <Button variant="outline" size="sm" onClick={() => actions.onRemove(row.original)} aria-label={t("removeNamed", { name: memberName(row.original) })}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => actions.onRemove(row.original)}
+              aria-label={t("removeNamed", { name: memberName(row.original) })}
+            >
               {t("removeAction")}
             </Button>
           ) : null,
@@ -88,7 +106,15 @@ const useColumns = (selfUid: string | undefined, roles: readonly Role[] | undefi
   );
 };
 
-function MembersTable({ context, inviteButton, canInvite }: { context: AccessContext; inviteButton: ReactNode; canInvite: boolean }) {
+function MembersTable({
+  context,
+  inviteButton,
+  canInvite,
+}: {
+  context: AccessContext;
+  inviteButton: ReactNode;
+  canInvite: boolean;
+}) {
   const t = useTranslations("settings.members");
   const { organization } = context;
   const members = useMembers(organization.id);
@@ -122,13 +148,28 @@ function MembersTable({ context, inviteButton, canInvite }: { context: AccessCon
             <MemberIdentity member={member} isSelf={member.uid === self} />
             <Grants member={member} roles={roles.data} actions={actions} />
             {actions.canRemove ? (
-              <Button variant="outline" size="sm" className="self-start" onClick={() => setRemoving(member)} aria-label={t("removeNamed", { name: memberName(member) })}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start"
+                onClick={() => setRemoving(member)}
+                aria-label={t("removeNamed", { name: memberName(member) })}
+              >
                 {t("removeAction")}
               </Button>
             ) : null}
           </div>
         )}
-        empty={<EmptyState frame="plain" headingLevel={2} icon="users" title={t("emptyTitle")} description={canInvite ? t("emptyDescription") : t("emptyDescriptionNoPermission")} action={inviteButton} />}
+        empty={
+          <EmptyState
+            frame="plain"
+            headingLevel={2}
+            icon="users"
+            title={t("emptyTitle")}
+            description={canInvite ? t("emptyDescription") : t("emptyDescriptionNoPermission")}
+            action={inviteButton}
+          />
+        }
       />
       <EditGrantRolesDialog
         organizationId={organization.id}
@@ -137,7 +178,11 @@ function MembersTable({ context, inviteButton, canInvite }: { context: AccessCon
         onOpenChange={(open) => !open && setEditing(null)}
         nodeLabel={editing === null ? null : <NodeName node={editing.grant.node} />}
       />
-      <RemoveMemberDialog organizationId={organization.id} member={removing} onOpenChange={(open) => !open && setRemoving(null)} />
+      <RemoveMemberDialog
+        organizationId={organization.id}
+        member={removing}
+        onOpenChange={(open) => !open && setRemoving(null)}
+      />
     </>
   );
 }
@@ -157,13 +202,28 @@ function SettingsMembers({ context }: { context: AccessContext }) {
     </Button>
   ) : undefined;
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={allowed}
-      header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} description={t("description")} actions={allowed ? inviteButton : undefined} />}
+      header={
+        <PageHeader
+          eyebrow={t("eyebrow", { organization: organization.name })}
+          title={t("title")}
+          description={t("description")}
+          actions={allowed ? inviteButton : undefined}
+        />
+      }
     >
       <MembersTable context={context} inviteButton={inviteButton} canInvite={canInvite} />
-      {canInvite ? <InviteMemberDialog organization={organization} customRoles={roles.data} open={inviting} onOpenChange={setInviting} /> : null}
+      {canInvite ? (
+        <InviteMemberDialog
+          organization={organization}
+          customRoles={roles.data}
+          open={inviting}
+          onOpenChange={setInviting}
+        />
+      ) : null}
     </SettingsPageFrame>
   );
 }

@@ -10,7 +10,11 @@ export type WebSearchResult = { readonly url: string; readonly title: string | n
  * The SSRF guard is the caller's job: this client only talks to the configured Firecrawl API.
  */
 export type WebClient = {
-  readonly search: (input: { readonly query: string; readonly limit: number; readonly abortSignal?: AbortSignal }) => Promise<readonly WebSearchResult[]>;
+  readonly search: (input: {
+    readonly query: string;
+    readonly limit: number;
+    readonly abortSignal?: AbortSignal;
+  }) => Promise<readonly WebSearchResult[]>;
   /** Markdown of the main content; `url` is the final address Firecrawl read (after redirects). */
   readonly scrape: (input: { readonly url: string; readonly abortSignal?: AbortSignal }) => Promise<WebPage>;
 };
@@ -31,7 +35,8 @@ export const firecrawlSecretRefOf = (tenantId: string): string => `firecrawl-${t
 const FIRECRAWL_TIMEOUT_MS = 12_000;
 
 // The SDK takes no AbortSignal: the call is abandoned (not cancelled upstream) when the run stops.
-const reasonOf = (signal: AbortSignal): Error => (signal.reason instanceof Error ? signal.reason : new Error("aborted"));
+const reasonOf = (signal: AbortSignal): Error =>
+  signal.reason instanceof Error ? signal.reason : new Error("aborted");
 
 const abortable = <T>(work: Promise<T>, signal: AbortSignal | undefined): Promise<T> => {
   if (signal === undefined) return work;
@@ -51,8 +56,16 @@ const textOrNull = (value: unknown): string | null => (typeof value === "string"
  * so the SDK never falls back to `process.env`. Scrape asks for Markdown of the main content
  * only; search asks for web results only.
  */
-export const createFirecrawlWebClient = (options: { readonly apiKey: string | null; readonly apiUrl?: string | undefined }): WebClient => {
-  const client = new Firecrawl({ apiKey: options.apiKey, apiUrl: options.apiUrl ?? null, timeoutMs: FIRECRAWL_TIMEOUT_MS, maxRetries: 1 });
+export const createFirecrawlWebClient = (options: {
+  readonly apiKey: string | null;
+  readonly apiUrl?: string | undefined;
+}): WebClient => {
+  const client = new Firecrawl({
+    apiKey: options.apiKey,
+    apiUrl: options.apiUrl ?? null,
+    timeoutMs: FIRECRAWL_TIMEOUT_MS,
+    maxRetries: 1,
+  });
   return {
     search: async ({ query, limit, abortSignal }) => {
       const data = await abortable(client.search(query, { limit, sources: ["web"] }), abortSignal);
@@ -67,7 +80,10 @@ export const createFirecrawlWebClient = (options: { readonly apiKey: string | nu
       });
     },
     scrape: async ({ url, abortSignal }) => {
-      const document = await abortable(client.scrape(url, { formats: ["markdown"], onlyMainContent: true, blockAds: true }), abortSignal);
+      const document = await abortable(
+        client.scrape(url, { formats: ["markdown"], onlyMainContent: true, blockAds: true }),
+        abortSignal,
+      );
       const finalUrl = textOrNull(document.metadata?.url) ?? textOrNull(document.metadata?.sourceURL) ?? url;
       return { url: finalUrl, title: textOrNull(document.metadata?.title), markdown: document.markdown ?? "" };
     },

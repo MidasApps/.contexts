@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, use, type ReactNode } from "react";
+import { createContext, type ReactNode, use } from "react";
 import type { CallEndpoint } from "./call-endpoint.ts";
 import type { FetchLike, GetIdToken } from "./http-client.ts";
 
@@ -14,7 +14,15 @@ const ApiConnectionContext = createContext<ApiConnection | null>(null);
  * Provides the typed `/v1` caller the app shell built (decision 0011); tests pass one over a fake
  * fetch. `connection` gives streaming transports (chat) the same origin, token source and fetch.
  */
-export function ApiProvider({ callEndpoint, connection, children }: { callEndpoint: CallEndpoint; connection?: ApiConnection | undefined; children: ReactNode }) {
+export function ApiProvider({
+  callEndpoint,
+  connection,
+  children,
+}: {
+  callEndpoint: CallEndpoint;
+  connection?: ApiConnection | undefined;
+  children: ReactNode;
+}) {
   return (
     <ApiContext value={callEndpoint}>
       <ApiConnectionContext value={connection ?? null}>{children}</ApiConnectionContext>

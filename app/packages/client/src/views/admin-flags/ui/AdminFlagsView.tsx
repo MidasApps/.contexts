@@ -6,7 +6,12 @@ import { useTranslations } from "use-intl";
 import { useAllAdminOrganizations } from "#/entities/admin-organization/index.ts";
 import { useAdminFlags } from "#/entities/feature-flag/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
-import { ClearFlagOverrideDialog, SetFlagDialog, type FlagChange, type FlagOverrideTarget } from "#/features/admin-set-flag/index.ts";
+import {
+  ClearFlagOverrideDialog,
+  type FlagChange,
+  type FlagOverrideTarget,
+  SetFlagDialog,
+} from "#/features/admin-set-flag/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
@@ -18,11 +23,20 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill, type StatusTone } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
-import { AdminOrganizationFilter, AdminPageFrame, AdminQuerySection, useAdminSearch } from "#/widgets/admin-nav/index.ts";
-import { ExpiredAlert, filterFlags, FlagSearch } from "./FlagFilters.tsx";
+import {
+  AdminOrganizationFilter,
+  AdminPageFrame,
+  AdminQuerySection,
+  useAdminSearch,
+} from "#/widgets/admin-nav/index.ts";
+import { ExpiredAlert, FlagSearch, filterFlags } from "./FlagFilters.tsx";
 
 const column = dataTableColumnHelper<FeatureFlag>();
-const KIND_TONES: Record<FeatureFlag["kind"], StatusTone> = { "kill-switch": "danger", rollout: "blue", ops: "neutral" };
+const KIND_TONES: Record<FeatureFlag["kind"], StatusTone> = {
+  "kill-switch": "danger",
+  rollout: "blue",
+  ops: "neutral",
+};
 
 type Organization = { readonly id: string; readonly name: string };
 
@@ -113,8 +127,12 @@ function OrganizationOverride({ flag }: { flag: FeatureFlag }) {
   );
   return (
     <span className="flex flex-col items-start gap-1.5">
-      <StatusPill tone={override === null ? "neutral" : override ? "emerald" : "amber"}>{t(override === null ? "override.none" : override ? "override.on" : "override.off")}</StatusPill>
-      <span className="text-caption text-muted-foreground">{t(seen.value ? "override.effectiveOn" : "override.effectiveOff")}</span>
+      <StatusPill tone={override === null ? "neutral" : override ? "emerald" : "amber"}>
+        {t(override === null ? "override.none" : override ? "override.on" : "override.off")}
+      </StatusPill>
+      <span className="text-caption text-muted-foreground">
+        {t(seen.value ? "override.effectiveOn" : "override.effectiveOff")}
+      </span>
       <span className="flex flex-wrap gap-1.5">
         {override === true ? null : offer(true)}
         {override === false ? null : offer(false)}
@@ -138,17 +156,50 @@ const useColumns = (withOverride: boolean) => {
   const t = useTranslations("admin.flags");
   return useMemo(
     () => [
-      column.display({ id: "flag", header: () => t("columns.flag"), cell: ({ row }) => <FlagName flag={row.original} /> }),
-      column.accessor("kind", { header: () => t("columns.kind"), cell: ({ getValue }) => <StatusPill tone={KIND_TONES[getValue()]}>{t(`kind.${getValue()}`)}</StatusPill> }),
-      column.display({ id: "expiry", header: () => t("columns.expiresAt"), cell: ({ row }) => <Expiry flag={row.original} /> }),
-      column.display({ id: "environment", header: () => t("columns.environment"), cell: ({ row }) => <EnvironmentSwitch flag={row.original} /> }),
-      ...(withOverride ? [column.display({ id: "override", header: () => t("columns.override"), cell: ({ row }) => <OrganizationOverride flag={row.original} /> })] : []),
+      column.display({
+        id: "flag",
+        header: () => t("columns.flag"),
+        cell: ({ row }) => <FlagName flag={row.original} />,
+      }),
+      column.accessor("kind", {
+        header: () => t("columns.kind"),
+        cell: ({ getValue }) => <StatusPill tone={KIND_TONES[getValue()]}>{t(`kind.${getValue()}`)}</StatusPill>,
+      }),
+      column.display({
+        id: "expiry",
+        header: () => t("columns.expiresAt"),
+        cell: ({ row }) => <Expiry flag={row.original} />,
+      }),
+      column.display({
+        id: "environment",
+        header: () => t("columns.environment"),
+        cell: ({ row }) => <EnvironmentSwitch flag={row.original} />,
+      }),
+      ...(withOverride
+        ? [
+            column.display({
+              id: "override",
+              header: () => t("columns.override"),
+              cell: ({ row }) => <OrganizationOverride flag={row.original} />,
+            }),
+          ]
+        : []),
     ],
     [withOverride, t],
   );
 };
 
-function FlagsTable({ flags, withOverride, onReload, onClearFilters }: { flags: readonly FeatureFlag[]; withOverride: boolean; onReload: () => void; onClearFilters: (() => void) | null }) {
+function FlagsTable({
+  flags,
+  withOverride,
+  onReload,
+  onClearFilters,
+}: {
+  flags: readonly FeatureFlag[];
+  withOverride: boolean;
+  onReload: () => void;
+  onClearFilters: (() => void) | null;
+}) {
   const t = useTranslations("admin.flags");
   const columns = useColumns(withOverride);
   return (
@@ -186,18 +237,18 @@ function FlagsTable({ flags, withOverride, onReload, onClearFilters }: { flags: 
             }
           />
         ) : (
-        <EmptyState
-          frame="plain"
-          headingLevel={2}
-          icon="flag"
-          title={t("emptyTitle")}
-          description={t("emptyDescription")}
-          action={
-            <Button variant="secondary" onClick={onReload}>
-              {t("reload")}
-            </Button>
-          }
-        />
+          <EmptyState
+            frame="plain"
+            headingLevel={2}
+            icon="flag"
+            title={t("emptyTitle")}
+            description={t("emptyDescription")}
+            action={
+              <Button variant="secondary" onClick={onReload}>
+                {t("reload")}
+              </Button>
+            }
+          />
         )
       }
     />
@@ -227,18 +278,31 @@ function FlagsContent({ flags, onReload }: { flags: readonly FeatureFlag[]; onRe
     return {
       writable: online,
       organization: organizationId === undefined ? undefined : { id: organizationId, name },
-      overrides: organizationId === undefined || overrides.data === undefined ? undefined : new Map(overrides.data.map((flag) => [flag.key, flag])),
+      overrides:
+        organizationId === undefined || overrides.data === undefined
+          ? undefined
+          : new Map(overrides.data.map((flag) => [flag.key, flag])),
       onChange: setChange,
       onClear: setClearing,
     };
   }, [online, organizationId, organizations.data, overrides.data]);
   return (
     <div className="flex flex-col gap-4">
-      <ExpiredAlert flags={flags} expiredOnly={filter.expiredOnly} onExpiredOnlyChange={(next) => search.set({ expired: next ? "1" : undefined })} />
+      <ExpiredAlert
+        flags={flags}
+        expiredOnly={filter.expiredOnly}
+        onExpiredOnlyChange={(next) => search.set({ expired: next ? "1" : undefined })}
+      />
       <FlagSearch key={searchReset} value={filter.query} onChange={(q) => search.set({ q })} />
       <div className="flex flex-col gap-1.5 sm:max-w-sm">
-        <AdminOrganizationFilter value={organizationId} onValueChange={(next) => search.set({ organizationId: next })} label={t("organizationLabel")} />
-        <p className="text-xs text-muted-foreground">{organizationId === undefined ? t("organizationHint") : t("overrideHint")}</p>
+        <AdminOrganizationFilter
+          value={organizationId}
+          onValueChange={(next) => search.set({ organizationId: next })}
+          label={t("organizationLabel")}
+        />
+        <p className="text-xs text-muted-foreground">
+          {organizationId === undefined ? t("organizationHint") : t("overrideHint")}
+        </p>
       </div>
       {organizationId !== undefined && overrides.isError ? (
         <Alert variant="destructive">
@@ -252,7 +316,12 @@ function FlagsContent({ flags, onReload }: { flags: readonly FeatureFlag[]; onRe
         </Alert>
       ) : null}
       <RowContextValue value={context}>
-        <FlagsTable flags={shown} withOverride={organizationId !== undefined} onReload={onReload} onClearFilters={filter.query === "" && !filter.expiredOnly ? null : clearFilters} />
+        <FlagsTable
+          flags={shown}
+          withOverride={organizationId !== undefined}
+          onReload={onReload}
+          onClearFilters={filter.query === "" && !filter.expiredOnly ? null : clearFilters}
+        />
       </RowContextValue>
       <SetFlagDialog change={change} onOpenChange={(open) => !open && setChange(null)} />
       <ClearFlagOverrideDialog target={clearing} onOpenChange={(open) => !open && setClearing(null)} />

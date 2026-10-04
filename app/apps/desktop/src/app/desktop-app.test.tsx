@@ -1,6 +1,15 @@
-import { createFakeAuth, type AuthUser } from "@core/client/shared/lib/auth";
+import { type AuthUser, createFakeAuth } from "@core/client/shared/lib/auth";
 import type { SessionBridgePort } from "@core/client/shared/lib/session-bridge";
-import { buildMe, createFakeApi, expectNoAxeViolations, IDS, MEMBER_PERMISSIONS, noContent, ok, shellRoutes } from "@core/client/testing";
+import {
+  buildMe,
+  createFakeApi,
+  expectNoAxeViolations,
+  IDS,
+  MEMBER_PERMISSIONS,
+  noContent,
+  ok,
+  shellRoutes,
+} from "@core/client/testing";
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -17,7 +26,13 @@ const ENV = loadDesktopEnv({
   VITE_MFA_FACTORS: "phone",
 });
 
-const USER: AuthUser = { uid: "uA1b2C3d4E5f6G7h8I9j", email: "ana@example.com", displayName: "Ana Souza", emailVerified: true, mfaFactors: [] };
+const USER: AuthUser = {
+  uid: "uA1b2C3d4E5f6G7h8I9j",
+  email: "ana@example.com",
+  displayName: "Ana Souza",
+  emailVerified: true,
+  mfaFactors: [],
+};
 
 type RenderArgs = {
   path: string;
@@ -47,7 +62,11 @@ const installFakeTauri = (keychain: Map<string, string>): void => {
 const renderDesktop = (args: RenderArgs) => {
   const auth = createFakeAuth(USER);
   auth.setClaims({ accessVersion: 3 });
-  const preferences = { locale: args.profileLocale ?? "pt-BR", theme: "system", notifications: { productUpdates: false, securityAlerts: true } };
+  const preferences = {
+    locale: args.profileLocale ?? "pt-BR",
+    theme: "system",
+    notifications: { productUpdates: false, securityAlerts: true },
+  };
   const api = createFakeApi({
     ...shellRoutes(MEMBER_PERMISSIONS),
     "GET /v1/me": ok(buildMe({ lastContext: { organizationId: IDS.organization }, preferences })),
@@ -55,14 +74,26 @@ const renderDesktop = (args: RenderArgs) => {
   });
   const stubBridge: SessionBridgePort = {
     establish: () => Promise.resolve(),
-    restore: () => (args.restoring === true ? new Promise(() => undefined) : Promise.resolve(args.signedIn ? { customToken: "custom-token" } : null)),
+    restore: () =>
+      args.restoring === true
+        ? new Promise(() => undefined)
+        : Promise.resolve(args.signedIn ? { customToken: "custom-token" } : null),
     end: () => Promise.resolve(),
   };
   const reportError = vi.fn();
   const history = createMemoryHistory({ initialEntries: [args.path] });
   if (args.keychain !== undefined) installFakeTauri(args.keychain);
   const sessionBridge = args.keychain === undefined ? stubBridge : undefined;
-  const { router } = createDesktopRuntime({ env: ENV, languages: args.languages ?? ["pt-BR"], history, auth, sessionBridge, fetch: api.fetch, reportError, scope: window });
+  const { router } = createDesktopRuntime({
+    env: ENV,
+    languages: args.languages ?? ["pt-BR"],
+    history,
+    auth,
+    sessionBridge,
+    fetch: api.fetch,
+    reportError,
+    scope: window,
+  });
   const view = render(<RouterProvider router={router} />);
   return { ...view, router, api, reportError };
 };
@@ -103,15 +134,24 @@ describe("desktop app", () => {
   });
 
   it("resumes the session kept in the OS keychain after a restart and stores the rotated secret", async () => {
-    const keychain = new Map([["desktop-session", JSON.stringify({ v: 1, sessionId: "session-1", secret: secretNo(1) })]]);
+    const keychain = new Map([
+      ["desktop-session", JSON.stringify({ v: 1, sessionId: "session-1", secret: secretNo(1) })],
+    ]);
     const view = renderDesktop({ path: `/o/${IDS.organization}`, signedIn: false, keychain });
-    view.api.route("POST /v1/desktop-sessions/exchange", ok({ customToken: "custom-token", secret: secretNo(2), expiresAt: EXPIRES_AT }));
+    view.api.route(
+      "POST /v1/desktop-sessions/exchange",
+      ok({ customToken: "custom-token", secret: secretNo(2), expiresAt: EXPIRES_AT }),
+    );
 
     expect(await screen.findByRole("heading", { level: 1, name: "Northwind" })).toBeDefined();
     const exchange = view.api.calls.find((call) => call.path === "/v1/desktop-sessions/exchange");
     expect(exchange?.body).toEqual({ secret: secretNo(1) });
     expect(exchange?.headers.get("authorization")).toBeNull();
-    expect(JSON.parse(keychain.get("desktop-session") ?? "null")).toEqual({ v: 1, sessionId: "session-1", secret: secretNo(2) });
+    expect(JSON.parse(keychain.get("desktop-session") ?? "null")).toEqual({
+      v: 1,
+      sessionId: "session-1",
+      secret: secretNo(2),
+    });
     expect(view.reportError).not.toHaveBeenCalled();
   });
 

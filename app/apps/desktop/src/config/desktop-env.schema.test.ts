@@ -43,7 +43,9 @@ describe("loadDesktopEnv", () => {
   });
 
   it("drops a trailing slash so paths can be appended", () => {
-    expect(loadDesktopEnv({ ...REMOTE, VITE_API_URL: "https://api.example.com/" }).VITE_API_URL).toBe("https://api.example.com");
+    expect(loadDesktopEnv({ ...REMOTE, VITE_API_URL: "https://api.example.com/" }).VITE_API_URL).toBe(
+      "https://api.example.com",
+    );
   });
 
   it("reads an empty MFA list and an empty emulator URL as none (Vite env files have no unset)", () => {
@@ -68,29 +70,54 @@ describe("loadDesktopEnv", () => {
 
   it("requires the Auth Emulator in local and forbids it elsewhere (follow-up #12c)", () => {
     expect(fieldsOf({ ...LOCAL, VITE_AUTH_EMULATOR_URL: undefined })).toEqual(["VITE_AUTH_EMULATOR_URL"]);
-    expect(fieldsOf({ ...REMOTE, VITE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099" })).toEqual(["VITE_AUTH_EMULATOR_URL"]);
+    expect(fieldsOf({ ...REMOTE, VITE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099" })).toEqual([
+      "VITE_AUTH_EMULATOR_URL",
+    ]);
   });
 
   it("accepts the Storage Emulator in local only, as a loopback http origin, and it stays optional", () => {
-    expect(loadDesktopEnv({ ...LOCAL, VITE_STORAGE_EMULATOR_URL: "http://127.0.0.1:9199/" }).VITE_STORAGE_EMULATOR_URL).toBe("http://127.0.0.1:9199");
+    expect(
+      loadDesktopEnv({ ...LOCAL, VITE_STORAGE_EMULATOR_URL: "http://127.0.0.1:9199/" }).VITE_STORAGE_EMULATOR_URL,
+    ).toBe("http://127.0.0.1:9199");
     expect(loadDesktopEnv({ ...LOCAL, VITE_STORAGE_EMULATOR_URL: "" }).VITE_STORAGE_EMULATOR_URL).toBeUndefined();
-    expect(fieldsOf({ ...REMOTE, VITE_STORAGE_EMULATOR_URL: "http://127.0.0.1:9199" })).toEqual(["VITE_STORAGE_EMULATOR_URL"]);
-    expect(fieldsOf({ ...LOCAL, VITE_STORAGE_EMULATOR_URL: "http://storage.example.com:9199" })).toEqual(["VITE_STORAGE_EMULATOR_URL"]);
+    expect(fieldsOf({ ...REMOTE, VITE_STORAGE_EMULATOR_URL: "http://127.0.0.1:9199" })).toEqual([
+      "VITE_STORAGE_EMULATOR_URL",
+    ]);
+    expect(fieldsOf({ ...LOCAL, VITE_STORAGE_EMULATOR_URL: "http://storage.example.com:9199" })).toEqual([
+      "VITE_STORAGE_EMULATOR_URL",
+    ]);
   });
 
   it("accepts the emulator only as a loopback http origin", () => {
-    expect(fieldsOf({ ...LOCAL, VITE_AUTH_EMULATOR_URL: "http://emulator.example.com:9099" })).toEqual(["VITE_AUTH_EMULATOR_URL"]);
-    expect(fieldsOf({ ...LOCAL, VITE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099/path" })).toEqual(["VITE_AUTH_EMULATOR_URL"]);
+    expect(fieldsOf({ ...LOCAL, VITE_AUTH_EMULATOR_URL: "http://emulator.example.com:9099" })).toEqual([
+      "VITE_AUTH_EMULATOR_URL",
+    ]);
+    expect(fieldsOf({ ...LOCAL, VITE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099/path" })).toEqual([
+      "VITE_AUTH_EMULATOR_URL",
+    ]);
   });
 
   it("lists every invalid variable at once", () => {
-    const fields = fieldsOf({ VITE_API_URL: "https://api.example.com", VITE_APP_ENV: "production", VITE_MFA_FACTORS: "sms" });
+    const fields = fieldsOf({
+      VITE_API_URL: "https://api.example.com",
+      VITE_APP_ENV: "production",
+      VITE_MFA_FACTORS: "sms",
+    });
     expect(fields).toEqual(
-      expect.arrayContaining(["VITE_APP_ENV", "VITE_FIREBASE_API_KEY", "VITE_FIREBASE_AUTH_DOMAIN", "VITE_FIREBASE_PROJECT_ID", "VITE_MFA_FACTORS"]),
+      expect.arrayContaining([
+        "VITE_APP_ENV",
+        "VITE_FIREBASE_API_KEY",
+        "VITE_FIREBASE_AUTH_DOMAIN",
+        "VITE_FIREBASE_PROJECT_ID",
+        "VITE_MFA_FACTORS",
+      ]),
     );
   });
 
   it("ignores other variables (Vite adds MODE, DEV, PROD, BASE_URL)", () => {
-    expect(loadDesktopEnv({ ...LOCAL, MODE: "development", DEV: true })).toEqual({ ...LOCAL, VITE_MFA_FACTORS: ["phone"] });
+    expect(loadDesktopEnv({ ...LOCAL, MODE: "development", DEV: true })).toEqual({
+      ...LOCAL,
+      VITE_MFA_FACTORS: ["phone"],
+    });
   });
 });

@@ -27,7 +27,11 @@ describe("loadDesktopBuildEnv", () => {
   it("reads the env from the mode's env file, as Vite does", () => {
     writeFileSync(path.join(envDir, ".env.production"), `VITE_API_URL=https://api.example.com\n${REMOTE_ENV}\n`);
 
-    expect(loadDesktopBuildEnv({ mode: "production", envDir })).toMatchObject({ VITE_API_URL: "https://api.example.com", VITE_APP_ENV: "staging", VITE_MFA_FACTORS: ["totp"] });
+    expect(loadDesktopBuildEnv({ mode: "production", envDir })).toMatchObject({
+      VITE_API_URL: "https://api.example.com",
+      VITE_APP_ENV: "staging",
+      VITE_MFA_FACTORS: ["totp"],
+    });
   });
 
   it("fails closed when the mode has no VITE_API_URL", () => {
@@ -41,7 +45,9 @@ describe("loadDesktopBuildEnv", () => {
     writeFileSync(path.join(envDir, ".env.development"), `VITE_API_URL=http://localhost:3100\n${REMOTE_ENV}\n`);
 
     expect(() => loadDesktopBuildEnv({ mode: "production", envDir })).toThrow(MissingDesktopEnvFileError);
-    expect(() => loadDesktopBuildEnv({ mode: "production", envDir })).toThrow(/^invalid environment: VITE_API_URL, .*copy \.env\.production\.example to \.env\.production/);
+    expect(() => loadDesktopBuildEnv({ mode: "production", envDir })).toThrow(
+      /^invalid environment: VITE_API_URL, .*copy \.env\.production\.example to \.env\.production/,
+    );
   });
 
   it("builds with the committed example values, which are placeholders of a remote environment", () => {

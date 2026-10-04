@@ -6,7 +6,9 @@ import { checkInvitationUsable, type InvitationUseError } from "../../domain/inv
 import { hashInvitationToken } from "../../domain/invitation-token.ts";
 import type { MemberDeps } from "../member-deps.ts";
 
-export type PreviewInvitation = (command: { readonly token: string }) => Promise<Result<InvitationPreview, InvitationUseError>>;
+export type PreviewInvitation = (command: {
+  readonly token: string;
+}) => Promise<Result<InvitationPreview, InvitationUseError>>;
 
 type Deps = Pick<MemberDeps, "invitations" | "organizations" | "clock">;
 
@@ -15,11 +17,19 @@ type Deps = Pick<MemberDeps, "invitations" | "organizations" | "clock">;
  * → 404, accepted → 409, expired → 410.
  * @returns the invitation and its organization's name.
  */
-export const findUsableInvitation = async (deps: Deps, token: string): Promise<Result<{ invitation: Invitation; organizationName: string }, InvitationUseError>> => {
-  const usable = checkInvitationUsable(await deps.invitations.findByTokenHash(hashInvitationToken(token)), deps.clock.now());
+export const findUsableInvitation = async (
+  deps: Deps,
+  token: string,
+): Promise<Result<{ invitation: Invitation; organizationName: string }, InvitationUseError>> => {
+  const usable = checkInvitationUsable(
+    await deps.invitations.findByTokenHash(hashInvitationToken(token)),
+    deps.clock.now(),
+  );
   if (!usable.ok) return usable;
   const organizationName = await deps.organizations.getName(usable.data.tenantId);
-  return organizationName === null ? err(new AccessNotFoundError("invitation")) : ok({ invitation: usable.data, organizationName });
+  return organizationName === null
+    ? err(new AccessNotFoundError("invitation"))
+    : ok({ invitation: usable.data, organizationName });
 };
 
 /**
@@ -33,5 +43,10 @@ export const makePreviewInvitation =
     if (!found.ok) return found;
     const { invitation, organizationName } = found.data;
     const inviter = (await deps.directory.getMany([invitation.invitedBy])).get(invitation.invitedBy);
-    return ok({ organizationName, inviterDisplayName: inviter?.displayName ?? "", maskedEmail: maskEmail(invitation.email), expiresAt: invitation.expiresAt });
+    return ok({
+      organizationName,
+      inviterDisplayName: inviter?.displayName ?? "",
+      maskedEmail: maskEmail(invitation.email),
+      expiresAt: invitation.expiresAt,
+    });
   };

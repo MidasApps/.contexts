@@ -21,7 +21,14 @@ export type DataTablePaginationProps = {
  * Cursor paging (no page numbers: the API returns opaque cursors). A labelled `nav` with
  * previous/next buttons; disabled ends stay visible so the layout does not jump.
  */
-export function DataTablePagination({ hasPrevious, hasNext, onPrevious, onNext, pending = false, label }: DataTablePaginationProps) {
+export function DataTablePagination({
+  hasPrevious,
+  hasNext,
+  onPrevious,
+  onNext,
+  pending = false,
+  label,
+}: DataTablePaginationProps) {
   const t = useTranslations("common.pagination");
   return (
     <nav aria-label={label ?? t("label")} className="flex items-center justify-end gap-2">

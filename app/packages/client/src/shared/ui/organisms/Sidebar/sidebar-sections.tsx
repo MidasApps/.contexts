@@ -17,7 +17,9 @@ export function SidebarFooter({ className, ...props }: ComponentProps<"div">) {
 }
 
 export function SidebarSeparator({ className, ...props }: ComponentProps<typeof Separator>) {
-  return <Separator data-slot="sidebar-separator" className={cn("mx-2 w-auto bg-sidebar-border", className)} {...props} />;
+  return (
+    <Separator data-slot="sidebar-separator" className={cn("mx-2 w-auto bg-sidebar-border", className)} {...props} />
+  );
 }
 
 /** Scrollable middle area with the navigation groups. */
@@ -25,21 +27,30 @@ export function SidebarContent({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-content"
-      className={cn("flex min-h-0 flex-1 flex-col gap-1 overflow-auto group-data-[collapsible=icon]:overflow-hidden", className)}
+      className={cn(
+        "flex min-h-0 flex-1 flex-col gap-1 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        className,
+      )}
       {...props}
     />
   );
 }
 
 export function SidebarGroup({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="sidebar-group" className={cn("relative flex w-full min-w-0 flex-col p-2", className)} {...props} />;
+  return (
+    <div data-slot="sidebar-group" className={cn("relative flex w-full min-w-0 flex-col p-2", className)} {...props} />
+  );
 }
 
 /**
  * Section header in mono uppercase (navegacao.html: TERMINAIS / EQUIPE / CONFIGURAÇÕES). Hidden when
  * collapsed to icons; give the group's list `aria-labelledby` this label's id.
  */
-export function SidebarGroupLabel({ className, asChild = false, ...props }: ComponentProps<"div"> & { asChild?: boolean }) {
+export function SidebarGroupLabel({
+  className,
+  asChild = false,
+  ...props
+}: ComponentProps<"div"> & { asChild?: boolean }) {
   const Component = asChild ? Slot.Root : "div";
   return (
     <Component
@@ -55,7 +66,11 @@ export function SidebarGroupLabel({ className, asChild = false, ...props }: Comp
 }
 
 /** Action next to a group label (e.g. "create project"); needs an accessible name. */
-export function SidebarGroupAction({ className, asChild = false, ...props }: ComponentProps<"button"> & { asChild?: boolean }) {
+export function SidebarGroupAction({
+  className,
+  asChild = false,
+  ...props
+}: ComponentProps<"button"> & { asChild?: boolean }) {
   const Component = asChild ? Slot.Root : "button";
   return (
     <Component

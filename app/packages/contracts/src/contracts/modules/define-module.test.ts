@@ -4,11 +4,19 @@ import { defineContract } from "../contract.ts";
 import { MoneySchema } from "../primitives/money.schema.ts";
 import { defineModule } from "./define-module.ts";
 import { ModuleDefinitionError } from "./module-definition-error.ts";
-import { RESERVED_MODULE_IDS, type ModuleManifest } from "./module-manifest.schema.ts";
+import { type ModuleManifest, RESERVED_MODULE_IDS } from "./module-manifest.schema.ts";
 
 const SettingsSchema = z.strictObject({
-  greeting: z.string().min(1).max(80).meta({ description: "Greeting.", pii: "none", ui: { labelKey: "sample.settings.greeting" } }),
-  defaultBudget: MoneySchema.meta({ description: "Default budget.", pii: "none", ui: { labelKey: "sample.settings.defaultBudget" } }),
+  greeting: z
+    .string()
+    .min(1)
+    .max(80)
+    .meta({ description: "Greeting.", pii: "none", ui: { labelKey: "sample.settings.greeting" } }),
+  defaultBudget: MoneySchema.meta({
+    description: "Default budget.",
+    pii: "none",
+    ui: { labelKey: "sample.settings.defaultBudget" },
+  }),
 });
 
 const settingsContract = (kind: "settings" | "entity" = "settings") =>
@@ -33,11 +41,33 @@ const validManifest = () => ({
   id: "sample",
   labelKey: "sample.module.name",
   permissions: [
-    { id: "sample.item.read", descriptionKey: "sample.permissions.item.read", kind: "read", scope: "tenant", defaultRoles: ["owner", "viewer"] },
-    { id: "sample.item.write", descriptionKey: "sample.permissions.item.write", kind: "write", scope: "tenant", defaultRoles: ["owner"] },
+    {
+      id: "sample.item.read",
+      descriptionKey: "sample.permissions.item.read",
+      kind: "read",
+      scope: "tenant",
+      defaultRoles: ["owner", "viewer"],
+    },
+    {
+      id: "sample.item.write",
+      descriptionKey: "sample.permissions.item.write",
+      kind: "write",
+      scope: "tenant",
+      defaultRoles: ["owner"],
+    },
   ],
   unitTypes: [{ id: "sample.area", labelKey: "sample.unitTypes.area", allowedParents: ["project", "sample.area"] }],
-  navigation: [{ id: "home", slot: "project", labelKey: "sample.nav.home", icon: "layers", path: "", permission: "sample.item.read", order: 10 }],
+  navigation: [
+    {
+      id: "home",
+      slot: "project",
+      labelKey: "sample.nav.home",
+      icon: "layers",
+      path: "",
+      permission: "sample.item.read",
+      order: 10,
+    },
+  ],
   settings: { contract: settingsContract(), readPermission: "sample.item.read", updatePermission: "sample.item.write" },
   messages: { "pt-BR": messages, "en-US": messages },
   agents: [{ id: "sample-helper" }],
@@ -68,7 +98,12 @@ describe("defineModule", () => {
   });
 
   it("accepts a minimal manifest (permissions and messages only)", () => {
-    const manifest = { id: "minimal", labelKey: "minimal.name", permissions: [], messages: { "pt-BR": { name: "Mínimo" } } };
+    const manifest = {
+      id: "minimal",
+      labelKey: "minimal.name",
+      permissions: [],
+      messages: { "pt-BR": { name: "Mínimo" } },
+    };
     expect(define(manifest).id).toBe("minimal");
   });
 
@@ -79,7 +114,20 @@ describe("defineModule", () => {
   });
 
   it("rejects the reserved ids core, platform and every core message namespace", () => {
-    expect(RESERVED_MODULE_IDS).toEqual(expect.arrayContaining(["core", "platform", "common", "errors", "shell", "auth", "profile", "settings", "admin", "permissions"]));
+    expect(RESERVED_MODULE_IDS).toEqual(
+      expect.arrayContaining([
+        "core",
+        "platform",
+        "common",
+        "errors",
+        "shell",
+        "auth",
+        "profile",
+        "settings",
+        "admin",
+        "permissions",
+      ]),
+    );
     for (const id of RESERVED_MODULE_IDS) expectProblem({ ...validManifest(), id }, "reserved");
   });
 
@@ -118,7 +166,9 @@ describe("defineModule", () => {
     manifest.navigation.push({ ...manifest.navigation[0]!, permission: "sample.item.delete" });
     const problems = problemsOf(manifest);
     expect(problems).toContain("duplicate navigation item home");
-    expect(problems).toContain("navigation[1].permission sample.item.delete is neither declared by the module nor a core permission");
+    expect(problems).toContain(
+      "navigation[1].permission sample.item.delete is neither declared by the module nor a core permission",
+    );
   });
 
   it("accepts a core permission on a navigation item", () => {
@@ -137,7 +187,10 @@ describe("defineModule", () => {
 
   it("requires a settings contract of kind settings over an object schema", () => {
     const manifest = validManifest();
-    expectProblem({ ...manifest, settings: { ...manifest.settings, contract: settingsContract("entity") } }, "settings.contract must have kind settings");
+    expectProblem(
+      { ...manifest, settings: { ...manifest.settings, contract: settingsContract("entity") } },
+      "settings.contract must have kind settings",
+    );
     const notObject = defineContract(z.string().meta({ description: "x", pii: "none" }), {
       id: "sample.Scalar",
       kind: "settings",
@@ -147,13 +200,19 @@ describe("defineModule", () => {
       tenancyScope: "organization",
       relations: [],
     });
-    expectProblem({ ...manifest, settings: { ...manifest.settings, contract: notObject } }, "settings.contract must be an object schema");
+    expectProblem(
+      { ...manifest, settings: { ...manifest.settings, contract: notObject } },
+      "settings.contract must be an object schema",
+    );
     expectProblem({ ...manifest, settings: { ...manifest.settings, contract: { id: "x" } } }, "settings.contract");
   });
 
   it("requires settings permissions declared by the module", () => {
     const manifest = validManifest();
-    expectProblem({ ...manifest, settings: { ...manifest.settings, updatePermission: "core.organization.update" } }, "settings.updatePermission");
+    expectProblem(
+      { ...manifest, settings: { ...manifest.settings, updatePermission: "core.organization.update" } },
+      "settings.updatePermission",
+    );
   });
 
   it("accepts any canonical BCP 47 locale and rejects non-canonical tags", () => {
@@ -171,9 +230,17 @@ describe("defineModule", () => {
   });
 
   it("requires capability refs namespaced by the module id and unique per kind", () => {
-    expectProblem({ ...validManifest(), agents: [{ id: "other-helper" }] }, "agents[0].id must start with sample- or sample.");
-    expectProblem({ ...validManifest(), tools: [{ id: "sample.a" }, { id: "sample.a" }] }, "duplicate tools ref sample.a");
-    expect(() => define({ ...validManifest(), workflows: [{ id: "sample.nightly" }], skills: [{ id: "sample-faq" }] })).not.toThrow();
+    expectProblem(
+      { ...validManifest(), agents: [{ id: "other-helper" }] },
+      "agents[0].id must start with sample- or sample.",
+    );
+    expectProblem(
+      { ...validManifest(), tools: [{ id: "sample.a" }, { id: "sample.a" }] },
+      "duplicate tools ref sample.a",
+    );
+    expect(() =>
+      define({ ...validManifest(), workflows: [{ id: "sample.nightly" }], skills: [{ id: "sample-faq" }] }),
+    ).not.toThrow();
   });
 
   it("reports every problem at once with the module id", () => {

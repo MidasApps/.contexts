@@ -25,10 +25,25 @@ describe("toWorkflowRunView", () => {
     const view = toWorkflowRunView(
       run({
         status: "suspended",
-        context: { "request-human-approval": { status: "suspended", startedAt: T0 + 1, suspendedAt: T0 + 2, suspendPayload: { approvalRequestId: "ap1" } } },
+        context: {
+          "request-human-approval": {
+            status: "suspended",
+            startedAt: T0 + 1,
+            suspendedAt: T0 + 2,
+            suspendPayload: { approvalRequestId: "ap1" },
+          },
+        },
       }),
     );
-    expect(view).toMatchObject({ runId: "run-1", workflowId: "approval-demo", tenantId: "org1", status: "suspended", startedBy: "u1", approvalRequestId: "ap1", scheduleId: null });
+    expect(view).toMatchObject({
+      runId: "run-1",
+      workflowId: "approval-demo",
+      tenantId: "org1",
+      status: "suspended",
+      startedBy: "u1",
+      approvalRequestId: "ap1",
+      scheduleId: null,
+    });
   });
 
   it("says which step a failed run stopped at, never the error message", () => {
@@ -39,7 +54,12 @@ describe("toWorkflowRunView", () => {
         context: {
           input: { title: "x" },
           a: { status: "success", startedAt: T0 + 1, endedAt: T0 + 2 },
-          "apply-note": { status: "failed", startedAt: T0 + 3, endedAt: T0 + 4, error: { message: "connect ECONNREFUSED 10.0.0.4:5432" } },
+          "apply-note": {
+            status: "failed",
+            startedAt: T0 + 3,
+            endedAt: T0 + 4,
+            error: { message: "connect ECONNREFUSED 10.0.0.4:5432" },
+          },
         },
       }),
     );
@@ -48,10 +68,19 @@ describe("toWorkflowRunView", () => {
   });
 
   it("tells a guardrail stop from a failure, and a failure outside any step", () => {
-    const tripped = toWorkflowRunView(run({ status: "tripwire", tripwire: { reason: "blocked by moderation" }, context: { a: { status: "failed", startedAt: T0 + 1, tripwire: { reason: "x" } } } }));
+    const tripped = toWorkflowRunView(
+      run({
+        status: "tripwire",
+        tripwire: { reason: "blocked by moderation" },
+        context: { a: { status: "failed", startedAt: T0 + 1, tripwire: { reason: "x" } } },
+      }),
+    );
     expect(tripped?.failure).toEqual({ code: "TRIPWIRE", stepId: "a" });
     expect(JSON.stringify(tripped)).not.toContain("moderation");
-    expect(toWorkflowRunView(run({ status: "failed", context: {} }))?.failure).toEqual({ code: "RUN_FAILED", stepId: null });
+    expect(toWorkflowRunView(run({ status: "failed", context: {} }))?.failure).toEqual({
+      code: "RUN_FAILED",
+      stepId: null,
+    });
     expect(toWorkflowRunView(run({ status: "success" }))?.failure).toBeNull();
     expect(toWorkflowRunView(run({ status: "canceled" }))?.failure).toBeNull();
   });
@@ -79,16 +108,39 @@ describe("eventsOfRun", () => {
       }),
     );
     expect(done.slice(0, 2)).toEqual(running);
-    expect(done.map((event) => event.type)).toEqual(["workflow-start", "workflow-step-start", "workflow-step-suspended", "workflow-step-start", "workflow-step-result", "workflow-finish"]);
+    expect(done.map((event) => event.type)).toEqual([
+      "workflow-start",
+      "workflow-step-start",
+      "workflow-step-suspended",
+      "workflow-step-start",
+      "workflow-step-result",
+      "workflow-finish",
+    ]);
     expect(done.every((event) => !("output" in event))).toBe(true);
   });
 
   it("keeps the suspended event after the step resumes", () => {
-    const events = eventsOfRun(run({ status: "success", context: { a: { status: "success", startedAt: T0 + 1, suspendedAt: T0 + 2, resumedAt: T0 + 3, endedAt: T0 + 4 } } }));
-    expect(events.map((event) => event.type)).toEqual(["workflow-start", "workflow-step-start", "workflow-step-suspended", "workflow-step-result", "workflow-finish"]);
+    const events = eventsOfRun(
+      run({
+        status: "success",
+        context: {
+          a: { status: "success", startedAt: T0 + 1, suspendedAt: T0 + 2, resumedAt: T0 + 3, endedAt: T0 + 4 },
+        },
+      }),
+    );
+    expect(events.map((event) => event.type)).toEqual([
+      "workflow-start",
+      "workflow-step-start",
+      "workflow-step-suspended",
+      "workflow-step-result",
+      "workflow-finish",
+    ]);
   });
 
   it("ends a canceled run with workflow-canceled", () => {
-    expect(eventsOfRun(run({ status: "canceled" })).at(-1)).toMatchObject({ type: "workflow-canceled", status: "canceled" });
+    expect(eventsOfRun(run({ status: "canceled" })).at(-1)).toMatchObject({
+      type: "workflow-canceled",
+      status: "canceled",
+    });
   });
 });

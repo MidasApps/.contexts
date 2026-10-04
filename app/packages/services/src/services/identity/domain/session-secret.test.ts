@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { InvalidRandomBytesError } from "../../access/domain/invitation-token.ts";
-import { generateSessionSecret, hashSessionSecret, secretHashesMatch, SESSION_SECRET_BYTES } from "./session-secret.ts";
+import { generateSessionSecret, hashSessionSecret, SESSION_SECRET_BYTES, secretHashesMatch } from "./session-secret.ts";
 
 const bytes = (fill: number) => (size: number) => new Uint8Array(size).fill(fill);
 

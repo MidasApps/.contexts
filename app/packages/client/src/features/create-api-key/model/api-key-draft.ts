@@ -11,7 +11,12 @@ export type ApiKeyDraftProblems = { name?: "required" | "tooLong"; scopes?: bool
 const NAME_MAX = 80;
 const DAY_MS = 86_400_000;
 
-export const emptyApiKeyDraft = (organizationId: string): ApiKeyDraft => ({ name: "", node: { level: "organization", tenantId: organizationId }, expiryDays: 90, scopes: [] });
+export const emptyApiKeyDraft = (organizationId: string): ApiKeyDraft => ({
+  name: "",
+  node: { level: "organization", tenantId: organizationId },
+  expiryDays: 90,
+  scopes: [],
+});
 
 export const validateApiKeyDraft = (draft: ApiKeyDraft): ApiKeyDraftProblems => {
   const name = draft.name.trim();

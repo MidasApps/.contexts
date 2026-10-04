@@ -32,7 +32,11 @@ export const useAsyncAction = (): AsyncAction => {
       return true;
     } catch (failure: unknown) {
       const described = describe(failure);
-      setError(described.requestId === undefined ? described.message : t("messageWithReference", { message: described.message, requestId: described.requestId }));
+      setError(
+        described.requestId === undefined
+          ? described.message
+          : t("messageWithReference", { message: described.message, requestId: described.requestId }),
+      );
       return false;
     } finally {
       setPending(false);

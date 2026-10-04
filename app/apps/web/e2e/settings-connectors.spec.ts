@@ -25,7 +25,10 @@ test("creates, edits, sets the secret of, disables and deletes a connector", asy
   await editor.getByRole("textbox", { name: /^URL do servidor/ }).fill("https://mcp.example.com/mcp");
   await editor.getByRole("textbox", { name: /^Hosts permitidos/ }).fill("mcp.example.com");
   await editor.getByRole("textbox", { name: /^Ferramentas permitidas/ }).fill("tickets.list\ntickets.create");
-  await editor.getByRole("group", { name: "Ferramentas que rodam sem aprovação" }).getByRole("checkbox", { name: "tickets.list" }).check();
+  await editor
+    .getByRole("group", { name: "Ferramentas que rodam sem aprovação" })
+    .getByRole("checkbox", { name: "tickets.list" })
+    .check();
   await editor.getByRole("button", { name: "Criar conector" }).click();
   await expect(toast(page, `Conector ${name} criado.`)).toBeVisible();
   const row = rowOf(page, name);
@@ -35,7 +38,9 @@ test("creates, edits, sets the secret of, disables and deletes a connector", asy
 
   await row.getByRole("button", { name: `Editar ${name}` }).click();
   const edit = page.getByRole("dialog", { name: `Editar ${name}` });
-  await edit.getByRole("textbox", { name: /^Ferramentas permitidas/ }).fill("tickets.list\ntickets.create\ntickets.close");
+  await edit
+    .getByRole("textbox", { name: /^Ferramentas permitidas/ })
+    .fill("tickets.list\ntickets.create\ntickets.close");
   await edit.getByRole("button", { name: "Salvar alterações" }).click();
   await expect(toast(page, `Conector ${name} atualizado.`)).toBeVisible();
   await expect(row).toContainText("3 ferramentas");
@@ -55,13 +60,23 @@ test("creates, edits, sets the secret of, disables and deletes a connector", asy
   await expect(page.getByText(SECRET)).toHaveCount(0);
   expect(await page.content()).not.toContain(SECRET);
 
-  await rowOf(page, name).getByRole("button", { name: `Desativar ${name}` }).click();
-  await page.getByRole("alertdialog", { name: `Desativar ${name}?` }).getByRole("button", { name: "Desativar" }).click();
+  await rowOf(page, name)
+    .getByRole("button", { name: `Desativar ${name}` })
+    .click();
+  await page
+    .getByRole("alertdialog", { name: `Desativar ${name}?` })
+    .getByRole("button", { name: "Desativar" })
+    .click();
   await expect(toast(page, `Conector ${name} desativado.`)).toBeVisible();
   await expect(rowOf(page, name)).toContainText("Desativado");
 
-  await rowOf(page, name).getByRole("button", { name: `Excluir ${name}` }).click();
-  await page.getByRole("alertdialog", { name: `Excluir ${name}?` }).getByRole("button", { name: "Excluir conector" }).click();
+  await rowOf(page, name)
+    .getByRole("button", { name: `Excluir ${name}` })
+    .click();
+  await page
+    .getByRole("alertdialog", { name: `Excluir ${name}?` })
+    .getByRole("button", { name: "Excluir conector" })
+    .click();
   await expect(toast(page, `Conector ${name} excluído.`)).toBeVisible();
   await expect(rowOf(page, name)).toHaveCount(0);
 });

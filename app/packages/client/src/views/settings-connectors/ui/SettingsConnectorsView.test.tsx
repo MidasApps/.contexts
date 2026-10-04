@@ -5,7 +5,7 @@ import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildConnector } from "#/shared/testing/admin-operations-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsConnectorsView } from "./SettingsConnectorsView.tsx";
 
@@ -30,7 +30,10 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     <main>
       <SettingsConnectorsView />
     </main>,
-    { path: `/o/${IDS.organization}/settings/connectors`, routes: shellRoutes(permissions, { [LIST]: page([buildConnector(), MCP]), ...routes }) },
+    {
+      path: `/o/${IDS.organization}/settings/connectors`,
+      routes: shellRoutes(permissions, { [LIST]: page([buildConnector(), MCP]), ...routes }),
+    },
   );
 
 // The whole app shell boots per test and sibling suites load the machine: the default 1 s of
@@ -43,7 +46,11 @@ afterAll(() => {
 });
 
 /** Fills a field by paste: long values typed key by key are slow under load and prove nothing more. */
-const paste = async (user: { click: (element: Element) => Promise<void>; paste: (text: string) => Promise<void> }, element: Element, text: string): Promise<void> => {
+const paste = async (
+  user: { click: (element: Element) => Promise<void>; paste: (text: string) => Promise<void> },
+  element: Element,
+  text: string,
+): Promise<void> => {
   await user.click(element);
   await user.paste(text);
 };
@@ -67,13 +74,26 @@ describe("SettingsConnectorsView", { timeout: 30_000 }, () => {
     expect(within(mcp).getByText("Não definido")).toBeDefined();
     expect(container.textContent).not.toContain(SECRET_REF);
     expect(screen.getByText(/Não há teste de conexão/u)).toBeDefined();
-    expect(api.callLines().filter((line) => line.includes("/connectors"))).toEqual([`GET /v1/organizations/${IDS.organization}/connectors`]);
+    expect(api.callLines().filter((line) => line.includes("/connectors"))).toEqual([
+      `GET /v1/organizations/${IDS.organization}/connectors`,
+    ]);
     await expectNoAxeViolations(container);
   });
 
   it("says why a connector did not load, under its status, and when", async () => {
     const { container } = renderView({
-      [LIST]: page([buildConnector({ lastError: { code: "SPEC_UNAVAILABLE", at: "2026-10-01T13:00:00.000Z" } }), buildConnector({ id: "Cn4sK2lPq0WnR5tYu3bZ", name: "warehouse", type: "postgres", secretRef: null, toolPolicy: { allow: ["query"], readOnly: ["query"] }, config: { allowedRelations: ["public.orders"] }, lastError: { code: "SECRET_MISSING", at: "2026-10-01T13:00:00.000Z" } })]),
+      [LIST]: page([
+        buildConnector({ lastError: { code: "SPEC_UNAVAILABLE", at: "2026-10-01T13:00:00.000Z" } }),
+        buildConnector({
+          id: "Cn4sK2lPq0WnR5tYu3bZ",
+          name: "warehouse",
+          type: "postgres",
+          secretRef: null,
+          toolPolicy: { allow: ["query"], readOnly: ["query"] },
+          config: { allowedRelations: ["public.orders"] },
+          lastError: { code: "SECRET_MISSING", at: "2026-10-01T13:00:00.000Z" },
+        }),
+      ]),
     });
     const table = await screen.findByRole("table", { name: "Conectores de Northwind" });
     const issues = await within(table).findByRole("row", { name: /issues-api/u });
@@ -85,7 +105,11 @@ describe("SettingsConnectorsView", { timeout: 30_000 }, () => {
   });
 
   it("goes straight to the secret after creating a connector that needs one", async () => {
-    const created = buildConnector({ ...MCP, status: "active", config: { url: "https://mcp.example.com/mcp", allowedHosts: ["mcp.example.com"], auth: "bearer" } });
+    const created = buildConnector({
+      ...MCP,
+      status: "active",
+      config: { url: "https://mcp.example.com/mcp", allowedHosts: ["mcp.example.com"], auth: "bearer" },
+    });
     const { user } = renderView({ "POST /v1/organizations/:organizationId/connectors": ok(created, 201) });
     await user.click(await screen.findByRole("button", { name: "Novo conector" }));
     const dialog = await screen.findByRole("dialog", { name: "Novo conector" });
@@ -146,7 +170,9 @@ describe("SettingsConnectorsView", { timeout: 30_000 }, () => {
 
   it("flags invalid fields before sending and shows the API's field errors", async () => {
     const { user, api } = renderView({
-      [`PATCH ${ONE}`]: apiError(400, "VALIDATION_FAILED", [{ field: "config.allowedHosts.0", issue: "HOST_NOT_ALLOWED" }]),
+      [`PATCH ${ONE}`]: apiError(400, "VALIDATION_FAILED", [
+        { field: "config.allowedHosts.0", issue: "HOST_NOT_ALLOWED" },
+      ]),
     });
     await user.click(await screen.findByRole("button", { name: "Editar issues-api" }));
     const dialog = await screen.findByRole("dialog", { name: "Editar issues-api" });
@@ -184,7 +210,10 @@ describe("SettingsConnectorsView", { timeout: 30_000 }, () => {
     expect(dialog.textContent).not.toContain(SECRET);
     await user.click(within(dialog).getByRole("button", { name: "Substituir segredo" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-    expect(requests[0]?.params).toEqual({ organizationId: IDS.organization, connectorId: String(buildConnector()["id"]) });
+    expect(requests[0]?.params).toEqual({
+      organizationId: IDS.organization,
+      connectorId: String(buildConnector()["id"]),
+    });
     expect(requests[0]?.body).toEqual({ value: SECRET });
     expect(document.body.textContent).not.toContain(SECRET);
     expect(document.body.innerHTML).not.toContain(SECRET);
@@ -202,16 +231,27 @@ describe("SettingsConnectorsView", { timeout: 30_000 }, () => {
       calls.push(request);
       return response;
     };
-    const { user } = renderView({ [`PATCH ${ONE}`]: record(ok(buildConnector({ status: "disabled" }))), [`DELETE ${ONE}`]: record(noContent()) });
+    const { user } = renderView({
+      [`PATCH ${ONE}`]: record(ok(buildConnector({ status: "disabled" }))),
+      [`DELETE ${ONE}`]: record(noContent()),
+    });
     await user.click(await screen.findByRole("button", { name: "Desativar issues-api" }));
-    await user.click(within(await screen.findByRole("alertdialog", { name: "Desativar issues-api?" })).getByRole("button", { name: "Desativar" }));
+    await user.click(
+      within(await screen.findByRole("alertdialog", { name: "Desativar issues-api?" })).getByRole("button", {
+        name: "Desativar",
+      }),
+    );
     await waitFor(() => expect(calls).toHaveLength(1));
     expect(calls[0]?.body).toEqual({ status: "disabled" });
     expect(calls[0]?.params["organizationId"]).toBe(IDS.organization);
 
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     await user.click(screen.getByRole("button", { name: "Excluir docs-mcp" }));
-    await user.click(within(await screen.findByRole("alertdialog", { name: "Excluir docs-mcp?" })).getByRole("button", { name: "Excluir conector" }));
+    await user.click(
+      within(await screen.findByRole("alertdialog", { name: "Excluir docs-mcp?" })).getByRole("button", {
+        name: "Excluir conector",
+      }),
+    );
     await waitFor(() => expect(calls).toHaveLength(2));
     expect(calls[1]?.method).toBe("DELETE");
     expect(calls[1]?.params).toEqual({ organizationId: IDS.organization, connectorId: "Cn4sK2lPq0WnR5tYu3bX" });
@@ -239,7 +279,11 @@ describe("SettingsConnectorsView", { timeout: 30_000 }, () => {
     expect(await screen.findByRole("heading", { name: "Nenhum conector" })).toBeDefined();
     setOnline(false);
     try {
-      await waitFor(() => expect(screen.getAllByRole("button", { name: "Novo conector" }).every((button) => button.hasAttribute("disabled"))).toBe(true));
+      await waitFor(() =>
+        expect(
+          screen.getAllByRole("button", { name: "Novo conector" }).every((button) => button.hasAttribute("disabled")),
+        ).toBe(true),
+      );
       expect(screen.getAllByRole("button", { name: "Novo conector" })).toHaveLength(2);
       expect(screen.getByText(/Crie um conector para que os agentes/u)).toBeDefined();
       expect(screen.queryByText(/Você não tem permissão para criar conectores/u)).toBeNull();

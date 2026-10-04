@@ -7,7 +7,7 @@ import { ACCEPTED_AUDIO_TYPES, baseMediaType, wavDurationSeconds } from "./audio
 import { type CoreVoice, VoiceUnavailableError } from "./create-voice.ts";
 import type { RealtimeMinter } from "./realtime-session.ts";
 import { SpeechInputSchema } from "./speech-input.schema.ts";
-import type { VoiceCallKind, VoiceCaller, VoiceGovernance } from "./voice-governance.ts";
+import type { VoiceCaller, VoiceCallKind, VoiceGovernance } from "./voice-governance.ts";
 
 /** Upload cap of a transcription (spec Task 26); the Mastra `bodySizeLimit` sits above it. */
 export const MAX_AUDIO_BYTES = 5 * 1024 * 1024;
@@ -65,7 +65,10 @@ const STATUS: Record<ErrorCode, number> = {
 
 /** Envelope of contracts/api.md §6. */
 const errorResponse = (code: ErrorCode, requestId: string, details?: readonly ErrorDetail[]): Response =>
-  Response.json({ error: { code, message: MESSAGES[code], ...(details === undefined ? {} : { details }), requestId } }, { status: STATUS[code] });
+  Response.json(
+    { error: { code, message: MESSAGES[code], ...(details === undefined ? {} : { details }), requestId } },
+    { status: STATUS[code] },
+  );
 
 const requestIdOf = (request: Request): string => resolveRequestId(request.headers.get(FORWARDED_HEADERS.requestId));
 
@@ -84,7 +87,8 @@ const readCapped = async (request: Request, limit: number): Promise<Uint8Array |
   return new Uint8Array(Buffer.concat(chunks));
 };
 
-const tooLong = (seconds: number | null | undefined): boolean => seconds !== null && seconds !== undefined && seconds > MAX_AUDIO_SECONDS;
+const tooLong = (seconds: number | null | undefined): boolean =>
+  seconds !== null && seconds !== undefined && seconds > MAX_AUDIO_SECONDS;
 
 const upstreamFailure = (deps: VoiceRouteDeps, event: string, requestId: string, error: unknown): Response => {
   if (error instanceof VoiceUnavailableError) return errorResponse("FEATURE_UNAVAILABLE", requestId);
@@ -93,18 +97,37 @@ const upstreamFailure = (deps: VoiceRouteDeps, event: string, requestId: string,
   return errorResponse("UPSTREAM_UNAVAILABLE", requestId);
 };
 
-type Admission = { readonly ok: true; readonly caller: VoiceCaller | null } | { readonly ok: false; readonly response: Response };
+type Admission =
+  | { readonly ok: true; readonly caller: VoiceCaller | null }
+  | { readonly ok: false; readonly response: Response };
 
 /** Gate, caller and budget before any body is read or the provider is called (decision 0034). */
-const admit = async (deps: VoiceRouteDeps, requestContext: RequestContext<unknown> | undefined, requestId: string, realtime = false): Promise<Admission> => {
+const admit = async (
+  deps: VoiceRouteDeps,
+  requestContext: RequestContext<unknown> | undefined,
+  requestId: string,
+  realtime = false,
+): Promise<Admission> => {
   if (deps.governance === undefined) return { ok: true, caller: null };
   const admitted = await deps.governance.admit(requestContext, { realtime });
-  return admitted.ok ? { ok: true, caller: admitted.caller } : { ok: false, response: errorResponse(admitted.refusal.code, requestId) };
+  return admitted.ok
+    ? { ok: true, caller: admitted.caller }
+    : { ok: false, response: errorResponse(admitted.refusal.code, requestId) };
 };
 
-const recordCall = async (deps: VoiceRouteDeps, caller: VoiceCaller | null, kind: VoiceCallKind, startedAt: number): Promise<void> => {
+const recordCall = async (
+  deps: VoiceRouteDeps,
+  caller: VoiceCaller | null,
+  kind: VoiceCallKind,
+  startedAt: number,
+): Promise<void> => {
   if (deps.governance === undefined || caller === null) return;
-  await deps.governance.record({ caller, kind, model: deps.voice?.models[kind] ?? null, latencyMs: performance.now() - startedAt });
+  await deps.governance.record({
+    caller,
+    kind,
+    model: deps.voice?.models[kind] ?? null,
+    latencyMs: performance.now() - startedAt,
+  });
 };
 
 /**
@@ -112,30 +135,44 @@ const recordCall = async (deps: VoiceRouteDeps, caller: VoiceCaller | null, kind
  * ≤ 60 s. A WAV is measured from its header before the model runs; other containers
  * are measured by the duration the model reports (decoding them here would need a codec).
  */
-export const handleTranscription = async (request: Request, deps: VoiceRouteDeps, requestContext?: RequestContext<unknown>): Promise<Response> => {
+export const handleTranscription = async (
+  request: Request,
+  deps: VoiceRouteDeps,
+  requestContext?: RequestContext<unknown>,
+): Promise<Response> => {
   const requestId = requestIdOf(request);
-  if (deps.voice === null || !deps.voice.capabilities.transcription) return errorResponse("FEATURE_UNAVAILABLE", requestId);
+  if (deps.voice === null || !deps.voice.capabilities.transcription)
+    return errorResponse("FEATURE_UNAVAILABLE", requestId);
   const admitted = await admit(deps, requestContext, requestId);
   if (!admitted.ok) return admitted.response;
   const mediaType = baseMediaType(request.headers.get("content-type"));
-  if (mediaType === undefined || !ACCEPTED_AUDIO_TYPES.has(mediaType)) return errorResponse("UNSUPPORTED_MEDIA_TYPE", requestId);
+  if (mediaType === undefined || !ACCEPTED_AUDIO_TYPES.has(mediaType))
+    return errorResponse("UNSUPPORTED_MEDIA_TYPE", requestId);
   const audio = await readCapped(request, MAX_AUDIO_BYTES);
   if (audio === "too-large") return errorResponse("PAYLOAD_TOO_LARGE", requestId);
-  if (audio.byteLength === 0) return errorResponse("VALIDATION_FAILED", requestId, [{ field: "body", issue: "EMPTY_AUDIO" }]);
+  if (audio.byteLength === 0)
+    return errorResponse("VALIDATION_FAILED", requestId, [{ field: "body", issue: "EMPTY_AUDIO" }]);
   if (tooLong(wavDurationSeconds(audio))) return errorResponse("AUDIO_TOO_LONG", requestId);
   const startedAt = performance.now();
   try {
     const transcript = await deps.voice.transcribe({ audio, mediaType, abortSignal: request.signal });
     await recordCall(deps, admitted.caller, "transcription", startedAt);
     if (tooLong(transcript.durationInSeconds)) return errorResponse("AUDIO_TOO_LONG", requestId);
-    deps.logger.info("voice_transcribed", { requestId, audioBytes: audio.byteLength, mediaType, durationMs: Math.round(performance.now() - startedAt) });
+    deps.logger.info("voice_transcribed", {
+      requestId,
+      audioBytes: audio.byteLength,
+      mediaType,
+      durationMs: Math.round(performance.now() - startedAt),
+    });
     return Response.json({ data: transcript });
   } catch (error: unknown) {
     return upstreamFailure(deps, "voice_transcription_failed", requestId, error);
   }
 };
 
-const readJson = async (request: Request): Promise<{ ok: true; value: unknown } | { ok: false; reason: "too-large" | "invalid" }> => {
+const readJson = async (
+  request: Request,
+): Promise<{ ok: true; value: unknown } | { ok: false; reason: "too-large" | "invalid" }> => {
   const body = await readCapped(request, MAX_SPEECH_BODY_BYTES);
   if (body === "too-large") return { ok: false, reason: "too-large" };
   try {
@@ -146,7 +183,11 @@ const readJson = async (request: Request): Promise<{ ok: true; value: unknown } 
 };
 
 /** `POST /voice/speech` `{ text, voice? }`: streams the synthesized audio. */
-export const handleSpeech = async (request: Request, deps: VoiceRouteDeps, requestContext?: RequestContext<unknown>): Promise<Response> => {
+export const handleSpeech = async (
+  request: Request,
+  deps: VoiceRouteDeps,
+  requestContext?: RequestContext<unknown>,
+): Promise<Response> => {
   const requestId = requestIdOf(request);
   if (deps.voice === null || !deps.voice.capabilities.speech) return errorResponse("FEATURE_UNAVAILABLE", requestId);
   const admitted = await admit(deps, requestContext, requestId);
@@ -159,15 +200,27 @@ export const handleSpeech = async (request: Request, deps: VoiceRouteDeps, reque
   }
   const parsed = SpeechInputSchema.safeParse(body.value);
   if (!parsed.success) {
-    const details = parsed.error.issues.map((issue) => ({ field: issue.path.map(String).join("."), issue: issue.code.toUpperCase() }));
+    const details = parsed.error.issues.map((issue) => ({
+      field: issue.path.map(String).join("."),
+      issue: issue.code.toUpperCase(),
+    }));
     return errorResponse("VALIDATION_FAILED", requestId, details);
   }
   const startedAt = performance.now();
   try {
     const { text, voice } = parsed.data;
-    const { audio, mediaType } = await deps.voice.synthesize({ text, ...(voice === undefined ? {} : { voice }), abortSignal: request.signal });
+    const { audio, mediaType } = await deps.voice.synthesize({
+      text,
+      ...(voice === undefined ? {} : { voice }),
+      abortSignal: request.signal,
+    });
     await recordCall(deps, admitted.caller, "speech", startedAt);
-    deps.logger.info("voice_synthesized", { requestId, textChars: parsed.data.text.length, audioBytes: audio.byteLength, durationMs: Math.round(performance.now() - startedAt) });
+    deps.logger.info("voice_synthesized", {
+      requestId,
+      textChars: parsed.data.text.length,
+      audioBytes: audio.byteLength,
+      durationMs: Math.round(performance.now() - startedAt),
+    });
     const stream = Readable.toWeb(Readable.from([Buffer.from(audio)])) as ReadableStream<Uint8Array>;
     return new Response(stream, { status: 200, headers: { "content-type": mediaType, "cache-control": "no-store" } });
   } catch (error: unknown) {
@@ -181,9 +234,14 @@ export const handleSpeech = async (request: Request, deps: VoiceRouteDeps, reque
  * tenant's `chat.voice` and `chat.voice.realtime` flags are on, the mode is real and the provider key exists. The audio then flows between
  * the browser and the provider, outside the usage ledger (decision 0034 amendment).
  */
-export const handleRealtimeSession = async (request: Request, deps: VoiceRouteDeps, requestContext?: RequestContext<unknown>): Promise<Response> => {
+export const handleRealtimeSession = async (
+  request: Request,
+  deps: VoiceRouteDeps,
+  requestContext?: RequestContext<unknown>,
+): Promise<Response> => {
   const requestId = requestIdOf(request);
-  if (deps.realtime === undefined || deps.governance === undefined) return errorResponse("FEATURE_UNAVAILABLE", requestId);
+  if (deps.realtime === undefined || deps.governance === undefined)
+    return errorResponse("FEATURE_UNAVAILABLE", requestId);
   const admitted = await admit(deps, requestContext, requestId, true);
   if (!admitted.ok) return admitted.response;
   try {
@@ -203,8 +261,16 @@ const contextOf = (context: RouteContext) => context.get("requestContext") as Re
  * member with `core.chat.use`); the context middleware on `/voice/*` writes the caller's context.
  */
 export const createVoiceRoutes = (deps: VoiceRouteDeps): ApiRoute[] => [
-  registerApiRoute(TRANSCRIPTION_ROUTE_PATH, { method: "POST", requiresAuth: true, handler: (context) => handleTranscription(context.req.raw, deps, contextOf(context)) }),
-  registerApiRoute(SPEECH_ROUTE_PATH, { method: "POST", requiresAuth: true, handler: (context) => handleSpeech(context.req.raw, deps, contextOf(context)) }),
+  registerApiRoute(TRANSCRIPTION_ROUTE_PATH, {
+    method: "POST",
+    requiresAuth: true,
+    handler: (context) => handleTranscription(context.req.raw, deps, contextOf(context)),
+  }),
+  registerApiRoute(SPEECH_ROUTE_PATH, {
+    method: "POST",
+    requiresAuth: true,
+    handler: (context) => handleSpeech(context.req.raw, deps, contextOf(context)),
+  }),
   registerApiRoute(REALTIME_SESSION_ROUTE_PATH, {
     method: "POST",
     requiresAuth: true,

@@ -23,7 +23,14 @@ const buildWrappedSecretsEntry = (): CatalogEntry => {
       kind: "entity",
       description: "Item with secrets behind wrappers.",
       examples: [
-        { name: "ok", metaThenNullable: "s1", nullableThenMeta: "s2", metaThenOptional: "s3", metaThenDefault: "s4", defaultThenMeta: "s5" },
+        {
+          name: "ok",
+          metaThenNullable: "s1",
+          nullableThenMeta: "s2",
+          metaThenOptional: "s3",
+          metaThenDefault: "s4",
+          defaultThenMeta: "s5",
+        },
       ],
       pii: "sensitive",
       tenancyScope: "organization",
@@ -58,13 +65,28 @@ describe("buildAiCatalog", () => {
 
   it("drops a property that references a contract excluded from the AI catalog", () => {
     const hidden: CatalogEntry = {
-      id: "vault.Code", context: "vault", name: "Code", kind: "view", description: "Opaque code.",
-      examples: ["x"], pii: "sensitive", tenancyScope: "organization", relations: [], fields: [],
+      id: "vault.Code",
+      context: "vault",
+      name: "Code",
+      kind: "view",
+      description: "Opaque code.",
+      examples: ["x"],
+      pii: "sensitive",
+      tenancyScope: "organization",
+      relations: [],
+      fields: [],
       jsonSchema: { type: "string", "x-pii": "sensitive" },
     };
     const holder: CatalogEntry = {
-      id: "vault.Holder", context: "vault", name: "Holder", kind: "entity", description: "Holds a code.",
-      examples: [{ label: "a", code: "x" }], pii: "none", tenancyScope: "organization", relations: [],
+      id: "vault.Holder",
+      context: "vault",
+      name: "Holder",
+      kind: "entity",
+      description: "Holds a code.",
+      examples: [{ label: "a", code: "x" }],
+      pii: "none",
+      tenancyScope: "organization",
+      relations: [],
       fields: [
         { name: "code", description: "Code.", pii: "none", required: true },
         { name: "label", description: "Label.", pii: "none", required: true },
@@ -97,14 +119,25 @@ describe("redactExampleValue", () => {
             city: { type: "string", "x-pii": "none" },
           },
         },
-        contacts: { type: "array", items: { type: "object", properties: { phone: { type: "string", "x-pii": "personal" } } } },
+        contacts: {
+          type: "array",
+          items: { type: "object", properties: { phone: { type: "string", "x-pii": "personal" } } },
+        },
         byKey: {
           type: "object",
-          additionalProperties: { type: "object", "x-pii": "sensitive", properties: { ssn: { type: "string", "x-pii": "sensitive" } } },
+          additionalProperties: {
+            type: "object",
+            "x-pii": "sensitive",
+            properties: { ssn: { type: "string", "x-pii": "sensitive" } },
+          },
         },
         byLabel: {
           type: "object",
-          additionalProperties: { type: "object", "x-pii": "none", properties: { text: { type: "string", "x-pii": "none" } } },
+          additionalProperties: {
+            type: "object",
+            "x-pii": "none",
+            properties: { text: { type: "string", "x-pii": "none" } },
+          },
         },
         maybe: { anyOf: [{ type: "string", "x-pii": "sensitive" }, { type: "null" }] },
       },
@@ -136,7 +169,10 @@ describe("redactExampleValue", () => {
   it("classifies undeclared keys by an additionalProperties schema that carries x-pii", () => {
     const open = { type: "object", additionalProperties: { type: "string", "x-pii": "none" } };
     const personal = { type: "object", additionalProperties: { type: "string", "x-pii": "personal" } };
-    const nullable = { type: "object", additionalProperties: { anyOf: [{ type: "string", "x-pii": "sensitive" }, { type: "null" }] } };
+    const nullable = {
+      type: "object",
+      additionalProperties: { anyOf: [{ type: "string", "x-pii": "sensitive" }, { type: "null" }] },
+    };
     expect(redactExampleValue({ a: "x" }, open, noRefs)).toEqual({ a: "x" });
     expect(redactExampleValue({ a: "x" }, personal, noRefs)).toEqual({ a: REDACTED });
     expect(redactExampleValue({ a: "x" }, nullable, noRefs)).toEqual({});

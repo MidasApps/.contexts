@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Combobox } from "#/shared/ui/molecules/Combobox/Combobox.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import type { MoveTarget } from "../model/unit-tree-rules.ts";
@@ -47,43 +54,43 @@ function MoveUnitDialogBody({ unitName, targets, onOpenChange, onMove }: MoveUni
 
   return (
     <>
-        <DialogHeader>
-          <DialogTitle>{t("title", { name: unitName ?? "" })}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
-        </DialogHeader>
-        <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
-          {failure === null ? null : <ApiErrorAlert error={failure} />}
-          <Field>
-            <FieldLabel>{t("destination")}</FieldLabel>
-            {targets.length === 0 ? (
-              <FieldDescription>{t("noTargets")}</FieldDescription>
-            ) : (
-              <FieldControl>
-                <Combobox
-                  groups={[{ options: targets.map(({ value, label }) => ({ value, label })) }]}
-                  value={target}
-                  onValueChange={(value) => {
-                    setTarget(value);
-                    setMissing(false);
-                  }}
-                  placeholder={t("placeholder")}
-                  searchLabel={t("search")}
-                  searchPlaceholder={t("search")}
-                  emptyText={t("empty")}
-                />
-              </FieldControl>
-            )}
-            <FieldError errors={[missing ? t("required") : undefined]} />
-          </Field>
-          <DialogFooter>
-            <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
-              {t("cancel")}
-            </Button>
-            <Button type="submit" pending={pending} disabled={targets.length === 0}>
-              {t("submit")}
-            </Button>
-          </DialogFooter>
-        </form>
+      <DialogHeader>
+        <DialogTitle>{t("title", { name: unitName ?? "" })}</DialogTitle>
+        <DialogDescription>{t("description")}</DialogDescription>
+      </DialogHeader>
+      <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
+        {failure === null ? null : <ApiErrorAlert error={failure} />}
+        <Field>
+          <FieldLabel>{t("destination")}</FieldLabel>
+          {targets.length === 0 ? (
+            <FieldDescription>{t("noTargets")}</FieldDescription>
+          ) : (
+            <FieldControl>
+              <Combobox
+                groups={[{ options: targets.map(({ value, label }) => ({ value, label })) }]}
+                value={target}
+                onValueChange={(value) => {
+                  setTarget(value);
+                  setMissing(false);
+                }}
+                placeholder={t("placeholder")}
+                searchLabel={t("search")}
+                searchPlaceholder={t("search")}
+                emptyText={t("empty")}
+              />
+            </FieldControl>
+          )}
+          <FieldError errors={[missing ? t("required") : undefined]} />
+        </Field>
+        <DialogFooter>
+          <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
+            {t("cancel")}
+          </Button>
+          <Button type="submit" pending={pending} disabled={targets.length === 0}>
+            {t("submit")}
+          </Button>
+        </DialogFooter>
+      </form>
     </>
   );
 }

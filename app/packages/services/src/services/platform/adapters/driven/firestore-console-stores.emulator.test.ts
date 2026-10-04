@@ -2,8 +2,12 @@ import { TenantIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
 import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
-import { createFirestoreAgentSettingsRepository, createFirestoreOrganizationAdminStore, createFirestorePlanRepository } from "./firestore-console-stores.ts";
 import type { AgentSettingsFields } from "../../application/ports/console-ports.ts";
+import {
+  createFirestoreAgentSettingsRepository,
+  createFirestoreOrganizationAdminStore,
+  createFirestorePlanRepository,
+} from "./firestore-console-stores.ts";
 
 const firebase = emulatorFirebase();
 const RUN = Date.now().toString(36).padStart(10, "0");
@@ -15,10 +19,22 @@ describe("Firestore console stores (emulator)", () => {
     const plans = createFirestorePlanRepository({ firestore: firebase.firestore });
     const created = await plans.create({ name: `Plan ${RUN}`, limits: LIMITS, at: AT, actorId: "staff" });
     expect(created.id).toMatch(/^[A-Za-z0-9]{20}$/);
-    const replaced = await plans.replace({ id: created.id, name: `Plan ${RUN}`, limits: { ...LIMITS, monthlyTokens: 9 }, at: "2026-10-02T00:00:00.000Z", actorId: "staff" });
-    expect(replaced).toMatchObject({ createdAt: AT, updatedAt: "2026-10-02T00:00:00.000Z", limits: { monthlyTokens: 9 } });
+    const replaced = await plans.replace({
+      id: created.id,
+      name: `Plan ${RUN}`,
+      limits: { ...LIMITS, monthlyTokens: 9 },
+      at: "2026-10-02T00:00:00.000Z",
+      actorId: "staff",
+    });
+    expect(replaced).toMatchObject({
+      createdAt: AT,
+      updatedAt: "2026-10-02T00:00:00.000Z",
+      limits: { monthlyTokens: 9 },
+    });
     expect(await plans.get(created.id)).toEqual(replaced);
-    expect(await plans.replace({ id: "missingPlanaaaaaaaaa", name: "x", limits: LIMITS, at: AT, actorId: "s" })).toBeNull();
+    expect(
+      await plans.replace({ id: "missingPlanaaaaaaaaa", name: "x", limits: LIMITS, at: AT, actorId: "s" }),
+    ).toBeNull();
   });
 
   it("lists live organizations by id, sets status, and keeps the plan assignment apart", async () => {
@@ -40,8 +56,18 @@ describe("Firestore console stores (emulator)", () => {
     expect(await store.setStatus({ tenantId: `a${RUN}`, status: "suspended", at: AT, actorId: "staff" })).toBe(true);
     expect(await store.setStatus({ tenantId: `b${RUN}`, status: "suspended", at: AT, actorId: "staff" })).toBe(false);
     expect((await store.getLive(`a${RUN}`))?.status).toBe("suspended");
-    await store.setPlan({ tenantId: `a${RUN}`, planId: `plan${RUN}`, budgetOverride: { monthlyMicroUsd: 5, monthlyTokens: 6 }, at: AT, actorId: "staff" });
-    expect(await store.getPlan(`a${RUN}`)).toEqual({ tenantId: `a${RUN}`, planId: `plan${RUN}`, budgetOverride: { monthlyMicroUsd: 5, monthlyTokens: 6 } });
+    await store.setPlan({
+      tenantId: `a${RUN}`,
+      planId: `plan${RUN}`,
+      budgetOverride: { monthlyMicroUsd: 5, monthlyTokens: 6 },
+      at: AT,
+      actorId: "staff",
+    });
+    expect(await store.getPlan(`a${RUN}`)).toEqual({
+      tenantId: `a${RUN}`,
+      planId: `plan${RUN}`,
+      budgetOverride: { monthlyMicroUsd: 5, monthlyTokens: 6 },
+    });
     expect(await store.tenantsOnPlan(`plan${RUN}`)).toEqual([`a${RUN}`]);
     expect(await store.getPlan(`none${RUN}`)).toEqual({ tenantId: `none${RUN}`, planId: null, budgetOverride: null });
   });
@@ -50,7 +76,8 @@ describe("Firestore console stores (emulator)", () => {
     const store = createFirestoreOrganizationAdminStore({ firestore: firebase.firestore });
     const tenantId = `members${RUN}`;
     const grants = firebase.firestore.collection(CORE_COLLECTIONS.memberships);
-    const grant = (principalId: string, extra: Record<string, unknown> = {}) => grants.doc().set({ tenantId, principalType: "user", principalId, nodeId: tenantId, deletedAt: null, ...extra });
+    const grant = (principalId: string, extra: Record<string, unknown> = {}) =>
+      grants.doc().set({ tenantId, principalType: "user", principalId, nodeId: tenantId, deletedAt: null, ...extra });
     await Promise.all([
       grant("ana"),
       grant("ana", { nodeId: `project${RUN}` }),

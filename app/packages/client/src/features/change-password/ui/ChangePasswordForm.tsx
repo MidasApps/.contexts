@@ -1,18 +1,36 @@
 "use client";
 
 import { CircleAlertIcon } from "lucide-react";
-import { useEffect, useRef, useState, type ComponentType, type FormEvent } from "react";
+import { type ComponentType, type FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { authErrorCode } from "#/shared/lib/auth/auth-error-code.ts";
 import type { AuthErrorCode, MfaChallenge } from "#/shared/lib/auth/auth-port.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { PasswordInput } from "#/shared/ui/molecules/PasswordInput/PasswordInput.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
-import { MIN_PASSWORD_LENGTH, validatePasswordChange, type PasswordChange, type PasswordChangeProblems } from "../model/validate-password-change.ts";
+import {
+  MIN_PASSWORD_LENGTH,
+  type PasswordChange,
+  type PasswordChangeProblems,
+  validatePasswordChange,
+} from "../model/validate-password-change.ts";
 
 /** Props of the second-factor step of the re-authentication (the view passes a `MfaChallengeForm` wrapper). */
 export type MfaStepProps = { challenge: MfaChallenge; onResolved: () => Promise<void>; onCancel: () => void };
@@ -46,7 +64,14 @@ function PasswordField({ name, value, onChange, problem, inputRef }: PasswordFie
     <Field>
       <FieldLabel>{t(`fields.${name}`)}</FieldLabel>
       <FieldControl>
-        <PasswordInput ref={inputRef} name={name} autoComplete={name === "current" ? "current-password" : "new-password"} required value={value} onChange={(event) => onChange(event.target.value)} />
+        <PasswordInput
+          ref={inputRef}
+          name={name}
+          autoComplete={name === "current" ? "current-password" : "new-password"}
+          required
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
       </FieldControl>
       {name === "next" ? <FieldDescription>{t("hint", { min: MIN_PASSWORD_LENGTH })}</FieldDescription> : null}
       <FieldError errors={[problem === undefined ? undefined : t(`errors.${problem}`, { min: MIN_PASSWORD_LENGTH })]} />
@@ -79,7 +104,12 @@ export function ChangePasswordForm({ MfaStep }: { MfaStep: ComponentType<MfaStep
 
   const fail = (error: unknown): void => {
     const code = authErrorCode(error);
-    const fieldProblem: Problems | null = code === "INVALID_CREDENTIALS" ? { current: "wrongPassword" } : code === "WEAK_PASSWORD" ? { next: "weak" } : null;
+    const fieldProblem: Problems | null =
+      code === "INVALID_CREDENTIALS"
+        ? { current: "wrongPassword" }
+        : code === "WEAK_PASSWORD"
+          ? { next: "weak" }
+          : null;
     if (fieldProblem === null) return setFailure(code);
     setProblems(fieldProblem);
     focusFirst(fieldProblem);
@@ -120,33 +150,41 @@ export function ChangePasswordForm({ MfaStep }: { MfaStep: ComponentType<MfaStep
     }
   };
 
-  const set = (name: keyof PasswordChange) => (value: string) => setValues((current) => ({ ...current, [name]: value }));
+  const set = (name: keyof PasswordChange) => (value: string) =>
+    setValues((current) => ({ ...current, [name]: value }));
   // The MFA dialog stays outside the <form>: React events bubble through portals, so its own
   // submit would also submit this form.
   return (
     <>
-    <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
-      {failure === null ? null : <FailureAlert code={failure} />}
-      <FieldGroup>
-        {FIELDS.map((name) => (
-          <PasswordField key={name} name={name} value={values[name]} onChange={set(name)} problem={problems[name]} inputRef={(element) => void (inputs.current[name] = element)} />
-        ))}
-      </FieldGroup>
-      <div className="flex justify-end">
-        <Button type="submit" pending={pending}>
-          {t("submit")}
-        </Button>
-      </div>
-    </form>
+      <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
+        {failure === null ? null : <FailureAlert code={failure} />}
+        <FieldGroup>
+          {FIELDS.map((name) => (
+            <PasswordField
+              key={name}
+              name={name}
+              value={values[name]}
+              onChange={set(name)}
+              problem={problems[name]}
+              inputRef={(element) => void (inputs.current[name] = element)}
+            />
+          ))}
+        </FieldGroup>
+        <div className="flex justify-end">
+          <Button type="submit" pending={pending}>
+            {t("submit")}
+          </Button>
+        </div>
+      </form>
       <Dialog open={challenge !== null} onOpenChange={(open) => !open && setChallenge(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("mfaTitle")}</DialogTitle>
             <DialogDescription>{t("mfaDescription")}</DialogDescription>
           </DialogHeader>
-          {challenge === null
-            ? null
-            : <MfaStep challenge={challenge} onResolved={resolveChallenge} onCancel={() => setChallenge(null)} />}
+          {challenge === null ? null : (
+            <MfaStep challenge={challenge} onResolved={resolveChallenge} onCancel={() => setChallenge(null)} />
+          )}
         </DialogContent>
       </Dialog>
     </>

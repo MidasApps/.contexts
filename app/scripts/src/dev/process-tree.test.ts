@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { collectDescendants, findSurvivors, mergeSnapshots, parsePsOutput, parseWindowsProcessJson } from "./process-tree.ts";
+import {
+  collectDescendants,
+  findSurvivors,
+  mergeSnapshots,
+  parsePsOutput,
+  parseWindowsProcessJson,
+} from "./process-tree.ts";
 
 const T0 = "2026-09-29T19:00:00.000Z";
 const T1 = "2026-09-29T19:00:05.000Z";
@@ -14,7 +20,11 @@ const TABLE = [
 
 describe("collectDescendants", () => {
   it("returns every process below the root, at any depth", () => {
-    expect(collectDescendants(TABLE, 10).map((entry) => entry.pid).sort()).toEqual([11, 12, 13]);
+    expect(
+      collectDescendants(TABLE, 10)
+        .map((entry) => entry.pid)
+        .sort(),
+    ).toEqual([11, 12, 13]);
   });
 
   it("returns nothing for a root without children", () => {
@@ -52,7 +62,9 @@ describe("mergeSnapshots", () => {
 
 describe("parsePsOutput", () => {
   it("reads pid, ppid, start time and command from `ps -A -o pid=,ppid=,lstart=,comm=`", () => {
-    expect(parsePsOutput("   10     1 Tue Sep 29 19:00:00 2026 node\n   12    11 Tue Sep  1 07:05:09 2026 java\n\n")).toEqual([
+    expect(
+      parsePsOutput("   10     1 Tue Sep 29 19:00:00 2026 node\n   12    11 Tue Sep  1 07:05:09 2026 java\n\n"),
+    ).toEqual([
       { pid: 10, ppid: 1, name: "node", startedAt: "Tue Sep 29 19:00:00 2026" },
       { pid: 12, ppid: 11, name: "java", startedAt: "Tue Sep  1 07:05:09 2026" },
     ]);
@@ -61,11 +73,11 @@ describe("parsePsOutput", () => {
 
 describe("parseWindowsProcessJson", () => {
   it("reads the CIM process list, including a single-object result", () => {
-    expect(parseWindowsProcessJson(`[{"ProcessId":10,"ParentProcessId":1,"Name":"node.exe","StartedAt":"${T0}"}]`)).toEqual([
-      { pid: 10, ppid: 1, name: "node.exe", startedAt: T0 },
-    ]);
-    expect(parseWindowsProcessJson(`{"ProcessId":12,"ParentProcessId":11,"Name":"java.exe","StartedAt":null}`)).toEqual([
-      { pid: 12, ppid: 11, name: "java.exe", startedAt: "" },
-    ]);
+    expect(
+      parseWindowsProcessJson(`[{"ProcessId":10,"ParentProcessId":1,"Name":"node.exe","StartedAt":"${T0}"}]`),
+    ).toEqual([{ pid: 10, ppid: 1, name: "node.exe", startedAt: T0 }]);
+    expect(parseWindowsProcessJson(`{"ProcessId":12,"ParentProcessId":11,"Name":"java.exe","StartedAt":null}`)).toEqual(
+      [{ pid: 12, ppid: 11, name: "java.exe", startedAt: "" }],
+    );
   });
 });

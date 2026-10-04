@@ -12,7 +12,9 @@ const { firestore } = createFirebaseAdmin({
   processEnv: process.env,
 });
 
-const policies: RateLimitPolicy[] = [{ id: "test-five-per-minute", limit: 5, windowMs: 60_000, subject: "ip", counts: "requests" }];
+const policies: RateLimitPolicy[] = [
+  { id: "test-five-per-minute", limit: 5, windowMs: 60_000, subject: "ip", counts: "requests" },
+];
 
 const movableClock = (iso: string) => {
   let current = Date.parse(iso);
@@ -34,10 +36,16 @@ describe("Firestore rate limiter", () => {
     const { clock, advance } = movableClock("2026-09-29T12:00:00.000Z");
     const limiter = createFirestoreRateLimiter({ firestore, clock, policies });
     const allowed: boolean[] = [];
-    for (let index = 0; index < 6; index += 1) allowed.push((await limiter.consume("test-five-per-minute", "10.0.0.1")).allowed);
+    for (let index = 0; index < 6; index += 1)
+      allowed.push((await limiter.consume("test-five-per-minute", "10.0.0.1")).allowed);
     expect(allowed).toEqual([true, true, true, true, true, false]);
 
-    const stored = (await firestore.collection(RATE_LIMIT_BUCKETS_COLLECTION).doc(rateLimitBucketId("test-five-per-minute", "10.0.0.1")).get()).data();
+    const stored = (
+      await firestore
+        .collection(RATE_LIMIT_BUCKETS_COLLECTION)
+        .doc(rateLimitBucketId("test-five-per-minute", "10.0.0.1"))
+        .get()
+    ).data();
     expect(stored).toMatchObject({ policyId: "test-five-per-minute", count: 5 });
     expect((stored?.["expiresAt"] as Timestamp).toDate().toISOString()).toBe("2026-09-29T12:01:00.000Z");
     expect(JSON.stringify(stored)).not.toContain("10.0.0.1");
@@ -67,10 +75,15 @@ describe("Firestore rate limiter", () => {
     const { clock } = movableClock("2026-09-29T12:00:00.000Z");
     const limiter = createFirestoreRateLimiter({ firestore, clock, policies });
     const contenders = 6;
-    const results = await Promise.all(Array.from({ length: contenders }, () => limiter.consume("test-five-per-minute", "10.0.0.2")));
+    const results = await Promise.all(
+      Array.from({ length: contenders }, () => limiter.consume("test-five-per-minute", "10.0.0.2")),
+    );
     expect(results.filter((result) => result.allowed)).toHaveLength(5);
     expect(results.filter((result) => !result.allowed)).toHaveLength(contenders - 5);
-    const stored = await firestore.collection(RATE_LIMIT_BUCKETS_COLLECTION).doc(rateLimitBucketId("test-five-per-minute", "10.0.0.2")).get();
+    const stored = await firestore
+      .collection(RATE_LIMIT_BUCKETS_COLLECTION)
+      .doc(rateLimitBucketId("test-five-per-minute", "10.0.0.2"))
+      .get();
     expect(stored.get("count")).toBe(5);
   });
 });

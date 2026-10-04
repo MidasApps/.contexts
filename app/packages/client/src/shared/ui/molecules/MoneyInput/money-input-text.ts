@@ -4,7 +4,9 @@ import { currencyMinorDigits, type MoneyValue } from "@core/i18n";
 const toDecimalString = (amountMinor: number, digits: number): `${number}` => {
   const magnitude = String(Math.abs(amountMinor)).padStart(digits + 1, "0");
   const sign = amountMinor < 0 ? "-" : "";
-  return (digits === 0 ? `${sign}${magnitude}` : `${sign}${magnitude.slice(0, -digits)}.${magnitude.slice(-digits)}`) as `${number}`;
+  return (
+    digits === 0 ? `${sign}${magnitude}` : `${sign}${magnitude.slice(0, -digits)}.${magnitude.slice(-digits)}`
+  ) as `${number}`;
 };
 
 /**

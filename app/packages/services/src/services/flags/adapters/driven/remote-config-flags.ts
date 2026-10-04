@@ -3,7 +3,10 @@ import type { EnvironmentFlagValues } from "../../application/ports/flag-store.t
 
 /** The parts of a Remote Config template this adapter touches (firebase-admin `RemoteConfigTemplate`). */
 export type RemoteConfigTemplateLike = {
-  parameters: Record<string, { defaultValue?: { value?: string } | Record<string, unknown>; valueType?: string; description?: string }>;
+  parameters: Record<
+    string,
+    { defaultValue?: { value?: string } | Record<string, unknown>; valueType?: string; description?: string }
+  >;
   readonly etag: string;
 };
 
@@ -18,7 +21,10 @@ export type RemoteConfigClient = {
 export const remoteConfigParameterOf = (key: string): string => `core_flag_${key.replace(/[.-]/g, "_")}`;
 
 const valueOf = (parameter: RemoteConfigTemplateLike["parameters"][string] | undefined): boolean | undefined => {
-  const raw = parameter?.defaultValue !== undefined && "value" in parameter.defaultValue ? parameter.defaultValue.value : undefined;
+  const raw =
+    parameter?.defaultValue !== undefined && "value" in parameter.defaultValue
+      ? parameter.defaultValue.value
+      : undefined;
   return raw === "true" ? true : raw === "false" ? false : undefined;
 };
 
@@ -30,7 +36,10 @@ const valueOf = (parameter: RemoteConfigTemplateLike["parameters"][string] | und
  * its ETag, retrying once on a concurrent change.
  * @param keys the registry keys to read (other parameters are ignored).
  */
-export const createRemoteConfigEnvironmentFlagValues = (deps: { readonly client: RemoteConfigClient; readonly keys: readonly string[] }): EnvironmentFlagValues => {
+export const createRemoteConfigEnvironmentFlagValues = (deps: {
+  readonly client: RemoteConfigClient;
+  readonly keys: readonly string[];
+}): EnvironmentFlagValues => {
   const publish = async (key: string, value: boolean): Promise<void> => {
     const template = await deps.client.getTemplate();
     template.parameters[remoteConfigParameterOf(key)] = {
@@ -67,6 +76,9 @@ export const createLazyRemoteConfigClient = (app: App): RemoteConfigClient => {
   const remoteConfig = async () => (await import("firebase-admin/remote-config")).getRemoteConfig(app);
   return {
     getTemplate: async () => (await remoteConfig()).getTemplate() as Promise<RemoteConfigTemplateLike>,
-    publishTemplate: async (template) => (await remoteConfig()).publishTemplate(template as Parameters<Awaited<ReturnType<typeof remoteConfig>>["publishTemplate"]>[0]),
+    publishTemplate: async (template) =>
+      (await remoteConfig()).publishTemplate(
+        template as Parameters<Awaited<ReturnType<typeof remoteConfig>>["publishTemplate"]>[0],
+      ),
   };
 };

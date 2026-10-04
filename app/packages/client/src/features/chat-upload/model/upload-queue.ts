@@ -1,15 +1,15 @@
-import { MAX_CHAT_ATTACHMENTS, type FilePurpose, type MessageAttachment } from "@core/contracts";
+import { type FilePurpose, MAX_CHAT_ATTACHMENTS, type MessageAttachment } from "@core/contracts";
 import { ApiError } from "#/shared/api/api-error.ts";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import {
   addKnowledgeSource,
   requestUpload,
-  sendBytes,
-  UploadValidationTimeoutError,
-  waitForValidation,
   type SendBytesOptions,
+  sendBytes,
   type UploadSource,
+  UploadValidationTimeoutError,
   type WaitOptions,
+  waitForValidation,
 } from "../api/request-upload.ts";
 
 /**
@@ -72,10 +72,12 @@ const SERVER_REASONS: ReadonlySet<string> = new Set(["TYPE_NOT_ALLOWED", "TOO_LA
 const IN_FLIGHT: ReadonlySet<UploadStatus> = new Set(["pending", "uploading", "validating"]);
 
 /** Uploads still on their way: sending waits for them. */
-export const hasUploadsInFlight = (items: readonly UploadItem[]): boolean => items.some((item) => IN_FLIGHT.has(item.status));
+export const hasUploadsInFlight = (items: readonly UploadItem[]): boolean =>
+  items.some((item) => IN_FLIGHT.has(item.status));
 
 /** A chat attachment that will not go: the member removes or retries it before sending. */
-export const hasUploadProblems = (items: readonly UploadItem[]): boolean => items.some((item) => item.purpose === "chat-attachment" && (item.status === "rejected" || item.status === "failed"));
+export const hasUploadProblems = (items: readonly UploadItem[]): boolean =>
+  items.some((item) => item.purpose === "chat-attachment" && (item.status === "rejected" || item.status === "failed"));
 
 const isAbort = (error: unknown): boolean => error instanceof DOMException && error.name === "AbortError";
 
@@ -88,7 +90,10 @@ const refusalOf = (error: unknown): UploadProblem | undefined => {
 
 type Entry = { item: UploadItem; source: UploadSource; controller: AbortController };
 
-const defaultPreviews = { create: (blob: Blob): string => URL.createObjectURL(blob), revoke: (url: string): void => URL.revokeObjectURL(url) };
+const defaultPreviews = {
+  create: (blob: Blob): string => URL.createObjectURL(blob),
+  revoke: (url: string): void => URL.revokeObjectURL(url),
+};
 
 let counter = 0;
 const nextId = (): string => `upload-${(counter += 1)}`;
@@ -117,7 +122,8 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
     if (isAbort(error)) return;
     const refusal = refusalOf(error);
     if (refusal !== undefined) update(id, { status: "rejected", problem: refusal });
-    else update(id, { status: "failed", problem: error instanceof UploadValidationTimeoutError ? "timeout" : "failed" });
+    else
+      update(id, { status: "failed", problem: error instanceof UploadValidationTimeoutError ? "timeout" : "failed" });
   };
 
   const run = async (id: string): Promise<void> => {
@@ -127,16 +133,30 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
     const { signal } = controller;
     const organizationId = deps.getOrganizationId();
     try {
-      const ticket = await requestUpload(deps.callEndpoint, { organizationId, purpose: entry.item.purpose, source, signal });
+      const ticket = await requestUpload(deps.callEndpoint, {
+        organizationId,
+        purpose: entry.item.purpose,
+        source,
+        signal,
+      });
       update(id, { status: "uploading", fileId: ticket.fileId, progress: 0, slow: false });
-      await sendBytes(ticket.upload, source.blob, { ...deps.transfer, signal, onProgress: (progress) => update(id, { progress }) });
+      await sendBytes(ticket.upload, source.blob, {
+        ...deps.transfer,
+        signal,
+        onProgress: (progress) => update(id, { progress }),
+      });
       update(id, { status: "validating", progress: 1 });
-      const file = await waitForValidation(deps.callEndpoint, ticket.fileId, { ...deps.wait, signal, onSlow: () => update(id, { slow: true }) });
+      const file = await waitForValidation(deps.callEndpoint, ticket.fileId, {
+        ...deps.wait,
+        signal,
+        onSlow: () => update(id, { slow: true }),
+      });
       if (file.status === "rejected") {
         update(id, { status: "rejected", problem: file.rejectionReason ?? "CONTENT_MISMATCH" });
         return;
       }
-      if (entry.item.purpose === "knowledge") await addKnowledgeSource(deps.callEndpoint, { organizationId, fileId: ticket.fileId, signal });
+      if (entry.item.purpose === "knowledge")
+        await addKnowledgeSource(deps.callEndpoint, { organizationId, fileId: ticket.fileId, signal });
       // The server's view of the file (detected type, real size) is what the message shows.
       update(id, { status: "ready", mediaType: file.contentType, sizeBytes: file.sizeBytes, slow: false });
     } catch (error: unknown) {
@@ -152,7 +172,8 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
     entries.delete(id);
   };
 
-  const chatCount = (): number => [...entries.values()].filter(({ item }) => item.purpose === "chat-attachment" && item.status !== "rejected").length;
+  const chatCount = (): number =>
+    [...entries.values()].filter(({ item }) => item.purpose === "chat-attachment" && item.status !== "rejected").length;
 
   const add: UploadQueue["add"] = (sources, purpose) => {
     const started: string[] = [];
@@ -198,8 +219,18 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
       void run(id);
     },
     take: () => {
-      const ready = [...entries.values()].filter(({ item }) => item.purpose === "chat-attachment" && item.status === "ready" && item.fileId !== undefined);
-      const attachments = ready.map(({ item }) => ({ fileId: item.fileId, name: item.name, mediaType: item.mediaType, sizeBytes: item.sizeBytes }) as MessageAttachment);
+      const ready = [...entries.values()].filter(
+        ({ item }) => item.purpose === "chat-attachment" && item.status === "ready" && item.fileId !== undefined,
+      );
+      const attachments = ready.map(
+        ({ item }) =>
+          ({
+            fileId: item.fileId,
+            name: item.name,
+            mediaType: item.mediaType,
+            sizeBytes: item.sizeBytes,
+          }) as MessageAttachment,
+      );
       ready.forEach(({ item }) => drop(item.id));
       if (ready.length > 0) publish();
       return attachments;

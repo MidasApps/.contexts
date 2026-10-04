@@ -8,7 +8,12 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/shared/ui/molecules/Collapsible/Collapsible.tsx";
 import { StatusPill, type StatusTone } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 
-const LEVEL_TONES: Record<LogLine["level"], StatusTone> = { debug: "neutral", info: "blue", warn: "amber", error: "danger" };
+const LEVEL_TONES: Record<LogLine["level"], StatusTone> = {
+  debug: "neutral",
+  info: "blue",
+  warn: "amber",
+  error: "danger",
+};
 const TRACE_ID = /^[0-9a-f]{32}$/u;
 
 function Reference({ label, value, traceLink = false }: { label: string; value: string | null; traceLink?: boolean }) {
@@ -18,7 +23,11 @@ function Reference({ label, value, traceLink = false }: { label: string; value: 
     <span className="inline-flex min-w-0 items-baseline gap-1">
       <span className="text-muted-foreground">{label}</span>
       {traceLink && TRACE_ID.test(value) ? (
-        <RouteLink to={{ id: "admin", rest: `traces/${value}` }} aria-label={t("openTrace", { id: value })} className="font-mono break-all underline underline-offset-4">
+        <RouteLink
+          to={{ id: "admin", rest: `traces/${value}` }}
+          aria-label={t("openTrace", { id: value })}
+          className="font-mono break-all underline underline-offset-4"
+        >
           {value}
         </RouteLink>
       ) : (
@@ -40,8 +49,12 @@ function Fields({ line, index }: { line: LogLine; index: number }) {
       </CollapsibleTrigger>
       <CollapsibleContent>
         {/* A scrollable region needs a tab stop so keyboard users can scroll it (WCAG 2.1.1). */}
-        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
-        <pre tabIndex={0} aria-label={t("fieldsOf", { message: line.message, position: index + 1 })} className="mt-1 max-h-64 overflow-auto rounded-sm bg-muted p-2 font-mono text-caption leading-relaxed">
+        <pre
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- see the comment above
+          tabIndex={0}
+          aria-label={t("fieldsOf", { message: line.message, position: index + 1 })}
+          className="mt-1 max-h-64 overflow-auto rounded-sm bg-muted p-2 font-mono text-caption leading-relaxed"
+        >
           {JSON.stringify(line.fields, null, 2)}
         </pre>
       </CollapsibleContent>
@@ -60,13 +73,18 @@ export function LogLines({ lines }: { lines: readonly LogLine[] }) {
   return (
     <ol aria-label={t("listLabel")} className="flex flex-col gap-2">
       {lines.map((line, index) => (
-        <li key={`${line.timestamp}-${String(index)}`} className="flex flex-col gap-1.5 rounded-lg border border-border bg-card p-3">
+        <li
+          key={`${line.timestamp}-${String(index)}`}
+          className="flex flex-col gap-1.5 rounded-lg border border-border bg-card p-3"
+        >
           <span className="flex flex-wrap items-center gap-2">
             <StatusPill tone={LEVEL_TONES[line.level]}>{t(`levels.${line.level}`)}</StatusPill>
             <time dateTime={line.timestamp} className="font-mono text-caption text-muted-foreground tabular-nums">
               {formatDateTime(line.timestamp, "precise")}
             </time>
-            <span className="text-caption text-muted-foreground">{t("service", { service: line.service, env: line.env })}</span>
+            <span className="text-caption text-muted-foreground">
+              {t("service", { service: line.service, env: line.env })}
+            </span>
           </span>
           <span className="font-mono text-body break-all">{line.message}</span>
           {line.requestId === null && line.traceId === null ? null : (

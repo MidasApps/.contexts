@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { MfaChallenge } from "#/shared/lib/auth/auth-port.ts";
 import type { SessionState } from "#/shared/lib/session/session-state.ts";
-import { INITIAL_SESSION_STATE, sessionReducer, type SessionEvent } from "./session-machine.ts";
+import { INITIAL_SESSION_STATE, type SessionEvent, sessionReducer } from "./session-machine.ts";
 
-const challenge: MfaChallenge = { hints: [{ uid: "h1", factor: "phone", displayName: null, phoneNumber: "+55***" }], handle: {} };
+const challenge: MfaChallenge = {
+  hints: [{ uid: "h1", factor: "phone", displayName: null, phoneNumber: "+55***" }],
+  handle: {},
+};
 
 const STATES: Record<SessionState["status"], SessionState> = {
   booting: { status: "booting" },

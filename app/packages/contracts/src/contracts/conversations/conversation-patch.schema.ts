@@ -7,7 +7,13 @@ import { MAX_TITLE_CHARS } from "./conversation.schema.ts";
 /** Body of `PATCH /v1/conversations/{conversationId}`: rename, pin, archive (owner only). */
 export const ConversationPatchSchema = z
   .strictObject({
-    title: z.string().trim().min(1).max(MAX_TITLE_CHARS).optional().meta(personal("New title; sets titleSource to user.")),
+    title: z
+      .string()
+      .trim()
+      .min(1)
+      .max(MAX_TITLE_CHARS)
+      .optional()
+      .meta(personal("New title; sets titleSource to user.")),
     pinned: z.boolean().optional().meta(none("Pin or unpin.")),
     archived: z.boolean().optional().meta(none("Archive (true) or restore (false).")),
   })

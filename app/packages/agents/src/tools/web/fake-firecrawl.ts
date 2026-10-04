@@ -23,7 +23,11 @@ export const FAKE_WEB_PAGES: readonly WebPage[] = [
 /** Hosts of the fixtures; the composition resolves them to a public test address in fake mode. */
 export const FAKE_WEB_HOSTS: ReadonlySet<string> = new Set(FAKE_WEB_PAGES.map((page) => new URL(page.url).hostname));
 
-const words = (text: string): string[] => text.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length > 2);
+const words = (text: string): string[] =>
+  text
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((word) => word.length > 2);
 
 const matches = (page: WebPage, query: string): boolean => {
   const haystack = `${page.title ?? ""} ${page.markdown}`.toLowerCase();
@@ -36,10 +40,22 @@ export const createFakeWebClient = (pages: readonly WebPage[] = FAKE_WEB_PAGES):
       pages
         .filter((page) => matches(page, query))
         .slice(0, limit)
-        .map((page): WebSearchResult => ({ url: page.url, title: page.title, snippet: page.markdown.split("\n").at(-1) ?? null })),
+        .map(
+          (page): WebSearchResult => ({
+            url: page.url,
+            title: page.title,
+            snippet: page.markdown.split("\n").at(-1) ?? null,
+          }),
+        ),
     ),
   scrape: ({ url }) =>
-    Promise.resolve(pages.find((page) => page.url === url) ?? { url, title: "Example page", markdown: `# Example page\n\nFixture content of ${url}.` }),
+    Promise.resolve(
+      pages.find((page) => page.url === url) ?? {
+        url,
+        title: "Example page",
+        markdown: `# Example page\n\nFixture content of ${url}.`,
+      },
+    ),
 });
 
 /** Public test address the fixture hosts resolve to in fake mode (never a reserved range). */

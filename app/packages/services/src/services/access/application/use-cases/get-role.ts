@@ -28,7 +28,9 @@ export const loadAuthorizedRole = async (
   return allowed.ok ? ok(role) : allowed;
 };
 
-export type GetRole = (command: Omit<LoadRoleCommand, "permission">) => Promise<Result<Role, AccessNotFoundError | AccessDeniedError>>;
+export type GetRole = (
+  command: Omit<LoadRoleCommand, "permission">,
+) => Promise<Result<Role, AccessNotFoundError | AccessDeniedError>>;
 
 /** Reads a custom role (`core.role.read` at its organization). */
 export const makeGetRole =

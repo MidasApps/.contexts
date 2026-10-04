@@ -23,13 +23,19 @@ describe("UnitPicker", () => {
   });
 
   it("shows the empty and error states inside the popover", async () => {
-    const empty = renderWidget(<UnitPicker />, { path: PROJECT, routes: { "GET /v1/projects/:projectId/units": page([]) } });
+    const empty = renderWidget(<UnitPicker />, {
+      path: PROJECT,
+      routes: { "GET /v1/projects/:projectId/units": page([]) },
+    });
     await empty.user.click(await screen.findByRole("button", { name: "Unidade: Projeto inteiro. Escolher unidade" }));
     expect(await screen.findByRole("heading", { name: "Nenhuma unidade neste projeto" })).toBeDefined();
     await expectNoAxeViolations(document.body);
     empty.unmount();
 
-    const failing = renderWidget(<UnitPicker />, { path: PROJECT, routes: { "GET /v1/projects/:projectId/units": apiError(403, "FORBIDDEN") } });
+    const failing = renderWidget(<UnitPicker />, {
+      path: PROJECT,
+      routes: { "GET /v1/projects/:projectId/units": apiError(403, "FORBIDDEN") },
+    });
     await failing.user.click(await screen.findByRole("button", { name: "Unidade: Projeto inteiro. Escolher unidade" }));
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("Você não tem permissão para fazer isso.");
@@ -40,7 +46,10 @@ describe("UnitPicker", () => {
     const matchMedia = globalThis.matchMedia;
     globalThis.matchMedia = (query: string) => ({ ...matchMedia(query), matches: query.includes("max-width") });
     try {
-      const { user } = renderWidget(<UnitPicker />, { path: PROJECT, routes: { "GET /v1/projects/:projectId/units": page([]) } });
+      const { user } = renderWidget(<UnitPicker />, {
+        path: PROJECT,
+        routes: { "GET /v1/projects/:projectId/units": page([]) },
+      });
       await user.click(await screen.findByRole("button", { name: "Unidade: Projeto inteiro. Escolher unidade" }));
       const popover = await screen.findByRole("dialog", { name: "Escolha uma unidade" });
       expect(popover.getAttribute("data-side")).toBe("bottom");
@@ -55,6 +64,11 @@ describe("UnitPicker", () => {
     await screen.findByRole("main");
     expect(container.querySelector("[data-slot=sidebar-menu]")).toBeNull();
     expect(withUnit({ organizationId: "o" }, "u")).toBeNull();
-    expect(withUnit({ organizationId: "o", projectId: "p" }, "u")).toEqual({ id: "project", organizationId: "o", projectId: "p", unit: "u" });
+    expect(withUnit({ organizationId: "o", projectId: "p" }, "u")).toEqual({
+      id: "project",
+      organizationId: "o",
+      projectId: "p",
+      unit: "u",
+    });
   });
 });

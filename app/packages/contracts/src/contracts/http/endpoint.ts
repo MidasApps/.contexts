@@ -110,12 +110,16 @@ const checkResponses = (responses: EndpointResponses): string[] => {
 const checkNames = (endpoint: EndpointDefinition): string[] => {
   const errorEntries = Object.entries<readonly string[]>(endpoint.errors ?? {});
   const badCodes = errorEntries.flatMap(([status, codes]) =>
-    codes.filter((code) => !ErrorCodeSchema.safeParse(code).success).map((code) => `error code ${code} (${status}) must be SCREAMING_SNAKE`),
+    codes
+      .filter((code) => !ErrorCodeSchema.safeParse(code).success)
+      .map((code) => `error code ${code} (${status}) must be SCREAMING_SNAKE`),
   );
   return [
     ...(ID_PATTERN.test(endpoint.id) ? [] : ["id must be <context>.<operation>, e.g. identity.getMe"]),
     ...badCodes,
-    ...(endpoint.rateLimit === undefined || POLICY_PATTERN.test(endpoint.rateLimit) ? [] : ["rateLimit must be a kebab-case policy id"]),
+    ...(endpoint.rateLimit === undefined || POLICY_PATTERN.test(endpoint.rateLimit)
+      ? []
+      : ["rateLimit must be a kebab-case policy id"]),
   ];
 };
 
@@ -137,6 +141,7 @@ export const defineEndpoint = <const E extends EndpointDefinition>(endpoint: E):
     ...checkResponses(endpoint.responses),
     ...checkNames(endpoint),
   ];
-  if (problems.length > 0) throw new EndpointDefinitionError({ code: "INVALID_ENDPOINT", endpointId: endpoint.id, problems });
+  if (problems.length > 0)
+    throw new EndpointDefinitionError({ code: "INVALID_ENDPOINT", endpointId: endpoint.id, problems });
   return endpoint;
 };

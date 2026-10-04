@@ -1,13 +1,13 @@
 "use client";
 
 import { syncClaimsEndpoint } from "@core/contracts";
-import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, type ActionDispatch } from "react";
-import { meQuery } from "#/shared/api/core-queries.ts";
+import { type QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type ActionDispatch, useEffect, useRef } from "react";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
+import { meQuery } from "#/shared/api/core-queries.ts";
 import { AuthError, type AuthPort } from "#/shared/lib/auth/auth-port.ts";
-import type { SessionBridgePort } from "#/shared/lib/session-bridge/session-bridge-port.ts";
 import type { SessionState } from "#/shared/lib/session/session-state.ts";
+import type { SessionBridgePort } from "#/shared/lib/session-bridge/session-bridge-port.ts";
 import type { SessionEvent } from "./session-machine.ts";
 
 /** Reports failures the shell handles itself (claims sync, boot); the apps pass their logger. */
@@ -36,7 +36,11 @@ export const waitForSignedInUid = (auth: AuthPort): Promise<string> =>
     });
   });
 
-const resumeSession = async (args: { auth: AuthPort; sessionBridge: SessionBridgePort; dispatch: ActionDispatch<[SessionEvent]> }): Promise<void> => {
+const resumeSession = async (args: {
+  auth: AuthPort;
+  sessionBridge: SessionBridgePort;
+  dispatch: ActionDispatch<[SessionEvent]>;
+}): Promise<void> => {
   const restored = await args.sessionBridge.restore();
   if (restored === null) return args.dispatch({ type: "NO_SESSION" });
   args.dispatch({ type: "SESSION_FOUND" });
@@ -48,7 +52,12 @@ const resumeSession = async (args: { auth: AuthPort; sessionBridge: SessionBridg
  * On boot: `sessionBridge.restore()` → custom token → `signInWithCustomToken`. Runs once per
  * provider (a desktop restore rotates its secret, so a StrictMode re-run must not repeat it).
  */
-export const useSessionBoot = (args: { auth: AuthPort; sessionBridge: SessionBridgePort; dispatch: ActionDispatch<[SessionEvent]>; reportError: ReportError }): void => {
+export const useSessionBoot = (args: {
+  auth: AuthPort;
+  sessionBridge: SessionBridgePort;
+  dispatch: ActionDispatch<[SessionEvent]>;
+  reportError: ReportError;
+}): void => {
   const started = useRef(false);
   const { auth, sessionBridge, dispatch, reportError } = args;
   useEffect(() => {
@@ -72,7 +81,12 @@ export const useAuthLossWatch = (args: { auth: AuthPort; state: SessionState; on
   }, [auth, state.status, onLost]);
 };
 
-const syncStaleClaims = async (args: { auth: AuthPort; callEndpoint: CallEndpoint; queryClient: QueryClient; accessVersion: number }): Promise<void> => {
+const syncStaleClaims = async (args: {
+  auth: AuthPort;
+  callEndpoint: CallEndpoint;
+  queryClient: QueryClient;
+  accessVersion: number;
+}): Promise<void> => {
   const claims = await args.auth.getIdTokenClaims();
   const tokenVersion = typeof claims?.accessVersion === "number" ? claims.accessVersion : -1;
   if (tokenVersion >= args.accessVersion) return;
@@ -85,7 +99,12 @@ const syncStaleClaims = async (args: { auth: AuthPort; callEndpoint: CallEndpoin
  * SP1 spec §5.4: when `GET /v1/me` reports a newer `accessVersion` than the ID token's claim, call
  * `POST /v1/me/claims/sync`, force a token refresh and refetch tenant data. Once per version.
  */
-export const useClaimsFreshness = (args: { auth: AuthPort; callEndpoint: CallEndpoint; signedIn: boolean; reportError: ReportError }): void => {
+export const useClaimsFreshness = (args: {
+  auth: AuthPort;
+  callEndpoint: CallEndpoint;
+  signedIn: boolean;
+  reportError: ReportError;
+}): void => {
   const { auth, callEndpoint, signedIn, reportError } = args;
   const queryClient = useQueryClient();
   const me = useQuery({ ...meQuery(callEndpoint), enabled: signedIn });

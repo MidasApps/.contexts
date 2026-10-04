@@ -20,11 +20,16 @@ export type PageHeaderProps = {
  */
 export function PageHeader({ title, description, eyebrow, meta, actions, className }: PageHeaderProps) {
   return (
-    <div data-slot="page-header" className={cn("mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between", className)}>
+    <div
+      data-slot="page-header"
+      className={cn("mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between", className)}
+    >
       <div className="flex min-w-0 flex-col gap-1">
         {eyebrow === undefined ? null : <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p>}
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="min-w-0 text-2xl leading-tight font-semibold tracking-tight break-words [overflow-wrap:anywhere]">{title}</h1>
+          <h1 className="min-w-0 text-2xl leading-tight font-semibold tracking-tight break-words [overflow-wrap:anywhere]">
+            {title}
+          </h1>
           {meta}
         </div>
         {description === undefined ? null : <p className="max-w-prose text-sm text-muted-foreground">{description}</p>}

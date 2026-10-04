@@ -1,5 +1,12 @@
 import type { AccessContext, AccessPort, AccessPrincipal, NodeRef } from "@core/agents";
-import { type NodeRef as CoreNodeRef, NodeRefSchema, type Permission, PermissionSchema, type Principal, PrincipalSchema } from "@core/contracts";
+import {
+  type NodeRef as CoreNodeRef,
+  NodeRefSchema,
+  type Permission,
+  PermissionSchema,
+  type Principal,
+  PrincipalSchema,
+} from "@core/contracts";
 import type { AccessCore, ResolveAccessContext, VerifyBearer } from "@core/services";
 
 // The ports carry the unbranded mirror of SP1's types; SP1 gets its branded values back
@@ -13,10 +20,14 @@ const fromPrincipal = (principal: Principal): AccessPrincipal => {
 };
 const toNode = (node: NodeRef): CoreNodeRef => NodeRefSchema.parse(node);
 const toPermissions = (permissions: ReadonlySet<string> | undefined): ReadonlySet<Permission> | undefined =>
-  permissions === undefined ? undefined : new Set([...permissions].flatMap((permission) => {
-    const parsed = PermissionSchema.safeParse(permission);
-    return parsed.success ? [parsed.data] : [];
-  }));
+  permissions === undefined
+    ? undefined
+    : new Set(
+        [...permissions].flatMap((permission) => {
+          const parsed = PermissionSchema.safeParse(permission);
+          return parsed.success ? [parsed.data] : [];
+        }),
+      );
 
 const ceilingOf = (ceiling: ReadonlySet<string> | undefined) => {
   const permissions = toPermissions(ceiling);
@@ -50,7 +61,11 @@ const bindResolveAccessContext =
  * per call) and SP1's `resolveAccessContext`. Every path fails closed: SP1
  * rejections propagate, denials stay denials.
  */
-export const bindAccessPort = (deps: { verifyBearer: VerifyBearer; access: AccessCore; resolveAccessContext: ResolveAccessContext }): AccessPort => ({
+export const bindAccessPort = (deps: {
+  verifyBearer: VerifyBearer;
+  access: AccessCore;
+  resolveAccessContext: ResolveAccessContext;
+}): AccessPort => ({
   verifyBearer: async (input) => {
     const principal = await deps.verifyBearer(input);
     return principal === null ? null : fromPrincipal(principal);
@@ -59,11 +74,20 @@ export const bindAccessPort = (deps: { verifyBearer: VerifyBearer; access: Acces
   authorize: async ({ principal, permission, node, ceiling }) => {
     const parsed = PermissionSchema.safeParse(permission);
     if (!parsed.success) return { allowed: false, reason: "UNKNOWN_PERMISSION" };
-    const decision = await deps.access.forRequest().authorize({ principal: toPrincipal(principal), permission: parsed.data, node: toNode(node), ...ceilingOf(ceiling) });
-    return decision.allowed ? { allowed: true, requiresApproval: decision.requiresApproval } : { allowed: false, reason: decision.reason };
+    const decision = await deps.access.forRequest().authorize({
+      principal: toPrincipal(principal),
+      permission: parsed.data,
+      node: toNode(node),
+      ...ceilingOf(ceiling),
+    });
+    return decision.allowed
+      ? { allowed: true, requiresApproval: decision.requiresApproval }
+      : { allowed: false, reason: decision.reason };
   },
   getEffectivePermissions: async ({ principal, node, ceiling }) => {
-    const result = await deps.access.forRequest().getEffectivePermissions({ principal: toPrincipal(principal), node: toNode(node), ...ceilingOf(ceiling) });
+    const result = await deps.access
+      .forRequest()
+      .getEffectivePermissions({ principal: toPrincipal(principal), node: toNode(node), ...ceilingOf(ceiling) });
     return result.ok ? result.permissions : new Set<string>();
   },
 });

@@ -3,7 +3,15 @@
 import type { ReactNode, RefObject } from "react";
 import { useTranslations } from "use-intl";
 import { ChatInput } from "#/features/chat-send/index.ts";
-import { AttachMenu, AttachmentChips, hasUploadProblems, hasUploadsInFlight, uploadSourcesOf, useUploadQueue, type UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
+import {
+  AttachMenu,
+  AttachmentChips,
+  hasUploadProblems,
+  hasUploadsInFlight,
+  type UseUploadQueueArgs,
+  uploadSourcesOf,
+  useUploadQueue,
+} from "#/features/chat-upload/index.ts";
 import { ComposerVoice, type ComposerVoiceProps, type VoicePreferences } from "#/features/chat-voice/index.ts";
 import type { ChatSession } from "../model/use-chat-session.ts";
 
@@ -33,11 +41,28 @@ export type ChatComposerProps = {
  * features). A message waits for its uploads, and a rejected file never goes with it. A
  * transcript lands in the draft for review; with auto-send on it goes at once when nothing blocks.
  */
-export function ChatComposer({ session, draft, onDraftChange: setDraft, organizationId, offline, inputRef, onStop, can, voice, tools, uploadSeams, voiceSeams }: ChatComposerProps) {
+export function ChatComposer({
+  session,
+  draft,
+  onDraftChange: setDraft,
+  organizationId,
+  offline,
+  inputRef,
+  onStop,
+  can,
+  voice,
+  tools,
+  uploadSeams,
+  voiceSeams,
+}: ChatComposerProps) {
   const t = useTranslations("chat.input");
   const { queue, items } = useUploadQueue({ organizationId, seams: uploadSeams });
   const canUpload = can?.("core.file.upload") === true;
-  const blocked = hasUploadsInFlight(items) ? t("uploading") : hasUploadProblems(items) ? t("attachmentProblem") : undefined;
+  const blocked = hasUploadsInFlight(items)
+    ? t("uploading")
+    : hasUploadProblems(items)
+      ? t("attachmentProblem")
+      : undefined;
 
   const send = (text: string) => {
     session.send(text, queue.take());
@@ -67,8 +92,22 @@ export function ChatComposer({ session, draft, onDraftChange: setDraft, organiza
       attachments={<AttachmentChips items={items} onRemove={queue.remove} onRetry={queue.retry} />}
       tools={
         <>
-          {canUpload ? <AttachMenu onPick={queue.add} canAddKnowledge={can?.("core.knowledge.write") === true} disabled={offline} /> : null}
-          {voice === undefined ? null : <ComposerVoice organizationId={organizationId} voice={voice} disabled={offline} onTranscript={onTranscript} seams={voiceSeams} />}
+          {canUpload ? (
+            <AttachMenu
+              onPick={queue.add}
+              canAddKnowledge={can?.("core.knowledge.write") === true}
+              disabled={offline}
+            />
+          ) : null}
+          {voice === undefined ? null : (
+            <ComposerVoice
+              organizationId={organizationId}
+              voice={voice}
+              disabled={offline}
+              onTranscript={onTranscript}
+              seams={voiceSeams}
+            />
+          )}
           {tools}
         </>
       }

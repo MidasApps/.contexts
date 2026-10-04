@@ -14,7 +14,13 @@ export const EvalExperimentSummarySchema = z.strictObject({
   status: z.enum(["pending", "running", "completed", "failed"]).meta(none("Experiment status.")),
   itemCount: z.int().nonnegative().meta(none("Dataset items evaluated.")),
   scores: z
-    .array(z.strictObject({ scorer: z.string().min(1).meta(none("Scorer id.")), mean: score("Mean score."), baseline: score("Baseline floor.").nullable() }))
+    .array(
+      z.strictObject({
+        scorer: z.string().min(1).meta(none("Scorer id.")),
+        mean: score("Mean score."),
+        baseline: score("Baseline floor.").nullable(),
+      }),
+    )
     .meta(none("Mean score per scorer against the baseline floor.")),
   verdict: z.enum(["passed", "failed", "pending"]).meta(none("Gate verdict: every scorer at or above its baseline.")),
   startedAt: IsoDateTimeSchema.meta(none("Start (UTC).")),

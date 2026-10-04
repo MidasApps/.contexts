@@ -32,14 +32,17 @@ describe("createPermissionRegistry", () => {
 
   it("registers the agent runtime permissions of the core catalog (SP3)", () => {
     const registry = createPermissionRegistry([CORE_PERMISSION_SOURCE]);
-    for (const agent of AGENT_PERMISSIONS) expect(registry.get(agent.id)).toMatchObject({ id: agent.id, scope: "tenant" });
+    for (const agent of AGENT_PERMISSIONS)
+      expect(registry.get(agent.id)).toMatchObject({ id: agent.id, scope: "tenant" });
     expect(registry.permissionsForSystemRole("member").has("core.chat.use")).toBe(true);
     expect(registry.permissionsForSystemRole("member").has("core.connector.write")).toBe(false);
     expect(registry.permissionsForSystemRole("admin").has("core.connector.write")).toBe(true);
   });
 
   it("lists tenant permissions only, sorted by id", () => {
-    const ids = createPermissionRegistry([CORE_PERMISSION_SOURCE]).listTenantPermissions().map((permission) => permission.id);
+    const ids = createPermissionRegistry([CORE_PERMISSION_SOURCE])
+      .listTenantPermissions()
+      .map((permission) => permission.id);
     expect(ids).toEqual([...ids].sort());
     expect(ids.some((id) => id.startsWith("platform."))).toBe(false);
     expect(ids).toContain("core.organization.delete");
@@ -47,8 +50,12 @@ describe("createPermissionRegistry", () => {
 
   it("rejects a duplicate id across sources", () => {
     const duplicate = moduleSource([samplePermission(), samplePermission()]);
-    expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, duplicate]))).toBe("DUPLICATE_PERMISSION");
-    expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, CORE_PERMISSION_SOURCE]))).toBe("DUPLICATE_PERMISSION");
+    expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, duplicate]))).toBe(
+      "DUPLICATE_PERMISSION",
+    );
+    expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, CORE_PERMISSION_SOURCE]))).toBe(
+      "DUPLICATE_PERMISSION",
+    );
   });
 
   it("rejects a module id that is not kebab-case", () => {
@@ -61,7 +68,9 @@ describe("createPermissionRegistry", () => {
     const fakeCore = { moduleId: "core", permissions: [CORE_PERMISSIONS[0] as PermissionDefinition] };
     expect(captureCode(() => createPermissionRegistry([fakeCore]))).toBe("RESERVED_MODULE_ID");
     const fakePlatform = { moduleId: "platform", permissions: [] };
-    expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, fakePlatform]))).toBe("RESERVED_MODULE_ID");
+    expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, fakePlatform]))).toBe(
+      "RESERVED_MODULE_ID",
+    );
   });
 
   it("rejects a module permission outside the module prefix", () => {
@@ -87,7 +96,10 @@ describe("createPermissionRegistry", () => {
 describe("permissionsForSystemRole", () => {
   const registry = createPermissionRegistry([
     CORE_PERMISSION_SOURCE,
-    moduleSource([samplePermission(), samplePermission({ id: "sample.invoice.delete", kind: "write", defaultRoles: [] })]),
+    moduleSource([
+      samplePermission(),
+      samplePermission({ id: "sample.invoice.delete", kind: "write", defaultRoles: [] }),
+    ]),
   ]);
   const tenantIds = registry.listTenantPermissions().map((permission) => permission.id);
 
@@ -103,11 +115,15 @@ describe("permissionsForSystemRole", () => {
   });
 
   it("gives member, viewer and device what the definitions list", () => {
-    expect(registry.permissionsForSystemRole("viewer")).toEqual(new Set(["core.organization.read", "core.project.read", "core.unit.read"]));
+    expect(registry.permissionsForSystemRole("viewer")).toEqual(
+      new Set(["core.organization.read", "core.project.read", "core.unit.read"]),
+    );
     expect(registry.permissionsForSystemRole("member").has("core.member.read")).toBe(true);
     expect(registry.permissionsForSystemRole("member").has("core.member.invite")).toBe(false);
     // Decision 0030 A1: the device role reads its own organization context.
-    expect(registry.permissionsForSystemRole("device")).toEqual(new Set(["core.organization.read", "sample.invoice.read"]));
+    expect(registry.permissionsForSystemRole("device")).toEqual(
+      new Set(["core.organization.read", "sample.invoice.read"]),
+    );
   });
 
   it("never gives a platform permission to a system role", () => {
@@ -121,10 +137,22 @@ describe("permissionsForPlatformRole", () => {
   it("gives platform-admin every platform permission", () => {
     expect(registry.permissionsForPlatformRole("platform-admin")).toEqual(
       new Set([
-        "platform.organization.read", "platform.user.read", "platform.audit-log.read", "platform.user.impersonate", "platform.staff.manage",
+        "platform.organization.read",
+        "platform.user.read",
+        "platform.audit-log.read",
+        "platform.user.impersonate",
+        "platform.staff.manage",
         // SP5 spec §2.1.
-        "platform.plan.manage", "platform.organization.update", "platform.agent.manage", "platform.prompt.manage", "platform.connector.read",
-        "platform.eval.manage", "platform.trace.read", "platform.usage.read", "platform.workflow.manage", "platform.flag.manage",
+        "platform.plan.manage",
+        "platform.organization.update",
+        "platform.agent.manage",
+        "platform.prompt.manage",
+        "platform.connector.read",
+        "platform.eval.manage",
+        "platform.trace.read",
+        "platform.usage.read",
+        "platform.workflow.manage",
+        "platform.flag.manage",
       ]),
     );
   });
@@ -132,9 +160,14 @@ describe("permissionsForPlatformRole", () => {
   it("gives platform-support reads and impersonation only (SP1 and SP5)", () => {
     expect(registry.permissionsForPlatformRole("platform-support")).toEqual(
       new Set([
-        "platform.organization.read", "platform.user.read", "platform.audit-log.read", "platform.user.impersonate",
+        "platform.organization.read",
+        "platform.user.read",
+        "platform.audit-log.read",
+        "platform.user.impersonate",
         // SP5 platform reads.
-        "platform.connector.read", "platform.trace.read", "platform.usage.read",
+        "platform.connector.read",
+        "platform.trace.read",
+        "platform.usage.read",
       ]),
     );
   });

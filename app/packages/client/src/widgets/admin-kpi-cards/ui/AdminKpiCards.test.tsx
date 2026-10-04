@@ -6,7 +6,8 @@ import { buildAdminOverview } from "#/shared/testing/admin-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { AdminKpiCards } from "./AdminKpiCards.tsx";
 
-const overview = (overrides: Record<string, unknown> = {}) => AdminOverviewSchema.parse(buildAdminOverview({ unmeasured: [], ...overrides }));
+const overview = (overrides: Record<string, unknown> = {}) =>
+  AdminOverviewSchema.parse(buildAdminOverview({ unmeasured: [], ...overrides }));
 
 const stat = (term: string): HTMLElement => {
   const label = screen.getByText(term, { selector: "dt, dt a" });
@@ -35,7 +36,9 @@ describe("AdminKpiCards", () => {
 
   it("links the stats to their area only for a role that may open it", async () => {
     const admin = renderAdmin(<AdminKpiCards overview={overview()} />);
-    expect((await screen.findByRole("link", { name: "Organizações ativas" })).getAttribute("href")).toBe("/admin/organizations");
+    expect((await screen.findByRole("link", { name: "Organizações ativas" })).getAttribute("href")).toBe(
+      "/admin/organizations",
+    );
     expect(screen.getByRole("link", { name: "Custo no mês" }).getAttribute("href")).toBe("/admin/costs");
     expect(screen.getByRole("link", { name: "Avaliação dos agentes" }).getAttribute("href")).toBe("/admin/evals");
     expect(screen.queryByRole("link", { name: "Usuários ativos" })).toBeNull();

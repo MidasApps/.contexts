@@ -10,17 +10,36 @@ const viewer: readonly RoleRef[] = [{ kind: "system", key: "viewer" }];
 const setup = async (uid: string) => {
   const world = makeMeWorld();
   const organization = await world.organizationOf("owner", "Shared");
-  const project = await world.tenancy.createProject({ ...world.command("owner"), tenantId: organization.id, input: { name: "Alpha" } });
+  const project = await world.tenancy.createProject({
+    ...world.command("owner"),
+    tenantId: organization.id,
+    input: { name: "Alpha" },
+  });
   if (!project.ok) throw project.error;
-  const unit = await world.tenancy.createUnit({ ...world.command("owner"), projectId: project.data.id, input: { name: "Room", type: "sample.site", parentUnitId: null } });
+  const unit = await world.tenancy.createUnit({
+    ...world.command("owner"),
+    projectId: project.data.id,
+    input: { name: "Room", type: "sample.site", parentUnitId: null },
+  });
   if (!unit.ok) throw unit.error;
   world.account(uid);
   await world.identity.getMe({ actor: userOf(uid) });
   const nodes = {
     project: { level: "project", tenantId: organization.id, projectId: project.data.id } as TenantNodeRef,
-    unit: { level: "unit", tenantId: organization.id, projectId: project.data.id, unitId: unit.data.id } as TenantNodeRef,
+    unit: {
+      level: "unit",
+      tenantId: organization.id,
+      projectId: project.data.id,
+      unitId: unit.data.id,
+    } as TenantNodeRef,
   };
-  const switchTo = () => world.identity.setActiveOrganization({ actor: userOf(uid), access: world.access(), organizationId: organization.id, requestId: REQUEST_ID });
+  const switchTo = () =>
+    world.identity.setActiveOrganization({
+      actor: userOf(uid),
+      access: world.access(),
+      organizationId: organization.id,
+      requestId: REQUEST_ID,
+    });
   return { ...world, organization, project: project.data, nodes, switchTo };
 };
 
@@ -29,11 +48,18 @@ describe("setActiveOrganization for members below the organization (decision 003
     const world = await setup("pat");
     await world.grant("pat", world.nodes.project, viewer);
 
-    const listed = await world.identity.listMyOrganizations({ actor: userOf("pat"), access: world.access(), page: PAGE });
+    const listed = await world.identity.listMyOrganizations({
+      actor: userOf("pat"),
+      access: world.access(),
+      page: PAGE,
+    });
     expect(listed.items.map((organization) => organization.name)).toEqual(["Shared"]);
     expect(await world.switchTo()).toEqual({ ok: true, data: undefined });
     expect(world.users.userOf("pat")?.lastContext).toEqual({ organizationId: world.organization.id });
-    expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "ACTIVE_ORGANIZATION_CHANGED", target: { id: "pat" } });
+    expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({
+      action: "ACTIVE_ORGANIZATION_CHANGED",
+      target: { id: "pat" },
+    });
   });
 
   it("lets a unit-only member switch", async () => {
@@ -46,14 +72,20 @@ describe("setActiveOrganization for members below the organization (decision 003
     const world = await setup("pat");
     await world.grant("pat", world.nodes.project, viewer);
     expect((await world.switchTo()).ok).toBe(true);
-    const atOrganization = await world.access().authorize({ principal: userOf("pat"), permission: "core.organization.read", node: { level: "organization", tenantId: world.organization.id } });
+    const atOrganization = await world.access().authorize({
+      principal: userOf("pat"),
+      permission: "core.organization.read",
+      node: { level: "organization", tenantId: world.organization.id },
+    });
     expect(atOrganization).toEqual({ allowed: false, reason: "NOT_A_MEMBER" });
   });
 
   it("refuses a member whose only grant sits on a deleted project (not found)", async () => {
     const world = await setup("pat");
     await world.grant("pat", world.nodes.project, viewer);
-    expect((await world.tenancy.deleteProject({ ...world.command("owner"), projectId: world.project.id })).ok).toBe(true);
+    expect((await world.tenancy.deleteProject({ ...world.command("owner"), projectId: world.project.id })).ok).toBe(
+      true,
+    );
     expect(await world.switchTo()).toMatchObject({ ok: false, error: { reason: "NODE_NOT_FOUND" } });
     expect(world.users.userOf("pat")?.lastContext).toEqual({});
   });
@@ -88,7 +120,14 @@ describe("setActiveOrganization for members below the organization (decision 003
     await world.grant("pat", world.nodes.project, viewer);
     const access = world.access();
     const failing = { ...access, getEffectivePermissions: () => Promise.reject(new Error("firestore unavailable")) };
-    await expect(world.identity.setActiveOrganization({ actor: userOf("pat"), access: failing, organizationId: ids.tenant(world.organization.id), requestId: REQUEST_ID })).rejects.toThrow("firestore unavailable");
+    await expect(
+      world.identity.setActiveOrganization({
+        actor: userOf("pat"),
+        access: failing,
+        organizationId: ids.tenant(world.organization.id),
+        requestId: REQUEST_ID,
+      }),
+    ).rejects.toThrow("firestore unavailable");
     expect(world.users.userOf("pat")?.lastContext).toEqual({});
   });
 });

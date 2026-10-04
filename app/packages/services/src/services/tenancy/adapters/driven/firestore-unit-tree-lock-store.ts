@@ -26,8 +26,10 @@ export const createFirestoreUnitTreeLockStore = (deps: { firestore: Firestore })
   const raw = () => deps.firestore.collection(CORE_COLLECTIONS.unitTreeLocks);
   return {
     newLockId: () => raw().doc().id,
-    get: async (tx, projectId) => ((await tx.get(raw().withConverter(converter).doc(projectId))).data() as TreeLock | undefined) ?? null,
-    put: (tx, lock) => void tx.set(raw().doc(lock.projectId), { ...converter.toFirestore(lock), schemaVersion: CORE_SCHEMA_VERSION }),
+    get: async (tx, projectId) =>
+      ((await tx.get(raw().withConverter(converter).doc(projectId))).data() as TreeLock | undefined) ?? null,
+    put: (tx, lock) =>
+      void tx.set(raw().doc(lock.projectId), { ...converter.toFirestore(lock), schemaVersion: CORE_SCHEMA_VERSION }),
     remove: (tx, projectId) => void tx.delete(raw().doc(projectId)),
   };
 };

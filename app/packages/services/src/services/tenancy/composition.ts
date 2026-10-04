@@ -2,17 +2,27 @@
 // regional settings. The unit type registry is built once: the core's types, then the modules'.
 import type { UnitTypeDefinition } from "@core/contracts";
 import type { TenancyDeps } from "./application/tenancy-deps.ts";
-import { makeCreateOrganization, makeMayCreateOrganization, type CreateOrganization, type MayCreateOrganization } from "./application/use-cases/create-organization.ts";
-import { makeCreateUnit, type CreateUnit } from "./application/use-cases/create-unit.ts";
-import { makeDeleteOrganization, type DeleteOrganization } from "./application/use-cases/delete-organization.ts";
-import { makeGetOrganization, type GetOrganization } from "./application/use-cases/get-organization.ts";
-import { makeListProjects, type ListProjects } from "./application/use-cases/list-projects.ts";
-import { makeListUnits, type ListUnits } from "./application/use-cases/list-units.ts";
-import { makeCreateProject, makeDeleteProject, makeGetProject, makeUpdateProject } from "./application/use-cases/project-use-cases.ts";
 import {
+  type CreateOrganization,
+  type MayCreateOrganization,
+  makeCreateOrganization,
+  makeMayCreateOrganization,
+} from "./application/use-cases/create-organization.ts";
+import { type CreateUnit, makeCreateUnit } from "./application/use-cases/create-unit.ts";
+import { type DeleteOrganization, makeDeleteOrganization } from "./application/use-cases/delete-organization.ts";
+import { type GetOrganization, makeGetOrganization } from "./application/use-cases/get-organization.ts";
+import { type ListProjects, makeListProjects } from "./application/use-cases/list-projects.ts";
+import { type ListUnits, makeListUnits } from "./application/use-cases/list-units.ts";
+import {
+  makeCreateProject,
+  makeDeleteProject,
+  makeGetProject,
+  makeUpdateProject,
+} from "./application/use-cases/project-use-cases.ts";
+import {
+  type LoadNode,
   makeLoadNode,
   makeResolveNodeRegionalSettings,
-  type LoadNode,
   type ResolveNodeRegionalSettings,
 } from "./application/use-cases/resolve-regional-settings.ts";
 import { makeDeleteUnit, makeGetUnit, makeListUnitTypes } from "./application/use-cases/unit-use-cases.ts";
@@ -50,7 +60,9 @@ export type TenancyServices = {
  * modules; the core adds its neutral `core.unit` (`CORE_UNIT_TYPES`, decision 0030 A6).
  * @throws {UnitTypeRegistryError} when the unit types conflict (startup bug).
  */
-export const createTenancyServices = (args: { unitTypes: readonly UnitTypeDefinition[] } & Omit<TenancyDeps, "unitTypes">): TenancyServices => {
+export const createTenancyServices = (
+  args: { unitTypes: readonly UnitTypeDefinition[] } & Omit<TenancyDeps, "unitTypes">,
+): TenancyServices => {
   const deps: TenancyDeps = { ...args, unitTypes: createUnitTypeRegistry([...CORE_UNIT_TYPES, ...args.unitTypes]) };
   return {
     unitTypes: deps.unitTypes,

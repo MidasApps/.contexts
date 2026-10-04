@@ -38,7 +38,13 @@ const callReal = (endpointId: string, path: string, init: { method?: string; bea
   const handler = real.routes[endpointId];
   if (handler === undefined) throw new Error(`no handler for ${endpointId}`);
   const headers = { "content-type": "application/json", authorization: `Bearer ${init.bearer}` };
-  return handler(new Request(`http://localhost${path}`, { method: init.method ?? "GET", headers, ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }) }));
+  return handler(
+    new Request(`http://localhost${path}`, {
+      method: init.method ?? "GET",
+      headers,
+      ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
+    }),
+  );
 };
 
 // Admin SDK enrollment of an SMS factor: what the user does once in SP2's security settings.
@@ -54,7 +60,9 @@ const recreateStaffWithSms = async (): Promise<void> => {
 };
 
 const auditEntries = async (collection: string) =>
-  (await firestore.collection(collection).get()).docs.map((doc) => doc.data() as { action: string; actor: { id: string; onBehalfOf?: string }; outcome: string });
+  (await firestore.collection(collection).get()).docs.map(
+    (doc) => doc.data() as { action: string; actor: { id: string; onBehalfOf?: string }; outcome: string },
+  );
 
 beforeEach(async () => {
   now = new Date(START);
@@ -63,7 +71,11 @@ beforeEach(async () => {
   await ensureAuthUser(auth, OWNER);
   await recreateStaffWithSms();
   await seedActiveUser(firestore, STAFF.uid);
-  await real.platform.grantPlatformStaff({ uid: UserIdSchema.parse(STAFF.uid), role: "platform-support", requestId: "seed" });
+  await real.platform.grantPlatformStaff({
+    uid: UserIdSchema.parse(STAFF.uid),
+    role: "platform-support",
+    requestId: "seed",
+  });
   const created = await harness.call("tenancy.createOrganization", {
     method: "POST",
     path: "/v1/organizations",
@@ -74,8 +86,14 @@ beforeEach(async () => {
 }, 30_000);
 
 describe("impersonation (Auth Emulator, SMS MFA)", () => {
-  it("lets MFA staff read as the user, refuses writes, stops at expiry and audits both logs", { timeout: 90_000 }, async () => {
-    const staffSignIn = await signInWithPasswordAndSms({ email: STAFF.email, password: STAFF.password, projectId: "demo-core" });
+  it("lets MFA staff read as the user, refuses writes, stops at expiry and audits both logs", {
+    timeout: 90_000,
+  }, async () => {
+    const staffSignIn = await signInWithPasswordAndSms({
+      email: STAFF.email,
+      password: STAFF.password,
+      projectId: "demo-core",
+    });
     expect((await auth.verifyIdToken(staffSignIn.idToken)).firebase.sign_in_second_factor).toBe("phone");
     const started = await callReal("identity.startImpersonation", "/v1/platform/impersonation-sessions", {
       method: "POST",
@@ -91,12 +109,19 @@ describe("impersonation (Auth Emulator, SMS MFA)", () => {
 
     const organizationPath = `/v1/organizations/${tenantId}`;
     expect((await callReal("tenancy.getOrganization", organizationPath, { bearer: idToken })).status).toBe(200);
-    const patched = await callReal("tenancy.updateOrganization", organizationPath, { method: "PATCH", bearer: idToken, body: { name: "Hijacked" } });
+    const patched = await callReal("tenancy.updateOrganization", organizationPath, {
+      method: "PATCH",
+      bearer: idToken,
+      body: { name: "Hijacked" },
+    });
     expect(patched.status).toBe(403);
     const patchedBody = JSON.stringify(await patched.json());
     expect(patchedBody).toContain('"FORBIDDEN"');
     expect(patchedBody).not.toContain("IMPERSONATION");
-    expect(logs.find((record) => record.message === "access_denied")).toMatchObject({ endpointId: "tenancy.updateOrganization", reason: "IMPERSONATION_READ_ONLY" });
+    expect(logs.find((record) => record.message === "access_denied")).toMatchObject({
+      endpointId: "tenancy.updateOrganization",
+      reason: "IMPERSONATION_READ_ONLY",
+    });
 
     now = new Date("2026-09-30T12:30:00.000Z");
     expect((await callReal("tenancy.getOrganization", organizationPath, { bearer: idToken })).status).toBe(403);
@@ -108,11 +133,17 @@ describe("impersonation (Auth Emulator, SMS MFA)", () => {
       expect(entries.map((entry) => entry.action)).toContain("IMPERSONATION_STARTED");
     }
     const endPath = `/v1/platform/impersonation-sessions/${data.sessionId}/end`;
-    expect((await callReal("identity.endImpersonation", endPath, { method: "POST", bearer: staffSignIn.idToken })).status).toBe(204);
-    expect((await callReal("identity.endImpersonation", endPath, { method: "POST", bearer: staffSignIn.idToken })).status).toBe(204);
+    expect(
+      (await callReal("identity.endImpersonation", endPath, { method: "POST", bearer: staffSignIn.idToken })).status,
+    ).toBe(204);
+    expect(
+      (await callReal("identity.endImpersonation", endPath, { method: "POST", bearer: staffSignIn.idToken })).status,
+    ).toBe(204);
   });
 
-  it("answers 403 MFA_REQUIRED to staff signed in without a second factor, and audits the refusal", { timeout: 60_000 }, async () => {
+  it("answers 403 MFA_REQUIRED to staff signed in without a second factor, and audits the refusal", {
+    timeout: 60_000,
+  }, async () => {
     const response = await harness.call("identity.startImpersonation", {
       method: "POST",
       path: "/v1/platform/impersonation-sessions",
@@ -121,7 +152,9 @@ describe("impersonation (Auth Emulator, SMS MFA)", () => {
     });
     expect(response.status).toBe(403);
     expect(((await response.json()) as { error: { code: string } }).error.code).toBe("MFA_REQUIRED");
-    const denied = (await auditEntries(AUDIT_LOG_COLLECTIONS.platform)).filter((entry) => entry.action === "PLATFORM_ACCESS_DENIED");
+    const denied = (await auditEntries(AUDIT_LOG_COLLECTIONS.platform)).filter(
+      (entry) => entry.action === "PLATFORM_ACCESS_DENIED",
+    );
     expect(denied).toMatchObject([{ outcome: "denied", actor: { id: STAFF.uid } }]);
   });
 });

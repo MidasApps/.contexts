@@ -34,7 +34,8 @@ const detailOf = (item: UploadItem, t: Translate, percent: (value: number) => st
 
 /** What a screen reader hears when an upload settles (one line per item; additions are announced). */
 const announcementOf = (item: UploadItem, t: Translate): string | undefined => {
-  if (item.status === "ready") return t(item.purpose === "knowledge" ? "announce.indexing" : "announce.ready", { name: item.name });
+  if (item.status === "ready")
+    return t(item.purpose === "knowledge" ? "announce.indexing" : "announce.ready", { name: item.name });
   const reason = problemOf(item, t);
   return reason === undefined ? undefined : t("announce.problem", { name: item.name, reason });
 };
@@ -65,15 +66,27 @@ export function AttachmentChips({ items, onRemove, onRetry }: AttachmentChipsPro
                 data-status={item.status}
                 aria-busy={inFlight || undefined}
                 detail={detailOf(item, t, percent)}
-                preview={item.previewUrl === undefined ? undefined : <img src={item.previewUrl} alt="" className="size-full object-cover" />}
+                preview={
+                  item.previewUrl === undefined ? undefined : (
+                    <img src={item.previewUrl} alt="" className="size-full object-cover" />
+                  )
+                }
                 action={
                   <>
                     {item.status === "failed" ? (
-                      <Button variant="ghost" size="icon-xs" aria-label={t("retry", { name: item.name })} onClick={() => onRetry(item.id)}>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label={t("retry", { name: item.name })}
+                        onClick={() => onRetry(item.id)}
+                      >
                         <RotateCwIcon aria-hidden="true" />
                       </Button>
                     ) : null}
-                    <AttachmentRemove label={t(inFlight ? "cancel" : "remove", { name: item.name })} onClick={() => onRemove(item.id)} />
+                    <AttachmentRemove
+                      label={t(inFlight ? "cancel" : "remove", { name: item.name })}
+                      onClick={() => onRemove(item.id)}
+                    />
                   </>
                 }
               />

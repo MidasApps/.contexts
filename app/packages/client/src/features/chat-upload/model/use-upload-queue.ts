@@ -28,7 +28,10 @@ const createScopeLink = (initial: string) => {
  * The composer's upload queue for one chat thread: created once, read through
  * `useSyncExternalStore`, and emptied (uploads in flight cancelled) when the thread unmounts.
  */
-export const useUploadQueue = ({ organizationId, seams }: UseUploadQueueArgs): { readonly queue: UploadQueue; readonly items: readonly UploadItem[] } => {
+export const useUploadQueue = ({
+  organizationId,
+  seams,
+}: UseUploadQueueArgs): { readonly queue: UploadQueue; readonly items: readonly UploadItem[] } => {
   const callEndpoint = useCallEndpoint();
   const [scope] = useState(() => createScopeLink(organizationId));
   useEffect(() => scope.set(organizationId), [scope, organizationId]);

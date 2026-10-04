@@ -27,6 +27,12 @@ export const makeCheckTenantBudget =
   async ({ tenantId }) => {
     if (tenantId.trim() === "") throw new BudgetTenantMissingError();
     const monthStart = utcMonthStart(deps.clock.now());
-    const [stored, spend] = await Promise.all([deps.repository.getTenantBudget({ tenantId }), deps.repository.getMonthSpend({ tenantId, monthStart })]);
-    return evaluateBudget({ budget: resolveBudget(stored), spend: { costMicroUsd: spend.costMicroUsd, tokens: spend.inputTokens + spend.outputTokens } });
+    const [stored, spend] = await Promise.all([
+      deps.repository.getTenantBudget({ tenantId }),
+      deps.repository.getMonthSpend({ tenantId, monthStart }),
+    ]);
+    return evaluateBudget({
+      budget: resolveBudget(stored),
+      spend: { costMicroUsd: spend.costMicroUsd, tokens: spend.inputTokens + spend.outputTokens },
+    });
   };

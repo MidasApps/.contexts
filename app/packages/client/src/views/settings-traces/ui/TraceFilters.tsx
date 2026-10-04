@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { type FormEvent, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAgentCatalog } from "#/entities/agent-catalog/index.ts";
 import { useCan } from "#/entities/permission/index.ts";
@@ -20,9 +20,14 @@ const AGENT_ID = /^[a-z][a-z0-9-]*$/u;
 
 export type TraceFilterValues = { agentId: string | undefined; status: "ok" | "error" | undefined };
 
-export type TraceFiltersProps = { organizationId: string; values: TraceFilterValues; onChange: (patch: Partial<TraceFilterValues>) => void };
+export type TraceFiltersProps = {
+  organizationId: string;
+  values: TraceFilterValues;
+  onChange: (patch: Partial<TraceFilterValues>) => void;
+};
 
-const statusOf = (value: string): TraceFilterValues["status"] => (value === "ok" || value === "error" ? value : undefined);
+const statusOf = (value: string): TraceFilterValues["status"] =>
+  value === "ok" || value === "error" ? value : undefined;
 
 /**
  * The agent as a list of names from the organization's catalog (`GET /v1/agents`), the supervisor
@@ -31,15 +36,30 @@ const statusOf = (value: string): TraceFilterValues["status"] => (value === "ok"
  */
 type AgentOption = { readonly key: string; readonly name?: string | undefined };
 
-function AgentSelect({ agents, value, onChange, pending }: { agents: readonly AgentOption[]; value: string | undefined; onChange: (agentId: string | undefined) => void; pending: boolean }) {
+function AgentSelect({
+  agents,
+  value,
+  onChange,
+  pending,
+}: {
+  agents: readonly AgentOption[];
+  value: string | undefined;
+  onChange: (agentId: string | undefined) => void;
+  pending: boolean;
+}) {
   const t = useTranslations("settings.traces.filters");
   const agentLabel = useAgentLabel();
   const id = useId();
-  const options = value === undefined || agents.some((agent) => agent.key === value) ? agents : [...agents, { key: value }];
+  const options =
+    value === undefined || agents.some((agent) => agent.key === value) ? agents : [...agents, { key: value }];
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{t("agent")}</Label>
-      <Select value={value ?? ANY_AGENT} onValueChange={(next) => onChange(next === ANY_AGENT ? undefined : next)} disabled={pending}>
+      <Select
+        value={value ?? ANY_AGENT}
+        onValueChange={(next) => onChange(next === ANY_AGENT ? undefined : next)}
+        disabled={pending}
+      >
         <SelectTrigger id={id} className="w-full lg:w-56" aria-busy={pending || undefined}>
           <SelectValue placeholder={pending ? t("agentsLoading") : undefined} />
         </SelectTrigger>
@@ -65,7 +85,9 @@ const useAgentOptions = (organizationId: string): { status: "pending" | "ready" 
   const catalog = useAgentCatalog(organizationId, { enabled: canRead });
   if (!canRead || catalog.isError) return { status: "typed", agents: [] };
   if (catalog.isPending) return { status: "pending", agents: [] };
-  const listed = catalog.data.filter((entry) => AGENT_ID.test(entry.key) && entry.key !== SUPERVISOR).map(({ key, name }) => ({ key, name }));
+  const listed = catalog.data
+    .filter((entry) => AGENT_ID.test(entry.key) && entry.key !== SUPERVISOR)
+    .map(({ key, name }) => ({ key, name }));
   return { status: "ready", agents: [{ key: SUPERVISOR }, ...listed] };
 };
 
@@ -80,14 +102,25 @@ export function TraceFilters({ organizationId, values, onChange }: TraceFiltersP
     return (
       <div role="search" aria-label={t("label")} className="flex flex-col gap-3 lg:flex-row lg:items-end">
         <StatusSelect value={values.status} onChange={(status) => onChange({ status })} />
-        <AgentSelect agents={agents.agents} value={values.agentId} onChange={(agentId) => onChange({ agentId })} pending={agents.status === "pending"} />
+        <AgentSelect
+          agents={agents.agents}
+          value={values.agentId}
+          onChange={(agentId) => onChange({ agentId })}
+          pending={agents.status === "pending"}
+        />
       </div>
     );
   }
   return <TypedAgentFilters values={values} onChange={onChange} />;
 }
 
-function StatusSelect({ value, onChange }: { value: TraceFilterValues["status"]; onChange: (status: TraceFilterValues["status"]) => void }) {
+function StatusSelect({
+  value,
+  onChange,
+}: {
+  value: TraceFilterValues["status"];
+  onChange: (status: TraceFilterValues["status"]) => void;
+}) {
   const t = useTranslations("settings.traces.filters");
   const statusText = useTranslations("common.traceViewer.status");
   const statusId = useId();
@@ -123,7 +156,13 @@ function TypedAgentFilters({ values, onChange }: Omit<TraceFiltersProps, "organi
     if (valid) onChange({ agentId: agent === "" ? undefined : agent });
   };
   return (
-    <form role="search" aria-label={t("label")} noValidate onSubmit={submit} className="flex flex-col gap-3 lg:flex-row lg:items-end">
+    <form
+      role="search"
+      aria-label={t("label")}
+      noValidate
+      onSubmit={submit}
+      className="flex flex-col gap-3 lg:flex-row lg:items-end"
+    >
       <StatusSelect value={values.status} onChange={(status) => onChange({ status })} />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={agentId}>{t("agent")}</Label>

@@ -11,9 +11,14 @@ const frame = (event: string, data: unknown, id?: number): string =>
 
 export const encodeWorkflowEvent = (event: WorkflowEvent): string => frame("data", event, event.index);
 
-export const encodeDone = (data: { readonly requestId: string; readonly status: WorkflowRunStatus }): string => frame("done", data);
+export const encodeDone = (data: { readonly requestId: string; readonly status: WorkflowRunStatus }): string =>
+  frame("done", data);
 
-export const encodeError = (error: { readonly code: string; readonly message: string; readonly requestId: string }): string => frame("error", { error });
+export const encodeError = (error: {
+  readonly code: string;
+  readonly message: string;
+  readonly requestId: string;
+}): string => frame("error", { error });
 
 /** Comment line that keeps proxies from closing an idle stream. */
 export const HEARTBEAT = ": keep-alive\n\n";

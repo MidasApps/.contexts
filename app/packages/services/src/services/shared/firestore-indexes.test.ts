@@ -5,7 +5,10 @@ import { z } from "zod";
 import { AUDIT_LOG_COLLECTIONS } from "../audit/adapters/driven/firestore-audit-log-writer.ts";
 import { CONNECTORS_COLLECTION } from "../connectors/adapters/driven/firestore-connector-repository.ts";
 import { CONVERSATIONS_COLLECTION } from "../conversations/adapters/driven/conversation-storage.ts";
-import { CUSTOM_AGENTS_COLLECTION, CUSTOM_SKILLS_COLLECTION } from "../custom-agents/adapters/driven/firestore-custom-repositories.ts";
+import {
+  CUSTOM_AGENTS_COLLECTION,
+  CUSTOM_SKILLS_COLLECTION,
+} from "../custom-agents/adapters/driven/firestore-custom-repositories.ts";
 import { FILES_COLLECTION } from "../files/adapters/driven/firestore-file-repository.ts";
 import { CORE_COLLECTIONS } from "./firestore/collections.ts";
 import { IDEMPOTENCY_RECORDS_COLLECTION } from "./idempotency/firestore-idempotency-store.ts";
@@ -22,11 +25,17 @@ const IndexFieldSchema = z.looseObject({
   arrayConfig: z.literal("CONTAINS").optional(),
 });
 const IndexesFileSchema = z.looseObject({
-  indexes: z.array(z.looseObject({ collectionGroup: z.string(), queryScope: z.string(), fields: z.array(IndexFieldSchema).min(2) })),
-  fieldOverrides: z.array(z.looseObject({ collectionGroup: z.string(), fieldPath: z.string(), ttl: z.boolean().optional() })),
+  indexes: z.array(
+    z.looseObject({ collectionGroup: z.string(), queryScope: z.string(), fields: z.array(IndexFieldSchema).min(2) }),
+  ),
+  fieldOverrides: z.array(
+    z.looseObject({ collectionGroup: z.string(), fieldPath: z.string(), ttl: z.boolean().optional() }),
+  ),
 });
 
-const file = IndexesFileSchema.parse(JSON.parse(readFileSync(path.join(WORKSPACE_ROOT, "firestore.indexes.json"), "utf8")));
+const file = IndexesFileSchema.parse(
+  JSON.parse(readFileSync(path.join(WORKSPACE_ROOT, "firestore.indexes.json"), "utf8")),
+);
 
 /** Collections whose queries start from a key that is already bound to one tenant or one user. */
 const TENANT_BOUND_FIRST_FIELD: Readonly<Record<string, string>> = {
@@ -38,20 +47,33 @@ const TENANT_BOUND_FIRST_FIELD: Readonly<Record<string, string>> = {
 const signature = (collection: string, fields: readonly string[]) => `${collection}(${fields.join(",")})`;
 const declared = new Set(
   file.indexes.map((index) =>
-    signature(index.collectionGroup, index.fields.map((field) => `${field.fieldPath}:${field.order ?? field.arrayConfig ?? ""}`)),
+    signature(
+      index.collectionGroup,
+      index.fields.map((field) => `${field.fieldPath}:${field.order ?? field.arrayConfig ?? ""}`),
+    ),
   ),
 );
 
 /** Composite indexes needed by the Firestore adapters (SP1 Tasks 7–18, SP3 connectors); equality-only queries use index merging. */
 const REQUIRED = [
-  signature("access", ["tenantId:ASCENDING", "principalType:ASCENDING", "isRevoked:ASCENDING", "principalId:ASCENDING"]),
+  signature("access", [
+    "tenantId:ASCENDING",
+    "principalType:ASCENDING",
+    "isRevoked:ASCENDING",
+    "principalId:ASCENDING",
+  ]),
   signature("access", ["principalId:ASCENDING", "isRevoked:ASCENDING", "tenantId:ASCENDING"]),
   signature("approval-requests", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
   signature("approval-requests", ["tenantId:ASCENDING", "status:ASCENDING", "createdAt:DESCENDING"]),
   signature("invitations", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
   signature("invitations", ["tenantId:ASCENDING", "status:ASCENDING", "createdAt:DESCENDING"]),
   signature("memberships", ["tenantId:ASCENDING", "deletedAt:ASCENDING", "createdAt:ASCENDING"]),
-  signature("memberships", ["tenantId:ASCENDING", "principalId:ASCENDING", "deletedAt:ASCENDING", "createdAt:ASCENDING"]),
+  signature("memberships", [
+    "tenantId:ASCENDING",
+    "principalId:ASCENDING",
+    "deletedAt:ASCENDING",
+    "createdAt:ASCENDING",
+  ]),
   signature("roles", ["tenantId:ASCENDING", "deletedAt:ASCENDING", "name:ASCENDING"]),
   signature("projects", ["tenantId:ASCENDING", "deletedAt:ASCENDING", "name:ASCENDING"]),
   signature("units", ["projectId:ASCENDING", "parentUnitId:ASCENDING", "deletedAt:ASCENDING", "name:ASCENDING"]),
@@ -66,8 +88,23 @@ const REQUIRED = [
   signature("custom-agents", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
   signature("custom-skills", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
   // SP4 conversations: history list (with and without search) and the per-tenant stream cap.
-  signature("conversations", ["tenantId:ASCENDING", "ownerId:ASCENDING", "deletedAt:ASCENDING", "archived:ASCENDING", "pinned:DESCENDING", "lastMessageAt:DESCENDING"]),
-  signature("conversations", ["tenantId:ASCENDING", "ownerId:ASCENDING", "deletedAt:ASCENDING", "archived:ASCENDING", "searchTokens:CONTAINS", "pinned:DESCENDING", "lastMessageAt:DESCENDING"]),
+  signature("conversations", [
+    "tenantId:ASCENDING",
+    "ownerId:ASCENDING",
+    "deletedAt:ASCENDING",
+    "archived:ASCENDING",
+    "pinned:DESCENDING",
+    "lastMessageAt:DESCENDING",
+  ]),
+  signature("conversations", [
+    "tenantId:ASCENDING",
+    "ownerId:ASCENDING",
+    "deletedAt:ASCENDING",
+    "archived:ASCENDING",
+    "searchTokens:CONTAINS",
+    "pinned:DESCENDING",
+    "lastMessageAt:DESCENDING",
+  ]),
   signature("conversations", ["tenantId:ASCENDING", "activeStreamStartedAt:ASCENDING"]),
   // Example module notes (`GET /v1/organizations/{id}/notes`, decision 0063).
   signature(EXAMPLE_NOTES_COLLECTION, ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
@@ -83,7 +120,11 @@ const PLATFORM_SWEEP_INDEXES: readonly string[] = [
   signature("approval-requests", ["status:ASCENDING", "updatedAt:ASCENDING"]),
 ];
 
-const TTL_COLLECTIONS = [RATE_LIMIT_BUCKETS_COLLECTION, IDEMPOTENCY_RECORDS_COLLECTION, CORE_COLLECTIONS.deviceActivations];
+const TTL_COLLECTIONS = [
+  RATE_LIMIT_BUCKETS_COLLECTION,
+  IDEMPOTENCY_RECORDS_COLLECTION,
+  CORE_COLLECTIONS.deviceActivations,
+];
 const KNOWN_COLLECTIONS = new Set<string>([
   ...Object.values(CORE_COLLECTIONS),
   ...Object.values(AUDIT_LOG_COLLECTIONS),
@@ -101,16 +142,28 @@ describe("firestore.indexes.json", () => {
   it("starts every composite index with tenantId, or with a key already bound to one tenant or user", () => {
     const allowedFirst = (collection: string) => new Set(["tenantId", TENANT_BOUND_FIRST_FIELD[collection]]);
     const signatureOf = (index: (typeof file.indexes)[number]) =>
-      signature(index.collectionGroup, index.fields.map((field) => `${field.fieldPath}:${field.order ?? field.arrayConfig ?? ""}`));
+      signature(
+        index.collectionGroup,
+        index.fields.map((field) => `${field.fieldPath}:${field.order ?? field.arrayConfig ?? ""}`),
+      );
     const offending = file.indexes
       .filter((index) => !PLATFORM_SWEEP_INDEXES.includes(signatureOf(index)))
       .filter((index) => !allowedFirst(index.collectionGroup).has(index.fields[0]?.fieldPath))
-      .map((index) => signature(index.collectionGroup, index.fields.map((field) => field.fieldPath)));
+      .map((index) =>
+        signature(
+          index.collectionGroup,
+          index.fields.map((field) => field.fieldPath),
+        ),
+      );
     expect(offending).toEqual([]);
   });
 
   it("declares indexes only on known collections, with collection scope", () => {
-    expect(file.indexes.filter((index) => !KNOWN_COLLECTIONS.has(index.collectionGroup)).map((index) => index.collectionGroup)).toEqual([]);
+    expect(
+      file.indexes
+        .filter((index) => !KNOWN_COLLECTIONS.has(index.collectionGroup))
+        .map((index) => index.collectionGroup),
+    ).toEqual([]);
     expect(new Set(file.indexes.map((index) => index.queryScope))).toEqual(new Set(["COLLECTION"]));
   });
 

@@ -54,7 +54,9 @@ export class CommandContractError extends Error {
  * @throws {CommandContractError} when the contract is not `kind: "command"`, has no
  *   `permission` or its schema is not an object (boot error by design).
  */
-export const defineContractCommand = <Schema extends z.ZodObject, Output extends z.ZodType>(spec: ContractCommandSpec<Schema, Output>): ContractCommand => {
+export const defineContractCommand = <Schema extends z.ZodObject, Output extends z.ZodType>(
+  spec: ContractCommandSpec<Schema, Output>,
+): ContractCommand => {
   const { contract } = spec;
   if (contract.meta.kind !== "command") throw new CommandContractError("COMMAND_KIND_INVALID", contract.id);
   const permission = contract.meta.permission;

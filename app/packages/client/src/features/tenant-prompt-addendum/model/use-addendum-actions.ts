@@ -1,6 +1,11 @@
 "use client";
 
-import { activateAddendumEndpoint, evaluateAddendumVersionEndpoint, type PromptAgentId, type PromptVersion } from "@core/contracts";
+import {
+  activateAddendumEndpoint,
+  evaluateAddendumVersionEndpoint,
+  type PromptAgentId,
+  type PromptVersion,
+} from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
@@ -41,7 +46,11 @@ export const useAddendumActions = (organizationId: string, agentId: PromptAgentI
       notify.success(await work());
     } catch (error: unknown) {
       const described = describe(error);
-      setFailure(described.requestId === undefined ? described.message : t("common.errorState.messageWithReference", { message: described.message, requestId: described.requestId }));
+      setFailure(
+        described.requestId === undefined
+          ? described.message
+          : t("common.errorState.messageWithReference", { message: described.message, requestId: described.requestId }),
+      );
     } finally {
       await queryClient.invalidateQueries({ queryKey: tenantAddendumKeys.agent(organizationId, agentId) });
       setPending(null);
@@ -50,13 +59,25 @@ export const useAddendumActions = (organizationId: string, agentId: PromptAgentI
 
   const evaluate = (version: PromptVersion): Promise<void> =>
     run(version, "evaluate", async () => {
-      const { data } = await callEndpoint(evaluateAddendumVersionEndpoint, { params: { agentId, versionId: version.id }, query: { organizationId } });
-      return t(data.verdict === "passed" ? "settings.agents.instructions.evalPassed" : "settings.agents.instructions.evalFailed", { version: version.version });
+      const { data } = await callEndpoint(evaluateAddendumVersionEndpoint, {
+        params: { agentId, versionId: version.id },
+        query: { organizationId },
+      });
+      return t(
+        data.verdict === "passed"
+          ? "settings.agents.instructions.evalPassed"
+          : "settings.agents.instructions.evalFailed",
+        { version: version.version },
+      );
     });
 
   const activate = (version: PromptVersion): Promise<void> =>
     run(version, "activate", async () => {
-      await callEndpoint(activateAddendumEndpoint, { params: { agentId }, query: { organizationId }, body: { versionId: version.id } });
+      await callEndpoint(activateAddendumEndpoint, {
+        params: { agentId },
+        query: { organizationId },
+        body: { versionId: version.id },
+      });
       return t("settings.agents.instructions.activated", { version: version.version });
     });
 

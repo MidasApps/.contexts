@@ -12,7 +12,12 @@ const agentParams = z.object({ agentId: PromptAgentIdSchema.meta(none("Agent who
 const versionParams = agentParams.extend({ versionId: PromptVersionIdSchema.meta(none("Prompt version.")) });
 const STAFF = { 403: ["FORBIDDEN", "MFA_REQUIRED"] } as const;
 const ACTIVATION_ERRORS = { 400: ["VALIDATION_FAILED"], 404: ["NOT_FOUND"], 409: ["EVAL_REQUIRED"] } as const;
-const EVAL_ERRORS = { 404: ["NOT_FOUND"], 422: ["EVAL_DATASET_MISSING"], 502: ["UPSTREAM_UNAVAILABLE"], 503: ["UPSTREAM_UNAVAILABLE"] } as const;
+const EVAL_ERRORS = {
+  404: ["NOT_FOUND"],
+  422: ["EVAL_DATASET_MISSING"],
+  502: ["UPSTREAM_UNAVAILABLE"],
+  503: ["UPSTREAM_UNAVAILABLE"],
+} as const;
 
 export const adminListPromptVersionsEndpoint = defineEndpoint({
   id: "prompts.adminListVersions",
@@ -68,7 +73,8 @@ export const adminActivatePromptEndpoint = defineEndpoint({
   body: ActivatePromptVersionInputSchema,
   responses: { 201: dataEnvelope(PromptActivationSchema) },
   errors: { ...STAFF, ...ACTIVATION_ERRORS },
-  summary: "Activates a platform version (eval-gated; staff may force with a reason). A rollback activates an older version.",
+  summary:
+    "Activates a platform version (eval-gated; staff may force with a reason). A rollback activates an older version.",
 });
 
 export const listAddendumVersionsEndpoint = defineEndpoint({
@@ -93,7 +99,8 @@ export const createAddendumVersionEndpoint = defineEndpoint({
   body: CreatePromptVersionInputSchema,
   responses: { 201: dataEnvelope(PromptVersionSchema) },
   errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"] },
-  summary: "Writes a new addendum version; it is appended to the platform prompt, never replaces it (core.prompt.write).",
+  summary:
+    "Writes a new addendum version; it is appended to the platform prompt, never replaces it (core.prompt.write).",
 });
 
 export const evaluateAddendumVersionEndpoint = defineEndpoint({
@@ -141,7 +148,8 @@ export const adminGetPromptSeedEndpoint = defineEndpoint({
   params: agentParams,
   responses: { 200: dataEnvelope(PromptSeedSchema) },
   errors: { ...STAFF, 404: ["NOT_FOUND"], 502: ["UPSTREAM_UNAVAILABLE"] },
-  summary: "The instructions the agent ships with in code, to start a first version from (staff, platform.prompt.manage).",
+  summary:
+    "The instructions the agent ships with in code, to start a first version from (staff, platform.prompt.manage).",
 });
 
 export const PROMPT_ENDPOINTS: readonly EndpointDefinition[] = [

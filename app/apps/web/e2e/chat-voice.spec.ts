@@ -1,4 +1,14 @@
-import { chatPanel, composer, expect, expectAnswered, messageLog, openChat, send, SIGNED_OUT, test } from "./chat-test.ts";
+import {
+  chatPanel,
+  composer,
+  expect,
+  expectAnswered,
+  messageLog,
+  openChat,
+  SIGNED_OUT,
+  send,
+  test,
+} from "./chat-test.ts";
 
 // SP4 gate (umbrella §8, D4-06): push-to-talk with Chromium's fake microphone goes through
 // `/v1/voice/transcriptions` (fake model: "fake transcript <n> bytes") into the draft without
@@ -10,7 +20,11 @@ test.use({
   launchOptions: { args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"] },
 });
 
-test("records with the keyboard, puts the transcript in the draft and reads an answer aloud", async ({ page, world, signInFresh }) => {
+test("records with the keyboard, puts the transcript in the draft and reads an answer aloud", async ({
+  page,
+  world,
+  signInFresh,
+}) => {
   await signInFresh();
   await openChat(page, world);
   const talk = chatPanel(page).getByRole("button", { name: "Falar: segure para gravar" });

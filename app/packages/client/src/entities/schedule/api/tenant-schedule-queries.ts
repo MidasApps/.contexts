@@ -1,38 +1,51 @@
 "use client";
 
-import { getScheduleEndpoint, listSchedulesEndpoint, previewScheduleEndpoint, type Schedule, type SchedulePreviewInput } from "@core/contracts";
+import {
+  getScheduleEndpoint,
+  listSchedulesEndpoint,
+  previewScheduleEndpoint,
+  type Schedule,
+  type SchedulePreviewInput,
+} from "@core/contracts";
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
-import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
+import { type QueryKey, queryKeys } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 
 /** Under `["organizations", id]`: leaving or switching the organization drops its schedules. */
 export const tenantScheduleKeys = {
   all: (organizationId: string): QueryKey => queryKeys.organizationScoped(organizationId, "schedules"),
   list: (organizationId: string): QueryKey => queryKeys.organizationScoped(organizationId, "schedules", "list"),
-  one: (organizationId: string, scheduleId: string): QueryKey => queryKeys.organizationScoped(organizationId, "schedules", "one", scheduleId),
-  preview: (organizationId: string, input: SchedulePreviewInput): QueryKey => queryKeys.organizationScoped(organizationId, "schedules", "preview", input.cron, input.timezone),
+  one: (organizationId: string, scheduleId: string): QueryKey =>
+    queryKeys.organizationScoped(organizationId, "schedules", "one", scheduleId),
+  preview: (organizationId: string, input: SchedulePreviewInput): QueryKey =>
+    queryKeys.organizationScoped(organizationId, "schedules", "preview", input.cron, input.timezone),
 };
 
 /** `GET /v1/schedules?organizationId=` (core.schedule.read): the organization's schedules with their next fire. */
 export const tenantSchedulesQuery = (callEndpoint: CallEndpoint, organizationId: string) =>
   queryOptions({
     queryKey: tenantScheduleKeys.list(organizationId),
-    queryFn: async ({ signal }): Promise<Schedule[]> => (await callEndpoint(listSchedulesEndpoint, { query: { organizationId }, signal })).data,
+    queryFn: async ({ signal }): Promise<Schedule[]> =>
+      (await callEndpoint(listSchedulesEndpoint, { query: { organizationId }, signal })).data,
   });
 
 export const useTenantSchedules = (organizationId: string, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...tenantSchedulesQuery(callEndpoint, organizationId), enabled: signedIn && organizationId !== "" && options.enabled !== false });
+  return useQuery({
+    ...tenantSchedulesQuery(callEndpoint, organizationId),
+    enabled: signedIn && organizationId !== "" && options.enabled !== false,
+  });
 };
 
 /** `GET /v1/schedules/{scheduleId}?organizationId=` (core.schedule.read). */
 export const tenantScheduleQuery = (callEndpoint: CallEndpoint, organizationId: string, scheduleId: string) =>
   queryOptions({
     queryKey: tenantScheduleKeys.one(organizationId, scheduleId),
-    queryFn: async ({ signal }): Promise<Schedule> => (await callEndpoint(getScheduleEndpoint, { params: { scheduleId }, query: { organizationId }, signal })).data,
+    queryFn: async ({ signal }): Promise<Schedule> =>
+      (await callEndpoint(getScheduleEndpoint, { params: { scheduleId }, query: { organizationId }, signal })).data,
   });
 
 /**
@@ -46,7 +59,13 @@ export const useSchedulePreview = (organizationId: string, input: SchedulePrevie
   return useQuery({
     queryKey: tenantScheduleKeys.preview(organizationId, input ?? { cron: "", timezone: "" }),
     queryFn: async ({ signal }): Promise<string[]> =>
-      (await callEndpoint(previewScheduleEndpoint, { query: { organizationId }, body: input ?? { cron: "", timezone: "" }, signal })).data.nextFireTimes,
+      (
+        await callEndpoint(previewScheduleEndpoint, {
+          query: { organizationId },
+          body: input ?? { cron: "", timezone: "" },
+          signal,
+        })
+      ).data.nextFireTimes,
     enabled: signedIn && organizationId !== "" && input !== null,
     placeholderData: keepPreviousData,
     // Fires move with the clock: a minute-old preview is still right for an editor.
@@ -58,5 +77,8 @@ export const useSchedulePreview = (organizationId: string, input: SchedulePrevie
 export const useTenantSchedule = (organizationId: string, scheduleId: string | undefined) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...tenantScheduleQuery(callEndpoint, organizationId, scheduleId ?? ""), enabled: signedIn && organizationId !== "" && scheduleId !== undefined });
+  return useQuery({
+    ...tenantScheduleQuery(callEndpoint, organizationId, scheduleId ?? ""),
+    enabled: signedIn && organizationId !== "" && scheduleId !== undefined,
+  });
 };

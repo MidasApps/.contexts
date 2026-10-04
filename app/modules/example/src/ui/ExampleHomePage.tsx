@@ -15,7 +15,11 @@ function ExampleHome({ context, moduleId, now }: { context: AccessContext; modul
   const t = useTranslations("example.home");
   return (
     <>
-      <PageHeader eyebrow={context.project?.name ?? context.organization.name} title={t("title")} description={t("description")} />
+      <PageHeader
+        eyebrow={context.project?.name ?? context.organization.name}
+        title={t("title")}
+        description={t("description")}
+      />
       <div className="flex flex-col gap-6">
         <ExampleContextCard context={context} now={now} />
         <ExampleSettingsCard organizationId={context.organization.id} moduleId={moduleId} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { AcceptInvitation, useInvitationToken } from "#/features/accept-invitation/index.ts";
 import { SignInForm } from "#/features/auth-by-email/index.ts";
@@ -17,7 +17,15 @@ import { AuthBrand, EntryLocaleSwitcher } from "#/widgets/auth-entry/index.ts";
 
 type SignedOutMode = "sign-in" | "create-account";
 
-function Heading({ title, description, focusOnMount = false }: { title: string; description?: string; focusOnMount?: boolean }) {
+function Heading({
+  title,
+  description,
+  focusOnMount = false,
+}: {
+  title: string;
+  description?: string;
+  focusOnMount?: boolean;
+}) {
   const ref = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (focusOnMount) ref.current?.focus();
@@ -50,7 +58,10 @@ function ModeSwitch({ prompt, action, onClick }: { prompt: string; action: strin
 function SignedOutInvite() {
   const t = useTranslations("auth.invite");
   // `switched`: focus moves to the new heading only after a switch, never on the first render.
-  const [{ mode, switched }, setView] = useState<{ mode: SignedOutMode; switched: boolean }>({ mode: "sign-in", switched: false });
+  const [{ mode, switched }, setView] = useState<{ mode: SignedOutMode; switched: boolean }>({
+    mode: "sign-in",
+    switched: false,
+  });
   const switchTo = (next: SignedOutMode) => setView({ mode: next, switched: true });
   if (mode === "create-account") {
     return (
@@ -73,7 +84,8 @@ function SignedOutInvite() {
 function InviteBody({ token }: { token: string }) {
   const t = useTranslations("auth");
   const { state } = useSession();
-  if (state.status === "booting" || state.status === "exchanging") return <LoadingState variant="spinner" label={t("signIn.loading")} />;
+  if (state.status === "booting" || state.status === "exchanging")
+    return <LoadingState variant="spinner" label={t("signIn.loading")} />;
   if (state.status === "mfa-required") {
     return (
       <>
@@ -86,7 +98,10 @@ function InviteBody({ token }: { token: string }) {
   return (
     <>
       <Heading title={t("invite.title")} />
-      <AcceptInvitation token={token} mismatchAction={<SignOutButton landing={null}>{t("invite.useAnotherAccount")}</SignOutButton>} />
+      <AcceptInvitation
+        token={token}
+        mismatchAction={<SignOutButton landing={null}>{t("invite.useAnotherAccount")}</SignOutButton>}
+      />
     </>
   );
 }

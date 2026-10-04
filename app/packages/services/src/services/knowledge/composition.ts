@@ -4,7 +4,10 @@ import { type DeleteDocument, makeDeleteDocument } from "./application/use-cases
 import { type GetDocument, makeGetDocument } from "./application/use-cases/get-document.ts";
 import { type ListDocuments, makeListDocuments } from "./application/use-cases/list-documents.ts";
 import { makeRegisterDocument, type RegisterDocument } from "./application/use-cases/register-document.ts";
-import { makeReplaceDocumentChunks, type ReplaceDocumentChunks } from "./application/use-cases/replace-document-chunks.ts";
+import {
+  makeReplaceDocumentChunks,
+  type ReplaceDocumentChunks,
+} from "./application/use-cases/replace-document-chunks.ts";
 import { makeSearchChunks, type SearchChunks } from "./application/use-cases/search-chunks.ts";
 
 export type KnowledgeServices = {
@@ -20,7 +23,10 @@ export type KnowledgeServices = {
  * Binds the knowledge use cases.
  * @param deps.embeddingModel model id stored with the vectors; search compares only those.
  */
-export const createKnowledgeServices = (deps: { readonly repository: KnowledgeRepository; readonly embeddingModel: string }): KnowledgeServices => ({
+export const createKnowledgeServices = (deps: {
+  readonly repository: KnowledgeRepository;
+  readonly embeddingModel: string;
+}): KnowledgeServices => ({
   registerDocument: makeRegisterDocument(deps),
   replaceDocumentChunks: makeReplaceDocumentChunks(deps),
   searchChunks: makeSearchChunks(deps),

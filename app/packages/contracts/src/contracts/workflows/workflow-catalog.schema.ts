@@ -15,7 +15,9 @@ export const WorkflowCatalogEntrySchema = z.strictObject({
   inputSchema: z
     .record(z.string(), z.unknown())
     .nullable()
-    .meta(none("JSON Schema of the workflow input, when the workflow declares one; the server validates the input again.")),
+    .meta(
+      none("JSON Schema of the workflow input, when the workflow declares one; the server validates the input again."),
+    ),
 });
 export type WorkflowCatalogEntry = z.infer<typeof WorkflowCatalogEntrySchema>;
 

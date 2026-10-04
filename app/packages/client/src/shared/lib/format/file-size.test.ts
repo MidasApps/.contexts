@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { formatFileSize } from "./file-size.ts";
 
-const format = (locale: string) => (value: number, options: Intl.NumberFormatOptions) => new Intl.NumberFormat(locale, options).format(value);
+const format = (locale: string) => (value: number, options: Intl.NumberFormatOptions) =>
+  new Intl.NumberFormat(locale, options).format(value);
 
 describe("formatFileSize", () => {
   it("picks bytes, kilobytes or megabytes and follows the locale", () => {

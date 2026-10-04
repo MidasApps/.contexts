@@ -28,11 +28,19 @@ type Dialog = "create" | "rename" | "move" | "delete" | null;
 
 const useTypeLabel = () => {
   const t = useTranslations();
-  return (type: Pick<UnitTypeDefinition, "id" | "labelKey">): string => (t.has(type.labelKey) ? t(type.labelKey) : type.id);
+  return (type: Pick<UnitTypeDefinition, "id" | "labelKey">): string =>
+    t.has(type.labelKey) ? t(type.labelKey) : type.id;
 };
 
 /** Actions on the selected unit (or the project root when nothing is selected). */
-function SelectionBar(props: { selected: Unit | null; path: string; typeName: string | null; canNest: boolean; can: UnitTreeEditorProps["can"]; open: (dialog: Dialog) => void }) {
+function SelectionBar(props: {
+  selected: Unit | null;
+  path: string;
+  typeName: string | null;
+  canNest: boolean;
+  can: UnitTreeEditorProps["can"];
+  open: (dialog: Dialog) => void;
+}) {
   const t = useTranslations("settings.units");
   const reasonId = useId();
   const { selected, can, open } = props;
@@ -45,7 +53,12 @@ function SelectionBar(props: { selected: Unit | null; path: string; typeName: st
       <div className="flex flex-wrap gap-2">
         {can.create ? (
           // Disabled with the reason beside it, rather than a dialog that can only say no.
-          <Button size="sm" disabled={!props.canNest} aria-describedby={props.canNest ? undefined : reasonId} onClick={() => open("create")}>
+          <Button
+            size="sm"
+            disabled={!props.canNest}
+            aria-describedby={props.canNest ? undefined : reasonId}
+            onClick={() => open("create")}
+          >
             <Icon name="plus" />
             {selected === null ? t("createRoot") : t("createChild")}
           </Button>
@@ -92,7 +105,10 @@ export function UnitTreeEditor({ organizationId, project, can }: UnitTreeEditorP
   const units = useMemo(() => tree.data ?? [], [tree.data]);
   const nodes = useMemo(() => buildUnitTree(units, locale), [units, locale]);
   const selected = units.find((unit) => unit.id === selectedId) ?? null;
-  const pathOf = (unit: Unit): string => unitPathIn(units, unit.id).map((segment) => segment.name).join(" › ");
+  const pathOf = (unit: Unit): string =>
+    unitPathIn(units, unit.id)
+      .map((segment) => segment.name)
+      .join(" › ");
   const typeOf = (id: string) => types.data?.find((type) => type.id === id);
   const creatable = typesAllowedUnder(types.data ?? [], selected === null ? "project" : selected.type);
   const subtree = selected === null ? 0 : descendantIds(units, selected.id).size;
@@ -108,7 +124,9 @@ export function UnitTreeEditor({ organizationId, project, can }: UnitTreeEditorP
   if (tree.isPending || types.isPending) return <LoadingState label={t("loadingTree")} rows={4} />;
   if (tree.isError || types.isError) {
     const retry = () => void Promise.all([tree.refetch(), types.refetch()]);
-    return <ApiErrorState error={tree.error ?? types.error} onRetry={retry} retrying={tree.isFetching || types.isFetching} />;
+    return (
+      <ApiErrorState error={tree.error ?? types.error} onRetry={retry} retrying={tree.isFetching || types.isFetching} />
+    );
   }
   const selectedType = selected === null ? undefined : typeOf(selected.type);
   return (
@@ -126,20 +144,37 @@ export function UnitTreeEditor({ organizationId, project, can }: UnitTreeEditorP
           headingLevel={3}
           icon="network"
           title={t("emptyTitle")}
-          description={can.create ? t("emptyDescription", { project: project.name }) : t("emptyDescriptionNoPermission")}
-          action={can.create && creatable.length > 0 ? <Button onClick={() => setDialog("create")}>{t("createRoot")}</Button> : undefined}
+          description={
+            can.create ? t("emptyDescription", { project: project.name }) : t("emptyDescriptionNoPermission")
+          }
+          action={
+            can.create && creatable.length > 0 ? (
+              <Button onClick={() => setDialog("create")}>{t("createRoot")}</Button>
+            ) : undefined
+          }
         />
       ) : (
         <div className="rounded-lg border border-border p-2">
-          <TreeView label={t("treeLabel", { project: project.name })} nodes={nodes} selectedId={selectedId} onSelect={(id) => setSelectedId(id === selectedId ? undefined : id)} />
+          <TreeView
+            label={t("treeLabel", { project: project.name })}
+            nodes={nodes}
+            selectedId={selectedId}
+            onSelect={(id) => setSelectedId(id === selectedId ? undefined : id)}
+          />
         </div>
       )}
-      {units.length >= MAX_TREE_UNITS ? <p className="text-xs text-muted-foreground">{t("truncated", { max: MAX_TREE_UNITS })}</p> : null}
+      {units.length >= MAX_TREE_UNITS ? (
+        <p className="text-xs text-muted-foreground">{t("truncated", { max: MAX_TREE_UNITS })}</p>
+      ) : null}
       <UnitNameDialog
         open={dialog === "create"}
         onOpenChange={(open) => setDialog(open ? "create" : null)}
         title={t("createTitle")}
-        description={selected === null ? t("createUnderProject", { project: project.name }) : t("createUnder", { parent: pathOf(selected) })}
+        description={
+          selected === null
+            ? t("createUnderProject", { project: project.name })
+            : t("createUnder", { parent: pathOf(selected) })
+        }
         submitLabel={t("createSubmit")}
         types={creatable}
         typeLabel={typeLabel}
@@ -163,7 +198,17 @@ export function UnitTreeEditor({ organizationId, project, can }: UnitTreeEditorP
       />
       <MoveUnitDialog
         unitName={dialog === "move" && selected !== null ? selected.name : null}
-        targets={selected === null ? [] : moveTargets({ unit: selected, units, types: types.data, projectLabel: t("projectRoot", { project: project.name }), pathOf })}
+        targets={
+          selected === null
+            ? []
+            : moveTargets({
+                unit: selected,
+                units,
+                types: types.data,
+                projectLabel: t("projectRoot", { project: project.name }),
+                pathOf,
+              })
+        }
         onOpenChange={(open) => !open && setDialog(null)}
         onMove={async (parentUnitId) => {
           if (selected === null) return;

@@ -19,7 +19,14 @@ export const makeObjectFinalizedHandler =
   async (data: ObjectFinalizedData): Promise<FinalizeOutcome> => {
     const startedAt = performance.now();
     const size = Number(data.size ?? 0);
-    const outcome = await deps.finalizeUpload({ name: data.name ?? "", size: Number.isFinite(size) ? size : 0, contentType: data.contentType });
-    deps.logger.info("file_finalized", { outcome: outcome.kind, durationMs: Math.round(performance.now() - startedAt) });
+    const outcome = await deps.finalizeUpload({
+      name: data.name ?? "",
+      size: Number.isFinite(size) ? size : 0,
+      contentType: data.contentType,
+    });
+    deps.logger.info("file_finalized", {
+      outcome: outcome.kind,
+      durationMs: Math.round(performance.now() - startedAt),
+    });
     return outcome;
   };

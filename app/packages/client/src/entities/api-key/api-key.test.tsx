@@ -24,7 +24,9 @@ describe("api-key entity", () => {
   it("merges API key pages under the organization's key", async () => {
     const api = createFakeApi({
       [`GET /v1/organizations/${IDS.organization}/api-keys`]: (request) =>
-        request.query.get("cursor") === "k2" ? page([apiKey("Ak2", "CI")]) : page([apiKey("Ak1", "Import")], { cursor: "k2" }),
+        request.query.get("cursor") === "k2"
+          ? page([apiKey("Ak2", "CI")])
+          : page([apiKey("Ak1", "Import")], { cursor: "k2" }),
     });
     const { result, queryClient } = renderClientHook(() => useApiKeys(IDS.organization), { api });
     await waitFor(() => expect(result.current.data).toHaveLength(1));

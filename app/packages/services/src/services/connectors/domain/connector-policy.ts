@@ -37,4 +37,5 @@ export const connectorHostIssues = (connector: Pick<Connector, "type" | "config"
 };
 
 /** Secret Manager id of a connector's secret (`connector-<tenantId>-<connectorId>`, decision 0027). */
-export const connectorSecretName = (connector: Pick<Connector, "tenantId" | "id">): string => `connector-${connector.tenantId}-${connector.id}`;
+export const connectorSecretName = (connector: Pick<Connector, "tenantId" | "id">): string =>
+  `connector-${connector.tenantId}-${connector.id}`;

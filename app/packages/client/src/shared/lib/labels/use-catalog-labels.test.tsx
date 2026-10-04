@@ -1,15 +1,27 @@
 import { CORE_PERMISSIONS } from "@core/contracts";
-import { loadMessages, type ExtraNamespaces, type SupportedLocale } from "@core/i18n";
+import { type ExtraNamespaces, loadMessages, type SupportedLocale } from "@core/i18n";
 import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { IntlProvider } from "use-intl";
 import { describe, expect, it } from "vitest";
 import { ShellRegistryProvider } from "../shell/shell-registry-context.tsx";
-import { useAgentLabel, useCommandLabel, useFlagLabel, useModuleLabel, usePermissionLabel, useToolLabel, useWorkflowLabel } from "./use-catalog-labels.ts";
+import {
+  useAgentLabel,
+  useCommandLabel,
+  useFlagLabel,
+  useModuleLabel,
+  usePermissionLabel,
+  useToolLabel,
+  useWorkflowLabel,
+} from "./use-catalog-labels.ts";
 
 const MODULE_MESSAGES: ExtraNamespaces = {
   example: {
-    "pt-BR": { workflows: { "note-intake": { name: "Entrada de notas", description: "Cria uma nota." } }, permissions: { note: { archive: "Arquivar notas" } }, agents: { helper: "Ajudante" } },
+    "pt-BR": {
+      workflows: { "note-intake": { name: "Entrada de notas", description: "Cria uma nota." } },
+      permissions: { note: { archive: "Arquivar notas" } },
+      agents: { helper: "Ajudante" },
+    },
   },
 };
 
@@ -104,7 +116,9 @@ describe("useCommandLabel", () => {
 
 describe("useModuleLabel", () => {
   const registries = {
-    modules: { get: (id: string) => (id === "example" ? { manifest: { labelKey: "example.module.name" } } : undefined) },
+    modules: {
+      get: (id: string) => (id === "example" ? { manifest: { labelKey: "example.module.name" } } : undefined),
+    },
   } as unknown as Parameters<typeof ShellRegistryProvider>[0]["registries"];
   const messages = loadMessages("pt-BR", { example: { "pt-BR": { module: { name: "Exemplo" } } } });
   const wrapper = ({ children }: { children: ReactNode }) => (

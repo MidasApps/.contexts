@@ -1,6 +1,6 @@
 "use client";
 
-import { revokeApiKeyEndpoint, type ApiKey } from "@core/contracts";
+import { type ApiKey, revokeApiKeyEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { apiKeyKeys } from "#/entities/api-key/index.ts";
@@ -10,7 +10,11 @@ import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts"
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
-export type RevokeApiKeyDialogProps = { organizationId: string; apiKey: ApiKey | null; onOpenChange: (open: boolean) => void };
+export type RevokeApiKeyDialogProps = {
+  organizationId: string;
+  apiKey: ApiKey | null;
+  onOpenChange: (open: boolean) => void;
+};
 
 /**
  * Revokes an API key (`DELETE /v1/api-keys/{id}`, core.api-key.revoke): integrations using it

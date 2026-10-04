@@ -49,7 +49,8 @@ export const useStartedIngestions = (organizationId: string) => {
   const add = useCallback((run: StartedKnowledgeIngestion) => setStarted((runs) => [...runs, run]), []);
   const dismiss = useCallback((runId: string) => setStarted((runs) => runs.filter((run) => run.runId !== runId)), []);
   const restart = useCallback(
-    (previousRunId: string, next: StartedKnowledgeIngestion) => setStarted((runs) => runs.map((run) => (run.runId === previousRunId ? next : run))),
+    (previousRunId: string, next: StartedKnowledgeIngestion) =>
+      setStarted((runs) => runs.map((run) => (run.runId === previousRunId ? next : run))),
     [],
   );
   return { started, add, dismiss, restart };

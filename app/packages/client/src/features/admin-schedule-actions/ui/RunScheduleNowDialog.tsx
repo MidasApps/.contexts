@@ -1,6 +1,6 @@
 "use client";
 
-import { adminRunScheduleNowEndpoint, type AdminSchedule } from "@core/contracts";
+import { type AdminSchedule, adminRunScheduleNowEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { scheduleKeys } from "#/entities/schedule/index.ts";
@@ -27,7 +27,10 @@ export function RunScheduleNowDialog({ schedule, onOpenChange }: RunScheduleNowD
     async () => {
       if (schedule === null) return;
       await callEndpoint(adminRunScheduleNowEndpoint, { params: { scheduleId: schedule.id } });
-      await Promise.all([queryClient.invalidateQueries({ queryKey: scheduleKeys.all() }), queryClient.invalidateQueries({ queryKey: workflowRunKeys.all() })]);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: scheduleKeys.all() }),
+        queryClient.invalidateQueries({ queryKey: workflowRunKeys.all() }),
+      ]);
     },
     () => notify.success(t("done", { workflow: schedule === null ? "" : workflowLabel.name(schedule.workflowId) })),
   );

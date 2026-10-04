@@ -3,12 +3,20 @@ import { type AnyExportedSpan, SpanType, type TracingEvent, TracingEventType } f
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type ModelPrice, priceTableFor } from "../models/model-prices.ts";
 import type { AgentRunRecord } from "../runtime/runtime-ports.ts";
-import { createUsageLedgerExporter, LEDGER_FLUSH_MS, LEDGER_FLUSH_ROWS, type LedgerLogger } from "./usage-ledger-exporter.ts";
+import {
+  createUsageLedgerExporter,
+  LEDGER_FLUSH_MS,
+  LEDGER_FLUSH_ROWS,
+  type LedgerLogger,
+} from "./usage-ledger-exporter.ts";
 
 const TRACE_ID = "4bf92f3577b34da6a3ce929d0e0e4736";
 const REQUEST_ID = "01J8Z3K4M5N6P7Q8R9S0T1V2W3";
 
-const generationSpan = (overrides: Partial<AnyExportedSpan> = {}, attributes: Record<string, unknown> = {}): AnyExportedSpan =>
+const generationSpan = (
+  overrides: Partial<AnyExportedSpan> = {},
+  attributes: Record<string, unknown> = {},
+): AnyExportedSpan =>
   ({
     id: "span-1",
     traceId: TRACE_ID,
@@ -34,7 +42,10 @@ const generationSpan = (overrides: Partial<AnyExportedSpan> = {}, attributes: Re
   }) as AnyExportedSpan;
 
 /** An agent run span; `tripwireAbort` is what Mastra sets when a processor stopped the run. */
-const agentRunSpan = (overrides: Partial<AnyExportedSpan> = {}, attributes: Record<string, unknown> = {}): AnyExportedSpan =>
+const agentRunSpan = (
+  overrides: Partial<AnyExportedSpan> = {},
+  attributes: Record<string, unknown> = {},
+): AnyExportedSpan =>
   ({
     id: "run-1",
     traceId: TRACE_ID,
@@ -69,7 +80,10 @@ const recordingLogger = () => {
   return { logger, lines };
 };
 
-const setup = (recordLlmCalls: (calls: readonly LlmCall[]) => Promise<void> = () => Promise.resolve(), extra: { prices?: Readonly<Record<string, ModelPrice>> } = {}) => {
+const setup = (
+  recordLlmCalls: (calls: readonly LlmCall[]) => Promise<void> = () => Promise.resolve(),
+  extra: { prices?: Readonly<Record<string, ModelPrice>> } = {},
+) => {
   const batches: LlmCall[][] = [];
   const runBatches: AgentRunRecord[][] = [];
   const { logger, lines } = recordingLogger();
@@ -136,7 +150,9 @@ describe("usage ledger exporter", () => {
     await exporter.exportTracingEvent(ended(span));
     await exporter.flush();
     expect(batches[0]?.map((row) => row.costMicroUsd)).toEqual([null, null]);
-    expect(lines).toEqual([{ level: "warn", message: "usage_price_missing", fields: { provider: "fake", model: "fake-chat" } }]);
+    expect(lines).toEqual([
+      { level: "warn", message: "usage_price_missing", fields: { provider: "fake", model: "fake-chat" } },
+    ]);
   });
 
   it("prices the fake models with the nominal table of fake mode", async () => {
@@ -183,7 +199,9 @@ describe("usage ledger exporter", () => {
 
   it("skips internal agent runs (the guardrail detectors' own agents) and runs without a tenant", async () => {
     const { exporter, runBatches, lines } = setup();
-    await exporter.exportTracingEvent(ended(agentRunSpan({ entityId: "prompt-injection-detector", isInternal: true, isRootSpan: false })));
+    await exporter.exportTracingEvent(
+      ended(agentRunSpan({ entityId: "prompt-injection-detector", isInternal: true, isRootSpan: false })),
+    );
     await exporter.exportTracingEvent(ended(agentRunSpan({ requestContext: { userId: "uid-1" } })));
     await exporter.flush();
     expect(runBatches).toEqual([]);
@@ -192,10 +210,19 @@ describe("usage ledger exporter", () => {
 
   it("uses the context of an agent run's own start when its end carries none (durable agents)", async () => {
     const { exporter, runBatches } = setup();
-    await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: agentRunSpan({ id: "run-durable" }) });
-    await exporter.exportTracingEvent(ended(withoutContext(agentRunSpan({ id: "run-durable" }, { tripwireAbort: { processorId: "tenant-budget-guard" } }))));
+    await exporter.exportTracingEvent({
+      type: TracingEventType.SPAN_STARTED,
+      exportedSpan: agentRunSpan({ id: "run-durable" }),
+    });
+    await exporter.exportTracingEvent(
+      ended(
+        withoutContext(agentRunSpan({ id: "run-durable" }, { tripwireAbort: { processorId: "tenant-budget-guard" } })),
+      ),
+    );
     await exporter.flush();
-    expect(runBatches.flat().map((run) => [run.tenantId, run.userId, run.tripwireProcessorId])).toEqual([["tenantA", "uid-1", "tenant-budget-guard"]]);
+    expect(runBatches.flat().map((run) => [run.tenantId, run.userId, run.tripwireProcessorId])).toEqual([
+      ["tenantA", "uid-1", "tenant-budget-guard"],
+    ]);
   });
 
   it("skips a span whose request context names no tenant, whatever its metadata says", async () => {
@@ -210,15 +237,22 @@ describe("usage ledger exporter", () => {
     const { exporter, batches, lines } = setup();
     const start = generationSpan({ id: "span-durable" });
     await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: start });
-    await exporter.exportTracingEvent(ended(withoutContext(generationSpan({ id: "span-durable", entityId: "assistant-chat" }))));
+    await exporter.exportTracingEvent(
+      ended(withoutContext(generationSpan({ id: "span-durable", entityId: "assistant-chat" }))),
+    );
     await exporter.flush();
-    expect(batches[0]?.map((row) => [row.tenantId, row.userId, row.requestId, row.agentId])).toEqual([["tenantA", "uid-1", REQUEST_ID, "assistant-chat"]]);
+    expect(batches[0]?.map((row) => [row.tenantId, row.userId, row.requestId, row.agentId])).toEqual([
+      ["tenantA", "uid-1", REQUEST_ID, "assistant-chat"],
+    ]);
     expect(lines).toEqual([]);
   });
 
   it("never borrows the context of another span, and forgets a start once its end arrived", async () => {
     const { exporter, batches, lines } = setup();
-    await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: generationSpan({ id: "span-a" }) });
+    await exporter.exportTracingEvent({
+      type: TracingEventType.SPAN_STARTED,
+      exportedSpan: generationSpan({ id: "span-a" }),
+    });
     await exporter.exportTracingEvent(ended(withoutContext(generationSpan({ id: "span-b" }))));
     await exporter.exportTracingEvent(ended(withoutContext(generationSpan({ id: "span-a" }))));
     await exporter.exportTracingEvent(ended(withoutContext(generationSpan({ id: "span-a" }))));
@@ -229,7 +263,10 @@ describe("usage ledger exporter", () => {
 
   it("prefers the end event's own context over the one seen at start", async () => {
     const { exporter, batches } = setup();
-    await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: generationSpan({ requestContext: { tenantId: "tenantStart" } }) });
+    await exporter.exportTracingEvent({
+      type: TracingEventType.SPAN_STARTED,
+      exportedSpan: generationSpan({ requestContext: { tenantId: "tenantStart" } }),
+    });
     await exporter.exportTracingEvent(ended(generationSpan()));
     await exporter.flush();
     expect(batches[0]?.[0]?.tenantId).toBe("tenantA");
@@ -237,7 +274,8 @@ describe("usage ledger exporter", () => {
 
   it(`flushes as soon as ${LEDGER_FLUSH_ROWS} rows are buffered`, async () => {
     const { exporter, batches } = setup();
-    for (let index = 0; index < LEDGER_FLUSH_ROWS; index += 1) await exporter.exportTracingEvent(ended(generationSpan()));
+    for (let index = 0; index < LEDGER_FLUSH_ROWS; index += 1)
+      await exporter.exportTracingEvent(ended(generationSpan()));
     await vi.advanceTimersByTimeAsync(0);
     expect(batches.map((batch) => batch.length)).toEqual([LEDGER_FLUSH_ROWS]);
   });
@@ -256,10 +294,15 @@ describe("usage ledger exporter", () => {
     const { exporter, batches, lines } = setup(() => (fail ? Promise.reject(new Error("db down")) : Promise.resolve()));
     await exporter.exportTracingEvent(ended(generationSpan()));
     await expect(exporter.flush()).resolves.toBeUndefined();
-    expect(lines).toEqual([{ level: "error", message: "usage_ledger_flush_failed", fields: { rowCount: 1, error: "db down" } }]);
+    expect(lines).toEqual([
+      { level: "error", message: "usage_ledger_flush_failed", fields: { rowCount: 1, error: "db down" } },
+    ]);
     fail = false;
     await exporter.flush();
-    expect(batches.map((batch) => batch.map((row) => row.id))).toEqual([["01928f6e-7b2a-7c3d-9e4f-000000000000"], ["01928f6e-7b2a-7c3d-9e4f-000000000000"]]);
+    expect(batches.map((batch) => batch.map((row) => row.id))).toEqual([
+      ["01928f6e-7b2a-7c3d-9e4f-000000000000"],
+      ["01928f6e-7b2a-7c3d-9e4f-000000000000"],
+    ]);
   });
 
   it("flushes what is left on shutdown", async () => {

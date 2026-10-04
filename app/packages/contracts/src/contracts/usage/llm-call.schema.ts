@@ -12,8 +12,17 @@ const count = (description: string) => z.int().nonnegative().meta(none(descripti
  */
 export const LlmCallSchema = z.strictObject({
   id: z.uuid().brand<"LlmCallId">().meta(none("Ledger row id (uuidv7).")),
-  requestId: z.string().min(1).max(64).nullable().meta(none("X-Request-Id of the call that triggered the model, when known.")),
-  traceId: z.string().regex(/^[0-9a-f]{32}$/).nullable().meta(none("W3C trace id of the run.")),
+  requestId: z
+    .string()
+    .min(1)
+    .max(64)
+    .nullable()
+    .meta(none("X-Request-Id of the call that triggered the model, when known.")),
+  traceId: z
+    .string()
+    .regex(/^[0-9a-f]{32}$/)
+    .nullable()
+    .meta(none("W3C trace id of the run.")),
   tenantId: TenantIdSchema.meta(none("Organization billed for the call.")),
   userId: UserIdSchema.nullable().meta({ description: "Uid of the caller; null for platform jobs.", pii: "personal" }),
   agentId: z.string().min(1).max(200).meta(none("Agent, workflow or processor that called the model.")),
@@ -22,7 +31,11 @@ export const LlmCallSchema = z.strictObject({
   inputTokens: count("Prompt tokens."),
   outputTokens: count("Completion tokens."),
   cachedTokens: count("Prompt tokens served from the provider cache."),
-  costMicroUsd: z.int().nonnegative().nullable().meta(none("Cost in micro-USD from the price table; null when the price is unknown.")),
+  costMicroUsd: z
+    .int()
+    .nonnegative()
+    .nullable()
+    .meta(none("Cost in micro-USD from the price table; null when the price is unknown.")),
   latencyMs: count("Wall time of the call in milliseconds."),
   finishReason: z.string().max(64).nullable().meta(none("Why generation stopped, as the provider reported it.")),
   occurredAt: IsoDateTimeSchema.meta(none("When the call finished (UTC).")),

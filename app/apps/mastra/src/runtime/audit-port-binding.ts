@@ -1,5 +1,12 @@
 import type { AccessPrincipal, AuditEntry, AuditPort } from "@core/agents";
-import { AuditActionSchema, type AuditMetadata, AuditMetadataSchema, type AuditOutcome, TenantIdSchema, UserIdSchema } from "@core/contracts";
+import {
+  AuditActionSchema,
+  type AuditMetadata,
+  AuditMetadataSchema,
+  type AuditOutcome,
+  TenantIdSchema,
+  UserIdSchema,
+} from "@core/contracts";
 import type { AuditWriter, TenantAuditRecordInput } from "@core/services";
 
 /** Target of a tool audit when the entry names none: the tool itself. */
@@ -9,13 +16,20 @@ const actorOf = (principal: AccessPrincipal): TenantAuditRecordInput["actor"] =>
   if (principal.type === "service") return { type: "service", id: principal.apiKeyId };
   if (principal.type === "device") return { type: "device", id: principal.deviceId };
   const staffUid = principal.impersonation?.staffUid;
-  return { type: "user", id: principal.uid, ...(staffUid === undefined ? {} : { onBehalfOf: UserIdSchema.parse(staffUid) }) };
+  return {
+    type: "user",
+    id: principal.uid,
+    ...(staffUid === undefined ? {} : { onBehalfOf: UserIdSchema.parse(staffUid) }),
+  };
 };
 
 const targetOf = (entry: AuditEntry): TenantAuditRecordInput["target"] => {
   if (entry.target !== undefined) return entry.target;
   const toolId = entry.metadata.toolId;
-  return { type: AGENT_TOOL_TARGET_TYPE, id: typeof toolId === "string" && toolId !== "" ? toolId : entry.action.toLowerCase() };
+  return {
+    type: AGENT_TOOL_TARGET_TYPE,
+    id: typeof toolId === "string" && toolId !== "" ? toolId : entry.action.toLowerCase(),
+  };
 };
 
 // The tool pipeline's outcomes (decision 0025) onto SP1's `AuditOutcome`.
@@ -44,7 +58,12 @@ export const auditMetadataOf = (metadata: AuditEntry["metadata"]): AuditMetadata
     durationMs: metadata.durationMs,
   };
   const kept = Object.fromEntries(
-    Object.entries(candidates).filter(([key, value]) => value !== undefined && value !== null && AuditMetadataSchema.shape[key as keyof AuditMetadata].safeParse(value).success),
+    Object.entries(candidates).filter(
+      ([key, value]) =>
+        value !== undefined &&
+        value !== null &&
+        AuditMetadataSchema.shape[key as keyof AuditMetadata].safeParse(value).success,
+    ),
   );
   return Object.keys(kept).length === 0 ? undefined : AuditMetadataSchema.parse(kept);
 };
@@ -60,7 +79,8 @@ export const auditMetadataOf = (metadata: AuditEntry["metadata"]): AuditMetadata
 export const bindAuditPort = (writer: AuditWriter): AuditPort => ({
   record: async (entry) => {
     if (entry.requestId === undefined) throw new Error("AUDIT_REQUEST_ID_MISSING: agent audits need the request id");
-    const outcome = typeof entry.metadata.outcome === "string" ? (OUTCOMES[entry.metadata.outcome] ?? "failed") : "failed";
+    const outcome =
+      typeof entry.metadata.outcome === "string" ? (OUTCOMES[entry.metadata.outcome] ?? "failed") : "failed";
     const metadata = auditMetadataOf(entry.metadata);
     await writer.record({
       log: "tenant",

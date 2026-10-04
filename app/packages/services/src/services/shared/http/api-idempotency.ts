@@ -1,7 +1,12 @@
 import type { Principal } from "@core/contracts";
-import { apiError } from "./api-errors.ts";
+import {
+  type IdempotencyBegin,
+  type IdempotencyStore,
+  idempotencyScopeKey,
+  type StoredResponse,
+} from "../idempotency/idempotency-store.ts";
 import { hashRequest } from "../idempotency/request-hash.ts";
-import { idempotencyScopeKey, type IdempotencyBegin, type IdempotencyStore, type StoredResponse } from "../idempotency/idempotency-store.ts";
+import { apiError } from "./api-errors.ts";
 
 /**
  * Endpoints whose success carries a one-time secret (accept link, API key, activation code,
@@ -26,7 +31,9 @@ export const principalKey = (principal: Principal | undefined, clientIp: string)
   if (principal === undefined) return `ip:${clientIp}`;
   switch (principal.type) {
     case "user":
-      return principal.impersonation === undefined ? `user:${principal.uid}` : `user:${principal.uid}:imp:${principal.impersonation.sessionId}`;
+      return principal.impersonation === undefined
+        ? `user:${principal.uid}`
+        : `user:${principal.uid}:imp:${principal.impersonation.sessionId}`;
     case "device":
       return `device:${principal.deviceId}`;
     case "service":
@@ -60,13 +67,19 @@ export const beginIdempotentAttempt = async (args: {
   /** The endpoint returns a one-time secret: store its successes without body. */
   redactSuccess: boolean;
 }): Promise<IdempotentAttempt> => {
-  const scopeKey = idempotencyScopeKey({ principalKey: args.principalKey, endpointId: args.endpointId, idempotencyKey: args.idempotencyKey });
+  const scopeKey = idempotencyScopeKey({
+    principalKey: args.principalKey,
+    endpointId: args.endpointId,
+    idempotencyKey: args.idempotencyKey,
+  });
   const begin = await args.store.begin(scopeKey, hashRequest(args.input));
   const attemptId = begin.kind === "new" ? begin.attemptId : "";
   return {
     begin,
     finish: async (response) =>
-      response.status >= 500 ? args.store.release(scopeKey, attemptId) : args.store.complete(scopeKey, attemptId, await toStored(response, args.redactSuccess)),
+      response.status >= 500
+        ? args.store.release(scopeKey, attemptId)
+        : args.store.complete(scopeKey, attemptId, await toStored(response, args.redactSuccess)),
     abandon: () => args.store.release(scopeKey, attemptId),
   };
 };
@@ -91,7 +104,10 @@ const withRequestId = (body: string, requestId: string): string => {
  * one-time secret is gone, the resource exists.
  */
 export const replayResponse = (stored: StoredResponse, requestId: string): Response => {
-  const replayed = { "idempotent-replayed": "true", ...(stored.location === undefined ? {} : { location: stored.location }) };
+  const replayed = {
+    "idempotent-replayed": "true",
+    ...(stored.location === undefined ? {} : { location: stored.location }),
+  };
   if (stored.redacted === true) {
     const conflict = apiError(409, "CONFLICT", requestId);
     for (const [name, value] of Object.entries(replayed)) conflict.headers.set(name, value);
@@ -99,5 +115,8 @@ export const replayResponse = (stored: StoredResponse, requestId: string): Respo
   }
   const headers: Record<string, string> = { "cache-control": "no-store", ...replayed };
   if (stored.body !== null) headers["content-type"] = "application/json";
-  return new Response(stored.body === null ? null : withRequestId(stored.body, requestId), { status: stored.status, headers });
+  return new Response(stored.body === null ? null : withRequestId(stored.body, requestId), {
+    status: stored.status,
+    headers,
+  });
 };

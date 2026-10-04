@@ -6,7 +6,11 @@ import { useFormatter, useTranslations } from "use-intl";
 import { BudgetUsagePill, OrganizationStatusPill, useAdminOrganization } from "#/entities/admin-organization/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { usePlans } from "#/entities/plan/index.ts";
-import { BudgetOverrideForm, OrganizationPlanForm, OrganizationStatusAction } from "#/features/admin-update-organization/index.ts";
+import {
+  BudgetOverrideForm,
+  OrganizationPlanForm,
+  OrganizationStatusAction,
+} from "#/features/admin-update-organization/index.ts";
 import { useFormatMicroUsd } from "#/shared/lib/format/use-format-micro-usd.ts";
 import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
@@ -52,7 +56,9 @@ function Summary({ organization, planName }: { organization: OrganizationAdminDe
         </Stat>
         <Stat label={tList("columns.cap")}>
           <span className={mono}>{formatCost(organization.budget.caps.monthlyMicroUsd)}</span>{" "}
-          <span className="ml-1 text-xs text-muted-foreground">{tList(`budgetSource.${organization.budget.source}`)}</span>
+          <span className="ml-1 text-xs text-muted-foreground">
+            {tList(`budgetSource.${organization.budget.source}`)}
+          </span>
         </Stat>
         <Stat label={t("tokenCap")}>
           <span className={mono}>{format.number(organization.budget.caps.monthlyTokens)}</span>
@@ -93,10 +99,21 @@ function RelatedLinks({ organization }: { organization: OrganizationAdminSummary
   );
 }
 
-function Detail({ organization, plans, canWrite }: { organization: OrganizationAdminDetail; plans: readonly Plan[] | undefined; canWrite: boolean }) {
+function Detail({
+  organization,
+  plans,
+  canWrite,
+}: {
+  organization: OrganizationAdminDetail;
+  plans: readonly Plan[] | undefined;
+  canWrite: boolean;
+}) {
   const t = useTranslations("admin.organizationDetail");
   const tList = useTranslations("admin.organizations");
-  const planName = organization.planId === null ? tList("defaultPlan") : (plans?.find((plan) => plan.id === organization.planId)?.name ?? organization.planId);
+  const planName =
+    organization.planId === null
+      ? tList("defaultPlan")
+      : (plans?.find((plan) => plan.id === organization.planId)?.name ?? organization.planId);
   return (
     <div className="flex flex-col gap-4">
       <Summary organization={organization} planName={planName} />
@@ -104,15 +121,26 @@ function Detail({ organization, plans, canWrite }: { organization: OrganizationA
         <>
           <SectionCard title={t("plan.title")} description={t("plan.description")}>
             {/* Remount when the saved plan changes so the select starts from it. */}
-            <OrganizationPlanForm key={organization.planId ?? "default"} organization={organization} plans={plans ?? []} />
+            <OrganizationPlanForm
+              key={organization.planId ?? "default"}
+              organization={organization}
+              plans={plans ?? []}
+            />
           </SectionCard>
-          <SectionCard title={t("budget.title")} description={organization.budget.override === null ? t("budget.descriptionNone") : t("budget.descriptionActive")}>
+          <SectionCard
+            title={t("budget.title")}
+            description={
+              organization.budget.override === null ? t("budget.descriptionNone") : t("budget.descriptionActive")
+            }
+          >
             <BudgetOverrideForm key={JSON.stringify(organization.budget.override)} organization={organization} />
           </SectionCard>
           <SectionCard
             tone={organization.status === "active" ? "danger" : "default"}
             title={t("status.title")}
-            description={organization.status === "active" ? t("status.descriptionActive") : t("status.descriptionSuspended")}
+            description={
+              organization.status === "active" ? t("status.descriptionActive") : t("status.descriptionSuspended")
+            }
           >
             <div>
               <OrganizationStatusAction organization={organization} />
@@ -120,7 +148,9 @@ function Detail({ organization, plans, canWrite }: { organization: OrganizationA
           </SectionCard>
         </>
       ) : (
-        <p className="rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">{t("readOnly")}</p>
+        <p className="rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
+          {t("readOnly")}
+        </p>
       )}
       <RelatedLinks organization={organization} />
     </div>
@@ -151,7 +181,9 @@ export function AdminOrganizationDetailView() {
       meta={organization === undefined ? undefined : <OrganizationStatusPill status={organization.status} />}
     >
       <AdminQuerySection query={query} loadingLabel={t("loading")}>
-        {(data) => <Detail organization={data} plans={plans.data} canWrite={permissions.can("platform.organization.update")} />}
+        {(data) => (
+          <Detail organization={data} plans={plans.data} canWrite={permissions.can("platform.organization.update")} />
+        )}
       </AdminQuerySection>
     </AdminPageFrame>
   );

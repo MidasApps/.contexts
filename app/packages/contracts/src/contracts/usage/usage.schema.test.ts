@@ -1,19 +1,25 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type { TenantId } from "../primitives/ids.schema.ts";
-import { LlmCallContract, LlmCallSchema, type LlmCall } from "./llm-call.schema.ts";
-import { UsageSummaryContract, UsageSummarySchema, type UsageSummary } from "./usage-summary.schema.ts";
+import { type LlmCall, LlmCallContract, LlmCallSchema } from "./llm-call.schema.ts";
+import { type UsageSummary, UsageSummaryContract, UsageSummarySchema } from "./usage-summary.schema.ts";
 
 const contracts = [LlmCallContract, UsageSummaryContract];
 
 describe("usage contracts", () => {
-  it.each(contracts.map((contract) => [contract.id, contract] as const))("%s: every example parses", (_id, contract) => {
-    for (const example of contract.meta.examples) expect(contract.schema.safeParse(example).success).toBe(true);
-  });
+  it.each(contracts.map((contract) => [contract.id, contract] as const))(
+    "%s: every example parses",
+    (_id, contract) => {
+      for (const example of contract.meta.examples) expect(contract.schema.safeParse(example).success).toBe(true);
+    },
+  );
 
-  it.each(contracts.map((contract) => [contract.id, contract] as const))("%s: rejects an unknown key", (_id, contract) => {
-    const [example] = contract.meta.examples;
-    expect(contract.schema.safeParse({ ...(example as object), injected: true }).success).toBe(false);
-  });
+  it.each(contracts.map((contract) => [contract.id, contract] as const))(
+    "%s: rejects an unknown key",
+    (_id, contract) => {
+      const [example] = contract.meta.examples;
+      expect(contract.schema.safeParse({ ...(example as object), injected: true }).success).toBe(false);
+    },
+  );
 
   it("brands tenant ids", () => {
     expectTypeOf<LlmCall["tenantId"]>().toEqualTypeOf<TenantId>();
@@ -48,7 +54,12 @@ describe("UsageSummarySchema", () => {
 
   it("breaks the month down by UTC day, agent and user; service calls have no user", () => {
     const totals = { calls: 1, inputTokens: 10, outputTokens: 5, costMicroUsd: 100, unpricedCalls: 0 };
-    const summary = { ...example, byDay: [{ day: "2026-09-30", totals }], byAgent: [{ agentId: "assistant", totals }], byUser: [{ userId: null, totals }] };
+    const summary = {
+      ...example,
+      byDay: [{ day: "2026-09-30", totals }],
+      byAgent: [{ agentId: "assistant", totals }],
+      byUser: [{ userId: null, totals }],
+    };
     expect(UsageSummarySchema.safeParse(summary).success).toBe(true);
     expect(UsageSummarySchema.safeParse({ ...summary, byDay: [{ day: "2026-09", totals }] }).success).toBe(false);
     expect(UsageSummarySchema.safeParse({ ...summary, byAgent: [{ agentId: "", totals }] }).success).toBe(false);

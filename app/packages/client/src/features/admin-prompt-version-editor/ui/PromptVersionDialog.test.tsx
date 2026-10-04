@@ -13,7 +13,16 @@ const ACTIVE = "Você é o assistente.";
 
 function Harness({ onCreated }: { onCreated?: (version: { version: number }) => void }) {
   const [open, setOpen] = useState(true);
-  return <PromptVersionDialog agentId="assistant" agentName="Assistente" initialBody={ACTIVE} open={open} onOpenChange={setOpen} onCreated={onCreated} />;
+  return (
+    <PromptVersionDialog
+      agentId="assistant"
+      agentName="Assistente"
+      initialBody={ACTIVE}
+      open={open}
+      onOpenChange={setOpen}
+      onCreated={onCreated}
+    />
+  );
 }
 
 const bodyField = (dialog: HTMLElement) => within(dialog).getByRole("textbox", { name: /Texto do prompt/u });
@@ -24,7 +33,9 @@ describe("PromptVersionDialog", () => {
   it("writes a new version from the active text with its note, pending until the API answers", async () => {
     const held = holdResponse();
     const onCreated = vi.fn();
-    const { user, api, container } = renderAdmin(<Harness onCreated={onCreated} />, { routes: { [CREATE]: held.handler } });
+    const { user, api, container } = renderAdmin(<Harness onCreated={onCreated} />, {
+      routes: { [CREATE]: held.handler },
+    });
     const dialog = await screen.findByRole("dialog", { name: "Nova versão do prompt de Assistente" });
     await expectNoAxeViolations(container.ownerDocument.body);
     await user.type(bodyField(dialog), " Responda em português.");
@@ -35,7 +46,10 @@ describe("PromptVersionDialog", () => {
     held.release(ok(buildPromptVersion({ version: 3 }), 201));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(await screen.findByText("Versão 3 criada.")).toBeDefined();
-    expect(api.calls.find((call) => call.method === "POST")?.body).toEqual({ body: `${ACTIVE} Responda em português.`, note: "tom" });
+    expect(api.calls.find((call) => call.method === "POST")?.body).toEqual({
+      body: `${ACTIVE} Responda em português.`,
+      note: "tom",
+    });
     expect(onCreated).toHaveBeenCalledWith(expect.objectContaining({ version: 3 }));
   });
 
@@ -62,7 +76,9 @@ describe("PromptVersionDialog", () => {
     const dialog = await screen.findByRole("dialog");
     await user.type(bodyField(dialog), "!");
     setOnline(false);
-    await waitFor(() => expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Criar versão" }).disabled).toBe(true));
+    await waitFor(() =>
+      expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Criar versão" }).disabled).toBe(true),
+    );
     expect(within(dialog).getByText(/Você está sem conexão/u)).toBeDefined();
     await user.type(within(dialog).getByRole("textbox", { name: /Nota/u }), "{Enter}");
     expect(api.calls.some((call) => call.method === "POST")).toBe(false);

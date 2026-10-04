@@ -22,16 +22,39 @@ type ProjectContext = AccessContext & { project: NonNullable<AccessContext["proj
 
 function UnitsSection({ context, node }: { context: ProjectContext; node: NodeParams & { projectId: string } }) {
   const t = useTranslations("shell.projectHome");
-  const units = useUnits({ organizationId: node.organizationId, projectId: node.projectId, parentUnitId: context.unit?.id });
+  const units = useUnits({
+    organizationId: node.organizationId,
+    projectId: node.projectId,
+    parentUnitId: context.unit?.id,
+  });
   const canManage = context.permissions.includes("core.unit.create");
   const settings = canManage ? (
     <Button variant="secondary" asChild>
-      <RouteLink to={{ id: "settings", organizationId: node.organizationId, section: "units" }}>{t("manageUnits")}</RouteLink>
+      <RouteLink to={{ id: "settings", organizationId: node.organizationId, section: "units" }}>
+        {t("manageUnits")}
+      </RouteLink>
     </Button>
   ) : undefined;
   if (units.isPending) return <LoadingState label={t("loadingUnits")} rows={3} />;
-  if (units.isError) return <ApiErrorState error={units.error} headingLevel={3} onRetry={() => void units.refetch()} retrying={units.isFetching} />;
-  if (units.data.length === 0) return <EmptyState icon="network" headingLevel={3} title={t("unitsEmptyTitle")} description={t("unitsEmptyDescription")} action={settings} />;
+  if (units.isError)
+    return (
+      <ApiErrorState
+        error={units.error}
+        headingLevel={3}
+        onRetry={() => void units.refetch()}
+        retrying={units.isFetching}
+      />
+    );
+  if (units.data.length === 0)
+    return (
+      <EmptyState
+        icon="network"
+        headingLevel={3}
+        title={t("unitsEmptyTitle")}
+        description={t("unitsEmptyDescription")}
+        action={settings}
+      />
+    );
   return (
     <ul aria-label={t("unitsHeading")} className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
       {units.data.map((unit) => (
@@ -60,7 +83,15 @@ function ModulesSection({ context, node }: { context: ProjectContext; node: Node
       const route = navItemRoute(item.target, node);
       return route === null ? [] : [{ item, route }];
     });
-  if (entries.length === 0) return <EmptyState icon="puzzle" headingLevel={3} title={t("shell.projectHome.modulesEmptyTitle")} description={t("shell.projectHome.modulesEmptyDescription")} />;
+  if (entries.length === 0)
+    return (
+      <EmptyState
+        icon="puzzle"
+        headingLevel={3}
+        title={t("shell.projectHome.modulesEmptyTitle")}
+        description={t("shell.projectHome.modulesEmptyDescription")}
+      />
+    );
   return (
     <ul aria-label={t("shell.projectHome.modulesHeading")} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {entries.map(({ item, route }) => (
@@ -133,7 +164,13 @@ export function ProjectHomeView() {
   const context = useAccessContext(node);
   const projectNode = node?.projectId === undefined ? null : { ...node, projectId: node.projectId };
   return (
-    <QueryPage query={{ ...context, data: context.data === undefined ? undefined : hasProject(context.data) ? context.data : null }} loadingLabel={t("loading")}>
+    <QueryPage
+      query={{
+        ...context,
+        data: context.data === undefined ? undefined : hasProject(context.data) ? context.data : null,
+      }}
+      loadingLabel={t("loading")}
+    >
       {(data) => (projectNode === null ? null : <ProjectHome context={data} node={projectNode} />)}
     </QueryPage>
   );

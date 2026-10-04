@@ -3,7 +3,8 @@ import { loadInstructions } from "./load-instructions.ts";
 
 export type PromptSeed = { readonly agentId: PromptAgentId; readonly body: string };
 
-const isPromptAgentId = (value: string): value is PromptAgentId => (PROMPT_AGENT_IDS as readonly string[]).includes(value);
+const isPromptAgentId = (value: string): value is PromptAgentId =>
+  (PROMPT_AGENT_IDS as readonly string[]).includes(value);
 
 /**
  * The code-defined instructions of an agent with a versioned prompt (`instructions/<agent>.v1.md`,

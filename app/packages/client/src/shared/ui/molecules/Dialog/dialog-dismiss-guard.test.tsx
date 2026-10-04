@@ -4,8 +4,16 @@ import { describe, expect, it } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./Dialog.tsx";
-import { useDialogDismissGuard, type DialogDismissGuard } from "./dialog-dismiss-guard.tsx";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./Dialog.tsx";
+import { type DialogDismissGuard, useDialogDismissGuard } from "./dialog-dismiss-guard.tsx";
 
 function Body({ guard }: { guard: DialogDismissGuard }) {
   useDialogDismissGuard(guard);

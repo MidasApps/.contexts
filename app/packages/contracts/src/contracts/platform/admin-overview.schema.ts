@@ -19,16 +19,30 @@ export const AdminOverviewSchema = z.strictObject({
   unmeasured: z
     .array(z.enum(["tripwireRate"]))
     .default([])
-    .meta(none("Numbers the platform does not measure yet; their value is a placeholder the UI must not show as a measurement.")),
+    .meta(
+      none(
+        "Numbers the platform does not measure yet; their value is a placeholder the UI must not show as a measurement.",
+      ),
+    ),
 });
 export type AdminOverview = z.infer<typeof AdminOverviewSchema>;
 
 export const AdminOverviewContract = defineContract(AdminOverviewSchema, {
   id: "platform.AdminOverview",
   kind: "view",
-  description: "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status, and which numbers are not measured yet.",
+  description:
+    "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status, and which numbers are not measured yet.",
   examples: [
-    { organizations: 12, activeUsers7d: 87, costMtdMicroUsd: 12_500_000, tripwireRate: 0.01, approvalRate: 0.92, evalStatus: "passed", generatedAt: "2026-09-30T12:00:00.000Z", unmeasured: ["tripwireRate"] },
+    {
+      organizations: 12,
+      activeUsers7d: 87,
+      costMtdMicroUsd: 12_500_000,
+      tripwireRate: 0.01,
+      approvalRate: 0.92,
+      evalStatus: "passed",
+      generatedAt: "2026-09-30T12:00:00.000Z",
+      unmeasured: ["tripwireRate"],
+    },
   ],
   pii: "none",
   tenancyScope: "platform",

@@ -12,7 +12,11 @@ import { apiFor, SEED_USERS, type World } from "./seed-users.ts";
 export const warmAgentRuntime = async (env: E2eEnv, world: World): Promise<void> => {
   const owner = await apiFor(env, createEmulatorAuth(env), SEED_USERS.owner);
   const message = { id: randomUUID(), role: "user", parts: [{ type: "text", text: "Warm-up" }] };
-  const response = await owner.raw("POST", "/v1/chat", { organizationId: world.alpha.id, projectId: world.alpha.projects.growth.id, message });
+  const response = await owner.raw("POST", "/v1/chat", {
+    organizationId: world.alpha.id,
+    projectId: world.alpha.projects.growth.id,
+    message,
+  });
   if (response.status !== 200) throw new Error(`warm-up POST /v1/chat → ${String(response.status)}`);
   const conversationId = response.headers.get("x-conversation-id");
   await response.text();

@@ -1,6 +1,6 @@
 import "server-only";
 import { createFirebaseAdmin, processLogger } from "@core/services";
-import { createCoreServer, createRouteResolver, type CoreRoutes, type CoreServer } from "@core/services/composition";
+import { type CoreRoutes, type CoreServer, createCoreServer, createRouteResolver } from "@core/services/composition";
 import { MODULE_ENDPOINT_IDS, serverModules } from "./modules";
 import { buildRuntimeRoutes } from "./runtime-routes";
 
@@ -44,4 +44,8 @@ const getAllRoutes = (): Promise<CoreRoutes> => {
  * Route file entry point: `export const GET = route("identity.getMe");`. The id is
  * checked when the route module loads; the handler is resolved on the first request.
  */
-export const route = createRouteResolver({ getRoutes: getAllRoutes, logger: processLogger, endpointIds: MODULE_ENDPOINT_IDS });
+export const route = createRouteResolver({
+  getRoutes: getAllRoutes,
+  logger: processLogger,
+  endpointIds: MODULE_ENDPOINT_IDS,
+});

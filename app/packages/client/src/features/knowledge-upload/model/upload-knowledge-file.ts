@@ -1,4 +1,11 @@
-import { addKnowledgeSourceEndpoint, getFileEndpoint, type KnowledgeSource, requestFileUploadEndpoint, type StoredFile, type UploadInstructions } from "@core/contracts";
+import {
+  addKnowledgeSourceEndpoint,
+  getFileEndpoint,
+  type KnowledgeSource,
+  requestFileUploadEndpoint,
+  type StoredFile,
+  type UploadInstructions,
+} from "@core/contracts";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import { contentTypeOfFile } from "./knowledge-file-policy.ts";
 
@@ -6,7 +13,10 @@ import { contentTypeOfFile } from "./knowledge-file-policy.ts";
 export const UPLOAD_STEPS = ["requesting", "uploading", "validating", "starting"] as const;
 export type UploadStep = (typeof UPLOAD_STEPS)[number];
 
-export type KnowledgeUploadFailure = "UPLOAD_FAILED" | "VALIDATION_TIMEOUT" | NonNullable<StoredFile["rejectionReason"]>;
+export type KnowledgeUploadFailure =
+  | "UPLOAD_FAILED"
+  | "VALIDATION_TIMEOUT"
+  | NonNullable<StoredFile["rejectionReason"]>;
 
 /** The upload did not reach the knowledge base for a reason outside `/v1` errors (storage refused it, validation rejected it or never finished). */
 export class KnowledgeUploadError extends Error {
@@ -28,7 +38,12 @@ export type SendBytes = (upload: UploadInstructions, file: Blob, signal: AbortSi
  * the method and headers are sent exactly as the ticket says or the storage rejects the object.
  */
 export const sendBytesWithFetch: SendBytes = async (upload, file, signal) => {
-  const response = await fetch(upload.url, { method: upload.method, headers: upload.headers, body: file, ...(signal === undefined ? {} : { signal }) });
+  const response = await fetch(upload.url, {
+    method: upload.method,
+    headers: upload.headers,
+    body: file,
+    ...(signal === undefined ? {} : { signal }),
+  });
   return response.ok;
 };
 
@@ -61,7 +76,10 @@ export type UploadKnowledgeFileArgs = {
 const untilValidated = async (args: UploadKnowledgeFileArgs, fileId: string): Promise<void> => {
   const wait = args.wait ?? waitFor;
   for (let attempt = 0; attempt < VALIDATION_MAX_POLLS; attempt += 1) {
-    const { data } = await args.callEndpoint(getFileEndpoint, { params: { fileId }, ...(args.signal === undefined ? {} : { signal: args.signal }) });
+    const { data } = await args.callEndpoint(getFileEndpoint, {
+      params: { fileId },
+      ...(args.signal === undefined ? {} : { signal: args.signal }),
+    });
     if (data.status === "ready") return;
     if (data.status === "rejected") throw new KnowledgeUploadError(data.rejectionReason ?? "CONTENT_MISMATCH");
     if (attempt + 1 === VALIDATION_SLOW_POLLS) args.onSlow?.();
@@ -77,7 +95,9 @@ const untilValidated = async (args: UploadKnowledgeFileArgs, fileId: string): Pr
  * @throws {KnowledgeUploadError} when the storage or the validation refuses the file.
  * @throws {ApiError} for a failed `/v1` call.
  */
-export const uploadKnowledgeFile = async (args: UploadKnowledgeFileArgs): Promise<{ runId: string; fileId: string; source: KnowledgeSource }> => {
+export const uploadKnowledgeFile = async (
+  args: UploadKnowledgeFileArgs,
+): Promise<{ runId: string; fileId: string; source: KnowledgeSource }> => {
   const { callEndpoint, organizationId, projectId, file, onStep, signal } = args;
   const withSignal = signal === undefined ? {} : { signal };
   onStep("requesting");
@@ -87,9 +107,11 @@ export const uploadKnowledgeFile = async (args: UploadKnowledgeFileArgs): Promis
     ...withSignal,
   });
   onStep("uploading");
-  const accepted = await (args.sendBytes ?? sendBytesWithFetch)(ticket.data.upload, file, signal).catch((cause: unknown) => {
-    throw new KnowledgeUploadError("UPLOAD_FAILED", { cause });
-  });
+  const accepted = await (args.sendBytes ?? sendBytesWithFetch)(ticket.data.upload, file, signal).catch(
+    (cause: unknown) => {
+      throw new KnowledgeUploadError("UPLOAD_FAILED", { cause });
+    },
+  );
   if (!accepted) throw new KnowledgeUploadError("UPLOAD_FAILED");
   onStep("validating");
   await untilValidated(args, ticket.data.fileId);

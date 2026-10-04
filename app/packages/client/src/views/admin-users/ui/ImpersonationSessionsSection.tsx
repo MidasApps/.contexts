@@ -5,7 +5,11 @@ import { createContext, use, useId, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAllAdminOrganizations } from "#/entities/admin-organization/index.ts";
 import { AdminUserRef, useAdminUserNames } from "#/entities/admin-user/index.ts";
-import { IMPERSONATION_SESSIONS_PAGE_LIMIT, useAdminImpersonationSessions, type ImpersonationSessionScope } from "#/entities/impersonation-session/index.ts";
+import {
+  IMPERSONATION_SESSIONS_PAGE_LIMIT,
+  type ImpersonationSessionScope,
+  useAdminImpersonationSessions,
+} from "#/entities/impersonation-session/index.ts";
 import { EndImpersonationSessionDialog } from "#/features/admin-impersonation/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
@@ -21,7 +25,11 @@ import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-tabl
 import { AdminQuerySection, useAdminSearch } from "#/widgets/admin-nav/index.ts";
 
 const column = dataTableColumnHelper<AdminImpersonationSession>();
-const STATUS_TONES: Record<AdminImpersonationSession["status"], StatusTone> = { active: "amber", ended: "neutral", expired: "neutral" };
+const STATUS_TONES: Record<AdminImpersonationSession["status"], StatusTone> = {
+  active: "amber",
+  ended: "neutral",
+  expired: "neutral",
+};
 
 /** What a row needs beyond the session: names, and the end action when the viewer may use it. */
 type RowHelpers = {
@@ -57,7 +65,13 @@ function SessionStatus({ session }: { session: AdminImpersonationSession }) {
 function Until({ session }: { session: AdminImpersonationSession }) {
   const t = useTranslations("admin.users.sessions");
   const formatDateTime = useFormatDateTime();
-  return <span>{session.endedAt === null ? t("expiresAt", { when: formatDateTime(session.expiresAt) }) : t("endedAt", { when: formatDateTime(session.endedAt) })}</span>;
+  return (
+    <span>
+      {session.endedAt === null
+        ? t("expiresAt", { when: formatDateTime(session.expiresAt) })
+        : t("endedAt", { when: formatDateTime(session.endedAt) })}
+    </span>
+  );
 }
 
 function EndButton({ session }: { session: AdminImpersonationSession }) {
@@ -66,7 +80,16 @@ function EndButton({ session }: { session: AdminImpersonationSession }) {
   if (helpers.onEnd === undefined || session.status !== "active") return null;
   const { onEnd } = helpers;
   return (
-    <Button variant="outline" size="sm" disabled={helpers.disabled} onClick={() => onEnd(session)} aria-label={t("endNamed", { staff: helpers.userLabel(session.staffUid), user: helpers.userLabel(session.targetUid) })}>
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={helpers.disabled}
+      onClick={() => onEnd(session)}
+      aria-label={t("endNamed", {
+        staff: helpers.userLabel(session.staffUid),
+        user: helpers.userLabel(session.targetUid),
+      })}
+    >
       {t("end")}
     </Button>
   );
@@ -77,20 +100,61 @@ const useColumns = () => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.display({ id: "staff", header: () => t("columns.staff"), cell: ({ row }) => <SessionUser id={row.original.staffUid} /> }),
-      column.display({ id: "user", header: () => t("columns.user"), cell: ({ row }) => <SessionUser id={row.original.targetUid} /> }),
-      column.display({ id: "organization", header: () => t("columns.organization"), cell: ({ row }) => <SessionOrganization id={row.original.tenantId} /> }),
-      column.display({ id: "reason", header: () => t("columns.reason"), cell: ({ row }) => <span className="block max-w-xs whitespace-normal">{row.original.reason}</span> }),
-      column.display({ id: "started", header: () => t("columns.started"), cell: ({ row }) => formatDateTime(row.original.createdAt) }),
-      column.display({ id: "until", header: () => t("columns.until"), cell: ({ row }) => <Until session={row.original} /> }),
-      column.display({ id: "status", header: () => t("columns.status"), cell: ({ row }) => <SessionStatus session={row.original} /> }),
-      column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <EndButton session={row.original} /> }),
+      column.display({
+        id: "staff",
+        header: () => t("columns.staff"),
+        cell: ({ row }) => <SessionUser id={row.original.staffUid} />,
+      }),
+      column.display({
+        id: "user",
+        header: () => t("columns.user"),
+        cell: ({ row }) => <SessionUser id={row.original.targetUid} />,
+      }),
+      column.display({
+        id: "organization",
+        header: () => t("columns.organization"),
+        cell: ({ row }) => <SessionOrganization id={row.original.tenantId} />,
+      }),
+      column.display({
+        id: "reason",
+        header: () => t("columns.reason"),
+        cell: ({ row }) => <span className="block max-w-xs whitespace-normal">{row.original.reason}</span>,
+      }),
+      column.display({
+        id: "started",
+        header: () => t("columns.started"),
+        cell: ({ row }) => formatDateTime(row.original.createdAt),
+      }),
+      column.display({
+        id: "until",
+        header: () => t("columns.until"),
+        cell: ({ row }) => <Until session={row.original} />,
+      }),
+      column.display({
+        id: "status",
+        header: () => t("columns.status"),
+        cell: ({ row }) => <SessionStatus session={row.original} />,
+      }),
+      column.display({
+        id: "actions",
+        header: () => t("columns.actions"),
+        meta: { headerHidden: true },
+        cell: ({ row }) => <EndButton session={row.original} />,
+      }),
     ],
     [formatDateTime, t],
   );
 };
 
-function SessionsTable({ scope, canEnd, onScopeReset }: { scope: ImpersonationSessionScope; canEnd: boolean; onScopeReset: () => void }) {
+function SessionsTable({
+  scope,
+  canEnd,
+  onScopeReset,
+}: {
+  scope: ImpersonationSessionScope;
+  canEnd: boolean;
+  onScopeReset: () => void;
+}) {
   const t = useTranslations("admin.users.sessions");
   const online = useOnlineStatus();
   const sessions = useAdminImpersonationSessions(scope);
@@ -123,7 +187,9 @@ function SessionsTable({ scope, canEnd, onScopeReset }: { scope: ImpersonationSe
             renderCard={(session) => (
               <div className="flex flex-col gap-2">
                 <span className="flex items-start justify-between gap-2">
-                  <span className="text-sm">{t("cardWho", { staff: userLabel(session.staffUid), user: userLabel(session.targetUid) })}</span>
+                  <span className="text-sm">
+                    {t("cardWho", { staff: userLabel(session.staffUid), user: userLabel(session.targetUid) })}
+                  </span>
                   <SessionStatus session={session} />
                 </span>
                 <span className="text-body">{helpers.organizationLabel(session.tenantId)}</span>
@@ -151,7 +217,13 @@ function SessionsTable({ scope, canEnd, onScopeReset }: { scope: ImpersonationSe
                   }
                 />
               ) : (
-                <EmptyState frame="plain" headingLevel={3} icon="eye-off" title={t("emptyAllTitle")} description={t("emptyAllDescription")} />
+                <EmptyState
+                  frame="plain"
+                  headingLevel={3}
+                  icon="eye-off"
+                  title={t("emptyAllTitle")}
+                  description={t("emptyAllDescription")}
+                />
               )
             }
           />
@@ -178,7 +250,8 @@ export function ImpersonationSessionsSection({ canEnd }: { canEnd: boolean }) {
   // The scope lives in the URL (`?sessions=all`), like every other admin filter.
   const search = useAdminSearch(["sessions"]);
   const scope: ImpersonationSessionScope = search.values.sessions === "all" ? "all" : "active";
-  const setScope = (next: ImpersonationSessionScope): void => search.set({ sessions: next === "all" ? "all" : undefined });
+  const setScope = (next: ImpersonationSessionScope): void =>
+    search.set({ sessions: next === "all" ? "all" : undefined });
   return (
     <SectionCard title={t("title")} description={t("description")}>
       <div className="flex flex-col gap-1.5 sm:max-w-xs">

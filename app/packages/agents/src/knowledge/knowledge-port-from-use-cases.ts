@@ -12,11 +12,16 @@ export class KnowledgeUseCaseError extends Error {
   }
 }
 
-type Outcome<T> = { ok: true; data: T } | { ok: false; error: { readonly code: string; readonly details?: readonly { readonly field: string }[] } };
+type Outcome<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: { readonly code: string; readonly details?: readonly { readonly field: string }[] } };
 
 const unwrap = <T>(result: Outcome<T>): T => {
   if (result.ok) return result.data;
-  throw new KnowledgeUseCaseError(result.error.code, (result.error.details ?? []).map((detail) => detail.field));
+  throw new KnowledgeUseCaseError(
+    result.error.code,
+    (result.error.details ?? []).map((detail) => detail.field),
+  );
 };
 
 /**
@@ -27,8 +32,12 @@ const unwrap = <T>(result: Outcome<T>): T => {
 export const knowledgePortFromUseCases = (
   knowledge: Pick<KnowledgeServices, "searchChunks" | "registerDocument" | "replaceDocumentChunks">,
 ): KnowledgePort => ({
-  searchChunks: async (input) => unwrap(await knowledge.searchChunks({ ...input, namespaces: [...input.namespaces], embedding: [...input.embedding] })),
-  registerDocument: async (input) => unwrap(await knowledge.registerDocument({ ...input, metadata: { ...input.metadata } })),
+  searchChunks: async (input) =>
+    unwrap(
+      await knowledge.searchChunks({ ...input, namespaces: [...input.namespaces], embedding: [...input.embedding] }),
+    ),
+  registerDocument: async (input) =>
+    unwrap(await knowledge.registerDocument({ ...input, metadata: { ...input.metadata } })),
   replaceChunks: async (input) =>
     unwrap(
       await knowledge.replaceDocumentChunks({

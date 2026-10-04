@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { type Route, SETTINGS_SECTIONS, type SettingsSection } from "./route-paths.ts";
 import { useRouter } from "./router-context.tsx";
-import { SETTINGS_SECTIONS, type Route, type SettingsSection } from "./route-paths.ts";
 
 export type RouteSearch<K extends string> = {
   /** Current value of each key; `undefined` when absent from the URL. */
@@ -24,7 +24,10 @@ const PAGE = "page";
  * keeps them. `toRoute` builds the current page's route with a new search; every other query
  * parameter of the page is preserved.
  */
-export const useRouteSearch = <K extends string>(keys: readonly K[], toRoute: (search: Record<string, string>) => Route): RouteSearch<K> => {
+export const useRouteSearch = <K extends string>(
+  keys: readonly K[],
+  toRoute: (search: Record<string, string>) => Route,
+): RouteSearch<K> => {
   const router = useRouter();
   const search = router.useSearch();
   const params = new URLSearchParams(search);
@@ -35,7 +38,10 @@ export const useRouteSearch = <K extends string>(keys: readonly K[], toRoute: (s
     pending.current = null;
   }, [search]);
   const base = (): URLSearchParams => new URLSearchParams(pending.current ?? search);
-  const values = Object.fromEntries(keys.map((key) => [key, params.get(key) ?? undefined])) as Record<K, string | undefined>;
+  const values = Object.fromEntries(keys.map((key) => [key, params.get(key) ?? undefined])) as Record<
+    K,
+    string | undefined
+  >;
   const parsedPage = Number.parseInt(params.get(PAGE) ?? "1", 10);
   // Same page, another address: the web writes the address bar instead of navigating, so a tab or
   // filter changes at once. A navigation waited for the server, and a second tab clicked meanwhile
@@ -65,7 +71,8 @@ export const useRouteSearch = <K extends string>(keys: readonly K[], toRoute: (s
   };
 };
 
-const isSettingsSection = (value: string | undefined): value is SettingsSection => (SETTINGS_SECTIONS as readonly (string | undefined)[]).includes(value);
+const isSettingsSection = (value: string | undefined): value is SettingsSection =>
+  (SETTINGS_SECTIONS as readonly (string | undefined)[]).includes(value);
 
 /**
  * `useRouteSearch` for a settings section (`/o/:organizationId/settings/:section`): its tabs,
@@ -78,7 +85,8 @@ export const useSettingsSearch = <K extends string>(keys: readonly K[]): RouteSe
   const section = params["section"];
   const rest = params["rest"];
   return useRouteSearch(keys, (search) => {
-    if (!isSettingsSection(section)) throw new Error(`useSettingsSearch outside a settings section: ${String(section)}`);
+    if (!isSettingsSection(section))
+      throw new Error(`useSettingsSearch outside a settings section: ${String(section)}`);
     return { id: "settings", organizationId, section, ...(rest === undefined ? {} : { rest }), search };
   });
 };
@@ -92,4 +100,5 @@ export const searchOption = <T extends string>(value: string | undefined, option
  * pages carry it, so "back" from a run, a trace or a request returns to the same tab, filters and
  * page.
  */
-export const useCarriedSearch = (): Readonly<Record<string, string>> => Object.fromEntries(new URLSearchParams(useRouter().useSearch()));
+export const useCarriedSearch = (): Readonly<Record<string, string>> =>
+  Object.fromEntries(new URLSearchParams(useRouter().useSearch()));

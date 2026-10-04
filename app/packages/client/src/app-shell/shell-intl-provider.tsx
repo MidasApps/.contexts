@@ -3,7 +3,7 @@
 import type { LoadedMessages, SupportedLocale } from "@core/i18n";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { IntlProvider, type IntlError } from "use-intl";
+import { type IntlError, IntlProvider } from "use-intl";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { accessContextQuery, meQuery } from "#/shared/api/core-queries.ts";
 import { useSession } from "#/shared/lib/session/session-context.tsx";
@@ -21,8 +21,15 @@ const useDisplayTimeZone = (): string => {
   const signedIn = useSession().state.status === "signed-in";
   const node = useCurrentNode();
   const me = useQuery({ ...meQuery(callEndpoint), enabled: signedIn });
-  const context = useQuery({ ...accessContextQuery(callEndpoint, node ?? { organizationId: "" }), enabled: signedIn && node !== null });
-  return (node === null ? undefined : context.data?.regional.displayTimeZone) ?? me.data?.preferences.timeZone ?? browserTimeZone();
+  const context = useQuery({
+    ...accessContextQuery(callEndpoint, node ?? { organizationId: "" }),
+    enabled: signedIn && node !== null,
+  });
+  return (
+    (node === null ? undefined : context.data?.regional.displayTimeZone) ??
+    me.data?.preferences.timeZone ??
+    browserTimeZone()
+  );
 };
 
 /** `use-intl` provider for both hosts: locale from the host, messages with module namespaces, display time zone. */

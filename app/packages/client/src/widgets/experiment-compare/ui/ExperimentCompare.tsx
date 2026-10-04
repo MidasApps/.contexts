@@ -20,7 +20,13 @@ export type ExperimentCompareProps = {
 const byId = (experiment: EvalExperimentSummary): string => experiment.experimentId;
 
 const OUTCOME_KEYS = { better: "better", worse: "worse", same: "same", "only-a": "onlyA", "only-b": "onlyB" } as const;
-const OUTCOME_ICONS: Record<ScoreComparison["outcome"], IconName> = { better: "circle-check", worse: "alert-triangle", same: "info", "only-a": "info", "only-b": "info" };
+const OUTCOME_ICONS: Record<ScoreComparison["outcome"], IconName> = {
+  better: "circle-check",
+  worse: "alert-triangle",
+  same: "info",
+  "only-a": "info",
+  "only-b": "info",
+};
 
 /**
  * Two experiments side by side (SP5 spec §8): mean score per scorer for A and B with the baseline
@@ -34,7 +40,9 @@ export function ExperimentCompare({ a, b, nameOf = byId }: ExperimentCompareProp
   const rows = useMemo(() => compareExperiments(a, b), [a, b]);
   const percent = (value: number): string => format.number(value, { style: "percent", maximumFractionDigits: 1 });
   const delta = (row: ScoreComparison): string =>
-    row.a === null || row.b === null ? "" : format.number(row.b - row.a, { style: "percent", maximumFractionDigits: 1, signDisplay: "exceptZero" });
+    row.a === null || row.b === null
+      ? ""
+      : format.number(row.b - row.a, { style: "percent", maximumFractionDigits: 1, signDisplay: "exceptZero" });
   return (
     <div data-slot="experiment-compare" className="flex flex-col gap-4">
       <BarChartFigure
@@ -47,7 +55,11 @@ export function ExperimentCompare({ a, b, nameOf = byId }: ExperimentCompareProp
           { key: "b", label: t("seriesB", { id: nameOf(b) }) },
           { key: "baseline", label: t("baseline"), color: "var(--muted-foreground)" },
         ]}
-        rows={rows.map((row) => ({ id: row.scorer, label: row.scorer, values: { a: row.a, b: row.b, baseline: row.baseline } }))}
+        rows={rows.map((row) => ({
+          id: row.scorer,
+          label: row.scorer,
+          values: { a: row.a, b: row.b, baseline: row.baseline },
+        }))}
       />
       <ul aria-label={t("verdicts")} className="flex flex-col gap-1.5 text-sm">
         {rows.map((row) => (

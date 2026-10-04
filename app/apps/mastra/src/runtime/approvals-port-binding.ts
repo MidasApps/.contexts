@@ -34,7 +34,11 @@ class ApprovalNodeError extends Error {
 export const bindApprovalsPort = (approvals: Pick<ApprovalServices, "requestApproval">): ApprovalPort => ({
   requestApproval: async ({ principal, node, permission, action, requestId }) => {
     if (node.level === "platform") throw new ApprovalNodeError();
-    const input = CreateApprovalRequestInputSchema.parse({ node, permission, action: { kind: action.kind, input: action, summary: action.summary } });
+    const input = CreateApprovalRequestInputSchema.parse({
+      node,
+      permission,
+      action: { kind: action.kind, input: action, summary: action.summary },
+    });
     const result = await approvals.requestApproval({ principal: PrincipalSchema.parse(principal), input, requestId });
     if (!result.ok) throw new ApprovalRefusedError(result.error.code);
     return { approvalId: result.data.id };

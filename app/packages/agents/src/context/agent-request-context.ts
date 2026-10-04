@@ -9,7 +9,9 @@ import type { AccessPrincipal, NodeRef } from "../runtime/runtime-ports.ts";
  */
 
 /** Keys of `AgentRequestContext`, each stored as its own request-context key (Mastra processors read `organizationId`). */
-export const AGENT_CONTEXT_KEYS = Object.keys(AgentRequestContextSchema.def.shape) as readonly (keyof AgentRequestContext)[];
+export const AGENT_CONTEXT_KEYS = Object.keys(
+  AgentRequestContextSchema.def.shape,
+) as readonly (keyof AgentRequestContext)[];
 
 /** Key of the verified SP1 principal (passed back to `authorize()`); set only by the server. */
 export const AGENT_PRINCIPAL_KEY = "corePrincipal";
@@ -44,7 +46,11 @@ const collectFields = (requestContext: RequestContextReader): Record<string, unk
 const principalMatches = (principal: AccessPrincipal, context: AgentRequestContext): boolean => {
   if (principal.type === "user") return context.principalKind === "user" && principal.uid === context.userId;
   if (principal.type === "service") {
-    return context.principalKind === "service" && principal.ownerUid === context.userId && principal.tenantId === context.tenantId;
+    return (
+      context.principalKind === "service" &&
+      principal.ownerUid === context.userId &&
+      principal.tenantId === context.tenantId
+    );
   }
   return false;
 };

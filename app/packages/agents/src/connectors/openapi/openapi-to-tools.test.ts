@@ -12,11 +12,19 @@ const SPEC = {
   servers: [{ url: "https://api.example.com/v1" }],
   paths: {
     "/issues": {
-      get: { operationId: "listIssues", summary: "Lists issues.", parameters: [{ name: "state", in: "query", schema: { type: "string", enum: ["open", "closed"] } }], responses: { "200": { description: "ok" } } },
+      get: {
+        operationId: "listIssues",
+        summary: "Lists issues.",
+        parameters: [{ name: "state", in: "query", schema: { type: "string", enum: ["open", "closed"] } }],
+        responses: { "200": { description: "ok" } },
+      },
       post: {
         operationId: "createIssue",
         summary: "Creates an issue.",
-        requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/NewIssue" } } } },
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/NewIssue" } } },
+        },
         responses: { "201": { description: "created" } },
       },
     },
@@ -26,7 +34,16 @@ const SPEC = {
       delete: { operationId: "deleteIssue", responses: { "204": { description: "gone" } } },
     },
   },
-  components: { schemas: { NewIssue: { type: "object", properties: { title: { type: "string" } }, required: ["title"], additionalProperties: false } } },
+  components: {
+    schemas: {
+      NewIssue: {
+        type: "object",
+        properties: { title: { type: "string" } },
+        required: ["title"],
+        additionalProperties: false,
+      },
+    },
+  },
 };
 
 const connectorOf = (allowedHosts = ["api.example.com"]): Connector =>
@@ -57,7 +74,13 @@ const recordingFetch = (respond: () => Response = () => Response.json({ items: [
 };
 
 const toolsOf = async (fetchFn: typeof fetch, connector = connectorOf()) =>
-  openApiToTools({ connector, document: await dereferenceOpenApi(SPEC), secret: "tok_secret", fetch: fetchFn, resolve: publicDns });
+  openApiToTools({
+    connector,
+    document: await dereferenceOpenApi(SPEC),
+    secret: "tok_secret",
+    fetch: fetchFn,
+    resolve: publicDns,
+  });
 
 describe("openapi to tools", () => {
   it("makes one tool per allowed operation: GET is a read, POST a mutation, others are hidden", async () => {
@@ -67,7 +90,11 @@ describe("openapi to tools", () => {
       ["api.issues-api.createIssue", "mutation"],
       ["api.issues-api.getIssue", "read"],
     ]);
-    const registry = createToolRegistry({ access: createFakeAccessPort({}), audit: createFakeAuditPort(), approvals: createFakeApprovalPort() });
+    const registry = createToolRegistry({
+      access: createFakeAccessPort({}),
+      audit: createFakeAuditPort(),
+      approvals: createFakeApprovalPort(),
+    });
     for (const tool of tools) registry.register(tool);
     const bound = registry.toMastraTools(tools.map((tool) => tool.id));
     expect(bound[openApiToolId("issues-api", "createIssue")]?.requireApproval).toBe(true);
@@ -103,22 +130,48 @@ describe("openapi to tools", () => {
   });
 
   it("refuses a spec whose server host is not in allowedHosts", async () => {
-    await expect(toolsOf(recordingFetch().fetchFn, connectorOf(["other.example.com"]))).rejects.toThrow(OpenApiConnectorError);
+    await expect(toolsOf(recordingFetch().fetchFn, connectorOf(["other.example.com"]))).rejects.toThrow(
+      OpenApiConnectorError,
+    );
   });
 
   it("refuses a redirect of an API call to a private address", async () => {
-    const redirect = (() => Promise.resolve(new Response(null, { status: 302, headers: { location: "https://internal.example.com/" } }))) as typeof fetch;
-    const tools = openApiToTools({ connector: connectorOf(), document: await dereferenceOpenApi(SPEC), secret: null, fetch: redirect, resolve: (host) => Promise.resolve(host === "internal.example.com" ? ["10.0.0.9"] : ["93.184.216.34"]) });
+    const redirect = (() =>
+      Promise.resolve(
+        new Response(null, { status: 302, headers: { location: "https://internal.example.com/" } }),
+      )) as typeof fetch;
+    const tools = openApiToTools({
+      connector: connectorOf(),
+      document: await dereferenceOpenApi(SPEC),
+      secret: null,
+      fetch: redirect,
+      resolve: (host) => Promise.resolve(host === "internal.example.com" ? ["10.0.0.9"] : ["93.184.216.34"]),
+    });
     await expect(tools[0]?.execute({}, ctx)).rejects.toMatchObject({ code: "URL_REJECTED" });
   });
 
   it("loads the spec through the guard and rejects external refs and non-JSON specs", async () => {
     const { fetchFn } = recordingFetch(() => Response.json(SPEC));
-    const document = await loadOpenApiDocument({ specUrl: "https://api.example.com/openapi.json", allowedHosts: ["api.example.com"], fetch: fetchFn, resolve: publicDns });
+    const document = await loadOpenApiDocument({
+      specUrl: "https://api.example.com/openapi.json",
+      allowedHosts: ["api.example.com"],
+      fetch: fetchFn,
+      resolve: publicDns,
+    });
     expect(Object.keys(document.paths ?? {})).toContain("/issues");
-    const external = { ...SPEC, components: { schemas: { NewIssue: { $ref: "https://evil.example.net/schema.json" } } } };
+    const external = {
+      ...SPEC,
+      components: { schemas: { NewIssue: { $ref: "https://evil.example.net/schema.json" } } },
+    };
     await expect(dereferenceOpenApi(external)).rejects.toThrow(OpenApiConnectorError);
     const yaml = recordingFetch(() => new Response("openapi: 3.1.0"));
-    await expect(loadOpenApiDocument({ specUrl: "https://api.example.com/openapi.yaml", allowedHosts: ["api.example.com"], fetch: yaml.fetchFn, resolve: publicDns })).rejects.toThrow(OpenApiConnectorError);
+    await expect(
+      loadOpenApiDocument({
+        specUrl: "https://api.example.com/openapi.yaml",
+        allowedHosts: ["api.example.com"],
+        fetch: yaml.fetchFn,
+        resolve: publicDns,
+      }),
+    ).rejects.toThrow(OpenApiConnectorError);
   });
 });

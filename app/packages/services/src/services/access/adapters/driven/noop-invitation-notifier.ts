@@ -7,7 +7,12 @@ import type { InvitationNotifier } from "../../application/ports/driven/invitati
  */
 export const createNoopInvitationNotifier = (deps: { logger: Logger }): InvitationNotifier => ({
   invitationCreated: ({ invitation, requestId }) => {
-    deps.logger.info("invitation_created", { requestId, tenantId: invitation.tenantId, invitationId: invitation.id, delivery: "none" });
+    deps.logger.info("invitation_created", {
+      requestId,
+      tenantId: invitation.tenantId,
+      invitationId: invitation.id,
+      delivery: "none",
+    });
     return Promise.resolve();
   },
 });

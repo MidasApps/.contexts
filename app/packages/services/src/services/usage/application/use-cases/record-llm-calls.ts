@@ -15,7 +15,10 @@ export type UsageValidationError = {
 
 export type RecordLlmCalls = (
   calls: readonly unknown[],
-) => Promise<{ readonly ok: true; readonly data: { readonly recorded: number } } | { readonly ok: false; readonly error: UsageValidationError }>;
+) => Promise<
+  | { readonly ok: true; readonly data: { readonly recorded: number } }
+  | { readonly ok: false; readonly error: UsageValidationError }
+>;
 
 /**
  * Appends model calls to `usage.llm_calls` (SP3 spec §12). Rows come from the
@@ -26,6 +29,7 @@ export const makeRecordLlmCalls =
   (deps: { readonly repository: UsageRepository }): RecordLlmCalls =>
   async (calls) => {
     const parsed = LlmCallBatchSchema.safeParse(calls);
-    if (!parsed.success) return { ok: false, error: { code: "VALIDATION_FAILED", details: validationDetailsOf(parsed.error.issues) } };
+    if (!parsed.success)
+      return { ok: false, error: { code: "VALIDATION_FAILED", details: validationDetailsOf(parsed.error.issues) } };
     return { ok: true, data: { recorded: await deps.repository.insertCalls(parsed.data) } };
   };

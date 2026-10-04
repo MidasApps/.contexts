@@ -8,5 +8,6 @@ export const monthKeyOf = (monthStart: Date): string => monthStart.toISOString()
 export const monthStartOfKey = (key: string): Date => new Date(`${key}-01T00:00:00.000Z`);
 
 /** Contract-style `VALIDATION_FAILED` details from Zod issues (never the raw `ZodError`). */
-export const validationDetailsOf = (issues: readonly { readonly path: readonly PropertyKey[]; readonly code: string }[]) =>
-  issues.map((issue) => ({ field: issue.path.map(String).join("."), issue: issue.code.toUpperCase() }));
+export const validationDetailsOf = (
+  issues: readonly { readonly path: readonly PropertyKey[]; readonly code: string }[],
+) => issues.map((issue) => ({ field: issue.path.map(String).join("."), issue: issue.code.toUpperCase() }));

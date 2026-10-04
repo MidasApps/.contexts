@@ -7,8 +7,17 @@ import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Switch } from "#/shared/ui/atoms/Switch/Switch.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "#/shared/ui/molecules/Field/Field.tsx";
-import { switchJsonInputMode, type JsonInputDraft, type JsonInputProblems } from "./json-input-draft.ts";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "#/shared/ui/molecules/Field/Field.tsx";
+import { type JsonInputDraft, type JsonInputProblems, switchJsonInputMode } from "./json-input-draft.ts";
 import type { JsonFieldPlan, JsonSchemaPlan } from "./json-schema-plan.ts";
 
 export type JsonSchemaFieldsProps = {
@@ -23,7 +32,11 @@ export type JsonSchemaFieldsProps = {
   jsonHint: string;
 };
 
-type ControlProps = { field: JsonFieldPlan; value: string | boolean | undefined; onChange: (value: string | boolean) => void };
+type ControlProps = {
+  field: JsonFieldPlan;
+  value: string | boolean | undefined;
+  onChange: (value: string | boolean) => void;
+};
 
 function OptionSelect({ field, value, onChange }: ControlProps) {
   const t = useTranslations();
@@ -62,7 +75,13 @@ function FieldInput({ field, value, onChange }: ControlProps) {
   if (field.kind === "textarea") {
     return (
       <FieldControl>
-        <Textarea rows={4} required={field.required} maxLength={field.maxLength} value={text} onChange={(event) => onChange(event.target.value)} />
+        <Textarea
+          rows={4}
+          required={field.required}
+          maxLength={field.maxLength}
+          value={text}
+          onChange={(event) => onChange(event.target.value)}
+        />
       </FieldControl>
     );
   }
@@ -82,7 +101,13 @@ function FieldInput({ field, value, onChange }: ControlProps) {
   );
 }
 
-function FormFields({ fields, draft, onDraftChange, problems, labelOf }: Omit<JsonSchemaFieldsProps, "plan" | "jsonHint"> & { fields: readonly JsonFieldPlan[] }) {
+function FormFields({
+  fields,
+  draft,
+  onDraftChange,
+  problems,
+  labelOf,
+}: Omit<JsonSchemaFieldsProps, "plan" | "jsonHint"> & { fields: readonly JsonFieldPlan[] }) {
   const t = useTranslations();
   return (
     <FieldGroup>
@@ -92,9 +117,15 @@ function FormFields({ fields, draft, onDraftChange, problems, labelOf }: Omit<Js
           <Field key={field.name} orientation={field.kind === "switch" ? "horizontal" : "vertical"}>
             <FieldLabel>
               {labelOf(field)}
-              {field.required ? <span className="font-normal text-muted-foreground"> ({t("common.form.required")})</span> : null}
+              {field.required ? (
+                <span className="font-normal text-muted-foreground"> ({t("common.form.required")})</span>
+              ) : null}
             </FieldLabel>
-            <FieldInput field={field} value={draft.fields[field.name]} onChange={(value) => onDraftChange({ ...draft, fields: { ...draft.fields, [field.name]: value } })} />
+            <FieldInput
+              field={field}
+              value={draft.fields[field.name]}
+              onChange={(value) => onDraftChange({ ...draft, fields: { ...draft.fields, [field.name]: value } })}
+            />
             <FieldError errors={[problem === undefined ? undefined : t(problem.key, problem.values)]} />
           </Field>
         );
@@ -131,7 +162,13 @@ export function JsonSchemaFields({ plan, draft, onDraftChange, problems, labelOf
         </div>
       ) : null}
       {plan.kind === "fields" && draft.mode === "fields" ? (
-        <FormFields fields={plan.fields} draft={draft} onDraftChange={onDraftChange} problems={problems} labelOf={labelOf} />
+        <FormFields
+          fields={plan.fields}
+          draft={draft}
+          onDraftChange={onDraftChange}
+          problems={problems}
+          labelOf={labelOf}
+        />
       ) : (
         <Field>
           <FieldLabel>{t("label")}</FieldLabel>

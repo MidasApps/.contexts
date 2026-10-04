@@ -15,11 +15,19 @@ describe("admin user lookups", () => {
     const callEndpoint = ((_endpoint: unknown, input: { query: { ids: string } }) => {
       const ids = input.query.ids.split(",");
       asked.push(ids);
-      return Promise.resolve({ data: ids.map((id) => ({ id, email: null, displayName: `Name ${id}`, status: "active", createdAt: null })), meta: { page: { cursor: null, hasMore: false, limit: 100 } } });
+      return Promise.resolve({
+        data: ids.map((id) => ({ id, email: null, displayName: `Name ${id}`, status: "active", createdAt: null })),
+        meta: { page: { cursor: null, hasMore: false, limit: 100 } },
+      });
     }) as unknown as CallEndpoint;
     const ids = Array.from({ length: 150 }, (_, index) => `u${String(index).padStart(3, "0")}`);
     const query = adminUsersByIdQuery(callEndpoint, ids);
-    const users = await query.queryFn?.({ signal, queryKey: query.queryKey, meta: undefined, client: undefined as never });
+    const users = await query.queryFn?.({
+      signal,
+      queryKey: query.queryKey,
+      meta: undefined,
+      client: undefined as never,
+    });
     expect(asked.map((chunk) => chunk.length)).toEqual([100, 50]);
     expect(users).toHaveLength(150);
   });

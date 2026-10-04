@@ -1,5 +1,5 @@
-import type { PiiLevel } from "../../src/contracts/primitives/catalog-meta.schema.ts";
 import { isPiiBelow } from "../../src/contracts/field-meta-rules.ts";
+import type { PiiLevel } from "../../src/contracts/primitives/catalog-meta.schema.ts";
 import type { CatalogEntry } from "./catalog-entry.ts";
 import { componentRef } from "./json-schema.ts";
 import { isJsonRecord, type JsonRecord } from "./stable-json.ts";
@@ -31,15 +31,13 @@ const membersOf = (node: JsonRecord): unknown[] =>
 const effectivePii = (node: unknown): PiiLevel => {
   if (!isJsonRecord(node)) return "none";
   const own = PII_LEVELS.has(node["x-pii"]) ? (node["x-pii"] as PiiLevel) : "none";
-  return membersOf(node).reduce<PiiLevel>(
-    (level, member) => higher(level, effectivePii(member)),
-    own,
-  );
+  return membersOf(node).reduce<PiiLevel>((level, member) => higher(level, effectivePii(member)), own);
 };
 
 /** True when the node (or a combinator member) declares `x-pii` itself. */
 const declaresPii = (node: unknown): boolean =>
-  isJsonRecord(node) && (PII_LEVELS.has(node["x-pii"]) || typeof node["$ref"] === "string" || membersOf(node).some(declaresPii));
+  isJsonRecord(node) &&
+  (PII_LEVELS.has(node["x-pii"]) || typeof node["$ref"] === "string" || membersOf(node).some(declaresPii));
 
 const referencesAny = (node: unknown, refs: ReadonlySet<string>): boolean => {
   if (Array.isArray(node)) return node.some((child) => referencesAny(child, refs));
@@ -53,7 +51,9 @@ const redactObject = (value: JsonRecord, node: JsonRecord, resolve: RefResolver)
   // An undeclared key is classified only by an additionalProperties schema that
   // declares its own pii (a catchall or record value with meta, or a contract $ref);
   // otherwise it cannot be classified, so it never goes out.
-  const additional = declaresPii(node["additionalProperties"]) ? (node["additionalProperties"] as JsonRecord) : undefined;
+  const additional = declaresPii(node["additionalProperties"])
+    ? (node["additionalProperties"] as JsonRecord)
+    : undefined;
   const entries = Object.entries(value).flatMap(([key, child]): [string, unknown][] => {
     const childNode = properties[key] ?? additional;
     if (childNode === undefined) return [];
@@ -105,7 +105,10 @@ function pruneSchema(node: unknown, droppedRefs: ReadonlySet<string>): unknown {
   if (!isJsonRecord(node)) return node;
   const result: JsonRecord = {};
   for (const [key, value] of Object.entries(node)) {
-    result[key] = key === "properties" && isJsonRecord(value) ? pruneProperties(value, droppedRefs) : pruneSchema(value, droppedRefs);
+    result[key] =
+      key === "properties" && isJsonRecord(value)
+        ? pruneProperties(value, droppedRefs)
+        : pruneSchema(value, droppedRefs);
   }
   if (effectivePii(node) === "personal") {
     if (Array.isArray(node["examples"])) result["examples"] = node["examples"].map(() => REDACTED);
@@ -144,8 +147,17 @@ const toAiEntry = (entry: CatalogEntry, droppedRefs: ReadonlySet<string>, resolv
   const jsonSchema = pruneSchema(source, droppedRefs) as JsonRecord;
   jsonSchema["examples"] = examples;
   const fields = entry.fields
-    .filter((field) => !hiddenFields.has(field.name) && isJsonRecord(jsonSchema["properties"]) && field.name in jsonSchema["properties"])
-    .map((field) => (field.pii === "personal" && field.examples !== undefined ? { ...field, examples: field.examples.map(() => REDACTED) } : field));
+    .filter(
+      (field) =>
+        !hiddenFields.has(field.name) &&
+        isJsonRecord(jsonSchema["properties"]) &&
+        field.name in jsonSchema["properties"],
+    )
+    .map((field) =>
+      field.pii === "personal" && field.examples !== undefined
+        ? { ...field, examples: field.examples.map(() => REDACTED) }
+        : field,
+    );
   return { ...entry, examples, fields, jsonSchema };
 };
 
@@ -157,7 +169,11 @@ const toAiEntry = (entry: CatalogEntry, droppedRefs: ReadonlySet<string>, resolv
 export const buildAiCatalog = (entries: readonly CatalogEntry[]): CatalogEntry[] => {
   const dropped = entries.filter(isExcluded);
   const droppedRefs = new Set(dropped.map((entry) => componentRef(entry.id)));
-  const schemasByRef = new Map(entries.filter((entry) => !isExcluded(entry)).map((entry) => [componentRef(entry.id), withoutRootPii(entry.jsonSchema)]));
+  const schemasByRef = new Map(
+    entries
+      .filter((entry) => !isExcluded(entry))
+      .map((entry) => [componentRef(entry.id), withoutRootPii(entry.jsonSchema)]),
+  );
   const resolve: RefResolver = (ref) => schemasByRef.get(ref);
   return entries.filter((entry) => !isExcluded(entry)).map((entry) => toAiEntry(entry, droppedRefs, resolve));
 };

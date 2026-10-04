@@ -21,19 +21,40 @@ function TraceSummaryCards({ detail, organizationName }: { detail: TraceDetail; 
   const format = useFormatter();
   const formatDateTime = useFormatDateTime();
   const { summary } = detail;
-  const target = summary.agentId !== null ? t("agentTarget", { id: summary.agentId }) : summary.workflowId !== null ? t("workflowTarget", { id: summary.workflowId }) : t("noTarget");
+  const target =
+    summary.agentId !== null
+      ? t("agentTarget", { id: summary.agentId })
+      : summary.workflowId !== null
+        ? t("workflowTarget", { id: summary.workflowId })
+        : t("noTarget");
   return (
     <section aria-labelledby="trace-summary-title" className="flex flex-col gap-3">
       <h2 id="trace-summary-title" className="text-sm font-medium text-muted-foreground">
         {t("detail.summary")}
       </h2>
       <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label={t("detail.organization")} value={<span className="font-sans text-base break-words">{organizationName}</span>} hint={target} />
-        <KpiCard label={t("detail.startedAt")} value={<span className="text-base">{formatDateTime(summary.startedAt, "precise")}</span>} />
+        <KpiCard
+          label={t("detail.organization")}
+          value={<span className="font-sans text-base break-words">{organizationName}</span>}
+          hint={target}
+        />
+        <KpiCard
+          label={t("detail.startedAt")}
+          value={<span className="text-base">{formatDateTime(summary.startedAt, "precise")}</span>}
+        />
         <KpiCard label={t("detail.duration")} value={<TraceDuration durationMs={summary.durationMs} />} />
-        <KpiCard label={t("detail.tokens")} value={t("tokensValue", { input: format.number(summary.inputTokens), output: format.number(summary.outputTokens) })} />
+        <KpiCard
+          label={t("detail.tokens")}
+          value={t("tokensValue", {
+            input: format.number(summary.inputTokens),
+            output: format.number(summary.outputTokens),
+          })}
+        />
         <KpiCard label={t("detail.cost")} value={<TraceCost costMicroUsd={summary.costMicroUsd} />} />
-        <KpiCard label={t("detail.traceId")} value={<span className="text-xs font-normal break-all">{summary.traceId}</span>} />
+        <KpiCard
+          label={t("detail.traceId")}
+          value={<span className="text-xs font-normal break-all">{summary.traceId}</span>}
+        />
       </dl>
     </section>
   );
@@ -52,10 +73,15 @@ export function AdminTraceDetailView() {
   const permissions = usePlatformPermissions();
   const allowed = permissions.can("platform.trace.read");
   const trace = useAdminTrace(traceId, { enabled: valid && allowed });
-  const organizations = useAllAdminOrganizations({ enabled: valid && allowed && permissions.can("platform.organization.read") });
+  const organizations = useAllAdminOrganizations({
+    enabled: valid && allowed && permissions.can("platform.organization.read"),
+  });
   if (!valid || isApiErrorStatus(trace.error, 404)) return <PageNotFound />;
   const tenantId = trace.data?.summary.tenantId;
-  const organizationName = tenantId === null || tenantId === undefined ? t("platform") : (organizations.data?.find((organization) => organization.id === tenantId)?.name ?? tenantId);
+  const organizationName =
+    tenantId === null || tenantId === undefined
+      ? t("platform")
+      : (organizations.data?.find((organization) => organization.id === tenantId)?.name ?? tenantId);
   return (
     <AdminPageFrame
       permission="platform.trace.read"
@@ -67,7 +93,10 @@ export function AdminTraceDetailView() {
         {(detail) => (
           <div className="flex flex-col gap-8">
             <TraceSummaryCards detail={detail} organizationName={organizationName} />
-            <TraceViewer detail={detail} logsRoute={{ id: "admin", rest: "logs", search: { traceId: detail.summary.traceId } }} />
+            <TraceViewer
+              detail={detail}
+              logsRoute={{ id: "admin", rest: "logs", search: { traceId: detail.summary.traceId } }}
+            />
           </div>
         )}
       </AdminQuerySection>

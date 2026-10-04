@@ -4,6 +4,7 @@ export { unitKeys } from "./api/unit-keys.ts";
 export {
   fetchUnitTree,
   MAX_TREE_UNITS,
+  type UnitPathSegment,
   unitQuery,
   unitsQuery,
   unitTreeQuery,
@@ -12,7 +13,6 @@ export {
   useUnits,
   useUnitTree,
   useUnitTypes,
-  type UnitPathSegment,
 } from "./api/unit-queries.ts";
 export { buildUnitTree, unitPathIn } from "./model/build-unit-tree.ts";
 export { UnitBreadcrumb, type UnitBreadcrumbProps } from "./ui/UnitBreadcrumb.tsx";

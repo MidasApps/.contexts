@@ -1,14 +1,20 @@
 import { type ApprovalRequest, ApprovalRequestSchema } from "@core/contracts";
 
 /** An SP1 approval request as the API returns it; override the action per test. */
-export const buildApprovalRequest = (overrides: Partial<Record<keyof ApprovalRequest, unknown>> = {}): ApprovalRequest =>
+export const buildApprovalRequest = (
+  overrides: Partial<Record<keyof ApprovalRequest, unknown>> = {},
+): ApprovalRequest =>
   ApprovalRequestSchema.parse({
     id: "Ap1qW2eR3tY4uI5oP6aS",
     tenantId: "OrgAaaaaaaaaaaaaaaaaa",
     node: { level: "organization", tenantId: "OrgAaaaaaaaaaaaaaaaaa" },
     permission: "core.workflow-run.approve-demo",
     requestedBy: { type: "user", id: "member-uid" },
-    action: { kind: "workflow-resume", input: { workflowId: "approval-demo", runId: "run-1", stepId: "request-human-approval" }, summary: "Create the note \"Follow-up\"" },
+    action: {
+      kind: "workflow-resume",
+      input: { workflowId: "approval-demo", runId: "run-1", stepId: "request-human-approval" },
+      summary: 'Create the note "Follow-up"',
+    },
     status: "pending",
     decidedBy: null,
     reason: null,

@@ -15,7 +15,19 @@ type WebTool = keyof AgentSettings["webTools"];
 
 export type OrganizationAgentRulesProps = { organizationId: string; settings: AgentSettings; canUpdate: boolean };
 
-function WebToolRow({ label, hint, checked, disabled, onChange }: { label: string; hint: string; checked: boolean; disabled: boolean; onChange: (checked: boolean) => void }) {
+function WebToolRow({
+  label,
+  hint,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  disabled: boolean;
+  onChange: (checked: boolean) => void;
+}) {
   const id = useId();
   return (
     <li className="flex items-start justify-between gap-4 py-2.5">
@@ -27,12 +39,26 @@ function WebToolRow({ label, hint, checked, disabled, onChange }: { label: strin
           {hint}
         </span>
       </span>
-      <Switch id={id} checked={checked} disabled={disabled} onCheckedChange={onChange} aria-describedby={`${id}-hint`} />
+      <Switch
+        id={id}
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onChange}
+        aria-describedby={`${id}-hint`}
+      />
     </li>
   );
 }
 
-function PiiModeGroup({ value, disabled, onChange }: { value: PiiMode; disabled: boolean; onChange: (mode: PiiMode) => void }) {
+function PiiModeGroup({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: PiiMode;
+  disabled: boolean;
+  onChange: (mode: PiiMode) => void;
+}) {
   const t = useTranslations("settings.agents.organization.pii");
   const id = useId();
   return (
@@ -40,10 +66,20 @@ function PiiModeGroup({ value, disabled, onChange }: { value: PiiMode; disabled:
       <h3 id={id} className="text-sm font-medium">
         {t("title")}
       </h3>
-      <RadioGroup aria-labelledby={id} value={value} disabled={disabled} onValueChange={(next) => (next === "warn" || next === "redact") && next !== value && onChange(next)}>
+      <RadioGroup
+        aria-labelledby={id}
+        value={value}
+        disabled={disabled}
+        onValueChange={(next) => (next === "warn" || next === "redact") && next !== value && onChange(next)}
+      >
         {(["warn", "redact"] as const).map((mode) => (
           <div key={mode} className="flex items-start gap-2.5">
-            <RadioGroupItem id={`${id}-${mode}`} value={mode} className="mt-0.5" aria-describedby={`${id}-${mode}-hint`} />
+            <RadioGroupItem
+              id={`${id}-${mode}`}
+              value={mode}
+              className="mt-0.5"
+              aria-describedby={`${id}-${mode}-hint`}
+            />
             <span className="flex flex-col gap-0.5">
               <Label htmlFor={`${id}-${mode}`} className="text-sm">
                 {t(mode)}
@@ -89,8 +125,20 @@ export function OrganizationAgentRules({ organizationId, settings, canUpdate }: 
         </h3>
         <p className="text-xs text-muted-foreground">{t("webTools.description")}</p>
         <ul className="divide-y divide-border">
-          <WebToolRow label={t("webTools.firecrawl")} hint={t("webTools.firecrawlHint")} checked={settings.webTools.firecrawl} disabled={disabled} onChange={(enabled) => setWebTool("firecrawl", enabled)} />
-          <WebToolRow label={t("webTools.browser")} hint={t("webTools.browserHint")} checked={settings.webTools.browser} disabled={disabled} onChange={(enabled) => setWebTool("browser", enabled)} />
+          <WebToolRow
+            label={t("webTools.firecrawl")}
+            hint={t("webTools.firecrawlHint")}
+            checked={settings.webTools.firecrawl}
+            disabled={disabled}
+            onChange={(enabled) => setWebTool("firecrawl", enabled)}
+          />
+          <WebToolRow
+            label={t("webTools.browser")}
+            hint={t("webTools.browserHint")}
+            checked={settings.webTools.browser}
+            disabled={disabled}
+            onChange={(enabled) => setWebTool("browser", enabled)}
+          />
         </ul>
       </section>
       <PiiModeGroup value={settings.guardrails.pii} disabled={disabled} onChange={setPii} />

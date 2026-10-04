@@ -39,7 +39,10 @@ describe("module-settings Security Rules (decision 0015 §6: server-only store)"
   });
 
   it.each(clients)("denies writes to %s", async (_label, makeContext) => {
-    const write = makeContext().firestore().doc(DOC).set({ tenantId: "org-1", moduleId: "sample", values: { greeting: "x" } });
+    const write = makeContext()
+      .firestore()
+      .doc(DOC)
+      .set({ tenantId: "org-1", moduleId: "sample", values: { greeting: "x" } });
     await expect(assertFails(write)).resolves.toBeDefined();
   });
 });

@@ -5,18 +5,32 @@ import { as, buildApprovalWorld, deleteInvoiceInput, tenantId } from "./approval
 type World = Awaited<ReturnType<typeof buildApprovalWorld>>;
 
 const request = async (world: World) => {
-  const created = await world.services.requestApproval({ principal: as("member"), access: world.access(), tenantId, input: CreateApprovalRequestInputSchema.parse(deleteInvoiceInput()), requestId: "r" });
+  const created = await world.services.requestApproval({
+    principal: as("member"),
+    access: world.access(),
+    tenantId,
+    input: CreateApprovalRequestInputSchema.parse(deleteInvoiceInput()),
+    requestId: "r",
+  });
   if (!created.ok) throw created.error;
   return created.data;
 };
 
-const read = (world: World, uid: string, id: string) => world.services.readApprovalRequest({ actor: as(uid), access: world.access(), approvalRequestId: ApprovalRequestIdSchema.parse(id) });
+const read = (world: World, uid: string, id: string) =>
+  world.services.readApprovalRequest({
+    actor: as(uid),
+    access: world.access(),
+    approvalRequestId: ApprovalRequestIdSchema.parse(id),
+  });
 
 describe("readApprovalRequest", () => {
   it("answers the request with its effective status to a member of its organization", async () => {
     const world = await buildApprovalWorld();
     const created = await request(world);
-    expect(await read(world, "admin", created.id)).toMatchObject({ ok: true, data: { id: created.id, status: "pending", action: { summary: "Delete invoice 42" } } });
+    expect(await read(world, "admin", created.id)).toMatchObject({
+      ok: true,
+      data: { id: created.id, status: "pending", action: { summary: "Delete invoice 42" } },
+    });
     world.setNow("2026-10-08T12:00:00.000Z");
     expect(await read(world, "member", created.id)).toMatchObject({ ok: true, data: { status: "expired" } });
   });

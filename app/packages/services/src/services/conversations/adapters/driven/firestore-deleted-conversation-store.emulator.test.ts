@@ -1,7 +1,10 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
 import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
-import { createFirestoreDeletedConversationStore, PURGEABLE_CONVERSATIONS_COLLECTION } from "./firestore-deleted-conversation-store.ts";
+import {
+  createFirestoreDeletedConversationStore,
+  PURGEABLE_CONVERSATIONS_COLLECTION,
+} from "./firestore-deleted-conversation-store.ts";
 
 // The purge query and delete over SP4-shaped conversation documents (Timestamp `deletedAt`).
 const firebase = emulatorFirebase();
@@ -12,8 +15,12 @@ const at = (iso: string) => Timestamp.fromDate(new Date(iso));
 describe("Firestore deleted conversation store (emulator)", () => {
   it("lists only conversations deleted before the cutoff and deletes them after a re-read", async () => {
     const collection = firebase.firestore.collection(PURGEABLE_CONVERSATIONS_COLLECTION);
-    await collection.doc(`old${RUN}`).set({ tenantId: `t${RUN}`, title: "secret", deletedAt: at("2000-01-01T00:00:00.000Z") });
-    await collection.doc(`new${RUN}`).set({ tenantId: `t${RUN}`, title: "secret", deletedAt: at("2000-03-01T00:00:00.000Z") });
+    await collection
+      .doc(`old${RUN}`)
+      .set({ tenantId: `t${RUN}`, title: "secret", deletedAt: at("2000-01-01T00:00:00.000Z") });
+    await collection
+      .doc(`new${RUN}`)
+      .set({ tenantId: `t${RUN}`, title: "secret", deletedAt: at("2000-03-01T00:00:00.000Z") });
     await collection.doc(`live${RUN}`).set({ tenantId: `t${RUN}`, title: "secret", deletedAt: null });
     const before = "2000-02-01T00:00:00.000Z";
     const listed = (await store.listDeletedBefore({ before, limit: 500 })).filter((row) => row.id.endsWith(RUN));

@@ -1,8 +1,8 @@
-import { ImpersonationSessionSchema, type ImpersonationSession } from "@core/contracts";
+import { type ImpersonationSession, ImpersonationSessionSchema } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
 import { runInTransaction } from "../../../shared/firestore/transaction-runner.ts";
-import { decodeCursor, type CursorPosition } from "../../../shared/pagination/cursor.ts";
+import { type CursorPosition, decodeCursor } from "../../../shared/pagination/cursor.ts";
 import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
 import { createFirestoreImpersonationSessionRepository } from "./firestore-platform-repositories.ts";
 
@@ -47,7 +47,10 @@ const recentRowsOf = async (ids: ReadonlySet<string>): Promise<ImpersonationSess
 
 describe("Firestore impersonation sessions for staff (emulator)", () => {
   beforeEach(async () => {
-    const leftovers = await firestore.collection(CORE_COLLECTIONS.impersonationSessions).where("staffUid", "==", STAFF_UID).get();
+    const leftovers = await firestore
+      .collection(CORE_COLLECTIONS.impersonationSessions)
+      .where("staffUid", "==", STAFF_UID)
+      .get();
     await Promise.all(leftovers.docs.map((doc) => doc.ref.delete()));
   });
 

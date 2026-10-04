@@ -7,7 +7,7 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { AdminKpiCards } from "#/widgets/admin-kpi-cards/index.ts";
 import { AdminPageFrame, AdminQuerySection } from "#/widgets/admin-nav/index.ts";
-import { useAdminItems, type AdminItem } from "#/widgets/admin-sidebar/index.ts";
+import { type AdminItem, useAdminItems } from "#/widgets/admin-sidebar/index.ts";
 
 function AreaCard({ area }: { area: AdminItem }) {
   const t = useTranslations();
@@ -34,7 +34,8 @@ function AreaCard({ area }: { area: AdminItem }) {
 function AdminAreas() {
   const t = useTranslations("admin.overview");
   const { items } = useAdminItems();
-  if (items.length === 0) return <EmptyState headingLevel={2} icon="shield" title={t("emptyTitle")} description={t("emptyDescription")} />;
+  if (items.length === 0)
+    return <EmptyState headingLevel={2} icon="shield" title={t("emptyTitle")} description={t("emptyDescription")} />;
   return (
     <section aria-labelledby="admin-areas-title" className="flex flex-col gap-3">
       <h2 id="admin-areas-title" className="text-sm font-medium text-muted-foreground">

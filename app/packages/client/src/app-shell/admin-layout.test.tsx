@@ -1,8 +1,8 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { createFakeAuth } from "#/shared/lib/auth/fake-auth.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { ok } from "#/shared/testing/fake-api.ts";
-import { createFakeAuth } from "#/shared/lib/auth/fake-auth.ts";
 import { buildMe } from "#/shared/testing/fixtures.ts";
 import { TEST_USER } from "#/shared/testing/render-client.tsx";
 import { AdminLayout } from "./admin-layout.tsx";
@@ -14,7 +14,10 @@ describe("AdminLayout", () => {
       <AdminLayout>
         <h1>Página</h1>
       </AdminLayout>,
-      { path: "/admin", routes: { "GET /v1/me": ok(buildMe({ isPlatformStaff: true, platformRole: "platform-admin" })) } },
+      {
+        path: "/admin",
+        routes: { "GET /v1/me": ok(buildMe({ isPlatformStaff: true, platformRole: "platform-admin" })) },
+      },
     );
     const nav = screen.getByRole("navigation", { name: "Áreas da administração" });
     expect(await within(nav).findByRole("link", { name: "Organizações" })).toBeDefined();
@@ -32,7 +35,11 @@ describe("AdminLayout", () => {
       <AdminLayout>
         <h1>Página</h1>
       </AdminLayout>,
-      { path: "/admin/organizations", auth, routes: { "GET /v1/me": ok(buildMe({ isPlatformStaff: true, platformRole: "platform-admin" })) } },
+      {
+        path: "/admin/organizations",
+        auth,
+        routes: { "GET /v1/me": ok(buildMe({ isPlatformStaff: true, platformRole: "platform-admin" })) },
+      },
     );
     auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
     expect(await screen.findByRole("heading", { name: "A administração não abre no modo suporte" })).toBeDefined();

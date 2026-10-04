@@ -1,20 +1,27 @@
-import type { Page } from "@playwright/test";
 import { SEED_USERS } from "@core/e2e/seed-users";
 import { accountMenu, signInThroughUi } from "@core/e2e/sign-in";
-import { authFile, expect, test, type FreshUser } from "./web-test.ts";
+import type { Page } from "@playwright/test";
+import { authFile, expect, type FreshUser, test } from "./web-test.ts";
 
 // SP2 spec §13 item 3. Every test changes its own fresh account (createUser), so parallel browser
 // projects never race on preferences or sessions and nothing needs resetting afterwards.
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const signInFresh = async (page: Page, createUser: (args: { label: string; organizations: { id: string }[] }) => Promise<FreshUser>, organizationId: string) => {
+const signInFresh = async (
+  page: Page,
+  createUser: (args: { label: string; organizations: { id: string }[] }) => Promise<FreshUser>,
+  organizationId: string,
+) => {
   const user = await createUser({ label: "Profile", organizations: [{ id: organizationId }] });
   await signInThroughUi(page, user);
   return user;
 };
 
 /** Picks an option of a searchable picker (time zone, currency): trigger → search → option. */
-const pick = async (page: Page, args: { field: RegExp; search: string; query: string; option: RegExp }): Promise<void> => {
+const pick = async (
+  page: Page,
+  args: { field: RegExp; search: string; query: string; option: RegExp },
+): Promise<void> => {
   await page.getByRole("combobox", { name: args.field }).click();
   const dialog = page.getByRole("dialog", { name: args.search });
   await dialog.getByRole("combobox", { name: args.search }).fill(args.query);
@@ -46,7 +53,11 @@ test("changes the language: the URL locale and the copy switch", async ({ page, 
   await expect(page.locator("html")).toHaveAttribute("lang", "en-US");
 });
 
-test("changes time zone and currency; the example page shows the new display zone", async ({ page, world, createUser }) => {
+test("changes time zone and currency; the example page shows the new display zone", async ({
+  page,
+  world,
+  createUser,
+}) => {
   await signInFresh(page, createUser, world.alpha.id);
   const modulePage = `o/${world.alpha.id}/p/${world.alpha.projects.launch.id}/m/example`;
   await page.goto(modulePage);
@@ -74,7 +85,9 @@ test.describe("theme", () => {
     await page.goto("profile/preferences");
     const html = page.locator("html");
     await expect(html).toHaveAttribute("data-theme", "light");
-    const saved = page.waitForResponse((response) => response.url().endsWith("/v1/me") && response.request().method() === "PATCH" && response.ok());
+    const saved = page.waitForResponse(
+      (response) => response.url().endsWith("/v1/me") && response.request().method() === "PATCH" && response.ok(),
+    );
     await page.getByRole("radio", { name: "Escuro" }).check();
     await expect(html).toHaveAttribute("data-theme", "dark");
     await saved;
@@ -123,7 +136,8 @@ test.describe("section navigation", () => {
     let rscRequests = 0;
     page.on("response", (response) => {
       if (response.request().headers()["rsc"] !== undefined) rscRequests += 1;
-      if (response.status() >= 400 && response.status() < 500) failures.push(`${String(response.status())} ${response.url()}`);
+      if (response.status() >= 400 && response.status() < 500)
+        failures.push(`${String(response.status())} ${response.url()}`);
     });
     await page.goto(`o/${world.alpha.id}`);
     await (await accountMenu(page, SEED_USERS.owner.displayName)).click();

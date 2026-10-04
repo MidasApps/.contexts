@@ -44,7 +44,11 @@ function Targets({ dataset }: { dataset: EvalDataset }) {
 const useScopeLabel = (organizations: readonly OrganizationAdminSummary[] | undefined) => {
   const t = useTranslations("admin.evals.datasets");
   return (dataset: EvalDataset): string =>
-    dataset.tenantId === null ? t("platformScope") : t("organizationScope", { name: organizations?.find((organization) => organization.id === dataset.tenantId)?.name ?? dataset.tenantId });
+    dataset.tenantId === null
+      ? t("platformScope")
+      : t("organizationScope", {
+          name: organizations?.find((organization) => organization.id === dataset.tenantId)?.name ?? dataset.tenantId,
+        });
 };
 
 const useColumns = (scope: (dataset: EvalDataset) => string) => {
@@ -53,17 +57,40 @@ const useColumns = (scope: (dataset: EvalDataset) => string) => {
   const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
-      column.display({ id: "name", header: () => t("columns.name"), cell: ({ row }) => <DatasetName dataset={row.original} /> }),
+      column.display({
+        id: "name",
+        header: () => t("columns.name"),
+        cell: ({ row }) => <DatasetName dataset={row.original} />,
+      }),
       column.display({ id: "scope", header: () => t("columns.scope"), cell: ({ row }) => scope(row.original) }),
-      column.accessor("version", { header: () => t("columns.version"), meta: { numeric: true }, cell: ({ getValue }) => format.number(getValue()) }),
-      column.display({ id: "targets", header: () => t("columns.targets"), cell: ({ row }) => <Targets dataset={row.original} /> }),
-      column.accessor("createdAt", { header: () => t("columns.createdAt"), cell: ({ getValue }) => formatDateTime(getValue()) }),
+      column.accessor("version", {
+        header: () => t("columns.version"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => format.number(getValue()),
+      }),
+      column.display({
+        id: "targets",
+        header: () => t("columns.targets"),
+        cell: ({ row }) => <Targets dataset={row.original} />,
+      }),
+      column.accessor("createdAt", {
+        header: () => t("columns.createdAt"),
+        cell: ({ getValue }) => formatDateTime(getValue()),
+      }),
     ],
     [format, formatDateTime, scope, t],
   );
 };
 
-function DatasetsTable({ datasets, organizations, onSeeExperiments }: { datasets: readonly EvalDataset[]; organizations: readonly OrganizationAdminSummary[] | undefined; onSeeExperiments: () => void }) {
+function DatasetsTable({
+  datasets,
+  organizations,
+  onSeeExperiments,
+}: {
+  datasets: readonly EvalDataset[];
+  organizations: readonly OrganizationAdminSummary[] | undefined;
+  onSeeExperiments: () => void;
+}) {
   const t = useTranslations("admin.evals.datasets");
   const formatDateTime = useFormatDateTime();
   const scope = useScopeLabel(organizations);
@@ -80,7 +107,9 @@ function DatasetsTable({ datasets, organizations, onSeeExperiments }: { datasets
         <div className="flex flex-col gap-2">
           <DatasetName dataset={dataset} />
           <span className="text-body">{scope(dataset)}</span>
-          <span className="text-xs text-muted-foreground">{t("cardMeta", { version: dataset.version, when: formatDateTime(dataset.createdAt) })}</span>
+          <span className="text-xs text-muted-foreground">
+            {t("cardMeta", { version: dataset.version, when: formatDateTime(dataset.createdAt) })}
+          </span>
           <Targets dataset={dataset} />
         </div>
       )}
@@ -109,7 +138,9 @@ export function DatasetsPanel({ onSeeExperiments }: { onSeeExperiments: () => vo
   const organizations = useAllAdminOrganizations();
   return (
     <AdminQuerySection query={datasets} loadingLabel={t("loading")}>
-      {(data) => <DatasetsTable datasets={data} organizations={organizations.data} onSeeExperiments={onSeeExperiments} />}
+      {(data) => (
+        <DatasetsTable datasets={data} organizations={organizations.data} onSeeExperiments={onSeeExperiments} />
+      )}
     </AdminQuerySection>
   );
 }

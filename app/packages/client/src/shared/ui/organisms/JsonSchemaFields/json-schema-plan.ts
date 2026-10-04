@@ -23,11 +23,15 @@ export type JsonFieldPlan = {
  * `none`: nothing to ask (no schema, or an object without properties); `fields`: a flat object a
  * form can hold; `json`: anything else (arrays, nested objects, unions), edited as JSON text.
  */
-export type JsonSchemaPlan = { readonly kind: "none" } | { readonly kind: "fields"; readonly fields: readonly JsonFieldPlan[] } | { readonly kind: "json" };
+export type JsonSchemaPlan =
+  | { readonly kind: "none" }
+  | { readonly kind: "fields"; readonly fields: readonly JsonFieldPlan[] }
+  | { readonly kind: "json" };
 
 type JsonRecord = Readonly<Record<string, unknown>>;
 
-const isRecord = (value: unknown): value is JsonRecord => typeof value === "object" && value !== null && !Array.isArray(value);
+const isRecord = (value: unknown): value is JsonRecord =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 // Long free text gets a textarea; short strings (titles, names) a single line.
 const LONG_TEXT = 500;
@@ -36,10 +40,12 @@ const LONG_TEXT = 500;
 const limit = (value: unknown): number | undefined =>
   typeof value === "number" && Number.isFinite(value) && Math.abs(value) < Number.MAX_SAFE_INTEGER ? value : undefined;
 
-const stringOr = (value: unknown): string | undefined => (typeof value === "string" && value !== "" ? value : undefined);
+const stringOr = (value: unknown): string | undefined =>
+  typeof value === "string" && value !== "" ? value : undefined;
 
 const kindOf = (property: JsonRecord): JsonFieldKind | undefined => {
-  if (Array.isArray(property["enum"])) return property["enum"].every((option) => typeof option === "string") ? "select" : undefined;
+  if (Array.isArray(property["enum"]))
+    return property["enum"].every((option) => typeof option === "string") ? "select" : undefined;
   const ui = isRecord(property["ui"]) ? property["ui"] : {};
   switch (property["type"]) {
     case "boolean":
@@ -92,12 +98,19 @@ export const planJsonSchemaFields = (schema: JsonRecord | null): JsonSchemaPlan 
   if (schema["type"] !== "object" || !isRecord(schema["properties"])) return { kind: "json" };
   const entries = Object.entries(schema["properties"]);
   if (entries.length === 0) return { kind: "none" };
-  const required = new Set(Array.isArray(schema["required"]) ? schema["required"].filter((name): name is string => typeof name === "string") : []);
+  const required = new Set(
+    Array.isArray(schema["required"])
+      ? schema["required"].filter((name): name is string => typeof name === "string")
+      : [],
+  );
   const planned: { field: JsonFieldPlan; order: number; index: number }[] = [];
   for (const [index, [name, property]] of entries.entries()) {
     const field = isRecord(property) ? planProperty(name, property, required) : undefined;
     if (field === undefined) return { kind: "json" };
     planned.push({ field, order: orderOf(property), index });
   }
-  return { kind: "fields", fields: planned.toSorted((a, b) => a.order - b.order || a.index - b.index).map(({ field }) => field) };
+  return {
+    kind: "fields",
+    fields: planned.toSorted((a, b) => a.order - b.order || a.index - b.index).map(({ field }) => field),
+  };
 };

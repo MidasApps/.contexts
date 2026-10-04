@@ -1,7 +1,12 @@
-import { cancelWorkflowRunEndpoint, getWorkflowRunEndpoint, listWorkflowRunsEndpoint, startWorkflowRunEndpoint } from "@core/contracts";
+import {
+  cancelWorkflowRunEndpoint,
+  getWorkflowRunEndpoint,
+  listWorkflowRunsEndpoint,
+  startWorkflowRunEndpoint,
+} from "@core/contracts";
 import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
 import { dataResponse } from "../../../shared/http/api-errors.ts";
-import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
+import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import type { WorkflowRuntimeGateway } from "../../application/ports/workflow-runtime-gateway.ts";
 import { makeCancelRun } from "../../application/use-cases/cancel-run.ts";
@@ -33,33 +38,52 @@ export const buildWorkflowRunsRoutes = (deps: WorkflowRunsRouteDeps): Record<str
   const getRun = makeGetRun(deps);
   const cancelRun = makeCancelRun(deps);
   const startRun = makeStartRun(deps);
-  const scopeOf = (ctx: Parameters<typeof workflowCallScope>[0]["ctx"], organizationId: Parameters<typeof workflowCallScope>[0]["organizationId"], permission: string) =>
-    workflowCallScope({ ctx, organizationId, permission, resolveAccessContext: deps.resolveAccessContext });
+  const scopeOf = (
+    ctx: Parameters<typeof workflowCallScope>[0]["ctx"],
+    organizationId: Parameters<typeof workflowCallScope>[0]["organizationId"],
+    permission: string,
+  ) => workflowCallScope({ ctx, organizationId, permission, resolveAccessContext: deps.resolveAccessContext });
   return {
     [listWorkflowRunsEndpoint.id]: withApiRoute(listWorkflowRunsEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, ctx.input.query.organizationId, WORKFLOW_RUN_PERMISSIONS.read);
       if (scope instanceof Response) return scope;
       const { workflowId, status, cursor, limit } = ctx.input.query;
-      const result = await listRuns(scope, { limit, ...(workflowId === undefined ? {} : { workflowId }), ...(status === undefined ? {} : { status }), ...(cursor === undefined ? {} : { cursor }) });
-      return result.ok ? dataResponse({ data: result.data.runs, meta: { page: result.data.page } }) : workflowGatewayErrorResponse(result.error, ctx.requestId);
+      const result = await listRuns(scope, {
+        limit,
+        ...(workflowId === undefined ? {} : { workflowId }),
+        ...(status === undefined ? {} : { status }),
+        ...(cursor === undefined ? {} : { cursor }),
+      });
+      return result.ok
+        ? dataResponse({ data: result.data.runs, meta: { page: result.data.page } })
+        : workflowGatewayErrorResponse(result.error, ctx.requestId);
     }),
     [getWorkflowRunEndpoint.id]: withApiRoute(getWorkflowRunEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, ctx.input.query.organizationId, WORKFLOW_RUN_PERMISSIONS.read);
       if (scope instanceof Response) return scope;
       const result = await getRun(scope, ctx.input.params.runId);
-      return result.ok ? dataResponse({ data: result.data }) : workflowGatewayErrorResponse(result.error, ctx.requestId);
+      return result.ok
+        ? dataResponse({ data: result.data })
+        : workflowGatewayErrorResponse(result.error, ctx.requestId);
     }),
     [cancelWorkflowRunEndpoint.id]: withApiRoute(cancelWorkflowRunEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, ctx.input.query.organizationId, WORKFLOW_RUN_PERMISSIONS.cancel);
       if (scope instanceof Response) return scope;
       const result = await cancelRun(scope, ctx.input.params.runId);
-      return result.ok ? new Response(null, { status: 204 }) : workflowGatewayErrorResponse(result.error, ctx.requestId);
+      return result.ok
+        ? new Response(null, { status: 204 })
+        : workflowGatewayErrorResponse(result.error, ctx.requestId);
     }),
     [startWorkflowRunEndpoint.id]: withApiRoute(startWorkflowRunEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, ctx.input.query.organizationId, WORKFLOW_RUN_PERMISSIONS.start);
       if (scope instanceof Response) return scope;
-      const result = await startRun(scope, { workflowId: ctx.input.params.workflowId, inputData: ctx.input.body.inputData });
-      return result.ok ? dataResponse({ data: result.data }, { status: 202 }) : workflowGatewayErrorResponse(result.error, ctx.requestId);
+      const result = await startRun(scope, {
+        workflowId: ctx.input.params.workflowId,
+        inputData: ctx.input.body.inputData,
+      });
+      return result.ok
+        ? dataResponse({ data: result.data }, { status: 202 })
+        : workflowGatewayErrorResponse(result.error, ctx.requestId);
     }),
   };
 };

@@ -15,11 +15,13 @@ describe("LocaleSchema", () => {
 
 describe("TimeZoneSchema", () => {
   it("accepts IANA time zone names", () => {
-    for (const zone of ["America/Sao_Paulo", "UTC", "Asia/Kolkata"]) expect(TimeZoneSchema.safeParse(zone).success).toBe(true);
+    for (const zone of ["America/Sao_Paulo", "UTC", "Asia/Kolkata"])
+      expect(TimeZoneSchema.safeParse(zone).success).toBe(true);
   });
 
   it("rejects unknown zones and raw offsets", () => {
-    for (const zone of ["Mars/Olympus", "+03:00", "", "-0300"]) expect(TimeZoneSchema.safeParse(zone).success).toBe(false);
+    for (const zone of ["Mars/Olympus", "+03:00", "", "-0300"])
+      expect(TimeZoneSchema.safeParse(zone).success).toBe(false);
   });
 });
 

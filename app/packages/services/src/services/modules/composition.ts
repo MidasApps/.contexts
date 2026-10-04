@@ -5,9 +5,13 @@ import type { Clock } from "../shared/clock/clock.ts";
 import { createFirestoreUnitOfWork, type UnitOfWork } from "../shared/firestore/unit-of-work.ts";
 import { createFirestoreModuleSettingsRepository } from "./adapters/driven/firestore-module-settings-repository.ts";
 import type { ModuleSettingsRepository } from "./application/ports/driven/module-settings-repository.ts";
-import { makeGetModuleSettings, type GetModuleSettings } from "./application/use-cases/get-module-settings.ts";
+import { type GetModuleSettings, makeGetModuleSettings } from "./application/use-cases/get-module-settings.ts";
 import { makeUpdateModuleSettings, type UpdateModuleSettings } from "./application/use-cases/update-module-settings.ts";
-import { createModuleSettingsRegistry, type ModuleSettingsDefinition, type ModuleSettingsRegistry } from "./domain/module-settings-registry.ts";
+import {
+  createModuleSettingsRegistry,
+  type ModuleSettingsDefinition,
+  type ModuleSettingsRegistry,
+} from "./domain/module-settings-registry.ts";
 
 export type ModuleSettingsServices = {
   readonly registry: ModuleSettingsRegistry;
@@ -27,8 +31,18 @@ export const createModuleSettingsServices = (deps: {
   clock: Clock;
 }): ModuleSettingsServices => {
   const registry = createModuleSettingsRegistry(deps.definitions);
-  const bound = { registry, repository: deps.repository, audit: deps.audit, unitOfWork: deps.unitOfWork, clock: deps.clock };
-  return { registry, getModuleSettings: makeGetModuleSettings(bound), updateModuleSettings: makeUpdateModuleSettings(bound) };
+  const bound = {
+    registry,
+    repository: deps.repository,
+    audit: deps.audit,
+    unitOfWork: deps.unitOfWork,
+    clock: deps.clock,
+  };
+  return {
+    registry,
+    getModuleSettings: makeGetModuleSettings(bound),
+    updateModuleSettings: makeUpdateModuleSettings(bound),
+  };
 };
 
 /** The Firestore-backed services `createCoreServer` builds (adapters keep references only). */

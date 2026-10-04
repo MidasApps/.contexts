@@ -1,4 +1,10 @@
-import { CreateConnectorInputSchema, type Connector, type ConnectorType, type CreateConnectorInput, type ErrorDetail } from "@core/contracts";
+import {
+  type Connector,
+  type ConnectorType,
+  type CreateConnectorInput,
+  CreateConnectorInputSchema,
+  type ErrorDetail,
+} from "@core/contracts";
 
 /** The form as the user types it: lists are text (one entry per line or comma), nothing is trusted yet. */
 export type ConnectorDraft = {
@@ -31,7 +37,17 @@ export const AUTH_MODES: Record<ConnectorType, readonly ConnectorAuth[]> = {
 };
 
 /** Fields of the form a problem can point at. */
-export const DRAFT_FIELDS = ["name", "specUrl", "url", "allowedHosts", "allowedRelations", "auth", "apiKeyHeader", "allow", "readOnly"] as const;
+export const DRAFT_FIELDS = [
+  "name",
+  "specUrl",
+  "url",
+  "allowedHosts",
+  "allowedRelations",
+  "auth",
+  "apiKeyHeader",
+  "allow",
+  "readOnly",
+] as const;
 export type DraftField = (typeof DRAFT_FIELDS)[number];
 export type DraftProblems = Partial<Record<DraftField, true>>;
 
@@ -55,12 +71,28 @@ const lines = (items: readonly string[]): string => items.join("\n");
 
 /** The form of an existing connector. It never carries the secret or `secretRef`. */
 export const draftFromConnector = (connector: Connector): ConnectorDraft => {
-  const base = { ...emptyConnectorDraft(connector.type), name: connector.name, allow: lines(connector.toolPolicy.allow), readOnly: connector.toolPolicy.readOnly };
+  const base = {
+    ...emptyConnectorDraft(connector.type),
+    name: connector.name,
+    allow: lines(connector.toolPolicy.allow),
+    readOnly: connector.toolPolicy.readOnly,
+  };
   switch (connector.type) {
     case "openapi":
-      return { ...base, specUrl: connector.config.specUrl, allowedHosts: lines(connector.config.allowedHosts), auth: connector.config.auth, apiKeyHeader: connector.config.apiKeyHeader ?? "" };
+      return {
+        ...base,
+        specUrl: connector.config.specUrl,
+        allowedHosts: lines(connector.config.allowedHosts),
+        auth: connector.config.auth,
+        apiKeyHeader: connector.config.apiKeyHeader ?? "",
+      };
     case "mcp":
-      return { ...base, url: connector.config.url, allowedHosts: lines(connector.config.allowedHosts), auth: connector.config.auth };
+      return {
+        ...base,
+        url: connector.config.url,
+        allowedHosts: lines(connector.config.allowedHosts),
+        auth: connector.config.auth,
+      };
     case "postgres":
       return { ...base, allowedRelations: lines(connector.config.allowedRelations) };
     case "browser":
@@ -72,7 +104,12 @@ const configOf = (draft: ConnectorDraft): Record<string, unknown> => {
   const allowedHosts = splitList(draft.allowedHosts);
   switch (draft.type) {
     case "openapi":
-      return { specUrl: draft.specUrl.trim(), allowedHosts, auth: draft.auth, apiKeyHeader: draft.auth === "api-key" ? draft.apiKeyHeader.trim() : null };
+      return {
+        specUrl: draft.specUrl.trim(),
+        allowedHosts,
+        auth: draft.auth,
+        apiKeyHeader: draft.auth === "api-key" ? draft.apiKeyHeader.trim() : null,
+      };
     case "mcp":
       return { url: draft.url.trim(), allowedHosts, auth: draft.auth };
     case "postgres":
@@ -99,7 +136,9 @@ export const problemsFromDetails = (details: readonly ErrorDetail[] | undefined)
   return problems;
 };
 
-export type DraftResult = { readonly ok: true; readonly input: CreateConnectorInput } | { readonly ok: false; readonly problems: DraftProblems };
+export type DraftResult =
+  | { readonly ok: true; readonly input: CreateConnectorInput }
+  | { readonly ok: false; readonly problems: DraftProblems };
 
 /**
  * Builds the wire input and checks it with the contract schema, for early feedback only: the API
@@ -117,7 +156,8 @@ export const connectorInputOf = (draft: ConnectorDraft): DraftResult => {
   const parsed = CreateConnectorInputSchema.safeParse(candidate);
   if (parsed.success) {
     // The contract accepts a null header with api-key auth, but then no credential would be sent.
-    if (draft.type === "openapi" && draft.auth === "api-key" && draft.apiKeyHeader.trim() === "") return { ok: false, problems: { apiKeyHeader: true } };
+    if (draft.type === "openapi" && draft.auth === "api-key" && draft.apiKeyHeader.trim() === "")
+      return { ok: false, problems: { apiKeyHeader: true } };
     return { ok: true, input: parsed.data };
   }
   const problems: DraftProblems = {};

@@ -1,7 +1,7 @@
 "use client";
 
 import type { NavSlot } from "@core/contracts";
-import { useId, type ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 import { useTranslations } from "use-intl";
 import { usePermissions } from "#/entities/permission/index.ts";
 import { useCurrentNode } from "#/entities/session/index.ts";
@@ -11,8 +11,19 @@ import { useNavigationRegistry } from "#/shared/lib/shell/shell-registry-context
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Sidebar, SidebarRail } from "#/shared/ui/organisms/Sidebar/Sidebar.tsx";
 import { useCloseMobileSidebarOnChange } from "#/shared/ui/organisms/Sidebar/sidebar-context.tsx";
-import { SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader } from "#/shared/ui/organisms/Sidebar/sidebar-sections.tsx";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "#/shared/ui/organisms/Sidebar/sidebar-menu.tsx";
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSkeleton,
+} from "#/shared/ui/organisms/Sidebar/sidebar-menu.tsx";
+import {
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+} from "#/shared/ui/organisms/Sidebar/sidebar-sections.tsx";
 import { isRouteActive } from "../model/active-route.ts";
 
 function NavGroup({ slot, label }: { slot: Extract<NavSlot, "organization" | "project">; label: string }) {

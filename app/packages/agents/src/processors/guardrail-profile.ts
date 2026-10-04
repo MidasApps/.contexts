@@ -64,7 +64,10 @@ export type GuardrailProfileDeps = {
 type PiiMode = "warn" | "redact";
 
 // Settings unreachable → redact (the stricter mode), never skip the detector.
-const piiModeOf = async (settings: AgentRuntimePorts["settings"], requestContext: RequestContext | undefined): Promise<PiiMode> => {
+const piiModeOf = async (
+  settings: AgentRuntimePorts["settings"],
+  requestContext: RequestContext | undefined,
+): Promise<PiiMode> => {
   const context = readAgentContext(requestContext);
   if (!context.ok) return "redact";
   try {
@@ -83,7 +86,8 @@ const createTenantPiiDetector = (settings: AgentRuntimePorts["settings"], model:
   return {
     id: TENANT_PII_DETECTOR_ID,
     name: "Tenant PII detector",
-    processInput: async (args: ProcessInputArgs) => detectors[await piiModeOf(settings, args.requestContext)].processInput(args),
+    processInput: async (args: ProcessInputArgs) =>
+      detectors[await piiModeOf(settings, args.requestContext)].processInput(args),
   };
 };
 
@@ -94,14 +98,27 @@ const createTenantPiiDetector = (settings: AgentRuntimePorts["settings"], model:
  */
 const createResultScrubber = (model: LanguageModelV4): OutputProcessor => {
   const scrubber = new SystemPromptScrubber({ model, strategy: "redact", errorStrategy: "strict" });
-  return { id: SYSTEM_PROMPT_SCRUBBER_RESULT_ID, name: "System prompt scrubber (final answer)", processOutputResult: (args) => scrubber.processOutputResult(args) };
+  return {
+    id: SYSTEM_PROMPT_SCRUBBER_RESULT_ID,
+    name: "System prompt scrubber (final answer)",
+    processOutputResult: (args) => scrubber.processOutputResult(args),
+  };
 };
 
-const secretFilter = (): RegexFilterProcessor => new RegexFilterProcessor({ presets: ["secrets"], strategy: "redact", phase: "output" });
+const secretFilter = (): RegexFilterProcessor =>
+  new RegexFilterProcessor({ presets: ["secrets"], strategy: "redact", phase: "output" });
 
 const costSignal = (): InputProcessor[] =>
   TOKEN_COST_CONTROL_ENABLED
-    ? [new TokenCostControl({ maxCost: DAILY_SOFT_CAP_USD, scope: "organization", window: "24h", strategy: "warn", warnAtPercent: 80 })]
+    ? [
+        new TokenCostControl({
+          maxCost: DAILY_SOFT_CAP_USD,
+          scope: "organization",
+          window: "24h",
+          strategy: "warn",
+          warnAtPercent: 80,
+        }),
+      ]
     : [];
 
 /**
@@ -113,13 +130,22 @@ const costSignal = (): InputProcessor[] =>
 export const createGuardrailProfile = (deps: GuardrailProfileDeps, kind: GuardrailProfileKind): GuardrailProfile => {
   const budgetGuard = createTenantBudgetGuard({ usage: deps.ports.usage });
   const tokenLimiter = new TokenLimiterProcessor({ limit: INPUT_TOKEN_LIMIT, trimMode: "best-fit" });
-  if (kind === "delegated") return { inputProcessors: [new UnicodeNormalizer(), budgetGuard, tokenLimiter], outputProcessors: [secretFilter()] };
+  if (kind === "delegated")
+    return {
+      inputProcessors: [new UnicodeNormalizer(), budgetGuard, tokenLimiter],
+      outputProcessors: [secretFilter()],
+    };
   const detector = deps.models.language("fast", { agentId: "guardrails" });
   return {
     inputProcessors: [
       new UnicodeNormalizer(),
       budgetGuard,
-      new PromptInjectionDetector({ model: detector, strategy: "block", threshold: PROMPT_INJECTION_THRESHOLD, errorStrategy: "strict" }),
+      new PromptInjectionDetector({
+        model: detector,
+        strategy: "block",
+        threshold: PROMPT_INJECTION_THRESHOLD,
+        errorStrategy: "strict",
+      }),
       new ModerationProcessor({ model: detector, strategy: "block", errorStrategy: "strict" }),
       createTenantPiiDetector(deps.ports.settings, detector),
       tokenLimiter,

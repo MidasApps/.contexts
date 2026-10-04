@@ -1,4 +1,4 @@
-import { errorResponse, type ErrorDetail } from "./error-envelope.ts";
+import { type ErrorDetail, errorResponse } from "./error-envelope.ts";
 
 // Short, generic, English (contracts/api.md §6.1); clients localize by `code`.
 const MESSAGES: Readonly<Record<string, string>> = {
@@ -21,7 +21,13 @@ const FALLBACK_MESSAGE = "The request could not be completed.";
  * @example return apiError(404, "NOT_FOUND", requestId);
  */
 export const apiError = (status: number, code: string, requestId: string, details?: ErrorDetail[]): Response =>
-  errorResponse({ status, code, message: MESSAGES[code] ?? FALLBACK_MESSAGE, requestId, ...(details === undefined ? {} : { details }) });
+  errorResponse({
+    status,
+    code,
+    message: MESSAGES[code] ?? FALLBACK_MESSAGE,
+    requestId,
+    ...(details === undefined ? {} : { details }),
+  });
 
 /** Status (and optionally a different wire code) for each domain error code a handler maps. */
 export type DomainErrorMapping = Readonly<Record<string, { readonly status: number; readonly code?: string }>>;
@@ -31,7 +37,11 @@ export type DomainErrorMapping = Readonly<Record<string, { readonly status: numb
  * @throws the error itself when it is not mapped: an unmapped error is a bug and the
  *   route boundary answers 500 `INTERNAL_ERROR` (rules/error-handling.md).
  */
-export const mapDomainError = (error: Error & { readonly code: string }, mapping: DomainErrorMapping, requestId: string): Response => {
+export const mapDomainError = (
+  error: Error & { readonly code: string },
+  mapping: DomainErrorMapping,
+  requestId: string,
+): Response => {
   const mapped = mapping[error.code];
   if (mapped === undefined) throw error;
   return apiError(mapped.status, mapped.code ?? error.code, requestId);
@@ -41,11 +51,15 @@ export const mapDomainError = (error: Error & { readonly code: string }, mapping
  * Success response with the `{ data, meta? }` envelope (contracts/api.md §5); `location`
  * is required by §7 for a 201.
  */
-export const dataResponse = (body: { data: unknown; meta?: unknown }, options: { status?: 200 | 201 | 202; location?: string } = {}): Response =>
+export const dataResponse = (
+  body: { data: unknown; meta?: unknown },
+  options: { status?: 200 | 201 | 202; location?: string } = {},
+): Response =>
   Response.json(body, {
     status: options.status ?? 200,
     headers: { "cache-control": "no-store", ...(options.location === undefined ? {} : { location: options.location }) },
   });
 
 /** `204 No Content`. */
-export const noContentResponse = (): Response => new Response(null, { status: 204, headers: { "cache-control": "no-store" } });
+export const noContentResponse = (): Response =>
+  new Response(null, { status: 204, headers: { "cache-control": "no-store" } });

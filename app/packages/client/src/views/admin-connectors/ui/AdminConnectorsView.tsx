@@ -14,10 +14,19 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill, type StatusTone } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
-import { AdminOrganizationFilter, AdminPageFrame, AdminQuerySection, useAdminSearch } from "#/widgets/admin-nav/index.ts";
+import {
+  AdminOrganizationFilter,
+  AdminPageFrame,
+  AdminQuerySection,
+  useAdminSearch,
+} from "#/widgets/admin-nav/index.ts";
 
 const column = dataTableColumnHelper<Connector>();
-const STATUS_TONES: Record<Connector["status"], StatusTone> = { active: "emerald", disabled: "neutral", error: "danger" };
+const STATUS_TONES: Record<Connector["status"], StatusTone> = {
+  active: "emerald",
+  disabled: "neutral",
+  error: "danger",
+};
 
 function ConnectorName({ connector }: { connector: Connector }) {
   return (
@@ -41,7 +50,9 @@ function Reach({ connector }: { connector: Connector }) {
   return (
     <span className="flex flex-col">
       <span className="font-mono text-body-sm break-all">{first}</span>
-      {others.length === 0 ? null : <span className="text-caption text-muted-foreground">{t("moreReach", { count: others.length })}</span>}
+      {others.length === 0 ? null : (
+        <span className="text-caption text-muted-foreground">{t("moreReach", { count: others.length })}</span>
+      )}
     </span>
   );
 }
@@ -65,13 +76,35 @@ const useColumns = () => {
   const t = useTranslations("admin.connectors");
   return useMemo(
     () => [
-      column.display({ id: "name", header: () => t("columns.name"), cell: ({ row }) => <ConnectorName connector={row.original} /> }),
+      column.display({
+        id: "name",
+        header: () => t("columns.name"),
+        cell: ({ row }) => <ConnectorName connector={row.original} />,
+      }),
       column.accessor("type", { header: () => t("columns.type"), cell: ({ getValue }) => t(`types.${getValue()}`) }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <ConnectorStatus status={getValue()} /> }),
-      column.display({ id: "reach", header: () => t("columns.reach"), cell: ({ row }) => <Reach connector={row.original} /> }),
-      column.display({ id: "tools", header: () => t("columns.tools"), cell: ({ row }) => <Tools connector={row.original} /> }),
-      column.display({ id: "secret", header: () => t("columns.secret"), cell: ({ row }) => <Secret connector={row.original} /> }),
-      column.accessor("updatedAt", { header: () => t("columns.updatedAt"), cell: ({ getValue }) => <When iso={getValue()} /> }),
+      column.accessor("status", {
+        header: () => t("columns.status"),
+        cell: ({ getValue }) => <ConnectorStatus status={getValue()} />,
+      }),
+      column.display({
+        id: "reach",
+        header: () => t("columns.reach"),
+        cell: ({ row }) => <Reach connector={row.original} />,
+      }),
+      column.display({
+        id: "tools",
+        header: () => t("columns.tools"),
+        cell: ({ row }) => <Tools connector={row.original} />,
+      }),
+      column.display({
+        id: "secret",
+        header: () => t("columns.secret"),
+        cell: ({ row }) => <Secret connector={row.original} />,
+      }),
+      column.accessor("updatedAt", {
+        header: () => t("columns.updatedAt"),
+        cell: ({ getValue }) => <When iso={getValue()} />,
+      }),
     ],
     [t],
   );
@@ -137,7 +170,11 @@ export function AdminConnectorsView() {
       {permissions.can("platform.connector.read") ? (
         <div className="flex flex-col gap-4">
           <div role="search" aria-label={t("filtersLabel")} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <AdminOrganizationFilter required value={organizationId} onValueChange={(next) => search.set({ organizationId: next })} />
+            <AdminOrganizationFilter
+              required
+              value={organizationId}
+              onValueChange={(next) => search.set({ organizationId: next })}
+            />
           </div>
           <Alert>
             <AlertDescription>{t("readOnlyNotice")}</AlertDescription>

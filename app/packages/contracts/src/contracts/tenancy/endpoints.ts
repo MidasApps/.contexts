@@ -9,14 +9,16 @@ import { CreateUnitInputSchema } from "./create-unit-input.schema.ts";
 import { OrganizationIdSchema, ProjectIdSchema, UnitIdSchema } from "./ids.schema.ts";
 import { OrganizationSchema } from "./organization.schema.ts";
 import { ProjectSchema } from "./project.schema.ts";
-import { UnitTypeDefinitionSchema } from "./unit-type.schema.ts";
 import { UnitSchema } from "./unit.schema.ts";
+import { UnitTypeDefinitionSchema } from "./unit-type.schema.ts";
 import { UpdateOrganizationInputSchema } from "./update-organization-input.schema.ts";
 import { UpdateProjectInputSchema } from "./update-project-input.schema.ts";
 import { UpdateUnitInputSchema } from "./update-unit-input.schema.ts";
 
 /** `{organizationId}` path param, shared by every organization-scoped route. */
-export const OrganizationParamsSchema = z.object({ organizationId: OrganizationIdSchema.meta(none("Organization id.")) });
+export const OrganizationParamsSchema = z.object({
+  organizationId: OrganizationIdSchema.meta(none("Organization id.")),
+});
 const projectParams = z.object({ projectId: ProjectIdSchema.meta(none("Project id.")) });
 const unitParams = z.object({ unitId: UnitIdSchema.meta(none("Unit id.")) });
 
@@ -135,7 +137,9 @@ export const listUnitsEndpoint = defineEndpoint({
   auth: "principal",
   params: projectParams,
   query: PageQuerySchema.extend({
-    parentUnitId: UnitIdSchema.optional().meta(none("Children of this unit; absent lists the units directly under the project.")),
+    parentUnitId: UnitIdSchema.optional().meta(
+      none("Children of this unit; absent lists the units directly under the project."),
+    ),
   }),
   responses: { 200: listEnvelope(UnitSchema) },
   errors: { 404: NOT_FOUND },
@@ -152,7 +156,8 @@ export const createUnitEndpoint = defineEndpoint({
   responses: { 201: dataEnvelope(UnitSchema) },
   errors: { 403: FORBIDDEN, 404: NOT_FOUND, 409: ["CONFLICT"], 422: ["INVALID_UNIT_PARENT"] },
   idempotency: "optional",
-  summary: "Creates a unit under the project or a unit (core.unit.create at the parent); 409 while the tree is being changed.",
+  summary:
+    "Creates a unit under the project or a unit (core.unit.create at the parent); 409 while the tree is being changed.",
 });
 
 export const getUnitEndpoint = defineEndpoint({

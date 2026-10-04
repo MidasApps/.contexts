@@ -17,7 +17,10 @@ const INSTRUCTIONS =
  * (tenant budget guard, token limit, secret filter), so the call is traced and lands in the usage
  * ledger like every other model call.
  */
-export const createConversationSummarizer = (deps: { readonly models: AgentModels; readonly guardrails: GuardrailProfile }): Agent =>
+export const createConversationSummarizer = (deps: {
+  readonly models: AgentModels;
+  readonly guardrails: GuardrailProfile;
+}): Agent =>
   new Agent({
     id: SUMMARIZER_AGENT_ID,
     name: "Conversation summarizer",

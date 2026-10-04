@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { loadMastraEnv, type MastraEnv } from "../mastra-env.schema.ts";
-import { buildLoggerOptions, buildMemoryVectorConfig, buildServerConfig, buildStorageConfig, createTimestampMixin } from "./mastra-options.ts";
+import {
+  buildLoggerOptions,
+  buildMemoryVectorConfig,
+  buildServerConfig,
+  buildStorageConfig,
+  createTimestampMixin,
+} from "./mastra-options.ts";
 
 const LOCAL_SOURCE = {
   APP_ENV: "local",

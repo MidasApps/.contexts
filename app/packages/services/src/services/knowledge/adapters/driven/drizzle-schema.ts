@@ -1,5 +1,17 @@
 import { sql } from "drizzle-orm";
-import { check, foreignKey, index, integer, jsonb, pgPolicy, text, timestamp, unique, uuid, vector } from "drizzle-orm/pg-core";
+import {
+  check,
+  foreignKey,
+  index,
+  integer,
+  jsonb,
+  pgPolicy,
+  text,
+  timestamp,
+  unique,
+  uuid,
+  vector,
+} from "drizzle-orm/pg-core";
 import { aiSchema } from "../../../shared/postgres/drizzle-schemas.ts";
 
 /**
@@ -17,7 +29,11 @@ const currentTenant = sql`current_setting('app.tenant_id', true)`;
 // Reads see the tenant's rows and shared platform rows; writes only the tenant's own
 // rows (platform content is written with app.tenant_id = '_platform').
 const tenantPolicies = (table: string) => [
-  pgPolicy(`${table}_tenant_rows`, { for: "all", using: sql`tenant_id = ${currentTenant}`, withCheck: sql`tenant_id = ${currentTenant}` }),
+  pgPolicy(`${table}_tenant_rows`, {
+    for: "all",
+    using: sql`tenant_id = ${currentTenant}`,
+    withCheck: sql`tenant_id = ${currentTenant}`,
+  }),
   pgPolicy(`${table}_platform_read`, { for: "select", using: sql`tenant_id = '_platform'` }),
 ];
 
@@ -71,13 +87,17 @@ export const knowledgeChunksV1 = aiSchema
       createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     },
     (table) => [
-      foreignKey({ name: "chunks_v1_document_fk", columns: [table.documentId, table.tenantId], foreignColumns: [knowledgeDocuments.id, knowledgeDocuments.tenantId] }).onDelete(
-        "cascade",
-      ),
+      foreignKey({
+        name: "chunks_v1_document_fk",
+        columns: [table.documentId, table.tenantId],
+        foreignColumns: [knowledgeDocuments.id, knowledgeDocuments.tenantId],
+      }).onDelete("cascade"),
       unique("chunks_v1_document_chunk_key").on(table.documentId, table.chunkIndex),
       index("chunks_v1_document_idx").on(table.documentId),
       index("chunks_v1_tenant_namespace_idx").on(table.tenantId, table.namespace),
-      index("chunks_v1_embedding_hnsw").using("hnsw", table.embedding.op("vector_cosine_ops")).with({ m: 16, ef_construction: 64 }),
+      index("chunks_v1_embedding_hnsw")
+        .using("hnsw", table.embedding.op("vector_cosine_ops"))
+        .with({ m: 16, ef_construction: 64 }),
       check("chunks_v1_chunk_index_check", sql`${table.chunkIndex} >= 0`),
       check("chunks_v1_token_count_check", sql`${table.tokenCount} >= 0`),
       ...tenantPolicies("chunks_v1"),

@@ -1,4 +1,10 @@
-import { ModuleSettingsSchema, type ErrorDetail, type ModuleSettings, type Principal, type TenantId } from "@core/contracts";
+import {
+  type ErrorDetail,
+  type ModuleSettings,
+  ModuleSettingsSchema,
+  type Principal,
+  type TenantId,
+} from "@core/contracts";
 import type { z } from "zod";
 import type { RequestAccess } from "../../access/composition.ts";
 import { AccessDeniedError } from "../../access/domain/errors/access-denied-error.ts";
@@ -6,9 +12,13 @@ import type { AuditWriter } from "../../audit/application/use-cases/record-audit
 import type { Clock } from "../../shared/clock/clock.ts";
 import type { UnitOfWork } from "../../shared/firestore/unit-of-work.ts";
 import { err, ok, type Result } from "../../shared/result/result.ts";
-import type { ModuleSettingsDefinition, ModuleSettingsRegistry } from "../domain/module-settings-registry.ts";
 import { UnknownModuleError } from "../domain/module-settings-errors.ts";
-import type { ModuleSettingsKey, ModuleSettingsRepository, StoredModuleSettings } from "./ports/driven/module-settings-repository.ts";
+import type { ModuleSettingsDefinition, ModuleSettingsRegistry } from "../domain/module-settings-registry.ts";
+import type {
+  ModuleSettingsKey,
+  ModuleSettingsRepository,
+  StoredModuleSettings,
+} from "./ports/driven/module-settings-repository.ts";
 
 /** Dependencies of the module settings use cases, built by `createModuleSettingsServices`. */
 export type ModuleSettingsDeps = {
@@ -61,4 +71,7 @@ export const toModuleSettings = (key: ModuleSettingsKey, stored: StoredModuleSet
 
 /** Zod issues → `VALIDATION_FAILED` details, the same shape the `/v1` pipeline reports for a body. */
 export const issuesToDetails = (error: z.ZodError): ErrorDetail[] =>
-  error.issues.map((issue) => ({ field: issue.path.length === 0 ? "(body)" : issue.path.map(String).join("."), issue: issue.code.toUpperCase() }));
+  error.issues.map((issue) => ({
+    field: issue.path.length === 0 ? "(body)" : issue.path.map(String).join("."),
+    issue: issue.code.toUpperCase(),
+  }));

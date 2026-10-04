@@ -12,8 +12,8 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
-import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
+import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { PageError, PageNotFound, QueryPage } from "#/widgets/page-state/index.ts";
@@ -53,18 +53,36 @@ function ProjectsSkeleton() {
   );
 }
 
-function ProjectsSection({ organizationId, canCreate, onCreate }: { organizationId: string; canCreate: boolean; onCreate: () => void }) {
+function ProjectsSection({
+  organizationId,
+  canCreate,
+  onCreate,
+}: {
+  organizationId: string;
+  canCreate: boolean;
+  onCreate: () => void;
+}) {
   const t = useTranslations("shell.organizationHome");
   const projects = useProjects(organizationId);
   if (projects.isPending) return <ProjectsSkeleton />;
-  if (projects.isError) return <ApiErrorState error={projects.error} onRetry={() => void projects.refetch()} retrying={projects.isFetching} />;
+  if (projects.isError)
+    return (
+      <ApiErrorState error={projects.error} onRetry={() => void projects.refetch()} retrying={projects.isFetching} />
+    );
   if (projects.data.length === 0) {
     return (
       <EmptyState
         icon="folder"
         title={t("emptyTitle")}
         description={canCreate ? t("emptyDescription") : t("emptyDescriptionNoPermission")}
-        action={canCreate ? <Button onClick={onCreate}><Icon name="plus" />{t("createProject")}</Button> : undefined}
+        action={
+          canCreate ? (
+            <Button onClick={onCreate}>
+              <Icon name="plus" />
+              {t("createProject")}
+            </Button>
+          ) : undefined
+        }
       />
     );
   }
@@ -78,7 +96,12 @@ function ProjectsSection({ organizationId, canCreate, onCreate }: { organization
         ))}
       </ul>
       {projects.hasNextPage ? (
-        <Button variant="outline" className="self-start" pending={projects.isFetchingNextPage} onClick={() => void projects.fetchNextPage()}>
+        <Button
+          variant="outline"
+          className="self-start"
+          pending={projects.isFetchingNextPage}
+          onClick={() => void projects.fetchNextPage()}
+        >
           {t("loadMore")}
         </Button>
       ) : null}
@@ -112,7 +135,9 @@ function OrganizationHome({ context }: { context: AccessContext }) {
         </h2>
         <ProjectsSection organizationId={organization.id} canCreate={canCreate} onCreate={() => setCreating(true)} />
       </section>
-      {canCreate ? <CreateProjectDialog organizationId={organization.id} open={creating} onOpenChange={setCreating} /> : null}
+      {canCreate ? (
+        <CreateProjectDialog organizationId={organization.id} open={creating} onOpenChange={setCreating} />
+      ) : null}
     </>
   );
 }
@@ -128,10 +153,12 @@ function EntryProjectRedirect({ organizationId }: { organizationId: string }) {
   const projects = useProjects(organizationId);
   const firstProjectId = projects.data?.[0]?.id;
   useEffect(() => {
-    if (firstProjectId !== undefined) router.navigate({ id: "project", organizationId, projectId: firstProjectId }, { replace: true });
+    if (firstProjectId !== undefined)
+      router.navigate({ id: "project", organizationId, projectId: firstProjectId }, { replace: true });
   }, [firstProjectId, organizationId, router]);
   if (projects.isPending || firstProjectId !== undefined) return <LoadingState label={t("loading")} rows={5} />;
-  if (projects.isError && !isApiErrorStatus(projects.error, 404)) return <PageError error={projects.error} onRetry={() => void projects.refetch()} retrying={projects.isFetching} />;
+  if (projects.isError && !isApiErrorStatus(projects.error, 404))
+    return <PageError error={projects.error} onRetry={() => void projects.refetch()} retrying={projects.isFetching} />;
   return <PageNotFound />;
 }
 
@@ -145,7 +172,8 @@ export function OrganizationHomeView() {
   const t = useTranslations("shell.organizationHome");
   const node = useCurrentNode();
   const context = useAccessContext(node === null ? null : { organizationId: node.organizationId });
-  if (node !== null && context.status === "error" && isApiErrorStatus(context.error, 404)) return <EntryProjectRedirect organizationId={node.organizationId} />;
+  if (node !== null && context.status === "error" && isApiErrorStatus(context.error, 404))
+    return <EntryProjectRedirect organizationId={node.organizationId} />;
   return (
     <QueryPage query={context} loadingLabel={t("loading")}>
       {(data) => <OrganizationHome context={data} />}

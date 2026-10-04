@@ -11,4 +11,6 @@ export const USER_SEARCH_NAME_FIELD = "searchName";
  * `updateProfile`, access's `create`), so the name and its searchable form never drift.
  * @example tx.update(ref, { displayName, ...userSearchFields(displayName) })
  */
-export const userSearchFields = (displayName: string): { readonly searchName: string } => ({ [USER_SEARCH_NAME_FIELD]: normalizeSearchText(displayName) });
+export const userSearchFields = (displayName: string): { readonly searchName: string } => ({
+  [USER_SEARCH_NAME_FIELD]: normalizeSearchText(displayName),
+});

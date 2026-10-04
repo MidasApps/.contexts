@@ -15,7 +15,13 @@ export type FakeResponse = { readonly status: number; readonly body?: unknown };
 export type FakeHandler = (request: FakeRequest) => FakeResponse | Promise<FakeResponse>;
 export type FakeRoutes = Record<string, FakeHandler | FakeResponse>;
 
-export type FakeCall = { readonly method: string; readonly path: string; readonly query: string; readonly body: unknown; readonly headers: Headers };
+export type FakeCall = {
+  readonly method: string;
+  readonly path: string;
+  readonly query: string;
+  readonly body: unknown;
+  readonly headers: Headers;
+};
 
 export type FakeApi = {
   readonly fetch: (input: string, init?: RequestInit) => Promise<Response>;
@@ -34,13 +40,27 @@ export const ok = (data: unknown, status = 200): FakeResponse => ({ status, body
 /** A list page: `{ data, meta: { page } }`. */
 export const page = (items: readonly unknown[], next: { cursor?: string; limit?: number } = {}): FakeResponse => ({
   status: 200,
-  body: { data: items, meta: { page: { cursor: next.cursor ?? null, hasMore: next.cursor !== undefined, limit: next.limit ?? 100 } } },
+  body: {
+    data: items,
+    meta: { page: { cursor: next.cursor ?? null, hasMore: next.cursor !== undefined, limit: next.limit ?? 100 } },
+  },
 });
 
 /** The canonical error envelope (contracts/api.md §6). */
-export const apiError = (status: number, code: string, details?: readonly { field: string; issue: string }[]): FakeResponse => ({
+export const apiError = (
+  status: number,
+  code: string,
+  details?: readonly { field: string; issue: string }[],
+): FakeResponse => ({
   status,
-  body: { error: { code, message: "Fake failure.", requestId: FAKE_REQUEST_ID, ...(details === undefined ? {} : { details }) } },
+  body: {
+    error: {
+      code,
+      message: "Fake failure.",
+      requestId: FAKE_REQUEST_ID,
+      ...(details === undefined ? {} : { details }),
+    },
+  },
 });
 
 export const noContent = (): FakeResponse => ({ status: 204 });
@@ -83,7 +103,10 @@ export const createFakeApi = (routes: FakeRoutes = {}): FakeApi => {
       const [routeMethod, pattern = ""] = key.split(" ");
       const params = routeMethod === method ? matchPattern(pattern, url.pathname) : null;
       if (params === null) continue;
-      const response = typeof handler === "function" ? await handler({ method, path: url.pathname, params, query: url.searchParams, body, headers }) : handler;
+      const response =
+        typeof handler === "function"
+          ? await handler({ method, path: url.pathname, params, query: url.searchParams, body, headers })
+          : handler;
       return toResponse(response);
     }
     return toResponse(apiError(404, "NOT_FOUND"));

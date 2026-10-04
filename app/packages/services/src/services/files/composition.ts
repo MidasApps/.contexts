@@ -1,17 +1,29 @@
 // Composition root of the files context (SP3 Task 13): Firestore records, Cloud Storage
 // bytes, V4 signed URLs (emulator URLs in local) and the onObjectFinalized validation.
-import type { FirebaseAdmin } from "../shared/firebase/firebase-admin.ts";
+
 import { type Clock, systemClock } from "../shared/clock/clock.ts";
+import type { FirebaseAdmin } from "../shared/firebase/firebase-admin.ts";
 import type { Logger } from "../shared/observability/logger.ts";
 import { createEmulatorUrlSigner } from "./adapters/driven/emulator-signed-url.ts";
 import { detectContentType } from "./adapters/driven/file-type-detector.ts";
 import { createFirestoreFileRepository } from "./adapters/driven/firestore-file-repository.ts";
 import { createGcsObjectStore, createGcsUrlSigner, filesBucketOf } from "./adapters/driven/gcs-signed-url.ts";
-import type { DetectContentType, FileEventPublisher, FileObjectStore, FileRepository, FileUrlSigner } from "./application/ports/file-ports.ts";
+import type {
+  DetectContentType,
+  FileEventPublisher,
+  FileObjectStore,
+  FileRepository,
+  FileUrlSigner,
+} from "./application/ports/file-ports.ts";
 import { type CreateReadUrl, makeCreateReadUrl } from "./application/use-cases/create-read-url.ts";
 import { type FinalizeUpload, makeFinalizeUpload } from "./application/use-cases/finalize-upload.ts";
 import { type GetFile, makeGetFile } from "./application/use-cases/get-file.ts";
-import { type GetReadyFile, makeGetReadyFile, makeReadFileBytes, type ReadFileBytes } from "./application/use-cases/read-file-bytes.ts";
+import {
+  type GetReadyFile,
+  makeGetReadyFile,
+  makeReadFileBytes,
+  type ReadFileBytes,
+} from "./application/use-cases/read-file-bytes.ts";
 import { makeRequestUpload, type RequestUpload } from "./application/use-cases/request-upload.ts";
 
 export type FilesServices = {
@@ -42,7 +54,14 @@ export const createFilesServices = (adapters: FilesAdapters): FilesServices => {
     requestUpload: makeRequestUpload({ files, signer, clock }),
     getFile: makeGetFile({ files }),
     createReadUrl: makeCreateReadUrl({ files, signer, clock }),
-    finalizeUpload: makeFinalizeUpload({ files, objects, detect, events: adapters.events, clock, logger: adapters.logger }),
+    finalizeUpload: makeFinalizeUpload({
+      files,
+      objects,
+      detect,
+      events: adapters.events,
+      clock,
+      logger: adapters.logger,
+    }),
     readFileBytes: makeReadFileBytes({ files, objects }),
     getReadyFile: makeGetReadyFile({ files }),
   };
@@ -58,7 +77,12 @@ export type FilesEnv = {
 /** Until an event bus lands (SP3 Task 25 / SP5), `FILE_UPLOADED` is a structured log line. */
 export const createLogFileEventPublisher = (logger: Logger): FileEventPublisher => ({
   publish: (event) => {
-    logger.info("file_uploaded_event", { eventId: event.eventId, eventName: event.eventName, tenantId: event.tenantId, fileId: event.data.fileId });
+    logger.info("file_uploaded_event", {
+      eventId: event.eventId,
+      eventName: event.eventName,
+      tenantId: event.tenantId,
+      fileId: event.data.fileId,
+    });
     return Promise.resolve();
   },
 });

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, ok } from "#/shared/testing/fake-api.ts";
 import { buildOrganization, IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsGeneralView } from "./SettingsGeneralView.tsx";
 
@@ -36,7 +36,9 @@ describe("SettingsGeneralView", () => {
 
   it("maps a server field error back to the input", async () => {
     const { user } = renderView(["core.organization.read", "core.organization.update"], {
-      "PATCH /v1/organizations/:organizationId": apiError(400, "VALIDATION_FAILED", [{ field: "name", issue: "TOO_BIG" }]),
+      "PATCH /v1/organizations/:organizationId": apiError(400, "VALIDATION_FAILED", [
+        { field: "name", issue: "TOO_BIG" },
+      ]),
     });
     const name = await screen.findByRole("textbox", { name: /Nome/u });
     await user.type(name, " Holding");

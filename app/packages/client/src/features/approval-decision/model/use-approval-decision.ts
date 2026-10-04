@@ -1,11 +1,11 @@
 "use client";
 
-import { approveApprovalRequestEndpoint, rejectApprovalRequestEndpoint, type ApprovalRequest } from "@core/contracts";
+import { type ApprovalRequest, approveApprovalRequestEndpoint, rejectApprovalRequestEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { approvalRequestKeys } from "#/entities/approval-request/index.ts";
-import { ApiError } from "#/shared/api/api-error.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
+import { ApiError } from "#/shared/api/api-error.ts";
 
 export type DecisionVerb = "approve" | "reject";
 
@@ -47,7 +47,10 @@ export const useApprovalDecision = (request: ApprovalRequest): ApprovalDecisionS
     setError(null);
     try {
       const endpoint = verb === "approve" ? approveApprovalRequestEndpoint : rejectApprovalRequestEndpoint;
-      const { data } = await callEndpoint(endpoint, { params: { approvalRequestId: request.id }, body: trimmed === "" ? {} : { reason: trimmed } });
+      const { data } = await callEndpoint(endpoint, {
+        params: { approvalRequestId: request.id },
+        body: trimmed === "" ? {} : { reason: trimmed },
+      });
       queryClient.setQueryData(approvalRequestKeys.one(request.tenantId, request.id), data);
       setDecided(data);
       return data;

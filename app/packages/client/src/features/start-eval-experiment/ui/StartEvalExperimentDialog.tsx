@@ -1,25 +1,45 @@
 "use client";
 
-import { startEvalExperimentEndpoint, type EvalDataset } from "@core/contracts";
+import { type EvalDataset, startEvalExperimentEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useTenantAgentSettings } from "#/entities/agent-settings/index.ts";
 import { tenantEvalKeys, useTenantDatasets } from "#/entities/eval-experiment/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
+import { useAgentLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
-import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
-import { useAgentLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
-import { evaluableAgents, refusalProblems, validateExperimentDraft, type ExperimentDraft, type ExperimentDraftProblems } from "../model/experiment-draft.ts";
+import {
+  type ExperimentDraft,
+  type ExperimentDraftProblems,
+  evaluableAgents,
+  refusalProblems,
+  validateExperimentDraft,
+} from "../model/experiment-draft.ts";
 
 export type StartEvalExperimentDialogProps = {
   organizationId: string;
@@ -27,7 +47,13 @@ export type StartEvalExperimentDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-type FieldsProps = { datasets: readonly EvalDataset[]; agents: readonly string[]; draft: ExperimentDraft; setDraft: (draft: ExperimentDraft) => void; problems: ExperimentDraftProblems };
+type FieldsProps = {
+  datasets: readonly EvalDataset[];
+  agents: readonly string[];
+  draft: ExperimentDraft;
+  setDraft: (draft: ExperimentDraft) => void;
+  problems: ExperimentDraftProblems;
+};
 
 function ExperimentFields({ datasets, agents, draft, setDraft, problems }: FieldsProps) {
   const agentLabel = useAgentLabel();
@@ -76,7 +102,17 @@ function ExperimentFields({ datasets, agents, draft, setDraft, problems }: Field
 }
 
 /** The form once datasets and agents are known; a dataset and the supervisor are preselected. */
-function ExperimentForm({ organizationId, datasets, agents, onClose }: { organizationId: string; datasets: readonly EvalDataset[]; agents: readonly string[]; onClose: () => void }) {
+function ExperimentForm({
+  organizationId,
+  datasets,
+  agents,
+  onClose,
+}: {
+  organizationId: string;
+  datasets: readonly EvalDataset[];
+  agents: readonly string[];
+  onClose: () => void;
+}) {
   const t = useTranslations("settings.evals.start");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
@@ -130,7 +166,16 @@ function DialogBody({ organizationId, onClose }: { organizationId: string; onClo
   const datasets = useTenantDatasets(organizationId);
   const settings = useTenantAgentSettings(organizationId);
   if (datasets.isPending || settings.isPending) return <LoadingState label={t("loading")} rows={2} />;
-  if (datasets.isError) return <ApiErrorState frame="plain" headingLevel={3} error={datasets.error} onRetry={() => void datasets.refetch()} retrying={datasets.isFetching} />;
+  if (datasets.isError)
+    return (
+      <ApiErrorState
+        frame="plain"
+        headingLevel={3}
+        error={datasets.error}
+        onRetry={() => void datasets.refetch()}
+        retrying={datasets.isFetching}
+      />
+    );
   if (datasets.data.length === 0) {
     return (
       <Alert>
@@ -139,7 +184,14 @@ function DialogBody({ organizationId, onClose }: { organizationId: string; onClo
     );
   }
   // Without `core.agent-settings.read` the enabled subagents are unknown; the supervisor is always evaluable.
-  return <ExperimentForm organizationId={organizationId} datasets={datasets.data} agents={evaluableAgents(settings.data)} onClose={onClose} />;
+  return (
+    <ExperimentForm
+      organizationId={organizationId}
+      datasets={datasets.data}
+      agents={evaluableAgents(settings.data)}
+      onClose={onClose}
+    />
+  );
 }
 
 /**

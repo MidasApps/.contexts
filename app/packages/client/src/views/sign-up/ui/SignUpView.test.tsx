@@ -15,7 +15,11 @@ describe("SignUpView", () => {
   });
 
   it("creates the account, establishes the session and goes on to ?next=", async () => {
-    const { user, auth, bridge, router, container } = renderApp(<SignUpView />, { signedIn: false, path: "/sign-up?next=%2Forganizations", config: { selfServeSignUp: true } });
+    const { user, auth, bridge, router, container } = renderApp(<SignUpView />, {
+      signedIn: false,
+      path: "/sign-up?next=%2Forganizations",
+      config: { selfServeSignUp: true },
+    });
     expect(await screen.findByRole("heading", { level: 1, name: "Criar conta" })).toBeDefined();
     await expectNoAxeViolations(container);
     await user.type(screen.getByLabelText(/Seu nome/u), "Bia Lima");

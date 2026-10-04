@@ -6,7 +6,16 @@ import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./Dialog.tsx";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./Dialog.tsx";
 
 const RenameDialog = () => (
   <Dialog>
@@ -39,10 +48,15 @@ const keepClosingContentMounted = (): void => {
     const styles = original(element, pseudo);
     return new Proxy(styles, {
       get: (target, property) => {
-        const closingContent = element instanceof HTMLElement && element.dataset["slot"] === "dialog-content" && element.dataset["state"] === "closed";
+        const closingContent =
+          element instanceof HTMLElement &&
+          element.dataset["slot"] === "dialog-content" &&
+          element.dataset["state"] === "closed";
         if (property === "animationName") return closingContent ? "exit" : "none";
         const value: unknown = Reflect.get(target, property, target);
-        return typeof value === "function" ? (...args: unknown[]): unknown => Reflect.apply(value, target, args) : value;
+        return typeof value === "function"
+          ? (...args: unknown[]): unknown => Reflect.apply(value, target, args)
+          : value;
       },
     });
   });

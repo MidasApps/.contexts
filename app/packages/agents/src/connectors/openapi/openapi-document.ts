@@ -34,7 +34,9 @@ const hasRef = (value: unknown, seen = new WeakSet<object>()): boolean => {
  */
 export const dereferenceOpenApi = async (api: unknown): Promise<OpenApiDocument> => {
   try {
-    const document = await SwaggerParser.validate(structuredClone(api) as OpenApiDocument, { resolve: { external: false } });
+    const document = await SwaggerParser.validate(structuredClone(api) as OpenApiDocument, {
+      resolve: { external: false },
+    });
     if (!("openapi" in document) || !String(document.openapi).startsWith("3.")) throw new Error("not OpenAPI 3");
     if (hasRef(document)) throw new Error("external $ref");
     return document;
@@ -66,7 +68,9 @@ export const loadOpenApiDocument = async (args: {
     if (body.truncated) throw new OpenApiConnectorError("SPEC_TOO_LARGE");
     text = body.text;
   } catch (error: unknown) {
-    throw error instanceof OpenApiConnectorError ? error : new OpenApiConnectorError("SPEC_UNAVAILABLE", { cause: error });
+    throw error instanceof OpenApiConnectorError
+      ? error
+      : new OpenApiConnectorError("SPEC_UNAVAILABLE", { cause: error });
   }
   let parsed: unknown;
   try {

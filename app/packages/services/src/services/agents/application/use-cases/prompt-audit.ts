@@ -10,7 +10,10 @@ import type { PromptDeps } from "../prompt-deps.ts";
 export const recordPromptAudit = (
   deps: Pick<PromptDeps, "audit">,
   args: {
-    readonly action: Extract<AuditAction, "PROMPT_VERSION_CREATED" | "PROMPT_EVALUATED" | "PROMPT_ACTIVATED" | "PROMPT_ACTIVATION_FORCED">;
+    readonly action: Extract<
+      AuditAction,
+      "PROMPT_VERSION_CREATED" | "PROMPT_EVALUATED" | "PROMPT_ACTIVATED" | "PROMPT_ACTIVATION_FORCED"
+    >;
     readonly actor: UserPrincipal;
     readonly key: PromptKey;
     readonly targetId: string;

@@ -12,7 +12,11 @@ const OUTPUT_FILE = path.join(APP_DIR, "src-tauri", "tauri.api.conf.json");
 
 const mode = process.argv[2] ?? "production";
 const env = loadDesktopBuildEnv({ mode, envDir: APP_DIR });
-const patch = buildTauriApiConfigPatch({ apiUrl: env.VITE_API_URL, authEmulatorUrl: env.VITE_AUTH_EMULATOR_URL, storageEmulatorUrl: env.VITE_STORAGE_EMULATOR_URL });
+const patch = buildTauriApiConfigPatch({
+  apiUrl: env.VITE_API_URL,
+  authEmulatorUrl: env.VITE_AUTH_EMULATOR_URL,
+  storageEmulatorUrl: env.VITE_STORAGE_EMULATOR_URL,
+});
 
 writeFileSync(OUTPUT_FILE, `${JSON.stringify(patch, null, 2)}\n`);
 process.stdout.write(`tauri api config (${mode}): connect-src ${patch.app.security.csp["connect-src"]}\n`);

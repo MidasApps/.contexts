@@ -1,7 +1,7 @@
-import type { Page } from "@playwright/test";
 import type { V1Client } from "@core/e2e/api";
 import { expectNoAxeViolations } from "@core/e2e/axe";
-import { chatStatus, expect, expectAnswered, messageLog, openChat, send, SIGNED_OUT, test } from "./chat-test.ts";
+import type { Page } from "@playwright/test";
+import { chatStatus, expect, expectAnswered, messageLog, openChat, SIGNED_OUT, send, test } from "./chat-test.ts";
 
 // SP4 gate, part 2 (umbrella §1 item 3, §8): generative UI form → submit → inline approval with
 // before/after → the command runs and is audited; a declined call runs nothing; a four-eyes command
@@ -30,13 +30,20 @@ const submitNoteForm = async (page: Page, title: string) => {
   await form.getByRole("textbox", { name: "Título (obrigatório)" }).fill(title);
   await form.getByRole("button", { name: "Enviar" }).click();
   await expect(chatStatus(page)).toHaveAttribute("data-phase", "awaiting-approval", { timeout: 30_000 });
-  await expect(messageLog(page).getByRole("article", { name: "Você" }).last()).toContainText(`Formulário enviado: ${CREATE_NOTE}`);
+  await expect(messageLog(page).getByRole("article", { name: "Você" }).last()).toContainText(
+    `Formulário enviado: ${CREATE_NOTE}`,
+  );
   const card = messageLog(page).getByRole("region", { name: `Aprovação: Create the note "${title}"` });
   await expect(card.getByRole("heading", { name: "Aprovação necessária" })).toBeVisible();
   return card;
 };
 
-test("a submitted form asks for approval with before and after, then the command runs and is audited", async ({ page, world, signInFresh, ownerApi }) => {
+test("a submitted form asks for approval with before and after, then the command runs and is audited", async ({
+  page,
+  world,
+  signInFresh,
+  ownerApi,
+}) => {
   const user = await signInFresh();
   await openChat(page, world);
   const card = await submitNoteForm(page, "Supplier follow-up");
@@ -50,17 +57,27 @@ test("a submitted form asks for approval with before and after, then the command
   await expect(card.getByText("Aprovado e executado.")).toBeVisible();
 
   const audit = await auditOf(ownerApi, world.alpha.id);
-  const approved = audit.find((entry) => entry.action === "AGENT_TOOL_CALL_APPROVED" && entry.metadata?.["toolId"] === "agent-action");
+  const approved = audit.find(
+    (entry) => entry.action === "AGENT_TOOL_CALL_APPROVED" && entry.metadata?.["toolId"] === "agent-action",
+  );
   expect(approved?.target?.type).toBe("conversation");
-  expect(audit.some((entry) => entry.action === "AGENT_TOOL_EXECUTED" && entry.target?.id === "command.example.CreateNoteCommand")).toBe(true);
-  expect(audit.some((entry) => entry.action === "MODULE_RECORD_CREATED" && entry.target?.type === "example-note")).toBe(true);
+  expect(
+    audit.some(
+      (entry) => entry.action === "AGENT_TOOL_EXECUTED" && entry.target?.id === "command.example.CreateNoteCommand",
+    ),
+  ).toBe(true);
+  expect(audit.some((entry) => entry.action === "MODULE_RECORD_CREATED" && entry.target?.type === "example-note")).toBe(
+    true,
+  );
   expect(user.uid).not.toBe("");
 });
 
 test("a declined call runs nothing and keeps the reason", async ({ page, world, signInFresh, ownerApi }) => {
   await signInFresh();
   await openChat(page, world);
-  const before = (await auditOf(ownerApi, world.alpha.id)).filter((entry) => entry.action === "MODULE_RECORD_CREATED").length;
+  const before = (await auditOf(ownerApi, world.alpha.id)).filter(
+    (entry) => entry.action === "MODULE_RECORD_CREATED",
+  ).length;
   const card = await submitNoteForm(page, "Not this one");
   await card.getByRole("button", { name: "Recusar" }).click();
   await card.getByRole("textbox", { name: "Motivo da recusa (opcional)" }).fill("Wrong title");
@@ -73,7 +90,11 @@ test("a declined call runs nothing and keeps the reason", async ({ page, world, 
   expect(audit.filter((entry) => entry.action === "MODULE_RECORD_CREATED").length).toBe(before);
 });
 
-test("a command that needs a second member waits in the approvals inbox, linked from the chat", async ({ page, world, signInFresh }) => {
+test("a command that needs a second member waits in the approvals inbox, linked from the chat", async ({
+  page,
+  world,
+  signInFresh,
+}) => {
   await signInFresh();
   await openChat(page, world);
   const card = await submitNoteForm(page, "To be archived");
@@ -90,7 +111,10 @@ test("a command that needs a second member waits in the approvals inbox, linked 
   const pending = messageLog(page).getByRole("region", { name: "Aguardando aprovação de outra pessoa" });
   await expect(pending).toBeVisible();
   const link = pending.getByRole("link", { name: "Abrir aprovações" });
-  await expect(link).toHaveAttribute("href", new RegExp(`^/pt-BR/o/${world.alpha.id}/settings/approvals/[A-Za-z0-9]{20}$`));
+  await expect(link).toHaveAttribute(
+    "href",
+    new RegExp(`^/pt-BR/o/${world.alpha.id}/settings/approvals/[A-Za-z0-9]{20}$`),
+  );
   await expectNoAxeViolations(page);
   await link.click();
   await expect(page).toHaveURL(new RegExp(`/o/${world.alpha.id}/settings/approvals/[A-Za-z0-9]{20}$`));

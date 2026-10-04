@@ -6,11 +6,29 @@ import { describe, expect, it } from "vitest";
 const PROJECT_ID = process.env["GCLOUD_PROJECT"] ?? "demo-core";
 const DEFAULT_BUCKET = `${PROJECT_ID}.appspot.com`;
 const TENANT = "OrgFunctionsFiles001";
-const PNG = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0]);
-const ZIP = Uint8Array.from([0x50, 0x4b, 0x03, 0x04, 0x14, 0x00, 0x00, 0x00, 0x08, 0x00, ...new Array<number>(30).fill(0)]);
+const PNG = Uint8Array.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, 0, 0, 0, 1, 0, 0, 0,
+  1, 8, 6, 0, 0, 0,
+]);
+const ZIP = Uint8Array.from([
+  0x50,
+  0x4b,
+  0x03,
+  0x04,
+  0x14,
+  0x00,
+  0x00,
+  0x00,
+  0x08,
+  0x00,
+  ...new Array<number>(30).fill(0),
+]);
 const SETTLE_TIMEOUT_MS = 45_000;
 
-const firebase = createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: PROJECT_ID }, processEnv: process.env });
+const firebase = createFirebaseAdmin({
+  env: { APP_ENV: "local", FIREBASE_PROJECT_ID: PROJECT_ID },
+  processEnv: process.env,
+});
 const files = createFirestoreFileRepository({ firestore: firebase.firestore });
 const bucket = filesBucketOf(firebase.app, DEFAULT_BUCKET);
 

@@ -1,28 +1,50 @@
-import { type AnyExportedSpan, type ObservabilityExporter, SpanType, type TracingEvent, TracingEventType } from "@mastra/core/observability";
+import {
+  type AnyExportedSpan,
+  type ObservabilityExporter,
+  SpanType,
+  type TracingEvent,
+  TracingEventType,
+} from "@mastra/core/observability";
 import { describe, expect, it } from "vitest";
 import { hashResourceId, isTraceSampled, sampleTraces, scrubSpanForExport } from "./span-export-policy.ts";
 
-const span = (traceId = "4bf92f3577b34da6a3ce929d0e0e4736"): AnyExportedSpan =>
-  ({
-    id: "span-1",
-    traceId,
-    name: "agent run: knowledge",
-    type: SpanType.AGENT_RUN,
-    startTime: new Date(0),
-    isEvent: false,
-    isRootSpan: true,
-    metadata: { tenantId: "tenantA", requestId: "req-1", resourceId: "tenantA:member-uid", userId: "member-uid", runId: "run-1" },
-    requestContext: { tenantId: "tenantA", userId: "member-uid", permissions: ["core.chat.use"], corePrincipal: { uid: "member-uid" }, requestId: "req-1" },
-    input: { messages: ["my prompt"] },
-    output: { text: "my answer" },
-  });
+const span = (traceId = "4bf92f3577b34da6a3ce929d0e0e4736"): AnyExportedSpan => ({
+  id: "span-1",
+  traceId,
+  name: "agent run: knowledge",
+  type: SpanType.AGENT_RUN,
+  startTime: new Date(0),
+  isEvent: false,
+  isRootSpan: true,
+  metadata: {
+    tenantId: "tenantA",
+    requestId: "req-1",
+    resourceId: "tenantA:member-uid",
+    userId: "member-uid",
+    runId: "run-1",
+  },
+  requestContext: {
+    tenantId: "tenantA",
+    userId: "member-uid",
+    permissions: ["core.chat.use"],
+    corePrincipal: { uid: "member-uid" },
+    requestId: "req-1",
+  },
+  input: { messages: ["my prompt"] },
+  output: { text: "my answer" },
+});
 
 const POLICY = { contextKeys: ["tenantId", "requestId"], keepPayloads: false };
 
 describe("scrubSpanForExport", () => {
   it("hashes the resource id and drops the uid from metadata", () => {
     const scrubbed = scrubSpanForExport(span(), POLICY);
-    expect(scrubbed.metadata).toEqual({ tenantId: "tenantA", requestId: "req-1", resourceId: hashResourceId("tenantA:member-uid"), runId: "run-1" });
+    expect(scrubbed.metadata).toEqual({
+      tenantId: "tenantA",
+      requestId: "req-1",
+      resourceId: hashResourceId("tenantA:member-uid"),
+      runId: "run-1",
+    });
     expect(hashResourceId("tenantA:member-uid")).toMatch(/^sha256:[0-9a-f]{16}$/);
     expect(JSON.stringify(scrubbed)).not.toContain("member-uid");
   });
@@ -35,7 +57,9 @@ describe("scrubSpanForExport", () => {
     const original = span();
     const withoutPayloads = scrubSpanForExport(original, POLICY);
     expect("input" in withoutPayloads || "output" in withoutPayloads).toBe(false);
-    expect(scrubSpanForExport(original, { ...POLICY, keepPayloads: true })).toMatchObject({ input: { messages: ["my prompt"] } });
+    expect(scrubSpanForExport(original, { ...POLICY, keepPayloads: true })).toMatchObject({
+      input: { messages: ["my prompt"] },
+    });
     expect(original.metadata?.["resourceId"]).toBe("tenantA:member-uid");
   });
 });
@@ -74,7 +98,11 @@ describe("sampleTraces", () => {
     const { exporter, traces, calls } = recorder();
     const sampled = sampleTraces(exporter, 0.5);
     const ids = Array.from({ length: 50 }, (_, index) => index.toString(16).padStart(32, "a"));
-    for (const id of ids) await sampled.exportTracingEvent({ type: TracingEventType.SPAN_ENDED, exportedSpan: span(id) } satisfies TracingEvent);
+    for (const id of ids)
+      await sampled.exportTracingEvent({
+        type: TracingEventType.SPAN_ENDED,
+        exportedSpan: span(id),
+      } satisfies TracingEvent);
     expect(traces).toEqual(ids.filter((id) => isTraceSampled(id, 0.5)));
     expect(sampled.name).toBe("recorder");
     await sampled.onMetricEvent?.({} as never);

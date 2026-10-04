@@ -11,7 +11,8 @@ export type WaitForHttpArgs = {
   signal?: AbortSignal;
 };
 
-const isSuccess = (status: number | undefined): status is number => status !== undefined && status >= 200 && status < 300;
+const isSuccess = (status: number | undefined): status is number =>
+  status !== undefined && status >= 200 && status < 300;
 
 /**
  * Polls `url` until it answers 2xx, the timeout passes or `signal` aborts.

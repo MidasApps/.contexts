@@ -9,12 +9,26 @@ import { type VoiceRoutesDeps, voiceScopeOf } from "./voice-http.ts";
  * aloud. The audio streams back as Mastra sends it (`audio/mpeg`, `audio/wav`, ...), never cached.
  */
 export const buildVoiceSpeechRoute = (deps: VoiceRoutesDeps): Record<string, RouteHandler> => ({
-  [synthesizeSpeechEndpoint.id]: withApiRoute(synthesizeSpeechEndpoint, deps.pipeline, async ({ principal, input, authorize, requestId, request }) => {
-    const scope = await voiceScopeOf({ deps, principal, tenantId: input.query.organizationId, authorize, request, requestId });
-    if (scope instanceof Response) return scope;
-    const { text, voice } = input.body;
-    const answer = await deps.voice.synthesize({ scope, text, ...(voice === undefined ? {} : { voice }) });
-    if (!answer.ok) return gatewayErrorResponse(answer.error, requestId);
-    return new Response(answer.data.body, { status: 200, headers: { "content-type": answer.data.contentType, "cache-control": "no-store" } });
-  }),
+  [synthesizeSpeechEndpoint.id]: withApiRoute(
+    synthesizeSpeechEndpoint,
+    deps.pipeline,
+    async ({ principal, input, authorize, requestId, request }) => {
+      const scope = await voiceScopeOf({
+        deps,
+        principal,
+        tenantId: input.query.organizationId,
+        authorize,
+        request,
+        requestId,
+      });
+      if (scope instanceof Response) return scope;
+      const { text, voice } = input.body;
+      const answer = await deps.voice.synthesize({ scope, text, ...(voice === undefined ? {} : { voice }) });
+      if (!answer.ok) return gatewayErrorResponse(answer.error, requestId);
+      return new Response(answer.data.body, {
+        status: 200,
+        headers: { "content-type": answer.data.contentType, "cache-control": "no-store" },
+      });
+    },
+  ),
 });

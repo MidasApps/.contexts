@@ -24,7 +24,8 @@ export const DEFAULT_PLAN_BUDGET: Budget = {
   alertThresholdPercent: ALERT_THRESHOLD_PERCENT,
 };
 
-const isPositiveCap = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+const isPositiveCap = (value: unknown): value is number =>
+  typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 
 const capOf = (config: unknown, key: "monthlyMicroUsd" | "monthlyTokens"): number => {
   const value = typeof config === "object" && config !== null ? (config as Record<string, unknown>)[key] : undefined;
@@ -40,14 +41,17 @@ export const resolveBudget = (config: unknown): Budget => ({
 
 export type MonthSpend = { readonly costMicroUsd: number; readonly tokens: number };
 
-export type BudgetDecision = { readonly allowed: true; readonly alert: boolean } | { readonly allowed: false; readonly reason: "BUDGET_EXCEEDED" };
+export type BudgetDecision =
+  | { readonly allowed: true; readonly alert: boolean }
+  | { readonly allowed: false; readonly reason: "BUDGET_EXCEEDED" };
 
 const reachesPercent = (value: number, cap: number, percent: number): boolean => value * 100 >= cap * percent;
 
 /** Hard cap first (either cap reached refuses), then the alert threshold of either cap. */
 export const evaluateBudget = (input: { readonly budget: Budget; readonly spend: MonthSpend }): BudgetDecision => {
   const { budget, spend } = input;
-  if (spend.costMicroUsd >= budget.monthlyMicroUsd || spend.tokens >= budget.monthlyTokens) return { allowed: false, reason: "BUDGET_EXCEEDED" };
+  if (spend.costMicroUsd >= budget.monthlyMicroUsd || spend.tokens >= budget.monthlyTokens)
+    return { allowed: false, reason: "BUDGET_EXCEEDED" };
   const alert =
     reachesPercent(spend.costMicroUsd, budget.monthlyMicroUsd, budget.alertThresholdPercent) ||
     reachesPercent(spend.tokens, budget.monthlyTokens, budget.alertThresholdPercent);
@@ -74,7 +78,13 @@ export const resolveTenantCaps = (input: {
       ? { caps: input.override, source: "override" }
       : input.plan !== null
         ? { caps: input.plan, source: "plan" }
-        : { caps: { monthlyMicroUsd: DEFAULT_PLAN_BUDGET.monthlyMicroUsd, monthlyTokens: DEFAULT_PLAN_BUDGET.monthlyTokens }, source: "default" };
+        : {
+            caps: {
+              monthlyMicroUsd: DEFAULT_PLAN_BUDGET.monthlyMicroUsd,
+              monthlyTokens: DEFAULT_PLAN_BUDGET.monthlyTokens,
+            },
+            source: "default",
+          };
   if (input.selfCap === null) return base;
   return {
     source: base.source,

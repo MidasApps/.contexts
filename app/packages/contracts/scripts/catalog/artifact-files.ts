@@ -14,7 +14,9 @@ const toPosix = (path: string): string => path.split(sep).join("/");
 const listFilesUnder = async (root: string, directory: string): Promise<string[]> => {
   try {
     const entries = await readdir(join(root, directory), { recursive: true, withFileTypes: true });
-    return entries.filter((entry) => entry.isFile()).map((entry) => toPosix(relative(root, join(entry.parentPath, entry.name))));
+    return entries
+      .filter((entry) => entry.isFile())
+      .map((entry) => toPosix(relative(root, join(entry.parentPath, entry.name))));
   } catch (error: unknown) {
     // A directory that does not exist yet simply has no files.
     if (error instanceof Error && "code" in error && error.code === "ENOENT") return [];
@@ -30,7 +32,10 @@ export const readGeneratedFiles = async (root: string = WORKSPACE_ROOT): Promise
 };
 
 /** Replaces the generated directories with exactly these artifacts. */
-export const writeArtifacts = async (artifacts: readonly CatalogArtifact[], root: string = WORKSPACE_ROOT): Promise<void> => {
+export const writeArtifacts = async (
+  artifacts: readonly CatalogArtifact[],
+  root: string = WORKSPACE_ROOT,
+): Promise<void> => {
   await Promise.all(GENERATED_DIRS.map((directory) => rm(join(root, directory), { recursive: true, force: true })));
   for (const artifact of artifacts) {
     const target = join(root, artifact.path);

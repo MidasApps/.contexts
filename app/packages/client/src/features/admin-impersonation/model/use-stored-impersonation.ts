@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isImpersonationOpen, useImpersonationStore, type StoredImpersonation } from "./use-impersonation-store.ts";
+import { isImpersonationOpen, type StoredImpersonation, useImpersonationStore } from "./use-impersonation-store.ts";
 
 const TICK_MS = 30_000;
 

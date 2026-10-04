@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { type FormEvent, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { LOG_LEVELS } from "#/entities/log-line/index.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -10,7 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#
 
 const ANY = "any";
 
-export type LogFilterValues = { level: string | undefined; q: string | undefined; traceId: string | undefined; requestId: string | undefined };
+export type LogFilterValues = {
+  level: string | undefined;
+  q: string | undefined;
+  traceId: string | undefined;
+  requestId: string | undefined;
+};
 
 type TextKey = "q" | "traceId" | "requestId";
 const TEXT_FIELDS: readonly { key: TextKey; maxLength: number; mono: boolean }[] = [
@@ -23,19 +28,37 @@ const TEXT_FIELDS: readonly { key: TextKey; maxLength: number; mono: boolean }[]
  * Filters of `/admin/logs`. The level applies at once; the text filters apply together on submit
  * (Enter or the button), so the URL does not change on every keystroke.
  */
-export function LogFiltersForm({ values, onChange }: { values: LogFilterValues; onChange: (patch: Partial<LogFilterValues>) => void }) {
+export function LogFiltersForm({
+  values,
+  onChange,
+}: {
+  values: LogFilterValues;
+  onChange: (patch: Partial<LogFilterValues>) => void;
+}) {
   const t = useTranslations("admin.logs.filters");
   const id = useId();
-  const [draft, setDraft] = useState<Record<TextKey, string>>({ q: values.q ?? "", traceId: values.traceId ?? "", requestId: values.requestId ?? "" });
+  const [draft, setDraft] = useState<Record<TextKey, string>>({
+    q: values.q ?? "",
+    traceId: values.traceId ?? "",
+    requestId: values.requestId ?? "",
+  });
   const submit = (event: FormEvent): void => {
     event.preventDefault();
     onChange({ q: draft.q.trim(), traceId: draft.traceId.trim(), requestId: draft.requestId.trim() });
   };
   return (
-    <form role="search" aria-label={t("label")} onSubmit={submit} className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+    <form
+      role="search"
+      aria-label={t("label")}
+      onSubmit={submit}
+      className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end"
+    >
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={`${id}-level`}>{t("level")}</Label>
-        <Select value={values.level ?? ANY} onValueChange={(value) => onChange({ level: value === ANY ? undefined : value })}>
+        <Select
+          value={values.level ?? ANY}
+          onValueChange={(value) => onChange({ level: value === ANY ? undefined : value })}
+        >
           <SelectTrigger id={`${id}-level`} className="w-full sm:w-44">
             <SelectValue />
           </SelectTrigger>

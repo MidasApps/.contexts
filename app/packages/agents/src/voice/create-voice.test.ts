@@ -1,7 +1,11 @@
 import { Readable } from "node:stream";
 import type { SpeechModelV4, TranscriptionModelV4 } from "@ai-sdk/provider";
 import { describe, expect, it } from "vitest";
-import { buildSilentWav, createFakeSpeechModel, createFakeTranscriptionModel } from "../models/fake/fake-voice-models.ts";
+import {
+  buildSilentWav,
+  createFakeSpeechModel,
+  createFakeTranscriptionModel,
+} from "../models/fake/fake-voice-models.ts";
 import { createVoice, type VoiceModels } from "./create-voice.ts";
 
 const fakeModels = (overrides: Partial<VoiceModels> = {}): VoiceModels => ({
@@ -49,7 +53,11 @@ describe("createVoice", () => {
   it("reports the capabilities it can serve; realtime stays off without a provider", () => {
     const onlyStt = createVoice({ models: fakeModels({ speech: () => null }) });
     expect(onlyStt?.capabilities).toEqual({ transcription: true, speech: false, realtime: false });
-    expect(createVoice({ models: fakeModels() })?.capabilities).toEqual({ transcription: true, speech: true, realtime: false });
+    expect(createVoice({ models: fakeModels() })?.capabilities).toEqual({
+      transcription: true,
+      speech: true,
+      realtime: false,
+    });
   });
 
   it("fails a synthesis when the speech model is missing", async () => {

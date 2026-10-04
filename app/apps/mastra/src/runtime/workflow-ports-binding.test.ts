@@ -1,5 +1,10 @@
 import type { ApprovalRequest } from "@core/contracts";
-import { AgentCommandError, agentCommandExecutors, defineAgentCommandExecutor, type CommandIdempotency } from "@core/services";
+import {
+  AgentCommandError,
+  agentCommandExecutors,
+  type CommandIdempotency,
+  defineAgentCommandExecutor,
+} from "@core/services";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { ApprovalRefusedError } from "./approvals-port-binding.ts";
@@ -23,12 +28,29 @@ describe("bindWorkflowApprovalsPort", () => {
       getApprovalRequest: () => Promise.resolve(null),
       cancelApprovalRequest: () => Promise.reject(new Error("unused")),
     });
-    const input = { principal: MEMBER, node: NODE, permission: "core.workflow-run.approve-demo", action: ACTION, summary: "Create the note", requestId: "r" };
+    const input = {
+      principal: MEMBER,
+      node: NODE,
+      permission: "core.workflow-run.approve-demo",
+      action: ACTION,
+      summary: "Create the note",
+      requestId: "r",
+    };
     expect(await port.requestWorkflowApproval(input)).toEqual({ approvalId: "Ap1sK2lPq0WnR5tYu3bV" });
     expect(calls).toEqual([
-      { principal: MEMBER, input: { node: NODE, permission: "core.workflow-run.approve-demo", action: { kind: "workflow-resume", input: ACTION, summary: "Create the note" } }, requestId: "r" },
+      {
+        principal: MEMBER,
+        input: {
+          node: NODE,
+          permission: "core.workflow-run.approve-demo",
+          action: { kind: "workflow-resume", input: ACTION, summary: "Create the note" },
+        },
+        requestId: "r",
+      },
     ]);
-    await expect(port.requestWorkflowApproval({ ...input, node: { level: "platform" } })).rejects.toMatchObject({ code: "APPROVAL_NODE_INVALID" });
+    await expect(port.requestWorkflowApproval({ ...input, node: { level: "platform" } })).rejects.toMatchObject({
+      code: "APPROVAL_NODE_INVALID",
+    });
   });
 
   it("rejects with SP1's code when SP1 refuses", async () => {
@@ -37,7 +59,14 @@ describe("bindWorkflowApprovalsPort", () => {
       getApprovalRequest: () => Promise.resolve(null),
       cancelApprovalRequest: () => Promise.reject(new Error("unused")),
     });
-    const refused = port.requestWorkflowApproval({ principal: MEMBER, node: NODE, permission: "core.project.read", action: ACTION, summary: "s", requestId: "r" });
+    const refused = port.requestWorkflowApproval({
+      principal: MEMBER,
+      node: NODE,
+      permission: "core.project.read",
+      action: ACTION,
+      summary: "s",
+      requestId: "r",
+    });
     await expect(refused).rejects.toBeInstanceOf(ApprovalRefusedError);
     await expect(refused).rejects.toMatchObject({ code: "APPROVAL_NOT_REQUIRED" });
   });
@@ -52,7 +81,11 @@ describe("bindWorkflowApprovalsPort", () => {
       decidedBy: "admin-uid",
       reason: null,
     } as unknown as ApprovalRequest;
-    const port = bindWorkflowApprovalsPort({ requestApproval: () => Promise.reject(new Error("unused")), getApprovalRequest: (id) => Promise.resolve(id === stored.id ? stored : null), cancelApprovalRequest: () => Promise.reject(new Error("unused")) });
+    const port = bindWorkflowApprovalsPort({
+      requestApproval: () => Promise.reject(new Error("unused")),
+      getApprovalRequest: (id) => Promise.resolve(id === stored.id ? stored : null),
+      cancelApprovalRequest: () => Promise.reject(new Error("unused")),
+    });
     expect(await port.getApprovalRequest({ approvalRequestId: stored.id })).toEqual({
       id: stored.id,
       tenantId: TENANT,
@@ -69,8 +102,17 @@ describe("bindWorkflowApprovalsPort", () => {
 
   // Follow-up 82: a cancelled run settles its request, and only a request that names that run.
   it("cancels the workflow-resume request of the cancelled run, and nothing else", async () => {
-    const pending = { id: "Ap1sK2lPq0WnR5tYu3bV", tenantId: TENANT, status: "pending", action: { kind: "workflow-resume", input: ACTION, summary: "s" } } as unknown as ApprovalRequest;
-    const other = { ...pending, id: "Ap2sK2lPq0WnR5tYu3bV", action: { kind: "agent-command", input: { runId: "run-1" }, summary: "s" } } as unknown as ApprovalRequest;
+    const pending = {
+      id: "Ap1sK2lPq0WnR5tYu3bV",
+      tenantId: TENANT,
+      status: "pending",
+      action: { kind: "workflow-resume", input: ACTION, summary: "s" },
+    } as unknown as ApprovalRequest;
+    const other = {
+      ...pending,
+      id: "Ap2sK2lPq0WnR5tYu3bV",
+      action: { kind: "agent-command", input: { runId: "run-1" }, summary: "s" },
+    } as unknown as ApprovalRequest;
     const cancelled: string[] = [];
     const port = bindWorkflowApprovalsPort({
       requestApproval: () => Promise.reject(new Error("unused")),
@@ -80,10 +122,18 @@ describe("bindWorkflowApprovalsPort", () => {
         return Promise.resolve({ cancelled: true });
       },
     });
-    expect(await port.cancelWorkflowApproval({ approvalRequestId: pending.id, runId: "run-1", requestId: "r" })).toEqual({ cancelled: true });
-    expect(await port.cancelWorkflowApproval({ approvalRequestId: pending.id, runId: "run-2", requestId: "r" })).toEqual({ cancelled: false });
-    expect(await port.cancelWorkflowApproval({ approvalRequestId: other.id, runId: "run-1", requestId: "r" })).toEqual({ cancelled: false });
-    expect(await port.cancelWorkflowApproval({ approvalRequestId: "missing", runId: "run-1", requestId: "r" })).toEqual({ cancelled: false });
+    expect(
+      await port.cancelWorkflowApproval({ approvalRequestId: pending.id, runId: "run-1", requestId: "r" }),
+    ).toEqual({ cancelled: true });
+    expect(
+      await port.cancelWorkflowApproval({ approvalRequestId: pending.id, runId: "run-2", requestId: "r" }),
+    ).toEqual({ cancelled: false });
+    expect(await port.cancelWorkflowApproval({ approvalRequestId: other.id, runId: "run-1", requestId: "r" })).toEqual({
+      cancelled: false,
+    });
+    expect(await port.cancelWorkflowApproval({ approvalRequestId: "missing", runId: "run-1", requestId: "r" })).toEqual(
+      { cancelled: false },
+    );
     expect(cancelled).toEqual([`${pending.id}:r`]);
   });
 });
@@ -108,11 +158,29 @@ const recordingIdempotency = (fail?: Error) => {
 };
 
 const accessAllowing = (allowed: boolean, requiresApproval = false) =>
-  ({ forRequest: () => ({ authorize: () => Promise.resolve(allowed ? { allowed: true, requiresApproval } : { allowed: false, reason: "PERMISSION_NOT_GRANTED" }) }) }) as never;
+  ({
+    forRequest: () => ({
+      authorize: () =>
+        Promise.resolve(
+          allowed ? { allowed: true, requiresApproval } : { allowed: false, reason: "PERMISSION_NOT_GRANTED" },
+        ),
+    }),
+  }) as never;
 
-const runWith = (args: { allowed?: boolean; requiresApproval?: boolean; commandId?: string; input?: unknown; fail?: Error; tenantId?: string }) => {
+const runWith = (args: {
+  allowed?: boolean;
+  requiresApproval?: boolean;
+  commandId?: string;
+  input?: unknown;
+  fail?: Error;
+  tenantId?: string;
+}) => {
   const { commands, keys } = recordingIdempotency(args.fail);
-  const port = bindWorkflowCommandsPort({ executors: agentCommandExecutors([NOTE]), access: accessAllowing(args.allowed ?? true, args.requiresApproval), commands });
+  const port = bindWorkflowCommandsPort({
+    executors: agentCommandExecutors([NOTE]),
+    access: accessAllowing(args.allowed ?? true, args.requiresApproval),
+    commands,
+  });
   const result = port.run({
     principal: MEMBER,
     tenantId: args.tenantId ?? TENANT,
@@ -140,7 +208,9 @@ describe("bindWorkflowCommandsPort", () => {
     expect(fourEyes.keys).toEqual([]);
     expect(await runWith({ input: { title: "" } }).result).toEqual({ ok: false, code: "COMMAND_INPUT_INVALID" });
     expect(await runWith({ tenantId: "OtherTenant000000001" }).result).toEqual({ ok: false, code: "TENANT_MISMATCH" });
-    expect(await runWith({ fail: new AgentCommandError("COMMAND_IN_PROGRESS", "example.CreateNoteCommand") }).result).toEqual({ ok: false, code: "COMMAND_IN_PROGRESS" });
+    expect(
+      await runWith({ fail: new AgentCommandError("COMMAND_IN_PROGRESS", "example.CreateNoteCommand") }).result,
+    ).toEqual({ ok: false, code: "COMMAND_IN_PROGRESS" });
   });
 
   it("rejects on infrastructure errors", async () => {

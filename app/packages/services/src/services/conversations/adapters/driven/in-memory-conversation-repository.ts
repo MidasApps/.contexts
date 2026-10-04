@@ -22,7 +22,9 @@ const matches = (conversation: Conversation, query: ConversationListQuery): bool
   conversation.deletedAt === null &&
   (conversation.archivedAt !== null) === query.archived &&
   (query.pinned === undefined || conversation.pinned === query.pinned) &&
-  (query.tokens === undefined || query.tokens.length === 0 || query.tokens.some((token) => conversation.searchTokens.includes(token)));
+  (query.tokens === undefined ||
+    query.tokens.length === 0 ||
+    query.tokens.some((token) => conversation.searchTokens.includes(token)));
 
 const isAfter = (conversation: Conversation, after: NonNullable<ConversationListQuery["page"]["after"]>): boolean => {
   const position = parseConversationPosition(after);
@@ -32,7 +34,9 @@ const isAfter = (conversation: Conversation, after: NonNullable<ConversationList
 };
 
 /** In-memory `ConversationRepository` for unit tests (same order and filters as Firestore). */
-export const createInMemoryConversationRepository = (seed: readonly Conversation[] = []): InMemoryConversationRepository => {
+export const createInMemoryConversationRepository = (
+  seed: readonly Conversation[] = [],
+): InMemoryConversationRepository => {
   const store = new Map<string, Conversation>(seed.map((conversation) => [conversation.id, conversation]));
   let next = 0;
   const put = (conversation: Conversation) => void store.set(conversation.id, conversation);
@@ -50,11 +54,18 @@ export const createInMemoryConversationRepository = (seed: readonly Conversation
       const sorted = [...store.values()].filter((conversation) => matches(conversation, query)).sort(compare);
       const after = query.page.after;
       const remaining = after === undefined ? sorted : sorted.filter((conversation) => isAfter(conversation, after));
-      return Promise.resolve(pageFromOverfetch({ fetched: remaining.slice(0, query.page.limit + 1), limit: query.page.limit, positionOf: conversationPosition }));
+      return Promise.resolve(
+        pageFromOverfetch({
+          fetched: remaining.slice(0, query.page.limit + 1),
+          limit: query.page.limit,
+          positionOf: conversationPosition,
+        }),
+      );
     },
     startRun: ({ conversationId, runId, startedAt }) => {
       const current = store.get(conversationId);
-      if (current !== undefined) put({ ...current, activeRunId: runId, activeStreamStartedAt: startedAt, updatedAt: startedAt });
+      if (current !== undefined)
+        put({ ...current, activeRunId: runId, activeStreamStartedAt: startedAt, updatedAt: startedAt });
       return Promise.resolve();
     },
     endRun: (end) => {
@@ -66,7 +77,12 @@ export const createInMemoryConversationRepository = (seed: readonly Conversation
     },
     countActiveRuns: ({ tenantId, since }) =>
       Promise.resolve(
-        [...store.values()].filter((conversation) => conversation.tenantId === tenantId && conversation.activeStreamStartedAt !== null && conversation.activeStreamStartedAt > since).length,
+        [...store.values()].filter(
+          (conversation) =>
+            conversation.tenantId === tenantId &&
+            conversation.activeStreamStartedAt !== null &&
+            conversation.activeStreamStartedAt > since,
+        ).length,
       ),
   };
 };

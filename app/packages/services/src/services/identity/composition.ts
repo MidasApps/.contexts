@@ -2,16 +2,19 @@
 // `resolveAccessContext`. Principal resolution (Task 8) is wired by `createCoreServer`.
 import type { SyncClaims } from "../access/application/use-cases/sync-claims.ts";
 import type { MeDeps } from "./application/me-deps.ts";
-import { makeGetMe, type GetMe } from "./application/use-cases/get-me.ts";
-import { makeListMyGrants, type ListMyGrants } from "./application/use-cases/list-my-grants.ts";
-import { makeListMyOrganizations, type ListMyOrganizations } from "./application/use-cases/list-my-organizations.ts";
+import { type GetMe, makeGetMe } from "./application/use-cases/get-me.ts";
+import { type ListMyGrants, makeListMyGrants } from "./application/use-cases/list-my-grants.ts";
+import { type ListMyOrganizations, makeListMyOrganizations } from "./application/use-cases/list-my-organizations.ts";
 import {
+  type LoadAccessContext,
   makeLoadAccessContext,
   makeResolveAccessContext,
-  type LoadAccessContext,
   type ResolveAccessContext,
 } from "./application/use-cases/resolve-access-context.ts";
-import { makeSetActiveOrganization, type SetActiveOrganization } from "./application/use-cases/set-active-organization.ts";
+import {
+  makeSetActiveOrganization,
+  type SetActiveOrganization,
+} from "./application/use-cases/set-active-organization.ts";
 import { makeUpdateMe, type UpdateMe } from "./application/use-cases/update-me.ts";
 
 export type IdentityServices = {

@@ -1,6 +1,6 @@
 "use client";
 
-import { adminCancelWorkflowRunEndpoint, type AdminWorkflowRun } from "@core/contracts";
+import { type AdminWorkflowRun, adminCancelWorkflowRunEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { workflowRunKeys } from "#/entities/workflow-run/index.ts";

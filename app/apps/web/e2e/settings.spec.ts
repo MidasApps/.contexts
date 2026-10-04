@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import type { Page } from "@playwright/test";
 import { fillSignInForm, signInThroughUi } from "@core/e2e/sign-in";
+import type { Page } from "@playwright/test";
 import { authFile, expect, test } from "./web-test.ts";
 
 // SP2 spec §13 item 4 as the seeded owner in "Alpha Org" (mutations use unique names), empty
@@ -11,13 +11,23 @@ const unique = (label: string): string => `${label} ${randomUUID().slice(0, 8)}`
 const settings = (organizationId: string, section: string): string => `o/${organizationId}/settings/${section}`;
 
 /** A table row on wide screens, a card (list item) on phones: DataTable switches by viewport. */
-const entry = (page: Page, text: string | RegExp) => page.getByRole("row").or(page.getByRole("listitem")).filter({ hasText: text });
+const entry = (page: Page, text: string | RegExp) =>
+  page.getByRole("row").or(page.getByRole("listitem")).filter({ hasText: text });
 
 const toast = (page: Page, text: string | RegExp) => page.getByRole("region", { name: /Notificações/ }).getByText(text);
 
 test.describe("members and invitations", () => {
-  test("invites a member, copies the link, the invitee accepts, then their roles change", async ({ page, browser, world, emulator, browserName }) => {
-    test.skip(browserName !== "chromium", "clipboard permissions are Chromium-only in Playwright; the flow is the same elsewhere");
+  test("invites a member, copies the link, the invitee accepts, then their roles change", async ({
+    page,
+    browser,
+    world,
+    emulator,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== "chromium",
+      "clipboard permissions are Chromium-only in Playwright; the flow is the same elsewhere",
+    );
     await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
     const email = `invitee-${randomUUID().slice(0, 8)}@e2e.local`;
     const invitee = { email, password: `pw-${randomUUID().slice(0, 8)}`, displayName: unique("Invitee") };
@@ -37,7 +47,9 @@ test.describe("members and invitations", () => {
     expect(link).toMatch(/\/pt-BR\/invite#token=[\w-]{43}$/);
     await created.getByRole("button", { name: "Copiar" }).click();
     // CopyField confirms in its own live region (screen-reader only), not with a toast.
-    await expect(created.getByRole("status").filter({ hasText: "Copiado para a área de transferência." })).toHaveCount(1);
+    await expect(created.getByRole("status").filter({ hasText: "Copiado para a área de transferência." })).toHaveCount(
+      1,
+    );
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(link);
     await created.getByRole("button", { name: "Concluir" }).click();
     await expect(entry(page, email)).toBeVisible();
@@ -85,7 +97,10 @@ test.describe("credentials", () => {
     await expect(page.getByText(/^core_/)).toHaveCount(0);
   });
 
-  test("on a 360×640 phone the tall key dialog fits and scrolls to its actions, and Esc asks before dropping the secret", async ({ page, world }) => {
+  test("on a 360×640 phone the tall key dialog fits and scrolls to its actions, and Esc asks before dropping the secret", async ({
+    page,
+    world,
+  }) => {
     await page.setViewportSize({ width: 360, height: 640 });
     const name = unique("Phone key");
     await page.goto(settings(world.alpha.id, "api-keys"));

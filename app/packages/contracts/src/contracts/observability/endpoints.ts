@@ -7,8 +7,12 @@ import { dataEnvelope } from "../http/envelopes.schema.ts";
 import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
 import { OrganizationQuerySchema } from "../workflows/endpoints.ts";
-import { AddEvalDatasetItemInputSchema, CreateEvalDatasetInputSchema, EvalDatasetItemSchema } from "./eval-dataset-item.schema.ts";
 import { EvalDatasetSchema, StartEvalExperimentInputSchema } from "./eval-dataset.schema.ts";
+import {
+  AddEvalDatasetItemInputSchema,
+  CreateEvalDatasetInputSchema,
+  EvalDatasetItemSchema,
+} from "./eval-dataset-item.schema.ts";
 import { EvalExperimentSummarySchema } from "./eval-experiment-summary.schema.ts";
 import { TraceDetailSchema } from "./trace-detail.schema.ts";
 import { TraceIdSchema, TraceStatusSchema, TraceSummarySchema } from "./trace-summary.schema.ts";
@@ -23,18 +27,42 @@ const PageNumberQuerySchema = z.object({
 
 /** `{ data: [...], meta: { hasMore } }` of a console list. */
 const pagedEnvelope = <Schema extends z.ZodType>(schema: Schema) =>
-  z.object({ data: z.array(schema), meta: z.object({ hasMore: z.boolean().meta(none("Whether a next page exists.")) }).meta(none("Paging state.")) });
+  z.object({
+    data: z.array(schema),
+    meta: z.object({ hasMore: z.boolean().meta(none("Whether a next page exists.")) }).meta(none("Paging state.")),
+  });
 
 const traceFilters = PageNumberQuerySchema.extend({
-  agentId: z.string().regex(/^[a-z][a-z0-9-]*$/).optional().meta(none("Only traces of this agent.")),
+  agentId: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]*$/)
+    .optional()
+    .meta(none("Only traces of this agent.")),
   status: TraceStatusSchema.optional().meta(none("Only traces in this status.")),
   startedAfter: IsoDateTimeSchema.optional().meta(none("Only traces that started at or after this instant (UTC).")),
-  startedBefore: IsoDateTimeSchema.optional().meta(none("Only traces that started before this instant (UTC); must be after `startedAfter`.")),
+  startedBefore: IsoDateTimeSchema.optional().meta(
+    none("Only traces that started before this instant (UTC); must be after `startedAfter`."),
+  ),
 });
 const traceParams = z.object({ traceId: TraceIdSchema.meta(none("Trace id.")) });
-const datasetParams = z.object({ datasetId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).meta(none("Dataset id.")) });
-const itemParams = datasetParams.extend({ itemId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).meta(none("Dataset item id.")) });
-const experimentParams = z.object({ experimentId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).meta(none("Experiment id.")) });
+const datasetParams = z.object({
+  datasetId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{1,128}$/)
+    .meta(none("Dataset id.")),
+});
+const itemParams = datasetParams.extend({
+  itemId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{1,128}$/)
+    .meta(none("Dataset item id.")),
+});
+const experimentParams = z.object({
+  experimentId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{1,128}$/)
+    .meta(none("Experiment id.")),
+});
 
 export const listTracesEndpoint = defineEndpoint({
   id: "traces.list",
@@ -44,7 +72,8 @@ export const listTracesEndpoint = defineEndpoint({
   query: OrganizationQuerySchema.extend(traceFilters.shape),
   responses: { 200: pagedEnvelope(TraceSummarySchema) },
   errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"] },
-  summary: "Lists the organization's traces, newest first, optionally of a time range; filtered by tenant on the server, cost from the usage ledger (core.trace.read).",
+  summary:
+    "Lists the organization's traces, newest first, optionally of a time range; filtered by tenant on the server, cost from the usage ledger (core.trace.read).",
 });
 
 export const getTraceEndpoint = defineEndpoint({
@@ -64,10 +93,13 @@ export const adminListTracesEndpoint = defineEndpoint({
   method: "GET",
   path: "/v1/admin/traces",
   auth: "user",
-  query: traceFilters.extend({ organizationId: OrganizationIdSchema.optional().meta(none("Only this organization's traces.")) }),
+  query: traceFilters.extend({
+    organizationId: OrganizationIdSchema.optional().meta(none("Only this organization's traces.")),
+  }),
   responses: { 200: pagedEnvelope(TraceSummarySchema) },
   errors: { 400: ["VALIDATION_FAILED"], ...STAFF },
-  summary: "Lists traces of every tenant, optionally one and of a time range, with the cost the usage ledger recorded (staff, platform.trace.read).",
+  summary:
+    "Lists traces of every tenant, optionally one and of a time range, with the cost the usage ledger recorded (staff, platform.trace.read).",
 });
 
 export const adminGetTraceEndpoint = defineEndpoint({
@@ -101,7 +133,8 @@ export const createEvalDatasetEndpoint = defineEndpoint({
   body: CreateEvalDatasetInputSchema,
   responses: { 201: dataEnvelope(EvalDatasetSchema) },
   errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"], 409: ["CONFLICT"], 503: ["UPSTREAM_UNAVAILABLE"] },
-  summary: "Creates an empty dataset of the organization; a name the organization already uses answers 409 (core.eval.write).",
+  summary:
+    "Creates an empty dataset of the organization; a name the organization already uses answers 409 (core.eval.write).",
 });
 
 export const listEvalDatasetItemsEndpoint = defineEndpoint({
@@ -113,7 +146,8 @@ export const listEvalDatasetItemsEndpoint = defineEndpoint({
   query: OrganizationQuerySchema.extend(PageNumberQuerySchema.shape),
   responses: { 200: pagedEnvelope(EvalDatasetItemSchema) },
   errors: { 403: ["FORBIDDEN"], 404: ["NOT_FOUND"] },
-  summary: "Lists the items of one of the organization's datasets, newest first; another tenant's dataset answers 404 (core.eval.read).",
+  summary:
+    "Lists the items of one of the organization's datasets, newest first; another tenant's dataset answers 404 (core.eval.read).",
 });
 
 export const addEvalDatasetItemEndpoint = defineEndpoint({
@@ -138,7 +172,8 @@ export const deleteEvalDatasetItemEndpoint = defineEndpoint({
   query: OrganizationQuerySchema,
   responses: { 204: null },
   errors: { 403: ["FORBIDDEN"], 404: ["NOT_FOUND"], 503: ["UPSTREAM_UNAVAILABLE"] },
-  summary: "Deletes an item of one of the organization's datasets; past experiments keep their results (core.eval.write).",
+  summary:
+    "Deletes an item of one of the organization's datasets; past experiments keep their results (core.eval.write).",
 });
 
 export const listEvalExperimentsEndpoint = defineEndpoint({
@@ -161,7 +196,8 @@ export const getEvalExperimentEndpoint = defineEndpoint({
   query: OrganizationQuerySchema,
   responses: { 200: dataEnvelope(EvalExperimentSummarySchema) },
   errors: { 403: ["FORBIDDEN"], 404: ["NOT_FOUND"] },
-  summary: "Reads one of the organization's experiments, to compare experiments of different list pages; another tenant's answers 404 (core.eval.read).",
+  summary:
+    "Reads one of the organization's experiments, to compare experiments of different list pages; another tenant's answers 404 (core.eval.read).",
 });
 
 export const startEvalExperimentEndpoint = defineEndpoint({
@@ -171,7 +207,9 @@ export const startEvalExperimentEndpoint = defineEndpoint({
   auth: "user",
   query: OrganizationQuerySchema,
   body: StartEvalExperimentInputSchema,
-  responses: { 202: dataEnvelope(z.strictObject({ experimentId: z.string().min(1).meta(none("Started experiment.")) })) },
+  responses: {
+    202: dataEnvelope(z.strictObject({ experimentId: z.string().min(1).meta(none("Started experiment.")) })),
+  },
   errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"], 404: ["NOT_FOUND"], 503: ["UPSTREAM_UNAVAILABLE"] },
   summary: "Runs an agent the organization enabled on one of its datasets, as the caller (core.eval.write).",
 });
@@ -213,11 +251,17 @@ export const recordMessageFeedbackEndpoint = defineEndpoint({
   method: "POST",
   path: "/v1/conversations/{conversationId}/feedback",
   auth: "user",
-  params: z.object({ conversationId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).meta(none("Conversation id.")) }),
+  params: z.object({
+    conversationId: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{1,128}$/)
+      .meta(none("Conversation id.")),
+  }),
   body: MessageFeedbackInputSchema,
   responses: { 200: dataEnvelope(MessageFeedbackSchema) },
   errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"], 404: ["NOT_FOUND"] },
-  summary: "Rates an assistant message (thumbs up/down, optional comment); one rating per message and user, a second one replaces it.",
+  summary:
+    "Rates an assistant message (thumbs up/down, optional comment); one rating per message and user, a second one replaces it.",
 });
 
 export const OBSERVABILITY_ENDPOINTS: readonly EndpointDefinition[] = [

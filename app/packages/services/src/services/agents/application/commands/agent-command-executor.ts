@@ -33,7 +33,9 @@ export type AgentCommandExecutor = {
   readonly commandId: string;
   readonly permission: string;
   /** Parses a stored input; `null` when it no longer matches the command schema. */
-  readonly prepare: (input: unknown) => ((execution: Omit<AgentCommandExecution<unknown>, "input">) => Promise<unknown>) | null;
+  readonly prepare: (
+    input: unknown,
+  ) => ((execution: Omit<AgentCommandExecution<unknown>, "input">) => Promise<unknown>) | null;
 };
 
 export const defineAgentCommandExecutor = <Input>(spec: AgentCommandExecutorSpec<Input>): AgentCommandExecutor => ({

@@ -1,6 +1,12 @@
 import { LlmCallContract } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { estimateCostMicroUsd, FAKE_MODEL_PRICES, MODEL_PRICES, PRICES_VERIFIED_AT, priceTableFor } from "./model-prices.ts";
+import {
+  estimateCostMicroUsd,
+  FAKE_MODEL_PRICES,
+  MODEL_PRICES,
+  PRICES_VERIFIED_AT,
+  priceTableFor,
+} from "./model-prices.ts";
 
 describe("estimateCostMicroUsd", () => {
   it("prices input and output tokens per million, rounding up to a whole micro-USD", () => {
@@ -31,7 +37,9 @@ describe("priceTableFor", () => {
       expect(estimateCostMicroUsd(modelId, { inputTokens: 1000, outputTokens: 100 }, fake)).toBeGreaterThan(0);
       expect(estimateCostMicroUsd(modelId, { inputTokens: 1000, outputTokens: 100 }, priceTableFor("real"))).toBeNull();
     }
-    expect(estimateCostMicroUsd("fake/fake-embedding", { inputTokens: 1000, outputTokens: 0 }, fake)).toBeGreaterThan(0);
+    expect(estimateCostMicroUsd("fake/fake-embedding", { inputTokens: 1000, outputTokens: 0 }, fake)).toBeGreaterThan(
+      0,
+    );
   });
 
   it("keeps the verified prices in both modes and never adds fake ids to the real table", () => {

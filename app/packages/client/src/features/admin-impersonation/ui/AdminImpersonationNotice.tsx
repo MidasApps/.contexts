@@ -15,7 +15,13 @@ export function AdminImpersonationNotice() {
   return (
     <>
       <h1 className="sr-only">{t("pageTitle")}</h1>
-      <StatePanel icon="eye" tone="amber" title={t("title")} description={t("description")} action={<LeaveImpersonationButton />} />
+      <StatePanel
+        icon="eye"
+        tone="amber"
+        title={t("title")}
+        description={t("description")}
+        action={<LeaveImpersonationButton />}
+      />
     </>
   );
 }

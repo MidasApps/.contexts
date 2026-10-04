@@ -25,7 +25,11 @@ export const createContractRegistry = (definitions: readonly ContractDefinition[
 
   const register = (definition: ContractDefinition): void => {
     if (byId.has(definition.id)) {
-      throw new ContractDefinitionError({ code: "DUPLICATE_CONTRACT_ID", contractId: definition.id, message: `Contract ${definition.id} is already registered.` });
+      throw new ContractDefinitionError({
+        code: "DUPLICATE_CONTRACT_ID",
+        contractId: definition.id,
+        message: `Contract ${definition.id} is already registered.`,
+      });
     }
     const existingId = idBySchema.get(definition.schema);
     if (existingId !== undefined) {

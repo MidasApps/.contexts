@@ -1,10 +1,10 @@
 import { createCorsPolicy } from "@core/services";
-import createMiddleware from "next-intl/middleware";
 import { NextRequest } from "next/server";
+import createMiddleware from "next-intl/middleware";
 import { describe, expect, it } from "vitest";
 import { buildPageContentSecurityPolicy } from "@/config/security-headers";
 import { routing } from "@/i18n/routing";
-import { createProxy, type CspMode } from "./create-proxy";
+import { type CspMode, createProxy } from "./create-proxy";
 
 const VALID_ULID = "01K6BZ3YQ8X4M7N2P5R9T0V1W2";
 const ULID_PATTERN = /^[0-9A-HJKMNP-TV-Z]{26}$/;
@@ -89,7 +89,9 @@ describe("createProxy /v1", () => {
   });
 
   it("leaves /v1 untouched by the locale middleware and gives it the JSON CSP", () => {
-    const response = proxy(requestWith({ "accept-language": "en-US", cookie: "NEXT_LOCALE=es-419" }, { path: "/v1/me" }));
+    const response = proxy(
+      requestWith({ "accept-language": "en-US", cookie: "NEXT_LOCALE=es-419" }, { path: "/v1/me" }),
+    );
 
     expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
@@ -115,7 +117,9 @@ describe("createProxy locale", () => {
   });
 
   it("prefers the NEXT_LOCALE cookie over Accept-Language", () => {
-    const response = proxy(requestWith({ cookie: "NEXT_LOCALE=es-419", "accept-language": "en-US,en;q=0.9" }, { path: "/sign-in" }));
+    const response = proxy(
+      requestWith({ cookie: "NEXT_LOCALE=es-419", "accept-language": "en-US,en;q=0.9" }, { path: "/sign-in" }),
+    );
 
     expect(response.headers.get("location")).toBe("http://localhost:3100/es-419/sign-in");
   });
@@ -163,7 +167,9 @@ describe("createProxy page CSP", () => {
   it("sends the static fallback policy without a nonce in static mode", () => {
     const response = makeProxy("static")(requestWith({}, { path: "/pt-BR/sign-in" }));
 
-    expect(response.headers.get("content-security-policy")).toBe(buildPageContentSecurityPolicy({ isDevelopment: false }));
+    expect(response.headers.get("content-security-policy")).toBe(
+      buildPageContentSecurityPolicy({ isDevelopment: false }),
+    );
     expect(forwarded(response, "x-nonce")).toBeNull();
   });
 });

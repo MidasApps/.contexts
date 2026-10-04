@@ -16,7 +16,12 @@ export const useFormatDuration = (): ((durationMs: number) => string) => {
   return (durationMs) =>
     durationMs < MS_PER_SECOND
       ? format.number(durationMs, { style: "unit", unit: "millisecond", unitDisplay: "short" })
-      : format.number(durationMs / MS_PER_SECOND, { style: "unit", unit: "second", unitDisplay: "short", maximumFractionDigits: 2 });
+      : format.number(durationMs / MS_PER_SECOND, {
+          style: "unit",
+          unit: "second",
+          unitDisplay: "short",
+          maximumFractionDigits: 2,
+        });
 };
 
 /** `ok` / `error` in words with an icon (color is never the only signal). */

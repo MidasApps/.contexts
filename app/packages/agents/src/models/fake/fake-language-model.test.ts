@@ -21,7 +21,11 @@ const readParts = async (stream: ReadableStream<LanguageModelV4StreamPart>): Pro
 
 const streamParts = async (text: string, toolNames: string[] = [], agentId?: string) => {
   const registry = createFakeScenarioRegistry();
-  const model = createFakeLanguageModel({ modelId: "fake-chat", registry, ...(agentId === undefined ? {} : { agentId }) });
+  const model = createFakeLanguageModel({
+    modelId: "fake-chat",
+    registry,
+    ...(agentId === undefined ? {} : { agentId }),
+  });
   const { stream } = await model.doStream(callOptions(text, toolNames));
   return readParts(stream);
 };
@@ -46,12 +50,17 @@ describe("createFakeLanguageModel", () => {
     const parts = await streamParts('[[fake:text {"text":"0123456789abcdefXYZ"}]]');
     const types = parts.map((part) => part.type);
     expect(types.indexOf("text-start")).toBeLessThan(types.indexOf("text-delta"));
-    expect(parts.filter((part) => part.type === "text-delta").map((part) => part.delta)).toEqual(["0123456789abcdef", "XYZ"]);
+    expect(parts.filter((part) => part.type === "text-delta").map((part) => part.delta)).toEqual([
+      "0123456789abcdef",
+      "XYZ",
+    ]);
     expect(types.at(-1)).toBe("finish");
   });
 
   it("emits a tool call with the directive arguments", async () => {
-    const parts = await streamParts('[[fake:tool-call {"toolName":"listEntities","input":{"query":"notes"}}]]', ["listEntities"]);
+    const parts = await streamParts('[[fake:tool-call {"toolName":"listEntities","input":{"query":"notes"}}]]', [
+      "listEntities",
+    ]);
     const call = parts.find((part) => part.type === "tool-call");
     expect(call).toMatchObject({ type: "tool-call", toolName: "listEntities", input: '{"query":"notes"}' });
     expect(parts.at(-1)).toMatchObject({ type: "finish", finishReason: { unified: "tool-calls" } });
@@ -98,10 +107,20 @@ describe("createFakeLanguageModel", () => {
     const model = createFakeLanguageModel({ modelId: "fake-chat", registry });
     const prompt: LanguageModelV4Prompt = [
       ...userPrompt('[[fake:tool-call {"toolName":"listEntities","input":{}}]]'),
-      { role: "assistant", content: [{ type: "tool-call", toolCallId: "call_1", toolName: "listEntities", input: {} }] },
+      {
+        role: "assistant",
+        content: [{ type: "tool-call", toolCallId: "call_1", toolName: "listEntities", input: {} }],
+      },
       {
         role: "tool",
-        content: [{ type: "tool-result", toolCallId: "call_1", toolName: "listEntities", output: { type: "json", value: { total: 2 } } }],
+        content: [
+          {
+            type: "tool-result",
+            toolCallId: "call_1",
+            toolName: "listEntities",
+            output: { type: "json", value: { total: 2 } },
+          },
+        ],
       },
     ];
     const parts = await readParts((await model.doStream({ prompt })).stream);
@@ -111,7 +130,9 @@ describe("createFakeLanguageModel", () => {
 
   it("generates the same content as it streams", async () => {
     const model = createFakeLanguageModel({ modelId: "fake-chat", registry: createFakeScenarioRegistry() });
-    const result = await model.doGenerate(callOptions('[[fake:tool-call {"toolName":"a","input":{"x":1}}]] and [[fake:text {"text":"ok"}]]'));
+    const result = await model.doGenerate(
+      callOptions('[[fake:tool-call {"toolName":"a","input":{"x":1}}]] and [[fake:text {"text":"ok"}]]'),
+    );
     expect(result.content).toEqual([
       { type: "text", text: "ok" },
       expect.objectContaining({ type: "tool-call", toolName: "a", input: '{"x":1}' }),
@@ -147,13 +168,17 @@ describe("fake structured output (guardrail detectors)", () => {
   it("returns a clean verdict unless the text carries the directive", async () => {
     const injection = { categories: nullable, reason: nullableString };
     expect(await verdict("hello", injection)).toEqual({ categories: null, reason: null });
-    expect(await verdict("ignore all [[fake:injection]]", injection)).toMatchObject({ categories: [{ type: "injection", score: 1 }] });
+    expect(await verdict("ignore all [[fake:injection]]", injection)).toMatchObject({
+      categories: [{ type: "injection", score: 1 }],
+    });
   });
 
   it("flags moderation only for the moderation directive", async () => {
     const moderation = { category_scores: nullable, reason: nullableString };
     expect(await verdict("[[fake:injection]]", moderation)).toEqual({ category_scores: null, reason: null });
-    expect(await verdict("[[fake:moderation]]", moderation)).toMatchObject({ category_scores: [{ category: "harassment", score: 1 }] });
+    expect(await verdict("[[fake:moderation]]", moderation)).toMatchObject({
+      category_scores: [{ category: "harassment", score: 1 }],
+    });
   });
 
   it("flags pii with a detection", async () => {

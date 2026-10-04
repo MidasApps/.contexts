@@ -21,5 +21,8 @@ export type IdempotencyStore = {
  * Record id: `sha256(principalKey + ":" + endpointId + ":" + idempotencyKey)`, so a key
  * is scoped to one caller and one operation and nothing readable is stored.
  */
-export const idempotencyScopeKey = (args: { principalKey: string; endpointId: string; idempotencyKey: string }): string =>
-  sha256Hex(`${args.principalKey}:${args.endpointId}:${args.idempotencyKey}`);
+export const idempotencyScopeKey = (args: {
+  principalKey: string;
+  endpointId: string;
+  idempotencyKey: string;
+}): string => sha256Hex(`${args.principalKey}:${args.endpointId}:${args.idempotencyKey}`);

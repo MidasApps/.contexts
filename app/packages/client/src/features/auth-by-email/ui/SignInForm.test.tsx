@@ -63,7 +63,10 @@ describe("SignInForm", () => {
   });
 
   it("hands an MFA challenge to the session instead of completing the sign-in", async () => {
-    const challenge: MfaChallenge = { hints: [{ uid: "h1", factor: "totp", displayName: null, phoneNumber: null }], handle: {} };
+    const challenge: MfaChallenge = {
+      hints: [{ uid: "h1", factor: "totp", displayName: null, phoneNumber: null }],
+      handle: {},
+    };
     const auth = createFakeAuth(TEST_USER);
     auth.signInWithEmail = () => Promise.resolve({ kind: "mfa-required", challenge });
     const session = signedOut();
@@ -83,6 +86,8 @@ describe("SignInForm", () => {
     await user.type(screen.getByLabelText("Email"), "ana@example.com");
     await user.type(screen.getByLabelText("Password"), "x");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
-    expect((await screen.findByRole("alert")).textContent).toBe("We couldn't sign you in right now. Try again in a moment.");
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "We couldn't sign you in right now. Try again in a moment.",
+    );
   });
 });

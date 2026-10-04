@@ -1,4 +1,4 @@
-import { UnitIdSchema, type UnitId } from "@core/contracts";
+import { type UnitId, UnitIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { placementUnder, planMove, type TreeUnit } from "./unit-tree.ts";
 
@@ -45,7 +45,13 @@ describe("planMove", () => {
 
   it("moves a subtree to the project root", () => {
     const plan = planMove({ unit: b, newParent: null, descendants: [c] });
-    expect(plan).toMatchObject({ ok: true, rewrites: [{ id: "b", ancestorIds: [], depth: 0 }, { id: "c", ancestorIds: ["b"], depth: 1 }] });
+    expect(plan).toMatchObject({
+      ok: true,
+      rewrites: [
+        { id: "b", ancestorIds: [], depth: 0 },
+        { id: "c", ancestorIds: ["b"], depth: 1 },
+      ],
+    });
   });
 
   it("refuses moving a unit under itself or its own descendant (cycle)", () => {

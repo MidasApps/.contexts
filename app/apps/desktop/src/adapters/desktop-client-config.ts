@@ -1,4 +1,4 @@
-import { parseClientConfig, type ClientConfig } from "@core/client/shared/config";
+import { type ClientConfig, parseClientConfig } from "@core/client/shared/config";
 import type { DesktopEnv } from "@/config/desktop-env.schema.ts";
 
 /**
@@ -10,7 +10,11 @@ export const toClientConfig = (env: DesktopEnv): ClientConfig =>
   parseClientConfig({
     appEnv: env.VITE_APP_ENV,
     apiBaseUrl: env.VITE_API_URL,
-    firebase: { apiKey: env.VITE_FIREBASE_API_KEY, authDomain: env.VITE_FIREBASE_AUTH_DOMAIN, projectId: env.VITE_FIREBASE_PROJECT_ID },
+    firebase: {
+      apiKey: env.VITE_FIREBASE_API_KEY,
+      authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+      projectId: env.VITE_FIREBASE_PROJECT_ID,
+    },
     ...(env.VITE_AUTH_EMULATOR_URL === undefined ? {} : { authEmulatorUrl: env.VITE_AUTH_EMULATOR_URL }),
     mfaFactors: env.VITE_MFA_FACTORS,
     ...(env.VITE_SELF_SERVE_SIGN_UP === undefined ? {} : { selfServeSignUp: env.VITE_SELF_SERVE_SIGN_UP }),

@@ -28,17 +28,27 @@ const toRows = (result: ResultRows, limit: number): SemanticQueryRows => ({
  * `semantic_owner` over `FORCE ROW LEVEL SECURITY` tables, so a missing tenant
  * setting yields zero rows. Database messages never leave this adapter.
  */
-export const createPostgresSemanticRunner = (sql: Sql, options: { readonly statementTimeoutMs?: number } = {}): SemanticQueryRunner => {
+export const createPostgresSemanticRunner = (
+  sql: Sql,
+  options: { readonly statementTimeoutMs?: number } = {},
+): SemanticQueryRunner => {
   const timeoutMs = Math.trunc(options.statementTimeoutMs ?? DEFAULT_STATEMENT_TIMEOUT_MS);
   return {
     run: async ({ scope, sql: statement, params, limit }) => {
       try {
-        const rows = await withTenantTransaction(sql, { tenantId: scope.tenantId, nodeIds: scope.nodeIds, readOnly: true }, async (tx) => {
-          // SET cannot take bind parameters; the value is an integer we computed.
-          await tx.unsafe(`SET LOCAL statement_timeout = ${timeoutMs}`);
-          await tx.unsafe(`SET LOCAL ROLE ${SEMANTIC_READER_ROLE}`);
-          return (await tx.unsafe(wrapWithLimit(statement, limit + 1), params as ParameterOrJSON<never>[])) as ResultRows;
-        });
+        const rows = await withTenantTransaction(
+          sql,
+          { tenantId: scope.tenantId, nodeIds: scope.nodeIds, readOnly: true },
+          async (tx) => {
+            // SET cannot take bind parameters; the value is an integer we computed.
+            await tx.unsafe(`SET LOCAL statement_timeout = ${timeoutMs}`);
+            await tx.unsafe(`SET LOCAL ROLE ${SEMANTIC_READER_ROLE}`);
+            return (await tx.unsafe(
+              wrapWithLimit(statement, limit + 1),
+              params as ParameterOrJSON<never>[],
+            )) as ResultRows;
+          },
+        );
         return { ok: true, data: toRows(rows, limit) };
       } catch (error: unknown) {
         return { ok: false, error: { code: isQueryCanceled(error) ? "QUERY_TIMEOUT" : "QUERY_FAILED" } };

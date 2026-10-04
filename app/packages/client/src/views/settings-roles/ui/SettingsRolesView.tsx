@@ -12,8 +12,8 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
-import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
@@ -27,12 +27,23 @@ function RoleRowActions({ item: role, actions }: { item: Role; actions: RoleActi
   return (
     <span className="flex gap-1">
       {actions.onEdit === null ? null : (
-        <Button variant="outline" size="sm" disabled={actions.waiting} onClick={() => actions.onEdit?.(role)} aria-label={t("editNamed", { name: role.name })}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={actions.waiting}
+          onClick={() => actions.onEdit?.(role)}
+          aria-label={t("editNamed", { name: role.name })}
+        >
           {t("edit")}
         </Button>
       )}
       {actions.onDelete === null ? null : (
-        <Button variant="ghost" size="sm" onClick={() => actions.onDelete?.(role)} aria-label={t("deleteNamed", { name: role.name })}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => actions.onDelete?.(role)}
+          aria-label={t("deleteNamed", { name: role.name })}
+        >
           {t("deleteAction")}
         </Button>
       )}
@@ -49,12 +60,23 @@ const useColumns = (actions: RoleActions) => {
         cell: ({ row }) => (
           <span className="flex flex-col">
             <span className="font-medium">{row.original.name}</span>
-            {row.original.description === "" ? null : <span className="text-xs text-muted-foreground">{row.original.description}</span>}
+            {row.original.description === "" ? null : (
+              <span className="text-xs text-muted-foreground">{row.original.description}</span>
+            )}
           </span>
         ),
       }),
-      column.accessor("permissions", { header: () => t("columns.permissions"), meta: { numeric: true }, cell: ({ getValue }) => t("permissionCount", { count: getValue().length }) }),
-      column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <RoleRowActions item={row.original} actions={actions} /> }),
+      column.accessor("permissions", {
+        header: () => t("columns.permissions"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => t("permissionCount", { count: getValue().length }),
+      }),
+      column.display({
+        id: "actions",
+        header: () => t("columns.actions"),
+        meta: { headerHidden: true },
+        cell: ({ row }) => <RoleRowActions item={row.original} actions={actions} />,
+      }),
     ],
     [actions, t],
   );
@@ -86,7 +108,10 @@ function CustomRoles({ context, onCreate }: { context: AccessContext; onCreate: 
   const canUpdate = context.permissions.includes("core.role.update");
   const canDelete = context.permissions.includes("core.role.delete");
   const waiting = catalog.isPending;
-  const actions = useMemo<RoleActions>(() => ({ onEdit: canUpdate ? setEditing : null, onDelete: canDelete ? setDeleting : null, waiting }), [canUpdate, canDelete, waiting]);
+  const actions = useMemo<RoleActions>(
+    () => ({ onEdit: canUpdate ? setEditing : null, onDelete: canDelete ? setDeleting : null, waiting }),
+    [canUpdate, canDelete, waiting],
+  );
   const columns = useColumns(actions);
   const grantable = (permission: Permission): boolean => context.permissions.includes(permission);
   return (
@@ -130,7 +155,11 @@ function CustomRoles({ context, onCreate }: { context: AccessContext; onCreate: 
         onOpenChange={(open) => !open && setEditing(null)}
         grantable={grantable}
       />
-      <DeleteRoleDialog organizationId={organization.id} customRole={deleting} onOpenChange={(open) => !open && setDeleting(null)} />
+      <DeleteRoleDialog
+        organizationId={organization.id}
+        customRole={deleting}
+        onOpenChange={(open) => !open && setDeleting(null)}
+      />
     </>
   );
 }
@@ -146,7 +175,8 @@ function SettingsRoles({ context }: { context: AccessContext }) {
   // The empty-state copy follows the permission; offline only holds the action (the shell says why).
   const create = canCreate ? () => setCreating(true) : null;
   return (
-    <SettingsPageFrame width="wide"
+    <SettingsPageFrame
+      width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.role.read")}
       header={
@@ -156,7 +186,11 @@ function SettingsRoles({ context }: { context: AccessContext }) {
           description={t("description")}
           actions={
             canCreate ? (
-              <Button onClick={() => setCreating(true)} disabled={!online || catalog.isPending} pending={catalog.isPending}>
+              <Button
+                onClick={() => setCreating(true)}
+                disabled={!online || catalog.isPending}
+                pending={catalog.isPending}
+              >
                 <Icon name="plus" />
                 {t("create")}
               </Button>
@@ -174,7 +208,13 @@ function SettingsRoles({ context }: { context: AccessContext }) {
         </SectionCard>
       </div>
       {canCreate ? (
-        <RoleEditorDialog organizationId={organization.id} customRole={null} open={creating} onOpenChange={setCreating} grantable={grantable} />
+        <RoleEditorDialog
+          organizationId={organization.id}
+          customRole={null}
+          open={creating}
+          onOpenChange={setCreating}
+          grantable={grantable}
+        />
       ) : null}
     </SettingsPageFrame>
   );

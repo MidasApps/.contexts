@@ -9,7 +9,13 @@ import { Field, FieldControl, FieldError, FieldLabel } from "#/shared/ui/molecul
 import { MoneyInput } from "./MoneyInput.tsx";
 import { formatMoneyInputText } from "./money-input-text.ts";
 
-const Budget = ({ onValue, initial = null }: { onValue: (value: MoneyValue | null) => void; initial?: MoneyValue | null }) => {
+const Budget = ({
+  onValue,
+  initial = null,
+}: {
+  onValue: (value: MoneyValue | null) => void;
+  initial?: MoneyValue | null;
+}) => {
   const t = useTranslations("common.money");
   const [value, setValue] = useState<MoneyValue | null>(initial);
   const [error, setError] = useState<ParseMoneyInputError | null>(null);
@@ -58,7 +64,9 @@ describe("MoneyInput", () => {
 
   it("flags unparseable text through the field error", async () => {
     const onValue = vi.fn();
-    const { user, container } = renderWithProviders(<Budget onValue={onValue} initial={{ amountMinor: 500, currency: "BRL" }} />);
+    const { user, container } = renderWithProviders(
+      <Budget onValue={onValue} initial={{ amountMinor: 500, currency: "BRL" }} />,
+    );
     const input = screen.getByRole("textbox", { name: "Orçamento" });
     expect((input as HTMLInputElement).value).toBe("5,00");
     await user.clear(input);

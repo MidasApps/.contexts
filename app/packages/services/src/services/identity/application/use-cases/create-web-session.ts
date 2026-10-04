@@ -17,7 +17,10 @@ export type CreatedWebSession = {
   readonly expiresAt: string;
 };
 
-export type CreateWebSession = (command: { idToken: string; userAgent: string | null }) => Promise<Result<CreatedWebSession, SessionInvalidError | RecentSignInRequiredError>>;
+export type CreateWebSession = (command: {
+  idToken: string;
+  userAgent: string | null;
+}) => Promise<Result<CreatedWebSession, SessionInvalidError | RecentSignInRequiredError>>;
 
 /**
  * `createSession({ idToken })` (SP1 spec §3.3): verifies the ID token with revocation, needs
@@ -30,7 +33,8 @@ export const makeCreateWebSession =
     const signIn = await deps.cookies.verifyIdToken(idToken);
     if (signIn === null) return err(new SessionInvalidError("ID_TOKEN_INVALID"));
     const now = deps.clock.now();
-    if (now.getTime() / 1000 - signIn.authTimeSeconds > RECENT_SIGN_IN_SECONDS) return err(new RecentSignInRequiredError());
+    if (now.getTime() / 1000 - signIn.authTimeSeconds > RECENT_SIGN_IN_SECONDS)
+      return err(new RecentSignInRequiredError());
     const expiresInMs = deps.sessionMaxAgeDays * DAY_MS;
     const cookie = await deps.cookies.createSessionCookie(idToken, { expiresInMs });
     const sessionId = deps.sessions.newId();

@@ -7,7 +7,15 @@ import { buildCatalogAgent } from "#/entities/agent-catalog/agent-catalog.fixtur
 import { buildCustomAgentOptions } from "#/entities/custom-agent/custom-agent.fixture.ts";
 import { buildCustomSkill, CUSTOM_SKILL_ID } from "#/entities/custom-skill/custom-skill.fixture.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, ok, page, type FakeRequest, type FakeResponse, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import {
+  apiError,
+  type FakeRequest,
+  type FakeResponse,
+  type FakeRoutes,
+  noContent,
+  ok,
+  page,
+} from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsSkillsView } from "./SettingsSkillsView.tsx";
 
@@ -18,7 +26,14 @@ const SAFE = { name: "safe-actions", description: "Confirm before changing data.
 const CATALOG = [
   buildCatalogAgent({ key: "action", name: "Action", enabled: true, skills: [SAFE] }),
   buildCatalogAgent({ key: "data", name: "Data", enabled: false, skills: [SAFE] }),
-  buildCatalogAgent({ key: "example-notes", name: "Notes", source: "module", moduleId: "example", enabled: false, skills: [{ name: "example-notes", description: "Take notes.", source: "module" }] }),
+  buildCatalogAgent({
+    key: "example-notes",
+    name: "Notes",
+    source: "module",
+    moduleId: "example",
+    enabled: false,
+    skills: [{ name: "example-notes", description: "Take notes.", source: "module" }],
+  }),
 ];
 
 const renderView = (permissions: readonly Permission[] = READ, routes: FakeRoutes = {}) =>
@@ -26,7 +41,15 @@ const renderView = (permissions: readonly Permission[] = READ, routes: FakeRoute
     <main>
       <SettingsSkillsView />
     </main>,
-    { path: `/o/${IDS.organization}/settings/skills`, routes: shellRoutes(permissions, { "GET /v1/agents": ok(CATALOG), "GET /v1/agent-options": ok(buildCustomAgentOptions()), "GET /v1/skills": page([buildCustomSkill()]), ...routes }) },
+    {
+      path: `/o/${IDS.organization}/settings/skills`,
+      routes: shellRoutes(permissions, {
+        "GET /v1/agents": ok(CATALOG),
+        "GET /v1/agent-options": ok(buildCustomAgentOptions()),
+        "GET /v1/skills": page([buildCustomSkill()]),
+        ...routes,
+      }),
+    },
   );
 
 // The whole app shell renders per test; under a loaded machine the defaults (1 s, 5 s) are too short.
@@ -61,7 +84,9 @@ describe("SettingsSkillsView", { timeout: 30_000 }, () => {
     const row = within(table).getByRole("row", { name: /weekly-report/u });
     expect(within(row).getByText("Ativada")).toBeDefined();
     expect(screen.getByText(/1 de 10 habilidades do plano em uso\./u)).toBeDefined();
-    expect(screen.getByRole("link", { name: "Abrir agentes" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/agents`);
+    expect(screen.getByRole("link", { name: "Abrir agentes" }).getAttribute("href")).toBe(
+      `/o/${IDS.organization}/settings/agents`,
+    );
     expect(screen.queryByText(/não pode criar/u)).toBeNull();
   });
 
@@ -84,7 +109,12 @@ describe("SettingsSkillsView", { timeout: 30_000 }, () => {
     expect(within(dialog).getByText(/17 de 8000 caracteres\./u)).toBeDefined();
     await user.click(within(dialog).getByRole("button", { name: "Criar habilidade" }));
     await waitFor(() => expect(posts).toHaveLength(1));
-    expect(posts[0]?.body).toEqual({ name: "release-notes", description: "How to write release notes.", instructions: "List the changes.", enabled: true });
+    expect(posts[0]?.body).toEqual({
+      name: "release-notes",
+      description: "How to write release notes.",
+      instructions: "List the changes.",
+      enabled: true,
+    });
     expect(posts[0]?.query.get("organizationId")).toBe(IDS.organization);
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
@@ -112,12 +142,20 @@ describe("SettingsSkillsView", { timeout: 30_000 }, () => {
       "DELETE /v1/skills/:skillId": record(noContent),
     });
     await user.click(await screen.findByRole("button", { name: "Desativar weekly-report" }));
-    await user.click(within(await screen.findByRole("alertdialog", { name: "Desativar weekly-report?" })).getByRole("button", { name: "Desativar" }));
+    await user.click(
+      within(await screen.findByRole("alertdialog", { name: "Desativar weekly-report?" })).getByRole("button", {
+        name: "Desativar",
+      }),
+    );
     await waitFor(() => expect(requests).toHaveLength(1));
     expect(requests[0]?.body).toEqual({ enabled: false });
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     await user.click(screen.getByRole("button", { name: "Excluir weekly-report" }));
-    await user.click(within(await screen.findByRole("alertdialog", { name: "Excluir weekly-report?" })).getByRole("button", { name: "Excluir habilidade" }));
+    await user.click(
+      within(await screen.findByRole("alertdialog", { name: "Excluir weekly-report?" })).getByRole("button", {
+        name: "Excluir habilidade",
+      }),
+    );
     await waitFor(() => expect(requests).toHaveLength(2));
     expect(requests[1]?.method).toBe("DELETE");
     expect(requests[1]?.params["skillId"]).toBe(CUSTOM_SKILL_ID);
@@ -131,7 +169,10 @@ describe("SettingsSkillsView", { timeout: 30_000 }, () => {
   });
 
   it("shows an empty state, the error with a retry, and no access without the permission", async () => {
-    const empty = renderView(READ, { "GET /v1/agents": ok([buildCatalogAgent({ skills: [] })]), "GET /v1/skills": page([]) });
+    const empty = renderView(READ, {
+      "GET /v1/agents": ok([buildCatalogAgent({ skills: [] })]),
+      "GET /v1/skills": page([]),
+    });
     expect(await screen.findByRole("heading", { name: "Nenhuma habilidade disponível" })).toBeDefined();
     expect(await screen.findByRole("heading", { name: "Nenhuma habilidade da organização" })).toBeDefined();
     empty.unmount();

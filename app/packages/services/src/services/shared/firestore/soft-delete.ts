@@ -7,7 +7,10 @@ export type SoftDeleteFields = { deletedAt: FieldValue; deletedBy: string } & Up
  * Fields a soft-deletable entity is created with. `deletedAt` must exist as
  * `null` (not be absent), or `notDeleted` queries would never match it.
  */
-export const initialSoftDeleteFields = (): { deletedAt: null; deletedBy: null } => ({ deletedAt: null, deletedBy: null });
+export const initialSoftDeleteFields = (): { deletedAt: null; deletedBy: null } => ({
+  deletedAt: null,
+  deletedBy: null,
+});
 
 /**
  * Update that soft-deletes an entity (contracts/firebase-firestore.md §5).

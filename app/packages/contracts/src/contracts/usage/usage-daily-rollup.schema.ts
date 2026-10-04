@@ -24,7 +24,16 @@ export const UsageDailyRollupContract = defineContract(UsageDailyRollupSchema, {
   kind: "view",
   description: "Daily model usage and cost of an organization per model and agent.",
   examples: [
-    { tenantId: EXAMPLE_IDS.organization, day: "2026-09-30", model: "gemini-3.5-flash", agentId: "assistant", calls: 42, inputTokens: 50_000, outputTokens: 12_000, costMicroUsd: 61_000 },
+    {
+      tenantId: EXAMPLE_IDS.organization,
+      day: "2026-09-30",
+      model: "gemini-3.5-flash",
+      agentId: "assistant",
+      calls: 42,
+      inputTokens: 50_000,
+      outputTokens: 12_000,
+      costMicroUsd: 61_000,
+    },
   ],
   pii: "none",
   tenancyScope: "organization",

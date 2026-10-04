@@ -7,7 +7,10 @@ import type { DeviceActivationRecord } from "../../domain/device-activation-reco
 import { SessionInvalidError } from "../../domain/errors/session-errors.ts";
 import type { DeviceDeps } from "../device-deps.ts";
 
-export type RedeemDeviceActivation = (command: { code: string; requestId: string }) => Promise<Result<RedeemDeviceActivationResponse, SessionInvalidError>>;
+export type RedeemDeviceActivation = (command: {
+  code: string;
+  requestId: string;
+}) => Promise<Result<RedeemDeviceActivationResponse, SessionInvalidError>>;
 
 const refused = (reason: string) => err(new SessionInvalidError(reason));
 
@@ -49,12 +52,30 @@ const activate = (deps: DeviceDeps, pending: DeviceActivationRecord, requestId: 
       requestId,
     });
     if (!plan.ok) return refused("CODE_NOT_USABLE");
-    const device: Device = { id: deviceId, tenantId: activation.tenantId, label: activation.label, node: activation.node, status: "active", lastSeenAt: null, createdAt: now.toISOString(), updatedAt: now.toISOString() };
+    const device: Device = {
+      id: deviceId,
+      tenantId: activation.tenantId,
+      label: activation.label,
+      node: activation.node,
+      status: "active",
+      lastSeenAt: null,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
     deps.devices.create(tx, { device, actorId: activation.createdBy });
     deps.activations.markRedeemed(tx, { id: activation.id, deviceId, updatedAt: now.toISOString() });
     await plan.data.commit();
     await deps.audit.record(
-      { log: "tenant", tenantId: activation.tenantId, action: "DEVICE_ACTIVATED", actor, target: { type: "device", id: deviceId }, node: activation.node, outcome: "success", requestId },
+      {
+        log: "tenant",
+        tenantId: activation.tenantId,
+        action: "DEVICE_ACTIVATED",
+        actor,
+        target: { type: "device", id: deviceId },
+        node: activation.node,
+        outcome: "success",
+        requestId,
+      },
       tx,
     );
     return ok(deviceId);
@@ -78,6 +99,9 @@ export const makeRedeemDeviceActivation =
     if (!activated.ok) return activated;
     const deviceId = activated.data;
     await deps.authUsers.createAccount(deviceId, { displayName: pending.label });
-    const customToken = await deps.customTokens.createCustomToken(deviceId, { principalType: "device", tenantId: pending.tenantId });
+    const customToken = await deps.customTokens.createCustomToken(deviceId, {
+      principalType: "device",
+      tenantId: pending.tenantId,
+    });
     return ok({ deviceId, tenantId: pending.tenantId, customToken });
   };

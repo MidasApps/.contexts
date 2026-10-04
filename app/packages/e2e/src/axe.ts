@@ -18,7 +18,9 @@ export const expectNoAxeViolations = async (page: Page, options: { include?: str
   const violations = results.violations.map((violation) => ({
     id: violation.id,
     impact: violation.impact,
-    nodes: violation.nodes.map((node) => `${node.target.join(" ")}: ${(node.failureSummary ?? "").replaceAll(/\s+/g, " ")}`),
+    nodes: violation.nodes.map(
+      (node) => `${node.target.join(" ")}: ${(node.failureSummary ?? "").replaceAll(/\s+/g, " ")}`,
+    ),
   }));
   expect(violations, `axe violations on ${page.url()}`).toEqual([]);
 };

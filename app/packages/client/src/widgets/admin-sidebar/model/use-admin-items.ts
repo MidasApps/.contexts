@@ -1,10 +1,10 @@
 "use client";
 
+import { type PermissionsState, usePlatformPermissions } from "#/entities/permission/index.ts";
 import type { Route } from "#/shared/lib/router/route-paths.ts";
 import { navItemRoute } from "#/shared/lib/shell/nav-item-route.ts";
 import { useNavigationRegistry } from "#/shared/lib/shell/shell-registry-context.tsx";
 import type { ShellNavItem } from "#/shared/lib/shell/shell-types.ts";
-import { usePlatformPermissions, type PermissionsState } from "#/entities/permission/index.ts";
 
 export type AdminItem = { readonly item: ShellNavItem; readonly route: Route };
 

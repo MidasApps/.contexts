@@ -1,6 +1,5 @@
 import { expectNoAxeViolations } from "@core/e2e/axe";
 import { showSidebar } from "@core/e2e/sign-in";
-import { authFile } from "./web-test.ts";
 import {
   chatPanel,
   chatPath,
@@ -15,10 +14,11 @@ import {
   messageLog,
   openChat,
   openChatFromNavigation,
-  send,
   SIGNED_OUT,
+  send,
   test,
 } from "./chat-test.ts";
+import { authFile } from "./web-test.ts";
 
 // SP4 gate, part 1 (umbrella §8): the chat opens from the project navigation, a turn streams
 // through `/v1/chat` and the agent runtime (fake models), and every state is said in words.
@@ -28,7 +28,11 @@ const LONG_QUESTION = "Tell me a long story about rivers and mountains and seas 
 test.describe("a member's own chat", () => {
   test.use({ storageState: SIGNED_OUT });
 
-  test("opens from the project navigation, streams an answer and keeps the conversation in the address", async ({ page, world, signInFresh }) => {
+  test("opens from the project navigation, streams an answer and keeps the conversation in the address", async ({
+    page,
+    world,
+    signInFresh,
+  }) => {
     await signInFresh();
     await openChatFromNavigation(page, world);
     await expect(chatPanel(page).getByRole("heading", { name: "Como posso ajudar?" })).toBeVisible();
@@ -42,7 +46,9 @@ test.describe("a member's own chat", () => {
     // screen is the same one: it reaches "finished", which a thread built again would never show.
     expect(await conversationIdOf(page)).not.toBe("");
     await expectAnswered(page);
-    await expect(messageLog(page).getByRole("article", { name: "Assistente" })).toContainText(/Fake answer [0-9a-f]{8}: Hello there/);
+    await expect(messageLog(page).getByRole("article", { name: "Assistente" })).toContainText(
+      /Fake answer [0-9a-f]{8}: Hello there/,
+    );
     await expect(messageLog(page).getByRole("article")).toHaveCount(2);
     await expectNoAxeViolations(page);
   });
@@ -66,7 +72,11 @@ test.describe("a member's own chat", () => {
     await expect(chatPanel(page).getByRole("button", { name: "Parar resposta" })).toHaveCount(0);
   });
 
-  test("resumes a streaming answer after a reload, with the question still on screen", async ({ page, world, signInFresh }) => {
+  test("resumes a streaming answer after a reload, with the question still on screen", async ({
+    page,
+    world,
+    signInFresh,
+  }) => {
     await signInFresh();
     await openChat(page, world);
     await send(page, `${LONG_QUESTION} ${FAKE.slow(1500)}`);
@@ -82,7 +92,11 @@ test.describe("a member's own chat", () => {
     await expect(messageLog(page).getByRole("article")).toHaveCount(2);
   });
 
-  test("marks an answer without a source as uncertain while it is still streaming", async ({ page, world, signInFresh }) => {
+  test("marks an answer without a source as uncertain while it is still streaming", async ({
+    page,
+    world,
+    signInFresh,
+  }) => {
     await signInFresh();
     await openChat(page, world);
     // A question goes to the knowledge agent; this organization has no document, so no source.
@@ -107,7 +121,13 @@ test.describe("a member's own chat", () => {
     await expectNoAxeViolations(page);
   });
 
-  test("keeps the draft and blocks sending while offline, and sends once the connection is back", async ({ page, world, context, signInFresh, consoleGuard }) => {
+  test("keeps the draft and blocks sending while offline, and sends once the connection is back", async ({
+    page,
+    world,
+    context,
+    signInFresh,
+    consoleGuard,
+  }) => {
     // The shell keeps polling while offline; Chromium logs each failed request.
     consoleGuard.allow(FAILED_REQUEST);
     await signInFresh();
@@ -138,7 +158,9 @@ test.describe("without permission", () => {
     await page.goto(`o/${world.alpha.id}/p/${world.alpha.projects.launch.id}`);
     await expect(page.getByRole("heading", { level: 1, name: world.alpha.projects.launch.name })).toBeVisible();
     await showSidebar(page);
-    await expect(page.getByRole("navigation", { name: "Navegação" }).getByRole("link", { name: "Visão geral" })).toBeVisible();
+    await expect(
+      page.getByRole("navigation", { name: "Navegação" }).getByRole("link", { name: "Visão geral" }),
+    ).toBeVisible();
     await expect(page.getByRole("link", { name: "Chat", exact: true })).toHaveCount(0);
 
     await page.goto(chatPath(world));

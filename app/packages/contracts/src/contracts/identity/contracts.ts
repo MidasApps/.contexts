@@ -7,13 +7,13 @@ import {
   ExchangeDesktopSessionInputContract,
   ExchangeDesktopSessionResponseContract,
 } from "./desktop-session.schema.ts";
+import { DeviceContract } from "./device.schema.ts";
 import {
   CreateDeviceActivationInputContract,
   CreateDeviceActivationResponseContract,
   RedeemDeviceActivationInputContract,
   RedeemDeviceActivationResponseContract,
 } from "./device-activation.schema.ts";
-import { DeviceContract } from "./device.schema.ts";
 import {
   ImpersonationSessionContract,
   StartImpersonationInputContract,
@@ -24,8 +24,8 @@ import { PlatformStaffContract } from "./platform-staff.schema.ts";
 import { PrincipalContract } from "./principal.schema.ts";
 import { SessionSummaryContract } from "./session.schema.ts";
 import { UpdateMeInputContract } from "./update-me-input.schema.ts";
-import { UserPreferencesContract } from "./user-preferences.schema.ts";
 import { UserContract } from "./user.schema.ts";
+import { UserPreferencesContract } from "./user-preferences.schema.ts";
 
 export const IDENTITY_CONTRACTS: readonly ContractDefinition[] = [
   PrincipalContract,

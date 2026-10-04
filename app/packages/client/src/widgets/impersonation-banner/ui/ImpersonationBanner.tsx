@@ -2,7 +2,11 @@
 
 import { useTranslations } from "use-intl";
 import { useMe } from "#/entities/session/index.ts";
-import { LeaveImpersonationButton, useStoredImpersonation, type StoredImpersonation } from "#/features/admin-impersonation/index.ts";
+import {
+  LeaveImpersonationButton,
+  type StoredImpersonation,
+  useStoredImpersonation,
+} from "#/features/admin-impersonation/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useImpersonationSessionId } from "#/shared/lib/session/use-impersonation.ts";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
@@ -24,7 +28,9 @@ const useBannerMessage = (stored: StoredImpersonation | undefined): string | nul
   const user = me.data.displayName.trim() === "" ? me.data.email : me.data.displayName;
   if (when === undefined) return t("messageNamed", { user });
   const organization = stored?.organizationName;
-  return organization === undefined ? t("messageNamedUntil", { user, when }) : t("messageNamedIn", { user, organization, when });
+  return organization === undefined
+    ? t("messageNamedUntil", { user, when })
+    : t("messageNamedIn", { user, organization, when });
 };
 
 function BannerNotice({ stored }: { stored: StoredImpersonation | undefined }) {

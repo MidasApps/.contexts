@@ -9,7 +9,7 @@ import { apiError, FAKE_REQUEST_ID, ok } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { holdResponse, setOnline } from "#/shared/testing/network.ts";
 import { ClearFlagOverrideDialog, type FlagOverrideTarget } from "./ClearFlagOverrideDialog.tsx";
-import { SetFlagDialog, type FlagChange } from "./SetFlagDialog.tsx";
+import { type FlagChange, SetFlagDialog } from "./SetFlagDialog.tsx";
 
 const KILL = FeatureFlagSchema.parse(buildFeatureFlag());
 const VOICE = FeatureFlagSchema.parse(buildExpiredFlag());
@@ -30,14 +30,19 @@ afterEach(() => setOnline(true));
 describe("SetFlagDialog", () => {
   it("turns a kill-switch on for one organization through a destructive confirmation", async () => {
     const held = holdResponse();
-    const { user, api, container } = renderAdmin(<SetHarness change={{ flag: KILL, value: true, organization: NORTHWIND }} />, {
-      routes: { "PUT /v1/admin/flags/:flagKey": held.handler },
-    });
+    const { user, api, container } = renderAdmin(
+      <SetHarness change={{ flag: KILL, value: true, organization: NORTHWIND }} />,
+      {
+        routes: { "PUT /v1/admin/flags/:flagKey": held.handler },
+      },
+    );
     const dialog = await screen.findByRole("alertdialog", { name: "Ligar ai.kill-switch?" });
     expect(dialog.textContent).toContain("interrompe o que ele descreve para Northwind");
     await expectNoAxeViolations(container.ownerDocument.body);
     await user.click(within(dialog).getByRole("button", { name: "Ligar" }));
-    await waitFor(() => expect(within(dialog).getByRole("button", { name: "Ligar" }).getAttribute("aria-busy")).toBe("true"));
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: "Ligar" }).getAttribute("aria-busy")).toBe("true"),
+    );
     held.release(ok(buildFeatureFlag({ value: true, tenantOverride: true })));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     expect(api.calls.find((call) => call.method === "PUT")?.body).toEqual({ value: true, tenantId: IDS.organization });
@@ -45,7 +50,9 @@ describe("SetFlagDialog", () => {
   });
 
   it("sets the environment value without a tenant and shows a failure with its reference", async () => {
-    const { user, api } = renderAdmin(<SetHarness change={{ flag: VOICE, value: false }} />, { routes: { "PUT /v1/admin/flags/:flagKey": apiError(403, "FORBIDDEN") } });
+    const { user, api } = renderAdmin(<SetHarness change={{ flag: VOICE, value: false }} />, {
+      routes: { "PUT /v1/admin/flags/:flagKey": apiError(403, "FORBIDDEN") },
+    });
     const dialog = await screen.findByRole("alertdialog", { name: "Desligar chat.voice?" });
     expect(dialog.textContent).toContain("Vale para todo o ambiente");
     await user.click(within(dialog).getByRole("button", { name: "Desligar" }));
@@ -57,14 +64,18 @@ describe("SetFlagDialog", () => {
     renderAdmin(<SetHarness change={{ flag: VOICE, value: false }} />);
     const dialog = await screen.findByRole("alertdialog");
     setOnline(false);
-    await waitFor(() => expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Desligar" }).disabled).toBe(true));
+    await waitFor(() =>
+      expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Desligar" }).disabled).toBe(true),
+    );
   });
 });
 
 describe("ClearFlagOverrideDialog", () => {
   it("removes the override of the organization after the confirmation and says so", async () => {
     const { user, api } = renderAdmin(<ClearHarness target={{ flag: VOICE, organization: NORTHWIND }} />, {
-      routes: { "DELETE /v1/admin/flags/:flagKey/overrides/:organizationId": ok(buildExpiredFlag({ tenantOverride: null })) },
+      routes: {
+        "DELETE /v1/admin/flags/:flagKey/overrides/:organizationId": ok(buildExpiredFlag({ tenantOverride: null })),
+      },
     });
     const dialog = await screen.findByRole("alertdialog", { name: "Remover o ajuste de chat.voice?" });
     expect(dialog.textContent).toContain("Northwind volta a seguir o valor do ambiente");
@@ -82,6 +93,8 @@ describe("ClearFlagOverrideDialog", () => {
     await user.click(within(dialog).getByRole("button", { name: "Remover ajuste" }));
     expect((await within(dialog).findByRole("alert")).textContent).toContain(FAKE_REQUEST_ID);
     setOnline(false);
-    await waitFor(() => expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Remover ajuste" }).disabled).toBe(true));
+    await waitFor(() =>
+      expect(within(dialog).getByRole<HTMLButtonElement>("button", { name: "Remover ajuste" }).disabled).toBe(true),
+    );
   });
 });

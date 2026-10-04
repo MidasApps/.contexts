@@ -37,7 +37,8 @@ export const gateScheduleFires = <S extends MastraCompositeStore>(args: {
   const gate = (store: SchedulesStore): unknown =>
     new Proxy(store, {
       get: (target, property) => {
-        if (property === "listDueSchedules") return async (now: number, limit?: number) => ((await allowed()) ? target.listDueSchedules(now, limit) : []);
+        if (property === "listDueSchedules")
+          return async (now: number, limit?: number) => ((await allowed()) ? target.listDueSchedules(now, limit) : []);
         const value: unknown = Reflect.get(target, property, target);
         return typeof value === "function" ? (value as (...values: unknown[]) => unknown).bind(target) : value;
       },

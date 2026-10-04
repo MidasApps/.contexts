@@ -28,12 +28,23 @@ export type AdminOrganizationFilterProps = {
  * or id, fed by `GET /v1/admin/organizations`. While the list loads or fails the trigger still
  * shows the chosen id, so a shared link keeps its filter.
  */
-export function AdminOrganizationFilter({ value, onValueChange, required = false, label, invalid = false, describedBy }: AdminOrganizationFilterProps) {
+export function AdminOrganizationFilter({
+  value,
+  onValueChange,
+  required = false,
+  label,
+  invalid = false,
+  describedBy,
+}: AdminOrganizationFilterProps) {
   const t = useTranslations("admin.organizationFilter");
   const id = useId();
   const organizations = useAllAdminOrganizations();
   const groups = useMemo((): ComboboxGroup[] => {
-    const known = (organizations.data ?? []).map((organization) => ({ value: organization.id, label: organization.name, keywords: [organization.id] }));
+    const known = (organizations.data ?? []).map((organization) => ({
+      value: organization.id,
+      label: organization.name,
+      keywords: [organization.id],
+    }));
     const selectedMissing = value !== undefined && !known.some((option) => option.value === value);
     const options = [...(selectedMissing ? [{ value, label: value }] : []), ...known];
     return [{ options: required ? options : [{ value: ALL, label: t("all") }, ...options] }];

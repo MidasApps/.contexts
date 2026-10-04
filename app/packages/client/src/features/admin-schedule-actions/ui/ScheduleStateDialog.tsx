@@ -1,6 +1,6 @@
 "use client";
 
-import { adminPauseScheduleEndpoint, adminResumeScheduleEndpoint, type AdminSchedule } from "@core/contracts";
+import { type AdminSchedule, adminPauseScheduleEndpoint, adminResumeScheduleEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { scheduleKeys } from "#/entities/schedule/index.ts";
@@ -38,7 +38,9 @@ export function ScheduleStateDialog({ request, onOpenChange }: ScheduleStateDial
   const action = useConfirmedAction(
     async () => {
       if (request === null) return;
-      await callEndpoint(request.action === "pause" ? adminPauseScheduleEndpoint : adminResumeScheduleEndpoint, { params: { scheduleId: request.schedule.id } });
+      await callEndpoint(request.action === "pause" ? adminPauseScheduleEndpoint : adminResumeScheduleEndpoint, {
+        params: { scheduleId: request.schedule.id },
+      });
       await queryClient.invalidateQueries({ queryKey: scheduleKeys.all() });
     },
     () => notify.success(t(pausing ? "paused" : "resumed", { workflow })),

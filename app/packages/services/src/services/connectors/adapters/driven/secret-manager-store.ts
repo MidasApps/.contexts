@@ -6,13 +6,20 @@ const ALREADY_EXISTS = 6;
 
 /** The part of `@google-cloud/secret-manager`'s `SecretManagerServiceClient` the store uses (a fake in tests). */
 export type SecretManagerClientLike = {
-  readonly createSecret: (request: { parent: string; secretId: string; secret: { replication: { automatic: Record<string, never> }; labels: Record<string, string> } }) => Promise<unknown>;
+  readonly createSecret: (request: {
+    parent: string;
+    secretId: string;
+    secret: { replication: { automatic: Record<string, never> }; labels: Record<string, string> };
+  }) => Promise<unknown>;
   readonly addSecretVersion: (request: { parent: string; payload: { data: Buffer } }) => Promise<unknown>;
-  readonly accessSecretVersion: (request: { name: string }) => Promise<readonly [{ payload?: { data?: Uint8Array | string | null } | null }, ...unknown[]]>;
+  readonly accessSecretVersion: (request: {
+    name: string;
+  }) => Promise<readonly [{ payload?: { data?: Uint8Array | string | null } | null }, ...unknown[]]>;
   readonly deleteSecret: (request: { name: string }) => Promise<unknown>;
 };
 
-const codeOf = (error: unknown): unknown => (typeof error === "object" && error !== null && "code" in error ? error.code : undefined);
+const codeOf = (error: unknown): unknown =>
+  typeof error === "object" && error !== null && "code" in error ? error.code : undefined;
 
 const decode = (data: Uint8Array | string | null | undefined): string | null => {
   if (data === null || data === undefined) return null;
@@ -25,11 +32,18 @@ const decode = (data: Uint8Array | string | null | undefined): string | null => 
  * version on every put, `latest` on read. Errors other than not-found/already-exists
  * propagate (the route answers 500 without the value; the value is never in an error).
  */
-export const createSecretManagerStore = (deps: { readonly client: SecretManagerClientLike; readonly projectId: string }): SecretStore => {
+export const createSecretManagerStore = (deps: {
+  readonly client: SecretManagerClientLike;
+  readonly projectId: string;
+}): SecretStore => {
   const secretPath = (name: string) => `projects/${deps.projectId}/secrets/${name}`;
   const ensureSecret = async (name: string): Promise<void> => {
     try {
-      await deps.client.createSecret({ parent: `projects/${deps.projectId}`, secretId: name, secret: { replication: { automatic: {} }, labels: { owner: "connectors" } } });
+      await deps.client.createSecret({
+        parent: `projects/${deps.projectId}`,
+        secretId: name,
+        secret: { replication: { automatic: {} }, labels: { owner: "connectors" } },
+      });
     } catch (error: unknown) {
       if (codeOf(error) !== ALREADY_EXISTS) throw error;
     }

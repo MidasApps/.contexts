@@ -37,18 +37,34 @@ export const effectiveNamespaces = (requested: readonly string[] | undefined, al
   return kept.length === 0 ? [...allowed] : [...new Set(kept)];
 };
 
-const byScore = (left: Citation, right: Citation): number => right.score - left.score || left.citationId.localeCompare(right.citationId);
+const byScore = (left: Citation, right: Citation): number =>
+  right.score - left.score || left.citationId.localeCompare(right.citationId);
 
-const searchAll = async (deps: SearchKnowledgeDeps, ctx: CoreToolContext, input: { namespaces: string[]; embedding: number[]; topK: number }) => {
+const searchAll = async (
+  deps: SearchKnowledgeDeps,
+  ctx: CoreToolContext,
+  input: { namespaces: string[]; embedding: number[]; topK: number },
+) => {
   const { tenantId, permissions } = ctx.agent;
   const own = input.namespaces.filter((namespace) => namespace !== CATALOG_NAMESPACE);
   const [tenantHits, catalogHits] = await Promise.all([
-    own.length === 0 ? [] : deps.knowledge.searchChunks({ tenantId, namespaces: own, embedding: input.embedding, topK: input.topK }),
-    input.namespaces.includes(CATALOG_NAMESPACE) ? deps.knowledge.searchChunks({ tenantId, namespaces: [CATALOG_NAMESPACE], embedding: input.embedding, topK: input.topK }) : [],
+    own.length === 0
+      ? []
+      : deps.knowledge.searchChunks({ tenantId, namespaces: own, embedding: input.embedding, topK: input.topK }),
+    input.namespaces.includes(CATALOG_NAMESPACE)
+      ? deps.knowledge.searchChunks({
+          tenantId,
+          namespaces: [CATALOG_NAMESPACE],
+          embedding: input.embedding,
+          topK: input.topK,
+        })
+      : [],
   ]);
   // Catalog documents are titled with their contract id: keep only contracts the caller may see.
   const visible = new Set(permissions);
-  const catalogVisible = catalogHits.filter((hit) => hit.title !== null && deps.catalog.describe({ id: hit.title, permissions: visible }) !== undefined);
+  const catalogVisible = catalogHits.filter(
+    (hit) => hit.title !== null && deps.catalog.describe({ id: hit.title, permissions: visible }) !== undefined,
+  );
   return [...tenantHits, ...catalogVisible].sort(byScore).slice(0, input.topK);
 };
 
@@ -68,8 +84,17 @@ export const createSearchKnowledgeTool = (deps: SearchKnowledgeDeps) =>
     permission: KNOWLEDGE_READ_PERMISSION,
     inputSchema: z.strictObject({
       query: z.string().min(1).max(1000).describe("What to look for, in the user's words."),
-      namespaces: z.array(KnowledgeNamespaceSchema).max(10).optional().describe("Optional subset of tenant, project:<id> or catalog; anything else is ignored."),
-      topK: z.int().min(1).max(MAX_KNOWLEDGE_RESULTS).optional().describe(`How many passages to return (1-${MAX_KNOWLEDGE_RESULTS}, default ${DEFAULT_TOP_K}).`),
+      namespaces: z
+        .array(KnowledgeNamespaceSchema)
+        .max(10)
+        .optional()
+        .describe("Optional subset of tenant, project:<id> or catalog; anything else is ignored."),
+      topK: z
+        .int()
+        .min(1)
+        .max(MAX_KNOWLEDGE_RESULTS)
+        .optional()
+        .describe(`How many passages to return (1-${MAX_KNOWLEDGE_RESULTS}, default ${DEFAULT_TOP_K}).`),
     }),
     outputSchema: z.strictObject({ results: z.array(CitationSchema) }),
     execute: async (input, ctx) => {

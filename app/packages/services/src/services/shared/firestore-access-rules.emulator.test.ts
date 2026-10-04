@@ -19,10 +19,10 @@ import {
   seedRulesFixture,
   serverOnlyDocId,
   TOKENS,
+  type TokenName,
   UID,
   UNIT,
   UNREADABLE_COLLECTIONS,
-  type TokenName,
 } from "./testing/firestore-rules.fixture.ts";
 
 // Security Rules of SP1 (spec §5.5, decision 0006 §5): reads per node through the access
@@ -46,11 +46,15 @@ afterAll(async () => {
 });
 
 const as = (name: TokenName | "anonymous"): RulesTestContext =>
-  name === "anonymous" ? testEnv.unauthenticatedContext() : testEnv.authenticatedContext(TOKENS[name].uid, TOKENS[name].claims);
+  name === "anonymous"
+    ? testEnv.unauthenticatedContext()
+    : testEnv.authenticatedContext(TOKENS[name].uid, TOKENS[name].claims);
 
 const read = (name: TokenName | "anonymous", docPath: string) => as(name).firestore().doc(docPath).get();
-const allowed = (name: TokenName | "anonymous", docPath: string) => expect(assertSucceeds(read(name, docPath))).resolves.toBeDefined();
-const denied = (name: TokenName | "anonymous", docPath: string) => expect(assertFails(read(name, docPath))).resolves.toBeDefined();
+const allowed = (name: TokenName | "anonymous", docPath: string) =>
+  expect(assertSucceeds(read(name, docPath))).resolves.toBeDefined();
+const denied = (name: TokenName | "anonymous", docPath: string) =>
+  expect(assertFails(read(name, docPath))).resolves.toBeDefined();
 
 describe("collection coverage", () => {
   it("classifies every core collection as readable or server-only", () => {
@@ -90,7 +94,8 @@ describe("access/{tenantId}_{uid}", () => {
 
 describe("organizations/{orgId}", () => {
   it("is readable by members of the active tenant, at any node", async () => {
-    for (const name of ["owner", "projectMember", "unitMember", "siblingMember"] as const) await allowed(name, `organizations/${ORG_1}`);
+    for (const name of ["owner", "projectMember", "unitMember", "siblingMember"] as const)
+      await allowed(name, `organizations/${ORG_1}`);
   });
 
   it("isolates organizations: only the active tenant is readable (multi-organization owner)", async () => {
@@ -145,9 +150,13 @@ describe("projects/{projectId}", () => {
 
   it("allows an org-wide list query only when it filters by the active tenant and live docs", async () => {
     const projects = () => as("owner").firestore().collection("projects");
-    await expect(assertSucceeds(projects().where("tenantId", "==", ORG_1).where("deletedAt", "==", null).get())).resolves.toBeDefined();
+    await expect(
+      assertSucceeds(projects().where("tenantId", "==", ORG_1).where("deletedAt", "==", null).get()),
+    ).resolves.toBeDefined();
     await expect(assertFails(projects().get())).resolves.toBeDefined();
-    await expect(assertFails(projects().where("tenantId", "==", ORG_2).where("deletedAt", "==", null).get())).resolves.toBeDefined();
+    await expect(
+      assertFails(projects().where("tenantId", "==", ORG_2).where("deletedAt", "==", null).get()),
+    ).resolves.toBeDefined();
   });
 });
 
@@ -186,7 +195,9 @@ describe.each(UNREADABLE_COLLECTIONS)("server-only collection %s", (collection) 
     const docPath = `${collection}/${serverOnlyDocId(collection)}`;
     for (const name of EVERY_PRINCIPAL) {
       await denied(name, docPath);
-      await expect(assertFails(as(name).firestore().collection(collection).where("tenantId", "==", ORG_1).get())).resolves.toBeDefined();
+      await expect(
+        assertFails(as(name).firestore().collection(collection).where("tenantId", "==", ORG_1).get()),
+      ).resolves.toBeDefined();
     }
   });
 });

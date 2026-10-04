@@ -1,6 +1,6 @@
 "use client";
 
-import { adminListSchedulesEndpoint, type AdminSchedule } from "@core/contracts";
+import { type AdminSchedule, adminListSchedulesEndpoint } from "@core/contracts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -20,11 +20,19 @@ export const adminSchedulesQuery = (callEndpoint: CallEndpoint, organizationId: 
   queryOptions({
     queryKey: scheduleKeys.list(organizationId),
     queryFn: async ({ signal }): Promise<AdminSchedule[]> =>
-      (await callEndpoint(adminListSchedulesEndpoint, { query: organizationId === undefined ? {} : { organizationId }, signal })).data,
+      (
+        await callEndpoint(adminListSchedulesEndpoint, {
+          query: organizationId === undefined ? {} : { organizationId },
+          signal,
+        })
+      ).data,
   });
 
 export const useAdminSchedules = (organizationId: string | undefined, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...adminSchedulesQuery(callEndpoint, organizationId), enabled: signedIn && options.enabled !== false });
+  return useQuery({
+    ...adminSchedulesQuery(callEndpoint, organizationId),
+    enabled: signedIn && options.enabled !== false,
+  });
 };

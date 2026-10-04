@@ -1,10 +1,13 @@
 import type { NodeRef, Permission, PermissionDefinition, TenantNodeRef } from "@core/contracts";
-import { deny, type AuthorizeDecision } from "../../domain/authorization.ts";
+import { type AuthorizeDecision, deny } from "../../domain/authorization.ts";
 import { loadPlatformAccess } from "../platform-access.ts";
 import type { Authorize, AuthorizeRequest } from "../ports/driving/authorize.ts";
-import { loadTenantAccess, type AccessDeps } from "../tenant-access.ts";
+import { type AccessDeps, loadTenantAccess } from "../tenant-access.ts";
 
-const allow = (definition: PermissionDefinition, grantedVia: Extract<AuthorizeDecision, { allowed: true }>["grantedVia"]): AuthorizeDecision => ({
+const allow = (
+  definition: PermissionDefinition,
+  grantedVia: Extract<AuthorizeDecision, { allowed: true }>["grantedVia"],
+): AuthorizeDecision => ({
   allowed: true,
   requiresApproval: definition.requiresApproval ?? false,
   grantedVia,
@@ -13,7 +16,11 @@ const allow = (definition: PermissionDefinition, grantedVia: Extract<AuthorizeDe
 const excludedByCeiling = (permission: Permission, ceiling: ReadonlySet<Permission> | undefined): boolean =>
   ceiling !== undefined && !ceiling.has(permission);
 
-const authorizePlatform = async (request: AuthorizeRequest, definition: PermissionDefinition, deps: AccessDeps): Promise<AuthorizeDecision> => {
+const authorizePlatform = async (
+  request: AuthorizeRequest,
+  definition: PermissionDefinition,
+  deps: AccessDeps,
+): Promise<AuthorizeDecision> => {
   const access = await loadPlatformAccess(request.principal, deps);
   if (!access.ok) return deny(access.reason);
   if (!access.permissions.has(request.permission)) return deny("PERMISSION_NOT_GRANTED");
@@ -47,7 +54,10 @@ const isTenantRequest = (request: AuthorizeRequest): request is AuthorizeRequest
   request.node.level !== "platform";
 
 // Step 1 (SP1 spec §5.2): registered permission, and platform scope ↔ platform node.
-const checkPermission = (request: { permission: Permission; node: NodeRef }, deps: AccessDeps): PermissionDefinition | "UNKNOWN_PERMISSION" | "SCOPE_MISMATCH" => {
+const checkPermission = (
+  request: { permission: Permission; node: NodeRef },
+  deps: AccessDeps,
+): PermissionDefinition | "UNKNOWN_PERMISSION" | "SCOPE_MISMATCH" => {
   const definition = deps.registry.get(request.permission);
   if (definition === undefined) return "UNKNOWN_PERMISSION";
   return (definition.scope === "platform") === (request.node.level === "platform") ? definition : "SCOPE_MISMATCH";
@@ -67,5 +77,7 @@ export const makeAuthorize =
   async (request) => {
     const checked = checkPermission(request, deps);
     if (typeof checked === "string") return deny(checked);
-    return isTenantRequest(request) ? authorizeTenant(request, checked, deps) : authorizePlatform(request, checked, deps);
+    return isTenantRequest(request)
+      ? authorizeTenant(request, checked, deps)
+      : authorizePlatform(request, checked, deps);
   };

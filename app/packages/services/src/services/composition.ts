@@ -2,53 +2,59 @@
 // `/v1` pipeline, the access core, the access write side and the audit writer. Apps call it lazily.
 import { randomBytes } from "node:crypto";
 import type { ModuleSettingsManifest, PermissionDefinition, UnitTypeDefinition } from "@core/contracts";
-import { createFirestoreAccessAdapters, type FirestoreAccessAdapters } from "./access/adapters/driven/firestore-access-adapters.ts";
+import {
+  createFirestoreAccessAdapters,
+  type FirestoreAccessAdapters,
+} from "./access/adapters/driven/firestore-access-adapters.ts";
 import { createNoopInvitationNotifier } from "./access/adapters/driven/noop-invitation-notifier.ts";
 import type { AccessWriteDeps } from "./access/application/access-write-deps.ts";
 import type { AccessReaders } from "./access/application/ports/driven/access-readers.ts";
+import type { ApprovalActionHandler } from "./access/application/ports/driven/approval-action-handler.ts";
 import type { InvitationNotifier } from "./access/application/ports/driven/invitation-notifier.ts";
 import { makeSyncClaims } from "./access/application/use-cases/sync-claims.ts";
-import { createAccessCore, createAccessServices, type AccessCore, type AccessServices } from "./access/composition.ts";
+import { type ApprovalServices, createFirestoreApprovalServices } from "./access/approval-composition.ts";
+import { type AccessCore, type AccessServices, createAccessCore, createAccessServices } from "./access/composition.ts";
 import type { RandomBytes } from "./access/domain/invitation-token.ts";
 import { createMemberServices, type MemberServices } from "./access/member-composition.ts";
-import { createFirestoreApprovalServices, type ApprovalServices } from "./access/approval-composition.ts";
-import type { ApprovalActionHandler } from "./access/application/ports/driven/approval-action-handler.ts";
 import { createFirestoreAuditLogWriter } from "./audit/adapters/driven/firestore-audit-log-writer.ts";
-import { createFirestoreAuditLogServices, type AuditLogServices } from "./audit/composition.ts";
-import { makeRecordAudit, type AuditWriter } from "./audit/application/use-cases/record-audit.ts";
+import { type AuditWriter, makeRecordAudit } from "./audit/application/use-cases/record-audit.ts";
+import { type AuditLogServices, createFirestoreAuditLogServices } from "./audit/composition.ts";
 import { buildCoreRoutes, type CoreRoutes } from "./core-routes.ts";
-import { createFirebaseTokenVerifier } from "./identity/adapters/driven/firebase-token-verifier.ts";
-import type { ApiKeyAuthenticator } from "./identity/application/ports/driven/api-key-authenticator.ts";
-import type { ApiKeyRevoker } from "./identity/application/ports/driven/api-key-revoker.ts";
-import { createFirestoreApiKeyServices, type ApiKeyServices } from "./identity/api-key-composition.ts";
-import { createFirestoreDeviceServices, type DeviceServices } from "./identity/device-composition.ts";
-import { createFirebaseCustomTokenIssuer } from "./identity/adapters/driven/firebase-custom-token-issuer.ts";
-import { createFirestorePlatformServices, type PlatformServices } from "./identity/platform-composition.ts";
-import type { TokenVerifier } from "./identity/application/ports/driven/token-verifier.ts";
 import { createFirebaseAuthAccountReader } from "./identity/adapters/driven/firebase-auth-account-reader.ts";
+import { createFirebaseCustomTokenIssuer } from "./identity/adapters/driven/firebase-custom-token-issuer.ts";
+import { createFirebaseTokenVerifier } from "./identity/adapters/driven/firebase-token-verifier.ts";
 import { createFirebaseUserAccountReader } from "./identity/adapters/driven/firebase-user-account-reader.ts";
 import { createFirestoreUserRepository } from "./identity/adapters/driven/firestore-user-repository.ts";
-import type { ResolveAccessContext } from "./identity/application/use-cases/resolve-access-context.ts";
-import { createIdentityServices, type IdentityServices } from "./identity/composition.ts";
-import { createFirebaseSessionVertical } from "./identity/firebase-session-composition.ts";
 import type { SessionActions } from "./identity/adapters/driving/session-actions.ts";
 import type { SessionGuards } from "./identity/adapters/driving/session-guards.ts";
-import type { SessionServices } from "./identity/session-composition.ts";
+import { type ApiKeyServices, createFirestoreApiKeyServices } from "./identity/api-key-composition.ts";
+import type { ApiKeyAuthenticator } from "./identity/application/ports/driven/api-key-authenticator.ts";
+import type { ApiKeyRevoker } from "./identity/application/ports/driven/api-key-revoker.ts";
+import type { TokenVerifier } from "./identity/application/ports/driven/token-verifier.ts";
+import type { ResolveAccessContext } from "./identity/application/use-cases/resolve-access-context.ts";
 import { makeVerifyBearer, type VerifyBearer } from "./identity/application/use-cases/resolve-principal.ts";
-import { systemClock, type Clock } from "./shared/clock/clock.ts";
+import { createIdentityServices, type IdentityServices } from "./identity/composition.ts";
+import { createFirestoreDeviceServices, type DeviceServices } from "./identity/device-composition.ts";
+import { createFirebaseSessionVertical } from "./identity/firebase-session-composition.ts";
+import { createFirestorePlatformServices, type PlatformServices } from "./identity/platform-composition.ts";
+import type { SessionServices } from "./identity/session-composition.ts";
+import { buildModuleSettingsRoutes } from "./modules/adapters/driving/module-settings-routes.ts";
+import { createFirestoreModuleSettingsServices, type ModuleSettingsServices } from "./modules/composition.ts";
+import { moduleSettingsDefinitionsOf } from "./modules/domain/module-settings-registry.ts";
+import { type Clock, systemClock } from "./shared/clock/clock.ts";
 import type { FirebaseAdmin } from "./shared/firebase/firebase-admin.ts";
 import { createFirestoreUnitOfWork } from "./shared/firestore/unit-of-work.ts";
 import type { ApiRouteDeps } from "./shared/http/api-route.ts";
 import { createFirestoreIdempotencyStore } from "./shared/idempotency/firestore-idempotency-store.ts";
 import type { Logger } from "./shared/observability/logger.ts";
 import { createFirestoreRateLimiter } from "./shared/rate-limit/firestore-rate-limiter.ts";
-import { createFirestoreTenancyAdapters, type FirestoreTenancyAdapters } from "./tenancy/adapters/driven/firestore-tenancy-adapters.ts";
+import {
+  createFirestoreTenancyAdapters,
+  type FirestoreTenancyAdapters,
+} from "./tenancy/adapters/driven/firestore-tenancy-adapters.ts";
 import { createTenancyServices, type TenancyServices } from "./tenancy/composition.ts";
-import { buildModuleSettingsRoutes } from "./modules/adapters/driving/module-settings-routes.ts";
-import { createFirestoreModuleSettingsServices, type ModuleSettingsServices } from "./modules/composition.ts";
-import { moduleSettingsDefinitionsOf } from "./modules/domain/module-settings-registry.ts";
 
-export { createRouteResolver, UnknownEndpointError, type CoreRoutes } from "./core-routes.ts";
+export { type CoreRoutes, createRouteResolver, UnknownEndpointError } from "./core-routes.ts";
 
 /** What a module contributes to the server; a `defineModule` manifest (decision 0015) satisfies it. */
 export type CoreServerModule = {
@@ -155,7 +161,13 @@ const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, api
     readers,
     clock,
   });
-  const syncClaims = makeSyncClaims({ users: adapters.users, projections: adapters.projections, principals: readers.principals, claims: adapters.claims, logger: args.logger });
+  const syncClaims = makeSyncClaims({
+    users: adapters.users,
+    projections: adapters.projections,
+    principals: readers.principals,
+    claims: adapters.claims,
+    logger: args.logger,
+  });
   const writeDeps: AccessWriteDeps = {
     registry: core.registry,
     memberships: adapters.memberships,
@@ -183,7 +195,13 @@ const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, api
   return { core, readers, services: createAccessServices(writeDeps), members };
 };
 
-const buildTenancy = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, access: AccessServices, adapters: FirestoreTenancyAdapters): TenancyServices => {
+const buildTenancy = (
+  args: CoreServerArgs,
+  clock: Clock,
+  audit: AuditWriter,
+  access: AccessServices,
+  adapters: FirestoreTenancyAdapters,
+): TenancyServices => {
   const { firestore, auth } = args.firebase;
   return createTenancyServices({
     unitTypes: (args.modules ?? []).flatMap((module) => module.unitTypes ?? []),
@@ -294,9 +312,26 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     logger: args.logger,
   });
   const modules = args.modules ?? [];
-  const moduleSettings = createFirestoreModuleSettingsServices({ firestore, definitions: moduleSettingsDefinitionsOf(modules), audit, clock });
+  const moduleSettings = createFirestoreModuleSettingsServices({
+    firestore,
+    definitions: moduleSettingsDefinitionsOf(modules),
+    audit,
+    clock,
+  });
   const routes = {
-    ...buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices, platform, approvals, auditLogs }),
+    ...buildCoreRoutes({
+      pipeline,
+      access: access.services,
+      members: access.members,
+      tenancy,
+      identity,
+      sessions,
+      apiKeys,
+      devices,
+      platform,
+      approvals,
+      auditLogs,
+    }),
     ...buildModuleSettingsRoutes({ pipeline, moduleSettings }),
   };
   const moduleUnitTypes = modules.flatMap((module) => module.unitTypes ?? []);

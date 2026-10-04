@@ -7,7 +7,11 @@
  */
 
 /** A shared package whose output versions are not all in the workspace lockfile. */
-export type PinDrift = { readonly name: string; readonly output: readonly string[]; readonly workspace: readonly string[] };
+export type PinDrift = {
+  readonly name: string;
+  readonly output: readonly string[];
+  readonly workspace: readonly string[];
+};
 
 // `  name@version:` or `  '@scope/name@version':` directly under `packages:` (pnpm lockfile v9).
 const PACKAGE_KEY = /^ {2}'?((?:@[^@/\s']+\/)?[^@\s']+)@([^(':\s]+)'?:/;

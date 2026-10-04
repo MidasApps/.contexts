@@ -58,7 +58,8 @@ export type BigQueryTableLike<Row = BigQueryLlmCallRow> = {
  * The warehouse joins and counts users by this value only. bigquery.md §15 (PII) wins
  * over the §14 `user_id` column: the uid is personal data (`LlmCall.userId`, pii personal).
  */
-export const hashUserId = (userId: string | null): string | null => (userId === null ? null : createHash("sha256").update(userId).digest("hex"));
+export const hashUserId = (userId: string | null): string | null =>
+  userId === null ? null : createHash("sha256").update(userId).digest("hex");
 
 /** Ledger row → warehouse row. Tool calls and errors are not in the ledger yet: empty array and null. */
 export const toBigQueryRow = (call: LlmCall): BigQueryLlmCallRow => ({
@@ -97,12 +98,30 @@ export const toBigQueryRollupRow = (rollup: UsageDailyRollup, exportedAt: string
 /** A rollup's insertId is its content: an identical retry is dropped, a changed value is a new row. */
 export const rollupInsertIdOf = (rollup: UsageDailyRollup): string =>
   createHash("sha256")
-    .update([rollup.tenantId, rollup.day, rollup.model, rollup.agentId, rollup.calls, rollup.inputTokens, rollup.outputTokens, rollup.costMicroUsd].join("|"))
+    .update(
+      [
+        rollup.tenantId,
+        rollup.day,
+        rollup.model,
+        rollup.agentId,
+        rollup.calls,
+        rollup.inputTokens,
+        rollup.outputTokens,
+        rollup.costMicroUsd,
+      ].join("|"),
+    )
     .digest("hex");
 
-const insertBatched = async <Row>(table: BigQueryTableLike<Row>, rows: readonly { readonly insertId: string; readonly json: Row }[]): Promise<void> => {
+const insertBatched = async <Row>(
+  table: BigQueryTableLike<Row>,
+  rows: readonly { readonly insertId: string; readonly json: Row }[],
+): Promise<void> => {
   for (let start = 0; start < rows.length; start += BIGQUERY_INSERT_BATCH) {
-    await table.insert(rows.slice(start, start + BIGQUERY_INSERT_BATCH), { raw: true, skipInvalidRows: false, ignoreUnknownValues: false });
+    await table.insert(rows.slice(start, start + BIGQUERY_INSERT_BATCH), {
+      raw: true,
+      skipInvalidRows: false,
+      ignoreUnknownValues: false,
+    });
   }
 };
 
@@ -118,11 +137,18 @@ export const createBigQueryUsageSink = (deps: {
   /** Test seam; defaults to the current time. */
   readonly now?: () => Date;
 }): UsageSink => ({
-  exportCalls: (calls) => insertBatched(deps.table, calls.map((call) => ({ insertId: call.id, json: toBigQueryRow(call) }))),
+  exportCalls: (calls) =>
+    insertBatched(
+      deps.table,
+      calls.map((call) => ({ insertId: call.id, json: toBigQueryRow(call) })),
+    ),
   exportRollups: async (rollups) => {
     if (deps.rollupsTable === undefined) throw new Error("daily_rollups table is not configured");
     const exportedAt = (deps.now ?? (() => new Date()))().toISOString();
-    await insertBatched(deps.rollupsTable, rollups.map((rollup) => ({ insertId: rollupInsertIdOf(rollup), json: toBigQueryRollupRow(rollup, exportedAt) })));
+    await insertBatched(
+      deps.rollupsTable,
+      rollups.map((rollup) => ({ insertId: rollupInsertIdOf(rollup), json: toBigQueryRollupRow(rollup, exportedAt) })),
+    );
   },
 });
 
@@ -130,7 +156,11 @@ export const createBigQueryUsageSink = (deps: {
  * The real `llm_calls` table through `@google-cloud/bigquery` (ADC on Cloud Run). The SDK
  * loads on the first export, so `local` (no-op sink) never imports it.
  */
-export const createBigQueryLlmCallsTable = <Row = BigQueryLlmCallRow>(config: { readonly dataset: string; readonly projectId?: string; readonly table?: string }): BigQueryTableLike<Row> => {
+export const createBigQueryLlmCallsTable = <Row = BigQueryLlmCallRow>(config: {
+  readonly dataset: string;
+  readonly projectId?: string;
+  readonly table?: string;
+}): BigQueryTableLike<Row> => {
   let table: Promise<BigQueryTableLike<Row>> | undefined;
   const load = async (): Promise<BigQueryTableLike<Row>> => {
     const { BigQuery } = await import("@google-cloud/bigquery");

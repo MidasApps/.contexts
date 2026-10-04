@@ -14,13 +14,17 @@ export type AgentMiddlewareContext = {
   readonly header?: (name: string, value: string) => void;
 };
 
-export type AgentMiddlewareHandler = (context: AgentMiddlewareContext, next: () => Promise<void>) => Promise<Response | void>;
+export type AgentMiddlewareHandler = (
+  context: AgentMiddlewareContext,
+  next: () => Promise<void>,
+) => Promise<Response | void>;
 
 /** A Mastra `server.middleware` entry (`{ path, handler }`). */
 export type AgentMiddleware = { readonly path: string; readonly handler: AgentMiddlewareHandler };
 
 /** Normalized API prefix without a trailing slash (`/api`). */
-export const normalizeApiPrefix = (apiPrefix: string = DEFAULT_MASTRA_API_PREFIX): string => apiPrefix.replace(/\/+$/, "") || DEFAULT_MASTRA_API_PREFIX;
+export const normalizeApiPrefix = (apiPrefix: string = DEFAULT_MASTRA_API_PREFIX): string =>
+  apiPrefix.replace(/\/+$/, "") || DEFAULT_MASTRA_API_PREFIX;
 
 /** Mastra registers middleware paths unchanged, so they must carry the prefix. */
 export const apiPathPattern = (apiPrefix?: string): string => `${normalizeApiPrefix(apiPrefix)}/*`;

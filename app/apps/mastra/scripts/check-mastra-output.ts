@@ -38,17 +38,27 @@ if (mergedYaml !== outputYaml) {
   const install = pnpmIn("install --prod");
   if (install.status !== 0) fail(`pnpm install in the output failed (exit ${String(install.status)})`);
 }
-const drift = findPinDrift({ workspaceLock: readFileSync(WORKSPACE_LOCK, "utf8"), outputLock: readFileSync(OUTPUT_LOCK, "utf8") });
+const drift = findPinDrift({
+  workspaceLock: readFileSync(WORKSPACE_LOCK, "utf8"),
+  outputLock: readFileSync(OUTPUT_LOCK, "utf8"),
+});
 if (drift.length > 0) {
-  const lines = drift.map((entry) => `  ${entry.name}: output ${entry.output.join(", ")} / workspace ${entry.workspace.join(", ")}`);
+  const lines = drift.map(
+    (entry) => `  ${entry.name}: output ${entry.output.join(", ")} / workspace ${entry.workspace.join(", ")}`,
+  );
   fail(`the build output resolves ${drift.length} shared package(s) off the workspace lockfile:\n${lines.join("\n")}`);
 }
 process.stdout.write("[check-mastra-output] output pins match the workspace lockfile\n");
 
 const assets = AGENT_ASSETS.map((asset) => ({ ...asset, source: path.resolve(APP_DIR, asset.source) }));
 const missing = missingBundledAssets({ assets, outputDir: OUTPUT_DIR });
-if (missing.length > 0) fail(`the build output lacks ${missing.length} agent asset file(s):\n${missing.map((file) => `  ${file}`).join("\n")}`);
-process.stdout.write(`[check-mastra-output] agent assets present: ${AGENT_ASSETS.map((asset) => asset.bundled).join(", ")}\n`);
+if (missing.length > 0)
+  fail(
+    `the build output lacks ${missing.length} agent asset file(s):\n${missing.map((file) => `  ${file}`).join("\n")}`,
+  );
+process.stdout.write(
+  `[check-mastra-output] agent assets present: ${AGENT_ASSETS.map((asset) => asset.bundled).join(", ")}\n`,
+);
 
 if (!process.argv.includes("--no-audit")) {
   const audit = pnpmIn("audit --prod --audit-level high");

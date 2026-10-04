@@ -3,7 +3,7 @@
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
 import { cn } from "#/shared/lib/cn.ts";
-import { buttonVariants, type ButtonVariantProps } from "#/shared/ui/atoms/Button/button-variants.ts";
+import { type ButtonVariantProps, buttonVariants } from "#/shared/ui/atoms/Button/button-variants.ts";
 import { centeredModalClasses, overlayClasses } from "#/shared/ui/styles/modal-classes.ts";
 
 /**
@@ -33,7 +33,9 @@ export function AlertDialogContent({ className, ...props }: ComponentProps<typeo
 }
 
 export function AlertDialogHeader({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="alert-dialog-header" className={cn("flex flex-col gap-1.5 text-left", className)} {...props} />;
+  return (
+    <div data-slot="alert-dialog-header" className={cn("flex flex-col gap-1.5 text-left", className)} {...props} />
+  );
 }
 
 export function AlertDialogFooter({ className, ...props }: ComponentProps<"div">) {
@@ -56,7 +58,10 @@ export function AlertDialogTitle({ className, ...props }: ComponentProps<typeof 
   );
 }
 
-export function AlertDialogDescription({ className, ...props }: ComponentProps<typeof AlertDialogPrimitive.Description>) {
+export function AlertDialogDescription({
+  className,
+  ...props
+}: ComponentProps<typeof AlertDialogPrimitive.Description>) {
   return (
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"

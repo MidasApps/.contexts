@@ -6,7 +6,10 @@ import { buildAccessContext, IDS } from "#/shared/testing/fixtures.ts";
 import { renderClientHook, renderWithClient } from "#/shared/testing/render-client.tsx";
 import { Can, useCan, usePermissions } from "./index.ts";
 
-const contextApi = () => createFakeApi({ "GET /v1/me/context": ok(buildAccessContext({ permissions: ["core.organization.read", "core.project.create"] })) });
+const contextApi = () =>
+  createFakeApi({
+    "GET /v1/me/context": ok(buildAccessContext({ permissions: ["core.organization.read", "core.project.create"] })),
+  });
 
 describe("Can", () => {
   it("renders children only with the permission, the fallback otherwise, nothing while loading", async () => {
@@ -37,14 +40,20 @@ describe("Can", () => {
     expect(outside.result.current.status).toBe("success");
     expect(outside.result.current.can("core.organization.read")).toBe(false);
 
-    const failing = renderClientHook(() => usePermissions(), { api: createFakeApi({ "GET /v1/me/context": apiError(500, "INTERNAL_ERROR") }), path: `/o/${IDS.organization}` });
+    const failing = renderClientHook(() => usePermissions(), {
+      api: createFakeApi({ "GET /v1/me/context": apiError(500, "INTERNAL_ERROR") }),
+      path: `/o/${IDS.organization}`,
+    });
     await waitFor(() => expect(failing.result.current.status).toBe("error"));
     expect(failing.result.current.can("core.organization.read")).toBe(false);
   });
 
   it("checks an explicit node instead of the URL", async () => {
     const api = contextApi();
-    const { result } = renderClientHook(() => useCan("core.project.create", { organizationId: IDS.otherOrganization }), { api, path: "/organizations" });
+    const { result } = renderClientHook(
+      () => useCan("core.project.create", { organizationId: IDS.otherOrganization }),
+      { api, path: "/organizations" },
+    );
     await waitFor(() => expect(result.current).toBe(true));
     expect(api.calls[0]?.query).toBe(`?organizationId=${IDS.otherOrganization}`);
   });

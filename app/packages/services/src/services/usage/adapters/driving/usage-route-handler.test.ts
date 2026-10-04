@@ -27,14 +27,20 @@ const setup = () => {
       reads.push({ tenantId, monthStart: monthStart.toISOString() });
       return Promise.resolve(tenantId === ORG_A ? TOTALS : EMPTY);
     },
-    getMonthByModel: ({ tenantId }) => Promise.resolve(tenantId === ORG_A ? [{ provider: "google", model: "gemini-3.5-flash", totals: TOTALS }] : []),
+    getMonthByModel: ({ tenantId }) =>
+      Promise.resolve(tenantId === ORG_A ? [{ provider: "google", model: "gemini-3.5-flash", totals: TOTALS }] : []),
     getMonthBreakdowns: ({ tenantId }) =>
       Promise.resolve(
         tenantId === ORG_A
-          ? { byDay: [{ day: "2026-10-01", totals: TOTALS }], byAgent: [{ agentId: "assistant", totals: TOTALS }], byUser: [{ userId: "alice", totals: TOTALS }] }
+          ? {
+              byDay: [{ day: "2026-10-01", totals: TOTALS }],
+              byAgent: [{ agentId: "assistant", totals: TOTALS }],
+              byUser: [{ userId: "alice", totals: TOTALS }],
+            }
           : { byDay: [], byAgent: [], byUser: [] },
       ),
-    getTenantBudget: ({ tenantId }) => Promise.resolve(tenantId === ORG_A ? { monthlyMicroUsd: 5000, monthlyTokens: 9000 } : null),
+    getTenantBudget: ({ tenantId }) =>
+      Promise.resolve(tenantId === ORG_A ? { monthlyMicroUsd: 5000, monthlyTokens: 9000 } : null),
     setTenantBudget: () => Promise.resolve(),
   };
   const routes = buildUsageRoutes({ pipeline, getUsageSummary: makeGetUsageSummary({ repository, clock }) });
@@ -65,14 +71,18 @@ describe("GET /v1/usage", () => {
 
   it("reads an earlier month when asked", async () => {
     const { routes, reads } = setup();
-    const response = await callRoute(routes, "usage.getSummary", `/v1/usage?organizationId=${ORG_A}&month=2026-08`, { as: "alice" });
+    const response = await callRoute(routes, "usage.getSummary", `/v1/usage?organizationId=${ORG_A}&month=2026-08`, {
+      as: "alice",
+    });
     expect(await json(response)).toMatchObject({ data: { month: "2026-08" } });
     expect(reads).toEqual([{ tenantId: ORG_A, monthStart: "2026-08-01T00:00:00.000Z" }]);
   });
 
   it("refuses a member without core.usage.read and an admin of another organization, without reading the ledger", async () => {
     const { routes, reads } = setup();
-    expect((await callRoute(routes, "usage.getSummary", `/v1/usage?organizationId=${ORG_A}`, { as: "mia" })).status).toBe(403);
+    expect(
+      (await callRoute(routes, "usage.getSummary", `/v1/usage?organizationId=${ORG_A}`, { as: "mia" })).status,
+    ).toBe(403);
     const other = await callRoute(routes, "usage.getSummary", `/v1/usage?organizationId=${ORG_A}`, { as: "bob" });
     expect([403, 404]).toContain(other.status);
     expect((await callRoute(routes, "usage.getSummary", `/v1/usage?organizationId=${ORG_A}`)).status).toBe(401);
@@ -81,7 +91,10 @@ describe("GET /v1/usage", () => {
 
   it("rejects a malformed month and a user call without an organization", async () => {
     const { routes } = setup();
-    expect((await callRoute(routes, "usage.getSummary", `/v1/usage?organizationId=${ORG_A}&month=2026-13`, { as: "alice" })).status).toBe(400);
+    expect(
+      (await callRoute(routes, "usage.getSummary", `/v1/usage?organizationId=${ORG_A}&month=2026-13`, { as: "alice" }))
+        .status,
+    ).toBe(400);
     expect((await callRoute(routes, "usage.getSummary", "/v1/usage", { as: "alice" })).status).toBe(400);
   });
 });

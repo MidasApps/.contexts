@@ -1,13 +1,13 @@
 import type {
   AgentApprovalRequest,
-  ApprovalStatus,
   AgentSettings,
+  ApprovalStatus,
   Citation,
-  EvalExperimentSummary,
   Connector,
   ConnectorLoadErrorCode,
   CustomAgent,
   CustomSkill,
+  EvalExperimentSummary,
   KnowledgeDocument,
   KnowledgeDocumentSource,
   LlmCall,
@@ -26,7 +26,12 @@ import type { ContractCommand, RunSemanticQuery } from "@core/services";
 
 /** SP1 `Principal` (spec §3.1). */
 export type AccessPrincipal =
-  | { readonly type: "user"; readonly uid: string; readonly mfa: boolean; readonly impersonation?: { readonly sessionId: string; readonly staffUid: string } }
+  | {
+      readonly type: "user";
+      readonly uid: string;
+      readonly mfa: boolean;
+      readonly impersonation?: { readonly sessionId: string; readonly staffUid: string };
+    }
   | { readonly type: "device"; readonly deviceId: string; readonly tenantId: string }
   | { readonly type: "service"; readonly apiKeyId: string; readonly tenantId: string; readonly ownerUid: string };
 
@@ -75,10 +80,17 @@ export type AccessPort = {
    */
   readonly verifyBearer: (input: { token: string; checkRevoked: boolean }) => Promise<AccessPrincipal | null>;
   /** @returns `null` when the principal has no membership on the node (fail-closed: no permissions). */
-  readonly resolveAccessContext: (input: { principal: AccessPrincipal; node: NodeRef }) => Promise<AccessContext | null>;
+  readonly resolveAccessContext: (input: {
+    principal: AccessPrincipal;
+    node: NodeRef;
+  }) => Promise<AccessContext | null>;
   /** Fail-closed decision; rejects only on infrastructure errors (never resolves to allowed on error). */
   readonly authorize: (request: AuthorizeRequest) => Promise<AuthorizeDecision>;
-  readonly getEffectivePermissions: (input: { principal: AccessPrincipal; node: NodeRef; ceiling?: ReadonlySet<string> }) => Promise<ReadonlySet<string>>;
+  readonly getEffectivePermissions: (input: {
+    principal: AccessPrincipal;
+    node: NodeRef;
+    ceiling?: ReadonlySet<string>;
+  }) => Promise<ReadonlySet<string>>;
 };
 
 /** SP1 `AuditWriter.record` entry (spec §6.7); actions are SCREAMING_SNAKE past tense. */
@@ -183,7 +195,9 @@ export type KnowledgePort = {
     readonly topK: number;
   }) => Promise<readonly Citation[]>;
   /** Upserts by `(tenant, source, sourceRef)`; `unchanged` = same content already indexed (skip embedding). */
-  readonly registerDocument: (input: KnowledgeDocumentInput) => Promise<{ readonly document: KnowledgeDocument; readonly unchanged: boolean }>;
+  readonly registerDocument: (
+    input: KnowledgeDocumentInput,
+  ) => Promise<{ readonly document: KnowledgeDocument; readonly unchanged: boolean }>;
   /** Replaces every chunk of the document in one transaction and marks it `ready`. */
   readonly replaceChunks: (input: {
     readonly tenantId: string;
@@ -203,12 +217,17 @@ export type FilesPort = {
     readonly tenantId: string;
     readonly fileId: string;
     readonly purpose: StoredFile["purpose"];
-  }) => Promise<{ readonly ok: true; readonly data: StoredFile } | { readonly ok: false; readonly error: FileReadError }>;
+  }) => Promise<
+    { readonly ok: true; readonly data: StoredFile } | { readonly ok: false; readonly error: FileReadError }
+  >;
   readonly readFileBytes: (input: {
     readonly tenantId: string;
     readonly fileId: string;
     readonly purpose: StoredFile["purpose"];
-  }) => Promise<{ readonly ok: true; readonly data: { readonly file: StoredFile; readonly bytes: Uint8Array } } | { readonly ok: false; readonly error: FileReadError }>;
+  }) => Promise<
+    | { readonly ok: true; readonly data: { readonly file: StoredFile; readonly bytes: Uint8Array } }
+    | { readonly ok: false; readonly error: FileReadError }
+  >;
 };
 
 /** A public web page as Markdown (Firecrawl scrape, SP3 Task 23; fixtures in fake mode). */
@@ -216,7 +235,11 @@ export type WebPage = { readonly url: string; readonly title: string | null; rea
 
 export type WebContentPort = {
   /** @throws when the page cannot be fetched; the SSRF guard lives in the adapter (Task 23). */
-  readonly scrape: (input: { readonly url: string; readonly tenantId: string; readonly abortSignal?: AbortSignal }) => Promise<WebPage>;
+  readonly scrape: (input: {
+    readonly url: string;
+    readonly tenantId: string;
+    readonly abortSignal?: AbortSignal;
+  }) => Promise<WebPage>;
 };
 
 /** Domain events of the knowledge base; the binding assigns the ULID `eventId`. */
@@ -233,7 +256,11 @@ export type KnowledgeEventsPort = {
 export type ConnectorsPort = {
   readonly listActive: (input: { tenantId: string }) => Promise<readonly Connector[]>;
   /** Stores why a connector failed to load (`null` clears it) for the settings page; optional for hosts without one. */
-  readonly recordLoad?: (input: { tenantId: string; connectorId: string; lastError: { code: ConnectorLoadErrorCode; at: string } | null }) => Promise<void>;
+  readonly recordLoad?: (input: {
+    tenantId: string;
+    connectorId: string;
+    lastError: { code: ConnectorLoadErrorCode; at: string } | null;
+  }) => Promise<void>;
 };
 
 /** Secret values by reference (Secret Manager outside local); never logged. */
@@ -255,7 +282,11 @@ export type SettingsPort = { readonly getAgentSettings: (input: { tenantId: stri
 export type PromptBody = { readonly versionId: string; readonly body: string };
 
 /** One stored prompt version, as the eval route reads it. */
-export type PromptVersionRecord = PromptBody & { readonly agentId: string; readonly scope: "platform" | "tenant"; readonly tenantId: string | null };
+export type PromptVersionRecord = PromptBody & {
+  readonly agentId: string;
+  readonly scope: "platform" | "tenant";
+  readonly tenantId: string | null;
+};
 
 /**
  * Versioned prompts (decision 0038): the active platform instructions and the tenant's active
@@ -263,12 +294,25 @@ export type PromptVersionRecord = PromptBody & { readonly agentId: string; reado
  * reject on a store failure; the resolver then serves its cache or the code seed.
  */
 export type PromptStorePort = {
-  readonly getActive: (input: { readonly agentId: string; readonly tenantId: string | null }) => Promise<{ readonly platform: PromptBody | null; readonly addendum: PromptBody | null }>;
-  readonly getVersion: (input: { readonly versionId: string; readonly tenantId: string | null }) => Promise<PromptVersionRecord | null>;
-  readonly recordEval: (input: { readonly versionId: string; readonly tenantId: string | null; readonly experimentId: string; readonly verdict: "passed" | "failed" }) => Promise<void>;
+  readonly getActive: (input: {
+    readonly agentId: string;
+    readonly tenantId: string | null;
+  }) => Promise<{ readonly platform: PromptBody | null; readonly addendum: PromptBody | null }>;
+  readonly getVersion: (input: {
+    readonly versionId: string;
+    readonly tenantId: string | null;
+  }) => Promise<PromptVersionRecord | null>;
+  readonly recordEval: (input: {
+    readonly versionId: string;
+    readonly tenantId: string | null;
+    readonly experimentId: string;
+    readonly verdict: "passed" | "failed";
+  }) => Promise<void>;
 };
 
-export type FlagsPort = { readonly getValues: (input: { readonly tenantId: string | null }) => Promise<Readonly<Record<string, boolean>>> };
+export type FlagsPort = {
+  readonly getValues: (input: { readonly tenantId: string | null }) => Promise<Readonly<Record<string, boolean>>>;
+};
 
 /** An SP1 approval request as workflows read it: effective status (a pending one past its expiry reads `expired`). */
 export type WorkflowApprovalRecord = {
@@ -299,8 +343,14 @@ export type WorkflowApprovalPort = {
     readonly summary: string;
     readonly requestId: string;
   }) => Promise<{ readonly approvalId: string }>;
-  readonly getApprovalRequest: (input: { readonly approvalRequestId: string }) => Promise<WorkflowApprovalRecord | null>;
-  readonly cancelWorkflowApproval: (input: { readonly approvalRequestId: string; readonly runId: string; readonly requestId: string }) => Promise<{ readonly cancelled: boolean }>;
+  readonly getApprovalRequest: (input: {
+    readonly approvalRequestId: string;
+  }) => Promise<WorkflowApprovalRecord | null>;
+  readonly cancelWorkflowApproval: (input: {
+    readonly approvalRequestId: string;
+    readonly runId: string;
+    readonly requestId: string;
+  }) => Promise<{ readonly cancelled: boolean }>;
 };
 
 /**
@@ -317,7 +367,10 @@ export type WorkflowCommandPort = {
     readonly input: unknown;
     readonly idempotencyKey: string;
     readonly requestId: string;
-  }) => Promise<{ readonly ok: true; readonly output: unknown; readonly replayed: boolean } | { readonly ok: false; readonly code: string }>;
+  }) => Promise<
+    | { readonly ok: true; readonly output: unknown; readonly replayed: boolean }
+    | { readonly ok: false; readonly code: string }
+  >;
 };
 
 /** Kinds of the notices SP5 workflows send (decision 0037: paused schedule; decision 0039: budget alerts). */
@@ -353,7 +406,10 @@ export type TenantUsageReportResult = {
  */
 export type UsageReportPort = {
   readonly listTenantIds: () => Promise<readonly string[]>;
-  readonly reportTenant: (input: { readonly tenantId: string; readonly requestId: string }) => Promise<TenantUsageReportResult>;
+  readonly reportTenant: (input: {
+    readonly tenantId: string;
+    readonly requestId: string;
+  }) => Promise<TenantUsageReportResult>;
 };
 
 /** SP1 approval sweeps (decision 0030 A3, SP5 spec §3.3): overdue pending → `expired`; stale `approved` → `failed`. */
@@ -364,7 +420,9 @@ export type ApprovalSweepPort = {
 
 /** Conversations soft-deleted more than 30 days ago (SP4 metadata); the workflow deletes each Mastra thread. */
 export type ConversationPurgePort = {
-  readonly purgeDeleted: (input: { readonly deleteThread: (threadId: string) => Promise<boolean> }) => Promise<{ readonly purged: number; readonly failed: number }>;
+  readonly purgeDeleted: (input: {
+    readonly deleteThread: (threadId: string) => Promise<boolean>;
+  }) => Promise<{ readonly purged: number; readonly failed: number }>;
 };
 
 /** Eval experiment summaries finished since a time, and their warehouse export (decision 0040). */

@@ -32,7 +32,10 @@ const scrubMetadata = (metadata: AnyExportedSpan["metadata"]): AnyExportedSpan["
   return typeof resourceId === "string" ? { ...rest, resourceId: hashResourceId(resourceId) } : rest;
 };
 
-const pickContext = (context: AnyExportedSpan["requestContext"], keys: readonly string[]): AnyExportedSpan["requestContext"] => {
+const pickContext = (
+  context: AnyExportedSpan["requestContext"],
+  keys: readonly string[],
+): AnyExportedSpan["requestContext"] => {
   if (context === undefined) return undefined;
   const kept = Object.fromEntries(keys.filter((key) => context[key] !== undefined).map((key) => [key, context[key]]));
   return Object.keys(kept).length === 0 ? undefined : kept;
@@ -63,7 +66,10 @@ export const isTraceSampled = (traceId: string, ratio: number): boolean => {
   return bucket < ratio;
 };
 
-type ExporterEvents = Pick<ObservabilityExporter, "onLogEvent" | "onMetricEvent" | "onScoreEvent" | "onFeedbackEvent" | "onDroppedEvent">;
+type ExporterEvents = Pick<
+  ObservabilityExporter,
+  "onLogEvent" | "onMetricEvent" | "onScoreEvent" | "onFeedbackEvent" | "onDroppedEvent"
+>;
 
 const forwardSignals = (inner: ObservabilityExporter): ExporterEvents => ({
   ...(inner.onLogEvent === undefined ? {} : { onLogEvent: (event) => inner.onLogEvent?.(event) }),
@@ -89,7 +95,9 @@ export const sampleTraces = (inner: ObservabilityExporter, ratio: number): Obser
     ...forwardSignals(inner),
     ...(inner.init === undefined ? {} : { init: (options) => inner.init?.(options) }),
     ...(inner.__setLogger === undefined ? {} : { __setLogger: (logger) => inner.__setLogger?.(logger) }),
-    ...(inner.addScoreToTrace === undefined ? {} : { addScoreToTrace: (args) => inner.addScoreToTrace?.(args) ?? Promise.resolve() }),
+    ...(inner.addScoreToTrace === undefined
+      ? {}
+      : { addScoreToTrace: (args) => inner.addScoreToTrace?.(args) ?? Promise.resolve() }),
     onTracingEvent: tracing,
     exportTracingEvent: async (event) => {
       await tracing(event);

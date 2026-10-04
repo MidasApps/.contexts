@@ -5,7 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import { cursorListQuery, pageQuery } from "#/shared/api/cursor-list.ts";
-import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
+import { type QueryKey, queryKeys } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 
 /** Page size of the sessions table (profile/sessions). */
@@ -21,7 +21,8 @@ export const sessionKeys = {
 export const mySessionsQuery = (callEndpoint: CallEndpoint, limit = SESSIONS_PAGE_LIMIT) =>
   cursorListQuery({
     queryKey: sessionKeys.list(limit),
-    fetchPage: async (cursor, signal) => callEndpoint(listSessionsEndpoint, { query: pageQuery(cursor, limit), signal }),
+    fetchPage: async (cursor, signal) =>
+      callEndpoint(listSessionsEndpoint, { query: pageQuery(cursor, limit), signal }),
   });
 
 /** Active sessions of the signed-in user; `fetchNextPage` loads more. */

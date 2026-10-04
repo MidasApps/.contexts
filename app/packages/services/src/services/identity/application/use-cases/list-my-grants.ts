@@ -3,7 +3,7 @@ import { LEVEL_ORDER } from "../../../access/application/organization-membership
 import type { RequestAccess } from "../../../access/composition.ts";
 import { nodeIdOf } from "../../../access/domain/access-projection.ts";
 import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { paginateInMemory, type Page, type PageRequest } from "../../../shared/pagination/page.ts";
+import { type Page, type PageRequest, paginateInMemory } from "../../../shared/pagination/page.ts";
 import { ok, type Result } from "../../../shared/result/result.ts";
 import type { MeDeps } from "../me-deps.ts";
 
@@ -25,5 +25,11 @@ export const makeListMyGrants =
   async ({ actor, access, organizationId, page }) => {
     const nodes = await deps.membership.listLiveGrantNodes({ access, actor, tenantId: organizationId });
     if (!nodes.ok) return nodes;
-    return ok(paginateInMemory({ items: nodes.data, page, positionOf: ({ node }) => [String(LEVEL_ORDER[node.level]), nodeIdOf(node)] }));
+    return ok(
+      paginateInMemory({
+        items: nodes.data,
+        page,
+        positionOf: ({ node }) => [String(LEVEL_ORDER[node.level]), nodeIdOf(node)],
+      }),
+    );
   };

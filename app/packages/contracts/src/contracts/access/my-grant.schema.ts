@@ -30,7 +30,12 @@ export const MyGrantContract = defineContract(MyGrantSchema, {
   description: "A live node where the signed-in user holds a grant, with its roles there (GET /v1/me/grants).",
   examples: [
     {
-      node: { level: "unit", tenantId: EXAMPLE_IDS.organization, projectId: EXAMPLE_IDS.project, unitId: EXAMPLE_IDS.unit },
+      node: {
+        level: "unit",
+        tenantId: EXAMPLE_IDS.organization,
+        projectId: EXAMPLE_IDS.project,
+        unitId: EXAMPLE_IDS.unit,
+      },
       roles: [{ kind: "system", key: "member" }],
     },
   ],

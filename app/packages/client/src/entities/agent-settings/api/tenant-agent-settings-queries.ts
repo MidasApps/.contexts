@@ -1,6 +1,6 @@
 "use client";
 
-import { getAgentSettingsEndpoint, type AgentSettings } from "@core/contracts";
+import { type AgentSettings, getAgentSettingsEndpoint } from "@core/contracts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -16,12 +16,16 @@ export const tenantAgentSettingsKeys = {
 export const tenantAgentSettingsQuery = (callEndpoint: CallEndpoint, organizationId: string) =>
   queryOptions({
     queryKey: tenantAgentSettingsKeys.one(organizationId),
-    queryFn: async ({ signal }): Promise<AgentSettings> => (await callEndpoint(getAgentSettingsEndpoint, { query: { organizationId }, signal })).data,
+    queryFn: async ({ signal }): Promise<AgentSettings> =>
+      (await callEndpoint(getAgentSettingsEndpoint, { query: { organizationId }, signal })).data,
   });
 
 /** The organization's own agent settings; idle until signed in. `PATCH` them with `updateAgentSettingsEndpoint` and invalidate `tenantAgentSettingsKeys.one`. */
 export const useTenantAgentSettings = (organizationId: string, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...tenantAgentSettingsQuery(callEndpoint, organizationId), enabled: signedIn && organizationId !== "" && options.enabled !== false });
+  return useQuery({
+    ...tenantAgentSettingsQuery(callEndpoint, organizationId),
+    enabled: signedIn && organizationId !== "" && options.enabled !== false,
+  });
 };

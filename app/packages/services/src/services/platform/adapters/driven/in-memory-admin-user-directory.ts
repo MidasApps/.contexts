@@ -1,5 +1,5 @@
 import { type AdminUserSummary, AdminUserSummarySchema } from "@core/contracts";
-import { paginateInMemory, type Page, type PageRequest } from "../../../shared/pagination/page.ts";
+import { type Page, type PageRequest, paginateInMemory } from "../../../shared/pagination/page.ts";
 import { normalizeSearchText } from "../../../shared/text/search-text.ts";
 import type { AdminUserDirectory } from "../../application/ports/admin-user-directory.ts";
 
@@ -19,13 +19,25 @@ export type InMemoryAdminUserDirectory = AdminUserDirectory & {
 /** In-memory `AdminUserDirectory` for unit tests. */
 export const createInMemoryAdminUserDirectory = (seed: readonly AdminUserSeed[]): InMemoryAdminUserDirectory => {
   const users: AdminUserSummary[] = seed.map((user) =>
-    AdminUserSummarySchema.parse({ id: user.id, email: user.email, displayName: user.displayName, status: user.status ?? "active", createdAt: user.createdAt ?? "2026-09-29T14:30:00.000Z" }),
+    AdminUserSummarySchema.parse({
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      status: user.status ?? "active",
+      createdAt: user.createdAt ?? "2026-09-29T14:30:00.000Z",
+    }),
   );
   const reads: { kind: string; count: number }[] = [];
-  const byPrefix = (kind: string, valueOf: (user: AdminUserSummary) => string, args: { prefix: string; page: PageRequest }): Promise<Page<AdminUserSummary>> => {
+  const byPrefix = (
+    kind: string,
+    valueOf: (user: AdminUserSummary) => string,
+    args: { prefix: string; page: PageRequest },
+  ): Promise<Page<AdminUserSummary>> => {
     reads.push({ kind, count: 1 });
     const items = users.filter((user) => valueOf(user) !== "" && valueOf(user).startsWith(args.prefix));
-    return Promise.resolve(paginateInMemory({ items, page: args.page, positionOf: (user) => [valueOf(user), user.id] }));
+    return Promise.resolve(
+      paginateInMemory({ items, page: args.page, positionOf: (user) => [valueOf(user), user.id] }),
+    );
   };
   return {
     reads,

@@ -21,7 +21,10 @@ const main = async (): Promise<void> => {
     process.argv.slice(2).filter((arg) => arg !== "--"),
     process.env,
   );
-  const firebase = createFirebaseAdmin({ env: { APP_ENV: args.appEnv, FIREBASE_PROJECT_ID: args.projectId }, processEnv: process.env });
+  const firebase = createFirebaseAdmin({
+    env: { APP_ENV: args.appEnv, FIREBASE_PROJECT_ID: args.projectId },
+    processEnv: process.env,
+  });
   const verb = args.dryRun ? "would update" : "updated";
   print(`project ${args.projectId}${args.dryRun ? " (dry run: nothing is written)" : ""}`);
   const result = await backfillUserSearchNames({
@@ -29,7 +32,8 @@ const main = async (): Promise<void> => {
     batchSize: args.batchSize,
     dryRun: args.dryRun,
     ...(args.startAfter === undefined ? {} : { startAfter: args.startAfter }),
-    onBatch: (progress) => print(`checkpoint ${progress.lastId ?? "-"}: scanned ${progress.scanned}, ${verb} ${progress.updated}`),
+    onBatch: (progress) =>
+      print(`checkpoint ${progress.lastId ?? "-"}: scanned ${progress.scanned}, ${verb} ${progress.updated}`),
   });
   print(`done: scanned ${result.scanned}, ${verb} ${result.updated}`);
 };

@@ -23,18 +23,33 @@ export type SetActiveOrganization = (command: SetActiveOrganizationCommand) => P
  * impersonation.
  */
 export const makeSetActiveOrganization =
-  (deps: Pick<MeDeps, "users" | "membership" | "audit" | "unitOfWork" | "clock" | "syncClaims">): SetActiveOrganization =>
+  (
+    deps: Pick<MeDeps, "users" | "membership" | "audit" | "unitOfWork" | "clock" | "syncClaims">,
+  ): SetActiveOrganization =>
   async (command) => {
     const { actor, organizationId } = command;
     if (actor.impersonation !== undefined) return err(new AccessDeniedError("IMPERSONATION_READ_ONLY"));
     const node = { level: "organization" as const, tenantId: organizationId };
-    const allowed = await deps.membership.requireOrganizationMember({ access: command.access, actor, tenantId: organizationId });
+    const allowed = await deps.membership.requireOrganizationMember({
+      access: command.access,
+      actor,
+      tenantId: organizationId,
+    });
     if (!allowed.ok) return allowed;
     const updatedAt = deps.clock.now().toISOString();
     await deps.unitOfWork.run(async (tx) => {
       deps.users.setActiveOrganization(tx, { uid: actor.uid, organizationId, updatedAt, actorId: actor.uid });
       await deps.audit.record(
-        { log: "tenant", tenantId: organizationId, action: "ACTIVE_ORGANIZATION_CHANGED", actor: auditActorOf(actor), target: { type: "user", id: actor.uid }, node, outcome: "success", requestId: command.requestId },
+        {
+          log: "tenant",
+          tenantId: organizationId,
+          action: "ACTIVE_ORGANIZATION_CHANGED",
+          actor: auditActorOf(actor),
+          target: { type: "user", id: actor.uid },
+          node,
+          outcome: "success",
+          requestId: command.requestId,
+        },
         tx,
       );
     });

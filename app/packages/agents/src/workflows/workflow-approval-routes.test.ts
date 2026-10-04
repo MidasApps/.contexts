@@ -12,8 +12,16 @@ const fakeMastra = (behavior: { status?: string; error?: Error; unknownWorkflow?
       return {
         createRun: () =>
           Promise.resolve({
-            resume: (params: { step: unknown; resumeData: unknown; requestContext: { size?: number; entries: () => Iterable<unknown> } }) => {
-              resumes.push({ step: params.step, resumeData: params.resumeData, hasContextKeys: [...params.requestContext.entries()].length > 0 });
+            resume: (params: {
+              step: unknown;
+              resumeData: unknown;
+              requestContext: { size?: number; entries: () => Iterable<unknown> };
+            }) => {
+              resumes.push({
+                step: params.step,
+                resumeData: params.resumeData,
+                hasContextKeys: [...params.requestContext.entries()].length > 0,
+              });
               if (behavior.error !== undefined) return Promise.reject(behavior.error);
               return Promise.resolve({ status: behavior.status ?? "success" });
             },
@@ -40,8 +48,17 @@ const suspendedRequest = () => {
     .then(({ approvalId }) => ({ approvals, approvalId }));
 };
 
-const call = async (args: { mastra: never; approvals: ReturnType<typeof createFakeWorkflowApprovalPort>; id: string }) => {
-  const response = await handleSettleWorkflowApproval({ mastra: args.mastra, approvalRequestId: args.id, requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3", deps: { approvals: args.approvals, logger } });
+const call = async (args: {
+  mastra: never;
+  approvals: ReturnType<typeof createFakeWorkflowApprovalPort>;
+  id: string;
+}) => {
+  const response = await handleSettleWorkflowApproval({
+    mastra: args.mastra,
+    approvalRequestId: args.id,
+    requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+    deps: { approvals: args.approvals, logger },
+  });
   return { status: response.status, body: (await response.json()) as Record<string, unknown> };
 };
 
@@ -50,16 +67,30 @@ describe("POST /workflow-approvals/:id/settle", () => {
     const { approvals, approvalId } = await suspendedRequest();
     approvals.settle(approvalId, "rejected", "approver-uid");
     const { mastra, resumes } = fakeMastra({});
-    expect(await call({ mastra, approvals, id: approvalId })).toEqual({ status: 200, body: { data: { settled: true, runStatus: "success" } } });
-    expect(resumes).toEqual([{ step: "request-human-approval", resumeData: { decision: "rejected", decidedBy: "approver-uid" }, hasContextKeys: false }]);
+    expect(await call({ mastra, approvals, id: approvalId })).toEqual({
+      status: 200,
+      body: { data: { settled: true, runStatus: "success" } },
+    });
+    expect(resumes).toEqual([
+      {
+        step: "request-human-approval",
+        resumeData: { decision: "rejected", decidedBy: "approver-uid" },
+        hasContextKeys: false,
+      },
+    ]);
   });
 
   it("maps executed to approved and skips pending or failed requests", async () => {
     const { approvals, approvalId } = await suspendedRequest();
     const { mastra, resumes } = fakeMastra({});
-    expect(await call({ mastra, approvals, id: approvalId })).toEqual({ status: 200, body: { data: { settled: false, reason: "NOT_SETTLED" } } });
+    expect(await call({ mastra, approvals, id: approvalId })).toEqual({
+      status: 200,
+      body: { data: { settled: false, reason: "NOT_SETTLED" } },
+    });
     approvals.settle(approvalId, "failed");
-    expect((await call({ mastra, approvals, id: approvalId })).body).toEqual({ data: { settled: false, reason: "NOT_SETTLED" } });
+    expect((await call({ mastra, approvals, id: approvalId })).body).toEqual({
+      data: { settled: false, reason: "NOT_SETTLED" },
+    });
     approvals.settle(approvalId, "executed", "approver-uid");
     await call({ mastra, approvals, id: approvalId });
     expect(resumes.at(-1)?.resumeData).toEqual({ decision: "approved", decidedBy: "approver-uid" });
@@ -68,9 +99,14 @@ describe("POST /workflow-approvals/:id/settle", () => {
   it("answers NOT_SUSPENDED when the run was claimed or already moved on", async () => {
     const { approvals, approvalId } = await suspendedRequest();
     approvals.settle(approvalId, "approved", "approver-uid");
-    for (const error of [Object.assign(new Error("claimed"), { id: "WORKFLOW_RESUME_ALREADY_CLAIMED" }), new Error("This workflow run was not suspended")]) {
+    for (const error of [
+      Object.assign(new Error("claimed"), { id: "WORKFLOW_RESUME_ALREADY_CLAIMED" }),
+      new Error("This workflow run was not suspended"),
+    ]) {
       const { mastra } = fakeMastra({ error });
-      expect((await call({ mastra, approvals, id: approvalId })).body).toEqual({ data: { settled: false, reason: "NOT_SUSPENDED" } });
+      expect((await call({ mastra, approvals, id: approvalId })).body).toEqual({
+        data: { settled: false, reason: "NOT_SUSPENDED" },
+      });
     }
   });
 
@@ -82,7 +118,9 @@ describe("POST /workflow-approvals/:id/settle", () => {
     approvals.records.set("otherKind", { ...record, id: "otherKind", kind: "agent-command" });
     expect((await call({ mastra: fakeMastra({}).mastra, approvals, id: "missing" })).status).toBe(404);
     expect((await call({ mastra: fakeMastra({}).mastra, approvals, id: "otherKind" })).status).toBe(404);
-    expect((await call({ mastra: fakeMastra({ unknownWorkflow: true }).mastra, approvals, id: approvalId })).status).toBe(404);
+    expect(
+      (await call({ mastra: fakeMastra({ unknownWorkflow: true }).mastra, approvals, id: approvalId })).status,
+    ).toBe(404);
     expect((await call({ mastra: fakeMastra({}).mastra, approvals, id: "../etc" })).status).toBe(404);
   });
 

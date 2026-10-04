@@ -35,7 +35,8 @@ const fakeClient = () => {
 
 describe("local secret store", () => {
   it("is refused outside local", () => {
-    for (const appEnv of ["dev", "staging", "prod"]) expect(() => createLocalSecretStore({ firestore, appEnv })).toThrow(LocalSecretStoreOutsideLocalError);
+    for (const appEnv of ["dev", "staging", "prod"])
+      expect(() => createLocalSecretStore({ firestore, appEnv })).toThrow(LocalSecretStoreOutsideLocalError);
     expect(() => createLocalSecretStore({ firestore, appEnv: "local" })).not.toThrow();
   });
 });

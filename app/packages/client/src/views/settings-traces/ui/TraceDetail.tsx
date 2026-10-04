@@ -40,7 +40,12 @@ export function TraceDetail({ detail }: { detail: TraceDetailData }) {
           <Stat label={t("detail.duration")}>
             <TraceDuration durationMs={summary.durationMs} />
           </Stat>
-          <Stat label={t("detail.tokens")}>{t("tokensValue", { input: format.number(summary.inputTokens), output: format.number(summary.outputTokens) })}</Stat>
+          <Stat label={t("detail.tokens")}>
+            {t("tokensValue", {
+              input: format.number(summary.inputTokens),
+              output: format.number(summary.outputTokens),
+            })}
+          </Stat>
           <Stat label={t("detail.cost")}>
             <TraceCost costMicroUsd={summary.costMicroUsd} />
           </Stat>

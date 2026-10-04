@@ -7,7 +7,10 @@ import { cn } from "#/shared/lib/cn.ts";
 import { resolveSafeLink } from "#/shared/lib/markdown/link-policy.ts";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/shared/ui/molecules/Collapsible/Collapsible.tsx";
 
-export type SourcesProps = Omit<ComponentProps<typeof Collapsible>, "children"> & { count: number; children: ReactNode };
+export type SourcesProps = Omit<ComponentProps<typeof Collapsible>, "children"> & {
+  count: number;
+  children: ReactNode;
+};
 
 /** AI Elements `sources`: what the answer cites, as a numbered list behind a disclosure. */
 export function Sources({ count, className, children, ...props }: SourcesProps) {
@@ -17,7 +20,10 @@ export function Sources({ count, className, children, ...props }: SourcesProps) 
       <CollapsibleTrigger className="flex items-center gap-2 rounded-xs text-body text-muted-foreground hover:text-foreground">
         <BookOpenIcon aria-hidden="true" className="size-4" />
         {t("sources.count", { count })}
-        <ChevronDownIcon aria-hidden="true" className="size-4 transition-transform group-data-[state=open]/sources:rotate-180" />
+        <ChevronDownIcon
+          aria-hidden="true"
+          className="size-4 transition-transform group-data-[state=open]/sources:rotate-180"
+        />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <ol className="mt-2 flex list-none flex-col gap-2">{children}</ol>
@@ -48,7 +54,12 @@ export function Source({ index, title, href, snippet, className, id, ...props }:
         {link === null ? (
           <p className="font-medium text-foreground">{title}</p>
         ) : (
-          <a href={link.href} target="_blank" rel="noopener noreferrer nofollow" className="font-medium text-foreground underline underline-offset-4">
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            className="font-medium text-foreground underline underline-offset-4"
+          >
             {title}
             <span className="font-normal text-muted-foreground"> ({link.host})</span>
             <span className="sr-only"> {t("newTab")}</span>

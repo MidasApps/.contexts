@@ -20,7 +20,13 @@ describe("CopyField", () => {
   it("masks a sensitive value until revealed and still copies the real value", async () => {
     const writeText = vi.fn(() => Promise.resolve());
     const { user, container } = renderWithProviders(
-      <CopyField label="Chave de API" value="sk_live_123" sensitive description="Mostrada uma única vez." writeText={writeText} />,
+      <CopyField
+        label="Chave de API"
+        value="sk_live_123"
+        sensitive
+        description="Mostrada uma única vez."
+        writeText={writeText}
+      />,
     );
     const field = screen.getByRole<HTMLInputElement>("textbox", { name: "Chave de API" });
     expect(field.value).not.toContain("sk_live_123");
@@ -37,7 +43,9 @@ describe("CopyField", () => {
 
   it("tells the user to copy manually when the clipboard fails", async () => {
     const writeText = vi.fn(() => Promise.reject(new Error("denied")));
-    const { user } = renderWithProviders(<CopyField label="Código" value="123-456" writeText={writeText} />, { locale: "en-US" });
+    const { user } = renderWithProviders(<CopyField label="Código" value="123-456" writeText={writeText} />, {
+      locale: "en-US",
+    });
     await user.click(screen.getByRole("button", { name: "Copy" }));
     expect(screen.getByRole("status").textContent).toBe("Couldn't copy. Select the text and copy it manually.");
   });

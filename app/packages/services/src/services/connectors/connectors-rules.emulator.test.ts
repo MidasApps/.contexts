@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { assertFails, initializeTestEnvironment, type RulesTestContext, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
+import {
+  assertFails,
+  initializeTestEnvironment,
+  type RulesTestContext,
+  type RulesTestEnvironment,
+} from "@firebase/rules-unit-testing";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 
 // Connectors and local secrets are server-only (decision 0027): no client, not even an
@@ -11,7 +16,10 @@ const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../../..");
 let testEnv: RulesTestEnvironment;
 
 beforeAll(async () => {
-  testEnv = await initializeTestEnvironment({ projectId: PROJECT_ID, firestore: { rules: readFileSync(path.join(WORKSPACE_ROOT, "firestore.rules"), "utf8") } });
+  testEnv = await initializeTestEnvironment({
+    projectId: PROJECT_ID,
+    firestore: { rules: readFileSync(path.join(WORKSPACE_ROOT, "firestore.rules"), "utf8") },
+  });
 });
 
 afterAll(async () => {

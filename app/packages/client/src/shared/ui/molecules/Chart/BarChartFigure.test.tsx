@@ -16,12 +16,27 @@ const ROWS = [
 describe("BarChartFigure", () => {
   it("gives the same numbers as a table to assistive technology and hides the drawing", async () => {
     const { container } = renderWithProviders(
-      <BarChartFigure title="Custo por organização" description="Mês atual" series={SERIES} rows={ROWS} rowHeader="Organização" formatValue={(value) => `$${String(value)}`} />,
+      <BarChartFigure
+        title="Custo por organização"
+        description="Mês atual"
+        series={SERIES}
+        rows={ROWS}
+        rowHeader="Organização"
+        formatValue={(value) => `$${String(value)}`}
+      />,
     );
     const table = screen.getByRole("table", { name: "Custo por organização" });
-    expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["Organização", "Custo", "Limite"]);
+    expect(
+      within(table)
+        .getAllByRole("columnheader")
+        .map((cell) => cell.textContent),
+    ).toEqual(["Organização", "Custo", "Limite"]);
     const northwind = within(table).getByRole("row", { name: /Northwind/u });
-    expect(within(northwind).getAllByRole("cell").map((cell) => cell.textContent)).toEqual(["$12", "$50"]);
+    expect(
+      within(northwind)
+        .getAllByRole("cell")
+        .map((cell) => cell.textContent),
+    ).toEqual(["$12", "$50"]);
     expect(within(within(table).getByRole("row", { name: /Contoso/u })).getAllByRole("cell")[1]?.textContent).toBe("—");
     expect(screen.getByText("Mês atual")).toBeDefined();
     expect(container.querySelector("[aria-hidden='true'].h-64")).not.toBeNull();
@@ -31,6 +46,10 @@ describe("BarChartFigure", () => {
   it("names every series in the legend, not by color alone", () => {
     renderWithProviders(<BarChartFigure title="T" series={SERIES} rows={ROWS} rowHeader="R" formatValue={String} />);
     const legend = screen.getByRole("list");
-    expect(within(legend).getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Custo", "Limite"]);
+    expect(
+      within(legend)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent),
+    ).toEqual(["Custo", "Limite"]);
   });
 });

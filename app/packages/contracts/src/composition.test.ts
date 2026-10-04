@@ -1,39 +1,51 @@
 import { describe, expect, it } from "vitest";
-import { composeCoreContracts, composeCoreEndpoints, CORE_CONTRACTS, CORE_ENDPOINTS } from "./composition.ts";
+import { CORE_CONTRACTS, CORE_ENDPOINTS, composeCoreContracts, composeCoreEndpoints } from "./composition.ts";
 import { ACCESS_CONTRACTS } from "./contracts/access/contracts.ts";
 import { AUDIT_CONTRACTS } from "./contracts/audit/contracts.ts";
+import { inspectSchema } from "./contracts/field-meta-rules.ts";
 import { IDENTITY_CONTRACTS } from "./contracts/identity/contracts.ts";
 import { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
-import { inspectSchema } from "./contracts/field-meta-rules.ts";
 
 describe("composeCoreContracts", () => {
   it("registers every core contract in a fresh registry, sorted by id", () => {
-    const ids = composeCoreContracts().listContracts().map((contract) => contract.id);
+    const ids = composeCoreContracts()
+      .listContracts()
+      .map((contract) => contract.id);
     expect(ids).toEqual([...CORE_CONTRACTS.map((contract) => contract.id)].sort());
-    expect(ids).toEqual(expect.arrayContaining([...TENANCY_CONTRACTS, ...IDENTITY_CONTRACTS, ...ACCESS_CONTRACTS, ...AUDIT_CONTRACTS].map((contract) => contract.id)));
-    expect(ids).toEqual(expect.arrayContaining([
-      "agents.AgentRequestContext",
-      "agents.AgentSettings",
-      "agents.ApprovalRequest",
-      "agents.ToolUi",
-      "connectors.Connector",
-      "connectors.ConnectorToolPolicy",
-      "example.Note",
-      "files.FileUploadRequest",
-      "files.StoredFile",
-      "http.ErrorEnvelope",
-      "knowledge.Citation",
-      "knowledge.KnowledgeDocument",
-      "knowledge.KnowledgeSource",
-      "usage.LlmCall",
-      "usage.UsageSummary",
-    ]));
+    expect(ids).toEqual(
+      expect.arrayContaining(
+        [...TENANCY_CONTRACTS, ...IDENTITY_CONTRACTS, ...ACCESS_CONTRACTS, ...AUDIT_CONTRACTS].map(
+          (contract) => contract.id,
+        ),
+      ),
+    );
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        "agents.AgentRequestContext",
+        "agents.AgentSettings",
+        "agents.ApprovalRequest",
+        "agents.ToolUi",
+        "connectors.Connector",
+        "connectors.ConnectorToolPolicy",
+        "example.Note",
+        "files.FileUploadRequest",
+        "files.StoredFile",
+        "http.ErrorEnvelope",
+        "knowledge.Citation",
+        "knowledge.KnowledgeDocument",
+        "knowledge.KnowledgeSource",
+        "usage.LlmCall",
+        "usage.UsageSummary",
+      ]),
+    );
   });
 
   it("keeps every field meta valid after registration (a nested registered schema would inherit contract meta)", () => {
     const problems = composeCoreContracts()
       .listContracts()
-      .flatMap((contract) => inspectSchema(contract.schema).problems.map((problem) => `${contract.id}.${problem.path}`));
+      .flatMap((contract) =>
+        inspectSchema(contract.schema).problems.map((problem) => `${contract.id}.${problem.path}`),
+      );
     expect(problems).toEqual([]);
   });
 

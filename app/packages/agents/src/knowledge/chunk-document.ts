@@ -95,7 +95,14 @@ export const chunkDocument = (text: string, options: ChunkOptions = {}): Documen
   const overlap = Math.min(options.overlap ?? DEFAULT_CHUNK_OVERLAP, Math.floor(maxSize / 2));
   const clean = normalize(text);
   if (clean === "") return [];
-  const body = pack(splitRecursive(`\n${clean}`, maxSize - overlap, SEPARATORS[options.format ?? "text"]), maxSize - overlap);
-  const chunks = body.map((piece, position) => `${position === 0 ? "" : tailOf(body[position - 1] ?? "", overlap)}${piece}`.trim());
-  return chunks.filter((chunk) => chunk !== "").map((chunk, index) => ({ index, text: chunk, tokenCount: estimateTokens(chunk) }));
+  const body = pack(
+    splitRecursive(`\n${clean}`, maxSize - overlap, SEPARATORS[options.format ?? "text"]),
+    maxSize - overlap,
+  );
+  const chunks = body.map((piece, position) =>
+    `${position === 0 ? "" : tailOf(body[position - 1] ?? "", overlap)}${piece}`.trim(),
+  );
+  return chunks
+    .filter((chunk) => chunk !== "")
+    .map((chunk, index) => ({ index, text: chunk, tokenCount: estimateTokens(chunk) }));
 };

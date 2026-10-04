@@ -28,7 +28,9 @@ export function UnitBreadcrumb({ path, className }: UnitBreadcrumbProps) {
               <VisuallyHidden>, </VisuallyHidden>
             </>
           )}
-          <span className={cn("truncate", index === path.length - 1 ? "font-medium" : "text-muted-foreground")}>{segment.name ?? t("hiddenUnit")}</span>
+          <span className={cn("truncate", index === path.length - 1 ? "font-medium" : "text-muted-foreground")}>
+            {segment.name ?? t("hiddenUnit")}
+          </span>
         </Fragment>
       ))}
     </span>

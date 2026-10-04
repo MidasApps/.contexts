@@ -12,10 +12,20 @@ export type InvitationRepository = {
   readonly get: (tx: Transaction | undefined, id: InvitationId) => Promise<Invitation | null>;
   readonly findByTokenHash: (tokenHash: string) => Promise<Invitation | null>;
   /** Newest first (`createdAt desc`, id desc); `statuses` filters the stored status. */
-  readonly list: (args: { tenantId: TenantId; statuses?: readonly InvitationStatus[] | undefined; page: PageRequest }) => Promise<Page<Invitation>>;
+  readonly list: (args: {
+    tenantId: TenantId;
+    statuses?: readonly InvitationStatus[] | undefined;
+    page: PageRequest;
+  }) => Promise<Page<Invitation>>;
   readonly create: (tx: Transaction, args: { invitation: Invitation; tokenHash: string; actorId: string }) => void;
   readonly setStatus: (
     tx: Transaction,
-    args: { id: InvitationId; status: "accepted" | "revoked"; acceptedByUid?: UserId; updatedAt: string; actorId: string },
+    args: {
+      id: InvitationId;
+      status: "accepted" | "revoked";
+      acceptedByUid?: UserId;
+      updatedAt: string;
+      actorId: string;
+    },
   ) => void;
 };

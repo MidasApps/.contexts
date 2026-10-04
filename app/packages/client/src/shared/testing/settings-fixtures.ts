@@ -15,7 +15,9 @@ export const buildMember = (overrides: Json = {}): Json => ({
   uid: "uB2c3D4e5F6g7H8i9J0k",
   displayName: "Bruno Lima",
   email: "bruno@example.com",
-  grants: [{ membershipId: "Mb6nB8vC0xZ2lK4jH6gF", node: ORGANIZATION_NODE, roles: [{ kind: "system", key: "member" }] }],
+  grants: [
+    { membershipId: "Mb6nB8vC0xZ2lK4jH6gF", node: ORGANIZATION_NODE, roles: [{ kind: "system", key: "member" }] },
+  ],
   ...overrides,
 });
 

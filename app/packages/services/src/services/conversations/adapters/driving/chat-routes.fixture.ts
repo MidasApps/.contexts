@@ -1,24 +1,37 @@
 // Unit-test harness of the `/v1/chat` and `/v1/conversations` routes: in-memory pipeline,
 // conversations and files, and a scripted chat gateway that records every call.
 import type { StoredFile, TenantId } from "@core/contracts";
+import type { AgentCallScope, GatewayResult } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+import type {
+  ChatRuntimeGateway,
+  ChatStreamAnswer,
+  ChatTurnBody,
+} from "../../../agents/application/ports/chat-runtime-gateway.ts";
 import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
 import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import type { AgentCallScope, GatewayResult } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { ChatRuntimeGateway, ChatStreamAnswer, ChatTurnBody } from "../../../agents/application/ports/chat-runtime-gateway.ts";
-import { createInMemoryFileRepository, createInMemoryObjectStore } from "../../../files/adapters/driven/in-memory-file-adapters.ts";
+import {
+  createInMemoryFileRepository,
+  createInMemoryObjectStore,
+} from "../../../files/adapters/driven/in-memory-file-adapters.ts";
 import { makeGetReadyFile, makeReadFileBytes } from "../../../files/application/use-cases/read-file-bytes.ts";
 import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
 import { makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
-import { createInMemoryConversationRepository } from "../driven/in-memory-conversation-repository.ts";
 import { createConversationsServices } from "../../composition.ts";
+import { createInMemoryConversationRepository } from "../driven/in-memory-conversation-repository.ts";
 import type { ChatRoutesDeps } from "./chat-http.ts";
 
 export const ORG_A = "OrgAaaaaaaaaaaaaaaaaa" as TenantId;
 export const ORG_B = "OrgBbbbbbbbbbbbbbbbbb" as TenantId;
 export const NOW = "2026-09-30T12:00:00.000Z";
-export const UI_STREAM = 'data: {"type":"start"}\n\ndata: {"type":"text-delta","id":"t","delta":"Hi"}\n\ndata: [DONE]\n\n';
+export const UI_STREAM =
+  'data: {"type":"start"}\n\ndata: {"type":"text-delta","id":"t","delta":"Hi"}\n\ndata: [DONE]\n\n';
 
-export type GatewayCall = { readonly kind: string; readonly scope: AgentCallScope; readonly body?: ChatTurnBody; readonly runId?: string };
+export type GatewayCall = {
+  readonly kind: string;
+  readonly scope: AgentCallScope;
+  readonly body?: ChatTurnBody;
+  readonly runId?: string;
+};
 
 const streamOf = (text: string) =>
   new ReadableStream<Uint8Array>({
@@ -28,7 +41,12 @@ const streamOf = (text: string) =>
     },
   });
 
-const answerOf = (runId: string | null): ChatStreamAnswer => ({ body: streamOf(UI_STREAM), contentType: "text/event-stream", runId, streamProtocol: "v1" });
+const answerOf = (runId: string | null): ChatStreamAnswer => ({
+  body: streamOf(UI_STREAM),
+  contentType: "text/event-stream",
+  runId,
+  streamProtocol: "v1",
+});
 
 /** Scripted gateway: `send` answers a UI stream with `x-run-id` run-1 unless a failure is set. */
 export const createFakeChatGateway = () => {
@@ -60,7 +78,10 @@ export const createFakeChatGateway = () => {
     },
     threadTitle: ({ scope }) => {
       calls.push({ kind: "title", scope });
-      return Promise.resolve({ ok: true, data: script.earlierTitles.length > 0 ? (script.earlierTitles.shift() ?? null) : script.title });
+      return Promise.resolve({
+        ok: true,
+        data: script.earlierTitles.length > 0 ? (script.earlierTitles.shift() ?? null) : script.title,
+      });
     },
     deleteThread: ({ scope }) => {
       calls.push({ kind: "deleteThread", scope });
@@ -78,7 +99,12 @@ export const createFakeChatGateway = () => {
   return { gateway, calls, script };
 };
 
-const REGIONAL = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" };
+const REGIONAL = {
+  locale: "pt-BR",
+  displayTimeZone: "America/Sao_Paulo",
+  nodeTimeZone: "America/Sao_Paulo",
+  currency: "BRL",
+};
 
 const resolveAccessContextFor =
   (members: ReadonlyMap<string, string>): ResolveAccessContext =>

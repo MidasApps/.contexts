@@ -1,4 +1,4 @@
-import { SOURCE_LOCALE, fallbackChain, type SupportedLocale } from "../locales.ts";
+import { fallbackChain, SOURCE_LOCALE, type SupportedLocale } from "../locales.ts";
 import { CORE_MESSAGES, type CoreMessages, type MessageTree } from "./core-catalog.ts";
 
 /** Extra namespaces (one per module id), each with its catalogs per locale. */
@@ -20,7 +20,10 @@ const mergeTrees = (base: MessageTree, override: MessageTree): MessageTree => {
 };
 
 /** Merges the fallback chain from the source up, so the requested locale wins per key. */
-const resolveChain = (chain: readonly SupportedLocale[], pick: (locale: SupportedLocale) => MessageTree | undefined): MessageTree =>
+const resolveChain = (
+  chain: readonly SupportedLocale[],
+  pick: (locale: SupportedLocale) => MessageTree | undefined,
+): MessageTree =>
   chain.toReversed().reduce<MessageTree>((merged, locale) => mergeTrees(merged, pick(locale) ?? {}), {});
 
 const assertNoReservedNamespace = (extra: ExtraNamespaces): void => {
@@ -42,7 +45,10 @@ export const loadMessages = (locale: SupportedLocale, extra: ExtraNamespaces = {
   const chain = fallbackChain(locale);
   const core = resolveChain(chain, (candidate) => CORE_MESSAGES[candidate]) as LoadedMessages;
   const modules = Object.fromEntries(
-    Object.entries(extra).map(([namespace, byLocale]) => [namespace, resolveChain(chain, (candidate) => byLocale[candidate])]),
+    Object.entries(extra).map(([namespace, byLocale]) => [
+      namespace,
+      resolveChain(chain, (candidate) => byLocale[candidate]),
+    ]),
   );
   return { ...core, ...modules };
 };

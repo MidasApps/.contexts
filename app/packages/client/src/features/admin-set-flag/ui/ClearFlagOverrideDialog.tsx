@@ -5,8 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { featureFlagKeys } from "#/entities/feature-flag/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
-import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
+import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
@@ -34,7 +34,9 @@ export function ClearFlagOverrideDialog({ target, onOpenChange }: ClearFlagOverr
   const action = useConfirmedAction(
     async () => {
       if (target === null) return;
-      await callEndpoint(adminClearFlagOverrideEndpoint, { params: { flagKey: target.flag.key, organizationId: target.organization.id } });
+      await callEndpoint(adminClearFlagOverrideEndpoint, {
+        params: { flagKey: target.flag.key, organizationId: target.organization.id },
+      });
       await queryClient.invalidateQueries({ queryKey: featureFlagKeys.all() });
     },
     () => notify.success(t("done", { key })),
@@ -47,7 +49,10 @@ export function ClearFlagOverrideDialog({ target, onOpenChange }: ClearFlagOverr
         onOpenChange(open);
       }}
       title={t("title", { key })}
-      description={t("description", { name: target?.organization.name ?? "", reason: target === null ? "" : label.description(target.flag.key, target.flag.reason) })}
+      description={t("description", {
+        name: target?.organization.name ?? "",
+        reason: target === null ? "" : label.description(target.flag.key, target.flag.reason),
+      })}
       confirmLabel={t("confirm")}
       onConfirm={action.confirm}
       error={action.error}

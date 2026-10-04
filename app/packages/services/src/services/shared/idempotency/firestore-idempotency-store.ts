@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { Timestamp, type DocumentReference, type Firestore } from "firebase-admin/firestore";
+import { type DocumentReference, type Firestore, Timestamp } from "firebase-admin/firestore";
 import { z } from "zod";
-import { systemClock, type Clock } from "../clock/clock.ts";
+import { type Clock, systemClock } from "../clock/clock.ts";
 import { CorruptDocumentError } from "../firestore/corrupt-document-error.ts";
 import { runInTransaction } from "../firestore/transaction-runner.ts";
-import { decideBegin, ownsAttempt, type IdempotencyRecord, type StoredResponse } from "./idempotency-decision.ts";
+import { decideBegin, type IdempotencyRecord, ownsAttempt, type StoredResponse } from "./idempotency-decision.ts";
 import type { IdempotencyStore } from "./idempotency-store.ts";
 
 /** One document per scope key (decision 0009 §3); `expiresAt` carries a TTL policy. */
@@ -61,7 +61,11 @@ const toStored = (record: IdempotencyRecord) => ({
  * in transactions on `idempotency-records/{scopeKey}`. Response bodies are kept as JSON
  * text for 24 h, then the TTL policy deletes them.
  */
-export const createFirestoreIdempotencyStore = (deps: { firestore: Firestore; clock?: Clock; newAttemptId?: () => string }): IdempotencyStore => {
+export const createFirestoreIdempotencyStore = (deps: {
+  firestore: Firestore;
+  clock?: Clock;
+  newAttemptId?: () => string;
+}): IdempotencyStore => {
   const clock = deps.clock ?? systemClock;
   const newAttemptId = deps.newAttemptId ?? randomUUID;
   const refOf = (scopeKey: string) => deps.firestore.collection(IDEMPOTENCY_RECORDS_COLLECTION).doc(scopeKey);

@@ -1,19 +1,36 @@
 // Composition root of the staff console and agent settings (SP5 Task 10, decisions 0039 and 0041).
 import type { Sql } from "postgres";
 import { type GetAgentSettings, makeGetAgentSettings } from "../agents/application/use-cases/get-agent-settings.ts";
-import { makeUpdateAgentSettings, type UpdateAgentSettings } from "../agents/application/use-cases/update-agent-settings.ts";
+import {
+  makeUpdateAgentSettings,
+  type UpdateAgentSettings,
+} from "../agents/application/use-cases/update-agent-settings.ts";
 import type { AuditWriter } from "../audit/application/use-cases/record-audit.ts";
+import type { ConsoleGateway } from "../observability/application/ports/console-gateway.ts";
 import type { Clock } from "../shared/clock/clock.ts";
 import type { FirebaseAdmin } from "../shared/firebase/firebase-admin.ts";
-import type { ConsoleGateway } from "../observability/application/ports/console-gateway.ts";
-import { countAgentRuns, createPostgresUsageRepository, listActiveUserIds, listUsageBuckets } from "../usage/adapters/driven/postgres-usage-repository.ts";
+import {
+  countAgentRuns,
+  createPostgresUsageRepository,
+  listActiveUserIds,
+  listUsageBuckets,
+} from "../usage/adapters/driven/postgres-usage-repository.ts";
 import { createFirestoreApprovalStats } from "./adapters/driven/firestore-approval-stats.ts";
-import { createFirestoreAgentSettingsRepository, createFirestoreOrganizationAdminStore, createFirestorePlanRepository } from "./adapters/driven/firestore-console-stores.ts";
+import {
+  createFirestoreAgentSettingsRepository,
+  createFirestoreOrganizationAdminStore,
+  createFirestorePlanRepository,
+} from "./adapters/driven/firestore-console-stores.ts";
 import type { ConsoleDeps } from "./application/console-deps.ts";
 import type { ConsoleUsage } from "./application/ports/console-ports.ts";
 import { type GetAdminOverview, makeGetAdminOverview } from "./application/use-cases/get-admin-overview.ts";
 import { type GetAdminUsage, makeGetAdminUsage } from "./application/use-cases/get-admin-usage.ts";
-import { type GetOrganizationAdmin, type ListOrganizationsAdmin, makeGetOrganizationAdmin, makeListOrganizationsAdmin } from "./application/use-cases/list-organizations-admin.ts";
+import {
+  type GetOrganizationAdmin,
+  type ListOrganizationsAdmin,
+  makeGetOrganizationAdmin,
+  makeListOrganizationsAdmin,
+} from "./application/use-cases/list-organizations-admin.ts";
 import { type ListPlans, makeListPlans } from "./application/use-cases/list-plans.ts";
 import {
   makeSetOrganizationBudget,
@@ -21,7 +38,12 @@ import {
   type SetOrganizationBudget,
   type UpdateOrganizationAdmin,
 } from "./application/use-cases/update-organization-admin.ts";
-import { type CreatePlan, makeCreatePlan, makeUpdatePlan, type UpdatePlan } from "./application/use-cases/upsert-plan.ts";
+import {
+  type CreatePlan,
+  makeCreatePlan,
+  makeUpdatePlan,
+  type UpdatePlan,
+} from "./application/use-cases/upsert-plan.ts";
 
 export type ConsoleServices = {
   readonly listPlans: ListPlans;

@@ -8,7 +8,9 @@ import { ProjectSwitcher } from "./ProjectSwitcher.tsx";
 
 describe("ProjectSwitcher", () => {
   it("lists the organization's projects and opens the chosen one", async () => {
-    const { user, router } = renderWidget(<ProjectSwitcher />, { path: `/o/${IDS.organization}/p/${IDS.project}?unit=u1` });
+    const { user, router } = renderWidget(<ProjectSwitcher />, {
+      path: `/o/${IDS.organization}/p/${IDS.project}?unit=u1`,
+    });
     await user.click(await screen.findByRole("button", { name: "Launch, trocar de projeto" }));
     expect((await screen.findByRole("menuitemradio", { name: "Launch" })).getAttribute("aria-checked")).toBe("true");
     expect(screen.getByRole("menuitem", { name: "Novo projeto" })).toBeDefined();

@@ -4,9 +4,17 @@ import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { InvalidConnectorError } from "../../domain/connector-errors.ts";
 import { connectorHostIssues } from "../../domain/connector-policy.ts";
-import { authorizeConnectors, CONNECTOR_WRITE_PERMISSION, type ConnectorsCommand, type ConnectorsDeps, recordConnectorAudit } from "../connectors-deps.ts";
+import {
+  authorizeConnectors,
+  CONNECTOR_WRITE_PERMISSION,
+  type ConnectorsCommand,
+  type ConnectorsDeps,
+  recordConnectorAudit,
+} from "../connectors-deps.ts";
 
-export type CreateConnector = (command: ConnectorsCommand & { readonly input: CreateConnectorInput }) => Promise<Result<Connector, AccessDeniedError | InvalidConnectorError>>;
+export type CreateConnector = (
+  command: ConnectorsCommand & { readonly input: CreateConnectorInput },
+) => Promise<Result<Connector, AccessDeniedError | InvalidConnectorError>>;
 
 /**
  * Registers a connector (`core.connector.write`): active, no secret yet (`PUT .../secret`

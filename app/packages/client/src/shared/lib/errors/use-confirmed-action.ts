@@ -17,7 +17,10 @@ export type ConfirmedAction = {
  * (usually a success toast) and closes; on failure keeps the dialog open with `errors.<CODE>` and
  * the request reference, so the user can retry or quote it.
  */
-export const useConfirmedAction = (action: () => Promise<void>, onDone: () => void = () => undefined): ConfirmedAction => {
+export const useConfirmedAction = (
+  action: () => Promise<void>,
+  onDone: () => void = () => undefined,
+): ConfirmedAction => {
   const t = useTranslations("common.errorState");
   const describe = useDescribeError();
   const [error, setError] = useState<string | undefined>();
@@ -27,7 +30,11 @@ export const useConfirmedAction = (action: () => Promise<void>, onDone: () => vo
       await action();
     } catch (failure: unknown) {
       const described = describe(failure);
-      setError(described.requestId === undefined ? described.message : t("messageWithReference", { message: described.message, requestId: described.requestId }));
+      setError(
+        described.requestId === undefined
+          ? described.message
+          : t("messageWithReference", { message: described.message, requestId: described.requestId }),
+      );
       return false;
     }
     onDone();

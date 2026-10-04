@@ -23,19 +23,29 @@ export class KnowledgeDocumentMissingError extends Error {
   }
 }
 
-type Rejected = { readonly code: "VALIDATION_FAILED"; readonly details: readonly { readonly field: string }[] } | { readonly code: "DOCUMENT_NOT_FOUND" };
+type Rejected =
+  | { readonly code: "VALIDATION_FAILED"; readonly details: readonly { readonly field: string }[] }
+  | { readonly code: "DOCUMENT_NOT_FOUND" };
 
 const rejectionOf = (error: Rejected): Error =>
-  error.code === "DOCUMENT_NOT_FOUND" ? new KnowledgeDocumentMissingError() : new KnowledgeSearchRejectedError(error.details.map((detail) => detail.field));
+  error.code === "DOCUMENT_NOT_FOUND"
+    ? new KnowledgeDocumentMissingError()
+    : new KnowledgeSearchRejectedError(error.details.map((detail) => detail.field));
 
 /**
  * Binds `KnowledgePort` to the knowledge use cases (SP3 Tasks 12, 14). Tenant and
  * namespaces come from the caller's server-side context; a rejected input rejects
  * (the tool pipeline answers `TOOL_FAILED`, a workflow step fails).
  */
-export const bindKnowledgePort = (knowledge: Pick<KnowledgeServices, "searchChunks" | "registerDocument" | "replaceDocumentChunks">): KnowledgePort => ({
+export const bindKnowledgePort = (
+  knowledge: Pick<KnowledgeServices, "searchChunks" | "registerDocument" | "replaceDocumentChunks">,
+): KnowledgePort => ({
   searchChunks: async (input) => {
-    const result = await knowledge.searchChunks({ ...input, namespaces: [...input.namespaces], embedding: [...input.embedding] });
+    const result = await knowledge.searchChunks({
+      ...input,
+      namespaces: [...input.namespaces],
+      embedding: [...input.embedding],
+    });
     if (!result.ok) throw rejectionOf(result.error);
     return result.data;
   },

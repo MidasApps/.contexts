@@ -12,7 +12,12 @@ export const listLiveOrganizationIds = async (firestore: Firestore): Promise<str
   const ids: string[] = [];
   let last: string | undefined;
   for (;;) {
-    let query = firestore.collection(CORE_COLLECTIONS.organizations).where("deletedAt", "==", null).orderBy("__name__").select().limit(PAGE);
+    let query = firestore
+      .collection(CORE_COLLECTIONS.organizations)
+      .where("deletedAt", "==", null)
+      .orderBy("__name__")
+      .select()
+      .limit(PAGE);
     if (last !== undefined) query = query.startAfter(last);
     const snapshot = await query.get();
     ids.push(...snapshot.docs.map((doc) => doc.id));

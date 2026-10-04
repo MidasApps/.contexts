@@ -1,20 +1,30 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type { TenantId } from "../primitives/ids.schema.ts";
 import { FileUploadRequestContract, FileUploadRequestSchema } from "./file-upload-request.schema.ts";
-import { FileReadUrlContract, FileUploadTicketContract, UploadInstructionsSchema } from "./file-upload-ticket.schema.ts";
-import { StoredFileContract, StoredFileSchema, type StoredFile } from "./stored-file.schema.ts";
+import {
+  FileReadUrlContract,
+  FileUploadTicketContract,
+  UploadInstructionsSchema,
+} from "./file-upload-ticket.schema.ts";
+import { type StoredFile, StoredFileContract, StoredFileSchema } from "./stored-file.schema.ts";
 
 const contracts = [FileUploadRequestContract, StoredFileContract, FileUploadTicketContract, FileReadUrlContract];
 
 describe("file contracts", () => {
-  it.each(contracts.map((contract) => [contract.id, contract] as const))("%s: every example parses", (_id, contract) => {
-    for (const example of contract.meta.examples) expect(contract.schema.safeParse(example).success).toBe(true);
-  });
+  it.each(contracts.map((contract) => [contract.id, contract] as const))(
+    "%s: every example parses",
+    (_id, contract) => {
+      for (const example of contract.meta.examples) expect(contract.schema.safeParse(example).success).toBe(true);
+    },
+  );
 
-  it.each(contracts.map((contract) => [contract.id, contract] as const))("%s: rejects an unknown key", (_id, contract) => {
-    const [example] = contract.meta.examples;
-    expect(contract.schema.safeParse({ ...(example as object), injected: true }).success).toBe(false);
-  });
+  it.each(contracts.map((contract) => [contract.id, contract] as const))(
+    "%s: rejects an unknown key",
+    (_id, contract) => {
+      const [example] = contract.meta.examples;
+      expect(contract.schema.safeParse({ ...(example as object), injected: true }).success).toBe(false);
+    },
+  );
 
   it("brands tenant ids", () => {
     expectTypeOf<StoredFile["tenantId"]>().toEqualTypeOf<TenantId>();

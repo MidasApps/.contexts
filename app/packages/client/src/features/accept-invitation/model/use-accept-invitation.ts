@@ -1,7 +1,18 @@
 "use client";
 
-import { acceptInvitationEndpoint, previewInvitationEndpoint, type AcceptInvitationResponse, type InvitationPreview } from "@core/contracts";
-import { useMutation, useQuery, useQueryClient, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
+import {
+  type AcceptInvitationResponse,
+  acceptInvitationEndpoint,
+  type InvitationPreview,
+  previewInvitationEndpoint,
+} from "@core/contracts";
+import {
+  type UseMutationResult,
+  type UseQueryResult,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
@@ -16,7 +27,8 @@ export const useInvitationPreview = (token: string | null): UseQueryResult<Invit
   const signedIn = useIsSignedIn();
   return useQuery({
     queryKey: ["me", "invitation-preview"],
-    queryFn: async ({ signal }) => (await callEndpoint(previewInvitationEndpoint, { body: { token: token ?? "" }, signal })).data,
+    queryFn: async ({ signal }) =>
+      (await callEndpoint(previewInvitationEndpoint, { body: { token: token ?? "" }, signal })).data,
     enabled: signedIn && token !== null,
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: 0,

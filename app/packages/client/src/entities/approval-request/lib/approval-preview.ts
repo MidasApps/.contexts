@@ -13,7 +13,13 @@ export const WORKFLOW_RESUME_KIND = "workflow-resume";
  * - anything else (a module's kind): the summary only.
  */
 export type ApprovalPreview =
-  | { readonly kind: "agent-command"; readonly commandId: string | null; readonly before: unknown; readonly after: unknown; readonly hasDiff: boolean }
+  | {
+      readonly kind: "agent-command";
+      readonly commandId: string | null;
+      readonly before: unknown;
+      readonly after: unknown;
+      readonly hasDiff: boolean;
+    }
   | { readonly kind: "workflow-resume"; readonly workflowId: string; readonly runId: string; readonly runRoute: Route }
   | { readonly kind: "summary"; readonly summary: string };
 
@@ -23,7 +29,12 @@ const AgentCommandPreviewSchema = z.looseObject({
 });
 
 /** The run's progress page in the organization's settings: `/o/{organizationId}/settings/workflows/runs/{runId}`. */
-export const workflowRunRoute = (organizationId: string, runId: string): Route => ({ id: "settings", organizationId, section: "workflows", rest: `runs/${runId}` });
+export const workflowRunRoute = (organizationId: string, runId: string): Route => ({
+  id: "settings",
+  organizationId,
+  section: "workflows",
+  rest: `runs/${runId}`,
+});
 
 /** The stable page of one request: `/o/{organizationId}/settings/approvals/{approvalRequestId}` (the chat links here). */
 export const approvalRequestRoute = (organizationId: string, approvalRequestId: string): Route => ({
@@ -42,14 +53,25 @@ export const approvalPreviewOf = (request: Pick<ApprovalRequest, "action" | "ten
   if (kind === WORKFLOW_RESUME_KIND) {
     const parsed = WorkflowResumeActionInputSchema.safeParse(input);
     if (parsed.success) {
-      return { kind: "workflow-resume", workflowId: parsed.data.workflowId, runId: parsed.data.runId, runRoute: workflowRunRoute(request.tenantId, parsed.data.runId) };
+      return {
+        kind: "workflow-resume",
+        workflowId: parsed.data.workflowId,
+        runId: parsed.data.runId,
+        runRoute: workflowRunRoute(request.tenantId, parsed.data.runId),
+      };
     }
   }
   if (kind === AGENT_COMMAND_KIND) {
     const parsed = AgentCommandPreviewSchema.safeParse(input);
     if (parsed.success) {
       const preview = parsed.data.preview ?? null;
-      return { kind: "agent-command", commandId: parsed.data.commandId ?? null, before: preview?.before ?? null, after: preview?.after ?? null, hasDiff: preview !== null };
+      return {
+        kind: "agent-command",
+        commandId: parsed.data.commandId ?? null,
+        before: preview?.before ?? null,
+        after: preview?.after ?? null,
+        hasDiff: preview !== null,
+      };
     }
   }
   return { kind: "summary", summary };

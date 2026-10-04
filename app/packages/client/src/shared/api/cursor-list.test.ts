@@ -9,7 +9,10 @@ const pagesOf =
   (cursor) => {
     const index = Number(cursor ?? "0");
     const hasMore = index + 1 < total;
-    return Promise.resolve({ data: [index], meta: { page: { cursor: hasMore ? String(index + 1) : null, hasMore, limit: 1 } } });
+    return Promise.resolve({
+      data: [index],
+      meta: { page: { cursor: hasMore ? String(index + 1) : null, hasMore, limit: 1 } },
+    });
   };
 
 describe("collectPages", () => {

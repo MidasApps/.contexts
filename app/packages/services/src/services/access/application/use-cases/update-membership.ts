@@ -1,4 +1,4 @@
-import { UserIdSchema, type Membership, type MembershipId, type RoleRef, type UserPrincipal } from "@core/contracts";
+import { type Membership, type MembershipId, type RoleRef, UserIdSchema, type UserPrincipal } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
@@ -7,7 +7,7 @@ import { AccessNotFoundError } from "../../domain/errors/access-not-found-error.
 import { LastOwnerError } from "../../domain/errors/last-owner-error.ts";
 import { holdsOwner } from "../../domain/role-permissions.ts";
 import type { AccessWriteDeps } from "../access-write-deps.ts";
-import { checkGrantable, requireWithinActor, type GrantCheckError } from "../grant-checks.ts";
+import { checkGrantable, type GrantCheckError, requireWithinActor } from "../grant-checks.ts";
 import { organizationGone, readPrincipalState, writePrincipalState } from "../membership-writes.ts";
 import { wouldLoseLastOwner } from "./last-owner-guard.ts";
 
@@ -23,7 +23,11 @@ export type UpdateMembershipError = GrantCheckError | AccessNotFoundError | Last
 
 export type UpdateMembership = (command: UpdateMembershipCommand) => Promise<Result<Membership, UpdateMembershipError>>;
 
-const applyUpdate = async (tx: Transaction, deps: AccessWriteDeps, command: UpdateMembershipCommand): Promise<Result<Membership, UpdateMembershipError>> => {
+const applyUpdate = async (
+  tx: Transaction,
+  deps: AccessWriteDeps,
+  command: UpdateMembershipCommand,
+): Promise<Result<Membership, UpdateMembershipError>> => {
   const membership = await deps.memberships.get(tx, command.membershipId);
   if (membership === null) return err(new AccessNotFoundError("membership"));
   const principal = { type: membership.principalType, id: membership.principalId };
@@ -71,6 +75,7 @@ export const makeUpdateMembership =
     const within = await requireWithinActor(deps, { ...command, grants: [current] });
     if (!within.ok) return within;
     const updated = await deps.unitOfWork.run((tx) => applyUpdate(tx, deps, command));
-    if (updated.ok && updated.data.principalType === "user") await deps.syncClaims(UserIdSchema.parse(updated.data.principalId));
+    if (updated.ok && updated.data.principalType === "user")
+      await deps.syncClaims(UserIdSchema.parse(updated.data.principalId));
     return updated;
   };

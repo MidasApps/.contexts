@@ -10,13 +10,11 @@ export const queryKeys = {
   me: (): QueryKey => ["me"],
   myOrganizations: (query: Record<string, unknown> = {}): QueryKey => ["me", "organizations", query],
   organization: (organizationId: string): QueryKey => ["organizations", organizationId],
-  accessContext: (node: { organizationId: string; projectId?: string | undefined; unitId?: string | undefined }): QueryKey => [
-    "organizations",
-    node.organizationId,
-    "access-context",
-    node.projectId ?? null,
-    node.unitId ?? null,
-  ],
+  accessContext: (node: {
+    organizationId: string;
+    projectId?: string | undefined;
+    unitId?: string | undefined;
+  }): QueryKey => ["organizations", node.organizationId, "access-context", node.projectId ?? null, node.unitId ?? null],
   /** Any other tenant resource: `["organizations", id, resource, ...parts]`. */
   organizationScoped: (organizationId: string, resource: string, ...parts: readonly unknown[]): QueryKey => [
     "organizations",

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import {
@@ -30,7 +30,10 @@ const DismissGuardContext = createContext<GuardContext | null>(null);
 /** Several parts may declare at once (a body blocks while sending, its child guards a secret): the strictest wins. */
 const STRICTNESS: readonly DialogDismissGuard[] = ["allow", "confirmUnsaved", "confirmOneTime", "block"];
 const strictest = (guards: Iterable<DialogDismissGuard>): DialogDismissGuard =>
-  [...guards].reduce<DialogDismissGuard>((winner, guard) => (STRICTNESS.indexOf(guard) > STRICTNESS.indexOf(winner) ? guard : winner), "allow");
+  [...guards].reduce<DialogDismissGuard>(
+    (winner, guard) => (STRICTNESS.indexOf(guard) > STRICTNESS.indexOf(winner) ? guard : winner),
+    "allow",
+  );
 
 /**
  * Declares, from anywhere inside a `Dialog`, how a dismissal is handled while the caller is

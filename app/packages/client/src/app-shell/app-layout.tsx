@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { useTranslations } from "use-intl";
 import { BREAKPOINTS, useMediaQuery } from "#/shared/lib/media/use-media-query.ts";
 import { useShellSlots } from "#/shared/lib/shell/shell-registry-context.tsx";
@@ -45,7 +45,12 @@ export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }:
   const { rightPanel: RightPanel, useRightPanelAvailable = alwaysAvailable } = useShellSlots();
   const panelAvailable = useRightPanelAvailable() && RightPanel !== undefined;
   const panelToggle = panelAvailable ? (
-    <Button variant={panelOpen ? "secondary" : "ghost"} size="sm" aria-pressed={panelOpen} onClick={() => setPanelOpen((open) => !open)}>
+    <Button
+      variant={panelOpen ? "secondary" : "ghost"}
+      size="sm"
+      aria-pressed={panelOpen}
+      onClick={() => setPanelOpen((open) => !open)}
+    >
       <Icon name="message" />
       <span className="max-sm:sr-only">{t("rightPanel.toggle")}</span>
     </Button>
@@ -66,7 +71,16 @@ export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }:
           />
         }
         topbar={<AppTopbar onOpenCommandPalette={() => setPaletteOpen(true)} actions={panelToggle} />}
-        rightPanel={panelAvailable ? { label: t("rightPanel.label"), content: panelOpen ? <RightPanel /> : null, open: panelOpen, onOpenChange: setPanelOpen } : undefined}
+        rightPanel={
+          panelAvailable
+            ? {
+                label: t("rightPanel.label"),
+                content: panelOpen ? <RightPanel /> : null,
+                open: panelOpen,
+                onOpenChange: setPanelOpen,
+              }
+            : undefined
+        }
         compactRightPanel={compactPanel}
         {...(sidebarDefaultOpen === undefined ? {} : { sidebarDefaultOpen })}
         {...(persistSidebarState === undefined ? {} : { persistSidebarState })}

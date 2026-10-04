@@ -3,7 +3,7 @@ import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { TenancyNotFoundError } from "../../domain/errors/tenancy-not-found-error.ts";
 import { organizationNode, recordTenancyAudit, type TenancyCommand, type TenancyDeps } from "../tenancy-deps.ts";
-import { loadAuthorizedOrganization, type LoadError, type OrganizationCommand } from "./get-organization.ts";
+import { type LoadError, loadAuthorizedOrganization, type OrganizationCommand } from "./get-organization.ts";
 
 export type DeleteOrganizationCommand = OrganizationCommand & TenancyCommand;
 
@@ -13,7 +13,12 @@ export type DeleteOrganization = (command: DeleteOrganizationCommand) => Promise
 const REVOKE_BATCH = 400;
 
 // Revokes live projections in batches until none is left; re-running is safe.
-const revokeProjections = async (deps: TenancyDeps, tenantId: TenantId, actorId: string, now: string): Promise<void> => {
+const revokeProjections = async (
+  deps: TenancyDeps,
+  tenantId: TenantId,
+  actorId: string,
+  now: string,
+): Promise<void> => {
   for (;;) {
     const batch = await deps.access.projections.listUnrevoked(undefined, { tenantId, limit: REVOKE_BATCH });
     if (batch.length === 0) return;
@@ -44,7 +49,12 @@ export const makeDeleteOrganization =
       if (current === null) return err(new TenancyNotFoundError("organization"));
       await deps.access.projections.markRevoked(tx, { projections: stragglers, updatedAt: now, actorId });
       deps.organizations.softDelete(tx, { id: current.id, deletedAt: now, actorId });
-      await recordTenancyAudit(tx, deps, command, { tenantId, action: "ORGANIZATION_DELETED", target: { type: "organization", id: tenantId }, node: organizationNode(tenantId) });
+      await recordTenancyAudit(tx, deps, command, {
+        tenantId,
+        action: "ORGANIZATION_DELETED",
+        target: { type: "organization", id: tenantId },
+        node: organizationNode(tenantId),
+      });
       return ok(undefined);
     });
   };

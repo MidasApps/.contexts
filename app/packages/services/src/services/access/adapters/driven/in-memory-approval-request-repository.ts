@@ -1,4 +1,4 @@
-import { ApprovalRequestIdSchema, type ApprovalRequest } from "@core/contracts";
+import { type ApprovalRequest, ApprovalRequestIdSchema } from "@core/contracts";
 import { paginateInMemory } from "../../../shared/pagination/page.ts";
 import type { ApprovalRequestRepository } from "../../application/ports/driven/approval-request-repository.ts";
 
@@ -9,7 +9,8 @@ export type InMemoryApprovalRequestRepository = ApprovalRequestRepository & {
 };
 
 // Newest first: sort by an inverted key, like `createdAt desc, id desc` in Firestore.
-const descending = (value: string): string => [...value].map((char) => String.fromCharCode(0xffff - char.charCodeAt(0))).join("");
+const descending = (value: string): string =>
+  [...value].map((char) => String.fromCharCode(0xffff - char.charCodeAt(0))).join("");
 
 /** In-memory `ApprovalRequestRepository` for unit tests; ids are `approval-1`, `approval-2`, … */
 export const createInMemoryApprovalRequestRepository = (): InMemoryApprovalRequestRepository => {
@@ -20,13 +21,24 @@ export const createInMemoryApprovalRequestRepository = (): InMemoryApprovalReque
     create: (_tx, { request }) => void rows.set(request.id, request),
     get: (_tx, id) => Promise.resolve(rows.get(id) ?? null),
     list: ({ tenantId, statuses, page }) => {
-      const items = [...rows.values()].filter((row) => row.tenantId === tenantId && (statuses === undefined || statuses.includes(row.status)));
-      return Promise.resolve(paginateInMemory({ items, page, positionOf: (row) => [descending(row.createdAt), descending(row.id)] }));
+      const items = [...rows.values()].filter(
+        (row) => row.tenantId === tenantId && (statuses === undefined || statuses.includes(row.status)),
+      );
+      return Promise.resolve(
+        paginateInMemory({ items, page, positionOf: (row) => [descending(row.createdAt), descending(row.id)] }),
+      );
     },
     setStatus: (_tx, { id, status, decidedBy, reason, failure, updatedAt }) => {
       const row = rows.get(id);
       if (row === undefined) return;
-      rows.set(id, { ...row, status, ...(decidedBy === undefined ? {} : { decidedBy }), ...(reason === undefined ? {} : { reason }), ...(failure === undefined ? {} : { failure }), updatedAt });
+      rows.set(id, {
+        ...row,
+        status,
+        ...(decidedBy === undefined ? {} : { decidedBy }),
+        ...(reason === undefined ? {} : { reason }),
+        ...(failure === undefined ? {} : { failure }),
+        updatedAt,
+      });
     },
     listByStatusBefore: ({ status, field, before, limit }) =>
       Promise.resolve(

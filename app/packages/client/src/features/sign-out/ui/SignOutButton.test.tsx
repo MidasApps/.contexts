@@ -1,9 +1,9 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { Toaster } from "#/shared/ui/molecules/Toaster/Toaster.tsx";
-import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { createRecordingSession, renderWithClient } from "#/shared/testing/render-client.tsx";
+import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
+import { Toaster } from "#/shared/ui/molecules/Toaster/Toaster.tsx";
 import { SignOutButton } from "./SignOutButton.tsx";
 
 afterEach(() => {

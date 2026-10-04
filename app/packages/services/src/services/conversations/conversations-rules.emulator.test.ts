@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { assertFails, assertSucceeds, initializeTestEnvironment, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
+import {
+  assertFails,
+  assertSucceeds,
+  initializeTestEnvironment,
+  type RulesTestEnvironment,
+} from "@firebase/rules-unit-testing";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 
 // Conversations (decision 0033): the owner reads their own conversations of the active
@@ -24,7 +29,10 @@ const DELETED = "conversations/conv-deleted";
 let testEnv: RulesTestEnvironment;
 
 beforeAll(async () => {
-  testEnv = await initializeTestEnvironment({ projectId: PROJECT_ID, firestore: { rules: readFileSync(path.join(WORKSPACE_ROOT, "firestore.rules"), "utf8") } });
+  testEnv = await initializeTestEnvironment({
+    projectId: PROJECT_ID,
+    firestore: { rules: readFileSync(path.join(WORKSPACE_ROOT, "firestore.rules"), "utf8") },
+  });
 });
 
 afterAll(async () => {
@@ -49,7 +57,14 @@ describe("conversations rules", () => {
   it("lets the owner read their own conversations of the active organization", async () => {
     const db = testEnv.authenticatedContext(OWNER, { tenantId: TENANT }).firestore();
     await assertSucceeds(db.doc(OWN).get());
-    await assertSucceeds(db.collection("conversations").where("tenantId", "==", TENANT).where("ownerId", "==", OWNER).where("deletedAt", "==", null).get());
+    await assertSucceeds(
+      db
+        .collection("conversations")
+        .where("tenantId", "==", TENANT)
+        .where("ownerId", "==", OWNER)
+        .where("deletedAt", "==", null)
+        .get(),
+    );
   });
 
   it("denies another member, another active tenant, deleted conversations and anonymous clients", async () => {

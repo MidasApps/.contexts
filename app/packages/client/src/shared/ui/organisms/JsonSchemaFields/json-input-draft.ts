@@ -16,15 +16,19 @@ export type JsonInputProblems = {
   readonly json: boolean;
 };
 
-export type JsonInputRead = { readonly ok: true; readonly value: Record<string, unknown> } | { readonly ok: false; readonly problems: JsonInputProblems };
+export type JsonInputRead =
+  | { readonly ok: true; readonly value: Record<string, unknown> }
+  | { readonly ok: false; readonly problems: JsonInputProblems };
 
 const ERRORS = "common.form.errors";
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const fieldsOf = (plan: JsonSchemaPlan): readonly JsonFieldPlan[] => (plan.kind === "fields" ? plan.fields : []);
 
-const textOf = (value: unknown): string => (value === undefined || value === null ? "" : typeof value === "string" ? value : JSON.stringify(value));
+const textOf = (value: unknown): string =>
+  value === undefined || value === null ? "" : typeof value === "string" ? value : JSON.stringify(value);
 
 /** The draft of an input value (an initial value, or a schedule's stored input); defaults fill the gaps. */
 export const draftOfValue = (plan: JsonSchemaPlan, value: Readonly<Record<string, unknown>>): JsonInputDraft => ({
@@ -58,14 +62,18 @@ const readNumber = (field: JsonFieldPlan, text: string): FieldRead => {
   const value = parseNumber(text);
   if (!Number.isFinite(value)) return { problem: { key: `${ERRORS}.invalid` } };
   if (field.kind === "integer" && !Number.isInteger(value)) return { problem: { key: `${ERRORS}.notInteger` } };
-  if (field.minimum !== undefined && value < field.minimum) return { problem: { key: `${ERRORS}.tooSmall`, values: { minimum: field.minimum } } };
-  if (field.maximum !== undefined && value > field.maximum) return { problem: { key: `${ERRORS}.tooBig`, values: { maximum: field.maximum } } };
+  if (field.minimum !== undefined && value < field.minimum)
+    return { problem: { key: `${ERRORS}.tooSmall`, values: { minimum: field.minimum } } };
+  if (field.maximum !== undefined && value > field.maximum)
+    return { problem: { key: `${ERRORS}.tooBig`, values: { maximum: field.maximum } } };
   return { value };
 };
 
 const readText = (field: JsonFieldPlan, text: string): FieldRead => {
-  if (field.minLength !== undefined && text.trim().length < field.minLength) return { problem: { key: `${ERRORS}.tooShort`, values: { minimum: field.minLength } } };
-  if (field.maxLength !== undefined && text.length > field.maxLength) return { problem: { key: `${ERRORS}.tooLong`, values: { maximum: field.maxLength } } };
+  if (field.minLength !== undefined && text.trim().length < field.minLength)
+    return { problem: { key: `${ERRORS}.tooShort`, values: { minimum: field.minLength } } };
+  if (field.maxLength !== undefined && text.length > field.maxLength)
+    return { problem: { key: `${ERRORS}.tooLong`, values: { maximum: field.maxLength } } };
   return { value: text };
 };
 
@@ -74,7 +82,8 @@ const readField = (field: JsonFieldPlan, raw: string | boolean | undefined): Fie
   const text = typeof raw === "string" ? raw : "";
   if (text.trim() === "") return field.required ? { problem: { key: `${ERRORS}.required` } } : {};
   if (field.kind === "number" || field.kind === "integer") return readNumber(field, text);
-  if (field.kind === "select") return field.options.includes(text) ? { value: text } : { problem: { key: `${ERRORS}.invalidOption` } };
+  if (field.kind === "select")
+    return field.options.includes(text) ? { value: text } : { problem: { key: `${ERRORS}.invalidOption` } };
   return readText(field, text);
 };
 
@@ -96,7 +105,9 @@ export const readJsonInput = (plan: JsonSchemaPlan, draft: JsonInputDraft): Json
     if (read.problem !== undefined) problems[field.name] = read.problem;
     else if (read.value !== undefined) value[field.name] = read.value;
   }
-  return Object.keys(problems).length === 0 ? { ok: true, value } : { ok: false, problems: { fields: problems, json: false } };
+  return Object.keys(problems).length === 0
+    ? { ok: true, value }
+    : { ok: false, problems: { fields: problems, json: false } };
 };
 
 /** What the fields hold, as far as it reads (an unparsable number stays as typed): the JSON view of the form. */
@@ -107,16 +118,25 @@ const looseValueOf = (plan: JsonSchemaPlan, draft: JsonInputDraft): Record<strin
       if (field.kind === "switch") return [[field.name, raw === true]];
       if (typeof raw !== "string" || raw.trim() === "") return [];
       const number = parseNumber(raw);
-      return [[field.name, (field.kind === "number" || field.kind === "integer") && Number.isFinite(number) ? number : raw]];
+      return [
+        [field.name, (field.kind === "number" || field.kind === "integer") && Number.isFinite(number) ? number : raw],
+      ];
     }),
   );
 
 /** Switches between the fields and "edit as JSON"; going back to fields fails while the JSON is not an object. */
-export const switchJsonInputMode = (plan: JsonSchemaPlan, draft: JsonInputDraft, mode: JsonInputMode): { ok: true; draft: JsonInputDraft } | { ok: false } => {
+export const switchJsonInputMode = (
+  plan: JsonSchemaPlan,
+  draft: JsonInputDraft,
+  mode: JsonInputMode,
+): { ok: true; draft: JsonInputDraft } | { ok: false } => {
   if (mode === draft.mode) return { ok: true, draft };
   if (mode === "json") {
     const value = looseValueOf(plan, draft);
-    return { ok: true, draft: { ...draft, mode, json: Object.keys(value).length === 0 ? "" : JSON.stringify(value, null, 2) } };
+    return {
+      ok: true,
+      draft: { ...draft, mode, json: Object.keys(value).length === 0 ? "" : JSON.stringify(value, null, 2) },
+    };
   }
   const value = parseObject(draft.json);
   if (value === null) return { ok: false };

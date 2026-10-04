@@ -2,13 +2,27 @@ import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
 import { describe, expect, it } from "vitest";
 import { AGENT_PRINCIPAL_KEY } from "../context/agent-request-context.ts";
-import { createFakeAccessPort, createFakeUsageReportPort, createRecordingNotificationPort } from "../testing/fake-ports.ts";
+import {
+  createFakeAccessPort,
+  createFakeUsageReportPort,
+  createRecordingNotificationPort,
+} from "../testing/fake-ports.ts";
 import { createUsageReportWorkflow, USAGE_REPORT_WORKFLOW_ID } from "./usage-report.workflow.ts";
 
-const run = async (usageReport: Parameters<typeof createUsageReportWorkflow>[0]["usageReport"], requestContext = new RequestContext<unknown>()) => {
-  const workflow = createUsageReportWorkflow({ access: createFakeAccessPort({}), notifications: createRecordingNotificationPort(), usageReport });
+const run = async (
+  usageReport: Parameters<typeof createUsageReportWorkflow>[0]["usageReport"],
+  requestContext = new RequestContext<unknown>(),
+) => {
+  const workflow = createUsageReportWorkflow({
+    access: createFakeAccessPort({}),
+    notifications: createRecordingNotificationPort(),
+    usageReport,
+  });
   const mastra = new Mastra({ workflows: { [workflow.id]: workflow }, logger: false });
-  const result = await (await mastra.getWorkflow(USAGE_REPORT_WORKFLOW_ID).createRun()).start({ inputData: {}, requestContext });
+  const result = await (await mastra.getWorkflow(USAGE_REPORT_WORKFLOW_ID).createRun()).start({
+    inputData: {},
+    requestContext,
+  });
   return result.status === "success" ? result.result : result.status;
 };
 
@@ -17,7 +31,8 @@ describe("usage-report workflow", () => {
     const fake = createFakeUsageReportPort({ tenantIds: ["t1", "t2", "t3"] });
     const result = await run({
       listTenantIds: fake.listTenantIds,
-      reportTenant: (input) => (input.tenantId === "t2" ? Promise.reject(new Error("db down")) : fake.reportTenant(input)),
+      reportTenant: (input) =>
+        input.tenantId === "t2" ? Promise.reject(new Error("db down")) : fake.reportTenant(input),
     });
     expect(result).toEqual({ tenants: 3, failed: 1, alerts: 0 });
     expect(fake.reported.sort()).toEqual(["t1", "t3"]);

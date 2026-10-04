@@ -1,12 +1,12 @@
 "use client";
 
-import { WORKFLOW_RUN_STATUSES, type AdminWorkflowRun, type WorkflowRunStatus } from "@core/contracts";
-import { useId, useState, type FormEvent } from "react";
+import { type AdminWorkflowRun, WORKFLOW_RUN_STATUSES, type WorkflowRunStatus } from "@core/contracts";
+import { type FormEvent, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAdminUserNames } from "#/entities/admin-user/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
-import { useAdminWorkflowRuns, ADMIN_RUNS_PAGE_LIMIT } from "#/entities/workflow-run/index.ts";
 import { useAdminSchedules } from "#/entities/schedule/index.ts";
+import { ADMIN_RUNS_PAGE_LIMIT, useAdminWorkflowRuns } from "#/entities/workflow-run/index.ts";
 import { CancelRunDialog } from "#/features/admin-cancel-run/index.ts";
 import { useScheduleLabels } from "#/features/schedule-editor/index.ts";
 import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
@@ -15,7 +15,13 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { AdminOrganizationFilter, AdminQuerySection } from "#/widgets/admin-nav/index.ts";
 import { RunTimeline } from "#/widgets/run-timeline/index.ts";
@@ -24,12 +30,23 @@ import { RunsTable } from "./RunsTable.tsx";
 const ANY = "any";
 /** Same shape as the contract's workflow id: a hand-typed value that cannot match is not sent. */
 export const WORKFLOW_ID = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u;
-const isStatus = (value: string | undefined): value is WorkflowRunStatus => value !== undefined && (WORKFLOW_RUN_STATUSES as readonly string[]).includes(value);
+const isStatus = (value: string | undefined): value is WorkflowRunStatus =>
+  value !== undefined && (WORKFLOW_RUN_STATUSES as readonly string[]).includes(value);
 
-export type RunFilterValues = { organizationId: string | undefined; workflowId: string | undefined; status: string | undefined };
+export type RunFilterValues = {
+  organizationId: string | undefined;
+  workflowId: string | undefined;
+  status: string | undefined;
+};
 type FilterPatch = Partial<RunFilterValues>;
 
-function WorkflowIdField({ value, onApply }: { value: string | undefined; onApply: (workflowId: string | undefined) => void }) {
+function WorkflowIdField({
+  value,
+  onApply,
+}: {
+  value: string | undefined;
+  onApply: (workflowId: string | undefined) => void;
+}) {
   const t = useTranslations("admin.workflows.runs.filters");
   const id = useId();
   const [draft, setDraft] = useState(value ?? "");
@@ -42,7 +59,15 @@ function WorkflowIdField({ value, onApply }: { value: string | undefined; onAppl
     <form onSubmit={submit} className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{t("workflow")}</Label>
       <span className="flex gap-2">
-        <Input id={id} className="w-full sm:w-48" value={draft} onChange={(event) => setDraft(event.target.value.trim())} placeholder={t("workflowPlaceholder")} aria-invalid={invalid || undefined} aria-describedby={invalid ? `${id}-error` : undefined} />
+        <Input
+          id={id}
+          className="w-full sm:w-48"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value.trim())}
+          placeholder={t("workflowPlaceholder")}
+          aria-invalid={invalid || undefined}
+          aria-describedby={invalid ? `${id}-error` : undefined}
+        />
         <Button type="submit" variant="secondary">
           {t("apply")}
         </Button>
@@ -63,11 +88,21 @@ function RunFilters({ values, onChange }: { values: RunFilterValues; onChange: (
   const suspendedOnly = values.status === "suspended";
   return (
     <div role="search" aria-label={t("label")} className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-      <AdminOrganizationFilter value={values.organizationId} onValueChange={(organizationId) => onChange({ organizationId })} />
-      <WorkflowIdField key={values.workflowId ?? ""} value={values.workflowId} onApply={(workflowId) => onChange({ workflowId })} />
+      <AdminOrganizationFilter
+        value={values.organizationId}
+        onValueChange={(organizationId) => onChange({ organizationId })}
+      />
+      <WorkflowIdField
+        key={values.workflowId ?? ""}
+        value={values.workflowId}
+        onApply={(workflowId) => onChange({ workflowId })}
+      />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={statusId}>{t("status")}</Label>
-        <Select value={values.status ?? ANY} onValueChange={(value) => onChange({ status: value === ANY ? undefined : value })}>
+        <Select
+          value={values.status ?? ANY}
+          onValueChange={(value) => onChange({ status: value === ANY ? undefined : value })}
+        >
           <SelectTrigger id={statusId} className="w-full sm:w-48">
             <SelectValue />
           </SelectTrigger>
@@ -81,7 +116,11 @@ function RunFilters({ values, onChange }: { values: RunFilterValues; onChange: (
           </SelectContent>
         </Select>
       </div>
-      <Button variant={suspendedOnly ? "default" : "secondary"} aria-pressed={suspendedOnly} onClick={() => onChange({ status: suspendedOnly ? undefined : "suspended" })}>
+      <Button
+        variant={suspendedOnly ? "default" : "secondary"}
+        aria-pressed={suspendedOnly}
+        onClick={() => onChange({ status: suspendedOnly ? undefined : "suspended" })}
+      >
         {t("suspendedOnly")}
       </Button>
     </div>
@@ -99,7 +138,19 @@ type RunLabels = {
  * loads or fails, nothing yet; not among them (another page, other filters, or gone), a dialog that says so
  * instead of an empty one. There is no endpoint for one run by id (follow-up 96).
  */
-function RunDetailsDialog({ runId, run, ready, labels, onClose }: { runId: string | undefined; run: AdminWorkflowRun | undefined; ready: boolean; labels: RunLabels; onClose: () => void }) {
+function RunDetailsDialog({
+  runId,
+  run,
+  ready,
+  labels,
+  onClose,
+}: {
+  runId: string | undefined;
+  run: AdminWorkflowRun | undefined;
+  ready: boolean;
+  labels: RunLabels;
+  onClose: () => void;
+}) {
   const t = useTranslations("admin.workflows.runs");
   const workflowLabel = useWorkflowLabel();
   // Only once the list loaded: while it loads or fails, the page shows its own loading or retry.
@@ -116,7 +167,9 @@ function RunDetailsDialog({ runId, run, ready, labels, onClose }: { runId: strin
           <>
             <DialogHeader>
               <DialogTitle>{t("detailsTitle", { workflow: workflowLabel.name(run.workflowId) })}</DialogTitle>
-              <DialogDescription>{t("detailsDescription", { organization: labels.organizationLabel(run.tenantId), id: run.runId })}</DialogDescription>
+              <DialogDescription>
+                {t("detailsDescription", { organization: labels.organizationLabel(run.tenantId), id: run.runId })}
+              </DialogDescription>
             </DialogHeader>
             <RunTimeline
               run={run}
@@ -132,12 +185,42 @@ function RunDetailsDialog({ runId, run, ready, labels, onClose }: { runId: strin
   );
 }
 
-function RunsEmpty({ filtering, onClear, onSchedules }: { filtering: boolean; onClear: () => void; onSchedules: () => void }) {
+function RunsEmpty({
+  filtering,
+  onClear,
+  onSchedules,
+}: {
+  filtering: boolean;
+  onClear: () => void;
+  onSchedules: () => void;
+}) {
   const t = useTranslations("admin.workflows.runs");
   return filtering ? (
-    <EmptyState frame="plain" headingLevel={2} icon="search" title={t("noMatchTitle")} description={t("noMatchDescription")} action={<Button variant="secondary" onClick={onClear}>{t("clearFilters")}</Button>} />
+    <EmptyState
+      frame="plain"
+      headingLevel={2}
+      icon="search"
+      title={t("noMatchTitle")}
+      description={t("noMatchDescription")}
+      action={
+        <Button variant="secondary" onClick={onClear}>
+          {t("clearFilters")}
+        </Button>
+      }
+    />
   ) : (
-    <EmptyState frame="plain" headingLevel={2} icon="workflow" title={t("emptyTitle")} description={t("emptyDescription")} action={<Button variant="secondary" onClick={onSchedules}>{t("emptyAction")}</Button>} />
+    <EmptyState
+      frame="plain"
+      headingLevel={2}
+      icon="workflow"
+      title={t("emptyTitle")}
+      description={t("emptyDescription")}
+      action={
+        <Button variant="secondary" onClick={onSchedules}>
+          {t("emptyAction")}
+        </Button>
+      }
+    />
   );
 }
 
@@ -156,7 +239,14 @@ export type RunsPanelProps = {
  * organization, workflow and status in the URL (one press shows the suspended ones, which wait
  * for an approval), paged by cursor, with the run's timeline and a cancel for runs still alive.
  */
-export function RunsPanel({ values, onChange, openRunId, onOpenRunChange, organizationLabel, onSeeSchedules }: RunsPanelProps) {
+export function RunsPanel({
+  values,
+  onChange,
+  openRunId,
+  onOpenRunChange,
+  organizationLabel,
+  onSeeSchedules,
+}: RunsPanelProps) {
   const t = useTranslations("admin.workflows.runs");
   const filters = {
     organizationId: values.organizationId,
@@ -167,7 +257,10 @@ export function RunsPanel({ values, onChange, openRunId, onOpenRunChange, organi
   const paged = useCursorPages(runs, ADMIN_RUNS_PAGE_LIMIT, t("pagination"));
   // One lookup for the starters of the page on screen (decision 0044), never one per row.
   const canReadUsers = usePlatformPermissions().can("platform.user.read");
-  const userLabel = useAdminUserNames(paged.rows.map((run) => run.startedBy), { enabled: canReadUsers });
+  const userLabel = useAdminUserNames(
+    paged.rows.map((run) => run.startedBy),
+    { enabled: canReadUsers },
+  );
   // The schedules of the same organization filter (the schedules tab's cached list) name the runs they started.
   const scheduleLabel = useScheduleLabels(useAdminSchedules(filters.organizationId).data);
   const [canceling, setCanceling] = useState<AdminWorkflowRun | null>(null);
@@ -185,7 +278,13 @@ export function RunsPanel({ values, onChange, openRunId, onOpenRunChange, organi
             scheduleLabel={scheduleLabel}
             onDetails={(run) => onOpenRunChange(run.runId)}
             onCancel={setCanceling}
-            empty={<RunsEmpty filtering={filtering} onClear={() => onChange({ organizationId: undefined, workflowId: undefined, status: undefined })} onSchedules={onSeeSchedules} />}
+            empty={
+              <RunsEmpty
+                filtering={filtering}
+                onClear={() => onChange({ organizationId: undefined, workflowId: undefined, status: undefined })}
+                onSchedules={onSeeSchedules}
+              />
+            }
           />
         )}
       </AdminQuerySection>

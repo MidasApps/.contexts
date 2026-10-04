@@ -25,7 +25,11 @@ export function Message({ from, author, className, children, ...props }: Message
       data-slot="message"
       data-from={from}
       aria-label={author}
-      className={cn("group/message flex w-full flex-col gap-2", from === "user" ? "items-end" : "items-start", className)}
+      className={cn(
+        "group/message flex w-full flex-col gap-2",
+        from === "user" ? "items-end" : "items-start",
+        className,
+      )}
       {...props}
     >
       {children}

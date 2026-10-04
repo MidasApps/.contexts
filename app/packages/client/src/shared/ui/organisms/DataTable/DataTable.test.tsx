@@ -4,8 +4,8 @@ import { ApiError } from "#/shared/api/api-error.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
-import { dataTableColumnHelper } from "./data-table-columns.ts";
 import { DataTable } from "./DataTable.tsx";
+import { dataTableColumnHelper } from "./data-table-columns.ts";
 
 type Member = { id: string; name: string; projects: number };
 
@@ -59,7 +59,9 @@ describe("DataTable", () => {
   it("shows loading, empty and error states", async () => {
     const onRetry = vi.fn();
     const props = { caption: "Membros", columns: COLUMNS, getRowId: (row: Member) => row.id, empty: EMPTY };
-    const { user, rerender, container } = renderWithProviders(<DataTable {...props} data={[]} status={{ kind: "loading" }} />);
+    const { user, rerender, container } = renderWithProviders(
+      <DataTable {...props} data={[]} status={{ kind: "loading" }} />,
+    );
     expect(screen.getByRole("table").getAttribute("aria-busy")).toBe("true");
     expect(screen.getByRole("status").textContent).toBe("Carregando…");
     await expectNoAxeViolations(container);
@@ -77,7 +79,14 @@ describe("DataTable", () => {
   it("shows the retry as pending while the list is fetched again", () => {
     const error = new ApiError({ status: 503, code: "SERVICE_UNAVAILABLE", message: "down" });
     renderWithProviders(
-      <DataTable caption="Membros" columns={COLUMNS} data={[]} getRowId={(row) => row.id} empty={EMPTY} status={{ kind: "error", error, onRetry: vi.fn(), retrying: true }} />,
+      <DataTable
+        caption="Membros"
+        columns={COLUMNS}
+        data={[]}
+        getRowId={(row) => row.id}
+        empty={EMPTY}
+        status={{ kind: "error", error, onRetry: vi.fn(), retrying: true }}
+      />,
     );
     const retry = screen.getByRole<HTMLButtonElement>("button", { name: /Tentar novamente/u });
     expect(retry.disabled).toBe(true);
@@ -86,7 +95,14 @@ describe("DataTable", () => {
   it("renders the no-access state, without a retry, for a 403", async () => {
     const error = new ApiError({ status: 403, code: "FORBIDDEN", message: "forbidden" });
     const { container } = renderWithProviders(
-      <DataTable caption="Membros" columns={COLUMNS} data={[]} getRowId={(row) => row.id} empty={EMPTY} status={{ kind: "error", error, onRetry: vi.fn() }} />,
+      <DataTable
+        caption="Membros"
+        columns={COLUMNS}
+        data={[]}
+        getRowId={(row) => row.id}
+        empty={EMPTY}
+        status={{ kind: "error", error, onRetry: vi.fn() }}
+      />,
     );
     expect(screen.getByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();
     expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
@@ -120,7 +136,16 @@ describe("DataTable in a narrow container", () => {
 
   it("becomes cards when its container is narrower than its columns need, at any screen size", async () => {
     await withContainerWidth(320, async () => {
-      const { container } = renderWithProviders(<DataTable caption="Membros" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} renderCard={renderCard} />);
+      const { container } = renderWithProviders(
+        <DataTable
+          caption="Membros"
+          columns={COLUMNS}
+          data={MEMBERS}
+          getRowId={(row) => row.id}
+          empty={EMPTY}
+          renderCard={renderCard}
+        />,
+      );
       expect(screen.getByRole("list", { name: "Membros" })).toBeDefined();
       expect(screen.queryByRole("table")).toBeNull();
       await expectNoAxeViolations(container);
@@ -129,18 +154,39 @@ describe("DataTable in a narrow container", () => {
 
   it("stays a table when the container fits the columns, or when there is no card form", async () => {
     await withContainerWidth(900, () => {
-      renderWithProviders(<DataTable caption="Membros" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} renderCard={renderCard} />);
+      renderWithProviders(
+        <DataTable
+          caption="Membros"
+          columns={COLUMNS}
+          data={MEMBERS}
+          getRowId={(row) => row.id}
+          empty={EMPTY}
+          renderCard={renderCard}
+        />,
+      );
       expect(screen.getByRole("table", { name: "Membros" })).toBeDefined();
     });
     await withContainerWidth(320, () => {
-      renderWithProviders(<DataTable caption="Sem cartões" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} />);
+      renderWithProviders(
+        <DataTable caption="Sem cartões" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} />,
+      );
       expect(screen.getByRole("table", { name: "Sem cartões" })).toBeDefined();
     });
   });
 
   it("takes the width its columns need from the caller", async () => {
     await withContainerWidth(700, () => {
-      renderWithProviders(<DataTable caption="Membros" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} renderCard={renderCard} minTableWidth={800} />);
+      renderWithProviders(
+        <DataTable
+          caption="Membros"
+          columns={COLUMNS}
+          data={MEMBERS}
+          getRowId={(row) => row.id}
+          empty={EMPTY}
+          renderCard={renderCard}
+          minTableWidth={800}
+        />,
+      );
       expect(screen.getByRole("list", { name: "Membros" })).toBeDefined();
     });
   });
@@ -149,13 +195,24 @@ describe("DataTable in a narrow container", () => {
 describe("DataTable on small screens", () => {
   it("renders a labelled card list instead of the table when renderCard is given", async () => {
     const matchMedia = globalThis.matchMedia;
-    globalThis.matchMedia = ((query: string) => ({ ...matchMedia(query), matches: query.includes("max-width") }));
+    globalThis.matchMedia = (query: string) => ({ ...matchMedia(query), matches: query.includes("max-width") });
     try {
       const { container } = renderWithProviders(
-        <DataTable caption="Membros" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} renderCard={(row) => <span>{row.name}</span>} />,
+        <DataTable
+          caption="Membros"
+          columns={COLUMNS}
+          data={MEMBERS}
+          getRowId={(row) => row.id}
+          empty={EMPTY}
+          renderCard={(row) => <span>{row.name}</span>}
+        />,
       );
       const list = screen.getByRole("list", { name: "Membros" });
-      expect(within(list).getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Ana", "Bruno"]);
+      expect(
+        within(list)
+          .getAllByRole("listitem")
+          .map((item) => item.textContent),
+      ).toEqual(["Ana", "Bruno"]);
       expect(screen.queryByRole("table")).toBeNull();
       await expectNoAxeViolations(container);
     } finally {

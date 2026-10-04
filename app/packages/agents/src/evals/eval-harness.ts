@@ -30,7 +30,12 @@ export type EvalHarness = {
   readonly requestContext: () => RequestContext<unknown>;
 };
 
-const REAL_MODE_KEYS = ["GOOGLE_GENERATIVE_AI_API_KEY", "GOOGLE_VERTEX_PROJECT", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"] as const;
+const REAL_MODE_KEYS = [
+  "GOOGLE_GENERATIVE_AI_API_KEY",
+  "GOOGLE_VERTEX_PROJECT",
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+] as const;
 
 /**
  * Which mode the current eval process runs in (`AI_MODE` of the Vitest project), or
@@ -46,8 +51,10 @@ const realEnvOf = (processEnv: Readonly<Record<string, string | undefined>>): Mo
   resolveAgentEnv({ ...AgentEnvSchema.parse(processEnv), APP_ENV: "local" as const, AI_MODE: "real" as const });
 
 /** The model env of an eval run: the fixture env in fake mode, the validated process env in real mode. */
-export const evalEnvOf = (mode: EvalMode, processEnv: Readonly<Record<string, string | undefined>> = {}): ModelFactoryEnv =>
-  mode === "fake" ? SUPERVISOR_TEST_ENV : realEnvOf(processEnv);
+export const evalEnvOf = (
+  mode: EvalMode,
+  processEnv: Readonly<Record<string, string | undefined>> = {},
+): ModelFactoryEnv => (mode === "fake" ? SUPERVISOR_TEST_ENV : realEnvOf(processEnv));
 
 export const embedWith = (models: AgentModels) => async (texts: readonly string[]) =>
   (await embedMany({ model: models.embedding(), values: [...texts] })).embeddings;
@@ -65,20 +72,34 @@ export const buildEvalHarness = (args: {
 }): EvalHarness => {
   const env = evalEnvOf(args.mode, args.processEnv);
   const models = createModelProvider(env);
-  const access = createFakeAccessPort({ memberships: [{ tenantId: EVAL_TENANT, uid: "member-uid", permissions: MEMBER_PERMISSIONS }] });
+  const access = createFakeAccessPort({
+    memberships: [{ tenantId: EVAL_TENANT, uid: "member-uid", permissions: MEMBER_PERMISSIONS }],
+  });
   const ports = createFakeRuntimePorts({
     access,
     settings: createFakeSettingsPort(),
     knowledge: args.knowledge?.(models) ?? createCorpusKnowledgePort(embedWith(models)),
     ...(args.prompts === undefined ? {} : { prompts: args.prompts }),
   });
-  const runtime = composeAgentRuntime({ env, ports, modules: [noteModule()], storage: new InMemoryStore(), serviceName: "evals", aiCatalog: FIXTURE_AI_CATALOG, models });
-  const scorers = createCoreScorers({ foreignMarkers: FOREIGN_MARKERS, ...(args.mode === "real" ? { judgeModel: models.language("judge") } : {}) });
+  const runtime = composeAgentRuntime({
+    env,
+    ports,
+    modules: [noteModule()],
+    storage: new InMemoryStore(),
+    serviceName: "evals",
+    aiCatalog: FIXTURE_AI_CATALOG,
+    models,
+  });
+  const scorers = createCoreScorers({
+    foreignMarkers: FOREIGN_MARKERS,
+    ...(args.mode === "real" ? { judgeModel: models.language("judge") } : {}),
+  });
   const mastra = new Mastra({ agents: { ...runtime.agents, ...runtime.subagents }, scorers, storage: runtime.storage });
   return {
     mode: args.mode,
     mastra,
     scorers,
-    requestContext: () => new RequestContext<unknown>(buildAgentContextEntries({ tenantId: EVAL_TENANT, permissions: MEMBER_PERMISSIONS })),
+    requestContext: () =>
+      new RequestContext<unknown>(buildAgentContextEntries({ tenantId: EVAL_TENANT, permissions: MEMBER_PERMISSIONS })),
   };
 };

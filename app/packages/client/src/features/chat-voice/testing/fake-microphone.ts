@@ -26,7 +26,9 @@ export type FakeMicrophoneOptions = {
   readonly manual?: boolean | undefined;
 };
 
-export const createFakeMicrophone = (options: FakeMicrophoneOptions = {}): FakeMicrophone & { readonly grant: () => void } => {
+export const createFakeMicrophone = (
+  options: FakeMicrophoneOptions = {},
+): FakeMicrophone & { readonly grant: () => void } => {
   const recorders: FakeRecorder[] = [];
   let released = 0;
   let requests = 0;
@@ -59,7 +61,9 @@ export const createFakeMicrophone = (options: FakeMicrophoneOptions = {}): FakeM
         stop: () => {
           if (state !== "recording") return;
           state = "stopped";
-          recorder.ondataavailable?.({ data: (options.recorded ?? (() => new Blob(["opus-bytes"], { type: "audio/webm" })))() });
+          recorder.ondataavailable?.({
+            data: (options.recorded ?? (() => new Blob(["opus-bytes"], { type: "audio/webm" })))(),
+          });
           recorder.onstop?.();
         },
       };

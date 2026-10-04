@@ -10,7 +10,8 @@ import type { MessageFeedbackStore } from "../../application/ports/message-feedb
  */
 export const MESSAGE_FEEDBACK_COLLECTION = "message-feedback";
 
-const isoOf = (value: unknown, fallback: string): string => (value instanceof Timestamp ? value.toDate().toISOString() : fallback);
+const isoOf = (value: unknown, fallback: string): string =>
+  value instanceof Timestamp ? value.toDate().toISOString() : fallback;
 
 export const createFirestoreMessageFeedbackStore = (deps: { readonly firestore: Firestore }): MessageFeedbackStore => ({
   upsert: ({ key, feedback, at }) =>
@@ -19,7 +20,13 @@ export const createFirestoreMessageFeedbackStore = (deps: { readonly firestore: 
       const current = await tx.get(ref);
       const createdAt = isoOf(current.get("createdAt"), at);
       const comment = feedback.comment ?? null;
-      tx.set(ref, { ...feedback, comment, createdAt: Timestamp.fromDate(new Date(createdAt)), updatedAt: Timestamp.fromDate(new Date(at)), schemaVersion: CORE_SCHEMA_VERSION });
+      tx.set(ref, {
+        ...feedback,
+        comment,
+        createdAt: Timestamp.fromDate(new Date(createdAt)),
+        updatedAt: Timestamp.fromDate(new Date(at)),
+        schemaVersion: CORE_SCHEMA_VERSION,
+      });
       return MessageFeedbackSchema.parse({ ...feedback, createdAt, updatedAt: at });
     }),
 });
@@ -29,7 +36,11 @@ export const createInMemoryMessageFeedbackStore = () => {
   const rows = new Map<string, ReturnType<typeof MessageFeedbackSchema.parse>>();
   const store: MessageFeedbackStore = {
     upsert: ({ key, feedback, at }) => {
-      const row = MessageFeedbackSchema.parse({ ...feedback, createdAt: rows.get(key)?.createdAt ?? at, updatedAt: at });
+      const row = MessageFeedbackSchema.parse({
+        ...feedback,
+        createdAt: rows.get(key)?.createdAt ?? at,
+        updatedAt: at,
+      });
       rows.set(key, row);
       return Promise.resolve(row);
     },

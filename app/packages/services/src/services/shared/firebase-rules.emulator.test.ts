@@ -49,10 +49,7 @@ afterAll(async () => {
 
 const contexts: Array<[string, () => RulesTestContext]> = [
   ["an anonymous client", () => testEnv.unauthenticatedContext()],
-  [
-    "an authenticated client",
-    () => testEnv.authenticatedContext(USER, { tenantId: TENANT }),
-  ],
+  ["an authenticated client", () => testEnv.authenticatedContext(USER, { tenantId: TENANT })],
 ];
 
 describe.each(contexts)("deny-by-default rules for %s", (_label, makeContext) => {

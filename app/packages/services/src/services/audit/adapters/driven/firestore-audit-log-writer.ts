@@ -1,8 +1,4 @@
-import {
-  AuditLogEntryContract,
-  AuditLogEntryIdSchema,
-  PlatformAuditLogEntryContract,
-} from "@core/contracts";
+import { AuditLogEntryContract, AuditLogEntryIdSchema, PlatformAuditLogEntryContract } from "@core/contracts";
 import type { DocumentData, Firestore } from "firebase-admin/firestore";
 import { withCreateAudit } from "../../../shared/firestore/audit-fields.ts";
 import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";

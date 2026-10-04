@@ -34,7 +34,10 @@ const settlerOf = (env: FunctionsEnv): WorkflowApprovalSettler => {
   const baseUrl = env.MASTRA_URL ?? (env.APP_ENV === "local" ? LOCAL_MASTRA_URL : undefined);
   if (baseUrl === undefined) throw new MissingMastraUrlError();
   const remote = env.APP_ENV !== "local" && env.MASTRA_AUDIENCE !== undefined;
-  return createMastraWorkflowApprovalSettler({ baseUrl, serverlessToken: remote ? createServerlessIdTokenSource({ audience: env.MASTRA_AUDIENCE ?? baseUrl }) : null });
+  return createMastraWorkflowApprovalSettler({
+    baseUrl,
+    serverlessToken: remote ? createServerlessIdTokenSource({ audience: env.MASTRA_AUDIENCE ?? baseUrl }) : null,
+  });
 };
 
 /**
@@ -53,6 +56,11 @@ export const makeOnApprovalRequestSettled = (deps: {
   let settle: ReturnType<typeof makeSettleOnApprovalUpdate> | undefined;
   return (event) => {
     settle ??= makeSettleOnApprovalUpdate({ settler: deps.settler ?? settlerOf(deps.env), logger: deps.logger });
-    return settle({ approvalRequestId: event.params.id, before: event.data?.before?.data(), after: event.data?.after?.data(), requestId: event.id });
+    return settle({
+      approvalRequestId: event.params.id,
+      before: event.data?.before?.data(),
+      after: event.data?.after?.data(),
+      requestId: event.id,
+    });
   };
 };

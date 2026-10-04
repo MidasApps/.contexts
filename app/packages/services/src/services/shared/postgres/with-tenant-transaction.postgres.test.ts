@@ -53,8 +53,10 @@ describe("withTenantTransaction", () => {
   });
 
   it("rejects writes in a read-only transaction", async () => {
-    const write = withTenantTransaction(sql, { tenantId: "tenantA", readOnly: true }, (tx) =>
-      tx`CREATE TEMP TABLE should_not_exist (id int)`,
+    const write = withTenantTransaction(
+      sql,
+      { tenantId: "tenantA", readOnly: true },
+      (tx) => tx`CREATE TEMP TABLE should_not_exist (id int)`,
     );
 
     await expect(write).rejects.toMatchObject({ code: "25006" });

@@ -2,7 +2,7 @@ import { type AdminUserSummary, AdminUserSummarySchema } from "@core/contracts";
 import { type DocumentSnapshot, FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
 import { USER_SEARCH_NAME_FIELD } from "../../../shared/firestore/user-search-fields.ts";
-import { pageFromOverfetch, type Page, type PageRequest } from "../../../shared/pagination/page.ts";
+import { type Page, type PageRequest, pageFromOverfetch } from "../../../shared/pagination/page.ts";
 import type { AdminUserDirectory } from "../../application/ports/admin-user-directory.ts";
 
 // The last code point Firestore orders, so `[prefix, prefix + END)` is every value with the prefix.
@@ -34,7 +34,10 @@ const rowOf = (snapshot: DocumentSnapshot, sortField: string): Row | null => {
  */
 export const createFirestoreAdminUserDirectory = (deps: { readonly firestore: Firestore }): AdminUserDirectory => {
   const users = () => deps.firestore.collection(CORE_COLLECTIONS.users);
-  const byPrefix = async (field: string, { prefix, page }: { prefix: string; page: PageRequest }): Promise<Page<AdminUserSummary>> => {
+  const byPrefix = async (
+    field: string,
+    { prefix, page }: { prefix: string; page: PageRequest },
+  ): Promise<Page<AdminUserSummary>> => {
     let query = users()
       .where(field, ">=", prefix)
       .where(field, "<", `${prefix}${PREFIX_END}`)
@@ -43,7 +46,11 @@ export const createFirestoreAdminUserDirectory = (deps: { readonly firestore: Fi
       .limit(page.limit + 1);
     if (page.after !== undefined) query = query.startAfter(page.after[0], page.after[1]);
     const rows = (await query.get()).docs.map((doc) => rowOf(doc, field)).filter((row): row is Row => row !== null);
-    const listed = pageFromOverfetch({ fetched: rows, limit: page.limit, positionOf: (row) => [row.sortValue, row.user.id] });
+    const listed = pageFromOverfetch({
+      fetched: rows,
+      limit: page.limit,
+      positionOf: (row) => [row.sortValue, row.user.id],
+    });
     return { items: listed.items.map((row) => row.user), nextCursor: listed.nextCursor };
   };
   return {

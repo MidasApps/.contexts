@@ -1,6 +1,12 @@
 import type { StoredFile } from "@core/contracts";
 import { FileIdSchema, StoredFileSchema } from "@core/contracts";
-import type { FileEventPublisher, FileObjectStore, FileRepository, FileUploadedEvent, FileUrlSigner } from "../../application/ports/file-ports.ts";
+import type {
+  FileEventPublisher,
+  FileObjectStore,
+  FileRepository,
+  FileUploadedEvent,
+  FileUrlSigner,
+} from "../../application/ports/file-ports.ts";
 
 /** In-memory `FileRepository` for unit tests and local fakes; ids are `file-1`, `file-2`, ... */
 export const createInMemoryFileRepository = (): FileRepository & { readonly files: Map<string, StoredFile> } => {
@@ -20,8 +26,20 @@ export const createInMemoryFileRepository = (): FileRepository & { readonly file
       if (current?.status !== "pending") return Promise.resolve(null);
       const settled = StoredFileSchema.parse(
         settlement.status === "ready"
-          ? { ...current, status: "ready", contentType: settlement.contentType, sizeBytes: settlement.sizeBytes, updatedAt }
-          : { ...current, status: "rejected", rejectionReason: settlement.reason, sizeBytes: settlement.sizeBytes, updatedAt },
+          ? {
+              ...current,
+              status: "ready",
+              contentType: settlement.contentType,
+              sizeBytes: settlement.sizeBytes,
+              updatedAt,
+            }
+          : {
+              ...current,
+              status: "rejected",
+              rejectionReason: settlement.reason,
+              sizeBytes: settlement.sizeBytes,
+              updatedAt,
+            },
       );
       files.set(fileId, settled);
       return Promise.resolve(settled);

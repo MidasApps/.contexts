@@ -1,4 +1,11 @@
-import { INVITATION_TTL_DAYS, type CreateInvitationInput, type CreateInvitationResponse, type Invitation, type TenantId, type UserPrincipal } from "@core/contracts";
+import {
+  type CreateInvitationInput,
+  type CreateInvitationResponse,
+  INVITATION_TTL_DAYS,
+  type Invitation,
+  type TenantId,
+  type UserPrincipal,
+} from "@core/contracts";
 // Subpaths, not the root: the root also loads every message catalog.
 import { SOURCE_LOCALE, type SupportedLocale } from "@core/i18n/locales";
 import { negotiateLocale } from "@core/i18n/negotiate-locale";
@@ -20,28 +27,58 @@ export type CreateInvitationCommand = {
   readonly requestId: string;
 };
 
-export type CreateInvitation = (command: CreateInvitationCommand) => Promise<Result<CreateInvitationResponse, GrantCheckError>>;
+export type CreateInvitation = (
+  command: CreateInvitationCommand,
+) => Promise<Result<CreateInvitationResponse, GrantCheckError>>;
 
 const DAY_MS = 86_400_000;
 
-type Deps = Pick<MemberDeps, "registry" | "roleReader" | "invitations" | "notifier" | "audit" | "unitOfWork" | "clock" | "randomBytes" | "appUrl" | "logger" | "directory" | "organizations">;
+type Deps = Pick<
+  MemberDeps,
+  | "registry"
+  | "roleReader"
+  | "invitations"
+  | "notifier"
+  | "audit"
+  | "unitOfWork"
+  | "clock"
+  | "randomBytes"
+  | "appUrl"
+  | "logger"
+  | "directory"
+  | "organizations"
+>;
 
 /**
  * Locale of the accept link (follow-up #32): the inviter's preference, else the organization
  * default, each matched to a supported web locale (`es-MX` → `es-419`), else the source locale.
  */
-const linkLocaleOf = async (deps: Deps, args: { inviter: UserPrincipal["uid"]; tenantId: TenantId }): Promise<SupportedLocale> => {
-  const [preferred, organizationDefault] = await Promise.all([deps.directory.getPreferredLocale(args.inviter), deps.organizations.getDefaultLocale(args.tenantId)]);
+const linkLocaleOf = async (
+  deps: Deps,
+  args: { inviter: UserPrincipal["uid"]; tenantId: TenantId },
+): Promise<SupportedLocale> => {
+  const [preferred, organizationDefault] = await Promise.all([
+    deps.directory.getPreferredLocale(args.inviter),
+    deps.organizations.getDefaultLocale(args.tenantId),
+  ]);
   const requested = [preferred, organizationDefault].filter((tag) => tag !== undefined && tag !== null);
   return negotiateLocale({ requested, fallback: SOURCE_LOCALE });
 };
 
-const notify = async (deps: Deps, args: { invitation: Invitation; acceptUrl: string; requestId: string }): Promise<void> => {
+const notify = async (
+  deps: Deps,
+  args: { invitation: Invitation; acceptUrl: string; requestId: string },
+): Promise<void> => {
   try {
     await deps.notifier.invitationCreated(args);
   } catch (e: unknown) {
     // The inviter already holds the link from the 201; delivery is best effort.
-    deps.logger.error("invitation_notify_failed", { requestId: args.requestId, tenantId: args.invitation.tenantId, invitationId: args.invitation.id, err: e });
+    deps.logger.error("invitation_notify_failed", {
+      requestId: args.requestId,
+      tenantId: args.invitation.tenantId,
+      invitationId: args.invitation.id,
+      err: e,
+    });
   }
 };
 
@@ -57,7 +94,12 @@ export const makeCreateInvitation =
     const { tenantId, input, actor } = command;
     if (deps.appUrl === undefined) throw new AppUrlMissingError();
     if (input.node.tenantId !== tenantId) return err(new AccessDeniedError("NODE_NOT_FOUND"));
-    const grantable = await checkGrantable(deps, { ...command, permission: "core.member.invite", node: input.node, roles: input.roles });
+    const grantable = await checkGrantable(deps, {
+      ...command,
+      permission: "core.member.invite",
+      node: input.node,
+      roles: input.roles,
+    });
     if (!grantable.ok) return grantable;
     const now = deps.clock.now();
     const token = generateInvitationToken(deps.randomBytes);
@@ -78,11 +120,24 @@ export const makeCreateInvitation =
     await deps.unitOfWork.run(async (tx) => {
       deps.invitations.create(tx, { invitation, tokenHash: hashInvitationToken(token), actorId: auditActor.id });
       await deps.audit.record(
-        { log: "tenant", tenantId, action: "INVITATION_CREATED", actor: auditActor, target: { type: "invitation", id: invitation.id }, node: input.node, outcome: "success", requestId: command.requestId },
+        {
+          log: "tenant",
+          tenantId,
+          action: "INVITATION_CREATED",
+          actor: auditActor,
+          target: { type: "invitation", id: invitation.id },
+          node: input.node,
+          outcome: "success",
+          requestId: command.requestId,
+        },
         tx,
       );
     });
-    const acceptUrl = buildAcceptUrl({ appUrl: deps.appUrl, token, locale: await linkLocaleOf(deps, { inviter: actor.uid, tenantId }) });
+    const acceptUrl = buildAcceptUrl({
+      appUrl: deps.appUrl,
+      token,
+      locale: await linkLocaleOf(deps, { inviter: actor.uid, tenantId }),
+    });
     await notify(deps, { invitation, acceptUrl, requestId: command.requestId });
     return ok({ invitation, acceptUrl });
   };

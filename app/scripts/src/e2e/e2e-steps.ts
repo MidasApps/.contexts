@@ -18,11 +18,24 @@ type ResolveBin = (args: { fromDir: string; packageName: string; binName: string
  */
 export const buildE2eSteps = (deps: { readonly appRoot: string; readonly resolveBin: ResolveBin }): E2eStep[] => {
   const app = (name: string): string => path.join(deps.appRoot, "apps", name);
-  const playwright = (dir: string): string => deps.resolveBin({ fromDir: dir, packageName: "@playwright/test", binName: "playwright" });
+  const playwright = (dir: string): string =>
+    deps.resolveBin({ fromDir: dir, packageName: "@playwright/test", binName: "playwright" });
   const turbo = deps.resolveBin({ fromDir: deps.appRoot, packageName: "turbo", binName: "turbo" });
   return [
     // The web journeys reach the agent runtime; the desktop-web project calls the web build.
-    { label: "build", cwd: deps.appRoot, args: [turbo, "run", "build", "--filter=@core/web", "--filter=@core/desktop", "--filter=@core/mastra", "--env-mode=loose"] },
+    {
+      label: "build",
+      cwd: deps.appRoot,
+      args: [
+        turbo,
+        "run",
+        "build",
+        "--filter=@core/web",
+        "--filter=@core/desktop",
+        "--filter=@core/mastra",
+        "--env-mode=loose",
+      ],
+    },
     // One app at a time: they share the e2e web port.
     { label: "web", cwd: app("web"), args: [playwright(app("web")), "test"] },
     { label: "desktop", cwd: app("desktop"), args: [playwright(app("desktop")), "test"] },

@@ -1,9 +1,9 @@
 import type { ObservabilityExporter } from "@mastra/core/observability";
 import { MastraStorageExporter, Observability, SensitiveDataFilter } from "@mastra/observability";
 import { OtelExporter, type OtelExporterConfig } from "@mastra/otel-exporter";
-import type { UsagePort } from "../runtime/runtime-ports.ts";
-import { sampleTraces, scrubSpanForExport, type SpanExportPolicy } from "./span-export-policy.ts";
 import { priceTableFor } from "../models/model-prices.ts";
+import type { UsagePort } from "../runtime/runtime-ports.ts";
+import { type SpanExportPolicy, sampleTraces, scrubSpanForExport } from "./span-export-policy.ts";
 import { createUsageLedgerExporter } from "./usage-ledger-exporter.ts";
 
 /**
@@ -11,7 +11,15 @@ import { createUsageLedgerExporter } from "./usage-ledger-exporter.ts";
  * traces filter by tenant and correlate with `/v1` logs. The uid and the
  * permissions stay out: spans are exported and are not the place for them.
  */
-export const SPAN_CONTEXT_KEYS = ["tenantId", "projectId", "unitId", "requestId", "conversationId", "principalKind", "aiMode"] as const;
+export const SPAN_CONTEXT_KEYS = [
+  "tenantId",
+  "projectId",
+  "unitId",
+  "requestId",
+  "conversationId",
+  "principalKind",
+  "aiMode",
+] as const;
 
 /**
  * `SensitiveDataFilter` defaults of `@mastra/observability` 1.18.1, copied because
@@ -36,7 +44,13 @@ export const DEFAULT_SENSITIVE_FIELDS = [
 ] as const;
 
 /** Fields of this runtime that carry credentials on top of the defaults. */
-export const EXTRA_SENSITIVE_FIELDS = ["idToken", "cookie", "setCookie", "x-serverless-authorization", "x-api-key"] as const;
+export const EXTRA_SENSITIVE_FIELDS = [
+  "idToken",
+  "cookie",
+  "setCookie",
+  "x-serverless-authorization",
+  "x-api-key",
+] as const;
 
 export const SENSITIVE_FIELDS: readonly string[] = [...DEFAULT_SENSITIVE_FIELDS, ...EXTRA_SENSITIVE_FIELDS];
 
@@ -87,7 +101,10 @@ export const buildExporters = (args: CreateObservabilityArgs): ObservabilityExpo
             ...(args.otlpSpanExporter === undefined ? {} : { exporter: args.otlpSpanExporter }),
           }),
         ];
-  const ledger = args.usage === undefined ? [] : [createUsageLedgerExporter({ usage: args.usage, prices: priceTableFor(args.aiMode ?? "real") })];
+  const ledger =
+    args.usage === undefined
+      ? []
+      : [createUsageLedgerExporter({ usage: args.usage, prices: priceTableFor(args.aiMode ?? "real") })];
   return [...[storage, ...otlp].map((exporter) => sampleTraces(exporter, ratio)), ...ledger];
 };
 

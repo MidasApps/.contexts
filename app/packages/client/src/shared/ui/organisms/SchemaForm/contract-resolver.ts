@@ -10,7 +10,11 @@ type Translate = (issue: z.core.$ZodIssue, value: unknown) => string;
 /** RHF name of an issue: its top-level field, or `root` for object-level refinements. */
 const issueName = (issue: z.core.$ZodIssue): string => (issue.path.length === 0 ? "root" : String(issue.path[0]));
 
-const collectErrors = (issues: readonly z.core.$ZodIssue[], values: FieldValues, translate: Translate): Record<string, FieldError> => {
+const collectErrors = (
+  issues: readonly z.core.$ZodIssue[],
+  values: FieldValues,
+  translate: Translate,
+): Record<string, FieldError> => {
   const errors: Record<string, FieldError> = {};
   for (const issue of issues) {
     const name = issueName(issue);
@@ -25,7 +29,11 @@ const collectErrors = (issues: readonly z.core.$ZodIssue[], values: FieldValues,
  * own (English, developer-facing) messages and drops the issue limits the copy needs.
  */
 export const createContractResolver =
-  <Values extends FieldValues>(schema: z.ZodType, translate: Translate, pending: () => PendingFieldErrors): Resolver<Values> =>
+  <Values extends FieldValues>(
+    schema: z.ZodType,
+    translate: Translate,
+    pending: () => PendingFieldErrors,
+  ): Resolver<Values> =>
   async (values) => {
     const result = await schema.safeParseAsync(values);
     const errors = result.success ? {} : collectErrors(result.error.issues, values, translate);

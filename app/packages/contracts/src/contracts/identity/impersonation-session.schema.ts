@@ -65,7 +65,12 @@ export const StartImpersonationInputContract = defineContract(StartImpersonation
   kind: "command",
   description: "Starts read-only impersonation (platform.user.impersonate with MFA).",
   examples: [
-    { targetUid: EXAMPLE_IDS.user, organizationId: EXAMPLE_IDS.organization, reason: "Ticket 4821: user cannot see project Launch.", durationMinutes: 30 },
+    {
+      targetUid: EXAMPLE_IDS.user,
+      organizationId: EXAMPLE_IDS.organization,
+      reason: "Ticket 4821: user cannot see project Launch.",
+      durationMinutes: 30,
+    },
   ],
   pii: "personal",
   tenancyScope: "platform",
@@ -85,7 +90,11 @@ export const StartImpersonationResponseContract = defineContract(StartImpersonat
   kind: "view",
   description: "Answer of POST /v1/platform/impersonation-sessions with the one-time custom token.",
   examples: [
-    { sessionId: EXAMPLE_IDS.impersonationSession, customToken: "eyJhbGciOiJSUzI1NiJ9.eyJpbXAiOiJJbTUifQ.c2ln", expiresAt: "2026-09-29T15:30:00.000Z" },
+    {
+      sessionId: EXAMPLE_IDS.impersonationSession,
+      customToken: "eyJhbGciOiJSUzI1NiJ9.eyJpbXAiOiJJbTUifQ.c2ln",
+      expiresAt: "2026-09-29T15:30:00.000Z",
+    },
   ],
   pii: "sensitive",
   tenancyScope: "platform",

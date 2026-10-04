@@ -3,17 +3,28 @@ import type { SessionServices } from "../../session-composition.ts";
 import { SESSION_COOKIE_NAME } from "./session-actions.ts";
 
 /** Result of `requireWebSession`: the principal, or send the user to sign in. */
-export type WebSessionGuardResult = { readonly kind: "session"; readonly principal: UserPrincipal; readonly sessionId: SessionId } | { readonly kind: "redirect" };
+export type WebSessionGuardResult =
+  | { readonly kind: "session"; readonly principal: UserPrincipal; readonly sessionId: SessionId }
+  | { readonly kind: "redirect" };
 
 /** Result of `requirePlatformStaffSession`: staff, sign in, or `/admin` does not exist (404). */
 export type StaffSessionGuardResult =
-  | { readonly kind: "staff"; readonly principal: UserPrincipal; readonly sessionId: SessionId; readonly role: PlatformRole }
+  | {
+      readonly kind: "staff";
+      readonly principal: UserPrincipal;
+      readonly sessionId: SessionId;
+      readonly role: PlatformRole;
+    }
   | { readonly kind: "redirect" }
   | { readonly kind: "not-found" };
 
 export type SessionGuards = {
-  readonly requireWebSession: (cookies: { get: (name: string) => string | undefined }) => Promise<WebSessionGuardResult>;
-  readonly requirePlatformStaffSession: (cookies: { get: (name: string) => string | undefined }) => Promise<StaffSessionGuardResult>;
+  readonly requireWebSession: (cookies: {
+    get: (name: string) => string | undefined;
+  }) => Promise<WebSessionGuardResult>;
+  readonly requirePlatformStaffSession: (cookies: {
+    get: (name: string) => string | undefined;
+  }) => Promise<StaffSessionGuardResult>;
 };
 
 /**

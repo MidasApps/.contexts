@@ -5,7 +5,10 @@ import type { ConversationRepository } from "../ports/conversation-repository.ts
 
 export type ConversationNotFound = { readonly code: "CONVERSATION_NOT_FOUND" };
 
-export type GetConversation = (input: { readonly conversationId: string; readonly ownerId: string }) => Promise<Result<Conversation, ConversationNotFound>>;
+export type GetConversation = (input: {
+  readonly conversationId: string;
+  readonly ownerId: string;
+}) => Promise<Result<Conversation, ConversationNotFound>>;
 
 export const CONVERSATION_NOT_FOUND: ConversationNotFound = { code: "CONVERSATION_NOT_FOUND" };
 

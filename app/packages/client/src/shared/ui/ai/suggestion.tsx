@@ -5,7 +5,14 @@ export type SuggestionsProps = Omit<ComponentProps<"ul">, "aria-label"> & { labe
 
 /** AI Elements `suggestion` as the chat.html §23.1 quick-start grid: a labelled list of cards. */
 export function Suggestions({ label, className, ...props }: SuggestionsProps) {
-  return <ul data-slot="suggestions" aria-label={label} className={cn("grid w-full list-none gap-2 @sm/chat:grid-cols-2", className)} {...props} />;
+  return (
+    <ul
+      data-slot="suggestions"
+      aria-label={label}
+      className={cn("grid w-full list-none gap-2 @sm/chat:grid-cols-2", className)}
+      {...props}
+    />
+  );
 }
 
 export type SuggestionProps = Omit<ComponentProps<"button">, "children" | "title" | "onSelect"> & {

@@ -29,7 +29,10 @@ export const usePermissions = (node?: NodeParams | null): PermissionsState => {
   const signedIn = useIsSignedIn();
   const urlNode = useCurrentNode();
   const target = node === undefined ? urlNode : node;
-  const query = useQuery({ ...accessContextQuery(callEndpoint, target ?? NO_NODE), enabled: signedIn && target !== null });
+  const query = useQuery({
+    ...accessContextQuery(callEndpoint, target ?? NO_NODE),
+    enabled: signedIn && target !== null,
+  });
   const granted = useMemo(() => new Set<string>(query.data?.permissions ?? []), [query.data]);
   const can = useCallback((permission: Permission) => granted.has(permission), [granted]);
   const { refetch } = query;
@@ -45,4 +48,5 @@ export const usePermissions = (node?: NodeParams | null): PermissionsState => {
  * `true` when the viewer holds `permission` at the URL node (or `node`). Hides actions the user
  * cannot take; the API still authorizes every call (`authorize()` is the only decision, SP1 §5.2).
  */
-export const useCan = (permission: Permission, node?: NodeParams | null): boolean => usePermissions(node).can(permission);
+export const useCan = (permission: Permission, node?: NodeParams | null): boolean =>
+  usePermissions(node).can(permission);

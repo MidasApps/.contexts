@@ -39,7 +39,8 @@ export const describeZodIssue = (issue: z.core.$ZodIssue, value: unknown): Messa
   }
   if (issue.code === "too_small") return tooSmall(issue);
   if (issue.code === "too_big") return tooBig(issue);
-  if (issue.code === "invalid_format") return { key: issue.format === "safeint" ? `${ERRORS}.notInteger` : `${ERRORS}.invalidFormat` };
+  if (issue.code === "invalid_format")
+    return { key: issue.format === "safeint" ? `${ERRORS}.notInteger` : `${ERRORS}.invalidFormat` };
   if (issue.code === "invalid_value") return { key: `${ERRORS}.invalidOption` };
   return { key: `${ERRORS}.invalid` };
 };
@@ -53,4 +54,6 @@ const SERVER_ISSUES: Record<string, string> = {
  * Copy for a server `VALIDATION_FAILED` detail (`issue` is the upper-cased Zod code, rule
  * `validation`); limits are not sent, so size issues fall back to the generic message.
  */
-export const describeServerIssue = (issue: string): MessageDescriptor => ({ key: SERVER_ISSUES[issue] ?? `${ERRORS}.invalid` });
+export const describeServerIssue = (issue: string): MessageDescriptor => ({
+  key: SERVER_ISSUES[issue] ?? `${ERRORS}.invalid`,
+});

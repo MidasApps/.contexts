@@ -1,6 +1,17 @@
 import { MastraClient } from "@mastra/client-js";
-import type { AgentCallScope, AgentRunInput, AgentRuntimeGateway } from "../../application/ports/agent-runtime-gateway.ts";
-import { buildForwardedHeaders, type MastraConnection, postForStream, postMcp, stripServerOwnedKeys, withDeadline } from "./mastra-request.ts";
+import type {
+  AgentCallScope,
+  AgentRunInput,
+  AgentRuntimeGateway,
+} from "../../application/ports/agent-runtime-gateway.ts";
+import {
+  buildForwardedHeaders,
+  type MastraConnection,
+  postForStream,
+  postMcp,
+  stripServerOwnedKeys,
+  withDeadline,
+} from "./mastra-request.ts";
 import type { ServerlessIdTokenSource } from "./serverless-id-token.ts";
 
 /** A JSON generate can take a long model turn; streams only wait for their first byte. */
@@ -29,7 +40,11 @@ export const connectionOf = (options: MastraGatewayOptions): MastraConnection =>
 
 // One client per call: the headers carry this caller's credential. No retries: a
 // generate is not idempotent, and the SDK would re-run it on a 5xx.
-export const clientFor = async (connection: MastraConnection, scope: AgentCallScope, signal: AbortSignal): Promise<MastraClient> =>
+export const clientFor = async (
+  connection: MastraConnection,
+  scope: AgentCallScope,
+  signal: AbortSignal,
+): Promise<MastraClient> =>
   new MastraClient({
     baseUrl: connection.baseUrl,
     apiPrefix: connection.apiPrefix,
@@ -68,9 +83,18 @@ export const createMastraGateway = (options: MastraGatewayOptions): AgentRuntime
   });
   return {
     generate: (input) =>
-      json(input.scope, (client) => client.getAgent(input.agentId).generate(toSdkMessages(input.messages), { ...stripServerOwnedKeys(input.options), runId: input.scope.requestId })),
+      json(input.scope, (client) =>
+        client.getAgent(input.agentId).generate(toSdkMessages(input.messages), {
+          ...stripServerOwnedKeys(input.options),
+          runId: input.scope.requestId,
+        }),
+      ),
     stream: (input) => stream(input.scope, `/agents/${pathSegment(input.agentId)}/stream`, runBody(input)),
-    approveToolCall: (input) => stream(input.scope, `/agents/${pathSegment(input.agentId)}/approve-tool-call`, { runId: input.runId, toolCallId: input.toolCallId }),
+    approveToolCall: (input) =>
+      stream(input.scope, `/agents/${pathSegment(input.agentId)}/approve-tool-call`, {
+        runId: input.runId,
+        toolCallId: input.toolCallId,
+      }),
     declineToolCall: (input) =>
       stream(input.scope, `/agents/${pathSegment(input.agentId)}/decline-tool-call`, {
         runId: input.runId,
@@ -79,12 +103,16 @@ export const createMastraGateway = (options: MastraGatewayOptions): AgentRuntime
       }),
     startWorkflow: (input) =>
       json(input.scope, async (client) => {
-        const run = await client.getWorkflow(input.workflowId).createRun(input.runId === undefined ? {} : { runId: input.runId });
+        const run = await client
+          .getWorkflow(input.workflowId)
+          .createRun(input.runId === undefined ? {} : { runId: input.runId });
         return { runId: run.runId, result: await run.startAsync({ inputData: { ...input.inputData } }) };
       }),
     launchWorkflow: (input) =>
       json(input.scope, async (client) => {
-        const run = await client.getWorkflow(input.workflowId).createRun(input.runId === undefined ? {} : { runId: input.runId });
+        const run = await client
+          .getWorkflow(input.workflowId)
+          .createRun(input.runId === undefined ? {} : { runId: input.runId });
         await run.start({ inputData: { ...input.inputData } });
         return { runId: run.runId };
       }),
@@ -95,15 +123,31 @@ export const createMastraGateway = (options: MastraGatewayOptions): AgentRuntime
         return run.resumeAsync({ resumeData: input.resumeData, ...(step === undefined ? {} : { step }) });
       }),
     streamWorkflow: (input) =>
-      stream(input.scope, `/workflows/${pathSegment(input.workflowId)}/stream${input.runId === undefined ? "" : `?runId=${pathSegment(input.runId)}`}`, {
-        inputData: input.inputData,
-      }),
-    listThreadMessages: (input) => json(input.scope, (client) => client.getMemoryThread({ threadId: input.threadId, agentId: input.agentId }).listMessages()),
+      stream(
+        input.scope,
+        `/workflows/${pathSegment(input.workflowId)}/stream${input.runId === undefined ? "" : `?runId=${pathSegment(input.runId)}`}`,
+        {
+          inputData: input.inputData,
+        },
+      ),
+    listThreadMessages: (input) =>
+      json(input.scope, (client) =>
+        client.getMemoryThread({ threadId: input.threadId, agentId: input.agentId }).listMessages(),
+      ),
     deleteThread: (input) =>
       json(input.scope, async (client) => {
-        await client.getMemoryThread({ threadId: input.threadId, agentId: input.agentId }).delete({ agentId: input.agentId });
+        await client
+          .getMemoryThread({ threadId: input.threadId, agentId: input.agentId })
+          .delete({ agentId: input.agentId });
         return null;
       }),
-    callMcp: (input) => postMcp({ connection, scope: input.scope, path: `/mcp/${pathSegment(input.serverId)}/mcp`, body: input.body, headers: input.headers ?? {} }),
+    callMcp: (input) =>
+      postMcp({
+        connection,
+        scope: input.scope,
+        path: `/mcp/${pathSegment(input.serverId)}/mcp`,
+        body: input.body,
+        headers: input.headers ?? {},
+      }),
   };
 };

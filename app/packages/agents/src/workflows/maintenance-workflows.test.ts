@@ -43,8 +43,18 @@ describe("approval-expiry-sweep", () => {
   });
 
   it("refuses a run started by a caller (platform only)", async () => {
-    const workflow = createApprovalExpirySweepWorkflow({ approvalSweeps: { expire: () => Promise.reject(new Error("must not run")), failInterrupted: () => Promise.reject(new Error("must not run")) } });
-    expect(await runOnce(workflow, callerContext())).toEqual({ status: "failed", expired: 0, failed: 0, code: "PLATFORM_ONLY" });
+    const workflow = createApprovalExpirySweepWorkflow({
+      approvalSweeps: {
+        expire: () => Promise.reject(new Error("must not run")),
+        failInterrupted: () => Promise.reject(new Error("must not run")),
+      },
+    });
+    expect(await runOnce(workflow, callerContext())).toEqual({
+      status: "failed",
+      expired: 0,
+      failed: 0,
+      code: "PLATFORM_ONLY",
+    });
   });
 });
 
@@ -67,7 +77,10 @@ describe("conversation-purge", () => {
   it("reports a thread that could not be deleted as not purged", async () => {
     const workflow = createConversationPurgeWorkflow({
       memory: { deleteThread: () => Promise.reject(new Error("storage down")) },
-      conversationPurge: { purgeDeleted: async ({ deleteThread }) => ((await deleteThread("c1")) ? { purged: 1, failed: 0 } : { purged: 0, failed: 1 }) },
+      conversationPurge: {
+        purgeDeleted: async ({ deleteThread }) =>
+          (await deleteThread("c1")) ? { purged: 1, failed: 0 } : { purged: 0, failed: 1 },
+      },
     });
     expect(await runOnce(workflow)).toEqual({ status: "done", purged: 0, failed: 1, code: null });
   });
@@ -91,7 +104,12 @@ describe("eval-export", () => {
   });
 
   it("refuses a caller's run", async () => {
-    const workflow = createEvalExportWorkflow({ evalExport: { listFinishedSince: () => Promise.reject(new Error("no")), exportSummaries: () => Promise.reject(new Error("no")) } });
+    const workflow = createEvalExportWorkflow({
+      evalExport: {
+        listFinishedSince: () => Promise.reject(new Error("no")),
+        exportSummaries: () => Promise.reject(new Error("no")),
+      },
+    });
     expect(await runOnce(workflow, callerContext())).toMatchObject({ status: "failed", code: "PLATFORM_ONLY" });
   });
 });

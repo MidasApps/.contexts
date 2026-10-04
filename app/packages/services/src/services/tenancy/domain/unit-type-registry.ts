@@ -1,4 +1,4 @@
-import { UnitTypeDefinitionSchema, type UnitTypeDefinition } from "@core/contracts";
+import { type UnitTypeDefinition, UnitTypeDefinitionSchema } from "@core/contracts";
 
 export type UnitTypeRegistryErrorCode = "INVALID_UNIT_TYPE" | "DUPLICATE_UNIT_TYPE" | "UNKNOWN_PARENT_TYPE";
 
@@ -30,7 +30,8 @@ const validate = (definitions: readonly unknown[]): UnitTypeDefinition[] =>
   definitions.map((definition) => {
     const parsed = UnitTypeDefinitionSchema.safeParse(definition);
     if (parsed.success) return parsed.data;
-    const id = typeof definition === "object" && definition !== null && "id" in definition ? String(definition.id) : "(unknown)";
+    const id =
+      typeof definition === "object" && definition !== null && "id" in definition ? String(definition.id) : "(unknown)";
     throw new UnitTypeRegistryError({ code: "INVALID_UNIT_TYPE", unitTypeId: id });
   });
 
@@ -43,7 +44,8 @@ const validate = (definitions: readonly unknown[]): UnitTypeDefinition[] =>
 export const createUnitTypeRegistry = (definitions: readonly UnitTypeDefinition[]): UnitTypeRegistry => {
   const byId = new Map<string, UnitTypeDefinition>();
   for (const definition of validate(definitions)) {
-    if (byId.has(definition.id)) throw new UnitTypeRegistryError({ code: "DUPLICATE_UNIT_TYPE", unitTypeId: definition.id });
+    if (byId.has(definition.id))
+      throw new UnitTypeRegistryError({ code: "DUPLICATE_UNIT_TYPE", unitTypeId: definition.id });
     byId.set(definition.id, definition);
   }
   for (const definition of byId.values()) {

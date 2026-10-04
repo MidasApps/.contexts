@@ -13,14 +13,21 @@ export const moduleOfCommand = (toolId: string, moduleIds: readonly string[]): s
   moduleIds.find((moduleId) => toolId.startsWith(`command.${moduleId}.`));
 
 /** True for a core command, or for a module command whose module the tenant enabled. */
-export const isCommandOffered = (toolId: string, moduleIds: readonly string[], enabledAgents: ReadonlySet<string>): boolean => {
+export const isCommandOffered = (
+  toolId: string,
+  moduleIds: readonly string[],
+  enabledAgents: ReadonlySet<string>,
+): boolean => {
   const owner = moduleOfCommand(toolId, moduleIds);
   return owner === undefined || isModuleEnabled(owner, enabledAgents);
 };
 
 /** Keeps the items whose tool id the tenant is offered. */
-export const offeredToolsOf = <T extends { readonly id: string }>(tools: readonly T[], moduleIds: readonly string[], enabledAgents: ReadonlySet<string>): T[] =>
-  tools.filter((tool) => isCommandOffered(tool.id, moduleIds, enabledAgents));
+export const offeredToolsOf = <T extends { readonly id: string }>(
+  tools: readonly T[],
+  moduleIds: readonly string[],
+  enabledAgents: ReadonlySet<string>,
+): T[] => tools.filter((tool) => isCommandOffered(tool.id, moduleIds, enabledAgents));
 
 /**
  * The `catalog.renderForm` check: a tool call's context carries the tenant but not the run's

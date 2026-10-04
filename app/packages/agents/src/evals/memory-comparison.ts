@@ -7,11 +7,11 @@ import { InMemoryStore } from "@mastra/core/storage";
 import { z } from "zod";
 import { createMemory } from "../memory/create-memory.ts";
 import { type AgentModels, createModelProvider, type ModelFactoryEnv } from "../models/model-factory.ts";
-import type { EvalMode } from "./eval-harness.ts";
 import { EVALS_DIR } from "./eval-dataset.ts";
+import type { EvalMode } from "./eval-harness.ts";
 import { EVAL_REPORT_DIR } from "./eval-report.ts";
 import { InMemoryVector } from "./in-memory-vector.ts";
-import { meterModels, type ModelMeter } from "./metered-models.ts";
+import { type ModelMeter, meterModels } from "./metered-models.ts";
 
 /**
  * Observational Memory comparison (SP3 Task 28, spec §10, decision 0029): the same
@@ -34,7 +34,10 @@ export type MemoryDataset = { readonly name: string; readonly sha256: string; re
 
 export const loadMemoryDataset = (version = 1): MemoryDataset => {
   const raw = readFileSync(path.join(EVALS_DIR, "datasets", `memory.v${version}.jsonl`), "utf8");
-  const cases = raw.split(/\r?\n/).filter((line) => line.trim() !== "").map((line) => MemoryCaseSchema.parse(JSON.parse(line)));
+  const cases = raw
+    .split(/\r?\n/)
+    .filter((line) => line.trim() !== "")
+    .map((line) => MemoryCaseSchema.parse(JSON.parse(line)));
   return { name: `memory.v${version}`, sha256: createHash("sha256").update(raw).digest("hex"), cases };
 };
 
@@ -44,8 +47,18 @@ export const MEMORY_CONFIGS: readonly { readonly id: MemoryConfigId; readonly ob
   { id: "B-observational", observational: true },
 ];
 
-export type MemoryCaseResult = { readonly caseId: string; readonly score: number; readonly answerExcerpt: string; readonly recallReachedPrompt: boolean };
-export type MemoryConfigResult = { readonly configId: MemoryConfigId; readonly meanScore: number; readonly cases: readonly MemoryCaseResult[]; readonly meter: ModelMeter };
+export type MemoryCaseResult = {
+  readonly caseId: string;
+  readonly score: number;
+  readonly answerExcerpt: string;
+  readonly recallReachedPrompt: boolean;
+};
+export type MemoryConfigResult = {
+  readonly configId: MemoryConfigId;
+  readonly meanScore: number;
+  readonly cases: readonly MemoryCaseResult[];
+  readonly meter: ModelMeter;
+};
 
 /** Share of expected terms present in the answer (case-insensitive). */
 export const scoreRecall = (answer: string, expectedTerms: readonly string[]): number => {
@@ -58,11 +71,17 @@ const EVAL_TENANT = "evalMemoryTenant0001";
 
 const buildAgent = (models: AgentModels, observational: boolean) => {
   const storage = new InMemoryStore();
-  const memory = createMemory({ storage, vector: new InMemoryVector(), models, env: { AI_MEMORY_OBSERVATIONAL: observational } });
+  const memory = createMemory({
+    storage,
+    vector: new InMemoryVector(),
+    models,
+    env: { AI_MEMORY_OBSERVATIONAL: observational },
+  });
   const agent = new Agent({
     id: AGENT_ID,
     name: "Memory eval",
-    instructions: "You are a workspace assistant. Answer the user's question in one or two sentences, using what you remember about the user.",
+    instructions:
+      "You are a workspace assistant. Answer the user's question in one or two sentences, using what you remember about the user.",
     model: models.language("chat", { agentId: AGENT_ID }),
     memory,
   });
@@ -72,7 +91,12 @@ const buildAgent = (models: AgentModels, observational: boolean) => {
 
 const ANSWER_EXCERPT_CHARS = 300;
 
-const runConfig = async (args: { env: ModelFactoryEnv; dataset: MemoryDataset; configId: MemoryConfigId; observational: boolean }): Promise<MemoryConfigResult> => {
+const runConfig = async (args: {
+  env: ModelFactoryEnv;
+  dataset: MemoryDataset;
+  configId: MemoryConfigId;
+  observational: boolean;
+}): Promise<MemoryConfigResult> => {
   const metered = meterModels(createModelProvider(args.env), args.env);
   const { agent, memory } = buildAgent(metered.models, args.observational);
   const cases: MemoryCaseResult[] = [];
@@ -102,12 +126,29 @@ export const MAX_COST_RATIO = 1.2;
 export type OmRecommendation = { readonly enableByDefault: boolean; readonly reason: string };
 
 /** Enable OM only on a real run where B scores ≥ A at ≤ 1.2× A's cost; fake runs never decide. */
-export const recommendObservational = (mode: EvalMode, a: MemoryConfigResult, b: MemoryConfigResult): OmRecommendation => {
-  if (mode === "fake") return { enableByDefault: false, reason: "fake mode proves the harness only; scores of scripted models say nothing about quality" };
-  if (a.meter.costMicroUsd === null || b.meter.costMicroUsd === null) return { enableByDefault: false, reason: "a called model has no verified price" };
-  if (b.meanScore < a.meanScore) return { enableByDefault: false, reason: `B scored ${b.meanScore} < A ${a.meanScore}` };
-  if (b.meter.costMicroUsd > a.meter.costMicroUsd * MAX_COST_RATIO) return { enableByDefault: false, reason: `B cost ${b.meter.costMicroUsd} > ${MAX_COST_RATIO} × A ${a.meter.costMicroUsd}` };
-  return { enableByDefault: true, reason: `B scored ${b.meanScore} ≥ A ${a.meanScore} at ≤ ${MAX_COST_RATIO} × A's cost` };
+export const recommendObservational = (
+  mode: EvalMode,
+  a: MemoryConfigResult,
+  b: MemoryConfigResult,
+): OmRecommendation => {
+  if (mode === "fake")
+    return {
+      enableByDefault: false,
+      reason: "fake mode proves the harness only; scores of scripted models say nothing about quality",
+    };
+  if (a.meter.costMicroUsd === null || b.meter.costMicroUsd === null)
+    return { enableByDefault: false, reason: "a called model has no verified price" };
+  if (b.meanScore < a.meanScore)
+    return { enableByDefault: false, reason: `B scored ${b.meanScore} < A ${a.meanScore}` };
+  if (b.meter.costMicroUsd > a.meter.costMicroUsd * MAX_COST_RATIO)
+    return {
+      enableByDefault: false,
+      reason: `B cost ${b.meter.costMicroUsd} > ${MAX_COST_RATIO} × A ${a.meter.costMicroUsd}`,
+    };
+  return {
+    enableByDefault: true,
+    reason: `B scored ${b.meanScore} ≥ A ${a.meanScore} at ≤ ${MAX_COST_RATIO} × A's cost`,
+  };
 };
 
 export type MemoryComparisonReport = {
@@ -129,7 +170,8 @@ export const runMemoryComparison = async (args: {
 }): Promise<{ readonly report: MemoryComparisonReport; readonly reportPath: string | null }> => {
   const dataset = args.dataset ?? loadMemoryDataset();
   const configs: MemoryConfigResult[] = [];
-  for (const config of MEMORY_CONFIGS) configs.push(await runConfig({ env: args.env, dataset, configId: config.id, observational: config.observational }));
+  for (const config of MEMORY_CONFIGS)
+    configs.push(await runConfig({ env: args.env, dataset, configId: config.id, observational: config.observational }));
   const [a, b] = configs as [MemoryConfigResult, MemoryConfigResult];
   const report: MemoryComparisonReport = {
     mode: args.mode,

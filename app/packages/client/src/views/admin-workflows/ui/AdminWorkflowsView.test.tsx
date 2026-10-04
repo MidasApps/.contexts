@@ -3,14 +3,27 @@ import { describe, expect, it } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { buildAdminUser } from "#/shared/testing/admin-accounts-fixtures.ts";
 import { buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
-import { buildAdminRun, buildAdminSchedule, buildPlatformSchedule, OPS_IDS } from "#/shared/testing/admin-operations-fixtures.ts";
+import {
+  buildAdminRun,
+  buildAdminSchedule,
+  buildPlatformSchedule,
+  OPS_IDS,
+} from "#/shared/testing/admin-operations-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, noContent, ok, page, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, FAKE_REQUEST_ID, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { AdminWorkflowsView } from "./AdminWorkflowsView.tsx";
 
 const SUSPENDED = buildAdminRun();
-const PLATFORM_DONE = buildAdminRun({ runId: OPS_IDS.otherRun, workflowId: "usage-report", tenantId: null, status: "success", startedBy: null, scheduleId: OPS_IDS.platformSchedule, approvalRequestId: null });
+const PLATFORM_DONE = buildAdminRun({
+  runId: OPS_IDS.otherRun,
+  workflowId: "usage-report",
+  tenantId: null,
+  status: "success",
+  startedBy: null,
+  scheduleId: OPS_IDS.platformSchedule,
+  approvalRequestId: null,
+});
 
 const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
   "GET /v1/admin/organizations": page([buildOrganizationSummary()]),
@@ -19,7 +32,8 @@ const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
   ...overrides,
 });
 
-const render = (options: Parameters<typeof renderAdmin>[1] = {}) => renderAdmin(<AdminWorkflowsView />, { path: "/admin/workflows", routes: routes(), ...options });
+const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
+  renderAdmin(<AdminWorkflowsView />, { path: "/admin/workflows", routes: routes(), ...options });
 
 const setOnline = (online: boolean): void => {
   Object.defineProperty(globalThis.navigator, "onLine", { configurable: true, get: () => online });
@@ -52,7 +66,11 @@ describe("AdminWorkflowsView: runs", () => {
     expect(toggle.getAttribute("aria-pressed")).toBe("false");
     await user.click(toggle);
     expect(router.current()).toBe("/admin/workflows?status=suspended");
-    await waitFor(() => expect(api.calls.some((call) => call.path === "/v1/admin/workflow-runs" && call.query.includes("status=suspended"))).toBe(true));
+    await waitFor(() =>
+      expect(
+        api.calls.some((call) => call.path === "/v1/admin/workflow-runs" && call.query.includes("status=suspended")),
+      ).toBe(true),
+    );
     expect(screen.getByRole("button", { name: "Aguardando aprovação" }).getAttribute("aria-pressed")).toBe("true");
   });
 
@@ -70,10 +88,14 @@ describe("AdminWorkflowsView: runs", () => {
   });
 
   it("cancels a suspended run after a destructive confirmation and reloads the list", async () => {
-    const { user, api, container } = render({ routes: routes({ "POST /v1/admin/workflow-runs/:runId/cancel": noContent() }) });
+    const { user, api, container } = render({
+      routes: routes({ "POST /v1/admin/workflow-runs/:runId/cancel": noContent() }),
+    });
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
     await user.click(within(table).getByRole("button", { name: /^Cancelar a execução/u }));
-    const dialog = await screen.findByRole("alertdialog", { name: "Cancelar a execução de Demonstração de aprovação?" });
+    const dialog = await screen.findByRole("alertdialog", {
+      name: "Cancelar a execução de Demonstração de aprovação?",
+    });
     expect(within(dialog).getByText(/solicitação de aprovação que ela aguardava é cancelada junto/u)).toBeDefined();
     await expectNoAxeViolations(container.ownerDocument.body);
     api.route("GET /v1/admin/workflow-runs", page([{ ...SUSPENDED, status: "canceled" }, PLATFORM_DONE]));
@@ -85,7 +107,9 @@ describe("AdminWorkflowsView: runs", () => {
   });
 
   it("keeps the confirmation open with the error and its reference when the runtime is down", async () => {
-    const { user } = render({ routes: routes({ "POST /v1/admin/workflow-runs/:runId/cancel": apiError(502, "UPSTREAM_UNAVAILABLE") }) });
+    const { user } = render({
+      routes: routes({ "POST /v1/admin/workflow-runs/:runId/cancel": apiError(502, "UPSTREAM_UNAVAILABLE") }),
+    });
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
     await user.click(within(table).getByRole("button", { name: /^Cancelar a execução/u }));
     const dialog = await screen.findByRole("alertdialog");
@@ -98,10 +122,18 @@ describe("AdminWorkflowsView: runs", () => {
   it("opens the timeline of a run", async () => {
     const { user, container } = render();
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
-    await user.click(within(table).getByRole("button", { name: /^Detalhes da execução .* de Demonstração de aprovação/u }));
+    await user.click(
+      within(table).getByRole("button", { name: /^Detalhes da execução .* de Demonstração de aprovação/u }),
+    );
     const dialog = await screen.findByRole("dialog", { name: "Execução de Demonstração de aprovação" });
-    const steps = within(within(dialog).getByRole("list", { name: "Linha do tempo da execução" })).getAllByRole("listitem");
-    expect(steps.map((step) => step.querySelector("span.font-medium")?.textContent)).toEqual(["Iniciada", "Aguarda aprovação", "Estado atual"]);
+    const steps = within(within(dialog).getByRole("list", { name: "Linha do tempo da execução" })).getAllByRole(
+      "listitem",
+    );
+    expect(steps.map((step) => step.querySelector("span.font-medium")?.textContent)).toEqual([
+      "Iniciada",
+      "Aguarda aprovação",
+      "Estado atual",
+    ]);
     expect(steps[0]?.textContent).toContain(`Pelo usuário ${IDS.user}`);
     expect(steps[1]?.textContent).toContain(OPS_IDS.approval);
     await expectNoAxeViolations(container.ownerDocument.body);
@@ -110,7 +142,9 @@ describe("AdminWorkflowsView: runs", () => {
   it("keeps the open run in the URL, so a reload or a shared link opens it again", async () => {
     const { user, router } = render();
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
-    await user.click(within(table).getByRole("button", { name: /^Detalhes da execução .* de Demonstração de aprovação/u }));
+    await user.click(
+      within(table).getByRole("button", { name: /^Detalhes da execução .* de Demonstração de aprovação/u }),
+    );
     await screen.findByRole("dialog", { name: "Execução de Demonstração de aprovação" });
     expect(router.current()).toBe(`/admin/workflows?run=${OPS_IDS.run}`);
     await user.keyboard("{Escape}");
@@ -132,15 +166,25 @@ describe("AdminWorkflowsView: runs", () => {
   });
 
   it("pages by cursor, passing the cursor back as given", async () => {
-    const first = Array.from({ length: 20 }, (_, index) => buildAdminRun({ runId: `run-${String(index)}`, status: "success", approvalRequestId: null }));
+    const first = Array.from({ length: 20 }, (_, index) =>
+      buildAdminRun({ runId: `run-${String(index)}`, status: "success", approvalRequestId: null }),
+    );
     const { user, api } = render({
-      routes: routes({ "GET /v1/admin/workflow-runs": (request) => (request.query.get("cursor") === "20" ? page([PLATFORM_DONE]) : page(first, { cursor: "20", limit: 20 })) }),
+      routes: routes({
+        "GET /v1/admin/workflow-runs": (request) =>
+          request.query.get("cursor") === "20" ? page([PLATFORM_DONE]) : page(first, { cursor: "20", limit: 20 }),
+      }),
     });
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
     expect(within(table).getAllByRole("row")).toHaveLength(21);
-    await user.click(within(screen.getByRole("navigation", { name: "Páginas de execuções" })).getByRole("button", { name: "Próxima" }));
+    await user.click(
+      within(screen.getByRole("navigation", { name: "Páginas de execuções" })).getByRole("button", { name: "Próxima" }),
+    );
     expect(await screen.findByRole("row", { name: /Relatório de uso/u })).toBeDefined();
-    expect(api.calls.filter((call) => call.path === "/v1/admin/workflow-runs").map((call) => call.query)).toEqual(["?limit=20", "?limit=20&cursor=20"]);
+    expect(api.calls.filter((call) => call.path === "/v1/admin/workflow-runs").map((call) => call.query)).toEqual([
+      "?limit=20",
+      "?limit=20&cursor=20",
+    ]);
   });
 
   it("tells an empty platform from filters that match nothing", async () => {
@@ -150,7 +194,10 @@ describe("AdminWorkflowsView: runs", () => {
     expect(empty.router.current()).toBe("/admin/workflows?tab=schedules");
     empty.unmount();
 
-    const filtered = render({ path: "/admin/workflows?status=failed", routes: routes({ "GET /v1/admin/workflow-runs": page([]) }) });
+    const filtered = render({
+      path: "/admin/workflows?status=failed",
+      routes: routes({ "GET /v1/admin/workflow-runs": page([]) }),
+    });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhuma execução com esses filtros" })).toBeDefined();
     await expectNoAxeViolations(filtered.container);
     await filtered.user.click(screen.getByRole("button", { name: "Limpar filtros" }));
@@ -158,7 +205,9 @@ describe("AdminWorkflowsView: runs", () => {
   });
 
   it("shows an error with the request reference and retries", async () => {
-    const { user, api, container } = render({ routes: routes({ "GET /v1/admin/workflow-runs": apiError(409, "CONFLICT") }) });
+    const { user, api, container } = render({
+      routes: routes({ "GET /v1/admin/workflow-runs": apiError(409, "CONFLICT") }),
+    });
     expect(await screen.findByRole("alert")).toBeDefined();
     expect(screen.getByText(new RegExp(FAKE_REQUEST_ID, "u"))).toBeDefined();
     await expectNoAxeViolations(container);
@@ -178,7 +227,13 @@ describe("AdminWorkflowsView: runs", () => {
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
     try {
       setOnline(false);
-      await waitFor(() => expect(within(table).getByRole("button", { name: /^Cancelar a execução/u }).hasAttribute("disabled")).toBe(true));
+      await waitFor(() =>
+        expect(
+          within(table)
+            .getByRole("button", { name: /^Cancelar a execução/u })
+            .hasAttribute("disabled"),
+        ).toBe(true),
+      );
     } finally {
       setOnline(true);
     }
@@ -199,7 +254,8 @@ describe("AdminWorkflowsView: runs", () => {
 });
 
 describe("AdminWorkflowsView: schedules", () => {
-  const renderSchedules = (overrides: FakeRoutes = {}, options: Parameters<typeof renderAdmin>[1] = {}) => render({ path: "/admin/workflows?tab=schedules", routes: routes(overrides), ...options });
+  const renderSchedules = (overrides: FakeRoutes = {}, options: Parameters<typeof renderAdmin>[1] = {}) =>
+    render({ path: "/admin/workflows?tab=schedules", routes: routes(overrides), ...options });
 
   it("lists platform and organization schedules with the next fire in the schedule's zone", async () => {
     const { container, api } = renderSchedules();
@@ -217,10 +273,15 @@ describe("AdminWorkflowsView: schedules", () => {
   });
 
   it("pauses a schedule, then offers to resume it", async () => {
-    const { user, api } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/pause": ok(buildAdminSchedule({ status: "paused", nextFireAt: null })) });
+    const { user, api } = renderSchedules({
+      "POST /v1/admin/schedules/:scheduleId/pause": ok(buildAdminSchedule({ status: "paused", nextFireAt: null })),
+    });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
     const tenant = within(table).getByRole("row", { name: /daily-usage/u });
-    api.route("GET /v1/admin/schedules", ok([buildPlatformSchedule(), buildAdminSchedule({ status: "paused", nextFireAt: null })]));
+    api.route(
+      "GET /v1/admin/schedules",
+      ok([buildPlatformSchedule(), buildAdminSchedule({ status: "paused", nextFireAt: null })]),
+    );
     await user.click(within(tenant).getByRole("button", { name: /^Pausar o agendamento/u }));
     const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de Relatório de uso?" });
     expect(dialog.textContent).toContain("deixa de disparar para a organização");
@@ -234,9 +295,15 @@ describe("AdminWorkflowsView: schedules", () => {
   });
 
   it("says so when a pause fails, with the request reference", async () => {
-    const { user } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/pause": apiError(502, "UPSTREAM_UNAVAILABLE") });
+    const { user } = renderSchedules({
+      "POST /v1/admin/schedules/:scheduleId/pause": apiError(502, "UPSTREAM_UNAVAILABLE"),
+    });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
-    await user.click(within(within(table).getByRole("row", { name: /daily-usage/u })).getByRole("button", { name: /^Pausar o agendamento/u }));
+    await user.click(
+      within(within(table).getByRole("row", { name: /daily-usage/u })).getByRole("button", {
+        name: /^Pausar o agendamento/u,
+      }),
+    );
     const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de Relatório de uso?" });
     await user.click(within(dialog).getByRole("button", { name: "Pausar agendamento" }));
     const alert = await within(dialog).findByRole("alert");
@@ -244,7 +311,9 @@ describe("AdminWorkflowsView: schedules", () => {
   });
 
   it("warns that pausing a platform schedule stops the job for every organization, and does nothing on cancel", async () => {
-    const { user, api, container } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/pause": ok(buildPlatformSchedule({ status: "paused", nextFireAt: null })) });
+    const { user, api, container } = renderSchedules({
+      "POST /v1/admin/schedules/:scheduleId/pause": ok(buildPlatformSchedule({ status: "paused", nextFireAt: null })),
+    });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
     const platform = within(table).getByRole("row", { name: /Plataforma/u });
     await user.click(within(platform).getByRole("button", { name: /^Pausar o agendamento/u }));
@@ -256,8 +325,12 @@ describe("AdminWorkflowsView: schedules", () => {
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     expect(api.callLines()).not.toContain(`POST /v1/admin/schedules/${OPS_IDS.platformSchedule}/pause`);
     await user.click(within(platform).getByRole("button", { name: /^Pausar o agendamento/u }));
-    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Pausar job da plataforma" }));
-    await waitFor(() => expect(api.callLines()).toContain(`POST /v1/admin/schedules/${OPS_IDS.platformSchedule}/pause`));
+    await user.click(
+      within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Pausar job da plataforma" }),
+    );
+    await waitFor(() =>
+      expect(api.callLines()).toContain(`POST /v1/admin/schedules/${OPS_IDS.platformSchedule}/pause`),
+    );
   });
 
   it("confirms before resuming a paused schedule", async () => {
@@ -275,9 +348,15 @@ describe("AdminWorkflowsView: schedules", () => {
   });
 
   it("runs a schedule now after a confirmation", async () => {
-    const { user, api, container } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/run": ok({ scheduleId: OPS_IDS.platformSchedule }, 202) });
+    const { user, api, container } = renderSchedules({
+      "POST /v1/admin/schedules/:scheduleId/run": ok({ scheduleId: OPS_IDS.platformSchedule }, 202),
+    });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
-    await user.click(within(within(table).getByRole("row", { name: /Plataforma/u })).getByRole("button", { name: /^Executar agora o agendamento/u }));
+    await user.click(
+      within(within(table).getByRole("row", { name: /Plataforma/u })).getByRole("button", {
+        name: /^Executar agora o agendamento/u,
+      }),
+    );
     const dialog = await screen.findByRole("alertdialog", { name: "Executar Relatório de uso agora?" });
     expect(within(dialog).getByText(/para todas as organizações/u)).toBeDefined();
     await expectNoAxeViolations(container.ownerDocument.body);
@@ -288,9 +367,19 @@ describe("AdminWorkflowsView: schedules", () => {
   });
 
   it("filters by organization in the URL and explains an organization without schedules", async () => {
-    const { user, router, api } = renderSchedules({ "GET /v1/admin/schedules": (request) => ok(request.query.get("organizationId") === null ? [buildPlatformSchedule()] : []) }, { path: `/admin/workflows?tab=schedules&organizationId=${IDS.organization}` });
-    expect(await screen.findByRole("heading", { level: 2, name: "Esta organização não tem agendamentos" })).toBeDefined();
-    expect(api.calls.find((call) => call.path === "/v1/admin/schedules")?.query).toBe(`?organizationId=${IDS.organization}`);
+    const { user, router, api } = renderSchedules(
+      {
+        "GET /v1/admin/schedules": (request) =>
+          ok(request.query.get("organizationId") === null ? [buildPlatformSchedule()] : []),
+      },
+      { path: `/admin/workflows?tab=schedules&organizationId=${IDS.organization}` },
+    );
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "Esta organização não tem agendamentos" }),
+    ).toBeDefined();
+    expect(api.calls.find((call) => call.path === "/v1/admin/schedules")?.query).toBe(
+      `?organizationId=${IDS.organization}`,
+    );
     await user.click(screen.getByRole("button", { name: "Ver todos" }));
     expect(router.current()).toBe("/admin/workflows?tab=schedules");
     expect(await screen.findByRole("row", { name: /Plataforma/u })).toBeDefined();
@@ -301,7 +390,13 @@ describe("AdminWorkflowsView: schedules", () => {
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
     try {
       setOnline(false);
-      await waitFor(() => expect(within(table).getAllByRole("button", { name: /^Executar agora/u })[0]?.hasAttribute("disabled")).toBe(true));
+      await waitFor(() =>
+        expect(
+          within(table)
+            .getAllByRole("button", { name: /^Executar agora/u })[0]
+            ?.hasAttribute("disabled"),
+        ).toBe(true),
+      );
     } finally {
       setOnline(true);
     }
@@ -320,20 +415,46 @@ describe("AdminWorkflowsView: schedules", () => {
 
 describe("AdminWorkflowsView: who started a run", () => {
   it("names the starters of the page with one lookup, and keeps the id when the lookup fails", async () => {
-    const other = buildAdminRun({ runId: "run_other_0001", workflowId: "onboarding", startedBy: "uOther", approvalRequestId: null, status: "running" });
-    const again = buildAdminRun({ runId: "run_again_0001", workflowId: "cleanup", approvalRequestId: null, status: "success" });
+    const other = buildAdminRun({
+      runId: "run_other_0001",
+      workflowId: "onboarding",
+      startedBy: "uOther",
+      approvalRequestId: null,
+      status: "running",
+    });
+    const again = buildAdminRun({
+      runId: "run_again_0001",
+      workflowId: "cleanup",
+      approvalRequestId: null,
+      status: "success",
+    });
     const { api, user } = render({
       routes: routes({
         "GET /v1/admin/workflow-runs": page([SUSPENDED, PLATFORM_DONE, other, again]),
-        "GET /v1/admin/users": page([buildAdminUser({ id: IDS.user, displayName: "Ana Souza" }), buildAdminUser({ id: "uOther", displayName: "", email: "bo@example.com" })]),
+        "GET /v1/admin/users": page([
+          buildAdminUser({ id: IDS.user, displayName: "Ana Souza" }),
+          buildAdminUser({ id: "uOther", displayName: "", email: "bo@example.com" }),
+        ]),
       }),
     });
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
-    expect(await within(within(table).getByRole("row", { name: /Demonstração de aprovação/u })).findByText("Usuário Ana Souza")).toBeDefined();
-    expect(within(within(table).getByRole("row", { name: /onboarding/u })).getByText("Usuário bo@example.com")).toBeDefined();
+    expect(
+      await within(within(table).getByRole("row", { name: /Demonstração de aprovação/u })).findByText(
+        "Usuário Ana Souza",
+      ),
+    ).toBeDefined();
+    expect(
+      within(within(table).getByRole("row", { name: /onboarding/u })).getByText("Usuário bo@example.com"),
+    ).toBeDefined();
     const lookups = api.calls.filter((call) => call.path === "/v1/admin/users");
-    expect(lookups.map((call) => new URLSearchParams(call.query).get("ids"))).toEqual([[IDS.user, "uOther"].sort().join(",")]);
-    await user.click(within(within(table).getByRole("row", { name: /Demonstração de aprovação/u })).getByRole("button", { name: /^Detalhes/u }));
+    expect(lookups.map((call) => new URLSearchParams(call.query).get("ids"))).toEqual([
+      [IDS.user, "uOther"].sort().join(","),
+    ]);
+    await user.click(
+      within(within(table).getByRole("row", { name: /Demonstração de aprovação/u })).getByRole("button", {
+        name: /^Detalhes/u,
+      }),
+    );
     expect(await within(await screen.findByRole("dialog")).findByText("Pelo usuário Ana Souza")).toBeDefined();
   });
 

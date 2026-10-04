@@ -10,14 +10,33 @@ test.describe("overview", () => {
     await staffPage.goto("admin");
     await expect(staffPage.getByRole("heading", { level: 1, name: "Administração da plataforma" })).toBeVisible();
     const kpis = staffPage.getByRole("region", { name: "Números da plataforma" });
-    for (const term of ["Organizações ativas", "Usuários ativos", "Custo no mês", "Paradas por guardrail", "Aprovações", "Avaliação dos agentes"]) {
+    for (const term of [
+      "Organizações ativas",
+      "Usuários ativos",
+      "Custo no mês",
+      "Paradas por guardrail",
+      "Aprovações",
+      "Avaliação dos agentes",
+    ]) {
       await expect(kpis.getByRole("term").filter({ hasText: term })).toBeVisible();
     }
     // At least Alpha, Beta and this worker's organization are active.
     await expect(kpis.getByRole("definition").first()).toHaveText(/^\d+$/);
     expect(Number(await kpis.getByRole("definition").first().textContent())).toBeGreaterThanOrEqual(2);
     const areas = staffPage.getByRole("region", { name: "Áreas" });
-    for (const area of ["Organizações", "Planos", "Usuários", "Agentes e prompts", "Conectores", "Avaliações", "Traces", "Logs", "Custos", "Workflows", "Flags"]) {
+    for (const area of [
+      "Organizações",
+      "Planos",
+      "Usuários",
+      "Agentes e prompts",
+      "Conectores",
+      "Avaliações",
+      "Traces",
+      "Logs",
+      "Custos",
+      "Workflows",
+      "Flags",
+    ]) {
       await expect(areas.getByRole("link", { name: new RegExp(`^${area} `) })).toBeVisible();
     }
   });
@@ -56,7 +75,9 @@ test.describe("organizations", () => {
     await staffPage.getByRole("link", { name: `Abrir ${sp5Org.name}` }).click();
     await expect(staffPage.getByRole("heading", { level: 1, name: sp5Org.name })).toBeVisible();
     const summary = staffPage.getByRole("region", { name: "Resumo" });
-    await expect(summary.getByRole("definition").filter({ hasText: "pessoas com acesso" })).toHaveText("1 pessoas com acesso");
+    await expect(summary.getByRole("definition").filter({ hasText: "pessoas com acesso" })).toHaveText(
+      "1 pessoas com acesso",
+    );
     await expect(summary.getByRole("definition").filter({ hasText: /^Ativa$/ })).toBeVisible();
   });
 
@@ -99,13 +120,17 @@ test.describe("organizations", () => {
     await expect(summary).toContainText("US$ 25,00");
 
     await staffPage.getByRole("button", { name: "Suspender organização" }).click();
-    const suspend = staffPage.getByRole("alertdialog", { name: `Suspender ${sp5Org.name}?` }).or(staffPage.getByRole("dialog", { name: `Suspender ${sp5Org.name}?` }));
+    const suspend = staffPage
+      .getByRole("alertdialog", { name: `Suspender ${sp5Org.name}?` })
+      .or(staffPage.getByRole("dialog", { name: `Suspender ${sp5Org.name}?` }));
     await suspend.getByRole("button", { name: "Suspender", exact: true }).click();
     await expect(toast(staffPage, `${sp5Org.name} foi suspensa.`)).toBeVisible();
     await expect(summary.getByRole("definition").filter({ hasText: /^Suspensa$/ })).toBeVisible();
 
     await staffPage.getByRole("button", { name: "Reativar organização" }).click();
-    const reactivate = staffPage.getByRole("alertdialog", { name: `Reativar ${sp5Org.name}?` }).or(staffPage.getByRole("dialog", { name: `Reativar ${sp5Org.name}?` }));
+    const reactivate = staffPage
+      .getByRole("alertdialog", { name: `Reativar ${sp5Org.name}?` })
+      .or(staffPage.getByRole("dialog", { name: `Reativar ${sp5Org.name}?` }));
     await reactivate.getByRole("button", { name: "Reativar", exact: true }).click();
     await expect(toast(staffPage, `${sp5Org.name} foi reativada.`)).toBeVisible();
     await expect(summary.getByRole("definition").filter({ hasText: /^Ativa$/ })).toBeVisible();

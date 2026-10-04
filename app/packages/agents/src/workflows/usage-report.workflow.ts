@@ -69,10 +69,20 @@ const reportTenantStep = (deps: UsageReportDeps) =>
             data: { thresholdPercent: threshold, usedPercent: report.usedPercent },
           });
         }
-        return { tenantId: report.tenantId, status: "reported" as const, rollups: report.rollups, exportedCalls: report.exportedCalls, alerts: [...report.newAlerts] };
+        return {
+          tenantId: report.tenantId,
+          status: "reported" as const,
+          rollups: report.rollups,
+          exportedCalls: report.exportedCalls,
+          alerts: [...report.newAlerts],
+        };
       } catch (error: unknown) {
         // One tenant's failure never blocks the others; the next hourly run catches up.
-        mastra.getLogger().error("usage_report_tenant_failed", { tenantId: inputData.tenantId, requestId: inputData.requestId, err: error });
+        mastra.getLogger().error("usage_report_tenant_failed", {
+          tenantId: inputData.tenantId,
+          requestId: inputData.requestId,
+          err: error,
+        });
         return { tenantId: inputData.tenantId, status: "failed" as const, rollups: 0, exportedCalls: 0, alerts: [] };
       }
     },
@@ -103,7 +113,15 @@ export const createUsageReportWorkflow = (deps: UsageReportDeps) =>
     inputSchema: InputSchema,
     outputSchema: UsageReportResultSchema,
   })
-    .then(createReauthorizeScheduleCreatorStep({ access: deps.access, notifications: deps.notifications, workflowId: USAGE_REPORT_WORKFLOW_ID, inputSchema: InputSchema, permission: USAGE_READ_PERMISSION }))
+    .then(
+      createReauthorizeScheduleCreatorStep({
+        access: deps.access,
+        notifications: deps.notifications,
+        workflowId: USAGE_REPORT_WORKFLOW_ID,
+        inputSchema: InputSchema,
+        permission: USAGE_READ_PERMISSION,
+      }),
+    )
     .then(selectTenantsStep(deps))
     .foreach(reportTenantStep(deps), { concurrency: USAGE_REPORT_CONCURRENCY })
     .then(summarizeStep())

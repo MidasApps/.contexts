@@ -1,6 +1,6 @@
 "use client";
 
-import { adminListAgentsEndpoint, type AdminAgent } from "@core/contracts";
+import { type AdminAgent, adminListAgentsEndpoint } from "@core/contracts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -19,7 +19,8 @@ export const adminAgentKeys = {
 export const adminAgentCatalogQuery = (callEndpoint: CallEndpoint) =>
   queryOptions({
     queryKey: adminAgentKeys.catalog(),
-    queryFn: async ({ signal }): Promise<AdminAgent[]> => (await callEndpoint(adminListAgentsEndpoint, { signal })).data,
+    queryFn: async ({ signal }): Promise<AdminAgent[]> =>
+      (await callEndpoint(adminListAgentsEndpoint, { signal })).data,
     staleTime: 5 * 60_000,
   });
 

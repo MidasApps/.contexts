@@ -3,7 +3,10 @@ import { buildSilentWav, createFakeSpeechModel, createFakeTranscriptionModel } f
 
 describe("fake voice models", () => {
   it("transcribes to a deterministic text with the audio size", async () => {
-    const result = await createFakeTranscriptionModel().doGenerate({ audio: new Uint8Array(42), mediaType: "audio/webm" });
+    const result = await createFakeTranscriptionModel().doGenerate({
+      audio: new Uint8Array(42),
+      mediaType: "audio/webm",
+    });
     expect(result.text).toBe("fake transcript 42 bytes");
   });
 

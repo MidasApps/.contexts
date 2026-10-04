@@ -1,4 +1,4 @@
-import { IsoDateTimeSchema, ProjectIdSchema, ProjectSchema, type Project } from "@core/contracts";
+import { IsoDateTimeSchema, type Project, ProjectIdSchema, ProjectSchema } from "@core/contracts";
 import { FieldPath, FieldValue, type Firestore } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
@@ -29,10 +29,16 @@ export const createFirestoreProjectRepository = (deps: { firestore: Firestore })
     },
     getMany: async ({ tenantId, ids }) => {
       const snapshots = await Promise.all(ids.map((id) => typed().doc(id).get()));
-      return snapshots.flatMap((snapshot) => liveOnly(snapshot.data()) ?? []).filter((project) => project.tenantId === tenantId);
+      return snapshots
+        .flatMap((snapshot) => liveOnly(snapshot.data()) ?? [])
+        .filter((project) => project.tenantId === tenantId);
     },
     list: async ({ tenantId, page }) => {
-      let query = typed().where("tenantId", "==", tenantId).where("deletedAt", "==", null).orderBy("name").orderBy(FieldPath.documentId());
+      let query = typed()
+        .where("tenantId", "==", tenantId)
+        .where("deletedAt", "==", null)
+        .orderBy("name")
+        .orderBy(FieldPath.documentId());
       if (page.after !== undefined) query = query.startAfter(...page.after);
       const fetched = (await query.limit(page.limit + 1).get()).docs.flatMap((doc) => liveOnly(doc.data()) ?? []);
       return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (project) => [project.name, project.id] });
@@ -58,6 +64,9 @@ export const createFirestoreProjectRepository = (deps: { firestore: Firestore })
         }),
       ),
     softDelete: (tx, { id, deletedAt, actorId }) =>
-      void tx.update(raw().doc(id), toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId })),
+      void tx.update(
+        raw().doc(id),
+        toFirestoreUpdate(stored, { deletedAt, deletedBy: actorId, updatedAt: deletedAt, updatedBy: actorId }),
+      ),
   };
 };

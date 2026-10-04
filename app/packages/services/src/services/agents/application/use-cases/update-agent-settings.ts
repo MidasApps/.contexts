@@ -1,8 +1,12 @@
 import type { AgentSettings, TenantId, UpdateAgentSettingsInput, UserPrincipal } from "@core/contracts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import type { ConsoleDeps } from "../../../platform/application/console-deps.ts";
-import { agentSettingsOf, type AgentSettingsFields } from "../../../platform/application/ports/console-ports.ts";
-import { baseCapsOf, changeTenantBudget, storedSettingsOf } from "../../../platform/application/use-cases/sync-tenant-budget.ts";
+import { type AgentSettingsFields, agentSettingsOf } from "../../../platform/application/ports/console-ports.ts";
+import {
+  baseCapsOf,
+  changeTenantBudget,
+  storedSettingsOf,
+} from "../../../platform/application/use-cases/sync-tenant-budget.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { resolveTenantCaps, selfCapWithin } from "../../../usage/domain/budget-policy.ts";
 
@@ -18,7 +22,9 @@ export type UpdateAgentSettingsCommand = {
   readonly input: UpdateAgentSettingsInput;
 };
 
-export type UpdateAgentSettings = (command: UpdateAgentSettingsCommand) => Promise<Result<AgentSettings, AgentSettingsError>>;
+export type UpdateAgentSettings = (
+  command: UpdateAgentSettingsCommand,
+) => Promise<Result<AgentSettings, AgentSettingsError>>;
 
 const audit = (deps: Pick<ConsoleDeps, "audit">, command: UpdateAgentSettingsCommand, changes: string[]) => {
   const common = {
@@ -31,7 +37,12 @@ const audit = (deps: Pick<ConsoleDeps, "audit">, command: UpdateAgentSettingsCom
   };
   return command.by === "staff"
     ? deps.audit.record({ log: "platform", ...common, targetTenantId: command.tenantId })
-    : deps.audit.record({ log: "tenant", ...common, tenantId: command.tenantId, node: { level: "organization", tenantId: command.tenantId } });
+    : deps.audit.record({
+        log: "tenant",
+        ...common,
+        tenantId: command.tenantId,
+        node: { level: "organization", tenantId: command.tenantId },
+      });
 };
 
 /**
@@ -46,7 +57,8 @@ export const makeUpdateAgentSettings =
     const { input, tenantId } = command;
     const base = await baseCapsOf(deps, tenantId);
     const baseCaps = resolveTenantCaps({ plan: base.plan, override: base.override, selfCap: null }).caps;
-    if (input.budget !== undefined && input.budget !== null && !selfCapWithin(input.budget, baseCaps)) return err({ code: "ABOVE_PLAN" });
+    if (input.budget !== undefined && input.budget !== null && !selfCapWithin(input.budget, baseCaps))
+      return err({ code: "ABOVE_PLAN" });
     const stored = await storedSettingsOf(deps, tenantId, baseCaps);
     const selfCap = input.budget === undefined ? stored.selfCap : input.budget;
     const settings: AgentSettingsFields = {
@@ -57,7 +69,15 @@ export const makeUpdateAgentSettings =
       updatedBy: command.actor.uid,
       updatedAt: deps.clock.now().toISOString(),
     };
-    const resolved = await changeTenantBudget(deps, { tenantId, next: (inputs) => ({ ...inputs, selfCap }), write: () => deps.agentSettings.save({ settings, selfCap }) });
-    await audit(deps, command, Object.keys(input).filter((key) => input[key as keyof UpdateAgentSettingsInput] !== undefined));
+    const resolved = await changeTenantBudget(deps, {
+      tenantId,
+      next: (inputs) => ({ ...inputs, selfCap }),
+      write: () => deps.agentSettings.save({ settings, selfCap }),
+    });
+    await audit(
+      deps,
+      command,
+      Object.keys(input).filter((key) => input[key as keyof UpdateAgentSettingsInput] !== undefined),
+    );
     return ok(agentSettingsOf({ settings: { ...settings, budget: { ...resolved.caps } }, selfCap }));
   };

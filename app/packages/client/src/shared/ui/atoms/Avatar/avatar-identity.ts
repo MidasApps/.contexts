@@ -14,8 +14,12 @@ export const avatarToneFor = (name: string): AvatarTone => {
  * two letters of a single word. Works per grapheme so accented and non-Latin names stay intact.
  */
 export const initialsOf = (name: string): string => {
-  const words = name.trim().split(/\s+/u).filter((word) => word !== "");
-  const letters = (word: string | undefined): string[] => Array.from(new Intl.Segmenter().segment(word ?? ""), (s) => s.segment);
+  const words = name
+    .trim()
+    .split(/\s+/u)
+    .filter((word) => word !== "");
+  const letters = (word: string | undefined): string[] =>
+    Array.from(new Intl.Segmenter().segment(word ?? ""), (s) => s.segment);
   const [first, ...rest] = words;
   const picked = rest.length > 0 ? [letters(first)[0], letters(rest.at(-1))[0]] : letters(first).slice(0, 2);
   return picked.join("").toLocaleUpperCase();

@@ -2,12 +2,10 @@
 
 import { MAX_APPROVAL_REASON_CHARS } from "@core/contracts";
 import { CircleCheckIcon, CircleXIcon, ShieldQuestionIcon, TriangleAlertIcon } from "lucide-react";
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { type ReactNode, useEffect, useId, useRef } from "react";
 import { useTranslations } from "use-intl";
 import type { ApprovalRequestView, ToolPartView, ToolPreviewView } from "#/entities/message/index.ts";
 import { usePermissionLabel, useToolLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
-import { Spinner } from "#/shared/ui/atoms/Spinner/Spinner.tsx";
-import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
 import { CodeBlock } from "#/shared/ui/ai/code-block.tsx";
 import {
   Confirmation,
@@ -18,7 +16,9 @@ import {
   ConfirmationRequest,
   ConfirmationTitle,
 } from "#/shared/ui/ai/confirmation.tsx";
-import { useToolApproval, type ApprovalDecision } from "../model/use-tool-approval.ts";
+import { Spinner } from "#/shared/ui/atoms/Spinner/Spinner.tsx";
+import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
+import { type ApprovalDecision, useToolApproval } from "../model/use-tool-approval.ts";
 
 export type ToolConfirmationProps = {
   /** The tool part in an approval state (for a delegated command, the `tool-agent-action` part). */
@@ -102,7 +102,12 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
 
   if (tool.approval === undefined) return null;
   return (
-    <Confirmation state={tool.state} approval={tool.approval} label={t("label", { summary })} data-tool-call={tool.toolCallId}>
+    <Confirmation
+      state={tool.state}
+      approval={tool.approval}
+      label={t("label", { summary })}
+      data-tool-call={tool.toolCallId}
+    >
       <div className="flex items-start gap-2.5">
         <ShieldQuestionIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber" />
         <div className="min-w-0 space-y-0.5">
@@ -116,7 +121,9 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
         </div>
       </div>
       {diff ?? (requested ? <p className="text-body-sm text-muted-foreground">{t("noPreview")}</p> : null)}
-      {request?.args === undefined || !requested ? null : <CodeBlock code={toJson(request.args)} language="json" label={t("details")} />}
+      {request?.args === undefined || !requested ? null : (
+        <CodeBlock code={toJson(request.args)} language="json" label={t("details")} />
+      )}
       <ConfirmationRequest>
         {approval.stage === "asking-reason" ? (
           <div className="flex flex-col gap-1.5">
@@ -144,7 +151,12 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
               <ConfirmationAction variant="ghost" onClick={approval.cancelDecline} disabled={locked}>
                 {t("cancelDecline")}
               </ConfirmationAction>
-              <ConfirmationAction variant="destructive" onClick={approval.confirmDecline} disabled={!interactive} pending={approval.sent === "declined"}>
+              <ConfirmationAction
+                variant="destructive"
+                onClick={approval.confirmDecline}
+                disabled={!interactive}
+                pending={approval.sent === "declined"}
+              >
                 {approval.sent === "declined" ? t("declining") : t("confirmDecline")}
               </ConfirmationAction>
             </>
@@ -153,7 +165,11 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
               <ConfirmationAction variant="outline" onClick={approval.startDecline} disabled={locked}>
                 {t("decline")}
               </ConfirmationAction>
-              <ConfirmationAction onClick={approval.approve} disabled={!interactive} pending={approval.sent === "approved"}>
+              <ConfirmationAction
+                onClick={approval.approve}
+                disabled={!interactive}
+                pending={approval.sent === "approved"}
+              >
                 {approval.sent === "approved" ? t("approving") : t("approve")}
               </ConfirmationAction>
             </>

@@ -26,8 +26,20 @@ export const importPromptSeeds = async (deps: {
       continue;
     }
     const body = loadSeed(agentId);
-    const version = await deps.prompts.insertVersion({ ...key, body, bodySha256: createHash("sha256").update(body, "utf8").digest("hex"), note: "Code seed v1.", createdBy: PROMPT_SEED_AUTHOR });
-    await deps.prompts.insertActivation({ ...key, versionId: version.id, forced: true, reason: PROMPT_SEED_REASON, activatedBy: PROMPT_SEED_AUTHOR });
+    const version = await deps.prompts.insertVersion({
+      ...key,
+      body,
+      bodySha256: createHash("sha256").update(body, "utf8").digest("hex"),
+      note: "Code seed v1.",
+      createdBy: PROMPT_SEED_AUTHOR,
+    });
+    await deps.prompts.insertActivation({
+      ...key,
+      versionId: version.id,
+      forced: true,
+      reason: PROMPT_SEED_REASON,
+      activatedBy: PROMPT_SEED_AUTHOR,
+    });
     imported.push(agentId);
   }
   return { imported, skipped };

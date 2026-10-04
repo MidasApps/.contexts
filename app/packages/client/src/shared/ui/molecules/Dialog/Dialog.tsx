@@ -2,11 +2,16 @@
 
 import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { createContext, use, useState, type ComponentProps } from "react";
+import { type ComponentProps, createContext, use, useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { centeredModalClasses, overlayClasses } from "#/shared/ui/styles/modal-classes.ts";
-import { DiscardQuestion, DismissGuardProvider, useCurrentDismissGuard, useDismissGuardState } from "./dialog-dismiss-guard.tsx";
+import {
+  DiscardQuestion,
+  DismissGuardProvider,
+  useCurrentDismissGuard,
+  useDismissGuardState,
+} from "./dialog-dismiss-guard.tsx";
 
 /** How many times the dialog has opened: each opening mounts its own overlay and content. */
 const DialogOpeningContext = createContext(0);
@@ -45,7 +50,12 @@ export function Dialog({ open, defaultOpen = false, children, ...props }: Compon
   const dismissal = useDismissGuardState(() => setOpen(false));
   const openings = useOpeningCount(isOpen);
   return (
-    <DialogPrimitive.Root data-slot="dialog" {...props} open={isOpen} onOpenChange={(next) => (next ? setOpen(true) : dismissal.requestDismiss())}>
+    <DialogPrimitive.Root
+      data-slot="dialog"
+      {...props}
+      open={isOpen}
+      onOpenChange={(next) => (next ? setOpen(true) : dismissal.requestDismiss())}
+    >
       <DialogOpeningContext value={openings}>
         <DismissGuardProvider value={dismissal.context}>{children}</DismissGuardProvider>
       </DialogOpeningContext>

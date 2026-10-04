@@ -8,12 +8,15 @@ export type SpanNode = { readonly span: TraceSpan; readonly children: readonly S
  * span is ever hidden.
  */
 export const buildSpanTree = (spans: readonly TraceSpan[]): SpanNode[] => {
-  const nodes = new Map<string, { span: TraceSpan; children: SpanNode[] }>(spans.map((span) => [span.spanId, { span, children: [] }]));
+  const nodes = new Map<string, { span: TraceSpan; children: SpanNode[] }>(
+    spans.map((span) => [span.spanId, { span, children: [] }]),
+  );
   const roots: SpanNode[] = [];
   for (const span of spans) {
     const node = nodes.get(span.spanId);
     if (node === undefined) continue;
-    const parent = span.parentSpanId === null || span.parentSpanId === span.spanId ? undefined : nodes.get(span.parentSpanId);
+    const parent =
+      span.parentSpanId === null || span.parentSpanId === span.spanId ? undefined : nodes.get(span.parentSpanId);
     if (parent === undefined) roots.push(node);
     else parent.children.push(node);
   }
@@ -21,4 +24,5 @@ export const buildSpanTree = (spans: readonly TraceSpan[]): SpanNode[] => {
 };
 
 /** Whether the span carries any (redacted) input or output worth a disclosure. */
-export const hasSpanPayload = (span: TraceSpan): boolean => (span.input !== null && span.input !== undefined) || (span.output !== null && span.output !== undefined);
+export const hasSpanPayload = (span: TraceSpan): boolean =>
+  (span.input !== null && span.input !== undefined) || (span.output !== null && span.output !== undefined);

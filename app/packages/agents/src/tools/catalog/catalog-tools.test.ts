@@ -28,7 +28,9 @@ const commands: FormCommandCatalog = {
 };
 
 const setup = (granted: readonly string[] = MEMBER_PERMISSIONS) => {
-  const access = createFakeAccessPort({ memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions: granted }] });
+  const access = createFakeAccessPort({
+    memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions: granted }],
+  });
   const deps: CoreToolDeps = { access, audit: createFakeAuditPort(), approvals: createFakeApprovalPort() };
   const catalog = createAiCatalogReader(FIXTURE_AI_CATALOG);
   return {
@@ -65,14 +67,18 @@ describe("listEntities", () => {
 
   it("uses the effective context permissions, not the membership alone", async () => {
     const { deps, listEntities } = setup();
-    const result = (await runCoreTool(listEntities, deps, { limit: 10 }, call(["core.catalog.read"]))) as { total: number };
+    const result = (await runCoreTool(listEntities, deps, { limit: 10 }, call(["core.catalog.read"]))) as {
+      total: number;
+    };
     expect(result.total).toBe(1);
   });
 
   it("refuses a limit above 50 and needs core.catalog.read", async () => {
     const { deps, listEntities } = setup();
     expect(await codeOf(runCoreTool(listEntities, deps, { limit: 51 }, call()))).toBe("TOOL_INPUT_INVALID");
-    expect(await codeOf(runCoreTool(listEntities, setup(["example.note.read"]).deps, { limit: 5 }, call()))).toBe("FORBIDDEN");
+    expect(await codeOf(runCoreTool(listEntities, setup(["example.note.read"]).deps, { limit: 5 }, call()))).toBe(
+      "FORBIDDEN",
+    );
   });
 });
 
@@ -95,16 +101,28 @@ describe("renderForm", () => {
 
   it("returns a schema-form UI that validates against agents.ToolUi and writes nothing", async () => {
     const { deps, renderForm } = setup();
-    const result = (await runCoreTool(renderForm, deps, { ...input, initialValues: { text: "Hi" } }, call())) as { ui: unknown };
+    const result = (await runCoreTool(renderForm, deps, { ...input, initialValues: { text: "Hi" } }, call())) as {
+      ui: unknown;
+    };
     expect(ToolUiSchema.parse(result.ui)).toEqual({
       component: "schema-form",
-      props: { contractId: "example.Note", commandId: "example.CreateNoteCommand", mode: "create", initialValues: { text: "Hi" } },
+      props: {
+        contractId: "example.Note",
+        commandId: "example.CreateNoteCommand",
+        mode: "create",
+        initialValues: { text: "Hi" },
+      },
     });
   });
 
   it("strips unknown and invalid initial values", async () => {
     const { deps, renderForm } = setup();
-    const result = (await runCoreTool(renderForm, deps, { ...input, initialValues: { text: "", pinned: true, tenantId: "other" } }, call())) as {
+    const result = (await runCoreTool(
+      renderForm,
+      deps,
+      { ...input, initialValues: { text: "", pinned: true, tenantId: "other" } },
+      call(),
+    )) as {
       ui: { props: { initialValues: unknown } };
     };
     expect(result.ui.props.initialValues).toEqual({ pinned: true });
@@ -112,8 +130,12 @@ describe("renderForm", () => {
 
   it("rejects an unknown command and a command bound to another contract", async () => {
     const { deps, renderForm } = setup();
-    expect(await codeOf(runCoreTool(renderForm, deps, { ...input, commandId: "example.DeleteNoteCommand" }, call()))).toBe("COMMAND_NOT_FOUND");
-    expect(await codeOf(runCoreTool(renderForm, deps, { ...input, contractId: "tenancy.Organization" }, call()))).toBe("COMMAND_CONTRACT_MISMATCH");
+    expect(
+      await codeOf(runCoreTool(renderForm, deps, { ...input, commandId: "example.DeleteNoteCommand" }, call())),
+    ).toBe("COMMAND_NOT_FOUND");
+    expect(await codeOf(runCoreTool(renderForm, deps, { ...input, contractId: "tenancy.Organization" }, call()))).toBe(
+      "COMMAND_CONTRACT_MISMATCH",
+    );
   });
 
   it("requires the command permission and a visible target contract", async () => {
@@ -122,6 +144,8 @@ describe("renderForm", () => {
     expect(await codeOf(runCoreTool(renderForm, deps, input, call(withoutCreate)))).toBe("FORBIDDEN");
     const withoutRead = ["core.catalog.read", "example.note.create"];
     const hidden = setup(withoutRead);
-    expect(await codeOf(runCoreTool(hidden.renderForm, hidden.deps, input, call(withoutRead)))).toBe("ENTITY_NOT_FOUND");
+    expect(await codeOf(runCoreTool(hidden.renderForm, hidden.deps, input, call(withoutRead)))).toBe(
+      "ENTITY_NOT_FOUND",
+    );
   });
 });

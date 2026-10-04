@@ -1,11 +1,15 @@
 import { AGENT_PERMISSIONS } from "../agents/agent-permissions.ts";
 import { CHAT_PERMISSIONS } from "../conversations/chat-permissions.ts";
-import type { Permission } from "../primitives/catalog-meta.schema.ts";
 import type { PlatformRole } from "../identity/platform-staff.schema.ts";
+import type { Permission } from "../primitives/catalog-meta.schema.ts";
 import type { PermissionDefinition, PermissionKind } from "./permission-definition.schema.ts";
 import type { SystemRoleKey } from "./system-roles.ts";
 
-const tenant = (id: Permission, kind: PermissionKind, defaultRoles: readonly SystemRoleKey[]): PermissionDefinition => ({
+const tenant = (
+  id: Permission,
+  kind: PermissionKind,
+  defaultRoles: readonly SystemRoleKey[],
+): PermissionDefinition => ({
   id,
   descriptionKey: `permissions.${id}`,
   kind,
@@ -13,7 +17,11 @@ const tenant = (id: Permission, kind: PermissionKind, defaultRoles: readonly Sys
   defaultRoles: [...defaultRoles],
 });
 
-const platform = (id: Permission, kind: PermissionKind, defaultRoles: readonly PlatformRole[]): PermissionDefinition => ({
+const platform = (
+  id: Permission,
+  kind: PermissionKind,
+  defaultRoles: readonly PlatformRole[],
+): PermissionDefinition => ({
   id,
   descriptionKey: `permissions.${id}`,
   kind,
@@ -105,6 +113,8 @@ export const SP5_PERMISSIONS: readonly PermissionDefinition[] = [
  */
 export const CORE_PERMISSIONS: readonly PermissionDefinition[] = [
   ...SP1_PERMISSIONS,
-  ...[...AGENT_PERMISSIONS, ...CHAT_PERMISSIONS].map((permission): PermissionDefinition => ({ ...permission, defaultRoles: [...permission.defaultRoles] })),
+  ...[...AGENT_PERMISSIONS, ...CHAT_PERMISSIONS].map(
+    (permission): PermissionDefinition => ({ ...permission, defaultRoles: [...permission.defaultRoles] }),
+  ),
   ...SP5_PERMISSIONS,
 ];

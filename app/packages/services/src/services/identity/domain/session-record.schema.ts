@@ -1,4 +1,10 @@
-import { ImpersonationSessionIdSchema, IsoDateTimeSchema, SessionIdSchema, SessionKindSchema, UserIdSchema } from "@core/contracts";
+import {
+  ImpersonationSessionIdSchema,
+  IsoDateTimeSchema,
+  SessionIdSchema,
+  SessionKindSchema,
+  UserIdSchema,
+} from "@core/contracts";
 import { z } from "zod";
 
 const Sha256HexSchema = z.string().regex(/^[a-f0-9]{64}$/);

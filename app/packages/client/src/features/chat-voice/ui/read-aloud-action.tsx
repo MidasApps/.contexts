@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import { useTranslations } from "use-intl";
 import { AudioPlayer } from "#/shared/ui/ai/audio-player.tsx";
 import { MessageAction } from "#/shared/ui/ai/message.tsx";
-import { useSpeechPlayback, type SpeechPlaybackSeams } from "../model/use-speech-playback.ts";
+import { type SpeechPlaybackSeams, useSpeechPlayback } from "../model/use-speech-playback.ts";
 
 export type ReadAloudActionProps = {
   organizationId: string;
@@ -42,10 +42,16 @@ export function ReadAloudAction({ organizationId, text, autoPlay = false, seams 
   const active = playback.status === "loading" || playback.status === "ready";
   return (
     <>
-      <MessageAction label={active ? t("stopReading") : t("readAloud")} aria-pressed={active} onClick={active ? stop : play}>
+      <MessageAction
+        label={active ? t("stopReading") : t("readAloud")}
+        aria-pressed={active}
+        onClick={active ? stop : play}
+      >
         {active ? <SquareIcon aria-hidden="true" className="fill-current" /> : <Volume2Icon aria-hidden="true" />}
       </MessageAction>
-      {playback.status === "ready" ? <AudioPlayer label={t("player")} src={playback.url} autoPlay onEnded={stop} className="basis-full" /> : null}
+      {playback.status === "ready" ? (
+        <AudioPlayer label={t("player")} src={playback.url} autoPlay onEnded={stop} className="basis-full" />
+      ) : null}
       <span role="status" className={playback.status === "error" ? "text-xs text-destructive-text" : "sr-only"}>
         {playback.status === "loading" ? t("loadingAudio") : ""}
         {playback.status === "error" ? errorTextOf(playback.reason) : ""}

@@ -14,14 +14,20 @@ export const TENANT_BUDGET_GUARD_ID = "tenant-budget-guard";
 
 export type BudgetGuardCode = "BUDGET_EXCEEDED" | "BUDGET_UNAVAILABLE";
 
-export type BudgetGuardTripwire = { readonly processorId: typeof TENANT_BUDGET_GUARD_ID; readonly code: BudgetGuardCode };
+export type BudgetGuardTripwire = {
+  readonly processorId: typeof TENANT_BUDGET_GUARD_ID;
+  readonly code: BudgetGuardCode;
+};
 
-export const createTenantBudgetGuard = (deps: { readonly usage: Pick<UsagePort, "checkTenantBudget"> }): InputProcessor<BudgetGuardTripwire> => ({
+export const createTenantBudgetGuard = (deps: {
+  readonly usage: Pick<UsagePort, "checkTenantBudget">;
+}): InputProcessor<BudgetGuardTripwire> => ({
   id: TENANT_BUDGET_GUARD_ID,
   name: "Tenant budget guard",
   description: "Refuses the run when the organization reached its monthly spend or token cap.",
   processInput: async ({ messages, requestContext, abort }: ProcessInputArgs<BudgetGuardTripwire>) => {
-    const stop = (code: BudgetGuardCode): never => abort(code, { metadata: { processorId: TENANT_BUDGET_GUARD_ID, code } });
+    const stop = (code: BudgetGuardCode): never =>
+      abort(code, { metadata: { processorId: TENANT_BUDGET_GUARD_ID, code } });
     const context = readAgentContext(requestContext);
     if (!context.ok) return stop("BUDGET_UNAVAILABLE");
     let check: Awaited<ReturnType<UsagePort["checkTenantBudget"]>>;

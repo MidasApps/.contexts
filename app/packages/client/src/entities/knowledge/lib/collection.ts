@@ -20,7 +20,9 @@ export const collectionOfNamespace = (namespace: string): KnowledgeCollection =>
 };
 
 /** The namespace documents of a writable collection get: `tenant` or `project:<id>`. */
-export const namespaceOfTarget = (projectId: string | undefined): string => (projectId === undefined ? ORGANIZATION_NAMESPACE : `project:${projectId}`);
+export const namespaceOfTarget = (projectId: string | undefined): string =>
+  projectId === undefined ? ORGANIZATION_NAMESPACE : `project:${projectId}`;
 
 /** Platform and module content is indexed by the platform; an organization cannot delete it. */
-export const isOwnCollection = (collection: KnowledgeCollection): boolean => collection.kind === "organization" || collection.kind === "project";
+export const isOwnCollection = (collection: KnowledgeCollection): boolean =>
+  collection.kind === "organization" || collection.kind === "project";

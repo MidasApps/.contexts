@@ -15,7 +15,11 @@ export type SqlRejectionReason =
   | "OPERATOR_NOT_ALLOWED"
   | "PARAM_OUT_OF_RANGE";
 
-export type SqlRejection = { readonly code: "SQL_REJECTED"; readonly reason: SqlRejectionReason; readonly detail?: string };
+export type SqlRejection = {
+  readonly code: "SQL_REJECTED";
+  readonly reason: SqlRejectionReason;
+  readonly detail?: string;
+};
 
 /** A statement that passed the guard: its text and a literal-free fingerprint (for audit). */
 export type GuardedSql = { readonly sql: string; readonly fingerprint: string };

@@ -6,7 +6,14 @@ const entries = Object.entries(CHAT_UI_COMPONENTS);
 
 describe("chat ui component contracts", () => {
   it("covers the spec §5.2 components", () => {
-    expect(Object.keys(CHAT_UI_COMPONENTS).sort()).toEqual(["approval-diff", "approval-pending", "chart", "data-table", "picker", "schema-form"]);
+    expect(Object.keys(CHAT_UI_COMPONENTS).sort()).toEqual([
+      "approval-diff",
+      "approval-pending",
+      "chart",
+      "data-table",
+      "picker",
+      "schema-form",
+    ]);
   });
 
   it.each(entries)("%s: is a ui-component whose examples parse", (_id, contract) => {
@@ -21,6 +28,8 @@ describe("chat ui component contracts", () => {
 
   it("caps table rows", () => {
     const rows = Array.from({ length: MAX_TABLE_ROWS + 1 }, () => ({ a: 1 }));
-    expect(DataTablePropsSchema.safeParse({ columns: [{ key: "a", type: "number" }], rows, truncated: true }).success).toBe(false);
+    expect(
+      DataTablePropsSchema.safeParse({ columns: [{ key: "a", type: "number" }], rows, truncated: true }).success,
+    ).toBe(false);
   });
 });

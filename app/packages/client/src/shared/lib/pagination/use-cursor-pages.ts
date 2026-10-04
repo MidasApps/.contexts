@@ -37,10 +37,16 @@ export type CursorPages<T> = {
  * With `pageState` the page lives with the caller (the URL): a link to page N loads the cursors
  * before it, one at a time, and shows the last loaded page meanwhile.
  */
-export const useCursorPages = <T>(query: CursorListState<T>, pageSize: number, label?: string, pageState?: PageState): CursorPages<T> => {
+export const useCursorPages = <T>(
+  query: CursorListState<T>,
+  pageSize: number,
+  label?: string,
+  pageState?: PageState,
+): CursorPages<T> => {
   const [localIndex, setLocalIndex] = useState(0);
   const requested = pageState === undefined ? localIndex : pageState.page - 1;
-  const setRequested = (next: number): void => (pageState === undefined ? setLocalIndex(next) : pageState.setPage(next + 1));
+  const setRequested = (next: number): void =>
+    pageState === undefined ? setLocalIndex(next) : pageState.setPage(next + 1);
   const all = query.data ?? [];
   const lastLoaded = Math.max(0, Math.ceil(all.length / pageSize) - 1);
   const index = Math.min(requested, lastLoaded);

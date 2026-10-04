@@ -1,12 +1,21 @@
 // Composition root of traces, evals and feedback (SP5 Task 11, decision 0040).
 import type { AgentSettings } from "@core/contracts";
-import type { GetConversation } from "../conversations/application/use-cases/get-conversation.ts";
 import type { MessageFeedbackStore } from "../conversations/application/ports/message-feedback-store.ts";
-import { makeRecordMessageFeedback, type RecordMessageFeedback } from "../conversations/application/use-cases/record-message-feedback.ts";
+import type { GetConversation } from "../conversations/application/use-cases/get-conversation.ts";
+import {
+  makeRecordMessageFeedback,
+  type RecordMessageFeedback,
+} from "../conversations/application/use-cases/record-message-feedback.ts";
 import { type GetExperiment, makeGetExperiment } from "../evals/application/use-cases/get-experiment.ts";
 import { type ListDatasets, makeListDatasets } from "../evals/application/use-cases/list-datasets.ts";
-import { type AddDatasetItem, type CreateDataset, type DeleteDatasetItem, type ListDatasetItems, makeDatasetItemUseCases } from "../evals/application/use-cases/manage-dataset-items.ts";
 import { type ListExperiments, makeListExperiments } from "../evals/application/use-cases/list-experiments.ts";
+import {
+  type AddDatasetItem,
+  type CreateDataset,
+  type DeleteDatasetItem,
+  type ListDatasetItems,
+  makeDatasetItemUseCases,
+} from "../evals/application/use-cases/manage-dataset-items.ts";
 import { makeStartExperiment, type StartExperiment } from "../evals/application/use-cases/start-experiment.ts";
 import type { Clock } from "../shared/clock/clock.ts";
 import type { Logger } from "../shared/observability/logger.ts";

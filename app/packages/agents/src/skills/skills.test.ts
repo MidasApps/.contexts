@@ -7,19 +7,36 @@ import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings
 import { defineAgentModule } from "../runtime/agent-module.ts";
 import { buildAgentContextEntries } from "../testing/agent-context-fixture.ts";
 import { createFakeSettingsPort } from "../testing/fake-ports.ts";
-import { CORE_SKILLS, createSkillsResolver, isModuleEnabled, loadSkill, SkillLoadError, skillFromContent } from "./resolve-skills.ts";
+import {
+  CORE_SKILLS,
+  createSkillsResolver,
+  isModuleEnabled,
+  loadSkill,
+  SkillLoadError,
+  skillFromContent,
+} from "./resolve-skills.ts";
 
 const SKILLS_DIR = path.join(import.meta.dirname, "..", "..", "skills");
-const skillDirs = readdirSync(SKILLS_DIR, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+const skillDirs = readdirSync(SKILLS_DIR, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name);
 
-const moduleSkill = createSkill({ name: "example-notes", description: "How to write good notes.", instructions: "Keep notes short." });
+const moduleSkill = createSkill({
+  name: "example-notes",
+  description: "How to write good notes.",
+  instructions: "Keep notes short.",
+});
 const noteModule = defineAgentModule({ id: "example", skills: [moduleSkill] });
-const namesOf = (skills: readonly unknown[]) => skills.map((skill) => (typeof skill === "string" ? skill : (skill as { name: string }).name));
+const namesOf = (skills: readonly unknown[]) =>
+  skills.map((skill) => (typeof skill === "string" ? skill : (skill as { name: string }).name));
 const context = () => new RequestContext<unknown>(buildAgentContextEntries());
 
 describe("core skills", () => {
   it.each(skillDirs)("%s/SKILL.md passes validateSkillContent", (name) => {
-    const result = validateSkillContent({ content: readFileSync(path.join(SKILLS_DIR, name, "SKILL.md"), "utf8"), directoryName: name });
+    const result = validateSkillContent({
+      content: readFileSync(path.join(SKILLS_DIR, name, "SKILL.md"), "utf8"),
+      directoryName: name,
+    });
     expect(result.errors).toEqual([]);
     expect(result.valid).toBe(true);
   });
@@ -38,9 +55,17 @@ describe("core skills", () => {
 
 describe("resolve skills per tenant", () => {
   it("adds module skills only for tenants that enabled the module", async () => {
-    const enabled = createSkillsResolver({ core: [loadSkill(CORE_SKILLS.dataCatalog)], modules: [noteModule], settings: createTenantAgentSettingsReader(createFakeSettingsPort({ enabledAgents: ["data", "example-helper"] })) });
+    const enabled = createSkillsResolver({
+      core: [loadSkill(CORE_SKILLS.dataCatalog)],
+      modules: [noteModule],
+      settings: createTenantAgentSettingsReader(createFakeSettingsPort({ enabledAgents: ["data", "example-helper"] })),
+    });
     expect(namesOf(await enabled({ requestContext: context() }))).toEqual(["data-catalog", "example-notes"]);
-    const disabled = createSkillsResolver({ core: [loadSkill(CORE_SKILLS.dataCatalog)], modules: [noteModule], settings: createTenantAgentSettingsReader(createFakeSettingsPort()) });
+    const disabled = createSkillsResolver({
+      core: [loadSkill(CORE_SKILLS.dataCatalog)],
+      modules: [noteModule],
+      settings: createTenantAgentSettingsReader(createFakeSettingsPort()),
+    });
     expect(namesOf(await disabled({ requestContext: context() }))).toEqual(["data-catalog"]);
   });
 
@@ -51,6 +76,11 @@ describe("resolve skills per tenant", () => {
   });
 
   it("rejects module skills that are not prefixed with the module id", () => {
-    expect(() => defineAgentModule({ id: "example", skills: [createSkill({ name: "notes", description: "x", instructions: "y" })] })).toThrow(/UNPREFIXED_CAPABILITY/);
+    expect(() =>
+      defineAgentModule({
+        id: "example",
+        skills: [createSkill({ name: "notes", description: "x", instructions: "y" })],
+      }),
+    ).toThrow(/UNPREFIXED_CAPABILITY/);
   });
 });

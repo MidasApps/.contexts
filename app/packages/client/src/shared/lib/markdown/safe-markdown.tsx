@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentProps, ReactNode } from "react";
-import { Streamdown, type Components } from "streamdown";
+import { type Components, Streamdown } from "streamdown";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { CodeBlock } from "#/shared/ui/ai/code-block.tsx";
@@ -88,7 +88,13 @@ export function SafeMarkdown({ children, streaming = false, renderCitation, clas
     if (!isBlock(props)) return <code className={codeClass}>{code}</code>;
     const language = /language-([\w+#.-]+)/u.exec(codeClass ?? "")?.[1];
     const text = textOf(code).replace(/\n$/u, "");
-    return <CodeBlock code={text} language={language} label={language === undefined ? t("code") : t("codeWithLanguage", { language })} />;
+    return (
+      <CodeBlock
+        code={text}
+        language={language}
+        label={language === undefined ? t("code") : t("codeWithLanguage", { language })}
+      />
+    );
   };
 
   // Streamdown styles emphasis with spans; the native elements keep the semantics.

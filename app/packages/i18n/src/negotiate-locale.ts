@@ -1,5 +1,5 @@
 import { match } from "@formatjs/intl-localematcher";
-import { SUPPORTED_LOCALES, isSupportedLocale, type SupportedLocale } from "./locales.ts";
+import { isSupportedLocale, SUPPORTED_LOCALES, type SupportedLocale } from "./locales.ts";
 
 export type NegotiateLocaleInput = {
   /** Requested tags in preference order (`Accept-Language`, `navigator.languages`). */

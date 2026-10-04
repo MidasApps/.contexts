@@ -17,7 +17,13 @@ const renderView = (mfaFactors: MfaFactor[] = ["phone", "totp"], authOptions: Fa
   );
 };
 
-const ENROLLED_SMS = { uid: "factor-sms", factor: "phone", displayName: "Celular", phoneNumber: "+5511912345678", enrolledAt: "2026-09-29T14:30:00.000Z" } as const;
+const ENROLLED_SMS = {
+  uid: "factor-sms",
+  factor: "phone",
+  displayName: "Celular",
+  phoneNumber: "+5511912345678",
+  enrolledAt: "2026-09-29T14:30:00.000Z",
+} as const;
 
 describe("ProfileSecurityView", () => {
   it("offers only the factors the environment supports", async () => {
@@ -39,7 +45,9 @@ describe("ProfileSecurityView", () => {
     const dialog = await screen.findByRole("dialog", { name: "Adicionar app autenticador" });
     const key = await within(dialog).findByRole("textbox", { name: "Chave de configuração" });
     expect((key as HTMLInputElement).value).not.toContain(FAKE_TOTP_SECRET);
-    expect(within(dialog).getByRole("link", { name: "Abrir no app autenticador" }).getAttribute("href")).toMatch(/^otpauth:\/\/totp\//u);
+    expect(within(dialog).getByRole("link", { name: "Abrir no app autenticador" }).getAttribute("href")).toMatch(
+      /^otpauth:\/\/totp\//u,
+    );
     await expectNoAxeViolations(dialog);
 
     const code = within(dialog).getByRole("textbox", { name: /Código de verificação/u });
@@ -61,7 +69,9 @@ describe("ProfileSecurityView", () => {
     const start = vi.spyOn(auth, "startTotpEnrollment");
     await user.click(await screen.findByRole("button", { name: "Adicionar app autenticador" }));
     const dialog = await screen.findByRole("dialog", { name: "Adicionar app autenticador" });
-    expect(await within(dialog).findByRole("img", { name: "QR code para configurar o app autenticador" })).toBeDefined();
+    expect(
+      await within(dialog).findByRole("img", { name: "QR code para configurar o app autenticador" }),
+    ).toBeDefined();
     expect(within(dialog).getByText(/Escaneie o QR code/u)).toBeDefined();
     // The authenticator lists the entry under the product name, not the Firebase project id.
     expect(start).toHaveBeenCalledWith("Core");

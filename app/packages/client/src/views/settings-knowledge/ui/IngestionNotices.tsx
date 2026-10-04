@@ -35,7 +35,13 @@ type NoticeProps = Omit<IngestionNoticesProps, "runs"> & { readonly run: Started
  */
 type Outcome = "failed" | "noDocument";
 
-function FailedNotice({ organizationId, run, outcome, onDismiss, onRestarted }: Omit<NoticeProps, "followRuns"> & { readonly outcome: Outcome }) {
+function FailedNotice({
+  organizationId,
+  run,
+  outcome,
+  onDismiss,
+  onRestarted,
+}: Omit<NoticeProps, "followRuns"> & { readonly outcome: Outcome }) {
   const t = useTranslations("settings.knowledge.indexing");
   const callEndpoint = useCallEndpoint();
   const [pending, setPending] = useState(false);
@@ -46,7 +52,11 @@ function FailedNotice({ organizationId, run, outcome, onDismiss, onRestarted }: 
     setRetryError(null);
     try {
       const query = run.projectId === undefined ? {} : { projectId: run.projectId };
-      const started = await callEndpoint(addKnowledgeSourceEndpoint, { params: { organizationId }, query, body: run.source });
+      const started = await callEndpoint(addKnowledgeSourceEndpoint, {
+        params: { organizationId },
+        query,
+        body: run.source,
+      });
       onRestarted(run.runId, { ...run, runId: started.data.runId });
     } catch (error: unknown) {
       setRetryError(error);
@@ -56,16 +66,29 @@ function FailedNotice({ organizationId, run, outcome, onDismiss, onRestarted }: 
   };
   return (
     <Alert variant="destructive" aria-labelledby={titleId}>
-      <AlertTitle id={titleId}>{t(outcome === "failed" ? "failedTitle" : "noDocumentTitle", { name: run.label })}</AlertTitle>
+      <AlertTitle id={titleId}>
+        {t(outcome === "failed" ? "failedTitle" : "noDocumentTitle", { name: run.label })}
+      </AlertTitle>
       <AlertDescription className="text-inherit">
         <p>{t(outcome === "failed" ? "failedDescription" : "noDocumentDescription")}</p>
         <span className="block font-mono text-caption">{t("reference", { runId: run.runId })}</span>
         {retryError === null ? null : <ApiErrorAlert error={retryError} />}
         <span className="mt-2 flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" disabled={pending} onClick={() => void retry()} aria-label={t("retryNamed", { name: run.label })}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pending}
+            onClick={() => void retry()}
+            aria-label={t("retryNamed", { name: run.label })}
+          >
             {t("retry")}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => onDismiss(run.runId)} aria-label={t("dismissNamed", { name: run.label })}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDismiss(run.runId)}
+            aria-label={t("dismissNamed", { name: run.label })}
+          >
             {t("dismiss")}
           </Button>
         </span>
@@ -87,19 +110,44 @@ function IngestionNotice({ organizationId, run, followRuns, onDismiss, onRestart
     if (!finished) return;
     // List the document the workflow registered; once it is listed the page drops this notice.
     let active = true;
-    void queryClient.invalidateQueries({ queryKey: knowledgeKeys.all(organizationId) }).then(() => active && setReread(true));
+    void queryClient
+      .invalidateQueries({ queryKey: knowledgeKeys.all(organizationId) })
+      .then(() => active && setReread(true));
     return () => {
       active = false;
     };
   }, [finished, queryClient, organizationId]);
-  if (status !== undefined && FAILED.has(status)) return <FailedNotice organizationId={organizationId} run={run} outcome="failed" onDismiss={onDismiss} onRestarted={onRestarted} />;
-  if (finished && reread) return <FailedNotice organizationId={organizationId} run={run} outcome="noDocument" onDismiss={onDismiss} onRestarted={onRestarted} />;
+  if (status !== undefined && FAILED.has(status))
+    return (
+      <FailedNotice
+        organizationId={organizationId}
+        run={run}
+        outcome="failed"
+        onDismiss={onDismiss}
+        onRestarted={onRestarted}
+      />
+    );
+  if (finished && reread)
+    return (
+      <FailedNotice
+        organizationId={organizationId}
+        run={run}
+        outcome="noDocument"
+        onDismiss={onDismiss}
+        onRestarted={onRestarted}
+      />
+    );
   if (finished) return null;
   return (
     <Alert variant="info" role="status">
       <AlertDescription className="flex w-full flex-wrap items-center justify-between gap-2 text-inherit">
         <span>{t("running", { name: run.label })}</span>
-        <Button variant="outline" size="sm" onClick={() => onDismiss(run.runId)} aria-label={t("dismissNamed", { name: run.label })}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onDismiss(run.runId)}
+          aria-label={t("dismissNamed", { name: run.label })}
+        >
           {t("dismiss")}
         </Button>
       </AlertDescription>

@@ -23,12 +23,18 @@ describe("invitation entity", () => {
   it("merges pending invitation pages under the organization's key", async () => {
     const api = createFakeApi({
       [`GET /v1/organizations/${IDS.organization}/invitations`]: (request) =>
-        request.query.get("cursor") === "i2" ? page([invitation("Iv2", "b@example.com")]) : page([invitation("Iv1", "a@example.com")], { cursor: "i2" }),
+        request.query.get("cursor") === "i2"
+          ? page([invitation("Iv2", "b@example.com")])
+          : page([invitation("Iv1", "a@example.com")], { cursor: "i2" }),
     });
-    const { result, queryClient } = renderClientHook(() => useInvitations(IDS.organization, { status: "pending" }), { api });
+    const { result, queryClient } = renderClientHook(() => useInvitations(IDS.organization, { status: "pending" }), {
+      api,
+    });
     await waitFor(() => expect(result.current.data).toHaveLength(1));
     await act(() => result.current.fetchNextPage());
-    await waitFor(() => expect(result.current.data?.map((item) => item.email)).toEqual(["a@example.com", "b@example.com"]));
+    await waitFor(() =>
+      expect(result.current.data?.map((item) => item.email)).toEqual(["a@example.com", "b@example.com"]),
+    );
     expect(api.calls[0]?.query).toBe("?limit=50&status=pending");
     expect(queryClient.getQueryCache().getAll()[0]?.queryKey.slice(0, 3)).toEqual(invitationKeys.all(IDS.organization));
   });

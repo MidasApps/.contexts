@@ -1,14 +1,22 @@
 // Test world of the device use cases: the access write world (org-a > p1, an owner and an
 // admin), in-memory devices and activations, a fake Firebase Auth and a movable clock.
 import { OrganizationIdSchema } from "@core/contracts";
-import { makeAccessWriteWorld, nodes, system, user } from "../../../access/application/use-cases/access-write.fixture.ts";
+import {
+  makeAccessWriteWorld,
+  nodes,
+  system,
+  user,
+} from "../../../access/application/use-cases/access-write.fixture.ts";
 import { createAccessServices } from "../../../access/composition.ts";
 import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
 import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
 import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
 import { createLogger } from "../../../shared/observability/logger.ts";
 import { createFakeFirebaseAuth } from "../../adapters/driven/fake-firebase-auth.ts";
-import { createInMemoryDeviceActivationRepository, createInMemoryDeviceRepository } from "../../adapters/driven/in-memory-device-repositories.ts";
+import {
+  createInMemoryDeviceActivationRepository,
+  createInMemoryDeviceRepository,
+} from "../../adapters/driven/in-memory-device-repositories.ts";
 import { createDeviceServices } from "../../device-composition.ts";
 
 export const DEVICE_NOW = "2026-09-30T12:00:00.000Z";

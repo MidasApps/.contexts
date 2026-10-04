@@ -20,7 +20,9 @@ describe("device entity", () => {
   it("merges device pages under the organization's key", async () => {
     const api = createFakeApi({
       [`GET /v1/organizations/${IDS.organization}/devices`]: (request) =>
-        request.query.get("cursor") === "d2" ? page([device("Dv2", "Kiosk")]) : page([device("Dv1", "Front desk")], { cursor: "d2" }),
+        request.query.get("cursor") === "d2"
+          ? page([device("Dv2", "Kiosk")])
+          : page([device("Dv1", "Front desk")], { cursor: "d2" }),
     });
     const { result, queryClient } = renderClientHook(() => useDevices(IDS.organization), { api });
     await waitFor(() => expect(result.current.data).toHaveLength(1));

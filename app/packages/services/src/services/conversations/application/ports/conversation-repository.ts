@@ -31,7 +31,11 @@ export type ConversationRepository = {
   /** Pinned first, then the most recent turn first (`pinned desc, lastMessageAt desc, id desc`). */
   readonly list: (query: ConversationListQuery) => Promise<Page<Conversation>>;
   /** Marks `runId` as the active run (a new run replaces a stale one). */
-  readonly startRun: (input: { readonly conversationId: ConversationId; readonly runId: string; readonly startedAt: string }) => Promise<void>;
+  readonly startRun: (input: {
+    readonly conversationId: ConversationId;
+    readonly runId: string;
+    readonly startedAt: string;
+  }) => Promise<void>;
   /**
    * Ends `runId` in one transaction: clears `activeRunId` only when it is still `runId`, counts the
    * turn, stamps `lastMessageAt` and copies an automatic title while `titleSource` is `auto`.

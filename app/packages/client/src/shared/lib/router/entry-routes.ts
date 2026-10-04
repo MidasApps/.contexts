@@ -5,7 +5,12 @@ import type { Route, RouteId } from "./route-paths.ts";
  * Signed-out entry pages: they frame themselves (`AuthTemplate`), handle their own session states
  * and are never a destination after signing in. Hosts render them outside the user-area shell.
  */
-export const ENTRY_ROUTE_IDS: ReadonlySet<RouteId> = new Set<RouteId>(["sign-in", "invite", "sign-up", "reset-password"]);
+export const ENTRY_ROUTE_IDS: ReadonlySet<RouteId> = new Set<RouteId>([
+  "sign-in",
+  "invite",
+  "sign-up",
+  "reset-password",
+]);
 
 const HOME: Route = { id: "home" };
 

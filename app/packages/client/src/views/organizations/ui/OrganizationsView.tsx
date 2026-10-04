@@ -2,7 +2,7 @@
 
 import type { Organization } from "@core/contracts";
 import { useTranslations } from "use-intl";
-import { orderByLastUsed, OrganizationAvatar } from "#/entities/organization/index.ts";
+import { OrganizationAvatar, orderByLastUsed } from "#/entities/organization/index.ts";
 import { useMe, useMyOrganizations } from "#/entities/session/index.ts";
 import { CreateOrganizationForm } from "#/features/create-organization/index.ts";
 import { SignOutButton } from "#/features/sign-out/index.ts";
@@ -25,7 +25,13 @@ const useCreateAccess = (): CreateAccess => {
   return me.data?.capabilities.createOrganization === true ? "allowed" : "denied";
 };
 
-function OrganizationList({ organizations, lastUsedId }: { organizations: readonly Organization[]; lastUsedId: string | undefined }) {
+function OrganizationList({
+  organizations,
+  lastUsedId,
+}: {
+  organizations: readonly Organization[];
+  lastUsedId: string | undefined;
+}) {
   const t = useTranslations("shell.organizations");
   return (
     <ul aria-label={t("listLabel")} className="grid gap-2 sm:grid-cols-2">
@@ -38,7 +44,9 @@ function OrganizationList({ organizations, lastUsedId }: { organizations: readon
             <OrganizationAvatar name={organization.name} size="md" decorative />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-sm font-medium">{organization.name}</span>
-              {organization.status === "suspended" ? <span className="text-xs text-amber-foreground">{t("suspended")}</span> : null}
+              {organization.status === "suspended" ? (
+                <span className="text-xs text-amber-foreground">{t("suspended")}</span>
+              ) : null}
             </span>
             {organization.id === lastUsedId ? <Badge variant="tag">{t("lastUsed")}</Badge> : null}
             <Icon name="chevron-right" className="size-4 text-muted-foreground" />
@@ -52,7 +60,8 @@ function OrganizationList({ organizations, lastUsedId }: { organizations: readon
 /** Nothing to list: create one next to it, or (no self-serve) ask for an invitation or switch account. */
 function NoOrganizations({ access }: { access: CreateAccess }) {
   const t = useTranslations("shell.organizations");
-  if (access !== "denied") return <EmptyState icon="building" title={t("emptyTitle")} description={t("emptyDescription")} />;
+  if (access !== "denied")
+    return <EmptyState icon="building" title={t("emptyTitle")} description={t("emptyDescription")} />;
   return (
     <EmptyState
       icon="building"
@@ -68,13 +77,25 @@ function OrganizationsSection({ access }: { access: CreateAccess }) {
   const me = useMe();
   const organizations = useMyOrganizations();
   if (organizations.isPending) return <LoadingState label={t("loading")} rows={4} />;
-  if (organizations.isError) return <ApiErrorState error={organizations.error} onRetry={() => void organizations.refetch()} retrying={organizations.isFetching} />;
+  if (organizations.isError)
+    return (
+      <ApiErrorState
+        error={organizations.error}
+        onRetry={() => void organizations.refetch()}
+        retrying={organizations.isFetching}
+      />
+    );
   if (organizations.data.length === 0) return <NoOrganizations access={access} />;
   return (
     <div className="flex flex-col gap-3">
       <OrganizationList organizations={organizations.data} lastUsedId={me.data?.lastContext.organizationId} />
       {organizations.hasNextPage ? (
-        <Button variant="outline" className="self-start" pending={organizations.isFetchingNextPage} onClick={() => void organizations.fetchNextPage()}>
+        <Button
+          variant="outline"
+          className="self-start"
+          pending={organizations.isFetchingNextPage}
+          onClick={() => void organizations.fetchNextPage()}
+        >
           {t("loadMore")}
         </Button>
       ) : null}
@@ -109,7 +130,10 @@ export function OrganizationsView() {
   const access = useCreateAccess();
   return (
     <>
-      <PageHeader title={t("title")} description={access === "denied" ? t("descriptionInviteOnly") : t("description")} />
+      <PageHeader
+        title={t("title")}
+        description={access === "denied" ? t("descriptionInviteOnly") : t("description")}
+      />
       <div className={access === "denied" ? "flex flex-col" : "grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]"}>
         <section aria-labelledby="organizations-list-heading" className="flex flex-col gap-3">
           <h2 id="organizations-list-heading" className="text-sm font-semibold">

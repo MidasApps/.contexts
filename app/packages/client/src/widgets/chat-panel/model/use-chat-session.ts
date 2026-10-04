@@ -1,14 +1,19 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { MessageMetadataSchema, stopChatRunEndpoint, type MessageAttachment } from "@core/contracts";
-import { lastAssistantMessageIsCompleteWithApprovalResponses, type ChatStatus, type ChatTransport, type UIMessage } from "ai";
+import { type MessageAttachment, MessageMetadataSchema, stopChatRunEndpoint } from "@core/contracts";
+import {
+  type ChatStatus,
+  type ChatTransport,
+  lastAssistantMessageIsCompleteWithApprovalResponses,
+  type UIMessage,
+} from "ai";
 import { useEffect, useState } from "react";
-import { ApiError } from "#/shared/api/api-error.ts";
-import { useApiConnection, useCallEndpoint } from "#/shared/api/api-context.tsx";
-import { createChatTransport, type ChatScope } from "#/shared/api/chat-transport.ts";
-import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { partsOf, textOf, toolPartOf } from "#/entities/message/index.ts";
+import { useApiConnection, useCallEndpoint } from "#/shared/api/api-context.tsx";
+import { ApiError } from "#/shared/api/api-error.ts";
+import { type ChatScope, createChatTransport } from "#/shared/api/chat-transport.ts";
+import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 
 /** What the status line says (SP4 spec §5.3); derived from `useChat` status, connectivity and how the last answer ended. */
 export type ChatPhase =
@@ -31,7 +36,10 @@ export type ChatPhase =
 
 /** How the last answer ended, and which message it left behind. */
 /** `failed`: the stream ended in an error after part of the answer arrived. */
-type Outcome = { readonly kind: "none" | "finished" | "stopped" | "lost" | "failed"; readonly messageId?: string | undefined };
+type Outcome = {
+  readonly kind: "none" | "finished" | "stopped" | "lost" | "failed";
+  readonly messageId?: string | undefined;
+};
 
 export type ChatFailure = {
   /** API error code (`errors.<code>`), or `undefined` for a failure inside the stream. */
@@ -88,7 +96,11 @@ type ThreadLink = {
 };
 
 /** What the transport reads at request time, kept outside React state so one transport serves the whole thread. */
-const createThreadLink = (initial: { scope: ChatScope; conversationId: string | undefined; onConversationStarted: ((id: string) => void) | undefined }): ThreadLink => {
+const createThreadLink = (initial: {
+  scope: ChatScope;
+  conversationId: string | undefined;
+  onConversationStarted: ((id: string) => void) | undefined;
+}): ThreadLink => {
   let { scope, conversationId, onConversationStarted } = initial;
   return {
     getScope: () => scope,
@@ -122,7 +134,14 @@ const hasAnsweredApproval = (messages: readonly UIMessage[]): boolean => {
   return last?.role === "assistant" && partsOf(last).some((part) => toolPartOf(part)?.state === "approval-responded");
 };
 
-const phaseOf = (args: { status: ChatStatus; online: boolean; failure: ChatFailure | undefined; outcome: Outcome; resuming: boolean; awaiting: boolean }): ChatPhase => {
+const phaseOf = (args: {
+  status: ChatStatus;
+  online: boolean;
+  failure: ChatFailure | undefined;
+  outcome: Outcome;
+  resuming: boolean;
+  awaiting: boolean;
+}): ChatPhase => {
   const { status, online, failure, outcome, resuming, awaiting } = args;
   if (status === "submitted") return resuming ? "resuming" : "connecting";
   if (status === "streaming") return "responding";
@@ -147,7 +166,13 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
   const [conversationId, setConversationId] = useState(args.conversationId);
   const [outcome, setOutcome] = useState<Outcome>({ kind: "none" });
   const [resuming, setResuming] = useState(args.resume === true);
-  const [link] = useState(() => createThreadLink({ scope: args.scope, conversationId: args.conversationId, onConversationStarted: args.onConversationStarted }));
+  const [link] = useState(() =>
+    createThreadLink({
+      scope: args.scope,
+      conversationId: args.conversationId,
+      onConversationStarted: args.onConversationStarted,
+    }),
+  );
   const { scope, onConversationStarted } = args;
   useEffect(() => link.update({ scope, onConversationStarted }), [link, scope, onConversationStarted]);
 
@@ -176,7 +201,11 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
       // A stop is recorded when the member asks for it; an abort seen here is that same stop.
       if (isAbort) return;
       if (isDisconnect) setOutcome({ kind: "lost", messageId: message.id });
-      else if (isError) setOutcome({ kind: "failed", messageId: message.role === "assistant" && textOf(message).trim() !== "" ? message.id : undefined });
+      else if (isError)
+        setOutcome({
+          kind: "failed",
+          messageId: message.role === "assistant" && textOf(message).trim() !== "" ? message.id : undefined,
+        });
       else setOutcome({ kind: "finished", messageId: message.id });
     },
     onError: () => setResuming(false),
@@ -190,7 +219,11 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
   const send = (text: string, attachments: readonly MessageAttachment[] = []) => {
     setOutcome({ kind: "none" });
     if (attachments.length === 0) void chat.sendMessage({ text });
-    else void chat.sendMessage({ text, metadata: { attachments } }, { body: { attachments: attachments.map((file) => file.fileId) } });
+    else
+      void chat.sendMessage(
+        { text, metadata: { attachments } },
+        { body: { attachments: attachments.map((file) => file.fileId) } },
+      );
   };
 
   const stop = () => {
@@ -220,7 +253,11 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
 
   const respondToApproval = (decision: { id: string; approved: boolean; reason?: string | undefined }) => {
     setOutcome({ kind: "none" });
-    void chat.addToolApprovalResponse({ id: decision.id, approved: decision.approved, ...(decision.reason === undefined ? {} : { reason: decision.reason }) });
+    void chat.addToolApprovalResponse({
+      id: decision.id,
+      approved: decision.approved,
+      ...(decision.reason === undefined ? {} : { reason: decision.reason }),
+    });
   };
 
   return {

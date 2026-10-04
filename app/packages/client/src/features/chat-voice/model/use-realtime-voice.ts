@@ -2,8 +2,8 @@
 
 import type { RealtimeSession } from "@core/contracts";
 import { useEffect, useRef, useState } from "react";
-import { ApiError } from "#/shared/api/api-error.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
+import { ApiError } from "#/shared/api/api-error.ts";
 import { createRealtimeSession } from "../api/voice-api.ts";
 
 /** A live realtime voice connection; `close` ends the call and releases the microphone. */
@@ -66,7 +66,10 @@ export const connectRealtimeOverWebRtc: RealtimeConnector = async (session) => {
  * ephemeral secret and connects with it. Offered only when the availability says the flag is on
  * and until the session route answers 503; the secret is used once and never stored.
  */
-export const useRealtimeVoice = (args: { organizationId: string; connect?: RealtimeConnector | undefined }): { readonly status: RealtimeVoiceStatus; readonly start: () => void; readonly stop: () => void } => {
+export const useRealtimeVoice = (args: {
+  organizationId: string;
+  connect?: RealtimeConnector | undefined;
+}): { readonly status: RealtimeVoiceStatus; readonly start: () => void; readonly stop: () => void } => {
   const callEndpoint = useCallEndpoint();
   const [status, setStatus] = useState<RealtimeVoiceStatus>("idle");
   const connection = useRef<RealtimeConnection | null>(null);

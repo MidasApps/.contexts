@@ -13,7 +13,10 @@ import { FirebaseMastraAuth } from "./firebase-mastra-auth.ts";
 // Runs inside `firebase emulators:exec` (root `pnpm test:emulators`), which exports
 // FIREBASE_AUTH_EMULATOR_HOST. Real ID tokens from the Auth Emulator, verified by
 // firebase-admin; memberships come from the fake access port.
-const { auth: adminAuth } = createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: process.env });
+const { auth: adminAuth } = createFirebaseAdmin({
+  env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" },
+  processEnv: process.env,
+});
 const TENANT = "EmuTenant0000000001";
 
 const signUp = async (label: string): Promise<{ uid: string; idToken: string }> => {
@@ -77,7 +80,9 @@ beforeAll(async () => {
       return c.json({ uid: user.uid, tenantId: user.tenantId, resourceId: context.get(MASTRA_RESOURCE_ID_KEY) });
     },
   });
-  const mastra = new Mastra({ server: { port, host: "127.0.0.1", auth: new FirebaseMastraAuth({ access }), apiRoutes: [whoami] } });
+  const mastra = new Mastra({
+    server: { port, host: "127.0.0.1", auth: new FirebaseMastraAuth({ access }), apiRoutes: [whoami] },
+  });
   const server = await createNodeServer(mastra, { tools: {} });
   baseUrl = `http://127.0.0.1:${port}`;
   closeServer = () => new Promise((resolve) => server.close(() => resolve()));

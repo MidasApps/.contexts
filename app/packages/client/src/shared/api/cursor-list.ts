@@ -1,5 +1,5 @@
 import type { PageMeta } from "@core/contracts";
-import { infiniteQueryOptions, type InfiniteData } from "@tanstack/react-query";
+import { type InfiniteData, infiniteQueryOptions } from "@tanstack/react-query";
 import { ApiError } from "./api-error.ts";
 import type { QueryKey } from "./query-keys.ts";
 
@@ -27,7 +27,11 @@ export type CollectedPages<T> = { readonly items: T[]; readonly truncated: boole
  * forever; `truncated` is `true` when it stopped with a next page still announced, so a view that
  * counts or totals the items can say they are partial.
  */
-export const collectPages = async <T>(fetchPage: FetchPage<T>, signal: AbortSignal, maxPages = MAX_COLLECTED_PAGES): Promise<CollectedPages<T>> => {
+export const collectPages = async <T>(
+  fetchPage: FetchPage<T>,
+  signal: AbortSignal,
+  maxPages = MAX_COLLECTED_PAGES,
+): Promise<CollectedPages<T>> => {
   const items: T[] = [];
   let cursor: string | undefined;
   for (let index = 0; index < maxPages; index += 1) {
@@ -43,11 +47,15 @@ export const collectPages = async <T>(fetchPage: FetchPage<T>, signal: AbortSign
  * Reads every page of a short list in order (unit types, permissions, the units under one parent),
  * stopping at `maxPages`; use `collectPages` where a silently partial list would mislead.
  */
-export const collectAllPages = async <T>(fetchPage: FetchPage<T>, signal: AbortSignal, maxPages = MAX_COLLECTED_PAGES): Promise<T[]> =>
-  (await collectPages(fetchPage, signal, maxPages)).items;
+export const collectAllPages = async <T>(
+  fetchPage: FetchPage<T>,
+  signal: AbortSignal,
+  maxPages = MAX_COLLECTED_PAGES,
+): Promise<T[]> => (await collectPages(fetchPage, signal, maxPages)).items;
 
 /** Merges the loaded pages of an infinite list into one array, oldest page first. */
-export const mergePages = <T>(data: InfiniteData<ListPage<T>, string | undefined>): readonly T[] => data.pages.flatMap((page) => page.data);
+export const mergePages = <T>(data: InfiniteData<ListPage<T>, string | undefined>): readonly T[] =>
+  data.pages.flatMap((page) => page.data);
 
 /**
  * Infinite query options over a cursor list: `fetchNextPage()` loads the next cursor and `data` is
@@ -63,7 +71,8 @@ export const cursorListQuery = <T>(args: { queryKey: QueryKey; fetchPage: FetchP
   });
 
 /** `true` when a failed `/v1` call answered `status` (404 = not visible, 403 = no permission). */
-export const isApiErrorStatus = (error: unknown, status: number): boolean => error instanceof ApiError && error.status === status;
+export const isApiErrorStatus = (error: unknown, status: number): boolean =>
+  error instanceof ApiError && error.status === status;
 
 /**
  * Runs a read and turns a 404 into `null` (SP1 answers 404 for resources the caller cannot see):

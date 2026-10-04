@@ -5,7 +5,10 @@ import { useSyncExternalStore } from "react";
  * The desktop UI language (SP2 spec §5, decision 0012: no locale in desktop URLs): the profile
  * preference, else the OS languages (`navigator.languages`, best fit), else pt-BR.
  */
-export const resolveDesktopLocale = (args: { profileLocale: string | undefined; languages: readonly string[] }): SupportedLocale =>
+export const resolveDesktopLocale = (args: {
+  profileLocale: string | undefined;
+  languages: readonly string[];
+}): SupportedLocale =>
   negotiateLocale({ requested: args.languages, saved: args.profileLocale, fallback: SOURCE_LOCALE });
 
 /** The current UI language; `switchLocale` of the router port writes it and the intl provider reads it. */
@@ -33,4 +36,5 @@ export const createLocaleStore = (initial: SupportedLocale): LocaleStore => {
 };
 
 /** Re-renders on every locale switch. */
-export const useLocale = (store: LocaleStore): SupportedLocale => useSyncExternalStore(store.subscribe, store.get, store.get);
+export const useLocale = (store: LocaleStore): SupportedLocale =>
+  useSyncExternalStore(store.subscribe, store.get, store.get);

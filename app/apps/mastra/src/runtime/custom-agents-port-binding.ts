@@ -10,7 +10,9 @@ import type { CustomAgentsRuntimeReads } from "@core/services";
 export const bindCustomAgentsPort = (reads: CustomAgentsRuntimeReads): AgentRuntimePorts["customAgents"] => ({
   getAgent: ({ tenantId, agentId }) => {
     const id = CustomAgentIdSchema.safeParse(agentId);
-    return id.success ? reads.getAgent({ tenantId: TenantIdSchema.parse(tenantId), agentId: id.data }) : Promise.resolve(null);
+    return id.success
+      ? reads.getAgent({ tenantId: TenantIdSchema.parse(tenantId), agentId: id.data })
+      : Promise.resolve(null);
   },
   listAgents: ({ tenantId }) => reads.listAgents({ tenantId: TenantIdSchema.parse(tenantId) }),
   listSkills: ({ tenantId }) => reads.listSkills({ tenantId: TenantIdSchema.parse(tenantId) }),

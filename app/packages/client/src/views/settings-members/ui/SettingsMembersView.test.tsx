@@ -4,13 +4,32 @@ import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { buildMe, IDS } from "#/shared/testing/fixtures.ts";
 import { buildMember, buildRole } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsMembersView } from "./SettingsMembersView.tsx";
 
-const ADMIN: Permission[] = ["core.organization.read", "core.member.read", "core.member.update", "core.member.remove", "core.member.invite", "core.role.read", "core.project.read"];
-const SELF = buildMember({ uid: IDS.user, displayName: "Ana Souza", email: "ana@example.com", grants: [{ membershipId: "MbSelf00000000000000", node: { level: "organization", tenantId: IDS.organization }, roles: [{ kind: "system", key: "owner" }] }] });
+const ADMIN: Permission[] = [
+  "core.organization.read",
+  "core.member.read",
+  "core.member.update",
+  "core.member.remove",
+  "core.member.invite",
+  "core.role.read",
+  "core.project.read",
+];
+const SELF = buildMember({
+  uid: IDS.user,
+  displayName: "Ana Souza",
+  email: "ana@example.com",
+  grants: [
+    {
+      membershipId: "MbSelf00000000000000",
+      node: { level: "organization", tenantId: IDS.organization },
+      roles: [{ kind: "system", key: "owner" }],
+    },
+  ],
+});
 const BRUNO = buildMember();
 
 const renderView = (permissions: readonly Permission[] = ADMIN, routes: FakeRoutes = {}) =>
@@ -58,16 +77,27 @@ describe("SettingsMembersView", () => {
     const alert = await within(dialog).findByRole("alert");
     expect(alert.textContent).toContain("Você não pode conceder permissões que não possui.");
     expect(document.activeElement).toBe(alert);
-    expect(bodies).toEqual([{ roles: [{ kind: "system", key: "member" }, { kind: "system", key: "admin" }] }]);
+    expect(bodies).toEqual([
+      {
+        roles: [
+          { kind: "system", key: "member" },
+          { kind: "system", key: "admin" },
+        ],
+      },
+    ]);
     await expectNoAxeViolations(dialog);
   });
 
   it("removes a member after confirming, and explains LAST_OWNER when the API refuses", async () => {
-    const { user, api } = renderView(ADMIN, { "DELETE /v1/organizations/:organizationId/members/:userId": apiError(422, "LAST_OWNER") });
+    const { user, api } = renderView(ADMIN, {
+      "DELETE /v1/organizations/:organizationId/members/:userId": apiError(422, "LAST_OWNER"),
+    });
     await user.click(await screen.findByRole("button", { name: /Remover Ana Souza/u }));
     const confirm = await screen.findByRole("alertdialog", { name: "Remover Ana Souza da organização?" });
     await user.click(within(confirm).getByRole("button", { name: "Remover membro" }));
-    expect((await within(confirm).findByRole("alert")).textContent).toContain("A organização precisa de pelo menos um proprietário.");
+    expect((await within(confirm).findByRole("alert")).textContent).toContain(
+      "A organização precisa de pelo menos um proprietário.",
+    );
     expect(screen.getByRole("table", { hidden: true }).textContent).toContain("Ana Souza");
 
     api.route("DELETE /v1/organizations/:organizationId/members/:userId", noContent());

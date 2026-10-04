@@ -1,11 +1,17 @@
-import { addKnowledgeSourceEndpoint, FORWARDED_HEADERS, type KnowledgeSource, type TenantId, type TenantNodeRef } from "@core/contracts";
-import type { AgentCallScope, AgentRuntimeGateway } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+import {
+  addKnowledgeSourceEndpoint,
+  FORWARDED_HEADERS,
+  type KnowledgeSource,
+  type TenantId,
+  type TenantNodeRef,
+} from "@core/contracts";
 import { gatewayErrorResponse } from "../../../agents/adapters/driven/mastra-error-mapper.ts";
+import type { AgentCallScope, AgentRuntimeGateway } from "../../../agents/application/ports/agent-runtime-gateway.ts";
 import type { GetReadyFile } from "../../../files/application/use-cases/read-file-bytes.ts";
 import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
 import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
 import { deniedResponse } from "../../../shared/http/api-list.ts";
-import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
+import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 
 export const KNOWLEDGE_WRITE_PERMISSION = "core.knowledge.write";
@@ -22,7 +28,12 @@ type SourcesDeps = {
 };
 
 // A file source must be a ready knowledge upload of the same organization.
-const checkFileSource = async (deps: SourcesDeps, tenantId: TenantId, source: KnowledgeSource, requestId: string): Promise<Response | null> => {
+const checkFileSource = async (
+  deps: SourcesDeps,
+  tenantId: TenantId,
+  source: KnowledgeSource,
+  requestId: string,
+): Promise<Response | null> => {
   if (source.kind !== "file") return null;
   const file = await deps.getReadyFile({ tenantId, fileId: source.fileId, purpose: "knowledge" });
   if (file.ok) return null;
@@ -40,28 +51,39 @@ const checkFileSource = async (deps: SourcesDeps, tenantId: TenantId, source: Kn
  * the scope, so the workflow indexes into `project:<id>` instead of the organization namespace.
  */
 export const buildKnowledgeSourcesRoutes = (deps: SourcesDeps): Record<string, RouteHandler> => ({
-  [addKnowledgeSourceEndpoint.id]: withApiRoute(addKnowledgeSourceEndpoint, deps.pipeline, async ({ principal, input, authorize, requestId, request }) => {
-    const tenantId = input.params.organizationId;
-    const { projectId } = input.query;
-    const node: TenantNodeRef = projectId === undefined ? { level: "organization", tenantId } : { level: "project", tenantId, projectId };
-    const decision = await authorize({ principal, permission: KNOWLEDGE_WRITE_PERMISSION, node });
-    if (!decision.allowed) return deniedResponse(decision.reason, requestId);
-    const fileProblem = await checkFileSource(deps, tenantId, input.body, requestId);
-    if (fileProblem !== null) return fileProblem;
-    const context = await deps.resolveAccessContext({ principal, node });
-    const bearer = BEARER.exec(request.headers.get(FORWARDED_HEADERS.authorization) ?? "")?.[1];
-    if (context === null || bearer === undefined) return apiError(403, "FORBIDDEN", requestId);
-    const traceparent = request.headers.get(FORWARDED_HEADERS.traceparent);
-    const scope: AgentCallScope = {
-      bearer,
-      tenantId,
-      ...(projectId === undefined ? {} : { projectId }),
-      regional: context.regional,
-      requestId,
-      ...(traceparent === null ? {} : { traceparent }),
-      signal: request.signal,
-    };
-    const launched = await deps.gateway.launchWorkflow({ scope, workflowId: KNOWLEDGE_INGEST_WORKFLOW, inputData: { source: input.body } });
-    return launched.ok ? dataResponse({ data: { runId: launched.data.runId } }, { status: 202 }) : gatewayErrorResponse(launched.error, requestId);
-  }),
+  [addKnowledgeSourceEndpoint.id]: withApiRoute(
+    addKnowledgeSourceEndpoint,
+    deps.pipeline,
+    async ({ principal, input, authorize, requestId, request }) => {
+      const tenantId = input.params.organizationId;
+      const { projectId } = input.query;
+      const node: TenantNodeRef =
+        projectId === undefined ? { level: "organization", tenantId } : { level: "project", tenantId, projectId };
+      const decision = await authorize({ principal, permission: KNOWLEDGE_WRITE_PERMISSION, node });
+      if (!decision.allowed) return deniedResponse(decision.reason, requestId);
+      const fileProblem = await checkFileSource(deps, tenantId, input.body, requestId);
+      if (fileProblem !== null) return fileProblem;
+      const context = await deps.resolveAccessContext({ principal, node });
+      const bearer = BEARER.exec(request.headers.get(FORWARDED_HEADERS.authorization) ?? "")?.[1];
+      if (context === null || bearer === undefined) return apiError(403, "FORBIDDEN", requestId);
+      const traceparent = request.headers.get(FORWARDED_HEADERS.traceparent);
+      const scope: AgentCallScope = {
+        bearer,
+        tenantId,
+        ...(projectId === undefined ? {} : { projectId }),
+        regional: context.regional,
+        requestId,
+        ...(traceparent === null ? {} : { traceparent }),
+        signal: request.signal,
+      };
+      const launched = await deps.gateway.launchWorkflow({
+        scope,
+        workflowId: KNOWLEDGE_INGEST_WORKFLOW,
+        inputData: { source: input.body },
+      });
+      return launched.ok
+        ? dataResponse({ data: { runId: launched.data.runId } }, { status: 202 })
+        : gatewayErrorResponse(launched.error, requestId);
+    },
+  ),
 });

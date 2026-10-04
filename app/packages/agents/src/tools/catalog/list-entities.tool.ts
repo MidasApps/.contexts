@@ -5,7 +5,13 @@ import { type AiCatalogReader, CATALOG_READ_PERMISSION } from "./ai-catalog-read
 export { CATALOG_READ_PERMISSION };
 export const MAX_ENTITIES_PAGE = 50;
 
-const EntitySummarySchema = z.strictObject({ id: z.string(), name: z.string(), context: z.string(), kind: z.string(), description: z.string() });
+const EntitySummarySchema = z.strictObject({
+  id: z.string(),
+  name: z.string(),
+  context: z.string(),
+  kind: z.string(),
+  description: z.string(),
+});
 
 /** `catalog.listEntities` (spec §8.2): the data contracts the caller may read, from the AI catalog. */
 export const createListEntitiesTool = (deps: { readonly catalog: AiCatalogReader }) =>

@@ -1,10 +1,10 @@
+import { isSupportedLocale, SOURCE_LOCALE } from "@core/i18n";
 import { cookies } from "next/headers";
 import { locale } from "next/root-params";
-import { Suspense, type ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { ShellSkeleton } from "@/client/shell-skeleton";
 import { SIDEBAR_COOKIE_NAME, WebAdminLayout } from "@/client/web-layouts";
 import { requirePlatformStaffSession } from "@/server/session-guards";
-import { isSupportedLocale, SOURCE_LOCALE } from "@core/i18n";
 
 /** Checks the staff session (request-time) and renders the admin shell; non-staff get 404. */
 async function StaffShell({ sidebarOpen, children }: { sidebarOpen: boolean; children: ReactNode }) {

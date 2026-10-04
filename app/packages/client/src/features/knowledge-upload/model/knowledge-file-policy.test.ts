@@ -12,7 +12,9 @@ describe("knowledge file policy", () => {
     expect(checkKnowledgeFile({ name: "a.md", type: "", size: 10 })).toBeNull();
     expect(checkKnowledgeFile({ name: "a.md", type: "", size: 0 })).toBe("EMPTY");
     expect(checkKnowledgeFile({ name: "a.png", type: "image/png", size: 10 })).toBe("TYPE_NOT_ALLOWED");
-    expect(checkKnowledgeFile({ name: "a.pdf", type: "application/pdf", size: KNOWLEDGE_MAX_BYTES + 1 })).toBe("TOO_LARGE");
+    expect(checkKnowledgeFile({ name: "a.pdf", type: "application/pdf", size: KNOWLEDGE_MAX_BYTES + 1 })).toBe(
+      "TOO_LARGE",
+    );
   });
 
   it("accepts only https URLs", () => {

@@ -24,7 +24,10 @@ function AccountSections({ me }: { me: Me }) {
             <dd className="truncate text-sm font-medium">{me.email}</dd>
             <dt className="sr-only">{t("mfaLabel")}</dt>
             <dd>
-              <StatusPill tone={me.mfaEnrolled ? "emerald" : "amber"} icon={me.mfaEnrolled ? "circle-check" : "alert-triangle"}>
+              <StatusPill
+                tone={me.mfaEnrolled ? "emerald" : "amber"}
+                icon={me.mfaEnrolled ? "circle-check" : "alert-triangle"}
+              >
                 {me.mfaEnrolled ? t("mfaOn") : t("mfaOff")}
               </StatusPill>
             </dd>

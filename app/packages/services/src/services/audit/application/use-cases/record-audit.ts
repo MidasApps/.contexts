@@ -1,9 +1,9 @@
 import {
-  AuditLogEntrySchema,
-  PlatformAuditLogEntrySchema,
   type AuditLogEntry,
   type AuditLogEntryId,
+  AuditLogEntrySchema,
   type PlatformAuditLogEntry,
+  PlatformAuditLogEntrySchema,
 } from "@core/contracts";
 import type { z } from "zod";
 import type { Clock } from "../../../shared/clock/clock.ts";
@@ -12,7 +12,10 @@ import { findForbiddenAuditKeys } from "../../domain/forbidden-audit-keys.ts";
 import type { AuditLogAppend, AuditLogWriter, AuditTransaction } from "../ports/driven/audit-log-writer.ts";
 
 /** A tenant entry; `occurredAt` defaults to the clock. */
-export type TenantAuditRecordInput = Omit<AuditLogEntry, "id" | "occurredAt"> & { readonly log: "tenant"; readonly occurredAt?: string };
+export type TenantAuditRecordInput = Omit<AuditLogEntry, "id" | "occurredAt"> & {
+  readonly log: "tenant";
+  readonly occurredAt?: string;
+};
 
 /** A platform (staff) entry; `occurredAt` defaults to the clock. */
 export type PlatformAuditRecordInput = Omit<PlatformAuditLogEntry, "id" | "occurredAt"> & {
@@ -59,7 +62,8 @@ const toAppend = (input: AuditRecordInput, occurredAt: string): AuditLogAppend =
 export const makeRecordAudit = (deps: { writer: AuditLogWriter; clock: Clock }): AuditWriter => ({
   record: async (input, tx) => {
     const forbidden = findForbiddenAuditKeys(input);
-    if (forbidden.length > 0) throw new AuditEntryRejectedError({ code: "AUDIT_ENTRY_REJECTED", issuePaths: forbidden });
+    if (forbidden.length > 0)
+      throw new AuditEntryRejectedError({ code: "AUDIT_ENTRY_REJECTED", issuePaths: forbidden });
     const append = toAppend(input, deps.clock.now().toISOString());
     return tx === undefined ? deps.writer.append(append) : deps.writer.append(append, tx);
   },

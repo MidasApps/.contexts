@@ -1,4 +1,4 @@
-import { DEFAULT_USER_PREFERENCES, OrganizationIdSchema, UserContract, type User } from "@core/contracts";
+import { DEFAULT_USER_PREFERENCES, OrganizationIdSchema, type User, UserContract } from "@core/contracts";
 import type { Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
@@ -26,7 +26,9 @@ export const createFirestoreUserAccessVersionStore = (deps: { firestore: Firesto
     read: async (tx, uid) => {
       const ref = raw().withConverter(accessFields).doc(uid);
       const fields = (tx === undefined ? await ref.get() : await tx.get(ref)).data();
-      return fields === undefined ? null : { accessVersion: fields.accessVersion, activeOrganizationId: fields.lastContext?.organizationId ?? null };
+      return fields === undefined
+        ? null
+        : { accessVersion: fields.accessVersion, activeOrganizationId: fields.lastContext?.organizationId ?? null };
     },
     bump: (tx, { uid, current, activeOrganizationId, updatedAt, actorId }) =>
       void tx.update(
@@ -49,7 +51,13 @@ export const createFirestoreUserAccessVersionStore = (deps: { firestore: Firesto
         createdAt,
         updatedAt: createdAt,
       };
-      tx.create(raw().doc(uid), { ...userConverter.toFirestore(user), ...userSearchFields(profile.displayName), createdBy: uid, updatedBy: uid, schemaVersion: CORE_SCHEMA_VERSION });
+      tx.create(raw().doc(uid), {
+        ...userConverter.toFirestore(user),
+        ...userSearchFields(profile.displayName),
+        createdBy: uid,
+        updatedBy: uid,
+        schemaVersion: CORE_SCHEMA_VERSION,
+      });
     },
   };
 };

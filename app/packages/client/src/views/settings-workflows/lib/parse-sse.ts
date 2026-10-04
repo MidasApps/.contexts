@@ -1,4 +1,4 @@
-import { WorkflowEventSchema, type WorkflowEvent } from "@core/contracts";
+import { type WorkflowEvent, WorkflowEventSchema } from "@core/contracts";
 
 /** One server-sent event frame: its `event` name and the joined `data` lines. */
 export type SseFrame = { readonly event: string; readonly data: string };
@@ -13,7 +13,11 @@ export const takeSseFrames = (buffer: string): { frames: SseFrame[]; rest: strin
   const rest = blocks.pop() ?? "";
   const frames = blocks.flatMap((block): SseFrame[] => {
     const lines = block.split("\n").filter((line) => !line.startsWith(":"));
-    const event = lines.find((line) => line.startsWith("event:"))?.slice(6).trim() ?? "message";
+    const event =
+      lines
+        .find((line) => line.startsWith("event:"))
+        ?.slice(6)
+        .trim() ?? "message";
     const data = lines.filter((line) => line.startsWith("data:")).map((line) => line.slice(5).trimStart());
     return data.length === 0 ? [] : [{ event, data: data.join("\n") }];
   });

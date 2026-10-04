@@ -1,10 +1,10 @@
 "use client";
 
 import { ChevronRightIcon } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { type KeyboardEvent, type ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useLocale } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
-import { visibleNodes, type TreeNode } from "./tree-model.ts";
+import { type TreeNode, visibleNodes } from "./tree-model.ts";
 import { handleTreeKey } from "./use-tree-keyboard.ts";
 
 export type TreeViewProps = {
@@ -94,7 +94,15 @@ function TreeItem({ node, level, tree }: ItemProps) {
  * (`handleTreeKey`), `aria-level`/`aria-expanded`/`aria-selected`, names from the label only
  * (children excluded). The chevron is a pointer affordance; keyboard users use ←/→.
  */
-export function TreeView({ label, nodes, selectedId, onSelect, defaultExpandedIds = [], renderMeta, className }: TreeViewProps) {
+export function TreeView({
+  label,
+  nodes,
+  selectedId,
+  onSelect,
+  defaultExpandedIds = [],
+  renderMeta,
+  className,
+}: TreeViewProps) {
   const idPrefix = useId();
   const locale = useLocale();
   const [expanded, setExpandedSet] = useState<ReadonlySet<string>>(() => new Set(defaultExpandedIds));
@@ -140,17 +148,21 @@ export function TreeView({ label, nodes, selectedId, onSelect, defaultExpandedId
     },
     onKeyDown: (event) => {
       event.stopPropagation();
-      const handled = handleTreeKey(event, { visible, focusedId, expanded, locale, focus, setExpanded, select: onSelect });
+      const handled = handleTreeKey(event, {
+        visible,
+        focusedId,
+        expanded,
+        locale,
+        focus,
+        setExpanded,
+        select: onSelect,
+      });
       if (handled) event.preventDefault();
     },
   };
 
   return (
-    <ul
-      role="tree"
-      aria-label={label}
-      className={cn("flex flex-col gap-0.5", className)}
-    >
+    <ul role="tree" aria-label={label} className={cn("flex flex-col gap-0.5", className)}>
       {nodes.map((node) => (
         <TreeItem key={node.id} node={node} level={1} tree={tree} />
       ))}

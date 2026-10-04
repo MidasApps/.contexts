@@ -30,7 +30,10 @@ export type ChatRunOwners = {
    * The message of the thread's newest run while that run has not finished, so a history read in
    * the middle of an answer (a reload that resumes it) shows the question too.
    */
-  readonly pendingMessageOf: (caller: { readonly resourceId: string; readonly threadId: string }) => PendingUserMessage | undefined;
+  readonly pendingMessageOf: (caller: {
+    readonly resourceId: string;
+    readonly threadId: string;
+  }) => PendingUserMessage | undefined;
 };
 
 /** Mastra `server.timeout` (15 min): no chat stream outlives it. */
@@ -42,7 +45,9 @@ const DEFAULT_MAX_RUNS = 10_000;
  *   for its approval that long).
  * @param options.maxRuns cap of remembered runs; the oldest go first.
  */
-export const createChatRunOwners = (options: { readonly ttlMs?: number; readonly maxRuns?: number; readonly now?: () => number } = {}): ChatRunOwners => {
+export const createChatRunOwners = (
+  options: { readonly ttlMs?: number; readonly maxRuns?: number; readonly now?: () => number } = {},
+): ChatRunOwners => {
   const ttlMs = options.ttlMs ?? DEFAULT_TTL_MS;
   const maxRuns = options.maxRuns ?? DEFAULT_MAX_RUNS;
   const now = options.now ?? Date.now;
@@ -77,13 +82,18 @@ export const createChatRunOwners = (options: { readonly ttlMs?: number; readonly
         const entry = live(runId);
         if (entry !== undefined && entry.threadId === caller.threadId) newest = entry;
       }
-      if (newest === undefined || newest.resourceId !== caller.resourceId || newest.state === "finished") return undefined;
+      if (newest === undefined || newest.resourceId !== caller.resourceId || newest.state === "finished")
+        return undefined;
       return newest.userMessage;
     },
   };
 };
 
-type ApprovalPart = { readonly toolCallId?: unknown; readonly state?: unknown; readonly approval?: { readonly id?: unknown } };
+type ApprovalPart = {
+  readonly toolCallId?: unknown;
+  readonly state?: unknown;
+  readonly approval?: { readonly id?: unknown };
+};
 
 const SEPARATOR = "::";
 

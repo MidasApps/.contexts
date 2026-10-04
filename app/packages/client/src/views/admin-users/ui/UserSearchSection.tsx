@@ -1,9 +1,15 @@
 "use client";
 
 import { AdminUserSearchBySchema, type AdminUserSummary } from "@core/contracts";
-import { useId, useMemo, useState, type FormEvent } from "react";
+import { type FormEvent, useId, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { ADMIN_USERS_PAGE_LIMIT, adminUserLabel, AdminUserStatusPill, useAdminUserSearch, type AdminUserSearch } from "#/entities/admin-user/index.ts";
+import {
+  ADMIN_USERS_PAGE_LIMIT,
+  type AdminUserSearch,
+  AdminUserStatusPill,
+  adminUserLabel,
+  useAdminUserSearch,
+} from "#/entities/admin-user/index.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
@@ -37,14 +43,33 @@ function UserName({ user }: { user: AdminUserSummary }) {
 
 function UserEmail({ user }: { user: AdminUserSummary }) {
   const t = useTranslations("admin.users.search");
-  return user.email === null ? <span className="text-muted-foreground">{t("noEmail")}</span> : <span className="break-all">{user.email}</span>;
+  return user.email === null ? (
+    <span className="text-muted-foreground">{t("noEmail")}</span>
+  ) : (
+    <span className="break-all">{user.email}</span>
+  );
 }
 
-function SelectUser({ user, selected, onSelect }: { user: AdminUserSummary; selected: boolean; onSelect: (user: AdminUserSummary) => void }) {
+function SelectUser({
+  user,
+  selected,
+  onSelect,
+}: {
+  user: AdminUserSummary;
+  selected: boolean;
+  onSelect: (user: AdminUserSummary) => void;
+}) {
   const t = useTranslations("admin.users.search");
   const name = adminUserLabel(user);
   return (
-    <Button variant={selected ? "secondary" : "outline"} size="sm" aria-pressed={selected} disabled={user.status === "disabled"} onClick={() => onSelect(user)} aria-label={t("selectNamed", { name })}>
+    <Button
+      variant={selected ? "secondary" : "outline"}
+      size="sm"
+      aria-pressed={selected}
+      disabled={user.status === "disabled"}
+      onClick={() => onSelect(user)}
+      aria-label={t("selectNamed", { name })}
+    >
       {selected ? t("selected") : t("select")}
     </Button>
   );
@@ -54,9 +79,20 @@ const useColumns = ({ onSelect, selectedId }: UserSearchSectionProps) => {
   const t = useTranslations("admin.users.search");
   return useMemo(
     () => [
-      column.display({ id: "user", header: () => t("columns.user"), cell: ({ row }) => <UserName user={row.original} /> }),
-      column.display({ id: "email", header: () => t("columns.email"), cell: ({ row }) => <UserEmail user={row.original} /> }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <AdminUserStatusPill status={getValue()} /> }),
+      column.display({
+        id: "user",
+        header: () => t("columns.user"),
+        cell: ({ row }) => <UserName user={row.original} />,
+      }),
+      column.display({
+        id: "email",
+        header: () => t("columns.email"),
+        cell: ({ row }) => <UserEmail user={row.original} />,
+      }),
+      column.accessor("status", {
+        header: () => t("columns.status"),
+        cell: ({ getValue }) => <AdminUserStatusPill status={getValue()} />,
+      }),
       ...(onSelect === undefined
         ? []
         : [
@@ -64,7 +100,9 @@ const useColumns = ({ onSelect, selectedId }: UserSearchSectionProps) => {
               id: "actions",
               header: () => t("columns.actions"),
               meta: { headerHidden: true },
-              cell: ({ row }) => <SelectUser user={row.original} selected={row.original.id === selectedId} onSelect={onSelect} />,
+              cell: ({ row }) => (
+                <SelectUser user={row.original} selected={row.original.id === selectedId} onSelect={onSelect} />
+              ),
             }),
           ]),
     ],
@@ -104,7 +142,15 @@ function Results({ search, onSelect, selectedId }: UserSearchSectionProps & { se
               )}
             </div>
           )}
-          empty={<EmptyState frame="plain" headingLevel={3} icon="search" title={t("noMatchTitle")} description={t("noMatchDescription")} />}
+          empty={
+            <EmptyState
+              frame="plain"
+              headingLevel={3}
+              icon="search"
+              title={t("noMatchTitle")}
+              description={t("noMatchDescription")}
+            />
+          }
         />
       )}
     </AdminQuerySection>
@@ -132,10 +178,23 @@ export function UserSearchSection({ onSelect, selectedId }: UserSearchSectionPro
 
   return (
     <SectionCard title={t("title")} description={t("description")}>
-      <form role="search" aria-label={t("title")} className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={submit}>
+      <form
+        role="search"
+        aria-label={t("title")}
+        className="flex flex-col gap-3 sm:flex-row sm:items-end"
+        onSubmit={submit}
+      >
         <div className="flex flex-col gap-1.5 sm:w-80">
           <Label id={ids.query}>{t("query")}</Label>
-          <SearchField aria-labelledby={ids.query} aria-describedby={ids.hint} maxLength={MAX_QUERY} autoComplete="off" value={text} onValueChange={setText} placeholder={t("placeholder")} />
+          <SearchField
+            aria-labelledby={ids.query}
+            aria-describedby={ids.hint}
+            maxLength={MAX_QUERY}
+            autoComplete="off"
+            value={text}
+            onValueChange={setText}
+            placeholder={t("placeholder")}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={ids.by}>{t("by")}</Label>
@@ -161,9 +220,20 @@ export function UserSearchSection({ onSelect, selectedId }: UserSearchSectionPro
         {t("hint")}
       </p>
       {search === null ? (
-        <EmptyState frame="plain" headingLevel={3} icon="users" title={t("idleTitle")} description={t("idleDescription")} />
+        <EmptyState
+          frame="plain"
+          headingLevel={3}
+          icon="users"
+          title={t("idleTitle")}
+          description={t("idleDescription")}
+        />
       ) : (
-        <Results key={`${search.by ?? AUTO}:${search.query}`} search={search} onSelect={onSelect} selectedId={selectedId} />
+        <Results
+          key={`${search.by ?? AUTO}:${search.query}`}
+          search={search}
+          onSelect={onSelect}
+          selectedId={selectedId}
+        />
       )}
     </SectionCard>
   );

@@ -13,7 +13,11 @@ export type RateLimitGate = {
   readonly after: (failed: boolean) => Promise<RateLimitDecision | undefined>;
 };
 
-export const createRateLimitGate = (args: { limiter: RateLimiter; policy: RateLimitPolicy; subject: string }): RateLimitGate => {
+export const createRateLimitGate = (args: {
+  limiter: RateLimiter;
+  policy: RateLimitPolicy;
+  subject: string;
+}): RateLimitGate => {
   const { limiter, policy, subject } = args;
   const countsFailures = policy.counts === "failures";
   let consumed: RateLimitDecision | undefined;

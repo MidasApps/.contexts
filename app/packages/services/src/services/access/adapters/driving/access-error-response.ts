@@ -1,4 +1,4 @@
-import { apiError, mapDomainError, type DomainErrorMapping } from "../../../shared/http/api-errors.ts";
+import { apiError, type DomainErrorMapping, mapDomainError } from "../../../shared/http/api-errors.ts";
 import { deniedResponse } from "../../../shared/http/api-list.ts";
 import { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
 import { UnknownRoleError } from "../../domain/errors/unknown-role-error.ts";
@@ -23,6 +23,7 @@ export const ACCESS_ERROR_MAPPING: DomainErrorMapping = {
  */
 export const accessErrorResponse = (error: Error & { readonly code: string }, requestId: string): Response => {
   if (error instanceof AccessDeniedError) return deniedResponse(error.reason, requestId);
-  if (error instanceof UnknownRoleError) return apiError(400, "VALIDATION_FAILED", requestId, [{ field: "roles", issue: "UNKNOWN_ROLE" }]);
+  if (error instanceof UnknownRoleError)
+    return apiError(400, "VALIDATION_FAILED", requestId, [{ field: "roles", issue: "UNKNOWN_ROLE" }]);
   return mapDomainError(error, ACCESS_ERROR_MAPPING, requestId);
 };

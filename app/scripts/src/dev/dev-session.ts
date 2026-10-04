@@ -51,13 +51,26 @@ const runStep = (label: string, command: string, args: string[], cwd: string): v
 
 const waitUntilReady = async (name: string, url: string, signal: AbortSignal): Promise<boolean> => {
   const result = await waitForHttp({
-    url, timeoutMs: STARTUP_TIMEOUT_MS, intervalMs: 1_000, fetchStatus: fetchHttpStatus, now: () => Date.now(), sleep, signal,
+    url,
+    timeoutMs: STARTUP_TIMEOUT_MS,
+    intervalMs: 1_000,
+    fetchStatus: fetchHttpStatus,
+    now: () => Date.now(),
+    sleep,
+    signal,
   });
-  if (!signal.aborted) log(result.ready ? `${name} ready: ${url}` : `${name} not ready after ${String(STARTUP_TIMEOUT_MS / 1000)}s: ${url}`);
+  if (!signal.aborted)
+    log(
+      result.ready ? `${name} ready: ${url}` : `${name} not ready after ${String(STARTUP_TIMEOUT_MS / 1000)}s: ${url}`,
+    );
   return result.ready;
 };
 
-type Stopper = { stop: (reason: string, code: number, interactive?: boolean) => Promise<void>; stopped: Promise<number>; signal: AbortSignal };
+type Stopper = {
+  stop: (reason: string, code: number, interactive?: boolean) => Promise<void>;
+  stopped: Promise<number>;
+  signal: AbortSignal;
+};
 
 /**
  * Emulator processes to check after the stop: descendants of the firebase CLI
@@ -76,11 +89,17 @@ const snapshotEmulators = (tracker: EmulatorTracker): readonly ProcessEntry[] =>
  * below), so they get a grace period to exit and export emulator data. Any other
  * stop on Windows cannot signal gracefully: it exports explicitly, then kills.
  */
-const createStopper = (args: { supervisor: Supervisor; exportEmulatorData: () => void; tracker: EmulatorTracker }): Stopper => {
+const createStopper = (args: {
+  supervisor: Supervisor;
+  exportEmulatorData: () => void;
+  tracker: EmulatorTracker;
+}): Stopper => {
   const { supervisor, exportEmulatorData, tracker } = args;
   const controller = new AbortController();
   let resolveStopped: (code: number) => void = () => undefined;
-  const stopped = new Promise<number>((resolve) => { resolveStopped = resolve; });
+  const stopped = new Promise<number>((resolve) => {
+    resolveStopped = resolve;
+  });
   let stopping = false;
   const stop = async (reason: string, code: number, interactive = false): Promise<void> => {
     if (stopping) {
@@ -95,7 +114,8 @@ const createStopper = (args: { supervisor: Supervisor; exportEmulatorData: () =>
     const graceful = interactive || !IS_WINDOWS;
     if (!graceful) exportEmulatorData();
     await supervisor.stopAll({ graceMs: graceful ? SHUTDOWN_GRACE_MS : 0, signal: "SIGINT" });
-    for (const orphan of killSurvivors(emulatorTree)) log(`killed orphaned emulator process ${orphan.name} (pid ${String(orphan.pid)})`);
+    for (const orphan of killSurvivors(emulatorTree))
+      log(`killed orphaned emulator process ${orphan.name} (pid ${String(orphan.pid)})`);
     log("all dev processes stopped");
     resolveStopped(code);
   };
@@ -104,24 +124,50 @@ const createStopper = (args: { supervisor: Supervisor; exportEmulatorData: () =>
 
 type Bins = { firebase: string; turbo: string };
 
-type StartArgs = { supervisor: Supervisor; stopper: Stopper; config: DevSessionConfig; bins: Bins; tracker: EmulatorTracker };
+type StartArgs = {
+  supervisor: Supervisor;
+  stopper: Stopper;
+  config: DevSessionConfig;
+  bins: Bins;
+  tracker: EmulatorTracker;
+};
 
 /** Each start is skipped once a stop has begun (Ctrl+C during startup). */
 const startLongRunning = async ({ supervisor, stopper, config, bins, tracker }: StartArgs): Promise<void> => {
   const hasSavedData = existsSync(path.join(config.appRoot, config.dataDir));
   const aborted = (): boolean => stopper.signal.aborted;
-  supervisor.start({ name: "functions-watch", command: process.execPath, args: [path.join("apps", "functions", "build.ts"), "--watch"], cwd: config.appRoot });
-  const emulators = supervisor.start({ name: "emulators", command: process.execPath, args: [bins.firebase, ...buildEmulatorStartArgs({ ...config, hasSavedData })], cwd: config.appRoot, env: buildEmulatorEnv(process.env) });
+  supervisor.start({
+    name: "functions-watch",
+    command: process.execPath,
+    args: [path.join("apps", "functions", "build.ts"), "--watch"],
+    cwd: config.appRoot,
+  });
+  const emulators = supervisor.start({
+    name: "emulators",
+    command: process.execPath,
+    args: [bins.firebase, ...buildEmulatorStartArgs({ ...config, hasSavedData })],
+    cwd: config.appRoot,
+    env: buildEmulatorEnv(process.env),
+  });
   tracker.rootPid = emulators.pid;
   if (!(await waitUntilReady("emulator ui", config.emulatorUiUrl, stopper.signal))) {
     if (!aborted()) await stopper.stop("emulators did not start", 1);
     return;
   }
   // A load failure is fixable by editing code (the watcher rebuilds), so it only warns.
-  await waitUntilReady("functions", buildFunctionsProbeUrl({ projectId: config.projectId, region: config.functionsRegion }), stopper.signal);
+  await waitUntilReady(
+    "functions",
+    buildFunctionsProbeUrl({ projectId: config.projectId, region: config.functionsRegion }),
+    stopper.signal,
+  );
   if (aborted()) return;
   tracker.startup = snapshotEmulators(tracker);
-  supervisor.start({ name: "turbo", command: process.execPath, args: [bins.turbo, ...buildTurboDevArgs()], cwd: config.appRoot });
+  supervisor.start({
+    name: "turbo",
+    command: process.execPath,
+    args: [bins.turbo, ...buildTurboDevArgs()],
+    cwd: config.appRoot,
+  });
   const checks = buildReadinessChecks(readDevPorts(process.env));
   await Promise.all(checks.map((check) => waitUntilReady(check.name, check.url, stopper.signal)));
   if (!aborted()) log("everything is up; Ctrl+C stops it (desktop: `pnpm dev:desktop` in another terminal)");
@@ -155,7 +201,12 @@ export const runDevSession = async (config: DevSessionConfig): Promise<number> =
     firebase: resolvePackageBin({ fromDir: config.appRoot, packageName: "firebase-tools", binName: "firebase" }),
     turbo: resolvePackageBin({ fromDir: config.appRoot, packageName: "turbo", binName: "turbo" }),
   };
-  runStep("postgres: docker compose up --wait", "docker", buildComposeUpArgs({ envFile: config.envFile }), config.appRoot);
+  runStep(
+    "postgres: docker compose up --wait",
+    "docker",
+    buildComposeUpArgs({ envFile: config.envFile }),
+    config.appRoot,
+  );
   runStep("functions: initial build", process.execPath, [path.join("apps", "functions", "build.ts")], config.appRoot);
 
   // The supervisor reports crashes to the stopper, which needs the supervisor.
@@ -169,13 +220,17 @@ export const runDevSession = async (config: DevSessionConfig): Promise<number> =
     if (!supervisor.isRunning("emulators")) return;
     log("emulators: exporting data before stopping");
     spawnSync(process.execPath, [bins.firebase, ...buildEmulatorExportArgs(config)], {
-      cwd: config.appRoot, stdio: "inherit", timeout: EXPORT_TIMEOUT_MS, windowsHide: true,
+      cwd: config.appRoot,
+      stdio: "inherit",
+      timeout: EXPORT_TIMEOUT_MS,
+      windowsHide: true,
     });
   };
   const stopper = createStopper({ supervisor, exportEmulatorData, tracker });
   stopperRef.current = stopper;
   process.on("SIGINT", () => void stopper.stop("Ctrl+C", 0, true));
-  for (const signal of ["SIGTERM", "SIGHUP", "SIGBREAK"] as const) process.on(signal, () => void stopper.stop(signal, 0));
+  for (const signal of ["SIGTERM", "SIGHUP", "SIGBREAK"] as const)
+    process.on(signal, () => void stopper.stop(signal, 0));
 
   await startLongRunning({ supervisor, stopper, config, bins, tracker });
   return stopper.stopped;

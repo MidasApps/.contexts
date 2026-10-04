@@ -5,8 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { featureFlagKeys } from "#/entities/feature-flag/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
-import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
+import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
@@ -34,7 +34,10 @@ export function SetFlagDialog({ change, onOpenChange }: SetFlagDialogProps) {
   const action = useConfirmedAction(
     async () => {
       if (change === null) return;
-      const body = change.organization === undefined ? { value: change.value } : { value: change.value, tenantId: change.organization.id };
+      const body =
+        change.organization === undefined
+          ? { value: change.value }
+          : { value: change.value, tenantId: change.organization.id };
       await callEndpoint(adminSetFlagEndpoint, { params: { flagKey: change.flag.key }, body });
       await queryClient.invalidateQueries({ queryKey: featureFlagKeys.all() });
     },

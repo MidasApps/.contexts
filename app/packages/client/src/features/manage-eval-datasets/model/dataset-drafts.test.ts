@@ -18,6 +18,9 @@ describe("dataset drafts", () => {
 
   it("sends trimmed texts and leaves out an empty expected answer", () => {
     expect(itemBody({ input: " Refund policy? ", expectedOutput: "  " })).toEqual({ input: "Refund policy?" });
-    expect(itemBody({ input: "Refund policy?", expectedOutput: " 30 days. " })).toEqual({ input: "Refund policy?", expectedOutput: "30 days." });
+    expect(itemBody({ input: "Refund policy?", expectedOutput: " 30 days. " })).toEqual({
+      input: "Refund policy?",
+      expectedOutput: "30 days.",
+    });
   });
 });

@@ -12,7 +12,12 @@ import { createFakeLanguageModel } from "./fake/fake-language-model.ts";
 import { createFakeScenarioRegistry, type FakeScenarioRegistry, type FakeScenarioRule } from "./fake/fake-scenarios.ts";
 import { createFakeSpeechModel, createFakeTranscriptionModel } from "./fake/fake-voice-models.ts";
 import { EMBEDDING_DIMENSIONS, MODEL_ROLES, type ModelProvider, parseModelId } from "./model-roles.ts";
-import { createProviderRegistry, type ProviderEnv, type ProviderFactories, type ProviderRegistry } from "./provider-registry.ts";
+import {
+  createProviderRegistry,
+  type ProviderEnv,
+  type ProviderFactories,
+  type ProviderRegistry,
+} from "./provider-registry.ts";
 
 /** Roles served by language models (voice and embedding have their own accessors). */
 export type TextModelRole = "chat" | "fast" | "reasoning" | "judge";
@@ -73,7 +78,11 @@ const embeddingOptionsFor = (provider: ModelProvider): SharedV4ProviderOptions =
 const createFakeModels = (scenarios: FakeScenarioRegistry): AgentModels => ({
   mode: "fake",
   language: (role, options) =>
-    createFakeLanguageModel({ modelId: `fake-${role}`, registry: scenarios, ...(options?.agentId === undefined ? {} : { agentId: options.agentId }) }),
+    createFakeLanguageModel({
+      modelId: `fake-${role}`,
+      registry: scenarios,
+      ...(options?.agentId === undefined ? {} : { agentId: options.agentId }),
+    }),
   languageFallbacks: () => [],
   embedding: () => createFakeEmbeddingModel(),
   embeddingProviderOptions: {},
@@ -117,8 +126,11 @@ const createRealModels = (env: ModelFactoryEnv, registry: ProviderRegistry): Age
     },
     embeddingProviderOptions,
     transcription: () =>
-      voiceModelOf(registry, env[MODEL_ROLES.transcription.envKey], (provider, model) => provider.transcriptionModel?.(model)),
-    speech: () => voiceModelOf(registry, env[MODEL_ROLES.speech.envKey], (provider, model) => provider.speechModel?.(model)),
+      voiceModelOf(registry, env[MODEL_ROLES.transcription.envKey], (provider, model) =>
+        provider.transcriptionModel?.(model),
+      ),
+    speech: () =>
+      voiceModelOf(registry, env[MODEL_ROLES.speech.envKey], (provider, model) => provider.speechModel?.(model)),
     registerFakeScenario: () => undefined,
   };
 };

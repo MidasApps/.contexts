@@ -1,8 +1,14 @@
 import type { LlmCall } from "@core/contracts";
 import type { Sql, TransactionSql } from "postgres";
 import { withTenantTransaction } from "../../../shared/postgres/with-tenant-transaction.ts";
+import type {
+  ModelTotals,
+  StoredBudget,
+  UsageBreakdowns,
+  UsageRepository,
+  UsageTotals,
+} from "../../application/ports/usage-repository.ts";
 import type { AgentRun } from "../../application/use-cases/record-agent-runs.schema.ts";
-import type { ModelTotals, StoredBudget, UsageBreakdowns, UsageRepository, UsageTotals } from "../../application/ports/usage-repository.ts";
 
 /** NOLOGIN role every usage query runs as (migration 0007): no BYPASSRLS, append-only on the ledger. */
 export const USAGE_RUNTIME_ROLE = "usage_runtime";
@@ -13,7 +19,13 @@ const asRuntime = async (tx: TransactionSql): Promise<void> => {
   await tx.unsafe(`SET LOCAL ROLE ${USAGE_RUNTIME_ROLE}`);
 };
 
-type TotalsRow = { calls: string; input_tokens: string; output_tokens: string; cost_micro_usd: string; unpriced_calls: string };
+type TotalsRow = {
+  calls: string;
+  input_tokens: string;
+  output_tokens: string;
+  cost_micro_usd: string;
+  unpriced_calls: string;
+};
 
 // Aggregates are bigint (strings in postgres.js); month totals of one tenant stay far below 2^53.
 const toTotals = (row: TotalsRow | undefined): UsageTotals => ({
@@ -49,17 +61,20 @@ const groupByTenant = (calls: readonly LlmCall[]): Map<string, LlmCall[]> => {
 };
 
 // One transaction per tenant: row level security checks every row against app.tenant_id.
-const insertCalls = (sql: Sql) => async (calls: readonly LlmCall[]): Promise<number> => {
-  let inserted = 0;
-  for (const [tenantId, rows] of groupByTenant(calls)) {
-    inserted += await withTenantTransaction(sql, { tenantId }, async (tx) => {
-      await asRuntime(tx);
-      const result = await tx`INSERT INTO usage.llm_calls ${tx(rows.map(toRow))} ON CONFLICT (id) DO NOTHING RETURNING id`;
-      return result.length;
-    });
-  }
-  return inserted;
-};
+const insertCalls =
+  (sql: Sql) =>
+  async (calls: readonly LlmCall[]): Promise<number> => {
+    let inserted = 0;
+    for (const [tenantId, rows] of groupByTenant(calls)) {
+      inserted += await withTenantTransaction(sql, { tenantId }, async (tx) => {
+        await asRuntime(tx);
+        const result =
+          await tx`INSERT INTO usage.llm_calls ${tx(rows.map(toRow))} ON CONFLICT (id) DO NOTHING RETURNING id`;
+        return result.length;
+      });
+    }
+    return inserted;
+  };
 
 const toRunRow = (run: AgentRun) => ({
   id: run.id,
@@ -73,19 +88,22 @@ const toRunRow = (run: AgentRun) => ({
 });
 
 // Same shape as insertCalls: one transaction per tenant, a retried row (same id) is skipped.
-const insertAgentRuns = (sql: Sql) => async (runs: readonly AgentRun[]): Promise<number> => {
-  const groups = new Map<string, AgentRun[]>();
-  for (const run of runs) groups.set(run.tenantId, [...(groups.get(run.tenantId) ?? []), run]);
-  let inserted = 0;
-  for (const [tenantId, rows] of groups) {
-    inserted += await withTenantTransaction(sql, { tenantId }, async (tx) => {
-      await asRuntime(tx);
-      const result = await tx`INSERT INTO usage.agent_runs ${tx(rows.map(toRunRow))} ON CONFLICT (id) DO NOTHING RETURNING id`;
-      return result.length;
-    });
-  }
-  return inserted;
-};
+const insertAgentRuns =
+  (sql: Sql) =>
+  async (runs: readonly AgentRun[]): Promise<number> => {
+    const groups = new Map<string, AgentRun[]>();
+    for (const run of runs) groups.set(run.tenantId, [...(groups.get(run.tenantId) ?? []), run]);
+    let inserted = 0;
+    for (const [tenantId, rows] of groups) {
+      inserted += await withTenantTransaction(sql, { tenantId }, async (tx) => {
+        await asRuntime(tx);
+        const result =
+          await tx`INSERT INTO usage.agent_runs ${tx(rows.map(toRunRow))} ON CONFLICT (id) DO NOTHING RETURNING id`;
+        return result.length;
+      });
+    }
+    return inserted;
+  };
 
 // Range on occurred_at (index llm_calls_tenant_occurred_idx): the hot path of every budget check.
 const monthRange = (monthStart: Date): { start: Date; end: Date } => ({
@@ -93,81 +111,93 @@ const monthRange = (monthStart: Date): { start: Date; end: Date } => ({
   end: new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 1)),
 });
 
-const getMonthSpend = (sql: Sql) => (input: { tenantId: string; monthStart: Date }): Promise<UsageTotals> =>
-  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
-    await asRuntime(tx);
-    const { start, end } = monthRange(input.monthStart);
-    const [row] = await tx<TotalsRow[]>`
+const getMonthSpend =
+  (sql: Sql) =>
+  (input: { tenantId: string; monthStart: Date }): Promise<UsageTotals> =>
+    withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+      await asRuntime(tx);
+      const { start, end } = monthRange(input.monthStart);
+      const [row] = await tx<TotalsRow[]>`
       SELECT count(*) AS calls, coalesce(sum(input_tokens), 0) AS input_tokens, coalesce(sum(output_tokens), 0) AS output_tokens,
              coalesce(sum(cost_micro_usd), 0) AS cost_micro_usd, count(*) FILTER (WHERE cost_micro_usd IS NULL) AS unpriced_calls
       FROM usage.llm_calls
       WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${start} AND occurred_at < ${end}`;
-    return toTotals(row);
-  });
+      return toTotals(row);
+    });
 
-const getMonthByModel = (sql: Sql) => (input: { tenantId: string; monthStart: Date }): Promise<readonly ModelTotals[]> =>
-  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
-    await asRuntime(tx);
-    const { start, end } = monthRange(input.monthStart);
-    const rows = await tx<(TotalsRow & { provider: string; model: string })[]>`
+const getMonthByModel =
+  (sql: Sql) =>
+  (input: { tenantId: string; monthStart: Date }): Promise<readonly ModelTotals[]> =>
+    withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+      await asRuntime(tx);
+      const { start, end } = monthRange(input.monthStart);
+      const rows = await tx<(TotalsRow & { provider: string; model: string })[]>`
       SELECT provider, model, count(*) AS calls, coalesce(sum(input_tokens), 0) AS input_tokens, coalesce(sum(output_tokens), 0) AS output_tokens,
              coalesce(sum(cost_micro_usd), 0) AS cost_micro_usd, count(*) FILTER (WHERE cost_micro_usd IS NULL) AS unpriced_calls
       FROM usage.llm_calls
       WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${start} AND occurred_at < ${end}
       GROUP BY provider, model
       ORDER BY coalesce(sum(cost_micro_usd), 0) DESC, provider, model`;
-    return rows.map((row) => ({ provider: row.provider, model: row.model, totals: toTotals(row) }));
-  });
+      return rows.map((row) => ({ provider: row.provider, model: row.model, totals: toTotals(row) }));
+    });
 
 const TOTALS_COLUMNS = `count(*) AS calls, coalesce(sum(input_tokens), 0) AS input_tokens, coalesce(sum(output_tokens), 0) AS output_tokens,
   coalesce(sum(cost_micro_usd), 0) AS cost_micro_usd, count(*) FILTER (WHERE cost_micro_usd IS NULL) AS unpriced_calls`;
 
 // One read-only transaction, three grouped reads of the same month on llm_calls_tenant_occurred_idx.
-const getMonthBreakdowns = (sql: Sql) => (input: { tenantId: string; monthStart: Date }): Promise<UsageBreakdowns> =>
-  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
-    await asRuntime(tx);
-    const { start, end } = monthRange(input.monthStart);
-    const days = await tx<(TotalsRow & { day: string })[]>`
+const getMonthBreakdowns =
+  (sql: Sql) =>
+  (input: { tenantId: string; monthStart: Date }): Promise<UsageBreakdowns> =>
+    withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+      await asRuntime(tx);
+      const { start, end } = monthRange(input.monthStart);
+      const days = await tx<(TotalsRow & { day: string })[]>`
       SELECT to_char(occurred_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS day, ${tx.unsafe(TOTALS_COLUMNS)}
       FROM usage.llm_calls
       WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${start} AND occurred_at < ${end}
       GROUP BY 1 ORDER BY 1`;
-    const agents = await tx<(TotalsRow & { agent_id: string })[]>`
+      const agents = await tx<(TotalsRow & { agent_id: string })[]>`
       SELECT agent_id, ${tx.unsafe(TOTALS_COLUMNS)}
       FROM usage.llm_calls
       WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${start} AND occurred_at < ${end}
       GROUP BY agent_id ORDER BY coalesce(sum(cost_micro_usd), 0) DESC, agent_id`;
-    const users = await tx<(TotalsRow & { user_id: string | null })[]>`
+      const users = await tx<(TotalsRow & { user_id: string | null })[]>`
       SELECT user_id, ${tx.unsafe(TOTALS_COLUMNS)}
       FROM usage.llm_calls
       WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${start} AND occurred_at < ${end}
       GROUP BY user_id ORDER BY coalesce(sum(cost_micro_usd), 0) DESC, user_id NULLS LAST`;
-    return {
-      byDay: days.map((row) => ({ day: row.day, totals: toTotals(row) })),
-      byAgent: agents.map((row) => ({ agentId: row.agent_id, totals: toTotals(row) })),
-      byUser: users.map((row) => ({ userId: row.user_id, totals: toTotals(row) })),
-    };
-  });
+      return {
+        byDay: days.map((row) => ({ day: row.day, totals: toTotals(row) })),
+        byAgent: agents.map((row) => ({ agentId: row.agent_id, totals: toTotals(row) })),
+        byUser: users.map((row) => ({ userId: row.user_id, totals: toTotals(row) })),
+      };
+    });
 
-const getTenantBudget = (sql: Sql) => (input: { tenantId: string }): Promise<StoredBudget | null> =>
-  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
-    await asRuntime(tx);
-    const [row] = await tx<{ monthly_micro_usd: string; monthly_tokens: string }[]>`
+const getTenantBudget =
+  (sql: Sql) =>
+  (input: { tenantId: string }): Promise<StoredBudget | null> =>
+    withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+      await asRuntime(tx);
+      const [row] = await tx<{ monthly_micro_usd: string; monthly_tokens: string }[]>`
       SELECT monthly_micro_usd, monthly_tokens FROM usage.tenant_budgets WHERE tenant_id = ${input.tenantId}`;
-    // Numbers beyond 2^53 become unsafe and fall back to the plan default in budget-policy.ts.
-    return row === undefined ? null : { monthlyMicroUsd: Number(row.monthly_micro_usd), monthlyTokens: Number(row.monthly_tokens) };
-  });
+      // Numbers beyond 2^53 become unsafe and fall back to the plan default in budget-policy.ts.
+      return row === undefined
+        ? null
+        : { monthlyMicroUsd: Number(row.monthly_micro_usd), monthlyTokens: Number(row.monthly_tokens) };
+    });
 
 // usage_runtime may INSERT and UPDATE budgets (migration 0007); one row per tenant (tenant_budgets_tenant_key).
-const setTenantBudget = (sql: Sql) => (input: { tenantId: string; budget: StoredBudget }): Promise<void> =>
-  withTenantTransaction(sql, { tenantId: input.tenantId }, async (tx) => {
-    await asRuntime(tx);
-    await tx`
+const setTenantBudget =
+  (sql: Sql) =>
+  (input: { tenantId: string; budget: StoredBudget }): Promise<void> =>
+    withTenantTransaction(sql, { tenantId: input.tenantId }, async (tx) => {
+      await asRuntime(tx);
+      await tx`
       INSERT INTO usage.tenant_budgets (tenant_id, monthly_micro_usd, monthly_tokens)
       VALUES (${input.tenantId}, ${input.budget.monthlyMicroUsd}, ${input.budget.monthlyTokens})
       ON CONFLICT (tenant_id) DO UPDATE
         SET monthly_micro_usd = EXCLUDED.monthly_micro_usd, monthly_tokens = EXCLUDED.monthly_tokens, updated_at = now()`;
-  });
+    });
 
 /**
  * Usage ledger over `usage.llm_calls` / `usage.tenant_budgets` (decision 0026): every
@@ -178,29 +208,36 @@ const setTenantBudget = (sql: Sql) => (input: { tenantId: string; budget: Stored
  * under the tenant's row level security like every other read here; rows without a user (service
  * calls) are skipped.
  */
-export const listActiveUserIds = (sql: Sql) => (input: { readonly tenantId: string; readonly since: Date }): Promise<readonly string[]> =>
-  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
-    await asRuntime(tx);
-    const rows = await tx<{ user_id: string }[]>`
+export const listActiveUserIds =
+  (sql: Sql) =>
+  (input: { readonly tenantId: string; readonly since: Date }): Promise<readonly string[]> =>
+    withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+      await asRuntime(tx);
+      const rows = await tx<{ user_id: string }[]>`
       SELECT DISTINCT user_id FROM usage.llm_calls
       WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${input.since} AND user_id IS NOT NULL`;
-    return rows.map((row) => row.user_id);
-  });
+      return rows.map((row) => row.user_id);
+    });
 
 /**
  * A tenant's agent runs since an instant and how many a guardrail stopped (the staff overview's
  * tripwire rate, decision 0066): one count on `agent_runs_tenant_occurred_idx`, under the tenant's
  * row level security like every other read here.
  */
-export const countAgentRuns = (sql: Sql) => (input: { readonly tenantId: string; readonly since: Date }): Promise<{ readonly runs: number; readonly stopped: number }> =>
-  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
-    await asRuntime(tx);
-    const [row] = await tx<{ runs: string; stopped: string }[]>`
+export const countAgentRuns =
+  (sql: Sql) =>
+  (input: {
+    readonly tenantId: string;
+    readonly since: Date;
+  }): Promise<{ readonly runs: number; readonly stopped: number }> =>
+    withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+      await asRuntime(tx);
+      const [row] = await tx<{ runs: string; stopped: string }[]>`
       SELECT count(*) AS runs, count(*) FILTER (WHERE tripwire_processor_id IS NOT NULL) AS stopped
       FROM usage.agent_runs
       WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${input.since}`;
-    return { runs: Number(row?.runs ?? 0), stopped: Number(row?.stopped ?? 0) };
-  });
+      return { runs: Number(row?.runs ?? 0), stopped: Number(row?.stopped ?? 0) };
+    });
 
 type BucketRow = TotalsRow & { day: string; provider: string; model: string };
 
@@ -211,7 +248,11 @@ type BucketRow = TotalsRow & { day: string; provider: string; model: string };
  */
 export const listUsageBuckets =
   (sql: Sql) =>
-  (input: { readonly tenantId: string; readonly from: Date; readonly to: Date }): Promise<readonly (UsageTotals & { readonly day: string; readonly provider: string; readonly model: string })[]> =>
+  (input: {
+    readonly tenantId: string;
+    readonly from: Date;
+    readonly to: Date;
+  }): Promise<readonly (UsageTotals & { readonly day: string; readonly provider: string; readonly model: string })[]> =>
     withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
       await asRuntime(tx);
       const rows = await tx<BucketRow[]>`

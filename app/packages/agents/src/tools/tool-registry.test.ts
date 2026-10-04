@@ -53,13 +53,20 @@ describe("createToolRegistry", () => {
 
   it("runs the core pipeline through the Mastra tool with the request context", async () => {
     const tool = createRegistry().toMastraTools(["example.countNotes"])["example.countNotes"];
-    const requestContext = new RequestContext<unknown>(buildAgentContextEntries({ permissions: ["example.note.read"] }));
-    const result = await tool?.execute?.({ max: 4 }, { requestContext, agent: { agentId: "data", toolCallId: "call_1", messages: [], suspend: () => Promise.resolve() } } as never);
+    const requestContext = new RequestContext<unknown>(
+      buildAgentContextEntries({ permissions: ["example.note.read"] }),
+    );
+    const result = await tool?.execute?.({ max: 4 }, {
+      requestContext,
+      agent: { agentId: "data", toolCallId: "call_1", messages: [], suspend: () => Promise.resolve() },
+    } as never);
     expect(result).toEqual({ count: 4 });
   });
 
   it("does not run without the typed context", async () => {
     const tool = createRegistry().toMastraTools(["example.countNotes"])["example.countNotes"];
-    await expect(tool?.execute?.({ max: 4 }, { requestContext: new RequestContext() } as never)).rejects.toMatchObject({ code: "CONTEXT_MISSING" });
+    await expect(tool?.execute?.({ max: 4 }, { requestContext: new RequestContext() } as never)).rejects.toMatchObject({
+      code: "CONTEXT_MISSING",
+    });
   });
 });

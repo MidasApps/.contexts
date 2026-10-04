@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { dataTableStatusOf, type DataTableQuery } from "./data-table-status.ts";
+import { type DataTableQuery, dataTableStatusOf } from "./data-table-status.ts";
 
 const query = (overrides: Partial<DataTableQuery>): DataTableQuery => ({
   isPending: false,

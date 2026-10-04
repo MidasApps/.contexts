@@ -49,26 +49,66 @@ const DESIGN_LIGHT = readBlock(DESIGN_MD, ':root[data-theme="light"]');
 
 /** Every raw color token both themes must declare (shadcn semantic set + sidebar family + status). */
 const THEMED_TOKENS = [
-  "--background", "--foreground", "--card", "--card-foreground", "--popover", "--popover-foreground",
-  "--primary", "--primary-foreground", "--secondary", "--secondary-foreground", "--muted", "--muted-foreground",
-  "--accent", "--accent-foreground", "--destructive", "--destructive-foreground", "--border", "--input", "--ring",
-  "--status-blue", "--status-emerald", "--status-amber", "--status-cyan", "--status-violet",
-  "--status-blue-foreground", "--status-emerald-foreground", "--status-amber-foreground",
-  "--status-cyan-foreground", "--status-violet-foreground", "--destructive-text", "--muted-foreground-strong",
-  "--chart-1", "--chart-2", "--chart-3", "--chart-4", "--chart-5",
-  "--sidebar", "--sidebar-foreground", "--sidebar-primary", "--sidebar-primary-foreground", "--sidebar-accent",
-  "--sidebar-accent-foreground", "--sidebar-border", "--sidebar-ring",
+  "--background",
+  "--foreground",
+  "--card",
+  "--card-foreground",
+  "--popover",
+  "--popover-foreground",
+  "--primary",
+  "--primary-foreground",
+  "--secondary",
+  "--secondary-foreground",
+  "--muted",
+  "--muted-foreground",
+  "--accent",
+  "--accent-foreground",
+  "--destructive",
+  "--destructive-foreground",
+  "--border",
+  "--input",
+  "--ring",
+  "--status-blue",
+  "--status-emerald",
+  "--status-amber",
+  "--status-cyan",
+  "--status-violet",
+  "--status-blue-foreground",
+  "--status-emerald-foreground",
+  "--status-amber-foreground",
+  "--status-cyan-foreground",
+  "--status-violet-foreground",
+  "--destructive-text",
+  "--muted-foreground-strong",
+  "--chart-1",
+  "--chart-2",
+  "--chart-3",
+  "--chart-4",
+  "--chart-5",
+  "--sidebar",
+  "--sidebar-foreground",
+  "--sidebar-primary",
+  "--sidebar-primary-foreground",
+  "--sidebar-accent",
+  "--sidebar-accent-foreground",
+  "--sidebar-border",
+  "--sidebar-ring",
 ];
 
 /** Text variants of the status accents (decision 0014: raw accents never carry text). */
 const STATUS_TEXT = [
-  "--status-blue-foreground", "--status-emerald-foreground", "--status-amber-foreground",
-  "--status-cyan-foreground", "--status-violet-foreground",
+  "--status-blue-foreground",
+  "--status-emerald-foreground",
+  "--status-amber-foreground",
+  "--status-cyan-foreground",
+  "--status-violet-foreground",
 ] as const;
 
 type Lab = [number, number, number];
-const toLinear = (channel: number): number => (channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
-const fromLinear = (channel: number): number => (channel <= 0.0031308 ? 12.92 * channel : 1.055 * channel ** (1 / 2.4) - 0.055);
+const toLinear = (channel: number): number =>
+  channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+const fromLinear = (channel: number): number =>
+  channel <= 0.0031308 ? 12.92 * channel : 1.055 * channel ** (1 / 2.4) - 0.055;
 
 // Björn Ottosson's sRGB ↔ Oklab matrices (the space of CSS `color-mix(in oklab, …)`).
 const toOklab = (color: Rgb): Lab => {
@@ -76,7 +116,11 @@ const toOklab = (color: Rgb): Lab => {
   const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
   const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
   const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
-  return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s];
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
 };
 
 const fromOklab = ([lightness, a, b]: Lab): Rgb => {
@@ -149,7 +193,10 @@ describe("globals.css tokens", () => {
   it.each(THEMES.flatMap(([theme, block]) => PAIRS.map(([text, surface]) => [theme, text, surface, block] as const)))(
     "%s: %s on %s reaches WCAG AA contrast (4.5)",
     (_theme, text, surface, block) => {
-      const ratio = contrastRatio(parseHexColor(resolveValue(block, text)), parseHexColor(resolveValue(block, surface)));
+      const ratio = contrastRatio(
+        parseHexColor(resolveValue(block, text)),
+        parseHexColor(resolveValue(block, surface)),
+      );
       expect(ratio).toBeGreaterThanOrEqual(4.5);
     },
   );
@@ -163,25 +210,55 @@ describe("globals.css tokens", () => {
     TINTED.flatMap(([text, accent]) => TINT_SURFACES.map((surface) => [theme, text, accent, surface, block] as const)),
   );
 
-  it.each(TINT_CASES)("%s: %s on a 14 percent tint of %s over %s reaches WCAG AA contrast (4.5)", (_theme, text, accent, surface, block) => {
-    const background = tint(resolveValue(block, accent), resolveValue(block, surface));
-    expect(contrastRatio(parseHexColor(resolveValue(block, text)), background)).toBeGreaterThanOrEqual(4.5);
-  });
+  it.each(TINT_CASES)(
+    "%s: %s on a 14 percent tint of %s over %s reaches WCAG AA contrast (4.5)",
+    (_theme, text, accent, surface, block) => {
+      const background = tint(resolveValue(block, accent), resolveValue(block, surface));
+      expect(contrastRatio(parseHexColor(resolveValue(block, text)), background)).toBeGreaterThanOrEqual(4.5);
+    },
+  );
 });
 
 describe("globals.css compiles with Tailwind", () => {
   it("generates semantic, status, sidebar, radius, elevation and animation utilities", async () => {
     const compiler = await compile(GLOBALS_CSS, { base: STYLES_DIR, onDependency: () => undefined });
     const css = compiler.build([
-      "bg-background", "text-muted-foreground", "bg-sidebar-primary", "text-blue", "bg-chart-3",
-      "rounded-xl", "font-mono", "dark:bg-card", "md:hidden",
-      "rounded-2xs", "rounded-xs", "shadow-popover", "shadow-modal", "ease-surface", "animate-in", "fade-in-0",
-      "text-amber-foreground", "text-destructive-text", "text-muted-foreground-strong",
+      "bg-background",
+      "text-muted-foreground",
+      "bg-sidebar-primary",
+      "text-blue",
+      "bg-chart-3",
+      "rounded-xl",
+      "font-mono",
+      "dark:bg-card",
+      "md:hidden",
+      "rounded-2xs",
+      "rounded-xs",
+      "shadow-popover",
+      "shadow-modal",
+      "ease-surface",
+      "animate-in",
+      "fade-in-0",
+      "text-amber-foreground",
+      "text-destructive-text",
+      "text-muted-foreground-strong",
     ]);
     const expected = [
-      ".bg-background", ".text-muted-foreground", ".bg-sidebar-primary", ".text-blue", ".bg-chart-3", ".rounded-xl",
-      ".rounded-2xs", ".shadow-popover", ".shadow-modal", ".ease-surface", ".animate-in", ".fade-in-0",
-      ".text-amber-foreground", ".text-destructive-text", ".text-muted-foreground-strong",
+      ".bg-background",
+      ".text-muted-foreground",
+      ".bg-sidebar-primary",
+      ".text-blue",
+      ".bg-chart-3",
+      ".rounded-xl",
+      ".rounded-2xs",
+      ".shadow-popover",
+      ".shadow-modal",
+      ".ease-surface",
+      ".animate-in",
+      ".fade-in-0",
+      ".text-amber-foreground",
+      ".text-destructive-text",
+      ".text-muted-foreground-strong",
     ];
     for (const selector of expected) {
       expect(css, selector).toContain(selector);

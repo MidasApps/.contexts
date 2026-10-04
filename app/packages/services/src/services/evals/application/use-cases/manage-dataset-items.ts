@@ -1,6 +1,9 @@
 import type { ConsoleGateway } from "../../../observability/application/ports/console-gateway.ts";
 
-type DatasetItemsGateway = Pick<ConsoleGateway, "listDatasetItems" | "addDatasetItem" | "deleteDatasetItem" | "createDataset">;
+type DatasetItemsGateway = Pick<
+  ConsoleGateway,
+  "listDatasetItems" | "addDatasetItem" | "deleteDatasetItem" | "createDataset"
+>;
 
 export type ListDatasetItems = ConsoleGateway["listDatasetItems"];
 export type AddDatasetItem = ConsoleGateway["addDatasetItem"];

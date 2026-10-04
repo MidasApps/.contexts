@@ -15,9 +15,24 @@ export type NewUserProfile = { readonly email: string; readonly displayName: str
 export type UserAccessVersionStore = {
   readonly read: (tx: Transaction | undefined, uid: UserId) => Promise<UserAccessState | null>;
   /** `accessVersion + 1`; also sets `lastContext.organizationId` when `activeOrganizationId` is given. */
-  readonly bump: (tx: Transaction, args: { uid: UserId; current: UserAccessState; activeOrganizationId?: TenantId; updatedAt: string; actorId: string }) => void;
+  readonly bump: (
+    tx: Transaction,
+    args: {
+      uid: UserId;
+      current: UserAccessState;
+      activeOrganizationId?: TenantId;
+      updatedAt: string;
+      actorId: string;
+    },
+  ) => void;
   readonly create: (
     tx: Transaction,
-    args: { uid: UserId; profile: NewUserProfile; accessVersion: number; activeOrganizationId: TenantId; createdAt: string },
+    args: {
+      uid: UserId;
+      profile: NewUserProfile;
+      accessVersion: number;
+      activeOrganizationId: TenantId;
+      createdAt: string;
+    },
   ) => void;
 };

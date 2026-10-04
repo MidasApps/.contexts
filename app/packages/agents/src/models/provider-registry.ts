@@ -53,7 +53,8 @@ export const DEFAULT_PROVIDER_FACTORIES: ProviderFactories = {
 /** Settings for a provider, or `undefined` when its variables are missing. */
 export const providerSettingsFor = (env: ProviderEnv, provider: ModelProvider): ProviderSettings | undefined => {
   if (provider === "openai") return env.OPENAI_API_KEY === undefined ? undefined : { apiKey: env.OPENAI_API_KEY };
-  if (provider === "anthropic") return env.ANTHROPIC_API_KEY === undefined ? undefined : { apiKey: env.ANTHROPIC_API_KEY };
+  if (provider === "anthropic")
+    return env.ANTHROPIC_API_KEY === undefined ? undefined : { apiKey: env.ANTHROPIC_API_KEY };
   if (env.GOOGLE_AI_BACKEND === "vertex") {
     const { GOOGLE_VERTEX_PROJECT: project, GOOGLE_VERTEX_LOCATION: location } = env;
     return project === undefined || location === undefined ? undefined : { backend: "vertex", project, location };
@@ -72,7 +73,10 @@ export type ProviderRegistry = {
   readonly get: (provider: ModelProvider) => ProviderV4;
 };
 
-export const createProviderRegistry = (env: ProviderEnv, factories: ProviderFactories = DEFAULT_PROVIDER_FACTORIES): ProviderRegistry => {
+export const createProviderRegistry = (
+  env: ProviderEnv,
+  factories: ProviderFactories = DEFAULT_PROVIDER_FACTORIES,
+): ProviderRegistry => {
   const built = new Map<ModelProvider, ProviderV4>();
   return {
     isConfigured: (provider) => providerSettingsFor(env, provider) !== undefined,

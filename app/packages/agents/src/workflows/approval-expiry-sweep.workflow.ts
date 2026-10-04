@@ -35,7 +35,8 @@ export const createApprovalExpirySweepWorkflow = (deps: { readonly approvalSweep
         inputSchema: z.strictObject({}),
         outputSchema: ApprovalSweepResultSchema,
         execute: async ({ requestContext, runId }) => {
-          if (!isPlatformRun(requestContext)) return { status: "failed" as const, expired: 0, failed: 0, code: PLATFORM_ONLY };
+          if (!isPlatformRun(requestContext))
+            return { status: "failed" as const, expired: 0, failed: 0, code: PLATFORM_ONLY };
           const { expired } = await deps.approvalSweeps.expire({ requestId: runId });
           const { failed } = await deps.approvalSweeps.failInterrupted({ requestId: runId });
           return { status: "done" as const, expired, failed, code: null };

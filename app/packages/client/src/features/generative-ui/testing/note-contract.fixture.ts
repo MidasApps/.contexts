@@ -10,12 +10,22 @@ export const CreateTestNoteSchema = z.strictObject({
     .trim()
     .min(1)
     .max(40)
-    .meta({ description: "Short title.", pii: "none", ui: { widget: "text", labelKey: "testnotes.note.title", order: 1 }, examples: ["Kickoff"] }),
+    .meta({
+      description: "Short title.",
+      pii: "none",
+      ui: { widget: "text", labelKey: "testnotes.note.title", order: 1 },
+      examples: ["Kickoff"],
+    }),
   body: z
     .string()
     .max(200)
     .optional()
-    .meta({ description: "Free text.", pii: "none", ui: { widget: "textarea", labelKey: "testnotes.note.body", order: 2 }, examples: ["Agenda."] }),
+    .meta({
+      description: "Free text.",
+      pii: "none",
+      ui: { widget: "textarea", labelKey: "testnotes.note.body", order: 2 },
+      examples: ["Agenda."],
+    }),
 });
 
 export const CreateTestNoteContract = defineContract(CreateTestNoteSchema, {
@@ -29,9 +39,16 @@ export const CreateTestNoteContract = defineContract(CreateTestNoteSchema, {
   permission: "testnotes.note.create",
 });
 
-export const TEST_NOTE_MESSAGES: ExtraNamespaces = { testnotes: { "pt-BR": { note: { title: "Título", body: "Texto" } } } };
+export const TEST_NOTE_MESSAGES: ExtraNamespaces = {
+  testnotes: { "pt-BR": { note: { title: "Título", body: "Texto" } } },
+};
 
 export const NOTE_FORM_UI = {
   component: "schema-form",
-  props: { contractId: "testnotes.Note", commandId: "testnotes.CreateNoteCommand", mode: "create", initialValues: { title: "Kickoff" } },
+  props: {
+    contractId: "testnotes.Note",
+    commandId: "testnotes.CreateNoteCommand",
+    mode: "create",
+    initialValues: { title: "Kickoff" },
+  },
 } as const;

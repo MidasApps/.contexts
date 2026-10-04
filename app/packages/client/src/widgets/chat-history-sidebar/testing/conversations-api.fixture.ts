@@ -2,10 +2,17 @@
 // ordering (pinned first, then most recent) and filters (archived, q), so history tests assert
 // what the member sees after each action rather than which calls were made.
 import { ConversationContract } from "@core/contracts";
-import { apiError, noContent, ok, page, type FakeApi } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeApi, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 
-export type FakeConversation = Record<string, unknown> & { id: string; title: string | null; pinned: boolean; archivedAt: string | null; summary: string | null; lastMessageAt: string };
+export type FakeConversation = Record<string, unknown> & {
+  id: string;
+  title: string | null;
+  pinned: boolean;
+  archivedAt: string | null;
+  summary: string | null;
+  lastMessageAt: string;
+};
 
 export const buildConversation = (id: string, overrides: Partial<FakeConversation> = {}): FakeConversation => ({
   ...(ConversationContract.meta.examples[0] as Record<string, unknown>),
@@ -20,7 +27,8 @@ export const buildConversation = (id: string, overrides: Partial<FakeConversatio
   ...overrides,
 });
 
-const matches = (conversation: FakeConversation, q: string | null): boolean => q === null || `${conversation.title ?? ""} ${conversation.summary ?? ""}`.toLowerCase().includes(q.toLowerCase());
+const matches = (conversation: FakeConversation, q: string | null): boolean =>
+  q === null || `${conversation.title ?? ""} ${conversation.summary ?? ""}`.toLowerCase().includes(q.toLowerCase());
 
 const ordered = (items: readonly FakeConversation[]): FakeConversation[] =>
   [...items].sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.lastMessageAt.localeCompare(a.lastMessageAt));
@@ -31,7 +39,9 @@ export type ConversationsStore = { items: FakeConversation[]; summaryText: strin
 export const routeConversationsApi = (api: FakeApi, store: ConversationsStore): void => {
   api.route("GET /v1/conversations", ({ query }) => {
     const archived = query.get("archived") === "true";
-    return page(ordered(store.items.filter((item) => (item.archivedAt !== null) === archived && matches(item, query.get("q")))));
+    return page(
+      ordered(store.items.filter((item) => (item.archivedAt !== null) === archived && matches(item, query.get("q")))),
+    );
   });
   api.route("PATCH /v1/conversations/:conversationId", ({ params, body }) => {
     const target = store.items.find((item) => item.id === params["conversationId"]);

@@ -32,7 +32,10 @@ const rewriteLocalRefs = (node: unknown): unknown => {
  * `$ref`s to OpenAPI components. Any other `$defs` entry would dangle.
  */
 const toOperationSchema = (schema: z.ZodType, io: Io, contractIds: ReadonlySet<string>): JsonRecord => {
-  const output = z.toJSONSchema(schema, { io, override: (ctx) => renameCustomMetaKeys(ctx.jsonSchema as JsonRecord) }) as JsonRecord;
+  const output = z.toJSONSchema(schema, {
+    io,
+    override: (ctx) => renameCustomMetaKeys(ctx.jsonSchema as JsonRecord),
+  }) as JsonRecord;
   const { $defs: defs, ...rest } = output;
   delete rest["$schema"];
   const unknownDefs = Object.keys(isJsonRecord(defs) ? defs : {}).filter((id) => !contractIds.has(id));
@@ -40,7 +43,11 @@ const toOperationSchema = (schema: z.ZodType, io: Io, contractIds: ReadonlySet<s
   return rewriteLocalRefs(rest) as JsonRecord;
 };
 
-const objectParameters = (args: { schema: z.ZodObject; location: "path" | "query"; contractIds: ReadonlySet<string> }): JsonRecord[] => {
+const objectParameters = (args: {
+  schema: z.ZodObject;
+  location: "path" | "query";
+  contractIds: ReadonlySet<string>;
+}): JsonRecord[] => {
   const json = toOperationSchema(args.schema, "input", args.contractIds);
   const properties = isJsonRecord(json["properties"]) ? json["properties"] : {};
   const required = new Set(Array.isArray(json["required"]) ? json["required"] : []);
@@ -119,7 +126,11 @@ const buildResponses = (endpoint: EndpointDefinition, contractIds: ReadonlySet<s
   const errorRef = { $ref: componentRef(ErrorEnvelopeContract.id) };
   const failures = [...collectErrorCodes(endpoint)].map(([status, codes]): [string, JsonRecord] => [
     String(status),
-    withHeaders(String(status), { description: codes.join(", "), "x-error-codes": codes, content: jsonContent(errorRef) }),
+    withHeaders(String(status), {
+      description: codes.join(", "),
+      "x-error-codes": codes,
+      content: jsonContent(errorRef),
+    }),
   ]);
   return Object.fromEntries([...success, ...failures]);
 };
@@ -135,7 +146,9 @@ const buildOperation = (endpoint: EndpointDefinition, contractIds: ReadonlySet<s
     ...(endpoint.rateLimit ? { "x-rate-limit": endpoint.rateLimit } : {}),
     ...(parameters.length > 0 ? { parameters } : {}),
     ...(endpoint.body
-      ? { requestBody: { required: true, content: jsonContent(toOperationSchema(endpoint.body, "input", contractIds)) } }
+      ? {
+          requestBody: { required: true, content: jsonContent(toOperationSchema(endpoint.body, "input", contractIds)) },
+        }
       : {}),
     responses: buildResponses(endpoint, contractIds),
   };
@@ -152,7 +165,10 @@ export const buildOpenApiPaths = (args: {
   const contractIds = new Set(args.contracts.map((contract) => contract.id));
   const paths: Record<string, JsonRecord> = {};
   for (const endpoint of args.endpoints) {
-    paths[endpoint.path] = { ...paths[endpoint.path], [endpoint.method.toLowerCase()]: buildOperation(endpoint, contractIds) };
+    paths[endpoint.path] = {
+      ...paths[endpoint.path],
+      [endpoint.method.toLowerCase()]: buildOperation(endpoint, contractIds),
+    };
   }
   return paths;
 };

@@ -9,7 +9,10 @@ import type { FileRepository, FileSettlement } from "../../application/ports/fil
 export const FILES_COLLECTION = "files";
 
 // The stored document: the contract plus its shape version (contracts/firebase-firestore.md §17).
-const StoredFileDocumentSchema = z.strictObject({ ...StoredFileSchema.shape, schemaVersion: z.literal(CORE_SCHEMA_VERSION) });
+const StoredFileDocumentSchema = z.strictObject({
+  ...StoredFileSchema.shape,
+  schemaVersion: z.literal(CORE_SCHEMA_VERSION),
+});
 const stored = { schema: StoredFileDocumentSchema };
 const converter = createContractConverter(stored);
 
@@ -19,7 +22,13 @@ const toFile = (document: z.output<typeof StoredFileDocumentSchema>): StoredFile
 
 const settledFields = (settlement: FileSettlement, updatedAt: string): Record<string, unknown> =>
   settlement.status === "ready"
-    ? { status: "ready", contentType: settlement.contentType, sizeBytes: settlement.sizeBytes, rejectionReason: null, updatedAt }
+    ? {
+        status: "ready",
+        contentType: settlement.contentType,
+        sizeBytes: settlement.sizeBytes,
+        rejectionReason: null,
+        updatedAt,
+      }
     : { status: "rejected", rejectionReason: settlement.reason, sizeBytes: settlement.sizeBytes, updatedAt };
 
 /** Firestore `FileRepository` over the top-level `files` collection (automatic ids, `tenantId` on every doc). */
@@ -29,7 +38,9 @@ export const createFirestoreFileRepository = (deps: { readonly firestore: Firest
   return {
     newId: () => FileIdSchema.parse(raw().doc().id),
     create: async (file) => {
-      await typed().doc(file.id).create({ ...file, schemaVersion: CORE_SCHEMA_VERSION });
+      await typed()
+        .doc(file.id)
+        .create({ ...file, schemaVersion: CORE_SCHEMA_VERSION });
     },
     get: async (fileId) => {
       const data = (await typed().doc(fileId).get()).data();

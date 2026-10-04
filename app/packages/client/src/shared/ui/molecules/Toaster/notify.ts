@@ -22,7 +22,8 @@ const withAction = ({ description, action, id }: NotifyOptions) => ({
 export const notify = {
   success: (title: string, options: NotifyOptions = {}) => toast.success(title, withAction(options)),
   info: (title: string, options: NotifyOptions = {}) => toast.info(title, withAction(options)),
-  warning: (title: string, options: NotifyOptions = {}) => toast.warning(title, { ...withAction(options), duration: 8000 }),
+  warning: (title: string, options: NotifyOptions = {}) =>
+    toast.warning(title, { ...withAction(options), duration: 8000 }),
   error: (title: string, options: NotifyOptions = {}) =>
     toast.error(title, { ...withAction(options), duration: Number.POSITIVE_INFINITY, closeButton: true }),
   dismiss: (id?: string | number) => toast.dismiss(id),

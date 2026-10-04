@@ -55,7 +55,14 @@ export const makeFilesWorld = () => {
   const repository = createInMemoryFileRepository();
   const objects = createInMemoryObjectStore();
   const events = createRecordingFileEvents();
-  const files = createFilesServices({ files: repository, objects, signer: createFakeUrlSigner(), events, clock, logger: pipeline.logger });
+  const files = createFilesServices({
+    files: repository,
+    objects,
+    signer: createFakeUrlSigner(),
+    events,
+    clock,
+    logger: pipeline.logger,
+  });
   const routes = buildFilesRoutes({ pipeline, files });
   const call = (endpointId: string, url: string, init: { method?: string; token?: string; body?: unknown } = {}) => {
     const route = routes[endpointId];

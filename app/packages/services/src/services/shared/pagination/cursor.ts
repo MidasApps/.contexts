@@ -9,7 +9,8 @@ const PositionSchema = z.tuple([z.string(), z.string().min(1)]);
  * Opaque cursor (contracts/api.md §9.1): base64url of the JSON `[sortValue, id]`.
  * @example encodeCursor(["Launch", "p1"]) // "WyJMYXVuY2giLCJwMSJd"
  */
-export const encodeCursor = (position: CursorPosition): string => Buffer.from(JSON.stringify(position), "utf8").toString("base64url");
+export const encodeCursor = (position: CursorPosition): string =>
+  Buffer.from(JSON.stringify(position), "utf8").toString("base64url");
 
 /**
  * Decodes a cursor made by `encodeCursor`.

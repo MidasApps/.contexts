@@ -24,7 +24,9 @@ export const logLineKeys = {
 };
 
 const defined = (filters: LogFilters): Record<string, string> =>
-  Object.fromEntries(Object.entries(filters).filter((entry): entry is [string, string] => entry[1] !== undefined && entry[1] !== ""));
+  Object.fromEntries(
+    Object.entries(filters).filter((entry): entry is [string, string] => entry[1] !== undefined && entry[1] !== ""),
+  );
 
 /**
  * `GET /v1/admin/logs` (staff, platform.trace.read): the latest lines of the web process, newest
@@ -35,7 +37,8 @@ export const adminLogsQuery = (callEndpoint: CallEndpoint, filters: LogFilters) 
   queryOptions({
     queryKey: logLineKeys.list(filters),
     queryFn: async ({ signal }): Promise<LogLine[]> =>
-      (await callEndpoint(adminListLogsEndpoint, { query: { ...defined(filters), limit: LOG_LINES_LIMIT }, signal })).data,
+      (await callEndpoint(adminListLogsEndpoint, { query: { ...defined(filters), limit: LOG_LINES_LIMIT }, signal }))
+        .data,
     staleTime: 0,
   });
 

@@ -21,7 +21,8 @@ const render = (options: Parameters<typeof renderApp>[1] = {}) => {
   return { ...view, impersonate: () => auth.setClaims(IMPERSONATED) };
 };
 
-const region = (container: HTMLElement): HTMLElement | null => container.querySelector('[data-slot="impersonation-banner"]');
+const region = (container: HTMLElement): HTMLElement | null =>
+  container.querySelector('[data-slot="impersonation-banner"]');
 
 afterEach(() => {
   act(() => useImpersonationStore.getState().reset());
@@ -39,16 +40,29 @@ describe("ImpersonationBanner", () => {
   it("names the impersonated user, read-only and audited, inside that region", async () => {
     const { container, impersonate } = render();
     impersonate();
-    expect(await screen.findByText(/Você está vendo o app como Ana Souza, em modo somente leitura. Tudo o que abrir fica registrado./u)).toBeDefined();
+    expect(
+      await screen.findByText(
+        /Você está vendo o app como Ana Souza, em modo somente leitura. Tudo o que abrir fica registrado./u,
+      ),
+    ).toBeDefined();
     expect(region(container)?.textContent).toContain("Sair do modo suporte");
     await expectNoAxeViolations(container);
   });
 
   it("names the organization and the end of a session this tab started", async () => {
-    globalThis.sessionStorage.setItem(IMPERSONATION_STORAGE_KEY, storedImpersonation({ sessionId: IMPERSONATION_IDS.session, organizationName: "Northwind", targetLabel: "Ana Souza" }));
+    globalThis.sessionStorage.setItem(
+      IMPERSONATION_STORAGE_KEY,
+      storedImpersonation({
+        sessionId: IMPERSONATION_IDS.session,
+        organizationName: "Northwind",
+        targetLabel: "Ana Souza",
+      }),
+    );
     const { impersonate } = render();
     impersonate();
-    expect(await screen.findByText(/Você está vendo o app como Ana Souza em Northwind, em modo somente leitura, até /u)).toBeDefined();
+    expect(
+      await screen.findByText(/Você está vendo o app como Ana Souza em Northwind, em modo somente leitura, até /u),
+    ).toBeDefined();
   });
 
   it("returns to the staff account on /admin/users when leaving, with the button pending meanwhile", async () => {
@@ -69,7 +83,9 @@ describe("ImpersonationBanner", () => {
   });
 
   it("signs out completely when the staff session cannot be restored, never staying as the user", async () => {
-    const { user, router, bridge, impersonate } = render({ leaveImpersonation: () => Promise.reject(new Error("staff session gone")) });
+    const { user, router, bridge, impersonate } = render({
+      leaveImpersonation: () => Promise.reject(new Error("staff session gone")),
+    });
     impersonate();
     await user.click(await screen.findByRole("button", { name: "Sair do modo suporte" }));
     await waitFor(() => expect(router.current()).toBe("/sign-in"));

@@ -1,10 +1,10 @@
 "use client";
 
 import { Slot } from "radix-ui";
-import { useCallback, useId, useLayoutEffect, useMemo, useState, type ComponentProps, type ReactElement } from "react";
+import { type ComponentProps, type ReactElement, useCallback, useId, useLayoutEffect, useMemo, useState } from "react";
 import { cn } from "#/shared/lib/cn.ts";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
-import { FieldContext, useFieldContext, type FieldContextValue } from "./field-context.ts";
+import { FieldContext, type FieldContextValue, useFieldContext } from "./field-context.ts";
 
 /**
  * shadcn **Field** family (Field, FieldLabel, FieldDescription, FieldError, FieldGroup, FieldSet,
@@ -21,7 +21,14 @@ export type FieldProps = ComponentProps<"div"> & {
   controlId?: string;
 };
 
-export function Field({ className, orientation = "vertical", invalid = false, controlId, children, ...props }: FieldProps) {
+export function Field({
+  className,
+  orientation = "vertical",
+  invalid = false,
+  controlId,
+  children,
+  ...props
+}: FieldProps) {
   const generated = useId();
   const [hasDescription, setHasDescription] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -77,7 +84,9 @@ export function FieldLabel({ className, htmlFor, ...props }: ComponentProps<type
 export function FieldControl({ children }: { children: ReactElement }) {
   const field = useFieldContext();
   if (field === null) return <>{children}</>;
-  const describedBy = [field.hasDescription && field.descriptionId, field.hasError && field.errorId].filter(Boolean).join(" ");
+  const describedBy = [field.hasDescription && field.descriptionId, field.hasError && field.errorId]
+    .filter(Boolean)
+    .join(" ");
   return (
     <Slot.Root
       id={field.controlId}
@@ -123,7 +132,9 @@ export type FieldErrorProps = ComponentProps<"p"> & {
  */
 export function FieldError({ className, id, errors, children, ...props }: FieldErrorProps) {
   const field = useFieldContext();
-  const messages = [...new Set((errors ?? []).filter((message): message is string => message !== undefined && message !== ""))];
+  const messages = [
+    ...new Set((errors ?? []).filter((message): message is string => message !== undefined && message !== "")),
+  ];
   const content = children ?? (messages.length > 1 ? <MessageList messages={messages} /> : messages[0]);
   const present = content !== undefined && content !== null && content !== "";
   usePresence(field?.registerError, present);

@@ -21,11 +21,14 @@ const deleteAllTestUsers = async (): Promise<void> => {
 };
 
 const signIn = async (password: string): Promise<number> => {
-  const response = await fetch(`${ORIGIN}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-api-key`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ email: OWNER.email, password, returnSecureToken: true }),
-  });
+  const response = await fetch(
+    `${ORIGIN}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-api-key`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: OWNER.email, password, returnSecureToken: true }),
+    },
+  );
   return response.status;
 };
 

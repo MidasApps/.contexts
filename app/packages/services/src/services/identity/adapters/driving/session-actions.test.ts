@@ -2,7 +2,7 @@ import { ImpersonationSessionIdSchema, TenantIdSchema, UserIdSchema } from "@cor
 import { describe, expect, it } from "vitest";
 import { createLogger } from "../../../shared/observability/logger.ts";
 import { buildSessionWorld, WORLD_NOW } from "../../application/use-cases/session.fixture.ts";
-import { makeSessionActions, SESSION_COOKIE_NAME, type CookieJar } from "./session-actions.ts";
+import { type CookieJar, makeSessionActions, SESSION_COOKIE_NAME } from "./session-actions.ts";
 import { makeSessionGuards } from "./session-guards.ts";
 
 const uid = UserIdSchema.parse("u-ana");
@@ -21,7 +21,11 @@ const jar = () => {
 const setup = () => {
   const world = buildSessionWorld();
   world.auth.addIdToken("id-1", { uid, authTimeSeconds: Date.parse(WORLD_NOW) / 1000, mfa: false });
-  const actions = makeSessionActions({ sessions: world.services, appUrl: `${ORIGIN}/`, logger: createLogger({ context: { service: "test", env: "local" }, sink: () => undefined }) });
+  const actions = makeSessionActions({
+    sessions: world.services,
+    appUrl: `${ORIGIN}/`,
+    logger: createLogger({ context: { service: "test", env: "local" }, sink: () => undefined }),
+  });
   return { world, actions, guards: makeSessionGuards({ sessions: world.services }) };
 };
 
@@ -61,7 +65,10 @@ describe("session actions", () => {
     const { actions } = setup();
     const { cookies, values } = jar();
     cookies.set(SESSION_COOKIE_NAME, "forged", { maxAgeSeconds: 10 });
-    expect(await actions.exchangeSession({ cookies, origin: ORIGIN })).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
+    expect(await actions.exchangeSession({ cookies, origin: ORIGIN })).toMatchObject({
+      ok: false,
+      error: { code: "UNAUTHORIZED" },
+    });
     expect(values.has(SESSION_COOKIE_NAME)).toBe(false);
   });
 });
@@ -74,7 +81,16 @@ describe("impersonation actions (decision 0047)", () => {
     world.staff.set(uid, { role: "platform-support", isActive: true });
     const expiresAt = new Date(Date.parse(WORLD_NOW) + 30 * 60_000).toISOString();
     const target = UserIdSchema.parse("u-bia");
-    const session = { id: IMP, staffUid: uid, targetUid: target, tenantId: TenantIdSchema.parse("org-1"), reason: "Ticket 4821: user cannot see it.", expiresAt, endedAt: null, createdAt: WORLD_NOW };
+    const session = {
+      id: IMP,
+      staffUid: uid,
+      targetUid: target,
+      tenantId: TenantIdSchema.parse("org-1"),
+      reason: "Ticket 4821: user cannot see it.",
+      expiresAt,
+      endedAt: null,
+      createdAt: WORLD_NOW,
+    };
     world.impersonations.create(undefined as never, { session, actorId: uid });
     const { cookies, values } = jar();
     await actions.createSession({ idToken: "id-staff" }, { cookies, origin: ORIGIN });
@@ -95,15 +111,32 @@ describe("impersonation actions (decision 0047)", () => {
 
   it("refuses a cross-origin call, a malformed input and an unknown session", async () => {
     const { actions, cookies } = await staffSetup();
-    expect(await actions.enterImpersonation({ impersonationSessionId: IMP }, { cookies, origin: "https://evil.example.com" })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
-    expect(await actions.leaveImpersonation({ cookies, origin: "https://evil.example.com" })).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
-    expect(await actions.enterImpersonation({ impersonationSessionId: "" }, { cookies, origin: ORIGIN })).toMatchObject({ ok: false, error: { code: "VALIDATION_FAILED" } });
-    expect(await actions.enterImpersonation({ impersonationSessionId: "imp-9" }, { cookies, origin: ORIGIN })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(
+      await actions.enterImpersonation(
+        { impersonationSessionId: IMP },
+        { cookies, origin: "https://evil.example.com" },
+      ),
+    ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await actions.leaveImpersonation({ cookies, origin: "https://evil.example.com" })).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN" },
+    });
+    expect(await actions.enterImpersonation({ impersonationSessionId: "" }, { cookies, origin: ORIGIN })).toMatchObject(
+      { ok: false, error: { code: "VALIDATION_FAILED" } },
+    );
+    expect(
+      await actions.enterImpersonation({ impersonationSessionId: "imp-9" }, { cookies, origin: ORIGIN }),
+    ).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 
   it("answers UNAUTHORIZED without a session cookie", async () => {
     const { actions } = setup();
-    expect(await actions.leaveImpersonation({ cookies: jar().cookies, origin: ORIGIN })).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
-    expect(await actions.enterImpersonation({ impersonationSessionId: IMP }, { cookies: jar().cookies, origin: ORIGIN })).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
+    expect(await actions.leaveImpersonation({ cookies: jar().cookies, origin: ORIGIN })).toMatchObject({
+      ok: false,
+      error: { code: "UNAUTHORIZED" },
+    });
+    expect(
+      await actions.enterImpersonation({ impersonationSessionId: IMP }, { cookies: jar().cookies, origin: ORIGIN }),
+    ).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
   });
 });

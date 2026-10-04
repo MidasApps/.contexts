@@ -53,7 +53,10 @@ const SampleContract = defineContract(SampleSchema, {
 
 // Raw Firestore data is untyped; walk it without trusting its shape.
 const readPath = (data: DocumentData, ...path: string[]): unknown =>
-  path.reduce<unknown>((value, key) => (typeof value === "object" && value !== null ? (value as Record<string, unknown>)[key] : undefined), data);
+  path.reduce<unknown>(
+    (value, key) => (typeof value === "object" && value !== null ? (value as Record<string, unknown>)[key] : undefined),
+    data,
+  );
 
 const captureError = (fn: () => unknown): unknown => {
   try {
@@ -154,7 +157,10 @@ describe("toFirestoreUpdate", () => {
   });
 
   it("converts date-times nested in an object value and leaves other keys untouched", () => {
-    const patch = toFirestoreUpdate(SampleContract, { window: { endsAt: "2026-10-03T00:00:00.000Z", label: "x" }, name: "2026-10-03T00:00:00.000Z" });
+    const patch = toFirestoreUpdate(SampleContract, {
+      window: { endsAt: "2026-10-03T00:00:00.000Z", label: "x" },
+      name: "2026-10-03T00:00:00.000Z",
+    });
     expect(readPath(patch, "window", "endsAt")).toBeInstanceOf(Timestamp);
     expect(patch["name"]).toBe("2026-10-03T00:00:00.000Z");
   });

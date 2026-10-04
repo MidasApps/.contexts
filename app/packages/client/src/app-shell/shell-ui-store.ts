@@ -26,7 +26,10 @@ export const createShellUiStore = (storage: StateStorage = browserStorage()): Pe
     persist(
       (set) => ({
         recents: [],
-        addRecent: (commandId) => set((state) => ({ recents: [commandId, ...state.recents.filter((id) => id !== commandId)].slice(0, MAX_RECENTS) })),
+        addRecent: (commandId) =>
+          set((state) => ({
+            recents: [commandId, ...state.recents.filter((id) => id !== commandId)].slice(0, MAX_RECENTS),
+          })),
         reset: () => set({ recents: [] }),
       }),
       {

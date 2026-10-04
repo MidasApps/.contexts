@@ -94,7 +94,9 @@ describe("SP1 endpoint coverage", () => {
   });
 
   it("rate limits the unauthenticated endpoints", () => {
-    const open = CORE_ENDPOINTS.filter((endpoint) => endpoint.auth === "none" && endpoint.rateLimit === undefined).map((e) => e.id);
+    const open = CORE_ENDPOINTS.filter((endpoint) => endpoint.auth === "none" && endpoint.rateLimit === undefined).map(
+      (e) => e.id,
+    );
     expect(open).toEqual([]);
   });
 });

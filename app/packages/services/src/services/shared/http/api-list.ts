@@ -1,7 +1,7 @@
 import type { PageQuery } from "@core/contracts";
 import type { DenyReason } from "../../access/domain/authorization.ts";
 import { decodeCursor } from "../pagination/cursor.ts";
-import { pageMeta, type Page, type PageRequest } from "../pagination/page.ts";
+import { type Page, type PageRequest, pageMeta } from "../pagination/page.ts";
 import { apiError, dataResponse } from "./api-errors.ts";
 
 /**
@@ -19,7 +19,8 @@ export const invalidCursorResponse = (requestId: string): Response =>
   apiError(400, "VALIDATION_FAILED", requestId, [{ field: "cursor", issue: "INVALID_CURSOR" }]);
 
 /** `200 { data: [...], meta: { page } }` (contracts/api.md §5.2, §9.1). */
-export const listResponse = <T>(page: Page<T>, limit: number): Response => dataResponse({ data: page.items, meta: pageMeta(page, limit) });
+export const listResponse = <T>(page: Page<T>, limit: number): Response =>
+  dataResponse({ data: page.items, meta: pageMeta(page, limit) });
 
 // Existence of a node the caller has no grant on is not revealed (SP1 spec §7.2).
 const HIDDEN_REASONS: ReadonlySet<DenyReason> = new Set(["NODE_NOT_FOUND", "NOT_A_MEMBER"]);

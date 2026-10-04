@@ -3,8 +3,8 @@ import {
   OrganizationIdSchema,
   OrganizationStatusSchema,
   ProjectIdSchema,
-  UnitIdSchema,
   type TenantNodeRef,
+  UnitIdSchema,
 } from "@core/contracts";
 import type { DocumentSnapshot, Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
@@ -15,12 +15,17 @@ import type { ChainNode, ChainUnit, NodeChain } from "../../domain/node-chain.ts
 
 // Only the fields `authorize()` checks; soft-deleted nodes are read too (they deny).
 const alive = { tenantId: OrganizationIdSchema, deletedAt: IsoDateTimeSchema.nullable() };
-const organizationConverter = createContractConverter({ schema: z.object({ ...alive, status: OrganizationStatusSchema }) });
+const organizationConverter = createContractConverter({
+  schema: z.object({ ...alive, status: OrganizationStatusSchema }),
+});
 const projectConverter = createContractConverter({ schema: z.object(alive) });
 const UnitChainFieldsSchema = z.object({ ...alive, projectId: ProjectIdSchema, ancestorIds: z.array(UnitIdSchema) });
 const unitConverter = createContractConverter({ schema: UnitChainFieldsSchema });
 
-const chainNode = (snapshot: DocumentSnapshot, fields: { tenantId: ChainNode["tenantId"]; deletedAt: string | null }): ChainNode => ({
+const chainNode = (
+  snapshot: DocumentSnapshot,
+  fields: { tenantId: ChainNode["tenantId"]; deletedAt: string | null },
+): ChainNode => ({
   id: snapshot.id,
   tenantId: fields.tenantId,
   isDeleted: fields.deletedAt !== null,
@@ -37,7 +42,9 @@ export const createFirestoreNodeChainReader = (deps: { firestore: Firestore }): 
     const leaf = await collection(CORE_COLLECTIONS.units).withConverter(unitConverter).doc(node.unitId).get();
     const leafFields = leaf.data();
     if (leafFields === undefined) return null;
-    const refs = leafFields.ancestorIds.map((id) => collection(CORE_COLLECTIONS.units).withConverter(unitConverter).doc(id));
+    const refs = leafFields.ancestorIds.map((id) =>
+      collection(CORE_COLLECTIONS.units).withConverter(unitConverter).doc(id),
+    );
     // At most 6 ancestors, read in parallel (typed; `getAll` drops the converter type).
     const ancestors = await Promise.all(refs.map((ref) => ref.get()));
     const units: ChainUnit[] = [];
@@ -50,10 +57,16 @@ export const createFirestoreNodeChainReader = (deps: { firestore: Firestore }): 
   };
   return {
     loadChain: async (node) => {
-      const organization = await collection(CORE_COLLECTIONS.organizations).withConverter(organizationConverter).doc(node.tenantId).get();
+      const organization = await collection(CORE_COLLECTIONS.organizations)
+        .withConverter(organizationConverter)
+        .doc(node.tenantId)
+        .get();
       const organizationFields = organization.data();
       if (organizationFields === undefined) return null;
-      const chain: NodeChain = { organization: { ...chainNode(organization, organizationFields), status: organizationFields.status }, units: [] };
+      const chain: NodeChain = {
+        organization: { ...chainNode(organization, organizationFields), status: organizationFields.status },
+        units: [],
+      };
       if (node.level === "organization") return chain;
       const [project, units] = await Promise.all([
         collection(CORE_COLLECTIONS.projects).withConverter(projectConverter).doc(node.projectId).get(),

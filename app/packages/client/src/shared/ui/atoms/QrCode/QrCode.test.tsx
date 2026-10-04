@@ -7,7 +7,8 @@ import { QrCode } from "./QrCode.tsx";
 
 const URI = "otpauth://totp/Core:ana%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=Core";
 
-const darkModules = (value: string): number => encode(value, { ecc: "M", border: 4 }).data.flat().filter(Boolean).length;
+const darkModules = (value: string): number =>
+  encode(value, { ecc: "M", border: 4 }).data.flat().filter(Boolean).length;
 
 describe("QrCode", () => {
   it("draws every dark module of the encoded value as one labelled image", async () => {

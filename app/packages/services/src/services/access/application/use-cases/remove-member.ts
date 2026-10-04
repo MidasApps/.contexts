@@ -27,12 +27,33 @@ export type RemoveMember = (command: RemoveMemberCommand) => Promise<Result<void
 // A member holds one grant per node; more than this many is not a real tenant shape.
 const MAX_GRANTS_CHECKED = 100;
 
-type Deps = Pick<MemberDeps, "memberships" | "projections" | "users" | "tenantGuard" | "audit" | "clock" | "unitOfWork" | "syncClaims" | "apiKeys" | "logger" | "registry" | "roleReader">;
+type Deps = Pick<
+  MemberDeps,
+  | "memberships"
+  | "projections"
+  | "users"
+  | "tenantGuard"
+  | "audit"
+  | "clock"
+  | "unitOfWork"
+  | "syncClaims"
+  | "apiKeys"
+  | "logger"
+  | "registry"
+  | "roleReader"
+>;
 
-const applyRemoval = async (tx: Transaction, deps: Deps, command: RemoveMemberCommand): Promise<Result<void, RemoveMemberError>> => {
+const applyRemoval = async (
+  tx: Transaction,
+  deps: Deps,
+  command: RemoveMemberCommand,
+): Promise<Result<void, RemoveMemberError>> => {
   const { tenantId, userId } = command;
   const principal = { type: "user" as const, id: userId };
-  const [state, owners] = await Promise.all([readPrincipalState(tx, deps, { tenantId, principal }), deps.memberships.listOrganizationOwners(tx, tenantId)]);
+  const [state, owners] = await Promise.all([
+    readPrincipalState(tx, deps, { tenantId, principal }),
+    deps.memberships.listOrganizationOwners(tx, tenantId),
+  ]);
   if (!state.tenantLive) return err(organizationGone());
   const grants = state.live.filter((grant) => grant.principalType === "user");
   if (grants.length === 0) return err(new AccessNotFoundError("member"));
@@ -43,7 +64,16 @@ const applyRemoval = async (tx: Transaction, deps: Deps, command: RemoveMemberCo
   for (const grant of grants) deps.memberships.softDelete(tx, { id: grant.id, deletedAt: now, actorId: actor.id });
   writePrincipalState(tx, deps, { tenantId, principal, state, grants: [], actorId: actor.id, now });
   await deps.audit.record(
-    { log: "tenant", tenantId, action: "MEMBER_REMOVED", actor, target: { type: "user", id: userId }, node: { level: "organization", tenantId }, outcome: "success", requestId: command.requestId },
+    {
+      log: "tenant",
+      tenantId,
+      action: "MEMBER_REMOVED",
+      actor,
+      target: { type: "user", id: userId },
+      node: { level: "organization", tenantId },
+      outcome: "success",
+      requestId: command.requestId,
+    },
     tx,
   );
   return ok(undefined);
@@ -53,9 +83,19 @@ const applyRemoval = async (tx: Transaction, deps: Deps, command: RemoveMemberCo
 // the key's place), so a failure is logged for follow-up, never surfaced as a failed removal.
 const revokeOwnedKeys = async (deps: Deps, command: RemoveMemberCommand): Promise<void> => {
   try {
-    await deps.apiKeys.revokeOwnedKeys({ tenantId: command.tenantId, ownerUid: command.userId, actor: auditActorOf(command.actor), requestId: command.requestId });
+    await deps.apiKeys.revokeOwnedKeys({
+      tenantId: command.tenantId,
+      ownerUid: command.userId,
+      actor: auditActorOf(command.actor),
+      requestId: command.requestId,
+    });
   } catch (e: unknown) {
-    deps.logger.error("member_api_keys_revoke_failed", { requestId: command.requestId, tenantId: command.tenantId, userId: command.userId, err: e });
+    deps.logger.error("member_api_keys_revoke_failed", {
+      requestId: command.requestId,
+      tenantId: command.tenantId,
+      userId: command.userId,
+      err: e,
+    });
   }
 };
 
@@ -68,10 +108,18 @@ const revokeOwnedKeys = async (deps: Deps, command: RemoveMemberCommand): Promis
 export const makeRemoveMember =
   (deps: Deps): RemoveMember =>
   async (command) => {
-    const allowed = await requirePermission({ ...command, permission: "core.member.remove", node: { level: "organization", tenantId: command.tenantId } });
+    const allowed = await requirePermission({
+      ...command,
+      permission: "core.member.remove",
+      node: { level: "organization", tenantId: command.tenantId },
+    });
     if (!allowed.ok) return allowed;
     // Owner hierarchy: every grant of the member must be within the actor's own permissions.
-    const grants = await deps.memberships.list({ tenantId: command.tenantId, principalId: command.userId, page: { after: undefined, limit: MAX_GRANTS_CHECKED } });
+    const grants = await deps.memberships.list({
+      tenantId: command.tenantId,
+      principalId: command.userId,
+      page: { after: undefined, limit: MAX_GRANTS_CHECKED },
+    });
     const within = await requireWithinActor(deps, { ...command, grants: grants.items });
     if (!within.ok) return within;
     const removed = await deps.unitOfWork.run((tx) => applyRemoval(tx, deps, command));

@@ -1,10 +1,10 @@
+import { isSupportedLocale, SOURCE_LOCALE } from "@core/i18n";
 import { cookies } from "next/headers";
 import { locale } from "next/root-params";
-import { Suspense, type ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { ShellSkeleton } from "@/client/shell-skeleton";
 import { SIDEBAR_COOKIE_NAME, WebAppLayout } from "@/client/web-layouts";
 import { requireWebSession } from "@/server/session-guards";
-import { isSupportedLocale, SOURCE_LOCALE } from "@core/i18n";
 
 /** Checks the web session (request-time: cookies) and renders the user area's shell. */
 async function SignedInShell({ sidebarOpen, children }: { sidebarOpen: boolean; children: ReactNode }) {

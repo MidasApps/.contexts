@@ -15,7 +15,13 @@ import { NodeName } from "#/widgets/access-node/index.ts";
 import { SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { useRequesterNames } from "./use-requester-names.ts";
 
-function BackToInbox({ organizationId, variant = "ghost" }: { organizationId: string; variant?: "ghost" | "secondary" }) {
+function BackToInbox({
+  organizationId,
+  variant = "ghost",
+}: {
+  organizationId: string;
+  variant?: "ghost" | "secondary";
+}) {
   const t = useTranslations("settings.approvals.detail");
   return (
     <Button variant={variant} size="sm" asChild className="self-start">
@@ -59,18 +65,39 @@ function Facts({ request, decidedByName }: { request: ApprovalRequest; decidedBy
  * that does not exist, belongs to another organization or is hidden from the viewer reads as not
  * found, inside the settings frame.
  */
-export function ApprovalDetail({ context, approvalRequestId, viewerUid }: { context: AccessContext; approvalRequestId: string; viewerUid: string | null }) {
+export function ApprovalDetail({
+  context,
+  approvalRequestId,
+  viewerUid,
+}: {
+  context: AccessContext;
+  approvalRequestId: string;
+  viewerUid: string | null;
+}) {
   const t = useTranslations("settings.approvals");
   const { organization } = context;
   const request = useApprovalRequest(organization.id, approvalRequestId);
-  const requesterName = useRequesterNames({ organizationId: organization.id, viewerUid, canReadMembers: context.permissions.includes("core.member.read") });
+  const requesterName = useRequesterNames({
+    organizationId: organization.id,
+    viewerUid,
+    canReadMembers: context.permissions.includes("core.member.read"),
+  });
   if (request.isPending) return <LoadingState label={t("detail.loading")} rows={4} />;
-  if (request.isError) return <ApiErrorState error={request.error} onRetry={() => void request.refetch()} retrying={request.isFetching} />;
+  if (request.isError)
+    return <ApiErrorState error={request.error} onRetry={() => void request.refetch()} retrying={request.isFetching} />;
   if (request.data === null) {
-    return <EmptyState icon="search" title={t("detail.notFoundTitle")} description={t("detail.notFoundDescription")} action={<BackToInbox organizationId={organization.id} variant="secondary" />} />;
+    return (
+      <EmptyState
+        icon="search"
+        title={t("detail.notFoundTitle")}
+        description={t("detail.notFoundDescription")}
+        action={<BackToInbox organizationId={organization.id} variant="secondary" />}
+      />
+    );
   }
   const data = request.data;
-  const decidedByName = data.decidedBy === null ? undefined : requesterName({ requestedBy: { type: "user", id: data.decidedBy } });
+  const decidedByName =
+    data.decidedBy === null ? undefined : requesterName({ requestedBy: { type: "user", id: data.decidedBy } });
   return (
     <div className="flex flex-col gap-4">
       <BackToInbox organizationId={organization.id} />

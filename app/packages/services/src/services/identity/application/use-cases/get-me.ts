@@ -1,7 +1,7 @@
 import type { Me, User, UserPrincipal } from "@core/contracts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { AccountMissingError } from "../../domain/errors/account-missing-error.ts";
-import { toMe, type MeDeps } from "../me-deps.ts";
+import { type MeDeps, toMe } from "../me-deps.ts";
 import type { AuthAccount } from "../ports/driven/auth-account-reader.ts";
 
 export type GetMe = (command: { readonly actor: UserPrincipal }) => Promise<Result<Me, AccountMissingError>>;
@@ -9,10 +9,17 @@ export type GetMe = (command: { readonly actor: UserPrincipal }) => Promise<Resu
 type Deps = Pick<MeDeps, "users" | "accounts" | "staff" | "clock" | "access" | "mayCreateOrganization" | "membership">;
 
 /** The Auth account of the caller and their users doc, created on the first call. */
-export const loadMe = async (deps: Deps, actor: UserPrincipal): Promise<Result<{ user: User; account: AuthAccount }, AccountMissingError>> => {
+export const loadMe = async (
+  deps: Deps,
+  actor: UserPrincipal,
+): Promise<Result<{ user: User; account: AuthAccount }, AccountMissingError>> => {
   const account = await deps.accounts.getAccount(actor.uid);
   if (account === null) return err(new AccountMissingError());
-  const user = await deps.users.ensure({ uid: actor.uid, profile: account.profile, now: deps.clock.now().toISOString() });
+  const user = await deps.users.ensure({
+    uid: actor.uid,
+    profile: account.profile,
+    now: deps.clock.now().toISOString(),
+  });
   return ok({ user, account });
 };
 
@@ -23,7 +30,11 @@ export const loadMe = async (deps: Deps, actor: UserPrincipal): Promise<Result<{
  * only: the users doc is rewritten by the next organization switch, so `GET /v1/me` stays safe.
  * Fail-closed like every membership check (a reader error fails the request).
  */
-const liveLastContext = async (deps: Pick<MeDeps, "access" | "membership">, actor: UserPrincipal, lastContext: User["lastContext"]): Promise<User["lastContext"]> => {
+const liveLastContext = async (
+  deps: Pick<MeDeps, "access" | "membership">,
+  actor: UserPrincipal,
+  lastContext: User["lastContext"],
+): Promise<User["lastContext"]> => {
   const tenantId = lastContext.organizationId;
   if (tenantId === undefined) return lastContext;
   const member = await deps.membership.requireOrganizationMember({ access: deps.access.forRequest(), actor, tenantId });
@@ -46,7 +57,14 @@ export const describeMe = async (
     deps.mayCreateOrganization({ actor, access: deps.access.forRequest() }),
     liveLastContext(deps, actor, user.lastContext),
   ]);
-  return toMe({ ...user, lastContext }, { platformRole: staff?.isActive === true ? staff.role : null, mfaEnrolled: account.mfaEnrolled, capabilities: { createOrganization } });
+  return toMe(
+    { ...user, lastContext },
+    {
+      platformRole: staff?.isActive === true ? staff.role : null,
+      mfaEnrolled: account.mfaEnrolled,
+      capabilities: { createOrganization },
+    },
+  );
 };
 
 /**

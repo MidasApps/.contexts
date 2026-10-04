@@ -10,7 +10,9 @@ import { exampleNotesSkill } from "./notes-skill.ts";
  * runtime derives the action agent's tools `command.example.*` from that registry (decision 0025).
  * @throws {AgentModuleError} when a manifest ref has no implementation, or the reverse (boot error).
  */
-export const createExampleAgentModule = (deps: { readonly ports: Pick<AgentRuntimePorts, "workflowCommands"> }): AgentModule =>
+export const createExampleAgentModule = (deps: {
+  readonly ports: Pick<AgentRuntimePorts, "workflowCommands">;
+}): AgentModule =>
   defineAgentModule({
     id: exampleManifest.id,
     manifest: exampleManifest,

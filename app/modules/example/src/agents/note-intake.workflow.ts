@@ -13,7 +13,9 @@ export const NoteIntakeResultSchema = z.strictObject({
 export type NoteIntakeResult = z.infer<typeof NoteIntakeResultSchema>;
 
 const readNoteId = (output: unknown): string | null =>
-  typeof output === "object" && output !== null && "noteId" in output && typeof output.noteId === "string" ? output.noteId : null;
+  typeof output === "object" && output !== null && "noteId" in output && typeof output.noteId === "string"
+    ? output.noteId
+    : null;
 
 const createNoteStep = (deps: { readonly commands: WorkflowCommandPort }) =>
   createStep({
@@ -34,7 +36,9 @@ const createNoteStep = (deps: { readonly commands: WorkflowCommandPort }) =>
         idempotencyKey: runId,
         requestId: context.requestId,
       });
-      return result.ok ? { outcome: "created" as const, noteId: readNoteId(result.output), code: null } : { outcome: "failed" as const, noteId: null, code: result.code };
+      return result.ok
+        ? { outcome: "created" as const, noteId: readNoteId(result.output), code: null }
+        : { outcome: "failed" as const, noteId: null, code: result.code };
     },
   });
 

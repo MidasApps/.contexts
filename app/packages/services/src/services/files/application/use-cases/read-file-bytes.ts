@@ -2,7 +2,10 @@ import type { FilePurpose, StoredFile } from "@core/contracts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { FileObjectStore, FileRepository } from "../ports/file-ports.ts";
 
-export type ReadFileBytesError = { readonly code: "FILE_NOT_FOUND" } | { readonly code: "FILE_NOT_READY" } | { readonly code: "FILE_PURPOSE_MISMATCH" };
+export type ReadFileBytesError =
+  | { readonly code: "FILE_NOT_FOUND" }
+  | { readonly code: "FILE_NOT_READY" }
+  | { readonly code: "FILE_PURPOSE_MISMATCH" };
 
 export type ReadFileBytes = (input: {
   /** From the server-side context of the caller (agent request context, workflow), never from a model or body. */

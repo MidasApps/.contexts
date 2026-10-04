@@ -1,7 +1,12 @@
 import { OrganizationIdSchema, ProjectIdSchema, RoleIdSchema, UserIdSchema } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { buildEmulatorServer, clearCoreCollections, emulatorFirebase, seedActiveUser } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import {
+  buildEmulatorServer,
+  clearCoreCollections,
+  emulatorFirebase,
+  seedActiveUser,
+} from "../../../shared/testing/core-server-emulator.fixture.ts";
 
 const firebase = emulatorFirebase();
 const { firestore } = firebase;
@@ -23,18 +28,27 @@ const seedGrant = (uid: string, key: "owner" | "member") =>
     await plan.data.commit();
   });
 
-const body = async (response: Response) => (await response.json()) as { data?: Record<string, unknown>; error?: { code: string }; meta?: unknown };
+const body = async (response: Response) =>
+  (await response.json()) as { data?: Record<string, unknown>; error?: { code: string }; meta?: unknown };
 
 beforeEach(async () => {
   await clearCoreCollections(firestore);
-  await firestore.collection(CORE_COLLECTIONS.organizations).doc("org-a").set({ tenantId, status: "active", deletedAt: null });
+  await firestore
+    .collection(CORE_COLLECTIONS.organizations)
+    .doc("org-a")
+    .set({ tenantId, status: "active", deletedAt: null });
   await Promise.all(["owner-1", "member-1", "stranger"].map((uid) => seedActiveUser(firestore, uid)));
   await seedGrant("owner-1", "owner");
   await seedGrant("member-1", "member");
 });
 
 const createRole = (as: string, permissions: string[]) =>
-  harness.call("access.createRole", { method: "POST", path: "/v1/organizations/org-a/roles", as, body: { name: "Editor", permissions } });
+  harness.call("access.createRole", {
+    method: "POST",
+    path: "/v1/organizations/org-a/roles",
+    as,
+    body: { name: "Editor", permissions },
+  });
 
 describe("roles routes (emulator)", () => {
   it("creates (201 + Location), reads (200), lists (200), updates (200) and deletes (204) a role", async () => {
@@ -45,14 +59,32 @@ describe("roles routes (emulator)", () => {
 
     const read = await harness.call("access.getRole", { method: "GET", path: `/v1/roles/${role.id}`, as: "member-1" });
     expect(read.status).toBe(200);
-    const listed = await harness.call("access.listRoles", { method: "GET", path: "/v1/organizations/org-a/roles?limit=10", as: "owner-1" });
-    expect(await body(listed)).toMatchObject({ data: [{ id: role.id, name: "Editor" }], meta: { page: { hasMore: false, cursor: null, limit: 10 } } });
+    const listed = await harness.call("access.listRoles", {
+      method: "GET",
+      path: "/v1/organizations/org-a/roles?limit=10",
+      as: "owner-1",
+    });
+    expect(await body(listed)).toMatchObject({
+      data: [{ id: role.id, name: "Editor" }],
+      meta: { page: { hasMore: false, cursor: null, limit: 10 } },
+    });
 
-    const updated = await harness.call("access.updateRole", { method: "PATCH", path: `/v1/roles/${role.id}`, as: "owner-1", body: { name: "Viewer plus" } });
+    const updated = await harness.call("access.updateRole", {
+      method: "PATCH",
+      path: `/v1/roles/${role.id}`,
+      as: "owner-1",
+      body: { name: "Viewer plus" },
+    });
     expect(await body(updated)).toMatchObject({ data: { name: "Viewer plus" } });
-    const deleted = await harness.call("access.deleteRole", { method: "DELETE", path: `/v1/roles/${role.id}`, as: "owner-1" });
+    const deleted = await harness.call("access.deleteRole", {
+      method: "DELETE",
+      path: `/v1/roles/${role.id}`,
+      as: "owner-1",
+    });
     expect(deleted.status).toBe(204);
-    expect((await harness.call("access.getRole", { method: "GET", path: `/v1/roles/${role.id}`, as: "owner-1" })).status).toBe(404);
+    expect(
+      (await harness.call("access.getRole", { method: "GET", path: `/v1/roles/${role.id}`, as: "owner-1" })).status,
+    ).toBe(404);
   });
 
   it("answers 403 to a member without core.role.create and 404 to a stranger", async () => {
@@ -80,13 +112,21 @@ describe("roles routes (emulator)", () => {
       });
       if (plan.ok) await plan.data.commit();
     });
-    const inUse = await harness.call("access.deleteRole", { method: "DELETE", path: `/v1/roles/${role.id}`, as: "owner-1" });
+    const inUse = await harness.call("access.deleteRole", {
+      method: "DELETE",
+      path: `/v1/roles/${role.id}`,
+      as: "owner-1",
+    });
     expect(inUse.status).toBe(409);
     expect((await body(inUse)).error?.code).toBe("ROLE_IN_USE");
   });
 
   it("lists the registered tenant permissions", async () => {
-    const response = await harness.call("access.listPermissions", { method: "GET", path: "/v1/permissions?limit=100", as: "member-1" });
+    const response = await harness.call("access.listPermissions", {
+      method: "GET",
+      path: "/v1/permissions?limit=100",
+      as: "member-1",
+    });
     const listed = (await body(response)).data as unknown as { id: string; scope: string }[];
     expect(listed.some((permission) => permission.id === "core.project.read")).toBe(true);
     expect(listed.every((permission) => permission.scope === "tenant")).toBe(true);

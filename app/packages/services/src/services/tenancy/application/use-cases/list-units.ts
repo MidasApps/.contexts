@@ -1,9 +1,9 @@
 import type { ProjectId, Unit, UnitId } from "@core/contracts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
 import type { DenyReason } from "../../../access/domain/authorization.ts";
+import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
 import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
-import { unitNode, type TenancyCommand, type TenancyDeps } from "../tenancy-deps.ts";
+import { type TenancyCommand, type TenancyDeps, unitNode } from "../tenancy-deps.ts";
 import { loadTreeParent, type UnitError } from "./unit-access.ts";
 
 export type ListUnitsCommand = Omit<TenancyCommand, "requestId"> & {
@@ -26,12 +26,22 @@ export const makeListUnits =
   async (command) => {
     const parent = await loadTreeParent(deps, command);
     if (!parent.ok) return parent;
-    const decision = await command.access.authorize({ principal: command.actor, permission: "core.unit.read", node: parent.data.node });
+    const decision = await command.access.authorize({
+      principal: command.actor,
+      permission: "core.unit.read",
+      node: parent.data.node,
+    });
     if (!decision.allowed && !NARROWABLE.has(decision.reason)) return err(new AccessDeniedError(decision.reason));
-    const page = await deps.units.listChildren({ projectId: command.projectId, parentUnitId: command.parentUnitId, page: command.page });
+    const page = await deps.units.listChildren({
+      projectId: command.projectId,
+      parentUnitId: command.parentUnitId,
+      page: command.page,
+    });
     if (decision.allowed) return ok(page);
     const decisions = await Promise.all(
-      page.items.map((unit) => command.access.authorize({ principal: command.actor, permission: "core.unit.read", node: unitNode(unit) })),
+      page.items.map((unit) =>
+        command.access.authorize({ principal: command.actor, permission: "core.unit.read", node: unitNode(unit) }),
+      ),
     );
     const items = page.items.filter((_, index) => decisions[index]?.allowed === true);
     if (items.length === 0 && command.page.after === undefined) return err(new AccessDeniedError(decision.reason));

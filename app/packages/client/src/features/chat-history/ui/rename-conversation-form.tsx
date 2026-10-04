@@ -1,7 +1,7 @@
 "use client";
 
-import { MAX_TITLE_CHARS, type Conversation } from "@core/contracts";
-import { useId, useState, type FormEvent, type KeyboardEvent } from "react";
+import { type Conversation, MAX_TITLE_CHARS } from "@core/contracts";
+import { type FormEvent, type KeyboardEvent, useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";

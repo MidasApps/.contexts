@@ -6,7 +6,10 @@ import { createFirestoreUnitOfWork } from "../../../shared/firestore/unit-of-wor
 import { CONNECTORS_COLLECTION, createFirestoreConnectorRepository } from "./firestore-connector-repository.ts";
 import { createLocalSecretStore, LOCAL_SECRETS_COLLECTION } from "./local-secret-store.ts";
 
-const { firestore } = createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: process.env });
+const { firestore } = createFirebaseAdmin({
+  env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" },
+  processEnv: process.env,
+});
 const repository = createFirestoreConnectorRepository({ firestore });
 const unitOfWork = createFirestoreUnitOfWork({ firestore });
 // Tenants unique to this file: other suites share the emulator.
@@ -43,7 +46,9 @@ describe("firestore connector repository (emulator)", () => {
     const older = connectorOf(TENANT, "2026-09-30T10:00:00.000Z");
     const newer = connectorOf(TENANT, "2026-09-30T11:00:00.000Z", "disabled");
     const foreign = connectorOf(OTHER, "2026-09-30T12:00:00.000Z");
-    await unitOfWork.run((tx) => Promise.resolve([older, newer, foreign].forEach((connector) => repository.create(tx, { connector }))));
+    await unitOfWork.run((tx) =>
+      Promise.resolve([older, newer, foreign].forEach((connector) => repository.create(tx, { connector }))),
+    );
     const stored = (await firestore.collection(CONNECTORS_COLLECTION).doc(older.id).get()).data();
     expect(stored?.schemaVersion).toBe(1);
     expect(stored?.createdAt).toBeInstanceOf(Timestamp);
@@ -59,7 +64,9 @@ describe("firestore connector repository (emulator)", () => {
   it("replaces and deletes inside a transaction", async () => {
     const connector = connectorOf(TENANT, "2026-09-30T09:00:00.000Z");
     await unitOfWork.run((tx) => Promise.resolve(repository.create(tx, { connector })));
-    await unitOfWork.run((tx) => Promise.resolve(repository.replace(tx, { connector: { ...connector, name: "renamed" }, actorId: "bob" })));
+    await unitOfWork.run((tx) =>
+      Promise.resolve(repository.replace(tx, { connector: { ...connector, name: "renamed" }, actorId: "bob" })),
+    );
     expect((await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id }))?.name).toBe("renamed");
     await unitOfWork.run((tx) => Promise.resolve(repository.delete(tx, { connectorId: connector.id })));
     expect(await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id })).toBeNull();
@@ -70,7 +77,9 @@ describe("firestore connector repository (emulator)", () => {
     await unitOfWork.run((tx) => Promise.resolve(repository.create(tx, { connector })));
     const lastError = { code: "CONNECT_FAILED" as const, at: "2026-10-01T10:00:00.000Z" };
     await repository.recordLoad({ tenantId: OTHER, connectorId: connector.id, lastError });
-    expect((await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id }))?.lastError).toBeUndefined();
+    expect(
+      (await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id }))?.lastError,
+    ).toBeUndefined();
     await repository.recordLoad({ tenantId: TENANT, connectorId: connector.id, lastError });
     const stored = await firestore.collection(CONNECTORS_COLLECTION).doc(connector.id).get();
     expect(stored.get("lastError.at")).toBeInstanceOf(Timestamp);
@@ -79,8 +88,12 @@ describe("firestore connector repository (emulator)", () => {
     expect(failing.lastError).toEqual(lastError);
     expect(failing.updatedAt).toBe(connector.updatedAt);
     // An edit keeps the error until the runtime loads the connector again.
-    await unitOfWork.run((tx) => Promise.resolve(repository.replace(tx, { connector: { ...failing, name: "docs" }, actorId: "bob" })));
-    expect((await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id }))?.lastError).toEqual(lastError);
+    await unitOfWork.run((tx) =>
+      Promise.resolve(repository.replace(tx, { connector: { ...failing, name: "docs" }, actorId: "bob" })),
+    );
+    expect((await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id }))?.lastError).toEqual(
+      lastError,
+    );
     await repository.recordLoad({ tenantId: TENANT, connectorId: connector.id, lastError: null });
     expect((await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id }))?.lastError).toBeNull();
     await repository.recordLoad({ tenantId: TENANT, connectorId: repository.newId(), lastError });
@@ -92,6 +105,8 @@ describe("firestore connector repository (emulator)", () => {
     expect(await store.get("connector-emulator-test")).toBe("value-1");
     await store.delete("connector-emulator-test");
     expect(await store.get("connector-emulator-test")).toBeNull();
-    expect((await firestore.collection(LOCAL_SECRETS_COLLECTION).doc("connector-emulator-test").get()).exists).toBe(false);
+    expect((await firestore.collection(LOCAL_SECRETS_COLLECTION).doc("connector-emulator-test").get()).exists).toBe(
+      false,
+    );
   });
 });

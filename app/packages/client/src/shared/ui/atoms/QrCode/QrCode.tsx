@@ -9,7 +9,9 @@ const QUIET_ZONE = 4;
 const qrPath = (value: string): { size: number; d: string } => {
   // Level M survives a smudged or partly reflective screen at a size phones still read.
   const { size, data } = encode(value, { ecc: "M", border: QUIET_ZONE });
-  const squares = data.flatMap((row, y) => row.flatMap((dark, x) => (dark ? [`M${String(x)} ${String(y)}h1v1h-1z`] : [])));
+  const squares = data.flatMap((row, y) =>
+    row.flatMap((dark, x) => (dark ? [`M${String(x)} ${String(y)}h1v1h-1z`] : [])),
+  );
   return { size, d: squares.join("") };
 };
 
@@ -29,7 +31,13 @@ export function QrCode({ value, label, className }: QrCodeProps) {
   const { size, d } = useMemo(() => qrPath(value), [value]);
   return (
     <div data-theme="light" className={cn("inline-block rounded-md border border-border bg-background", className)}>
-      <svg role="img" aria-label={label} viewBox={`0 0 ${String(size)} ${String(size)}`} shapeRendering="crispEdges" className="block size-44">
+      <svg
+        role="img"
+        aria-label={label}
+        viewBox={`0 0 ${String(size)} ${String(size)}`}
+        shapeRendering="crispEdges"
+        className="block size-44"
+      >
         <path d={d} className="fill-foreground" />
       </svg>
     </div>

@@ -11,7 +11,9 @@ const converter = createContractConverter({ schema: z.object({ deletedAt: IsoDat
 /** Firestore `OrganizationGuard`: reads `organizations/{id}` in the caller's transaction. */
 export const createFirestoreOrganizationGuard = (deps: { firestore: Firestore }): OrganizationGuard => ({
   isLive: async (tx, tenantId) => {
-    const fields = (await tx.get(deps.firestore.collection(CORE_COLLECTIONS.organizations).withConverter(converter).doc(tenantId))).data();
+    const fields = (
+      await tx.get(deps.firestore.collection(CORE_COLLECTIONS.organizations).withConverter(converter).doc(tenantId))
+    ).data();
     return fields !== undefined && fields.deletedAt === null;
   },
 });

@@ -21,7 +21,12 @@ const toApiError = async (response: Response, requestId: string): Promise<ApiErr
     const { code, message, details, requestId: bodyRequestId } = envelope.data.error;
     return new ApiError({ status: response.status, code, message, details, requestId: bodyRequestId });
   }
-  return new ApiError({ status: response.status, code: "INVALID_RESPONSE", message: "Unexpected error response.", requestId });
+  return new ApiError({
+    status: response.status,
+    code: "INVALID_RESPONSE",
+    message: "Unexpected error response.",
+    requestId,
+  });
 };
 
 /**
@@ -49,7 +54,10 @@ export const sendRawRequest = async (connection: ApiConnection, request: RawRequ
     });
   } catch (error: unknown) {
     if (request.signal?.aborted === true) throw error;
-    throw new ApiError({ status: 0, code: "NETWORK_ERROR", message: "Network request failed.", requestId }, { cause: error });
+    throw new ApiError(
+      { status: 0, code: "NETWORK_ERROR", message: "Network request failed.", requestId },
+      { cause: error },
+    );
   }
   if (!response.ok) throw await toApiError(response, requestId);
   return response;

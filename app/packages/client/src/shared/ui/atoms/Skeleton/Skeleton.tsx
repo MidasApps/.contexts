@@ -7,5 +7,12 @@ import { cn } from "#/shared/lib/cn.ts";
  * (`aria-busy` + a `status` text, see the `LoadingState` molecule). Reduced motion stops the pulse.
  */
 export function Skeleton({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="skeleton" aria-hidden="true" className={cn("animate-pulse rounded-sm bg-muted", className)} {...props} />;
+  return (
+    <div
+      data-slot="skeleton"
+      aria-hidden="true"
+      className={cn("animate-pulse rounded-sm bg-muted", className)}
+      {...props}
+    />
+  );
 }

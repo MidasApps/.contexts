@@ -24,7 +24,13 @@ describe("toClientConfig", () => {
   });
 
   it("leaves the emulator out of a remote config (the client schema forbids it there)", () => {
-    const config = toClientConfig({ ...LOCAL_ENV, VITE_API_URL: "https://api.example.com", VITE_APP_ENV: "prod", VITE_AUTH_EMULATOR_URL: undefined, VITE_MFA_FACTORS: ["totp"] });
+    const config = toClientConfig({
+      ...LOCAL_ENV,
+      VITE_API_URL: "https://api.example.com",
+      VITE_APP_ENV: "prod",
+      VITE_AUTH_EMULATOR_URL: undefined,
+      VITE_MFA_FACTORS: ["totp"],
+    });
 
     expect(config).not.toHaveProperty("authEmulatorUrl");
     expect(config).toMatchObject({ appEnv: "prod", apiBaseUrl: "https://api.example.com", mfaFactors: ["totp"] });

@@ -1,8 +1,8 @@
 "use client";
 
-import { createRoleEndpoint, updateRoleEndpoint, type Permission, type Role } from "@core/contracts";
+import { createRoleEndpoint, type Permission, type Role, updateRoleEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { PermissionCatalogField, roleKeys, usePermissionCatalogReady } from "#/entities/role/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -10,12 +10,25 @@ import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
-import { changedRole, draftOf, validateRoleDraft, type RoleDraft, type RoleDraftProblems } from "../model/role-draft.ts";
+import {
+  changedRole,
+  draftOf,
+  type RoleDraft,
+  type RoleDraftProblems,
+  validateRoleDraft,
+} from "../model/role-draft.ts";
 
 export type RoleEditorDialogProps = {
   organizationId: string;
@@ -36,7 +49,13 @@ const useSaveRole = (organizationId: string, role: Role | null) => {
     let saved: Role | null = null;
     if (role === null) {
       const body = { name: draft.name.trim(), description: draft.description.trim(), permissions: draft.permissions };
-      saved = (await callEndpoint(createRoleEndpoint, { params: { organizationId }, body, idempotencyKey: idempotency.keyFor(body) })).data;
+      saved = (
+        await callEndpoint(createRoleEndpoint, {
+          params: { organizationId },
+          body,
+          idempotencyKey: idempotency.keyFor(body),
+        })
+      ).data;
       idempotency.reset();
     } else {
       const body = changedRole(role, draft);
@@ -82,7 +101,11 @@ function RoleEditorDialogBody({ organizationId, customRole: role, onOpenChange, 
     setPending(true);
     try {
       const saved = await save(draft);
-      notify.success(role === null ? t("created", { name: saved?.name ?? draft.name }) : t("updated", { name: saved?.name ?? draft.name }));
+      notify.success(
+        role === null
+          ? t("created", { name: saved?.name ?? draft.name })
+          : t("updated", { name: saved?.name ?? draft.name }),
+      );
       onOpenChange(false);
     } catch (error: unknown) {
       setFailure(error);
@@ -93,43 +116,54 @@ function RoleEditorDialogBody({ organizationId, customRole: role, onOpenChange, 
 
   return (
     <>
-        <DialogHeader>
-          <DialogTitle>{role === null ? t("createTitle") : t("editTitle", { name: role.name })}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
-        </DialogHeader>
-        <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
-          {failure === null ? null : <ApiErrorAlert error={failure} />}
-          <FieldGroup>
-            <Field>
-              <FieldLabel>{t("name")}</FieldLabel>
-              <FieldControl>
-                <Input ref={nameInput} required maxLength={120} value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} />
-              </FieldControl>
-              <FieldError errors={[problems.name === undefined ? undefined : t(`errors.${problems.name}`)]} />
-            </Field>
-            <Field>
-              <FieldLabel>{t("descriptionField")}</FieldLabel>
-              <FieldControl>
-                <Textarea rows={2} maxLength={500} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} />
-              </FieldControl>
-            </Field>
-            <PermissionCatalogField
-              legend={t("permissions")}
-              value={draft.permissions}
-              onChange={(next) => setDraft({ ...draft, permissions: next })}
-              grantable={grantable}
-              error={problems.permissions === true ? t("errors.permissions") : undefined}
-            />
-          </FieldGroup>
-          <DialogFooter>
-            <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
-              {t("cancel")}
-            </Button>
-            <Button type="submit" pending={pending} disabled={!catalogReady}>
-              {role === null ? t("create") : t("save")}
-            </Button>
-          </DialogFooter>
-        </form>
+      <DialogHeader>
+        <DialogTitle>{role === null ? t("createTitle") : t("editTitle", { name: role.name })}</DialogTitle>
+        <DialogDescription>{t("description")}</DialogDescription>
+      </DialogHeader>
+      <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
+        {failure === null ? null : <ApiErrorAlert error={failure} />}
+        <FieldGroup>
+          <Field>
+            <FieldLabel>{t("name")}</FieldLabel>
+            <FieldControl>
+              <Input
+                ref={nameInput}
+                required
+                maxLength={120}
+                value={draft.name}
+                onChange={(event) => setDraft({ ...draft, name: event.target.value })}
+              />
+            </FieldControl>
+            <FieldError errors={[problems.name === undefined ? undefined : t(`errors.${problems.name}`)]} />
+          </Field>
+          <Field>
+            <FieldLabel>{t("descriptionField")}</FieldLabel>
+            <FieldControl>
+              <Textarea
+                rows={2}
+                maxLength={500}
+                value={draft.description}
+                onChange={(event) => setDraft({ ...draft, description: event.target.value })}
+              />
+            </FieldControl>
+          </Field>
+          <PermissionCatalogField
+            legend={t("permissions")}
+            value={draft.permissions}
+            onChange={(next) => setDraft({ ...draft, permissions: next })}
+            grantable={grantable}
+            error={problems.permissions === true ? t("errors.permissions") : undefined}
+          />
+        </FieldGroup>
+        <DialogFooter>
+          <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
+            {t("cancel")}
+          </Button>
+          <Button type="submit" pending={pending} disabled={!catalogReady}>
+            {role === null ? t("create") : t("save")}
+          </Button>
+        </DialogFooter>
+      </form>
     </>
   );
 }

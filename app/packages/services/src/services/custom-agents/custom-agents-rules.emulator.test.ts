@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { assertFails, initializeTestEnvironment, type RulesTestContext, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
+import {
+  assertFails,
+  initializeTestEnvironment,
+  type RulesTestContext,
+  type RulesTestEnvironment,
+} from "@firebase/rules-unit-testing";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 
 // Custom agents and skills are server-only (decision 0046): no client reads or writes them
@@ -12,7 +17,10 @@ const COLLECTIONS = ["custom-agents", "custom-skills"] as const;
 let testEnv: RulesTestEnvironment;
 
 beforeAll(async () => {
-  testEnv = await initializeTestEnvironment({ projectId: PROJECT_ID, firestore: { rules: readFileSync(path.join(WORKSPACE_ROOT, "firestore.rules"), "utf8") } });
+  testEnv = await initializeTestEnvironment({
+    projectId: PROJECT_ID,
+    firestore: { rules: readFileSync(path.join(WORKSPACE_ROOT, "firestore.rules"), "utf8") },
+  });
 });
 
 afterAll(async () => {
@@ -21,7 +29,11 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await testEnv.withSecurityRulesDisabled(async (admin) => {
-    for (const collection of COLLECTIONS) await admin.firestore().doc(`${collection}/rules-1`).set({ tenantId: "org-1", name: "x", instructions: "private" });
+    for (const collection of COLLECTIONS)
+      await admin
+        .firestore()
+        .doc(`${collection}/rules-1`)
+        .set({ tenantId: "org-1", name: "x", instructions: "private" });
   });
 });
 

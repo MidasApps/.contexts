@@ -3,7 +3,7 @@
 import type { ComponentProps } from "react";
 import { useTranslations } from "use-intl";
 import { Combobox } from "#/shared/ui/molecules/Combobox/Combobox.tsx";
-import { nodeFromOptionValue, nodeOptionValue, useNodeOptions, type TenantNodeInput } from "../model/node-options.ts";
+import { nodeFromOptionValue, nodeOptionValue, type TenantNodeInput, useNodeOptions } from "../model/node-options.ts";
 
 export type NodeSelectProps = Omit<ComponentProps<"button">, "value" | "onChange" | "children"> & {
   organization: { id: string; name: string };

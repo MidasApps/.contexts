@@ -19,13 +19,29 @@ describe("eval datasets", () => {
   });
 
   it("reports the line of an invalid case", () => {
-    expect(() => parseEvalDataset({ agentId: "data", version: 1, text: '{"id":"ok","input":"hi"}\n{"id":"bad"}\n' })).toThrow(/line 2/);
+    expect(() =>
+      parseEvalDataset({ agentId: "data", version: 1, text: '{"id":"ok","input":"hi"}\n{"id":"bad"}\n' }),
+    ).toThrow(/line 2/);
   });
 
   it("skips blank lines and keeps the case expectations as ground truth", () => {
-    const dataset = parseEvalDataset({ agentId: "data", version: 1, text: '\n{"id":"a","input":"Which entities exist?","expectedTools":["catalog.listEntities"]}\n\n' });
+    const dataset = parseEvalDataset({
+      agentId: "data",
+      version: 1,
+      text: '\n{"id":"a","input":"Which entities exist?","expectedTools":["catalog.listEntities"]}\n\n',
+    });
     expect(dataset.cases).toEqual([
-      { id: "a", input: "Which entities exist?", tags: [], groundTruth: { expectedTools: ["catalog.listEntities"], forbiddenTools: [], expectCitations: false, foreignMarkers: [] } },
+      {
+        id: "a",
+        input: "Which entities exist?",
+        tags: [],
+        groundTruth: {
+          expectedTools: ["catalog.listEntities"],
+          forbiddenTools: [],
+          expectCitations: false,
+          foreignMarkers: [],
+        },
+      },
     ]);
   });
 

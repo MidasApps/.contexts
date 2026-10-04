@@ -26,7 +26,11 @@ const axis = (index: number, tilt = 0): number[] => {
   return vector.map((value) => value / norm);
 };
 
-const hash = (label: string): string => label.padEnd(64, "0").replace(/[^a-f0-9]/g, "a").slice(0, 64);
+const hash = (label: string): string =>
+  label
+    .padEnd(64, "0")
+    .replace(/[^a-f0-9]/g, "a")
+    .slice(0, 64);
 
 const doc = (overrides: Partial<NewKnowledgeDocument> = {}): NewKnowledgeDocument => ({
   tenantId: TENANT_A,
@@ -42,7 +46,8 @@ const doc = (overrides: Partial<NewKnowledgeDocument> = {}): NewKnowledgeDocumen
   ...overrides,
 });
 
-const chunk = (chunkIndex: number, embedding: number[], text = `chunk ${chunkIndex}`) => ({ chunkIndex, text, tokenCount: 3, embedding, metadata: {} }) satisfies NewChunk;
+const chunk = (chunkIndex: number, embedding: number[], text = `chunk ${chunkIndex}`) =>
+  ({ chunkIndex, text, tokenCount: 3, embedding, metadata: {} }) satisfies NewChunk;
 
 // Test cleanup as the runtime role, one tenant at a time (RLS lets nothing else through).
 const cleanup = async (): Promise<void> => {
@@ -64,46 +69,110 @@ afterAll(async () => {
 
 const indexed = async (document: NewKnowledgeDocument, chunks: NewChunk[]) => {
   const { document: stored } = await repository.upsertDocument(document);
-  await repository.replaceChunks({ tenantId: document.tenantId, documentId: stored.id, embeddingModel: MODEL, embeddingVersion: "v1", chunks });
+  await repository.replaceChunks({
+    tenantId: document.tenantId,
+    documentId: stored.id,
+    embeddingModel: MODEL,
+    embeddingVersion: "v1",
+    chunks,
+  });
   return stored;
 };
 
 describe("postgres knowledge repository", () => {
   it("upserts idempotently by (tenant_id, source, source_ref) and flags unchanged content", async () => {
     const first = await repository.upsertDocument(doc());
-    await repository.replaceChunks({ tenantId: TENANT_A, documentId: first.document.id, embeddingModel: MODEL, embeddingVersion: "v1", chunks: [chunk(0, axis(0))] });
+    await repository.replaceChunks({
+      tenantId: TENANT_A,
+      documentId: first.document.id,
+      embeddingModel: MODEL,
+      embeddingVersion: "v1",
+      chunks: [chunk(0, axis(0))],
+    });
     const again = await repository.upsertDocument(doc());
     expect(again).toMatchObject({ unchanged: true, document: { id: first.document.id, status: "ready" } });
     const changed = await repository.upsertDocument(doc({ contentHash: hash("b2"), title: "Guide v2" }));
-    expect(changed).toMatchObject({ unchanged: false, document: { id: first.document.id, status: "pending", title: "Guide v2" } });
+    expect(changed).toMatchObject({
+      unchanged: false,
+      document: { id: first.document.id, status: "pending", title: "Guide v2" },
+    });
     expect((await repository.listDocuments({ tenantId: TENANT_A, limit: 10 })).documents).toHaveLength(1);
   });
 
   it("replaces chunks atomically: a failing insert keeps the previous chunks", async () => {
     const stored = await indexed(doc(), [chunk(0, axis(0)), chunk(1, axis(1))]);
     const broken = [chunk(0, axis(2)), chunk(0, axis(3))]; // duplicate chunk_index violates the unique key
-    await expect(repository.replaceChunks({ tenantId: TENANT_A, documentId: stored.id, embeddingModel: MODEL, embeddingVersion: "v1", chunks: broken })).rejects.toThrow();
-    const hits = await repository.searchChunks({ tenantId: TENANT_A, namespaces: ["tenant"], embedding: axis(1), embeddingModel: MODEL, topK: 5 });
+    await expect(
+      repository.replaceChunks({
+        tenantId: TENANT_A,
+        documentId: stored.id,
+        embeddingModel: MODEL,
+        embeddingVersion: "v1",
+        chunks: broken,
+      }),
+    ).rejects.toThrow();
+    const hits = await repository.searchChunks({
+      tenantId: TENANT_A,
+      namespaces: ["tenant"],
+      embedding: axis(1),
+      embeddingModel: MODEL,
+      topK: 5,
+    });
     expect(hits.map((hit) => hit.chunkIndex).sort()).toEqual([0, 1]);
   });
 
   it("never returns tenant B's chunks to tenant A, even with the same text", async () => {
     await indexed(doc({ tenantId: TENANT_A }), [chunk(0, axis(5), "same text")]);
     const other = await indexed(doc({ tenantId: TENANT_B }), [chunk(0, axis(5), "same text")]);
-    const hits = await repository.searchChunks({ tenantId: TENANT_A, namespaces: ["tenant"], embedding: axis(5), embeddingModel: MODEL, topK: 10 });
+    const hits = await repository.searchChunks({
+      tenantId: TENANT_A,
+      namespaces: ["tenant"],
+      embedding: axis(5),
+      embeddingModel: MODEL,
+      topK: 10,
+    });
     expect(hits).toHaveLength(1);
     expect(hits.map((hit) => hit.documentId)).not.toContain(other.id);
   });
 
   it("shows _platform rows to every tenant but lets no tenant write them", async () => {
-    const platform = await indexed(doc({ tenantId: PLATFORM, namespace: "catalog", source: "catalog", sourceRef: "contract:example.Note", createdBy: null }), [chunk(0, axis(7))]);
+    const platform = await indexed(
+      doc({
+        tenantId: PLATFORM,
+        namespace: "catalog",
+        source: "catalog",
+        sourceRef: "contract:example.Note",
+        createdBy: null,
+      }),
+      [chunk(0, axis(7))],
+    );
     for (const tenantId of [TENANT_A, TENANT_B]) {
-      const hits = await repository.searchChunks({ tenantId, namespaces: ["catalog"], embedding: axis(7), embeddingModel: MODEL, topK: 3 });
+      const hits = await repository.searchChunks({
+        tenantId,
+        namespaces: ["catalog"],
+        embedding: axis(7),
+        embeddingModel: MODEL,
+        topK: 3,
+      });
       expect(hits.map((hit) => hit.documentId)).toEqual([platform.id]);
     }
-    expect(await repository.replaceChunks({ tenantId: TENANT_A, documentId: platform.id, embeddingModel: MODEL, embeddingVersion: "v1", chunks: [] })).toBe(false);
+    expect(
+      await repository.replaceChunks({
+        tenantId: TENANT_A,
+        documentId: platform.id,
+        embeddingModel: MODEL,
+        embeddingVersion: "v1",
+        chunks: [],
+      }),
+    ).toBe(false);
     expect(await repository.deleteDocument({ tenantId: TENANT_A, documentId: platform.id })).toBe(false);
-    const stillThere = await repository.searchChunks({ tenantId: TENANT_B, namespaces: ["catalog"], embedding: axis(7), embeddingModel: MODEL, topK: 3 });
+    const stillThere = await repository.searchChunks({
+      tenantId: TENANT_B,
+      namespaces: ["catalog"],
+      embedding: axis(7),
+      embeddingModel: MODEL,
+      topK: 3,
+    });
     expect(stillThere).toHaveLength(1);
   });
 
@@ -120,7 +189,13 @@ describe("postgres knowledge repository", () => {
   it("filters by namespace", async () => {
     await indexed(doc({ namespace: "project:p1", sourceRef: "file-p1" }), [chunk(0, axis(9))]);
     await indexed(doc({ namespace: "tenant", sourceRef: "file-t" }), [chunk(0, axis(9, 0.1))]);
-    const hits = await repository.searchChunks({ tenantId: TENANT_A, namespaces: ["project:p1"], embedding: axis(9), embeddingModel: MODEL, topK: 10 });
+    const hits = await repository.searchChunks({
+      tenantId: TENANT_A,
+      namespaces: ["project:p1"],
+      embedding: axis(9),
+      embeddingModel: MODEL,
+      topK: 10,
+    });
     expect(hits.map((hit) => hit.namespace)).toEqual(["project:p1"]);
   });
 
@@ -166,11 +241,20 @@ describe("knowledge use cases over Postgres", () => {
   it("replaces chunks and searches with citations, dropping weak matches", async () => {
     const { document } = await repository.upsertDocument(doc());
     const replace = makeReplaceDocumentChunks({ repository });
-    const replaced = await replace({ tenantId: TENANT_A, documentId: document.id, embeddingModel: MODEL, embeddingVersion: "v1", chunks: [chunk(0, axis(20)), chunk(1, axis(40))] });
+    const replaced = await replace({
+      tenantId: TENANT_A,
+      documentId: document.id,
+      embeddingModel: MODEL,
+      embeddingVersion: "v1",
+      chunks: [chunk(0, axis(20)), chunk(1, axis(40))],
+    });
     expect(replaced).toEqual({ ok: true, data: { chunkCount: 2 } });
     const search = makeSearchChunks({ repository, embeddingModel: MODEL });
     const result = await search({ tenantId: TENANT_A, namespaces: ["tenant"], embedding: axis(20, 0.05), topK: 5 });
-    expect(result).toMatchObject({ ok: true, data: [{ citationId: `kb:${document.id}#0`, documentId: document.id, title: "Guide", snippet: "chunk 0" }] });
+    expect(result).toMatchObject({
+      ok: true,
+      data: [{ citationId: `kb:${document.id}#0`, documentId: document.id, title: "Guide", snippet: "chunk 0" }],
+    });
     if (result.ok) expect(result.data).toHaveLength(1); // the orthogonal chunk scores ~0 and is dropped
   });
 });

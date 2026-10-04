@@ -1,32 +1,59 @@
 // Removable sample so the catalog is never empty. Delete this file and its
 // re-exports in src/index.ts and src/composition.ts once a real contract exists.
 import { z } from "zod";
+import { defineContract } from "../contract.ts";
 import { firestoreIdSchema, TenantIdSchema, UserIdSchema } from "../primitives/ids.schema.ts";
 import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
-import { defineContract } from "../contract.ts";
 
 export const NoteIdSchema = firestoreIdSchema<"NoteId">();
 export type NoteId = z.infer<typeof NoteIdSchema>;
 
 export const NoteSchema = z.object({
   id: NoteIdSchema.meta({ description: "Firestore automatic id of the note.", pii: "none", ui: { widget: "hidden" } }),
-  tenantId: TenantIdSchema.meta({ description: "Organization that owns the note.", pii: "none", ui: { widget: "hidden" } }),
-  authorId: UserIdSchema.meta({ description: "Firebase Auth uid of the author.", pii: "personal", ui: { widget: "hidden" } }),
-  title: z.string().min(1).max(200).meta({
-    description: "Short title shown in lists.",
+  tenantId: TenantIdSchema.meta({
+    description: "Organization that owns the note.",
     pii: "none",
-    ui: { widget: "text", labelKey: "example.note.title", order: 1 },
-    examples: ["Supplier follow-up"],
+    ui: { widget: "hidden" },
   }),
-  body: z.string().max(10_000).meta({
-    description: "Free text written by the author; may mention people.",
+  authorId: UserIdSchema.meta({
+    description: "Firebase Auth uid of the author.",
     pii: "personal",
-    ui: { widget: "textarea", labelKey: "example.note.body", order: 2 },
-    examples: ["Call Ana about the invoice on Monday."],
+    ui: { widget: "hidden" },
   }),
-  createdAt: IsoDateTimeSchema.meta({ description: "When the note was created (UTC).", pii: "none", ui: { widget: "hidden" } }),
-  updatedAt: IsoDateTimeSchema.meta({ description: "When the note last changed (UTC).", pii: "none", ui: { widget: "hidden" } }),
-  archivedAt: IsoDateTimeSchema.optional().meta({ description: "When the note was archived (UTC); absent while it is active.", pii: "none", ui: { widget: "hidden" } }),
+  title: z
+    .string()
+    .min(1)
+    .max(200)
+    .meta({
+      description: "Short title shown in lists.",
+      pii: "none",
+      ui: { widget: "text", labelKey: "example.note.title", order: 1 },
+      examples: ["Supplier follow-up"],
+    }),
+  body: z
+    .string()
+    .max(10_000)
+    .meta({
+      description: "Free text written by the author; may mention people.",
+      pii: "personal",
+      ui: { widget: "textarea", labelKey: "example.note.body", order: 2 },
+      examples: ["Call Ana about the invoice on Monday."],
+    }),
+  createdAt: IsoDateTimeSchema.meta({
+    description: "When the note was created (UTC).",
+    pii: "none",
+    ui: { widget: "hidden" },
+  }),
+  updatedAt: IsoDateTimeSchema.meta({
+    description: "When the note last changed (UTC).",
+    pii: "none",
+    ui: { widget: "hidden" },
+  }),
+  archivedAt: IsoDateTimeSchema.optional().meta({
+    description: "When the note was archived (UTC); absent while it is active.",
+    pii: "none",
+    ui: { widget: "hidden" },
+  }),
 });
 export type Note = z.infer<typeof NoteSchema>;
 

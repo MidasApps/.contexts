@@ -4,7 +4,14 @@ import type { AccessDeniedError } from "../../../access/domain/errors/access-den
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { TenancyNotFoundError } from "../../domain/errors/tenancy-not-found-error.ts";
-import { changedKeys, organizationNode, projectNode, recordTenancyAudit, type TenancyCommand, type TenancyDeps } from "../tenancy-deps.ts";
+import {
+  changedKeys,
+  organizationNode,
+  projectNode,
+  recordTenancyAudit,
+  type TenancyCommand,
+  type TenancyDeps,
+} from "../tenancy-deps.ts";
 
 export type ProjectError = AccessDeniedError | TenancyNotFoundError;
 
@@ -27,7 +34,11 @@ export type CreateProjectCommand = TenancyCommand & { readonly tenantId: TenantI
 export const makeCreateProject =
   (deps: TenancyDeps) =>
   async (command: CreateProjectCommand): Promise<Result<Project, AccessDeniedError>> => {
-    const allowed = await requirePermission({ ...command, permission: "core.project.create", node: organizationNode(command.tenantId) });
+    const allowed = await requirePermission({
+      ...command,
+      permission: "core.project.create",
+      node: organizationNode(command.tenantId),
+    });
     if (!allowed.ok) return allowed;
     const now = deps.clock.now().toISOString();
     const { name, description, settings } = command.input;
@@ -43,7 +54,12 @@ export const makeCreateProject =
     };
     await deps.unitOfWork.run(async (tx) => {
       deps.projects.create(tx, { project, actorId: auditActorOf(command.actor).id });
-      await recordTenancyAudit(tx, deps, command, { tenantId: project.tenantId, action: "PROJECT_CREATED", target: { type: "project", id: project.id }, node: projectNode(project) });
+      await recordTenancyAudit(tx, deps, command, {
+        tenantId: project.tenantId,
+        action: "PROJECT_CREATED",
+        target: { type: "project", id: project.id },
+        node: projectNode(project),
+      });
     });
     return ok(project);
   };
@@ -77,13 +93,21 @@ const applyProjectPatch = (project: Project, input: UpdateProjectInput, now: str
 /** Changes a project (`core.project.update`). */
 export const makeUpdateProject =
   (deps: TenancyDeps) =>
-  async (command: ProjectCommand & TenancyCommand & { readonly input: UpdateProjectInput }): Promise<Result<Project, ProjectError>> => {
+  async (
+    command: ProjectCommand & TenancyCommand & { readonly input: UpdateProjectInput },
+  ): Promise<Result<Project, ProjectError>> => {
     const loaded = await loadAuthorizedProject(deps, { ...command, permission: "core.project.update" });
     if (!loaded.ok) return loaded;
     const next = applyProjectPatch(loaded.data, command.input, deps.clock.now().toISOString());
     await deps.unitOfWork.run(async (tx) => {
       deps.projects.update(tx, { project: next, actorId: auditActorOf(command.actor).id });
-      await recordTenancyAudit(tx, deps, command, { tenantId: next.tenantId, action: "PROJECT_UPDATED", target: { type: "project", id: next.id }, node: projectNode(next), changes: changedKeys(command.input) });
+      await recordTenancyAudit(tx, deps, command, {
+        tenantId: next.tenantId,
+        action: "PROJECT_UPDATED",
+        target: { type: "project", id: next.id },
+        node: projectNode(next),
+        changes: changedKeys(command.input),
+      });
     });
     return ok(next);
   };
@@ -96,11 +120,18 @@ const CASCADE_ROUND = 400;
  * (decision 0030 §3): Security Rules read units without their project, so none may outlive
  * it. An interrupted delete leaves the project live and a retry finishes the units.
  */
-const cascadeUnits = async (deps: Pick<TenancyDeps, "units">, args: { projectId: ProjectId; deletedAt: string; actorId: string }): Promise<void> => {
+const cascadeUnits = async (
+  deps: Pick<TenancyDeps, "units">,
+  args: { projectId: ProjectId; deletedAt: string; actorId: string },
+): Promise<void> => {
   for (;;) {
     const units = await deps.units.listOfProject({ projectId: args.projectId, limit: CASCADE_ROUND });
     if (units.length === 0) return;
-    await deps.units.softDeleteMany({ ids: units.map((unit) => unit.id), deletedAt: args.deletedAt, actorId: args.actorId });
+    await deps.units.softDeleteMany({
+      ids: units.map((unit) => unit.id),
+      deletedAt: args.deletedAt,
+      actorId: args.actorId,
+    });
   }
 };
 
@@ -116,7 +147,12 @@ export const makeDeleteProject =
     await cascadeUnits(deps, { projectId: project.id, deletedAt, actorId });
     await deps.unitOfWork.run(async (tx) => {
       deps.projects.softDelete(tx, { id: project.id, deletedAt, actorId });
-      await recordTenancyAudit(tx, deps, command, { tenantId: project.tenantId, action: "PROJECT_DELETED", target: { type: "project", id: project.id }, node: projectNode(project) });
+      await recordTenancyAudit(tx, deps, command, {
+        tenantId: project.tenantId,
+        action: "PROJECT_DELETED",
+        target: { type: "project", id: project.id },
+        node: projectNode(project),
+      });
     });
     return ok(undefined);
   };

@@ -14,7 +14,8 @@ export class PubSubConfigError extends Error {
 
 // Lazy: `@mastra/google-cloud-pubsub` pulls @google-cloud/pubsub (gRPC) and inngest, which
 // local runs never need.
-const loadGoogleCloudPubSub = async (): Promise<GcpPubSubClass> => (await import("@mastra/google-cloud-pubsub")).GoogleCloudPubSub;
+const loadGoogleCloudPubSub = async (): Promise<GcpPubSubClass> =>
+  (await import("@mastra/google-cloud-pubsub")).GoogleCloudPubSub;
 
 /**
  * Mastra's event bus (SP3 spec §14, Task 25): `memory` is Mastra's in-process

@@ -6,7 +6,9 @@ import { RegionalDefaultsSchema } from "./regional-defaults.schema.ts";
 
 export const CreateOrganizationInputSchema = z.strictObject({
   name: NodeNameSchema.meta(none("Display name of the new organization.")),
-  defaults: z.strictObject(RegionalDefaultsSchema.shape).meta(none("Regional defaults: locale, time zone and currency.")),
+  defaults: z
+    .strictObject(RegionalDefaultsSchema.shape)
+    .meta(none("Regional defaults: locale, time zone and currency.")),
 });
 export type CreateOrganizationInput = z.infer<typeof CreateOrganizationInputSchema>;
 

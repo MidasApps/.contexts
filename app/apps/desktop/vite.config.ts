@@ -14,19 +14,19 @@ export default defineConfig(({ mode }) => {
   // VITE_API_URL instead of bundling an app that cannot reach its API.
   loadDesktopBuildEnv({ mode, envDir: import.meta.dirname });
   return {
-  // The router plugin must run before the React plugin (TanStack Router docs); Tailwind 4 compiles
-  // src/styles.css (the shared @core/client tokens) through its Vite plugin.
-  plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), tailwindcss()],
-  // Same alias as tsconfig `paths` (rule development: no ../../ imports).
-  resolve: { alias: { "@": path.resolve(import.meta.dirname, "src") } },
-  // Keep Rust compiler output visible when `tauri dev` runs Vite.
-  clearScreen: false,
-  // Only VITE_* reaches the bundle; everything in it is public (secrets.md §5.3).
-  envPrefix: ["VITE_"],
-  server: {
-    port: DEV_PORT,
-    strictPort: true,
-    watch: { ignored: ["**/src-tauri/**"] },
-  },
+    // The router plugin must run before the React plugin (TanStack Router docs); Tailwind 4 compiles
+    // src/styles.css (the shared @core/client tokens) through its Vite plugin.
+    plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), tailwindcss()],
+    // Same alias as tsconfig `paths` (rule development: no ../../ imports).
+    resolve: { alias: { "@": path.resolve(import.meta.dirname, "src") } },
+    // Keep Rust compiler output visible when `tauri dev` runs Vite.
+    clearScreen: false,
+    // Only VITE_* reaches the bundle; everything in it is public (secrets.md §5.3).
+    envPrefix: ["VITE_"],
+    server: {
+      port: DEV_PORT,
+      strictPort: true,
+      watch: { ignored: ["**/src-tauri/**"] },
+    },
   };
 });

@@ -22,7 +22,8 @@ const movableClock = (iso: string) => {
   };
 };
 
-const scope = (key: string) => idempotencyScopeKey({ principalKey: "user:u1", endpointId: "tenancy.createProject", idempotencyKey: key });
+const scope = (key: string) =>
+  idempotencyScopeKey({ principalKey: "user:u1", endpointId: "tenancy.createProject", idempotencyKey: key });
 
 beforeEach(async () => {
   await firestore.recursiveDelete(firestore.collection(IDEMPOTENCY_RECORDS_COLLECTION));

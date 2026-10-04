@@ -1,6 +1,10 @@
 import type { IncomingMessage } from "node:http";
 import { AgentRequestContextSchema, PrincipalSchema } from "@core/contracts";
-import { type AgentContextSnapshot, readAgentContext, type RequestContextReader } from "../context/agent-request-context.ts";
+import {
+  type AgentContextSnapshot,
+  type RequestContextReader,
+  readAgentContext,
+} from "../context/agent-request-context.ts";
 import { type RequestContextStore, writeAgentContext } from "../context/write-agent-context.ts";
 import type { AccessPrincipal } from "../runtime/runtime-ports.ts";
 
@@ -30,13 +34,21 @@ const BEARER = /^Bearer\s+(\S+)$/i;
  * `server.mcpOptions.setRequestAuth` of `new Mastra()`: runs after the context middleware
  * and Mastra's route auth, on the Node request handed to the MCP transport.
  */
-export const setMcpRequestAuth = (req: IncomingMessage & { auth?: McpAuthInfo }, requestContext: RequestContextReader): void => {
+export const setMcpRequestAuth = (
+  req: IncomingMessage & { auth?: McpAuthInfo },
+  requestContext: RequestContextReader,
+): void => {
   const read = readAgentContext(requestContext);
   const header: unknown = req.headers.authorization;
   const token = BEARER.exec(typeof header === "string" ? header : "")?.[1];
   if (!read.ok || token === undefined) return;
   const { context, principal } = read.data;
-  req.auth = { token, clientId: context.userId, scopes: [...context.permissions], extra: { [MCP_AGENT_CONTEXT_KEY]: { context, principal } } };
+  req.auth = {
+    token,
+    clientId: context.userId,
+    scopes: [...context.permissions],
+    extra: { [MCP_AGENT_CONTEXT_KEY]: { context, principal } },
+  };
 };
 
 const snapshotOf = (extra: Record<string, unknown> | undefined): AgentContextSnapshot | null => {
@@ -54,9 +66,17 @@ const snapshotOf = (extra: Record<string, unknown> | undefined): AgentContextSna
  * answers the user (the caller's uid) that request-state continuations are bound to.
  * @returns `null` (no user, nothing written) for an unverified or malformed snapshot.
  */
-export const hydrateMcpRequestContext = (args: { readonly authInfo: unknown; readonly requestContext: RequestContextStore }): { readonly id: string } | null => {
-  const extra = typeof args.authInfo === "object" && args.authInfo !== null ? (args.authInfo as { extra?: unknown }).extra : undefined;
-  const snapshot = snapshotOf(typeof extra === "object" && extra !== null ? (extra as Record<string, unknown>) : undefined);
+export const hydrateMcpRequestContext = (args: {
+  readonly authInfo: unknown;
+  readonly requestContext: RequestContextStore;
+}): { readonly id: string } | null => {
+  const extra =
+    typeof args.authInfo === "object" && args.authInfo !== null
+      ? (args.authInfo as { extra?: unknown }).extra
+      : undefined;
+  const snapshot = snapshotOf(
+    typeof extra === "object" && extra !== null ? (extra as Record<string, unknown>) : undefined,
+  );
   if (snapshot === null) return null;
   writeAgentContext(args.requestContext, snapshot);
   return readAgentContext(args.requestContext).ok ? { id: snapshot.context.userId } : null;

@@ -61,7 +61,12 @@ describe("AppShellTemplate", () => {
   it("persists the sidebar state through the injected callback", async () => {
     const persist = vi.fn();
     const { user } = renderWithProviders(
-      <AppShellTemplate sidebar={SIDEBAR} topbar={<SidebarTrigger />} sidebarDefaultOpen={false} persistSidebarState={persist}>
+      <AppShellTemplate
+        sidebar={SIDEBAR}
+        topbar={<SidebarTrigger />}
+        sidebarDefaultOpen={false}
+        persistSidebarState={persist}
+      >
         <h1>Projeto</h1>
       </AppShellTemplate>,
     );

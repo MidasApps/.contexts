@@ -1,9 +1,9 @@
-import { expect, test as setup } from "@playwright/test";
 import { readE2eEnv } from "@core/e2e/e2e-env";
 import { createEmulatorAuth } from "@core/e2e/emulator";
 import { readWorld, SEED_USERS, seedWorld, writeWorld } from "@core/e2e/seed-users";
 import { completeSmsChallenge, signInThroughUi, submitSignIn } from "@core/e2e/sign-in";
 import { warmAgentRuntime } from "@core/e2e/warm-agents";
+import { expect, test as setup } from "@playwright/test";
 import { authFile, WEB_AUTH_DIR } from "./web-test.ts";
 
 // Seeds the e2e world once, then signs each seeded user in through the UI and keeps the storage

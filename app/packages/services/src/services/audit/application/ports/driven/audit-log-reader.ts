@@ -11,5 +11,9 @@ export type AuditLogFilters = {
 
 /** Driven port: reads `audit-logs` of one tenant, newest first (`occurredAt desc`, id desc). */
 export type AuditLogReader = {
-  readonly list: (args: { tenantId: TenantId; filters: AuditLogFilters; page: PageRequest }) => Promise<Page<AuditLogEntry>>;
+  readonly list: (args: {
+    tenantId: TenantId;
+    filters: AuditLogFilters;
+    page: PageRequest;
+  }) => Promise<Page<AuditLogEntry>>;
 };

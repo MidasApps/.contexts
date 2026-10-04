@@ -15,7 +15,11 @@ export function ApprovalPendingPart({ props }: GenerativeComponentProps<Approval
   const t = useTranslations("chat.ui.approvalPending");
   const { approvalHref } = useGenerativeUi();
   return (
-    <section data-slot="approval-pending" aria-label={t("title")} className="flex flex-col gap-3 rounded-md border border-amber/40 bg-card p-4 text-sm">
+    <section
+      data-slot="approval-pending"
+      aria-label={t("title")}
+      className="flex flex-col gap-3 rounded-md border border-amber/40 bg-card p-4 text-sm"
+    >
       <div className="flex items-start gap-2.5">
         <UsersIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber" />
         <div className="min-w-0 space-y-0.5">

@@ -34,7 +34,8 @@ export const createEvalExportWorkflow = (deps: { readonly evalExport: EvalExport
         inputSchema: z.strictObject({}),
         outputSchema: EvalExportResultSchema,
         execute: async ({ requestContext }) => {
-          if (!isPlatformRun(requestContext)) return { status: "failed" as const, experiments: 0, rows: 0, code: PLATFORM_ONLY };
+          if (!isPlatformRun(requestContext))
+            return { status: "failed" as const, experiments: 0, rows: 0, code: PLATFORM_ONLY };
           const since = new Date((deps.now ?? (() => new Date()))().getTime() - EVAL_EXPORT_WINDOW_MS).toISOString();
           const summaries = await deps.evalExport.listFinishedSince({ since });
           const rows = summaries.length === 0 ? 0 : await deps.evalExport.exportSummaries(summaries);

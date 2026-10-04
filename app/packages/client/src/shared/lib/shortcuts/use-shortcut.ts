@@ -15,7 +15,10 @@ export type ShortcutOptions = {
 
 const isEditableTarget = (target: EventTarget | null): boolean =>
   target instanceof HTMLElement &&
-  (target.isContentEditable || target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT");
+  (target.isContentEditable ||
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.tagName === "SELECT");
 
 /** `true` when the event is ⌘/Ctrl + `key` without Alt/Shift. */
 export const isModShortcut = (event: KeyboardEvent, key: string): boolean =>
@@ -25,7 +28,13 @@ export const isModShortcut = (event: KeyboardEvent, key: string): boolean =>
  * Registers a global keyboard shortcut on `window`. Single-key shortcuts (no `mod`) never fire in
  * editable fields, so they cannot hijack typing (WCAG 2.1.4); modifier shortcuts do by default.
  */
-export const useShortcut = ({ key, mod = true, onTrigger, enabled = true, allowInEditable = mod }: ShortcutOptions): void => {
+export const useShortcut = ({
+  key,
+  mod = true,
+  onTrigger,
+  enabled = true,
+  allowInEditable = mod,
+}: ShortcutOptions): void => {
   const handler = useRef(onTrigger);
   useEffect(() => {
     handler.current = onTrigger;

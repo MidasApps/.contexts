@@ -8,5 +8,8 @@ export type DeviceActivationRepository = {
   readonly create: (tx: Transaction, args: { activation: DeviceActivationRecord; codeHash: string }) => void;
   readonly get: (tx: Transaction, id: DeviceActivationId) => Promise<DeviceActivationRecord | null>;
   readonly findByCodeHash: (codeHash: string) => Promise<DeviceActivationRecord | null>;
-  readonly markRedeemed: (tx: Transaction, args: { id: DeviceActivationId; deviceId: DeviceId; updatedAt: string }) => void;
+  readonly markRedeemed: (
+    tx: Transaction,
+    args: { id: DeviceActivationId; deviceId: DeviceId; updatedAt: string },
+  ) => void;
 };

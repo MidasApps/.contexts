@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
-import { ScheduleTable, type ScheduleRow } from "./ScheduleTable.tsx";
+import { type ScheduleRow, ScheduleTable } from "./ScheduleTable.tsx";
 
 const ROW: ScheduleRow = {
   id: "schedule_3fa9c0e1b2d4a6f8-daily-usage",
@@ -16,7 +16,16 @@ const ROW: ScheduleRow = {
 
 const renderTable = (rows: readonly ScheduleRow[] = [ROW]) =>
   renderWithProviders(
-    <ScheduleTable caption="Agendamentos" schedules={rows} canManage pendingId={null} onPause={vi.fn()} onResume={vi.fn()} onRunNow={vi.fn()} empty={<p>vazio</p>} />,
+    <ScheduleTable
+      caption="Agendamentos"
+      schedules={rows}
+      canManage
+      pendingId={null}
+      onPause={vi.fn()}
+      onResume={vi.fn()}
+      onRunNow={vi.fn()}
+      empty={<p>vazio</p>}
+    />,
   );
 
 const useMobileViewport = (): void => {
@@ -33,7 +42,16 @@ describe("ScheduleTable", () => {
   it("shows the next fire in the schedule's zone, and in the viewer's zone only when they differ", () => {
     const tokyo = { ...ROW, timezone: "Asia/Tokyo" };
     const view = renderWithProviders(
-      <ScheduleTable caption="Agendamentos" schedules={[tokyo]} canManage pendingId={null} onPause={vi.fn()} onResume={vi.fn()} onRunNow={vi.fn()} empty={<p>vazio</p>} />,
+      <ScheduleTable
+        caption="Agendamentos"
+        schedules={[tokyo]}
+        canManage
+        pendingId={null}
+        onPause={vi.fn()}
+        onResume={vi.fn()}
+        onRunNow={vi.fn()}
+        empty={<p>vazio</p>}
+      />,
       { timeZone: "America/Sao_Paulo" },
     );
     const row = screen.getAllByRole("row")[1]!;
@@ -41,7 +59,16 @@ describe("ScheduleTable", () => {
     expect(within(row).getByText("5 de out. de 2026, 09:00 no seu fuso (America/Sao_Paulo)")).toBeDefined();
     view.unmount();
     renderWithProviders(
-      <ScheduleTable caption="Agendamentos" schedules={[ROW]} canManage pendingId={null} onPause={vi.fn()} onResume={vi.fn()} onRunNow={vi.fn()} empty={<p>vazio</p>} />,
+      <ScheduleTable
+        caption="Agendamentos"
+        schedules={[ROW]}
+        canManage
+        pendingId={null}
+        onPause={vi.fn()}
+        onResume={vi.fn()}
+        onRunNow={vi.fn()}
+        empty={<p>vazio</p>}
+      />,
       { timeZone: "America/Sao_Paulo" },
     );
     expect(within(screen.getAllByRole("row")[1]!).queryByText(/no seu fuso/u)).toBeNull();
@@ -53,13 +80,19 @@ describe("ScheduleTable", () => {
     expect(within(row).getByText("Relatório de uso")).toBeDefined();
     expect(within(row).getByText("daily-usage")).toBeDefined();
     expect(within(row).queryByText(ROW.id)).toBeNull();
-    expect(within(row).getByRole("button", { name: "Pausar o agendamento daily-usage de Relatório de uso" })).toBeDefined();
+    expect(
+      within(row).getByRole("button", { name: "Pausar o agendamento daily-usage de Relatório de uso" }),
+    ).toBeDefined();
   });
 
   it("names a platform schedule's actions by its workflow alone, since it has no slug", () => {
     renderTable([{ ...ROW, id: "schedule_platform-catalog-reindex", workflowId: "catalog-reindex", status: "paused" }]);
     const row = screen.getAllByRole("row")[1]!;
-    expect(within(row).getAllByRole("button").map((button) => button.getAttribute("aria-label"))).toEqual([
+    expect(
+      within(row)
+        .getAllByRole("button")
+        .map((button) => button.getAttribute("aria-label")),
+    ).toEqual([
       "Retomar o agendamento de Reindexação do catálogo",
       "Executar agora o agendamento de Reindexação do catálogo",
     ]);
@@ -84,7 +117,11 @@ describe("ScheduleTable", () => {
       />,
     );
     const row = screen.getAllByRole("row")[1]!;
-    expect(within(row).getAllByRole("button").map((button) => button.getAttribute("aria-label"))).toEqual([
+    expect(
+      within(row)
+        .getAllByRole("button")
+        .map((button) => button.getAttribute("aria-label")),
+    ).toEqual([
       "Pausar o agendamento daily-usage de Relatório de uso",
       "Executar agora o agendamento daily-usage de Relatório de uso",
       "Mais ações do agendamento daily-usage de Relatório de uso",

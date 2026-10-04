@@ -15,7 +15,9 @@ export const PLATFORM_TENANT_ID = "_platform";
 /** `tenant`, `catalog`, `project:<projectId>` or `module:<moduleId>` (SP3 spec §11). */
 export const KnowledgeNamespaceSchema = z
   .string()
-  .regex(/^(?:tenant|catalog|project:[A-Za-z0-9_-]+|module:[a-z][a-z0-9-]*)$/, { error: "Expected tenant, catalog, project:<id> or module:<id>." });
+  .regex(/^(?:tenant|catalog|project:[A-Za-z0-9_-]+|module:[a-z][a-z0-9-]*)$/, {
+    error: "Expected tenant, catalog, project:<id> or module:<id>.",
+  });
 export type KnowledgeNamespace = z.infer<typeof KnowledgeNamespaceSchema>;
 
 export const KnowledgeDocumentSourceSchema = z.enum(["upload", "url", "catalog", "module"]);
@@ -30,13 +32,23 @@ export const KnowledgeDocumentSchema = z.strictObject({
   tenantId: TenantIdSchema.meta(none("Owning organization, or _platform for shared platform content.")),
   namespace: KnowledgeNamespaceSchema.meta(none("Namespace the search tool filters on.")),
   source: KnowledgeDocumentSourceSchema.meta(none("Where the content came from.")),
-  sourceRef: z.string().min(1).max(2048).meta(none("File id, URL, contract id or module doc path; unique per tenant and source.")),
+  sourceRef: z
+    .string()
+    .min(1)
+    .max(2048)
+    .meta(none("File id, URL, contract id or module doc path; unique per tenant and source.")),
   title: z.string().max(500).nullable().meta({ description: "Document title shown in citations.", pii: "personal" }),
   sourceUrl: z.url().nullable().meta(none("Public URL of the source, when there is one.")),
   mimeType: z.string().max(255).nullable().meta(none("Media type of the original content.")),
-  contentHash: z.string().regex(/^[a-f0-9]{64}$/).meta(none("SHA-256 of the extracted text; unchanged content is not re-indexed.")),
+  contentHash: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .meta(none("SHA-256 of the extracted text; unchanged content is not re-indexed.")),
   status: KnowledgeDocumentStatusSchema.meta(none("Indexing status.")),
-  createdBy: UserIdSchema.nullable().meta({ description: "Uid of the user who added it; null for platform content.", pii: "personal" }),
+  createdBy: UserIdSchema.nullable().meta({
+    description: "Uid of the user who added it; null for platform content.",
+    pii: "personal",
+  }),
   createdAt: IsoDateTimeSchema.meta(none("When the document was registered (UTC).")),
   updatedAt: IsoDateTimeSchema.meta(none("When the document last changed (UTC).")),
 });

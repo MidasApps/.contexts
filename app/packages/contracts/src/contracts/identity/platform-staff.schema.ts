@@ -24,7 +24,13 @@ export const PlatformStaffContract = defineContract(PlatformStaffSchema, {
   kind: "entity",
   description: "A platform staff member; access also requires MFA (SP1 spec §3.4).",
   examples: [
-    { uid: EXAMPLE_IDS.otherUser, role: "platform-support", isActive: true, createdAt: EXAMPLE_TIMES.created, updatedAt: EXAMPLE_TIMES.updated },
+    {
+      uid: EXAMPLE_IDS.otherUser,
+      role: "platform-support",
+      isActive: true,
+      createdAt: EXAMPLE_TIMES.created,
+      updatedAt: EXAMPLE_TIMES.updated,
+    },
   ],
   pii: "personal",
   tenancyScope: "platform",

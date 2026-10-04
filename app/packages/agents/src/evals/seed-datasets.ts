@@ -33,7 +33,12 @@ const payloadsOf = (dataset: EvalDataset) =>
     metadata: { caseId: item.id, tags: [...item.tags] },
   }));
 
-const metadataOf = (dataset: EvalDataset) => ({ source: "packages/agents/evals/datasets", agentId: dataset.agentId, version: dataset.version, sha256: dataset.sha256 });
+const metadataOf = (dataset: EvalDataset) => ({
+  source: "packages/agents/evals/datasets",
+  agentId: dataset.agentId,
+  version: dataset.version,
+  sha256: dataset.sha256,
+});
 
 const replaceItems = async (dataset: Dataset, source: EvalDataset): Promise<void> => {
   const existing = itemsOf(await dataset.listItems({ perPage: 1000 }));
@@ -55,14 +60,18 @@ const seedOne = async (mastra: Mastra, source: EvalDataset): Promise<SeedOutcome
     await dataset.addItems({ items: payloadsOf(source) });
     return { name: source.name, datasetId: dataset.id, status: "created", itemCount };
   }
-  if (record.metadata?.["sha256"] === source.sha256) return { name: source.name, datasetId: record.id, status: "unchanged", itemCount };
+  if (record.metadata?.["sha256"] === source.sha256)
+    return { name: source.name, datasetId: record.id, status: "unchanged", itemCount };
   const dataset = await mastra.datasets.get({ id: record.id });
   await replaceItems(dataset, source);
   await dataset.update({ metadata: metadataOf(source) });
   return { name: source.name, datasetId: record.id, status: "updated", itemCount };
 };
 
-export const seedEvalDatasets = async (args: { readonly mastra: Mastra; readonly datasets: readonly EvalDataset[] }): Promise<SeedOutcome[]> => {
+export const seedEvalDatasets = async (args: {
+  readonly mastra: Mastra;
+  readonly datasets: readonly EvalDataset[];
+}): Promise<SeedOutcome[]> => {
   const outcomes: SeedOutcome[] = [];
   // Sequential: one storage writer, readable logs, no partial interleaving.
   for (const dataset of args.datasets) outcomes.push(await seedOne(args.mastra, dataset));

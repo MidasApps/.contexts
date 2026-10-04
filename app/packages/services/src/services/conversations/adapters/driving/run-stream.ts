@@ -7,7 +7,10 @@
  * - A client that goes away cancels the upstream read only: the run keeps going on Mastra and
  *   `activeRunId` stays, so the client can resume.
  */
-export const trackRunStream = (upstream: ReadableStream<Uint8Array>, onUpstreamEnd: () => Promise<void>): ReadableStream<Uint8Array> => {
+export const trackRunStream = (
+  upstream: ReadableStream<Uint8Array>,
+  onUpstreamEnd: () => Promise<void>,
+): ReadableStream<Uint8Array> => {
   const reader = upstream.getReader();
   let ended = false;
   const end = async () => {

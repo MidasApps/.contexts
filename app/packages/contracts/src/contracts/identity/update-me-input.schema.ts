@@ -5,12 +5,14 @@ import { LocaleSchema } from "../primitives/locale.schema.ts";
 import { CurrencySchema } from "../primitives/money.schema.ts";
 import { HAS_ANY_FIELD_ERROR, hasAnyField } from "../primitives/refinements.ts";
 import { TimeZoneSchema } from "../primitives/time-zone.schema.ts";
-import { ThemeSchema } from "./user-preferences.schema.ts";
 import { DisplayNameSchema } from "./user.schema.ts";
+import { ThemeSchema } from "./user-preferences.schema.ts";
 
 const PreferencesPatchSchema = z
   .strictObject({
-    locale: LocaleSchema.nullable().optional().meta(personal("New locale; null falls back to the organization default.")),
+    locale: LocaleSchema.nullable()
+      .optional()
+      .meta(personal("New locale; null falls back to the organization default.")),
     timeZone: TimeZoneSchema.nullable().optional().meta(personal("New IANA time zone; null falls back to the node's.")),
     currency: CurrencySchema.nullable().optional().meta(personal("New display currency; null removes it.")),
     theme: ThemeSchema.optional().meta(none("New color theme.")),
@@ -34,7 +36,11 @@ export const UpdateMeInputContract = defineContract(UpdateMeInputSchema, {
   id: "identity.UpdateMeInput",
   kind: "command",
   description: "Changes the signed-in user's display name, photo or preferences (PATCH /v1/me).",
-  examples: [{ displayName: "Ana S." }, { preferences: { timeZone: "America/Recife", theme: "dark" } }, { preferences: { locale: null } }],
+  examples: [
+    { displayName: "Ana S." },
+    { preferences: { timeZone: "America/Recife", theme: "dark" } },
+    { preferences: { locale: null } },
+  ],
   pii: "personal",
   tenancyScope: "user",
   relations: [],

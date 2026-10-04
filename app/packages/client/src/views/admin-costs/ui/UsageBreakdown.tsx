@@ -22,7 +22,8 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/u;
 const MODELS_IN_CHART = 10;
 
 /** A day of the URL when it has the day format; anything else is ignored (the API validates the rest). */
-const dayOf = (value: string | undefined): string | undefined => (value !== undefined && DAY.test(value) ? value : undefined);
+const dayOf = (value: string | undefined): string | undefined =>
+  value !== undefined && DAY.test(value) ? value : undefined;
 
 const useModelColumns = () => {
   const t = useTranslations("admin.costs.usage");
@@ -30,13 +31,36 @@ const useModelColumns = () => {
   const formatCost = useFormatMicroUsd();
   return useMemo(
     () => [
-      column.accessor("model", { header: () => t("columns.model"), cell: ({ getValue }) => <span className="font-mono text-body-sm">{getValue()}</span> }),
+      column.accessor("model", {
+        header: () => t("columns.model"),
+        cell: ({ getValue }) => <span className="font-mono text-body-sm">{getValue()}</span>,
+      }),
       column.accessor("provider", { header: () => t("columns.provider") }),
-      column.accessor("calls", { header: () => t("columns.calls"), meta: { numeric: true }, cell: ({ getValue }) => format.number(getValue()) }),
-      column.accessor("inputTokens", { header: () => t("columns.inputTokens"), meta: { numeric: true }, cell: ({ getValue }) => format.number(getValue()) }),
-      column.accessor("outputTokens", { header: () => t("columns.outputTokens"), meta: { numeric: true }, cell: ({ getValue }) => format.number(getValue()) }),
-      column.accessor("costMicroUsd", { header: () => t("columns.cost"), meta: { numeric: true }, cell: ({ getValue }) => formatCost(getValue()) }),
-      column.accessor("unpricedCalls", { header: () => t("columns.unpriced"), meta: { numeric: true }, cell: ({ getValue }) => format.number(getValue()) }),
+      column.accessor("calls", {
+        header: () => t("columns.calls"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => format.number(getValue()),
+      }),
+      column.accessor("inputTokens", {
+        header: () => t("columns.inputTokens"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => format.number(getValue()),
+      }),
+      column.accessor("outputTokens", {
+        header: () => t("columns.outputTokens"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => format.number(getValue()),
+      }),
+      column.accessor("costMicroUsd", {
+        header: () => t("columns.cost"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => formatCost(getValue()),
+      }),
+      column.accessor("unpricedCalls", {
+        header: () => t("columns.unpriced"),
+        meta: { numeric: true },
+        cell: ({ getValue }) => format.number(getValue()),
+      }),
     ],
     [format, formatCost, t],
   );
@@ -74,7 +98,8 @@ function Totals({ usage }: { usage: AdminUsage }) {
   const t = useTranslations("admin.costs.usage");
   const format = useFormatter();
   const formatCost = useFormatMicroUsd();
-  const day = (value: string): string => format.dateTime(new Date(`${value}T00:00:00.000Z`), { timeZone: "UTC", dateStyle: "medium" });
+  const day = (value: string): string =>
+    format.dateTime(new Date(`${value}T00:00:00.000Z`), { timeZone: "UTC", dateStyle: "medium" });
   return (
     <p role="status" className="text-sm">
       {t("totals", {
@@ -93,7 +118,8 @@ function Charts({ usage, onClear }: { usage: AdminUsage; onClear: () => void }) 
   const format = useFormatter();
   const formatCost = useFormatMicroUsd();
   const columns = useModelColumns();
-  const dayLabel = (value: string): string => format.dateTime(new Date(`${value}T00:00:00.000Z`), { timeZone: "UTC", day: "2-digit", month: "2-digit" });
+  const dayLabel = (value: string): string =>
+    format.dateTime(new Date(`${value}T00:00:00.000Z`), { timeZone: "UTC", day: "2-digit", month: "2-digit" });
   if (usage.totals.calls === 0) {
     return (
       <EmptyState
@@ -120,7 +146,9 @@ function Charts({ usage, onClear }: { usage: AdminUsage; onClear: () => void }) 
           <AlertDescription>{t("truncatedDescription", { count: usage.organizations })}</AlertDescription>
         </Alert>
       ) : null}
-      {usage.totals.unpricedCalls === 0 ? null : <p className="text-xs text-muted-foreground">{t("unpricedNote", { count: usage.totals.unpricedCalls })}</p>}
+      {usage.totals.unpricedCalls === 0 ? null : (
+        <p className="text-xs text-muted-foreground">{t("unpricedNote", { count: usage.totals.unpricedCalls })}</p>
+      )}
       <BarChartFigure
         title={t("byDayTitle")}
         description={t("byDayDescription")}
@@ -131,13 +159,29 @@ function Charts({ usage, onClear }: { usage: AdminUsage; onClear: () => void }) 
       />
       <BarChartFigure
         title={t("byModelTitle")}
-        description={usage.byModel.length > topModels.length ? t("byModelDescriptionTop", { shown: topModels.length, total: usage.byModel.length }) : t("byModelDescription")}
+        description={
+          usage.byModel.length > topModels.length
+            ? t("byModelDescriptionTop", { shown: topModels.length, total: usage.byModel.length })
+            : t("byModelDescription")
+        }
         series={[{ key: "cost", label: t("columns.cost") }]}
-        rows={topModels.map((model) => ({ id: `${model.provider}/${model.model}`, label: model.model, values: { cost: model.costMicroUsd } }))}
+        rows={topModels.map((model) => ({
+          id: `${model.provider}/${model.model}`,
+          label: model.model,
+          values: { cost: model.costMicroUsd },
+        }))}
         rowHeader={t("columns.model")}
         formatValue={(value) => formatCost(value)}
       />
-      <DataTable caption={t("modelsCaption")} columns={columns} data={usage.byModel} getRowId={(model) => `${model.provider}/${model.model}`} stateHeadingLevel={3} empty={null} renderCard={(model) => <ModelCard model={model} />} />
+      <DataTable
+        caption={t("modelsCaption")}
+        columns={columns}
+        data={usage.byModel}
+        getRowId={(model) => `${model.provider}/${model.model}`}
+        stateHeadingLevel={3}
+        empty={null}
+        renderCard={(model) => <ModelCard model={model} />}
+      />
     </div>
   );
 }
@@ -155,7 +199,10 @@ const DAY_MS = 86_400_000;
  * ADMIN_USAGE_MAX_DAYS days (an absent end means today), is answered 400 by the API, so the page
  * asks for another range instead of sending it.
  */
-export const isUsageRangeValid = (range: { from?: string | undefined; to?: string | undefined }, now: Date = new Date()): boolean => {
+export const isUsageRangeValid = (
+  range: { from?: string | undefined; to?: string | undefined },
+  now: Date = new Date(),
+): boolean => {
   if (range.from === undefined) return true;
   const end = Date.parse(`${range.to ?? now.toISOString().slice(0, 10)}T00:00:00.000Z`);
   const days = (end - Date.parse(`${range.from}T00:00:00.000Z`)) / DAY_MS + 1;
@@ -168,7 +215,11 @@ export function UsageBreakdown() {
   const toId = useId();
   const rangeErrorId = useId();
   const search = useAdminSearch(["organizationId", "from", "to"]);
-  const filters = { organizationId: search.values.organizationId, from: dayOf(search.values.from), to: dayOf(search.values.to) };
+  const filters = {
+    organizationId: search.values.organizationId,
+    from: dayOf(search.values.from),
+    to: dayOf(search.values.to),
+  };
   const validRange = isUsageRangeValid(filters);
   const usage = useAdminUsage(filters, { enabled: validRange });
   const clear = (): void => search.set({ organizationId: undefined, from: undefined, to: undefined });
@@ -176,7 +227,10 @@ export function UsageBreakdown() {
   // Both days are wrong together (an order or a length), so both carry the error.
   const invalid = validRange ? {} : { "aria-invalid": true, "aria-describedby": rangeErrorId };
   return (
-    <section aria-labelledby="costs-usage-title" className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4">
+    <section
+      aria-labelledby="costs-usage-title"
+      className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
+    >
       <div className="flex flex-col gap-1">
         <h2 id="costs-usage-title" className="text-sm font-medium">
           {t("title")}
@@ -184,14 +238,33 @@ export function UsageBreakdown() {
         <p className="text-xs text-muted-foreground">{t("description")}</p>
       </div>
       <div role="search" aria-label={t("filtersLabel")} className="flex flex-col gap-3 lg:flex-row lg:items-end">
-        <AdminOrganizationFilter value={filters.organizationId} onValueChange={(organizationId) => search.set({ organizationId })} />
+        <AdminOrganizationFilter
+          value={filters.organizationId}
+          onValueChange={(organizationId) => search.set({ organizationId })}
+        />
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={fromId}>{t("from")}</Label>
-          <Input id={fromId} type="date" className="lg:w-40" value={filters.from ?? ""} max={filters.to} onChange={(event) => search.set({ from: event.target.value })} {...invalid} />
+          <Input
+            id={fromId}
+            type="date"
+            className="lg:w-40"
+            value={filters.from ?? ""}
+            max={filters.to}
+            onChange={(event) => search.set({ from: event.target.value })}
+            {...invalid}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={toId}>{t("to")}</Label>
-          <Input id={toId} type="date" className="lg:w-40" value={filters.to ?? ""} min={filters.from} onChange={(event) => search.set({ to: event.target.value })} {...invalid} />
+          <Input
+            id={toId}
+            type="date"
+            className="lg:w-40"
+            value={filters.to ?? ""}
+            min={filters.from}
+            onChange={(event) => search.set({ to: event.target.value })}
+            {...invalid}
+          />
         </div>
       </div>
       {validRange ? (

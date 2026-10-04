@@ -16,7 +16,10 @@ export function CollapsibleTrigger(props: ComponentProps<typeof CollapsiblePrimi
   return <CollapsiblePrimitive.CollapsibleTrigger data-slot="collapsible-trigger" {...props} />;
 }
 
-export function CollapsibleContent({ className, ...props }: ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
+export function CollapsibleContent({
+  className,
+  ...props
+}: ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
   return (
     <CollapsiblePrimitive.CollapsibleContent
       data-slot="collapsible-content"

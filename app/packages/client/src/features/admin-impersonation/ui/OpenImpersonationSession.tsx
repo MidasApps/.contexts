@@ -16,7 +16,7 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
-import { useImpersonationStore, type StoredImpersonation } from "../model/use-impersonation-store.ts";
+import { type StoredImpersonation, useImpersonationStore } from "../model/use-impersonation-store.ts";
 
 export type OpenImpersonationSessionProps = {
   session: StoredImpersonation;
@@ -32,7 +32,11 @@ export type OpenImpersonationSessionProps = {
  * runs as the user, read-only, also after a reload, until the banner's "leave support mode"
  * (which ends it and returns to the staff account) or the expiry.
  */
-export function OpenImpersonationSession({ session, organizationName, focusOnMount = false }: OpenImpersonationSessionProps) {
+export function OpenImpersonationSession({
+  session,
+  organizationName,
+  focusOnMount = false,
+}: OpenImpersonationSessionProps) {
   const t = useTranslations("admin.impersonation.session");
   const online = useOnlineStatus();
   const sessionController = useSession();
@@ -70,13 +74,25 @@ export function OpenImpersonationSession({ session, organizationName, focusOnMou
         <div className="flex flex-col gap-1">
           <dt className="text-xs font-medium text-muted-foreground">{t("user")}</dt>
           <dd className="flex min-w-0 flex-col gap-0.5">
-            {session.targetLabel === undefined ? null : <span className="text-sm font-medium break-all">{session.targetLabel}</span>}
-            <span className={session.targetLabel === undefined ? "font-mono text-sm break-all" : "font-mono text-xs break-all text-muted-foreground"}>{session.targetUid}</span>
+            {session.targetLabel === undefined ? null : (
+              <span className="text-sm font-medium break-all">{session.targetLabel}</span>
+            )}
+            <span
+              className={
+                session.targetLabel === undefined
+                  ? "font-mono text-sm break-all"
+                  : "font-mono text-xs break-all text-muted-foreground"
+              }
+            >
+              {session.targetUid}
+            </span>
           </dd>
         </div>
         <div className="flex flex-col gap-1">
           <dt className="text-xs font-medium text-muted-foreground">{t("organization")}</dt>
-          <dd className="text-sm break-all">{organizationName ?? session.organizationName ?? session.organizationId}</dd>
+          <dd className="text-sm break-all">
+            {organizationName ?? session.organizationName ?? session.organizationId}
+          </dd>
         </div>
         <div className="flex flex-col gap-1">
           <dt className="text-xs font-medium text-muted-foreground">{t("expires")}</dt>

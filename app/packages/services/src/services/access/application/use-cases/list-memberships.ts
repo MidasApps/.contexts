@@ -21,7 +21,11 @@ export const makeListMemberships =
   (deps: Pick<AccessWriteDeps, "memberships">): ListMemberships =>
   async (command) => {
     const { tenantId, principalId, page } = command;
-    const allowed = await requirePermission({ ...command, permission: "core.member.read", node: { level: "organization", tenantId } });
+    const allowed = await requirePermission({
+      ...command,
+      permission: "core.member.read",
+      node: { level: "organization", tenantId },
+    });
     if (!allowed.ok) return allowed;
     return ok(await deps.memberships.list({ tenantId, principalId, page }));
   };

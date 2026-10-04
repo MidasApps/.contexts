@@ -1,6 +1,6 @@
 "use client";
 
-import { revokeInvitationEndpoint, type Invitation } from "@core/contracts";
+import { type Invitation, revokeInvitationEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { invitationKeys } from "#/entities/invitation/index.ts";
@@ -10,7 +10,11 @@ import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts"
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
-export type RevokeInvitationDialogProps = { organizationId: string; invitation: Invitation | null; onOpenChange: (open: boolean) => void };
+export type RevokeInvitationDialogProps = {
+  organizationId: string;
+  invitation: Invitation | null;
+  onOpenChange: (open: boolean) => void;
+};
 
 /**
  * Revokes a pending invitation (`DELETE /v1/invitations/{id}`, core.member.invite): its link stops

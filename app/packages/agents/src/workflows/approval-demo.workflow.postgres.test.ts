@@ -3,8 +3,18 @@ import { RequestContext } from "@mastra/core/request-context";
 import { PostgresStore } from "@mastra/pg";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
-import { createFakeAccessPort, createFakeWorkflowApprovalPort, createFakeWorkflowCommandPort } from "../testing/fake-ports.ts";
-import { APPROVAL_DEMO_COMMAND_ID, APPROVAL_DEMO_PERMISSION, APPROVAL_DEMO_WORKFLOW_ID, type ApprovalDemoResult, createApprovalDemoWorkflow } from "./approval-demo.workflow.ts";
+import {
+  createFakeAccessPort,
+  createFakeWorkflowApprovalPort,
+  createFakeWorkflowCommandPort,
+} from "../testing/fake-ports.ts";
+import {
+  APPROVAL_DEMO_COMMAND_ID,
+  APPROVAL_DEMO_PERMISSION,
+  APPROVAL_DEMO_WORKFLOW_ID,
+  type ApprovalDemoResult,
+  createApprovalDemoWorkflow,
+} from "./approval-demo.workflow.ts";
 import { settleWorkflowApproval } from "./settle-workflow-approval.ts";
 import { REQUEST_HUMAN_APPROVAL_STEP_ID } from "./steps/request-human-approval.step.ts";
 
@@ -28,15 +38,26 @@ const workflow = createApprovalDemoWorkflow({ approvals, access, commands: { run
 let mastra: Mastra;
 
 const contextOf = (uid = TEST_UID) =>
-  new RequestContext<unknown>(buildAgentContextEntries({ permissions: MEMBER, principal: { type: "user", uid, mfa: false } }).map(([key, value]) => [key, key === "userId" ? uid : value]));
+  new RequestContext<unknown>(
+    buildAgentContextEntries({ permissions: MEMBER, principal: { type: "user", uid, mfa: false } }).map(
+      ([key, value]) => [key, key === "userId" ? uid : value],
+    ),
+  );
 
 const startSuspended = async () => {
   const run = await mastra.getWorkflow(APPROVAL_DEMO_WORKFLOW_ID).createRun();
-  const started = await run.start({ inputData: { title: "Supplier follow-up", body: "Call about the invoice." }, requestContext: contextOf() });
+  const started = await run.start({
+    inputData: { title: "Supplier follow-up", body: "Call about the invoice." },
+    requestContext: contextOf(),
+  });
   expect(started.status).toBe("suspended");
   const request = approvals.requests.at(-1);
   if (request === undefined) throw new Error("no approval request");
-  expect(request.action).toEqual({ workflowId: APPROVAL_DEMO_WORKFLOW_ID, runId: run.runId, stepId: REQUEST_HUMAN_APPROVAL_STEP_ID });
+  expect(request.action).toEqual({
+    workflowId: APPROVAL_DEMO_WORKFLOW_ID,
+    runId: run.runId,
+    stepId: REQUEST_HUMAN_APPROVAL_STEP_ID,
+  });
   const approvalRequestId = [...approvals.records.keys()].at(-1) ?? "";
   return { run, approvalRequestId };
 };
@@ -65,7 +86,11 @@ describe("approval-demo workflow on SP1 approval requests (Postgres)", () => {
   it("suspends after creating a workflow-resume approval request as the requester", async () => {
     const { approvalRequestId } = await startSuspended();
     const request = approvals.requests.at(-1);
-    expect(request).toMatchObject({ permission: APPROVAL_DEMO_PERMISSION, node: { level: "organization", tenantId: TEST_TENANT }, principal: { uid: TEST_UID } });
+    expect(request).toMatchObject({
+      permission: APPROVAL_DEMO_PERMISSION,
+      node: { level: "organization", tenantId: TEST_TENANT },
+      principal: { uid: TEST_UID },
+    });
     expect(request?.summary).toContain("Supplier follow-up");
     expect(await settle(approvalRequestId)).toEqual({ ok: true, data: { settled: false, reason: "NOT_SETTLED" } });
     expect(commands.runs).toEqual([]);
@@ -79,7 +104,9 @@ describe("approval-demo workflow on SP1 approval requests (Postgres)", () => {
     const results = await Promise.all([settle(approvalRequestId), settle(approvalRequestId)]);
     const settled = results.filter((result) => result.ok && result.data.settled);
     expect(settled).toHaveLength(1);
-    expect(results.filter((result) => result.ok && !result.data.settled)).toEqual([{ ok: true, data: { settled: false, reason: "NOT_SUSPENDED" } }]);
+    expect(results.filter((result) => result.ok && !result.data.settled)).toEqual([
+      { ok: true, data: { settled: false, reason: "NOT_SUSPENDED" } },
+    ]);
     expect(commands.runs).toHaveLength(1);
     expect(commands.runs[0]).toMatchObject({
       commandId: APPROVAL_DEMO_COMMAND_ID,
@@ -88,7 +115,12 @@ describe("approval-demo workflow on SP1 approval requests (Postgres)", () => {
       principal: { type: "user", uid: TEST_UID },
       input: { title: "Supplier follow-up", body: "Call about the invoice." },
     });
-    expect(await outcomeOf(run.runId)).toMatchObject({ outcome: "applied", approvalRequestId, decidedBy: "approver-uid", code: null });
+    expect(await outcomeOf(run.runId)).toMatchObject({
+      outcome: "applied",
+      approvalRequestId,
+      decidedBy: "approver-uid",
+      code: null,
+    });
     expect(await settle(approvalRequestId)).toEqual({ ok: true, data: { settled: false, reason: "NOT_SUSPENDED" } });
   });
 
@@ -110,7 +142,11 @@ describe("approval-demo workflow on SP1 approval requests (Postgres)", () => {
 
   it("a forged resume never releases the action: the step re-reads SP1 and suspends again", async () => {
     const { run, approvalRequestId } = await startSuspended();
-    const forged = await run.resume({ step: REQUEST_HUMAN_APPROVAL_STEP_ID, resumeData: { decision: "approved" }, requestContext: new RequestContext() });
+    const forged = await run.resume({
+      step: REQUEST_HUMAN_APPROVAL_STEP_ID,
+      resumeData: { decision: "approved" },
+      requestContext: new RequestContext(),
+    });
     expect(forged.status).toBe("suspended");
     expect(commands.runs).toEqual([]);
     approvals.settle(approvalRequestId, "approved", "approver-uid");
@@ -121,7 +157,11 @@ describe("approval-demo workflow on SP1 approval requests (Postgres)", () => {
   it("a resume under another caller's context does not run the command as that caller", async () => {
     const { run, approvalRequestId } = await startSuspended();
     approvals.settle(approvalRequestId, "approved", "approver-uid");
-    const hijacked = await run.resume({ step: REQUEST_HUMAN_APPROVAL_STEP_ID, resumeData: { decision: "approved" }, requestContext: contextOf(INTRUDER_UID) });
+    const hijacked = await run.resume({
+      step: REQUEST_HUMAN_APPROVAL_STEP_ID,
+      resumeData: { decision: "approved" },
+      requestContext: contextOf(INTRUDER_UID),
+    });
     expect(hijacked.status).toBe("success");
     expect(await outcomeOf(run.runId)).toMatchObject({ outcome: "failed", code: "REQUESTER_MISMATCH" });
     expect(commands.runs).toEqual([]);

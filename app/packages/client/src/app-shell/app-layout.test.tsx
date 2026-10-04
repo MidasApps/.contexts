@@ -1,11 +1,11 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { apiError, ok } from "#/shared/testing/fake-api.ts";
-import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { buildProject, IDS } from "#/shared/testing/fixtures.ts";
 import { IMPERSONATION_STORAGE_KEY, useImpersonationStore } from "#/features/admin-impersonation/index.ts";
 import { createFakeAuth } from "#/shared/lib/auth/fake-auth.ts";
 import { storedImpersonation } from "#/shared/testing/admin-accounts-fixtures.ts";
+import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
+import { apiError, ok } from "#/shared/testing/fake-api.ts";
+import { buildProject, IDS } from "#/shared/testing/fixtures.ts";
 import { TEST_USER } from "#/shared/testing/render-client.tsx";
 import { AppLayout } from "./app-layout.tsx";
 import { renderApp } from "./testing/render-app.tsx";
@@ -27,10 +27,14 @@ describe("AppLayout", () => {
     const nav = await screen.findByRole("navigation", { name: "Navegação" });
     await waitFor(() => expect(within(nav).getByRole("link", { name: "Visão geral" })).toBeDefined());
     expect(within(nav).getByRole("link", { name: "Visão geral" }).getAttribute("aria-current")).toBe("page");
-    expect(within(nav).getByRole("link", { name: "Configurações" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/general`);
+    expect(within(nav).getByRole("link", { name: "Configurações" }).getAttribute("href")).toBe(
+      `/o/${IDS.organization}/settings/general`,
+    );
     const breadcrumb = screen.getByRole("navigation", { name: "Trilha de navegação" });
     await waitFor(() => expect(within(breadcrumb).getByRole("link", { name: "Launch" })).toBeDefined());
-    expect(within(breadcrumb).getByRole("link", { name: "Northwind" }).getAttribute("href")).toBe(`/o/${IDS.organization}`);
+    expect(within(breadcrumb).getByRole("link", { name: "Northwind" }).getAttribute("href")).toBe(
+      `/o/${IDS.organization}`,
+    );
     expect(within(breadcrumb).getByText("Visão geral").getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("main")).toBeDefined();
     expect(screen.getByRole("banner")).toBeDefined();
@@ -50,11 +54,20 @@ describe("AppLayout", () => {
   });
 
   it("names the organization and the end time of a session this tab started, and stays pinned under the topbar", async () => {
-    globalThis.sessionStorage.setItem(IMPERSONATION_STORAGE_KEY, storedImpersonation({ sessionId: "Im5sK2lPq0WnR5tYu3bV", organizationName: "Northwind", targetLabel: "Ana Souza" }));
+    globalThis.sessionStorage.setItem(
+      IMPERSONATION_STORAGE_KEY,
+      storedImpersonation({
+        sessionId: "Im5sK2lPq0WnR5tYu3bV",
+        organizationName: "Northwind",
+        targetLabel: "Ana Souza",
+      }),
+    );
     const auth = createFakeAuth(TEST_USER);
     const { container } = renderLayout({ auth });
     auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
-    expect(await screen.findByText(/Você está vendo o app como Ana Souza em Northwind, em modo somente leitura, até /u)).toBeDefined();
+    expect(
+      await screen.findByText(/Você está vendo o app como Ana Souza em Northwind, em modo somente leitura, até /u),
+    ).toBeDefined();
     const banner = container.querySelector("[data-slot='impersonation-banner']");
     expect(banner?.className.split(" ")).toContain("sticky");
     expect(banner?.className).toContain("top-14");
@@ -74,7 +87,10 @@ describe("AppLayout", () => {
 
   it("signs out completely when the staff session cannot be restored", async () => {
     const auth = createFakeAuth(TEST_USER);
-    const { user, router, bridge } = renderLayout({ auth, leaveImpersonation: () => Promise.reject(new Error("no staff session")) });
+    const { user, router, bridge } = renderLayout({
+      auth,
+      leaveImpersonation: () => Promise.reject(new Error("no staff session")),
+    });
     auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
     await user.click(await screen.findByRole("button", { name: "Sair do modo suporte" }));
     await waitFor(() => expect(router.current()).toBe("/sign-in"));
@@ -98,7 +114,10 @@ describe("AppLayout", () => {
       if (options.forceRefresh) refreshedAt.push(calls.length);
       return getIdToken(options);
     };
-    const { user, api, router } = renderLayout({ auth, routes: shellRoutes(MEMBER_PERMISSIONS, { "PUT /v1/me/active-organization": { status: 204 } }) });
+    const { user, api, router } = renderLayout({
+      auth,
+      routes: shellRoutes(MEMBER_PERMISSIONS, { "PUT /v1/me/active-organization": { status: 204 } }),
+    });
     calls = api.calls;
     await user.click(await screen.findByRole("button", { name: "Northwind, trocar de organização" }));
     await user.click(await screen.findByRole("menuitemradio", { name: "Contoso" }));
@@ -115,7 +134,9 @@ describe("AppLayout", () => {
   });
 
   it("tells the user when the switch is refused", async () => {
-    const { user } = renderLayout({ routes: shellRoutes(MEMBER_PERMISSIONS, { "PUT /v1/me/active-organization": apiError(403, "FORBIDDEN") }) });
+    const { user } = renderLayout({
+      routes: shellRoutes(MEMBER_PERMISSIONS, { "PUT /v1/me/active-organization": apiError(403, "FORBIDDEN") }),
+    });
     await user.click(await screen.findByRole("button", { name: "Northwind, trocar de organização" }));
     await user.click(await screen.findByRole("menuitemradio", { name: "Contoso" }));
     expect(await screen.findByText("Não foi possível trocar de organização")).toBeDefined();
@@ -127,9 +148,14 @@ describe("AppLayout", () => {
     await screen.findByRole("link", { name: "Visão geral" });
     await user.keyboard("{Control>}k{/Control}");
     const dialog = await screen.findByRole("dialog", { name: "Paleta de comandos" });
-    const options = () => within(dialog).getAllByRole("option").map((option) => option.textContent);
+    const options = () =>
+      within(dialog)
+        .getAllByRole("option")
+        .map((option) => option.textContent);
     await waitFor(() => expect(options()).toContain("Trocar para Contoso"));
-    expect(options()).toEqual(expect.arrayContaining(["Visão geral", "Geral", "Membros", "Abrir projeto Beta", "Criar projeto", "Sair"]));
+    expect(options()).toEqual(
+      expect.arrayContaining(["Visão geral", "Geral", "Membros", "Abrir projeto Beta", "Criar projeto", "Sair"]),
+    );
     expect(options()).not.toContain("Convites");
     expect(options()).not.toContain("Chaves de API");
     await expectNoAxeViolations(container);
@@ -153,7 +179,9 @@ describe("AppLayout", () => {
 
   it("creates a project from the project switcher and opens it", async () => {
     const created = buildProject({ id: "NewProject0000000001", name: "Gamma" });
-    const { user, api, router } = renderLayout({ routes: shellRoutes(MEMBER_PERMISSIONS, { "POST /v1/organizations/:organizationId/projects": ok(created, 201) }) });
+    const { user, api, router } = renderLayout({
+      routes: shellRoutes(MEMBER_PERMISSIONS, { "POST /v1/organizations/:organizationId/projects": ok(created, 201) }),
+    });
     await user.click(await screen.findByRole("button", { name: "Launch, trocar de projeto" }));
     await user.click(await screen.findByRole("menuitem", { name: "Novo projeto" }));
     const dialog = await screen.findByRole("dialog", { name: "Novo projeto" });

@@ -15,6 +15,8 @@ export type RegionalDefaults = z.infer<typeof RegionalDefaultsSchema>;
 /** Overrides a project or unit may set; an absent field inherits from the parent node. */
 export const NodeRegionalOverridesSchema = z.object({
   timeZone: TimeZoneSchema.optional().meta(none("IANA time zone of this node; absent inherits the parent's.")),
-  currency: CurrencySchema.optional().meta(none("ISO 4217 currency for new amounts here; absent inherits the parent's.")),
+  currency: CurrencySchema.optional().meta(
+    none("ISO 4217 currency for new amounts here; absent inherits the parent's."),
+  ),
 });
 export type NodeRegionalOverrides = z.infer<typeof NodeRegionalOverridesSchema>;

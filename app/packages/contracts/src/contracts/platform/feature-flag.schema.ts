@@ -6,7 +6,10 @@ import { TenantIdSchema } from "../primitives/ids.schema.ts";
 import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
 
 /** Dotted kebab-case flag key (`ai.kill-switch`). */
-export const FeatureFlagKeySchema = z.string().regex(/^[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)+$/, { error: "Expected a dotted kebab-case key." }).max(80);
+export const FeatureFlagKeySchema = z
+  .string()
+  .regex(/^[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)+$/, { error: "Expected a dotted kebab-case key." })
+  .max(80);
 
 export const FeatureFlagKindSchema = z.enum(["kill-switch", "rollout", "ops"]);
 export type FeatureFlagKind = z.infer<typeof FeatureFlagKindSchema>;
@@ -21,7 +24,8 @@ const definitionShape = {
   expiresAt: IsoDateTimeSchema.meta(none("When the flag must be removed or renewed (UTC); after createdAt.")),
 };
 
-const expiresAfterCreation = (flag: { createdAt: string; expiresAt: string }): boolean => Date.parse(flag.expiresAt) > Date.parse(flag.createdAt);
+const expiresAfterCreation = (flag: { createdAt: string; expiresAt: string }): boolean =>
+  Date.parse(flag.expiresAt) > Date.parse(flag.createdAt);
 const EXPIRY_ERROR = { error: "expiresAt must be after createdAt.", path: ["expiresAt"] };
 
 /** A flag of the code registry (decision 0039): every flag has an owner, a reason and an expiry. */
@@ -73,7 +77,9 @@ export const FeatureFlagContract = defineContract(FeatureFlagSchema, {
 
 export const SetFeatureFlagValueInputSchema = z.strictObject({
   value: z.boolean().meta(none("New value.")),
-  tenantId: TenantIdSchema.optional().meta(none("Organization to override; omitted = the environment value (staff only).")),
+  tenantId: TenantIdSchema.optional().meta(
+    none("Organization to override; omitted = the environment value (staff only)."),
+  ),
 });
 export type SetFeatureFlagValueInput = z.infer<typeof SetFeatureFlagValueInputSchema>;
 
@@ -89,13 +95,16 @@ export const SetFeatureFlagValueInputContract = defineContract(SetFeatureFlagVal
 });
 
 /** Body of `PUT /v1/flags/{flagKey}`: the organization comes from the query, never from the body. */
-export const TenantFlagValueInputSchema = z.strictObject({ value: z.boolean().meta(none("Override for the organization.")) });
+export const TenantFlagValueInputSchema = z.strictObject({
+  value: z.boolean().meta(none("Override for the organization.")),
+});
 export type TenantFlagValueInput = z.infer<typeof TenantFlagValueInputSchema>;
 
 export const TenantFlagValueInputContract = defineContract(TenantFlagValueInputSchema, {
   id: "platform.TenantFlagValueInput",
   kind: "command",
-  description: "Overrides a tenant-overridable flag for the caller's organization (switch off, or back on when the environment allows).",
+  description:
+    "Overrides a tenant-overridable flag for the caller's organization (switch off, or back on when the environment allows).",
   examples: [{ value: false }],
   pii: "none",
   tenancyScope: "organization",

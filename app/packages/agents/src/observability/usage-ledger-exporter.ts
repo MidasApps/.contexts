@@ -1,5 +1,11 @@
 import { type LlmCall, LlmCallSchema } from "@core/contracts";
-import { type AnyExportedSpan, type ObservabilityExporter, SpanType, type TracingEvent, TracingEventType } from "@mastra/core/observability";
+import {
+  type AnyExportedSpan,
+  type ObservabilityExporter,
+  SpanType,
+  type TracingEvent,
+  TracingEventType,
+} from "@mastra/core/observability";
 import { estimateCostMicroUsd, MODEL_PRICES, type ModelPrice } from "../models/model-prices.ts";
 import type { AgentRunRecord, UsagePort } from "../runtime/runtime-ports.ts";
 import { uuidv7 } from "./uuidv7.ts";
@@ -50,7 +56,8 @@ export type UsageLedgerExporterOptions = {
 const TRACE_ID_PATTERN = /^[0-9a-f]{32}$/;
 
 const stringOf = (value: unknown): string | null => (typeof value === "string" && value.length > 0 ? value : null);
-const countOf = (value: unknown): number => (typeof value === "number" && Number.isSafeInteger(value) && value > 0 ? value : 0);
+const countOf = (value: unknown): number =>
+  typeof value === "number" && Number.isSafeInteger(value) && value > 0 ? value : 0;
 
 // AI SDK provider ids carry the API flavour (`google.generative-ai`, `google.vertex.chat`); prices key on the vendor.
 const vendorOf = (provider: string): string => provider.split(".")[0] ?? provider;
@@ -66,7 +73,13 @@ type RowParts = { readonly row: LlmCall; readonly priced: boolean } | { readonly
 
 type SpanContext = Readonly<Record<string, unknown>>;
 
-const toRow = (span: AnyExportedSpan, context: SpanContext, tenantId: string, id: string, prices: Readonly<Record<string, ModelPrice>>): RowParts => {
+const toRow = (
+  span: AnyExportedSpan,
+  context: SpanContext,
+  tenantId: string,
+  id: string,
+  prices: Readonly<Record<string, ModelPrice>>,
+): RowParts => {
   const attributes = (span.attributes ?? {}) as GenerationAttributes;
   const provider = vendorOf(stringOf(attributes.provider) ?? "unknown");
   const model = stringOf(attributes.model) ?? "unknown";
@@ -102,7 +115,11 @@ type BufferedWriter<Row> = { readonly push: (row: Row) => void; readonly flush: 
  * Batches rows to one port call (≤ `LEDGER_FLUSH_MS` or `LEDGER_FLUSH_ROWS`); flushes run one after
  * another, so a retry never races a newer batch, and a failed batch is kept for the next flush.
  */
-const createBufferedWriter = <Row>(write: (rows: Row[]) => Promise<void>, log: () => LedgerLogger, failure: { flush: string; dropped: string }): BufferedWriter<Row> => {
+const createBufferedWriter = <Row>(
+  write: (rows: Row[]) => Promise<void>,
+  log: () => LedgerLogger,
+  failure: { flush: string; dropped: string },
+): BufferedWriter<Row> => {
   let buffer: Row[] = [];
   let timer: ReturnType<typeof setTimeout> | undefined;
   let flushing: Promise<void> = Promise.resolve();
@@ -111,9 +128,13 @@ const createBufferedWriter = <Row>(write: (rows: Row[]) => Promise<void>, log: (
     try {
       await write(rows);
     } catch (error: unknown) {
-      log().error(failure.flush, { rowCount: rows.length, error: error instanceof Error ? error.message : String(error) });
+      log().error(failure.flush, {
+        rowCount: rows.length,
+        error: error instanceof Error ? error.message : String(error),
+      });
       const kept = [...rows, ...buffer];
-      if (kept.length > LEDGER_MAX_BUFFERED_ROWS) log().error(failure.dropped, { rowCount: kept.length - LEDGER_MAX_BUFFERED_ROWS });
+      if (kept.length > LEDGER_MAX_BUFFERED_ROWS)
+        log().error(failure.dropped, { rowCount: kept.length - LEDGER_MAX_BUFFERED_ROWS });
       buffer = kept.slice(-LEDGER_MAX_BUFFERED_ROWS);
     }
   };
@@ -164,14 +185,22 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
   const newId = options.newId ?? (() => uuidv7());
   const prices = options.prices ?? MODEL_PRICES;
   const warnedModels = new Set<string>();
-  const calls = createBufferedWriter<LlmCall>((rows) => options.usage.recordLlmCalls(rows), () => logger, {
-    flush: "usage_ledger_flush_failed",
-    dropped: "usage_ledger_rows_dropped",
-  });
-  const runs = createBufferedWriter<AgentRunRecord>((rows) => options.usage.recordAgentRuns(rows), () => logger, {
-    flush: "usage_ledger_runs_flush_failed",
-    dropped: "usage_ledger_runs_dropped",
-  });
+  const calls = createBufferedWriter<LlmCall>(
+    (rows) => options.usage.recordLlmCalls(rows),
+    () => logger,
+    {
+      flush: "usage_ledger_flush_failed",
+      dropped: "usage_ledger_rows_dropped",
+    },
+  );
+  const runs = createBufferedWriter<AgentRunRecord>(
+    (rows) => options.usage.recordAgentRuns(rows),
+    () => logger,
+    {
+      flush: "usage_ledger_runs_flush_failed",
+      dropped: "usage_ledger_runs_dropped",
+    },
+  );
   const flush = async (): Promise<void> => {
     await Promise.all([calls.flush(), runs.flush()]);
   };
@@ -196,7 +225,9 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
   };
 
   /** The tenant of an ended span, or null (logged) when its context names none. */
-  const tenantContextOf = (span: AnyExportedSpan): { readonly context: SpanContext; readonly tenantId: string } | null => {
+  const tenantContextOf = (
+    span: AnyExportedSpan,
+  ): { readonly context: SpanContext; readonly tenantId: string } | null => {
     const context = contextOf(span);
     const tenantId = stringOf(context["tenantId"]);
     if (tenantId !== null) return { context, tenantId };
@@ -239,7 +270,8 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
       const span = event.exportedSpan;
       const enqueue = LEDGER_SPANS.get(span.type);
       // Internal agent runs are the guardrail detectors' own agents, not runs of the tenant.
-      if (enqueue === undefined || (span.type === SpanType.AGENT_RUN && span.isInternal === true)) return Promise.resolve();
+      if (enqueue === undefined || (span.type === SpanType.AGENT_RUN && span.isInternal === true))
+        return Promise.resolve();
       if (event.type === TracingEventType.SPAN_STARTED) remember(span);
       if (event.type === TracingEventType.SPAN_ENDED) enqueue(span);
       return Promise.resolve();

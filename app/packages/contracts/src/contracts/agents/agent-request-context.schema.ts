@@ -15,19 +15,35 @@ const none = (description: string) => ({ description, pii: "none" as const });
  */
 export const AgentRequestContextSchema = z
   .strictObject({
-    tenantId: TenantIdSchema.meta(none("Active organization; from the verified principal, never from the client body.")),
-    projectId: firestoreIdSchema<"ProjectId">().optional().meta(none("Active project, when the request is scoped to one.")),
+    tenantId: TenantIdSchema.meta(
+      none("Active organization; from the verified principal, never from the client body."),
+    ),
+    projectId: firestoreIdSchema<"ProjectId">()
+      .optional()
+      .meta(none("Active project, when the request is scoped to one.")),
     unitId: firestoreIdSchema<"UnitId">().optional().meta(none("Active unit, when the request is scoped to one.")),
-    userId: UserIdSchema.meta({ description: "Firebase Auth uid of the caller (API key owner for services).", pii: "personal" }),
+    userId: UserIdSchema.meta({
+      description: "Firebase Auth uid of the caller (API key owner for services).",
+      pii: "personal",
+    }),
     principalKind: z.enum(["user", "service"]).meta(none("Whether a person or an API key made the call.")),
-    permissions: z.array(PermissionSchema).meta(none("Effective permissions: principal grants intersected with the agent ceiling.")),
+    permissions: z
+      .array(PermissionSchema)
+      .meta(none("Effective permissions: principal grants intersected with the agent ceiling.")),
     locale: LocaleSchema.meta(none("BCP 47 locale for answers and formatting.")),
     displayTimeZone: TimeZoneSchema.meta(none("IANA time zone used to show dates to the caller.")),
     nodeTimeZone: TimeZoneSchema.meta(none("IANA time zone of the active node, for calendar rules.")),
     currency: CurrencySchema.meta(none("Default ISO 4217 currency of the active node.")),
-    activeScreen: z.string().min(1).max(ACTIVE_SCREEN_MAX_LENGTH).optional().meta(none("Route id of the UI screen the caller is on.")),
+    activeScreen: z
+      .string()
+      .min(1)
+      .max(ACTIVE_SCREEN_MAX_LENGTH)
+      .optional()
+      .meta(none("Route id of the UI screen the caller is on.")),
     requestId: RequestIdSchema.meta(none("X-Request-Id of the /v1 call (ULID).")),
-    conversationId: firestoreIdSchema<"ConversationId">().optional().meta(none("Chat conversation id; also the memory thread id.")),
+    conversationId: firestoreIdSchema<"ConversationId">()
+      .optional()
+      .meta(none("Chat conversation id; also the memory thread id.")),
     organizationId: TenantIdSchema.meta(none("Same value as tenantId; the key Mastra TokenCostControl reads.")),
     aiMode: z.enum(["real", "fake"]).meta(none("Whether models are real providers or the deterministic fakes.")),
   })
@@ -40,7 +56,8 @@ export type AgentRequestContext = z.infer<typeof AgentRequestContextSchema>;
 export const AgentRequestContextContract = defineContract(AgentRequestContextSchema, {
   id: "agents.AgentRequestContext",
   kind: "settings",
-  description: "Per-run context every agent, tool and workflow reads: tenant, caller, effective permissions and regional settings.",
+  description:
+    "Per-run context every agent, tool and workflow reads: tenant, caller, effective permissions and regional settings.",
   examples: [
     {
       tenantId: "Jd8sK2lPq0WnR5tYu3bV",
