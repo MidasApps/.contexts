@@ -161,6 +161,12 @@
       "monthlyTokens": "Tokens por mês",
       "monthlyTokensHint": "Vale quando o modelo não tem preço cadastrado.",
       "maxConnectors": "Máximo de conectores",
+      "maxCustomAgents": "Máximo de agentes personalizados",
+      "maxCustomAgentsHint": "Deixe em branco para usar o padrão da plataforma.",
+      "maxCustomSkills": "Máximo de habilidades personalizadas",
+      "maxCustomSkillsHint": "Deixe em branco para usar o padrão da plataforma.",
+      "maxCustomInstructionChars": "Tamanho máximo das instruções (caracteres)",
+      "maxCustomInstructionCharsHint": "Deixe em branco para usar o padrão da plataforma.",
       "features": "Funcionalidades",
       "featuresHint": "Chaves separadas por vírgula, por exemplo: web-tools, chat.voice"
     }

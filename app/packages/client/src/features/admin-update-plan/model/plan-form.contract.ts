@@ -17,13 +17,21 @@ export const PlanFormSchema = z.object({
   monthlyBudget: MoneySchema.meta({ description: "Monthly model spend cap.", pii: "none", ui: { widget: "money", labelKey: `${LABELS}.monthlyBudget`, order: 2 } }),
   monthlyTokens: z.int().nonnegative().meta({ description: "Monthly model token cap.", pii: "none", ui: { labelKey: `${LABELS}.monthlyTokens`, order: 3 } }),
   maxConnectors: z.int().nonnegative().meta({ description: "Most connectors an organization may configure.", pii: "none", ui: { labelKey: `${LABELS}.maxConnectors`, order: 4 } }),
+  // Decision 0046: blank means "not set", so the platform default applies.
+  maxCustomAgents: z.int().nonnegative().optional().meta({ description: "Most custom agents an organization may have.", pii: "none", ui: { labelKey: `${LABELS}.maxCustomAgents`, order: 5 } }),
+  maxCustomSkills: z.int().nonnegative().optional().meta({ description: "Most custom skills an organization may have.", pii: "none", ui: { labelKey: `${LABELS}.maxCustomSkills`, order: 6 } }),
+  maxCustomInstructionChars: z
+    .int()
+    .nonnegative()
+    .optional()
+    .meta({ description: "Longest instructions of a custom agent or skill, in characters.", pii: "none", ui: { labelKey: `${LABELS}.maxCustomInstructionChars`, order: 7 } }),
   features: z
     .string()
     .trim()
     .max(2000)
     .regex(FEATURE_LIST)
     .optional()
-    .meta({ description: "Feature keys the plan includes, separated by commas.", pii: "none", ui: { widget: "textarea", labelKey: `${LABELS}.features`, order: 5 } }),
+    .meta({ description: "Feature keys the plan includes, separated by commas.", pii: "none", ui: { widget: "textarea", labelKey: `${LABELS}.features`, order: 8 } }),
 });
 export type PlanForm = z.infer<typeof PlanFormSchema>;
 
@@ -46,6 +54,10 @@ export const toUpsertPlanInput = (form: PlanForm): UpsertPlanInput => ({
     monthlyMicroUsd: moneyToMicroUsd(form.monthlyBudget),
     monthlyTokens: form.monthlyTokens,
     maxConnectors: form.maxConnectors,
+    // A blank cap is left out: the PUT replaces the plan, so it clears a cap set before.
+    ...(form.maxCustomAgents === undefined ? {} : { maxCustomAgents: form.maxCustomAgents }),
+    ...(form.maxCustomSkills === undefined ? {} : { maxCustomSkills: form.maxCustomSkills }),
+    ...(form.maxCustomInstructionChars === undefined ? {} : { maxCustomInstructionChars: form.maxCustomInstructionChars }),
     features: parseFeatures(form.features),
   },
 });
@@ -59,5 +71,8 @@ export const planFormDefaults = (plan: Plan | null): Partial<PlanForm> =>
         monthlyBudget: microUsdToMoney(plan.limits.monthlyMicroUsd),
         monthlyTokens: plan.limits.monthlyTokens,
         maxConnectors: plan.limits.maxConnectors,
+        maxCustomAgents: plan.limits.maxCustomAgents,
+        maxCustomSkills: plan.limits.maxCustomSkills,
+        maxCustomInstructionChars: plan.limits.maxCustomInstructionChars,
         features: plan.limits.features.join(", "),
       };

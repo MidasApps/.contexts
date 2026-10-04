@@ -161,6 +161,12 @@
       "monthlyTokens": "Tokens per month",
       "monthlyTokensHint": "Applies when the model has no registered price.",
       "maxConnectors": "Maximum connectors",
+      "maxCustomAgents": "Maximum custom agents",
+      "maxCustomAgentsHint": "Leave blank to use the platform default.",
+      "maxCustomSkills": "Maximum custom skills",
+      "maxCustomSkillsHint": "Leave blank to use the platform default.",
+      "maxCustomInstructionChars": "Maximum instruction length (characters)",
+      "maxCustomInstructionCharsHint": "Leave blank to use the platform default.",
       "features": "Features",
       "featuresHint": "Keys separated by commas, for example: web-tools, chat.voice"
     }

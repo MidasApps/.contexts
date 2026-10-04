@@ -51,6 +51,25 @@ describe("PlanFormDialog", () => {
     expect(api.calls.find((call) => call.method === "PUT")?.path).toBe(`/v1/admin/plans/${ADMIN_IDS.plan}`);
   });
 
+  it("edits the optional custom agent caps and leaves a blank cap out of the PUT", async () => {
+    const plan = PlanSchema.parse(buildPlan({ limits: { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000, maxConnectors: 5, maxCustomAgents: 10, features: ["web-tools"] } }));
+    const { user, api } = renderAdmin(<Harness plan={plan} />, { routes: { "PUT /v1/admin/plans/:planId": ok(buildPlan()) } });
+    const dialog = await screen.findByRole("dialog");
+    const agents = within(dialog).getByRole<HTMLInputElement>("spinbutton", { name: /Máximo de agentes personalizados/u });
+    const skills = within(dialog).getByRole<HTMLInputElement>("spinbutton", { name: /Máximo de habilidades personalizadas/u });
+    const chars = within(dialog).getByRole<HTMLInputElement>("spinbutton", { name: /Tamanho máximo das instruções/u });
+    expect([agents.value, skills.value, chars.value]).toEqual(["10", "", ""]);
+    expect(agents.required).toBe(false);
+    await user.clear(agents);
+    await user.type(skills, "4");
+    await user.click(within(dialog).getByRole("button", { name: "Salvar plano" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    const limits = (api.calls.find((call) => call.method === "PUT")?.body as { limits: Record<string, unknown> }).limits;
+    expect(limits).toMatchObject({ maxConnectors: 5, maxCustomSkills: 4 });
+    expect(Object.keys(limits)).not.toContain("maxCustomAgents");
+    expect(Object.keys(limits)).not.toContain("maxCustomInstructionChars");
+  });
+
   it("keeps the dialog open with the error and its reference when saving fails", async () => {
     const { user } = renderAdmin(<Harness plan={STANDARD} />, { routes: { "PUT /v1/admin/plans/:planId": apiError(409, "CONFLICT") } });
     const dialog = await screen.findByRole("dialog");
