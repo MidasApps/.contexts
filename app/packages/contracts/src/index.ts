@@ -555,7 +555,7 @@ export {
   previewScheduleEndpoint, runScheduleNowEndpoint, SCHEDULE_ENDPOINTS, ScheduleRunQueuedSchema, updateScheduleEndpoint,
 } from "./contracts/workflows/endpoints.ts";
 export {
-  adminClearFlagOverrideEndpoint, adminListFlagsEndpoint, adminSetFlagEndpoint, FLAG_ENDPOINTS, listFlagsEndpoint, setTenantFlagEndpoint,
+  adminClearFlagOverrideEndpoint, adminListFlagsEndpoint, adminSetFlagEndpoint, clearTenantFlagEndpoint, FLAG_ENDPOINTS, listFlagsEndpoint, setTenantFlagEndpoint,
 } from "./contracts/platform/flag-endpoints.ts";
 export {
   TenantFlagValueInputContract, TenantFlagValueInputSchema, type TenantFlagValueInput,

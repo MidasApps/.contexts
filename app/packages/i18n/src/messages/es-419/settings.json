@@ -1210,7 +1210,9 @@
       "turnOffNamed": "Desactivar {key} para la organización",
       "turnOn": "Volver a usar",
       "turnOnNamed": "Volver a usar {key}",
-      "platformOff": "Desactivada por la plataforma"
+      "platformOff": "Desactivada por la plataforma",
+      "follow": "Seguir a la plataforma",
+      "followNamed": "Seguir a la plataforma en {key}"
     },
     "confirm": {
       "titleOff": "¿Desactivar {key} para la organización?",
@@ -1221,6 +1223,12 @@
       "confirmOn": "Volver a usar",
       "doneOff": "{key} desactivada para la organización.",
       "doneOn": "La organización volvió a usar {key}."
+    },
+    "clear": {
+      "title": "¿Seguir a la plataforma en {key}?",
+      "description": "Se quita el cambio de la organización y la función toma el valor de la plataforma, activada o desactivada. Descripción de la función: {reason}",
+      "confirm": "Seguir a la plataforma",
+      "done": "{key} sigue a la plataforma."
     }
   },
   "knowledge": {

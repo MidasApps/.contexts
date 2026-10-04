@@ -1210,7 +1210,9 @@
       "turnOffNamed": "Turn off {key} for the organization",
       "turnOn": "Use again",
       "turnOnNamed": "Use {key} again",
-      "platformOff": "Turned off by the platform"
+      "platformOff": "Turned off by the platform",
+      "follow": "Follow the platform",
+      "followNamed": "Follow the platform for {key}"
     },
     "confirm": {
       "titleOff": "Turn off {key} for the organization?",
@@ -1221,6 +1223,12 @@
       "confirmOn": "Use again",
       "doneOff": "{key} turned off for the organization.",
       "doneOn": "The organization uses {key} again."
+    },
+    "clear": {
+      "title": "Follow the platform for {key}?",
+      "description": "The organization's change is removed and the feature takes the platform's value, on or off. Feature description: {reason}",
+      "confirm": "Follow the platform",
+      "done": "{key} follows the platform."
     }
   },
   "knowledge": {

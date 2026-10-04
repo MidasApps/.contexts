@@ -93,10 +93,39 @@ describe("SettingsFlagsView", { timeout: 30_000 }, () => {
     expect(requests[0]?.body).toEqual({ value: true });
   });
 
+  it("removes the organization's own override after confirmation, so the flag follows the platform again", async () => {
+    const requests: FakeRequest[] = [];
+    const { user } = renderView({
+      "DELETE /v1/flags/:flagKey": (request: FakeRequest) => {
+        requests.push(request);
+        return ok(rollout({ key: "chat.voice.realtime", value: false, tenantOverride: null }));
+      },
+    });
+    const table = await screen.findByRole("table", { name: "Recursos que Northwind pode desligar" });
+    // Only a flag the organization changed offers the removal.
+    expect(within(within(table).getByRole("row", { name: /Voz no chat/u })).queryByRole("button", { name: /Seguir a plataforma/u })).toBeNull();
+    await user.click(within(table).getByRole("button", { name: "Seguir a plataforma em Voz em tempo real" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Seguir a plataforma em Voz em tempo real?" });
+    await user.click(within(dialog).getByRole("button", { name: "Seguir a plataforma" }));
+    await waitFor(() => expect(requests).toHaveLength(1));
+    expect(requests[0]?.params["flagKey"]).toBe("chat.voice.realtime");
+    expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+  });
+
+  it("keeps a failed removal in the dialog with the request reference", async () => {
+    const { user } = renderView({ "DELETE /v1/flags/:flagKey": apiError(403, "FORBIDDEN") });
+    await user.click(await screen.findByRole("button", { name: "Seguir a plataforma em Voz em tempo real" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Seguir a plataforma em Voz em tempo real?" });
+    await user.click(within(dialog).getByRole("button", { name: "Seguir a plataforma" }));
+    expect(await within(dialog).findByText(/Referência/u)).toBeDefined();
+  });
+
   it("shows no action without the write permission and refuses the page without the read one", async () => {
     const reader = renderView({}, READER);
     await screen.findByRole("table", { name: "Recursos que Northwind pode desligar" });
     expect(screen.queryByRole("button", { name: /Desligar chat\.voice/u })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Seguir a plataforma/u })).toBeNull();
     reader.unmount();
     const { api } = renderView({}, ["core.organization.read"]);
     expect(await screen.findByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();

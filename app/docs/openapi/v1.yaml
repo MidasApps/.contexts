@@ -6586,6 +6586,85 @@ paths:
         - flags
       x-auth: principal
   /v1/flags/{flagKey}:
+    delete:
+      operationId: flags.clearTenantOverride
+      parameters:
+        - description: Flag key (`chat.voice`).
+          in: path
+          name: flagKey
+          required: true
+          schema:
+            maxLength: 80
+            pattern: ^[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)+$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.FeatureFlag"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Removes the organization's own override of a tenant-overridable flag, so the environment value applies again; idempotent (core.flag.write).
+      tags:
+        - flags
+      x-auth: user
     put:
       operationId: flags.setTenantValue
       parameters:

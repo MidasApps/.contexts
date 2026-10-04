@@ -75,3 +75,22 @@ describe("setFlagValue", () => {
     });
   });
 });
+
+describe("clearFlagOverride by a tenant", () => {
+  it("removes the organization's own override, audited on its tenant log, and is idempotent", async () => {
+    const { flags, memory, auditLog } = setup({ tenants: { [ORG]: { "chat.voice": false, "chat.voice.realtime": false } } }, { "chat.voice": true });
+    const cleared = await flags.clearFlagOverride({ actor: ACTOR, by: "tenant", key: "chat.voice", tenantId: ORG, requestId: "r" });
+    expect(cleared).toMatchObject({ ok: true, data: { key: "chat.voice", value: true, tenantOverride: null } });
+    expect(memory.tenants[ORG]).toEqual({ "chat.voice.realtime": false });
+    expect(auditLog.entries("tenant")).toEqual([expect.objectContaining({ action: "FEATURE_FLAG_UPDATED", tenantId: ORG, changes: ["tenantOverride"] })]);
+    expect(auditLog.entries("platform")).toEqual([]);
+    expect(await flags.clearFlagOverride({ actor: ACTOR, by: "tenant", key: "chat.voice", tenantId: ORG, requestId: "r" })).toMatchObject({ ok: true });
+    expect(auditLog.entries("tenant")).toHaveLength(1);
+  });
+
+  it("never removes an override of a flag the organization may not change (staff set it)", async () => {
+    const { flags, memory } = setup({ tenants: { [ORG]: { "ai.kill-switch": true } } });
+    expect(await flags.clearFlagOverride({ actor: ACTOR, by: "tenant", key: "ai.kill-switch", tenantId: ORG, requestId: "r" })).toEqual({ ok: false, error: { code: "FLAG_NOT_OVERRIDABLE" } });
+    expect(memory.tenants[ORG]).toEqual({ "ai.kill-switch": true });
+  });
+});

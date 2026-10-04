@@ -2,3 +2,4 @@
 import { route } from "@/server/core";
 
 export const PUT = route("flags.setTenantValue");
+export const DELETE = route("flags.clearTenantOverride");

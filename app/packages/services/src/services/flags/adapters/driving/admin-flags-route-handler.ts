@@ -36,7 +36,7 @@ export const buildAdminFlagsRoutes = (deps: { readonly pipeline: ApiRouteDeps; r
     const { flagKey, organizationId } = ctx.input.params;
     const denied = await requireStaff(ctx, { permission: FLAG_PERMISSIONS.manage, targetTenantId: organizationId });
     if (denied !== null) return denied;
-    const result = await deps.flags.clearFlagOverride({ actor: ctx.principal, key: flagKey, tenantId: organizationId, requestId: ctx.requestId });
+    const result = await deps.flags.clearFlagOverride({ actor: ctx.principal, by: "staff", key: flagKey, tenantId: organizationId, requestId: ctx.requestId });
     return result.ok ? dataResponse({ data: result.data }) : apiError(404, "NOT_FOUND", ctx.requestId);
   }),
 });

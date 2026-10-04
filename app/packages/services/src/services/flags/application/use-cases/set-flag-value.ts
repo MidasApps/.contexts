@@ -27,7 +27,8 @@ const tenantRefusal = async (deps: FlagsDeps, flag: RegisteredFlag, value: boole
   return value && !(await environmentValueFor(deps, flag)) ? { code: "ENVIRONMENT_DISABLED" } : null;
 };
 
-const recordChange = async (deps: FlagsDeps, command: SetFlagValueCommand): Promise<void> => {
+// Writes and removals of an override are audited alike.
+const recordChange = async (deps: FlagsDeps, command: Omit<SetFlagValueCommand, "value">): Promise<void> => {
   const common = {
     action: "FEATURE_FLAG_UPDATED" as const,
     actor: auditActorOf(command.actor),
@@ -73,33 +74,34 @@ export const makeSetFlagValue =
     );
   };
 
-export type ClearFlagOverrideCommand = { readonly actor: UserPrincipal; readonly key: string; readonly tenantId: TenantId; readonly requestId: string };
+export type ClearFlagOverrideCommand = {
+  readonly actor: UserPrincipal;
+  /** `staff` (`/v1/admin/flags/.../overrides/...`) or `tenant` (`/v1/flags`, the organization's own override); both already authorized. */
+  readonly by: "staff" | "tenant";
+  readonly key: string;
+  readonly tenantId: TenantId;
+  readonly requestId: string;
+};
 
-export type ClearFlagOverride = (command: ClearFlagOverrideCommand) => Promise<Result<FeatureFlag, { readonly code: "FLAG_NOT_FOUND" }>>;
+export type ClearFlagOverrideError = { readonly code: "FLAG_NOT_FOUND" } | { readonly code: "FLAG_NOT_OVERRIDABLE" };
+
+export type ClearFlagOverride = (command: ClearFlagOverrideCommand) => Promise<Result<FeatureFlag, ClearFlagOverrideError>>;
 
 /**
- * Staff remove an organization's override (decision 0044): the environment value applies again.
- * Idempotent: clearing an absent override answers the flag without a second audit entry. A removal
- * is audited like a write (`FEATURE_FLAG_UPDATED`, platform log, `targetTenantId`).
+ * Removes an organization's override (decisions 0044, 0066): the environment value applies again.
+ * Staff may remove any override; the organization only its own of a tenant-overridable flag, so
+ * it never strips what staff set on a flag it cannot change. Idempotent: clearing an absent
+ * override answers the flag without a second audit entry. A removal is audited like a write
+ * (`FEATURE_FLAG_UPDATED`): staff on the platform log with `targetTenantId`, a tenant on its log.
  */
 export const makeClearFlagOverride =
   (deps: FlagsDeps): ClearFlagOverride =>
   async (command) => {
     const flag = findFlag(deps.registry, command.key);
     if (flag === undefined) return err({ code: "FLAG_NOT_FOUND" });
+    if (command.by === "tenant" && !flag.tenantOverridable) return err({ code: "FLAG_NOT_OVERRIDABLE" });
     const removed = await deps.stores.tenants.clear({ key: flag.key, tenantId: command.tenantId, updatedBy: command.actor.uid });
-    if (removed) {
-      await deps.audit.record({
-        log: "platform",
-        action: "FEATURE_FLAG_UPDATED",
-        actor: auditActorOf(command.actor),
-        target: { type: "feature-flag", id: flag.key },
-        targetTenantId: command.tenantId,
-        outcome: "success",
-        requestId: command.requestId,
-        changes: ["tenantOverride"],
-      });
-    }
+    if (removed) await recordChange(deps, command);
     const [stored, overrides] = await Promise.all([deps.stores.environment.read(), deps.stores.tenants.read(command.tenantId)]);
     return ok(toFeatureFlag(flag, { stored: stored[flag.key], environmentDefault: deps.environmentDefaults[flag.key], tenantOverride: overrides[flag.key] ?? null, now: deps.clock.now() }));
   };

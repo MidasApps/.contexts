@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useTenantFlags } from "#/entities/feature-flag/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
-import { TenantSetFlagDialog, type TenantFlagChange } from "#/features/tenant-set-flag/index.ts";
+import { TenantClearFlagOverrideDialog, TenantSetFlagDialog, type TenantFlagChange } from "#/features/tenant-set-flag/index.ts";
 import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -58,19 +58,31 @@ const changeOf = (flag: FeatureFlag): TenantFlagChange | null => {
   return flag.value ? { flag, value: false } : null;
 };
 
-function FlagAction({ flag, onChange }: { flag: FeatureFlag; onChange: (change: TenantFlagChange) => void }) {
+/** What a writer may do on a row: change the override, or remove it (decision 0066). */
+type FlagHandlers = { readonly onChange: (change: TenantFlagChange) => void; readonly onClear: (flag: FeatureFlag) => void };
+
+function FlagAction({ flag, handlers }: { flag: FeatureFlag; handlers: FlagHandlers }) {
   const t = useTranslations("settings.flags.actions");
   const change = changeOf(flag);
   const name = useFlagLabel().name(flag.key);
-  if (change === null) return <span className="text-body text-muted-foreground">{t("platformOff")}</span>;
+  const follow =
+    flag.tenantOverride === null ? null : (
+      <Button variant="ghost" size="sm" onClick={() => handlers.onClear(flag)} aria-label={t("followNamed", { key: name })}>
+        {t("follow")}
+      </Button>
+    );
+  if (change === null) return follow ?? <span className="text-body text-muted-foreground">{t("platformOff")}</span>;
   return (
-    <Button variant="outline" size="sm" onClick={() => onChange(change)} aria-label={t(change.value ? "turnOnNamed" : "turnOffNamed", { key: name })}>
-      {t(change.value ? "turnOn" : "turnOff")}
-    </Button>
+    <span className="flex flex-wrap gap-2">
+      <Button variant="outline" size="sm" onClick={() => handlers.onChange(change)} aria-label={t(change.value ? "turnOnNamed" : "turnOffNamed", { key: name })}>
+        {t(change.value ? "turnOn" : "turnOff")}
+      </Button>
+      {follow}
+    </span>
   );
 }
 
-const useColumns = (onChange: ((change: TenantFlagChange) => void) | null) => {
+const useColumns = (handlers: FlagHandlers | null) => {
   const t = useTranslations("settings.flags");
   return useMemo(
     () => [
@@ -82,16 +94,16 @@ const useColumns = (onChange: ((change: TenantFlagChange) => void) | null) => {
         id: "actions",
         header: () => t("columns.actions"),
         meta: { headerHidden: true },
-        cell: ({ row }) => (onChange === null ? null : <FlagAction flag={row.original} onChange={onChange} />),
+        cell: ({ row }) => (handlers === null ? null : <FlagAction flag={row.original} handlers={handlers} />),
       }),
     ],
-    [onChange, t],
+    [handlers, t],
   );
 };
 
-function FlagsTable({ flags, organizationName, onChange }: { flags: readonly FeatureFlag[]; organizationName: string; onChange: ((change: TenantFlagChange) => void) | null }) {
+function FlagsTable({ flags, organizationName, handlers }: { flags: readonly FeatureFlag[]; organizationName: string; handlers: FlagHandlers | null }) {
   const t = useTranslations("settings.flags");
-  const columns = useColumns(onChange);
+  const columns = useColumns(handlers);
   return (
     <DataTable
       caption={t("caption", { organization: organizationName })}
@@ -109,7 +121,7 @@ function FlagsTable({ flags, organizationName, onChange }: { flags: readonly Fea
           <span className="text-xs text-muted-foreground">
             {t("columns.override")}: <Override flag={flag} />
           </span>
-          {onChange === null ? null : <FlagAction flag={flag} onChange={onChange} />}
+          {handlers === null ? null : <FlagAction flag={flag} handlers={handlers} />}
         </div>
       )}
       empty={<EmptyState frame="plain" headingLevel={2} icon="flag" title={t("emptyTitle")} description={t("emptyDescription")} />}
@@ -125,6 +137,8 @@ function SettingsFlags({ context }: { context: AccessContext }) {
   const canWrite = context.permissions.includes("core.flag.write");
   const flags = useTenantFlags(organization.id, { enabled: allowed });
   const [change, setChange] = useState<TenantFlagChange | null>(null);
+  const [clearing, setClearing] = useState<FeatureFlag | null>(null);
+  const handlers = useMemo<FlagHandlers>(() => ({ onChange: setChange, onClear: setClearing }), []);
   return (
     <SettingsPageFrame width="wide"
       organizationId={organization.id}
@@ -137,10 +151,11 @@ function SettingsFlags({ context }: { context: AccessContext }) {
           <AlertDescription>{t("onlyOffNotice")}</AlertDescription>
         </Alert>
         <QuerySection query={flags} loadingLabel={t("loading")}>
-          {(data) => <FlagsTable flags={data} organizationName={organization.name} onChange={canWrite && online ? setChange : null} />}
+          {(data) => <FlagsTable flags={data} organizationName={organization.name} handlers={canWrite && online ? handlers : null} />}
         </QuerySection>
       </div>
       {canWrite ? <TenantSetFlagDialog organizationId={organization.id} change={change} onOpenChange={(open) => !open && setChange(null)} /> : null}
+      {canWrite ? <TenantClearFlagOverrideDialog organizationId={organization.id} flag={clearing} onOpenChange={(open) => !open && setClearing(null)} /> : null}
     </SettingsPageFrame>
   );
 }
@@ -148,8 +163,9 @@ function SettingsFlags({ context }: { context: AccessContext }) {
 /**
  * `/o/:organizationId/settings/flags` (SP5 spec §5, §7; core.flag.read): the flags an
  * organization may override, with the platform value, its own override and what it gets. An
- * organization can only switch a feature off for itself, or use it again (core.flag.write); it
- * can never enable what the platform disables.
+ * organization can only switch a feature off for itself, use it again, or remove its own change
+ * and follow the platform (core.flag.write, decision 0066); it can never enable what the platform
+ * disables.
  */
 export function SettingsFlagsView() {
   const t = useTranslations("settings.flags");

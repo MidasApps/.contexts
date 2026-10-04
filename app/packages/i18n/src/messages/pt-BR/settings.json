@@ -1210,7 +1210,9 @@
       "turnOffNamed": "Desligar {key} para a organização",
       "turnOn": "Voltar a usar",
       "turnOnNamed": "Voltar a usar {key}",
-      "platformOff": "Desligado pela plataforma"
+      "platformOff": "Desligado pela plataforma",
+      "follow": "Seguir a plataforma",
+      "followNamed": "Seguir a plataforma em {key}"
     },
     "confirm": {
       "titleOff": "Desligar {key} para a organização?",
@@ -1221,6 +1223,12 @@
       "confirmOn": "Voltar a usar",
       "doneOff": "{key} desligado para a organização.",
       "doneOn": "A organização voltou a usar {key}."
+    },
+    "clear": {
+      "title": "Seguir a plataforma em {key}?",
+      "description": "A alteração da organização é removida e o recurso passa a ter o valor da plataforma, ligado ou desligado. Descrição do recurso: {reason}",
+      "confirm": "Seguir a plataforma",
+      "done": "{key} segue a plataforma."
     }
   },
   "knowledge": {

@@ -105,3 +105,28 @@ describe("/v1/flags", () => {
     expect(await enable.json()).toMatchObject({ error: { code: "VALIDATION_FAILED", details: [{ field: "value", issue: "ENVIRONMENT_DISABLED" }] } });
   });
 });
+
+describe("DELETE /v1/flags/{flagKey}", () => {
+  const path = (key: string) => `/v1/flags/${key}?organizationId=${ORG_A}`;
+
+  it("lets an admin (core.flag.write) remove the organization's own override, so it follows the platform again", async () => {
+    const { routes, memory, auditLog } = setup();
+    memory.tenants[ORG_A] = { "chat.voice": false };
+    const cleared = await callRoute(routes, "flags.clearTenantOverride", path("chat.voice"), { method: "DELETE", as: "alice" });
+    expect(cleared.status).toBe(200);
+    expect(await cleared.json()).toMatchObject({ data: { key: "chat.voice", value: true, tenantOverride: null } });
+    expect(memory.tenants[ORG_A]).toEqual({});
+    expect(auditLog.entries("tenant")).toEqual([expect.objectContaining({ action: "FEATURE_FLAG_UPDATED", tenantId: ORG_A, actor: { type: "user", id: "alice" } })]);
+  });
+
+  it("refuses members without core.flag.write, another tenant and non-overridable flags, and answers 404 for an unknown flag", async () => {
+    const { routes, memory } = setup();
+    memory.tenants[ORG_A] = { "chat.voice": false, "ai.kill-switch": true };
+    expect((await callRoute(routes, "flags.clearTenantOverride", path("chat.voice"), { method: "DELETE", as: "mia" })).status).toBe(403);
+    expect((await callRoute(routes, "flags.clearTenantOverride", path("chat.voice"), { method: "DELETE", as: "bob" })).status).toBe(404);
+    expect((await callRoute(routes, "flags.clearTenantOverride", path("ai.kill-switch"), { method: "DELETE", as: "alice" })).status).toBe(403);
+    expect((await callRoute(routes, "flags.clearTenantOverride", path("no.such"), { method: "DELETE", as: "alice" })).status).toBe(404);
+    expect(memory.tenants[ORG_A]).toEqual({ "chat.voice": false, "ai.kill-switch": true });
+  });
+});
+
