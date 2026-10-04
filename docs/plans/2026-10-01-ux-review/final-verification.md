@@ -29,6 +29,7 @@ The framework (`.contexts/`, `.claude/`) was not changed by any of these commits
 | Evals (fake mode) | `AI_MODE=fake pnpm evals` | 7 of 7 |
 | Emulator tests | `pnpm test:emulators` | 274 passed (services 211, mastra 42, functions 9, agents 6, module-example 4, scripts 2) |
 | Postgres tests | `pnpm test:postgres` | 76 passed (services 49, agents 27) |
+| Builds | web, Mastra, desktop (built by the e2e runs at `0cc2e911`); Functions with `turbo run build --force` | all ok |
 | e2e web, before B5 (`2ed87e70`) | `pnpm test:e2e` | 502 passed, 0 failed, 2 skipped |
 | e2e web, with B5 (`0cc2e911`) | `pnpm test:e2e` | 501 passed, 1 failed, 2 skipped |
 | e2e console project alone (`0cc2e911`) | `--project=console` | 53 of 53 |
@@ -38,7 +39,7 @@ The two skipped journeys are the invite-link copy on Firefox and WebKit (no clip
 
 ### The revoke journey
 
-"revokes another session, which then has to sign in again" failed in every fast full run and passed in slow ones. A bisect showed no commit caused it; the speed did. Two sign-ins of one user in the same second get identical ID tokens and identical session cookies (checked against the Auth Emulator), and each created its own record, so revoking one left its twin open. `createWebSession` now reuses the open record that holds the cookie hash (decision 0069), and the journey signs the second browser in during a later second.
+"revokes another session, which then has to sign in again" failed in every fast full run and passed in slow ones. A bisect showed no commit caused it; the speed did. Two sign-ins of one user in the same second get identical ID tokens and identical session cookies (checked against the Auth Emulator; the same is expected in production, not reproduced there), and each created its own record, so revoking one left its twin open. `createWebSession` now reuses the open record that holds the cookie hash (decision 0069), and the journey signs the second browser in during a later second.
 
 ### Code-size and import metrics (decision 0068)
 

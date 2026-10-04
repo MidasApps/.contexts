@@ -8,7 +8,7 @@
 
 Decision 0007 keeps a `sessions` record holding only `sha256(cookie)`. Every request then finds the record by that hash and checks that it is still open.
 
-Firebase ID tokens carry no nonce. Two sign-ins of the same user in the same second, from two browsers, therefore get byte-identical ID tokens. `createSessionCookie` then returns byte-identical cookies too. The Auth Emulator confirmed this on 2026-10-04: same second, same cookie; the next second, a different cookie. Production tokens are signed with RS256, whose signature is deterministic, so the same happens there.
+Firebase ID tokens carry no nonce. Two sign-ins of the same user in the same second, from two browsers, therefore get byte-identical ID tokens. `createSessionCookie` then returns byte-identical cookies too. The Auth Emulator confirmed this on 2026-10-04: same second, same cookie; the next second, a different cookie. Production tokens are signed with RS256, whose signature is deterministic, so the same is expected in production. This was verified against the Auth Emulator only, not reproduced against Google's service.
 
 Before this decision, each sign-in created its own record. That left two records with one hash. Revoking either record changed nothing, because `findByCookieHash` still returned the other, open record. The e2e test "revokes another session, which then has to sign in again" failed whenever the suite ran fast enough for both sign-ins to land in one second.
 
