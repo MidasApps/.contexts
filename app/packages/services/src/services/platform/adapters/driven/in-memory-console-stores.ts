@@ -11,31 +11,14 @@ import type {
   UsageBucket,
 } from "../../application/ports/console-ports.ts";
 
-/** In-memory console stores for unit tests; every map is inspectable. */
-export const createInMemoryConsoleStores = (
-  seed: {
-    organizations?: readonly { id: string; name?: string; status?: OrganizationStatus }[];
-    /** User ids holding a grant, per organization (one entry per grant: repeats are the same person). */
-    members?: Readonly<Record<string, readonly string[]>>;
-  } = {},
-) => {
-  const plans = new Map<string, Plan>();
-  const organizations = new Map(
-    seed.organizations?.map((org) => [
-      org.id,
-      { id: org.id, name: org.name ?? org.id, status: org.status ?? "active" },
-    ]) ?? [],
-  );
-  const assignments = new Map<string, OrganizationPlan>();
-  const settings = new Map<string, StoredAgentSettings>();
-  const budgets = new Map<string, BudgetCaps>();
-  const costs = new Map<string, number>();
-  const activity: { tenantId: string; userId: string; at: Date }[] = [];
-  const agentRuns: { tenantId: string; at: Date; stoppedBy: string | null }[] = [];
-  /** Ledger rows already grouped by tenant, UTC day and model (what the Postgres adapter answers). */
-  const usageRows: (UsageBucket & { tenantId: string })[] = [];
+type InMemoryOrganization = { id: string; name: string; status: OrganizationStatus };
+type ActivityRow = { tenantId: string; userId: string; at: Date };
+type AgentRunRow = { tenantId: string; at: Date; stoppedBy: string | null };
+type UsageRow = UsageBucket & { tenantId: string };
+
+const createInMemoryPlanRepository = (plans: Map<string, Plan>): PlanRepository => {
   let sequence = 0;
-  const planRepository: PlanRepository = {
+  return {
     list: () => Promise.resolve([...plans.values()].sort((a, b) => a.name.localeCompare(b.name))),
     get: (planId) => Promise.resolve(plans.get(planId) ?? null),
     create: ({ name, limits, at }) => {
@@ -58,7 +41,15 @@ export const createInMemoryConsoleStores = (
       return Promise.resolve(plan);
     },
   };
-  const organizationStore: OrganizationAdminStore = {
+};
+
+const createInMemoryOrganizationStore = (args: {
+  organizations: Map<string, InMemoryOrganization>;
+  assignments: Map<string, OrganizationPlan>;
+  members: Readonly<Record<string, readonly string[]>> | undefined;
+}): OrganizationAdminStore => {
+  const { organizations, assignments } = args;
+  return {
     listLive: ({ after, limit }) => {
       const sorted = [...organizations.values()]
         .sort((a, b) => (a.id < b.id ? -1 : 1))
@@ -80,18 +71,29 @@ export const createInMemoryConsoleStores = (
       assignments.set(tenantId, { tenantId, planId, budgetOverride });
       return Promise.resolve();
     },
-    countMembers: (tenantId) => Promise.resolve(new Set(seed.members?.[tenantId] ?? []).size),
+    countMembers: (tenantId) => Promise.resolve(new Set(args.members?.[tenantId] ?? []).size),
     tenantsOnPlan: (planId) =>
       Promise.resolve([...assignments.values()].filter((row) => row.planId === planId).map((row) => row.tenantId)),
   };
-  const settingsRepository: AgentSettingsRepository = {
-    get: (tenantId) => Promise.resolve(settings.get(tenantId) ?? null),
-    save: (stored) => {
-      settings.set(stored.settings.tenantId, stored);
-      return Promise.resolve();
-    },
-  };
-  const usage: ConsoleUsage = {
+};
+
+const createInMemorySettingsRepository = (settings: Map<string, StoredAgentSettings>): AgentSettingsRepository => ({
+  get: (tenantId) => Promise.resolve(settings.get(tenantId) ?? null),
+  save: (stored) => {
+    settings.set(stored.settings.tenantId, stored);
+    return Promise.resolve();
+  },
+});
+
+const createInMemoryConsoleUsage = (args: {
+  budgets: Map<string, BudgetCaps>;
+  costs: Map<string, number>;
+  usageRows: readonly UsageRow[];
+  activity: readonly ActivityRow[];
+  agentRuns: readonly AgentRunRow[];
+}): ConsoleUsage => {
+  const { budgets, costs, usageRows, activity, agentRuns } = args;
+  return {
     setTenantBudget: ({ tenantId, budget }) => {
       budgets.set(tenantId, budget);
       return Promise.resolve();
@@ -128,8 +130,39 @@ export const createInMemoryConsoleStores = (
       return Promise.resolve({ runs: runs.length, stopped: runs.filter((row) => row.stoppedBy !== null).length });
     },
   };
+};
+
+/** In-memory console stores for unit tests; every map is inspectable. */
+export const createInMemoryConsoleStores = (
+  seed: {
+    organizations?: readonly { id: string; name?: string; status?: OrganizationStatus }[];
+    /** User ids holding a grant, per organization (one entry per grant: repeats are the same person). */
+    members?: Readonly<Record<string, readonly string[]>>;
+  } = {},
+) => {
+  const plans = new Map<string, Plan>();
+  const organizations = new Map(
+    seed.organizations?.map((org) => [
+      org.id,
+      { id: org.id, name: org.name ?? org.id, status: org.status ?? "active" },
+    ]) ?? [],
+  );
+  const assignments = new Map<string, OrganizationPlan>();
+  const settings = new Map<string, StoredAgentSettings>();
+  const budgets = new Map<string, BudgetCaps>();
+  const costs = new Map<string, number>();
+  const activity: ActivityRow[] = [];
+  const agentRuns: AgentRunRow[] = [];
+  /** Ledger rows already grouped by tenant, UTC day and model (what the Postgres adapter answers). */
+  const usageRows: UsageRow[] = [];
+  const stores = {
+    plans: createInMemoryPlanRepository(plans),
+    organizations: createInMemoryOrganizationStore({ organizations, assignments, members: seed.members }),
+    agentSettings: createInMemorySettingsRepository(settings),
+    usage: createInMemoryConsoleUsage({ budgets, costs, usageRows, activity, agentRuns }),
+  };
   return {
-    stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage },
+    stores,
     plans,
     organizations,
     assignments,
