@@ -37,6 +37,10 @@ const addSource = (sources: Map<Permission, GrantSource[]>, permission: Permissi
   else if (!existing.includes(source)) existing.push(source);
 };
 
+/** Every permission the roles of one grant resolve to (repeats allowed; `addSource` dedupes the source). */
+const grantedPermissions = (roles: readonly RoleRef[], resolve: RolePermissionsResolver): Permission[] =>
+  roles.flatMap((role) => resolve(role));
+
 /**
  * Effective tenant permissions of a principal at a node: the union of the roles of
  * every live grant on the node chain (grants inherit downwards), optionally
@@ -61,10 +65,8 @@ export const computeEffectivePermissions = (args: {
       nodeId: grant.nodeId,
       roles: grant.roles,
     };
-    for (const role of grant.roles) {
-      for (const permission of resolve(role)) {
-        if (args.ceiling === undefined || args.ceiling.has(permission)) addSource(sources, permission, source);
-      }
+    for (const permission of grantedPermissions(grant.roles, resolve)) {
+      if (args.ceiling === undefined || args.ceiling.has(permission)) addSource(sources, permission, source);
     }
   }
   return { permissions: new Set(sources.keys()), sources };
