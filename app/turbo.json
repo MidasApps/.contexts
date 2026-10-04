@@ -11,7 +11,7 @@
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "lib/**", ".mastra/output/**"]
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "typecheck"]
     },
     "typecheck": {
       "dependsOn": ["^build"]

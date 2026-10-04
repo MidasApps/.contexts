@@ -83,6 +83,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Audit dependencies (high and critical block)
         run: pnpm audit --audit-level high
+      - name: Formatting (Biome, decision 0068)
+        run: pnpm format:check
       - name: Lint
         run: pnpm lint
       - name: Typecheck
