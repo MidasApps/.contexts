@@ -186,7 +186,7 @@ export function ChatThread(props: ChatThreadProps) {
               <Button variant="ghost" size="sm" pending={older.loading} onClick={older.load}>
                 {t("panel.loadEarlier")}
               </Button>
-              <p role="status" className={older.failed ? "text-[12.5px] text-destructive-text" : "sr-only"}>
+              <p role="status" className={older.failed ? "text-body-sm text-destructive-text" : "sr-only"}>
                 {older.failed ? t("panel.loadEarlierFailed") : ""}
               </p>
             </div>
