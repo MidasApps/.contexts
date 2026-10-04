@@ -28,48 +28,35 @@ import { SettingsTracesView } from "@core/client/views/settings-traces";
 import { SettingsUnitsView } from "@core/client/views/settings-units";
 import { SettingsUsageView } from "@core/client/views/settings-usage";
 import { SettingsWorkflowsView } from "@core/client/views/settings-workflows";
+import type { ComponentType } from "react";
 
 const isOneOf = <T extends string>(values: readonly T[], value: string): value is T =>
   (values as readonly string[]).includes(value);
 
+// From `agents` on: the agent runtime sections (SP5 spec §7); the ones with detail pages read the `rest` tail.
+const SETTINGS_SECTION_VIEWS: Record<SettingsSection, ComponentType> = {
+  general: SettingsGeneralView,
+  members: SettingsMembersView,
+  invitations: SettingsInvitationsView,
+  roles: SettingsRolesView,
+  units: SettingsUnitsView,
+  "api-keys": SettingsApiKeysView,
+  devices: SettingsDevicesView,
+  agents: SettingsAgentsView,
+  skills: SettingsSkillsView,
+  knowledge: SettingsKnowledgeView,
+  connectors: SettingsConnectorsView,
+  workflows: SettingsWorkflowsView,
+  approvals: SettingsApprovalsView,
+  usage: SettingsUsageView,
+  traces: SettingsTracesView,
+  evals: SettingsEvalsView,
+  flags: SettingsFlagsView,
+};
+
 function KnownSettingsSection({ section }: { section: SettingsSection }) {
-  switch (section) {
-    case "general":
-      return <SettingsGeneralView />;
-    case "members":
-      return <SettingsMembersView />;
-    case "invitations":
-      return <SettingsInvitationsView />;
-    case "roles":
-      return <SettingsRolesView />;
-    case "units":
-      return <SettingsUnitsView />;
-    case "api-keys":
-      return <SettingsApiKeysView />;
-    case "devices":
-      return <SettingsDevicesView />;
-    // The agent runtime sections (SP5 spec §7); the ones with detail pages read the `rest` tail.
-    case "agents":
-      return <SettingsAgentsView />;
-    case "skills":
-      return <SettingsSkillsView />;
-    case "knowledge":
-      return <SettingsKnowledgeView />;
-    case "connectors":
-      return <SettingsConnectorsView />;
-    case "workflows":
-      return <SettingsWorkflowsView />;
-    case "approvals":
-      return <SettingsApprovalsView />;
-    case "usage":
-      return <SettingsUsageView />;
-    case "traces":
-      return <SettingsTracesView />;
-    case "evals":
-      return <SettingsEvalsView />;
-    case "flags":
-      return <SettingsFlagsView />;
-  }
+  const View = SETTINGS_SECTION_VIEWS[section];
+  return <View />;
 }
 
 function KnownProfileSection({ section }: { section: ProfileSection }) {
