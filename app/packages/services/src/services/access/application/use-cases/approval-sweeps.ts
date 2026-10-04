@@ -89,8 +89,9 @@ export const makeCancelApprovalRequest =
 
 /**
  * Decision 0030 A3: a request still `approved` 15 min after `updatedAt` was interrupted between
- * its approval and its execution record. It becomes `failed` with `EXECUTION_INTERRUPTED` and an
- * `APPROVAL_FAILED` audit entry, in one transaction; its handler never runs again.
+ * its approval and its execution record. It becomes `failed` with `EXECUTION_INTERRUPTED` (stored
+ * on the request as its `failure`, decision 0067) and an `APPROVAL_FAILED` audit entry, in one
+ * transaction; its handler never runs again.
  */
 export const makeFailInterruptedApprovals =
   (deps: ApprovalDeps): FailInterruptedApprovals =>
@@ -105,7 +106,9 @@ export const makeFailInterruptedApprovals =
         if (current === null || Date.parse(current.updatedAt) > Date.parse(cutoff)) return false;
         const status = nextApprovalStatus(current.status, "fail");
         if (status === null) return false;
-        deps.approvals.setStatus(tx, { id: current.id, status, updatedAt: now.toISOString(), actorId: SYSTEM.id });
+        // Decision 0067: the request itself says why, not only the audit entry.
+        const failure = { code: EXECUTION_INTERRUPTED, requestId };
+        deps.approvals.setStatus(tx, { id: current.id, status, failure, updatedAt: now.toISOString(), actorId: SYSTEM.id });
         await deps.audit.record(
           {
             log: "tenant",

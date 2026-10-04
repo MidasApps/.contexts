@@ -84,7 +84,7 @@ describe("failInterruptedApprovals (decision 0030 A3)", () => {
     expect(await world.services.failInterruptedApprovals({ requestId: "sweep" })).toEqual({ failed: 0 });
     world.setNow("2026-09-30T12:15:00.000Z");
     expect(await world.services.failInterruptedApprovals({ requestId: "sweep" })).toEqual({ failed: 1 });
-    expect(world.approvals.rowOf(stuck.id)?.status).toBe("failed");
+    expect(world.approvals.rowOf(stuck.id)).toMatchObject({ status: "failed", failure: { code: "EXECUTION_INTERRUPTED", requestId: "sweep" } });
     expect(world.auditEntries().filter((entry) => entry.action === "APPROVAL_FAILED")).toEqual([
       expect.objectContaining({ tenantId, actor: { type: "system", id: "system" }, target: { type: "approval-request", id: stuck.id }, outcome: "failed", metadata: { errorCode: "EXECUTION_INTERRUPTED" }, requestId: "sweep" }),
     ]);
