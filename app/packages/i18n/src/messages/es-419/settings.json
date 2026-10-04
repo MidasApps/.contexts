@@ -455,6 +455,18 @@
       "showDetailsNamed": "Ver detalles de {name}",
       "hideDetailsNamed": "Ocultar detalles de {name}"
     },
+    "modules": {
+      "title": "Módulos",
+      "description": "Módulos instalados en esta aplicación. Activar un módulo pone sus comandos, habilidades y agentes a disposición de la organización.",
+      "emptyTitle": "Ningún módulo instalado",
+      "emptyDescription": "Esta aplicación no tiene módulos instalados.",
+      "enabled": "Activado",
+      "disabled": "Desactivado",
+      "enable": "Activar el módulo {module}",
+      "enabledToast": "Módulo {module} activado.",
+      "disabledToast": "Módulo {module} desactivado.",
+      "viaAgents": "Un agente activado de este módulo ya habilita sus comandos y habilidades."
+    },
     "assistant": {
       "name": "Asistente",
       "description": "Conversa con las personas, planifica el trabajo y delega en los agentes activados. Siempre está activo."

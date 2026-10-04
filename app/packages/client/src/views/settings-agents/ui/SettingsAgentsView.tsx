@@ -17,6 +17,7 @@ import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage, QuerySection } from "#/widgets/page-state/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 import { AgentCard } from "./AgentCard.tsx";
+import { InstalledModules } from "./InstalledModules.tsx";
 import { OrganizationAgents } from "./OrganizationAgents.tsx";
 
 // The supervisor is not a subagent of the catalog, but it has a versioned prompt of its own.
@@ -131,6 +132,7 @@ function AgentsContent({ organizationId, viewer }: { organizationId: string; vie
                 </>
               )}
             </QuerySection>
+            <InstalledModules organizationId={organizationId} settings={settingsData} canUpdate={viewer.canUpdate} />
             <SectionCard title={t("organization.title")} description={t("organization.description")}>
               <OrganizationAgentRules
                 organizationId={organizationId}
@@ -173,7 +175,8 @@ function SettingsAgents({ context }: { context: AccessContext }) {
  * `/o/:organizationId/settings/agents` (SP5 spec §7, core.agent-settings.read): the agents the
  * platform and the installed modules offer to the organization, each with its switch, tools,
  * skills and the organization's instructions; the organization's own agents, which an admin
- * creates, edits, enables and deletes (decision 0046); plus the rules for all of them (web tools, PII).
+ * creates, edits, enables and deletes (decision 0046); one switch per installed module (decision
+ * 0064); plus the rules for all of them (web tools, PII).
  */
 export function SettingsAgentsView() {
   const t = useTranslations("settings.agents");

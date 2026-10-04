@@ -455,6 +455,18 @@
       "showDetailsNamed": "Show details of {name}",
       "hideDetailsNamed": "Hide details of {name}"
     },
+    "modules": {
+      "title": "Modules",
+      "description": "Modules installed in this application. Turning a module on gives the organization its commands, skills and agents.",
+      "emptyTitle": "No module installed",
+      "emptyDescription": "This application has no modules installed.",
+      "enabled": "On",
+      "disabled": "Off",
+      "enable": "Turn on the {module} module",
+      "enabledToast": "Module {module} turned on.",
+      "disabledToast": "Module {module} turned off.",
+      "viaAgents": "An enabled agent of this module already gives its commands and skills."
+    },
     "assistant": {
       "name": "Assistant",
       "description": "Talks to people, plans the work and delegates to the agents that are on. It is always on."
