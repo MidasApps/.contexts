@@ -46,7 +46,10 @@ organization only when `agent-settings.enabledAgents` names the module or one of
 ## Consequences
 
 - An organization enables a module's commands the way it enables its skills: by naming the module
-  (or one of its agents) in `enabledAgents`. No new switch or contract field.
+  (or one of its agents) in `enabledAgents`. No new contract field.
+- `/settings` agents has a "Módulos" section with one switch per installed module
+  (`ModuleEnabledSwitch`): it adds or removes the module id in the same `enabledAgents` list, so a
+  module without agents (`modules/example`) can be enabled from the UI and the two cannot disagree.
 - The action agent's ceiling (`actionCeilingOf`) and a custom agent's record ceiling still count
   every selected command permission; a ceiling is an upper bound, not the offered set.
 - The staff catalog still lists module commands in the action agent's `tools`
@@ -58,7 +61,7 @@ organization only when `agent-settings.enabledAgents` names the module or one of
 
 - **Filtering only `AgentModule.commands`.** In production the module's commands come from the
   command registry, so this would miss them.
-- **A per-module switch in agent settings.** The follow-up waited for one, but `enabledAgents`
+- **A per-module switch backed by its own settings field.** The follow-up waited for one, but `enabledAgents`
   already gates module skills and agents; a second switch would let the two disagree.
 - **Putting the request context in every tool call context.** It would let `catalog.renderForm`
   reuse the memoized settings reader, but it changes the tool pipeline for one tool.
