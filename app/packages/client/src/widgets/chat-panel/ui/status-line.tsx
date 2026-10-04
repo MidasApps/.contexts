@@ -18,8 +18,9 @@ export type StatusLineProps = {
   className?: string | undefined;
 };
 
+/** How the line looks in a phase; `textKey` is a key of the `chat` messages. */
 type Line = {
-  readonly text: string;
+  readonly textKey: string;
   readonly icon: ReactNode;
   readonly tone: "muted" | "warning";
   readonly visible: boolean;
@@ -27,6 +28,78 @@ type Line = {
 };
 
 const BUSY: ReadonlySet<ChatPhase> = new Set<ChatPhase>(["connecting", "resuming", "responding"]);
+
+const SPINNER = <Spinner decorative className="size-3.5" />;
+
+/** The line of each phase; `error` speaks through the alert and `idle` says nothing. */
+const LINES: Readonly<Record<ChatPhase, Line | null>> = {
+  connecting: { textKey: "status.connecting", icon: SPINNER, tone: "muted", visible: true, retry: false },
+  resuming: { textKey: "status.resuming", icon: SPINNER, tone: "muted", visible: true, retry: false },
+  responding: { textKey: "status.responding", icon: SPINNER, tone: "muted", visible: true, retry: false },
+  finished: { textKey: "status.finished", icon: null, tone: "muted", visible: false, retry: false },
+  "awaiting-approval": {
+    textKey: "status.awaitingApproval",
+    icon: <HandIcon aria-hidden="true" className="size-3.5" />,
+    tone: "warning",
+    visible: true,
+    retry: false,
+  },
+  stopped: {
+    textKey: "status.stopped",
+    icon: <CircleStopIcon aria-hidden="true" className="size-3.5" />,
+    tone: "muted",
+    visible: true,
+    retry: false,
+  },
+  lost: {
+    textKey: "status.lost",
+    icon: <AlertTriangleIcon aria-hidden="true" className="size-3.5" />,
+    tone: "warning",
+    visible: true,
+    retry: true,
+  },
+  offline: {
+    textKey: "status.offline",
+    icon: <WifiOffIcon aria-hidden="true" className="size-3.5" />,
+    tone: "warning",
+    visible: true,
+    retry: true,
+  },
+  error: null,
+  idle: null,
+};
+
+/**
+ * The line of a phase. Plain offline is already said by the shell banner and under the field;
+ * the line speaks only when a send failed and can be retried.
+ */
+const lineOf = (phase: ChatPhase, failure: ChatFailure | undefined): Line | null =>
+  phase === "offline" && failure === undefined ? null : LINES[phase];
+
+/** A failed turn: the translated reason, the request reference and a retry. */
+function FailureAlert({ failure, onRetry }: { failure: ChatFailure | undefined; onRetry: () => void }) {
+  const t = useTranslations("chat");
+  const tErrors = useTranslations("errors");
+  const tCommon = useTranslations("common");
+  const code = failure?.code;
+  const reason =
+    code !== undefined && tErrors.has(code as "INTERNAL_ERROR") ? tErrors(code as "INTERNAL_ERROR") : t("error.stream");
+  return (
+    <Alert variant="destructive" data-slot="chat-error">
+      <AlertTriangleIcon aria-hidden="true" />
+      <AlertTitle>{t("error.title")}</AlertTitle>
+      <AlertDescription className="text-inherit">
+        <p>{reason}</p>
+        {failure?.requestId === undefined ? null : (
+          <p className="font-mono text-caption">{tCommon("errorState.reference", { requestId: failure.requestId })}</p>
+        )}
+        <Button variant="outline" size="sm" onClick={onRetry} className="mt-1 text-foreground">
+          {t("error.retry")}
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+}
 
 /**
  * The state of the conversation in words (SP4 spec §5.3). One polite live region, always
@@ -36,84 +109,8 @@ const BUSY: ReadonlySet<ChatPhase> = new Set<ChatPhase>(["connecting", "resuming
  */
 export function StatusLine({ phase, failure, onRetry, className }: StatusLineProps) {
   const t = useTranslations("chat");
-  const tErrors = useTranslations("errors");
-  const tCommon = useTranslations("common");
-
-  const lineOf = (): Line | null => {
-    switch (phase) {
-      case "connecting":
-        return {
-          text: t("status.connecting"),
-          icon: <Spinner decorative className="size-3.5" />,
-          tone: "muted",
-          visible: true,
-          retry: false,
-        };
-      case "resuming":
-        return {
-          text: t("status.resuming"),
-          icon: <Spinner decorative className="size-3.5" />,
-          tone: "muted",
-          visible: true,
-          retry: false,
-        };
-      case "responding":
-        return {
-          text: t("status.responding"),
-          icon: <Spinner decorative className="size-3.5" />,
-          tone: "muted",
-          visible: true,
-          retry: false,
-        };
-      case "finished":
-        return { text: t("status.finished"), icon: null, tone: "muted", visible: false, retry: false };
-      case "awaiting-approval":
-        return {
-          text: t("status.awaitingApproval"),
-          icon: <HandIcon aria-hidden="true" className="size-3.5" />,
-          tone: "warning",
-          visible: true,
-          retry: false,
-        };
-      case "stopped":
-        return {
-          text: t("status.stopped"),
-          icon: <CircleStopIcon aria-hidden="true" className="size-3.5" />,
-          tone: "muted",
-          visible: true,
-          retry: false,
-        };
-      case "lost":
-        return {
-          text: t("status.lost"),
-          icon: <AlertTriangleIcon aria-hidden="true" className="size-3.5" />,
-          tone: "warning",
-          visible: true,
-          retry: true,
-        };
-      case "offline":
-        // Plain offline is already said by the shell banner and under the field; the line speaks
-        // only when a send failed and can be retried.
-        return failure === undefined
-          ? null
-          : {
-              text: t("status.offline"),
-              icon: <WifiOffIcon aria-hidden="true" className="size-3.5" />,
-              tone: "warning",
-              visible: true,
-              retry: true,
-            };
-      case "error":
-      case "idle":
-        return null;
-    }
-  };
-
-  const line = lineOf();
-  const code = failure?.code;
-  const reason =
-    code !== undefined && tErrors.has(code as "INTERNAL_ERROR") ? tErrors(code as "INTERNAL_ERROR") : t("error.stream");
-
+  const line = lineOf(phase, failure);
+  const text = line === null ? "" : t(line.textKey);
   return (
     <div data-slot="chat-status" data-phase={phase} className={cn("flex flex-col gap-2", className)}>
       <div
@@ -131,7 +128,7 @@ export function StatusLine({ phase, failure, onRetry, className }: StatusLinePro
           )}
         >
           {line?.icon}
-          {line === null ? "" : BUSY.has(phase) ? <Shimmer>{line.text}</Shimmer> : line.text}
+          {line === null ? "" : BUSY.has(phase) ? <Shimmer>{text}</Shimmer> : text}
         </p>
         {line?.retry === true ? (
           <Button variant="outline" size="sm" onClick={onRetry}>
@@ -139,23 +136,7 @@ export function StatusLine({ phase, failure, onRetry, className }: StatusLinePro
           </Button>
         ) : null}
       </div>
-      {phase === "error" ? (
-        <Alert variant="destructive" data-slot="chat-error">
-          <AlertTriangleIcon aria-hidden="true" />
-          <AlertTitle>{t("error.title")}</AlertTitle>
-          <AlertDescription className="text-inherit">
-            <p>{reason}</p>
-            {failure?.requestId === undefined ? null : (
-              <p className="font-mono text-caption">
-                {tCommon("errorState.reference", { requestId: failure.requestId })}
-              </p>
-            )}
-            <Button variant="outline" size="sm" onClick={onRetry} className="mt-1 text-foreground">
-              {t("error.retry")}
-            </Button>
-          </AlertDescription>
-        </Alert>
-      ) : null}
+      {phase === "error" ? <FailureAlert failure={failure} onRetry={onRetry} /> : null}
     </div>
   );
 }

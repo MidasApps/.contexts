@@ -153,19 +153,31 @@ const phaseOf = (args: {
   return outcome.kind === "finished" ? "finished" : "idle";
 };
 
+/** How an answer that just ended left the thread, or `undefined` for a stop (recorded when the member asked). */
+const outcomeOfFinish = (finish: {
+  message: UIMessage;
+  isAbort: boolean;
+  isDisconnect: boolean;
+  isError: boolean;
+}): Outcome | undefined => {
+  const { message } = finish;
+  if (finish.isAbort) return undefined;
+  if (finish.isDisconnect) return { kind: "lost", messageId: message.id };
+  if (!finish.isError) return { kind: "finished", messageId: message.id };
+  // Only a partial answer with text is kept on screen as incomplete.
+  return {
+    kind: "failed",
+    messageId: message.role === "assistant" && textOf(message).trim() !== "" ? message.id : undefined,
+  };
+};
+
 /**
- * One chat thread over `useChat` (server state stays in `useChat`, never copied to a store):
- * the transport for `/v1/chat`, stop that also aborts the run on the server (`useChat.stop`
- * only closes the connection), resume on mount, native approval responses (decision 0032 path
- * A) and the phase the status line shows.
+ * The transport of one thread, created once: it reads the latest scope and conversation through
+ * the thread link at request time, and adopts the id the server gives a new conversation.
  */
-export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
+const useThreadTransport = (args: UseChatSessionArgs) => {
   const connection = useApiConnection();
-  const callEndpoint = useCallEndpoint();
-  const online = useOnlineStatus();
   const [conversationId, setConversationId] = useState(args.conversationId);
-  const [outcome, setOutcome] = useState<Outcome>({ kind: "none" });
-  const [resuming, setResuming] = useState(args.resume === true);
   const [link] = useState(() =>
     createThreadLink({
       scope: args.scope,
@@ -175,7 +187,6 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
   );
   const { scope, onConversationStarted } = args;
   useEffect(() => link.update({ scope, onConversationStarted }), [link, scope, onConversationStarted]);
-
   const [transport] = useState(
     () =>
       args.transport ??
@@ -188,6 +199,21 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
         },
       }),
   );
+  return { link, transport, conversationId };
+};
+
+/**
+ * One chat thread over `useChat` (server state stays in `useChat`, never copied to a store):
+ * the transport for `/v1/chat`, stop that also aborts the run on the server (`useChat.stop`
+ * only closes the connection), resume on mount, native approval responses (decision 0032 path
+ * A) and the phase the status line shows.
+ */
+export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
+  const callEndpoint = useCallEndpoint();
+  const online = useOnlineStatus();
+  const { link, transport, conversationId } = useThreadTransport(args);
+  const [outcome, setOutcome] = useState<Outcome>({ kind: "none" });
+  const [resuming, setResuming] = useState(args.resume === true);
 
   const chat = useChat({
     transport,
@@ -196,17 +222,10 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
     // The stream's metadata is checked against the contract (`confidence: low | normal`, follow-up #42).
     messageMetadataSchema: MessageMetadataSchema,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
-    onFinish: ({ message, isAbort, isDisconnect, isError }) => {
+    onFinish: (finish) => {
       setResuming(false);
-      // A stop is recorded when the member asks for it; an abort seen here is that same stop.
-      if (isAbort) return;
-      if (isDisconnect) setOutcome({ kind: "lost", messageId: message.id });
-      else if (isError)
-        setOutcome({
-          kind: "failed",
-          messageId: message.role === "assistant" && textOf(message).trim() !== "" ? message.id : undefined,
-        });
-      else setOutcome({ kind: "finished", messageId: message.id });
+      const next = outcomeOfFinish(finish);
+      if (next !== undefined) setOutcome(next);
     },
     onError: () => setResuming(false),
   });

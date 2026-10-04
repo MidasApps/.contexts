@@ -3,7 +3,7 @@
 import { CORE_CONTRACTS, type ContractDefinition } from "@core/contracts";
 import type { ChatTransport, UIMessage } from "ai";
 import { SquarePenIcon } from "lucide-react";
-import { type ReactNode, useEffect, useId, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useId, useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { ASSISTANT_AGENT_ID, agentNameOf, useChatAgents } from "#/entities/chat-agent/index.ts";
 import { AgentPicker } from "#/features/chat-agent-picker/index.ts";
@@ -23,6 +23,7 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { ErrorState } from "#/shared/ui/molecules/ErrorState/ErrorState.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { useConversationThread } from "../model/use-conversation-thread.ts";
+import { type PanelThread, usePanelThread } from "../model/use-panel-thread.ts";
 import { type ChatSuggestion, ChatThread } from "./chat-thread.tsx";
 
 export type ChatPanelProps = {
@@ -57,36 +58,12 @@ export type ChatPanelProps = {
   speechSeams?: ReadAloudActionProps["seams"];
 };
 
-/**
- * Which conversation is on screen. `key` remounts the thread; adopting the id the server gave a
- * new conversation does not. `storedId` is the conversation the thread loads when it mounts.
- */
-type Thread = {
-  readonly key: number;
-  readonly conversationId: string | undefined;
-  readonly storedId: string | undefined;
-  /** Last `conversationId` prop seen, to tell "the owner navigated" from "the owner caught up". */
-  readonly prop: string | undefined;
-  /** The member asked for a new conversation: the composer takes the focus. */
-  readonly fresh: boolean;
-  readonly attempt: number;
-};
-
-const threadFor = (key: number, conversationId: string | undefined): Thread => ({
-  key,
-  conversationId,
-  storedId: conversationId,
-  prop: conversationId,
-  fresh: false,
-  attempt: 0,
-});
-
 const CORE_SUGGESTIONS = ["capabilities", "knowledge", "data", "create"] as const;
 
 type ThreadEnvironment = { readonly uiRegistry: UiRegistry; readonly contracts: readonly ContractDefinition[] };
 
 type StoredThreadProps = {
-  thread: Thread;
+  thread: PanelThread;
   conversationId: string;
   panel: ChatPanelProps;
   environment: ThreadEnvironment;
@@ -217,9 +194,10 @@ export function ChatPanel(props: ChatPanelProps) {
     }),
     [uiComponents, contracts],
   );
-  const [thread, setThread] = useState<Thread>(() => threadFor(0, conversationId));
-  // The agent picked for a new conversation, or the one a stored conversation names.
-  const [agentId, setAgentId] = useState<string>(ASSISTANT_AGENT_ID);
+  const { thread, agentId, setAgentId, started, startNew, recover } = usePanelThread(
+    conversationId,
+    onConversationChange,
+  );
   const agents = useChatAgents(props.scope.organizationId);
   const knownName = agentNameOf({ agentId, agents: agents.data, assistant: t("agents.assistant") });
   const agentName = knownName ?? t("agents.unknown");
@@ -229,35 +207,6 @@ export function ChatPanel(props: ChatPanelProps) {
     () => (agentId === ASSISTANT_AGENT_ID ? props.scope : { ...props.scope, agentId }),
     [agentId, props.scope],
   );
-
-  // The owner of the URL moved to another conversation: start that thread. When it only caught
-  // up with the id this thread got from the server, nothing remounts (the answer is streaming).
-  if (conversationId !== thread.prop) {
-    const caughtUp = conversationId === thread.conversationId;
-    setThread(caughtUp ? { ...thread, prop: conversationId } : threadFor(thread.key + 1, conversationId));
-    // Another conversation: a stored one names its agent once loaded, a new one starts with the assistant.
-    if (!caughtUp) setAgentId(ASSISTANT_AGENT_ID);
-  }
-
-  const started = (id: string) => {
-    setThread((current) => ({ ...current, conversationId: id }));
-    onConversationChange?.(id);
-  };
-
-  const startNew = () => {
-    setThread((current) => ({ ...threadFor(current.key + 1, undefined), prop: current.prop, fresh: true }));
-    setAgentId(ASSISTANT_AGENT_ID);
-    onConversationChange?.(undefined);
-  };
-
-  const recover = () =>
-    setThread((current) => ({
-      ...current,
-      key: current.key + 1,
-      storedId: current.conversationId,
-      fresh: false,
-      attempt: current.attempt + 1,
-    }));
 
   const suggestions =
     props.suggestions ??

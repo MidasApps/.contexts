@@ -3,7 +3,7 @@
 import type { Conversation } from "@core/contracts";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { SquarePenIcon } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { ASSISTANT_AGENT_ID, agentNameOf, useChatAgents } from "#/entities/chat-agent/index.ts";
 import { ConversationItem, conversationsQuery } from "#/entities/conversation/index.ts";
@@ -19,6 +19,7 @@ import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.ts
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { NoAccessState } from "#/shared/ui/molecules/NoAccessState/NoAccessState.tsx";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
+import { useRenamingRow } from "../model/use-renaming-row.ts";
 
 export type ChatHistorySidebarProps = {
   organizationId: string;
@@ -113,6 +114,100 @@ function ListState({
   return query.data.length === 0 ? <EmptyList q={q} archived={archived} /> : null;
 }
 
+/** Search, the count of listed conversations, the archived toggle and the offline notice. */
+function HistoryToolbar({
+  query,
+  count,
+  archived,
+  online,
+  onSearch,
+  onToggleArchived,
+}: {
+  query: ListQuery;
+  count: number;
+  archived: boolean;
+  online: boolean;
+  onSearch: (q: string) => void;
+  onToggleArchived: () => void;
+}) {
+  const t = useTranslations("chat.history");
+  return (
+    <div className="flex shrink-0 flex-col gap-2 px-3 py-2">
+      <HistorySearch onSearch={onSearch} />
+      <div className="flex items-center justify-between gap-2">
+        <p role="status" data-slot="history-count" className="text-caption text-muted-foreground">
+          {/* While more pages exist, the loaded rows are not the total. */}
+          {query.isSuccess ? t(query.hasNextPage ? "countLoaded" : "count", { count }) : ""}
+        </p>
+        <Button variant={archived ? "secondary" : "ghost"} size="sm" aria-pressed={archived} onClick={onToggleArchived}>
+          {t("showArchived")}
+        </Button>
+      </div>
+      {online ? null : <OfflineNotice onRetry={() => void query.refetch()} />}
+    </div>
+  );
+}
+
+type ConversationRowProps = {
+  organizationId: string;
+  /** Project of the chat route, for conversations that do not name their own. */
+  projectId: string;
+  conversation: Conversation;
+  active: boolean;
+  agentName: string | undefined;
+  /** The row shows the rename form instead of its link. */
+  renaming: boolean;
+  /** Opens the rename form on a row (`undefined` closes it). */
+  onRename: (conversationId: string | undefined) => void;
+  onNavigate: (() => void) | undefined;
+  onDeleted: ((conversationId: string) => void) | undefined;
+};
+
+/** One conversation: its link to the chat, its rename form while renaming, and its actions menu. */
+function ConversationRow({
+  organizationId,
+  projectId,
+  conversation,
+  active,
+  agentName,
+  renaming,
+  onRename,
+  onNavigate,
+  onDeleted,
+}: ConversationRowProps) {
+  return (
+    <ConversationItem
+      conversation={conversation}
+      to={{
+        id: "chat",
+        organizationId,
+        projectId: conversation.projectId ?? projectId,
+        conversationId: conversation.id,
+      }}
+      active={active}
+      agentName={agentName}
+      onNavigate={onNavigate}
+      editing={
+        renaming ? (
+          <RenameConversationForm
+            organizationId={organizationId}
+            conversation={conversation}
+            onDone={() => onRename(undefined)}
+          />
+        ) : undefined
+      }
+      actions={
+        <ConversationActionsMenu
+          organizationId={organizationId}
+          conversation={conversation}
+          onRename={() => onRename(conversation.id)}
+          onDeleted={onDeleted}
+        />
+      }
+    />
+  );
+}
+
 /**
  * The conversation history beside the chat (chat.html §23.5, SP4 spec §4.1): the member's own
  * conversations — pinned first, then most recent — with search, the archived ones behind a
@@ -132,21 +227,8 @@ export function ChatHistorySidebar({
   const titleId = useId();
   const [q, setQ] = useState("");
   const [archived, setArchived] = useState(false);
-  const [renamingId, setRenamingId] = useState<string | undefined>();
   const query = useConversationList(organizationId, { archived, q });
-  const listRef = useRef<HTMLUListElement>(null);
-  const renamed = useRef<string | undefined>(undefined);
-
-  // The rename form left the row: the focus goes back to that row's link, not to the page.
-  useEffect(() => {
-    if (renamingId !== undefined) {
-      renamed.current = renamingId;
-      return;
-    }
-    if (renamed.current === undefined) return;
-    listRef.current?.querySelector<HTMLElement>(`[data-conversation-id="${renamed.current}"] a`)?.focus();
-    renamed.current = undefined;
-  }, [renamingId]);
+  const { renamingId, setRenamingId, listRef } = useRenamingRow();
 
   const conversations: readonly Conversation[] = query.data ?? [];
   const tAgents = useTranslations("chat.agents");
@@ -174,58 +256,30 @@ export function ChatHistorySidebar({
           </RouteLink>
         </Button>
       </div>
-      <div className="flex shrink-0 flex-col gap-2 px-3 py-2">
-        <HistorySearch onSearch={setQ} />
-        <div className="flex items-center justify-between gap-2">
-          <p role="status" data-slot="history-count" className="text-caption text-muted-foreground">
-            {/* While more pages exist, the loaded rows are not the total. */}
-            {query.isSuccess ? t(query.hasNextPage ? "countLoaded" : "count", { count: conversations.length }) : ""}
-          </p>
-          <Button
-            variant={archived ? "secondary" : "ghost"}
-            size="sm"
-            aria-pressed={archived}
-            onClick={() => setArchived((current) => !current)}
-          >
-            {t("showArchived")}
-          </Button>
-        </div>
-        {online ? null : <OfflineNotice onRetry={() => void query.refetch()} />}
-      </div>
+      <HistoryToolbar
+        query={query}
+        count={conversations.length}
+        archived={archived}
+        online={online}
+        onSearch={setQ}
+        onToggleArchived={() => setArchived((current) => !current)}
+      />
       <div className="min-h-0 flex-1 overflow-y-auto px-1 pb-3">
         {state}
         {conversations.length === 0 ? null : (
           <ul ref={listRef} aria-label={t("listLabel")} className="flex list-none flex-col gap-0.5">
             {conversations.map((conversation) => (
-              <ConversationItem
+              <ConversationRow
                 key={conversation.id}
+                organizationId={organizationId}
+                projectId={projectId}
                 conversation={conversation}
-                to={{
-                  id: "chat",
-                  organizationId,
-                  projectId: conversation.projectId ?? projectId,
-                  conversationId: conversation.id,
-                }}
                 active={conversation.id === activeConversationId}
                 agentName={agentNameFor(conversation.agentId)}
+                renaming={renamingId === conversation.id}
+                onRename={setRenamingId}
                 onNavigate={onNavigate}
-                editing={
-                  renamingId === conversation.id ? (
-                    <RenameConversationForm
-                      organizationId={organizationId}
-                      conversation={conversation}
-                      onDone={() => setRenamingId(undefined)}
-                    />
-                  ) : undefined
-                }
-                actions={
-                  <ConversationActionsMenu
-                    organizationId={organizationId}
-                    conversation={conversation}
-                    onRename={() => setRenamingId(conversation.id)}
-                    onDeleted={onDeleted}
-                  />
-                }
+                onDeleted={onDeleted}
               />
             ))}
           </ul>

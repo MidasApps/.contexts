@@ -2,28 +2,28 @@
 
 import type { ContractDefinition } from "@core/contracts";
 import type { ChatTransport, UIMessage } from "ai";
-import { CheckIcon, CopyIcon, RefreshCwIcon, SparklesIcon } from "lucide-react";
-import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { SparklesIcon } from "lucide-react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { useTranslations } from "use-intl";
 import { approvalRequestRoute } from "#/entities/approval-request/index.ts";
-import { ChatMessage, formatUiSubmission, textOf, type UiSubmission } from "#/entities/message/index.ts";
+import { formatUiSubmission, type UiSubmission } from "#/entities/message/index.ts";
 import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
-import { type ComposerVoiceProps, ReadAloudAction, type ReadAloudActionProps } from "#/features/chat-voice/index.ts";
+import type { ComposerVoiceProps, ReadAloudActionProps } from "#/features/chat-voice/index.ts";
 import { GenerativeUiProvider, type UiRegistry } from "#/features/generative-ui/index.ts";
 import type { ChatScope } from "#/shared/api/chat-transport.ts";
 import { routeHref } from "#/shared/lib/router/route-paths.ts";
 import { Conversation, ConversationEmptyState, ConversationScrollButton } from "#/shared/ui/ai/conversation.tsx";
-import { Message, MessageAction, MessageActions, MessageContent } from "#/shared/ui/ai/message.tsx";
+import { Message, MessageContent } from "#/shared/ui/ai/message.tsx";
 import { Shimmer } from "#/shared/ui/ai/shimmer.tsx";
 import { Suggestion, Suggestions } from "#/shared/ui/ai/suggestion.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { useChatSession } from "../model/use-chat-session.ts";
 import { useChatVoice } from "../model/use-chat-voice.ts";
+import { useComposerFocus } from "../model/use-composer-focus.ts";
 import { useOlderMessages } from "../model/use-older-messages.ts";
 import { ChatComposer } from "./chat-composer.tsx";
-import { createCoreToolRenderer } from "./chat-tool-part.tsx";
-import { OpenAttachment } from "./open-attachment.tsx";
 import { StatusLine } from "./status-line.tsx";
+import { ThreadMessages } from "./thread-messages.tsx";
 
 /** A quick-start card of the empty conversation (chat.html §23.1). */
 export type ChatSuggestion = {
@@ -67,65 +67,50 @@ export type ChatThreadProps = {
   speechSeams?: ReadAloudActionProps["seams"];
 };
 
-const COPIED_MS = 2000;
-
-/** Read aloud for one answer; `undefined` while voice is off. */
-type AnswerSpeech = {
-  readonly organizationId: string;
-  readonly autoPlay: boolean;
-  readonly seams: ReadAloudActionProps["seams"];
-};
-
-function AnswerActions({
-  message,
-  canRegenerate,
-  onRegenerate,
-  speech,
+/** The empty conversation: quick-start cards that fill the draft. */
+function EmptyConversation({
+  suggestions,
+  onSelect,
 }: {
-  message: UIMessage;
-  canRegenerate: boolean;
-  onRegenerate: () => void;
-  speech?: AnswerSpeech | undefined;
+  suggestions: readonly ChatSuggestion[];
+  onSelect: (prompt: string) => void;
 }) {
-  const t = useTranslations("chat.message");
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    if (!copied) return undefined;
-    const timer = setTimeout(() => setCopied(false), COPIED_MS);
-    return () => clearTimeout(timer);
-  }, [copied]);
-  const text = textOf(message);
-  if (text === "" && !canRegenerate) return null;
-  const copy = () => {
-    navigator.clipboard.writeText(text).then(
-      () => setCopied(true),
-      () => setCopied(false),
-    );
-  };
+  const t = useTranslations("chat");
   return (
-    <MessageActions className="flex-wrap">
-      {text === "" ? null : (
-        <MessageAction label={copied ? t("copied") : t("copy")} onClick={copy}>
-          {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
-        </MessageAction>
-      )}
-      {canRegenerate ? (
-        <MessageAction label={t("regenerate")} onClick={onRegenerate}>
-          <RefreshCwIcon aria-hidden="true" />
-        </MessageAction>
-      ) : null}
-      {speech === undefined || text === "" ? null : (
-        <ReadAloudAction
-          organizationId={speech.organizationId}
-          text={text}
-          autoPlay={speech.autoPlay}
-          seams={speech.seams}
-        />
-      )}
-      <span role="status" className="sr-only">
-        {copied ? t("copied") : ""}
-      </span>
-    </MessageActions>
+    <ConversationEmptyState
+      title={t("panel.empty.title")}
+      description={t("panel.empty.description")}
+      icon={<SparklesIcon className="size-5" />}
+    >
+      <Suggestions label={t("panel.empty.suggestionsLabel")}>
+        {suggestions.map((suggestion) => (
+          <Suggestion
+            key={suggestion.id}
+            title={suggestion.title}
+            description={suggestion.description}
+            prompt={suggestion.prompt}
+            onSelect={onSelect}
+          />
+        ))}
+      </Suggestions>
+    </ConversationEmptyState>
+  );
+}
+
+/** The answer placeholder until its first chunk arrives (hidden from screen readers; the status line speaks). */
+function PendingAnswer({ assistantName }: { assistantName: string | undefined }) {
+  const t = useTranslations("chat");
+  return (
+    <Message
+      from="assistant"
+      author={assistantName ?? t("message.assistant")}
+      aria-hidden="true"
+      data-slot="pending-answer"
+    >
+      <MessageContent>
+        <Shimmer>{t("status.responding")}</Shimmer>
+      </MessageContent>
+    </Message>
   );
 }
 
@@ -144,36 +129,21 @@ export function ChatThread(props: ChatThreadProps) {
     onConversationStarted: props.onConversationStarted,
     transport: props.transport,
   });
-  const inputRef = useRef<HTMLTextAreaElement>(null);
   const { messages, phase, busy } = session;
   const voice = useChatVoice({ organizationId: props.scope.organizationId, can: props.can });
-  const finishedAnswerId =
-    phase === "finished" ? messages.findLast((message) => message.role === "assistant")?.id : undefined;
-  // "Read answers aloud": the answer that just finished in this thread starts reading by itself.
-  const speechFor = (messageId: string): AnswerSpeech | undefined =>
-    voice === undefined
-      ? undefined
-      : {
-          organizationId: props.scope.organizationId,
-          autoPlay: voice.autoRead && messageId === finishedAnswerId,
-          seams: props.speechSeams,
-        };
   const older = useOlderMessages({
     conversationId: session.conversationId,
     initialCursor: props.olderCursor,
     messages,
     prepend: (page) => session.setMessages((current) => [...page, ...current]),
   });
-  const renderTool = createCoreToolRenderer(session);
 
   // What the member answers in a form or a picker goes as the next user turn: the tools that
   // render them already returned (`catalog.renderForm` runs on the server) and `/v1/chat` takes
   // only text in a user message (decision 0032, amendment of SP4 Task 10).
   const submitUi = (submission: UiSubmission) => session.send(formatUiSubmission(submission));
 
-  useEffect(() => {
-    if (props.focusOnMount === true) inputRef.current?.focus();
-  }, [props.focusOnMount]);
+  const { inputRef, draft, setDraft, stop, suggest, onKeyDown } = useComposerFocus(session, props.focusOnMount);
 
   // The run ended on the server before the stream closed (`/v1/chat` clears it first), so what
   // the host shows about this conversation (answering, its generated title) is stale now.
@@ -189,27 +159,6 @@ export function ChatThread(props: ChatThreadProps) {
     props.approvalHref ??
     ((approvalId: string) => routeHref(approvalRequestRoute(props.scope.organizationId, approvalId)));
 
-  const stop = () => {
-    session.stop();
-    inputRef.current?.focus();
-  };
-
-  // The draft is the composer's, kept here so a suggestion can fill it.
-  const [draft, setDraft] = useState("");
-  // A suggestion fills the draft for review instead of sending at once: the member can edit it.
-  const suggest = (prompt: string) => {
-    setDraft(prompt);
-    inputRef.current?.focus();
-  };
-
-  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    // Popovers and the composer handle their own Esc first (they prevent the default).
-    if (event.key !== "Escape" || event.defaultPrevented || !busy) return;
-    event.preventDefault();
-    stop();
-  };
-
-  const lastId = messages.at(-1)?.id;
   const waitingFirstChunk = (phase === "connecting" || phase === "resuming") && messages.at(-1)?.role !== "assistant";
   const retry =
     phase === "lost" && props.onRecover !== undefined && session.conversationId !== undefined
@@ -238,64 +187,18 @@ export function ChatThread(props: ChatThreadProps) {
             </Button>
           )}
           {messages.length === 0 ? (
-            <ConversationEmptyState
-              title={t("panel.empty.title")}
-              description={t("panel.empty.description")}
-              icon={<SparklesIcon className="size-5" />}
-            >
-              <Suggestions label={t("panel.empty.suggestionsLabel")}>
-                {props.suggestions.map((suggestion) => (
-                  <Suggestion
-                    key={suggestion.id}
-                    title={suggestion.title}
-                    description={suggestion.description}
-                    prompt={suggestion.prompt}
-                    onSelect={suggest}
-                  />
-                ))}
-              </Suggestions>
-            </ConversationEmptyState>
+            <EmptyConversation suggestions={props.suggestions} onSelect={suggest} />
           ) : (
-            messages.map((message) => {
-              const last = message.id === lastId;
-              const settled = !(busy && last);
-              return (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  streaming={busy && last && message.role === "assistant"}
-                  interrupted={message.id === session.interruptedMessageId}
-                  incomplete={message.id === session.incompleteMessageId}
-                  showReasoning={props.showReasoning}
-                  assistantName={props.assistantName}
-                  renderTool={renderTool}
-                  attachmentAction={(file) => <OpenAttachment file={file} />}
-                  actions={
-                    message.role === "assistant" && settled ? (
-                      <AnswerActions
-                        message={message}
-                        canRegenerate={last && phase !== "awaiting-approval"}
-                        onRegenerate={session.regenerate}
-                        speech={speechFor(message.id)}
-                      />
-                    ) : undefined
-                  }
-                />
-              );
-            })
+            <ThreadMessages
+              session={session}
+              organizationId={props.scope.organizationId}
+              showReasoning={props.showReasoning}
+              assistantName={props.assistantName}
+              voice={voice}
+              speechSeams={props.speechSeams}
+            />
           )}
-          {waitingFirstChunk ? (
-            <Message
-              from="assistant"
-              author={props.assistantName ?? t("message.assistant")}
-              aria-hidden="true"
-              data-slot="pending-answer"
-            >
-              <MessageContent>
-                <Shimmer>{t("status.responding")}</Shimmer>
-              </MessageContent>
-            </Message>
-          ) : null}
+          {waitingFirstChunk ? <PendingAnswer assistantName={props.assistantName} /> : null}
         </Conversation>
         <div className="flex flex-col gap-2 border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <StatusLine phase={phase} failure={session.failure} onRetry={retry} />
