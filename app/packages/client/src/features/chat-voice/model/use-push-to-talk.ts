@@ -41,6 +41,7 @@ const browserCreateRecorder = (stream: StreamLike): RecorderLike => {
 
 const problemOf = (error: unknown): PushToTalkProblem => {
   if (!(error instanceof ApiError)) return "failed";
+  if (error.code === "BUDGET_EXCEEDED") return "budget";
   return error.code === "FEATURE_UNAVAILABLE" ? "unavailable" : "failed";
 };
 

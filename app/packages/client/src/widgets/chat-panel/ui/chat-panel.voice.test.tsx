@@ -140,6 +140,26 @@ describe("ChatPanel voice (flag gated)", () => {
     expect(transport.streams[0]?.messages.at(-1)).toMatchObject({ role: "user", parts: [{ type: "text", text: "qual é o prazo" }] });
   });
 
+  it("says the organization's AI budget ran out when transcription or read aloud answers BUDGET_EXCEEDED", async () => {
+    const api = createFakeApi({
+      "GET /v1/voice/availability": ok({ voice: true, realtime: false }),
+      "POST /v1/voice/transcriptions": apiError(429, "BUDGET_EXCEEDED"),
+      "POST /v1/voice/speech": apiError(429, "BUDGET_EXCEEDED"),
+    });
+    const { user, transport, field } = setup(api);
+    const budget = "O orçamento de IA da organização acabou. Fale com um administrador.";
+    const button = await talkButton();
+    button.focus();
+    await user.keyboard("{Enter}");
+    await screen.findByRole("button", { name: "Parar a gravação e transcrever" });
+    await user.keyboard("{Enter}");
+    expect(await screen.findByText(budget)).toBeTruthy();
+    await user.type(field(), "oi{Enter}");
+    await answer(transport, "O prazo é de 30 dias.");
+    await user.click(await screen.findByRole("button", { name: "Ouvir resposta" }));
+    await waitFor(() => expect(screen.getAllByText(budget)).toHaveLength(2));
+  });
+
   it("reads an answer aloud with the returned audio and frees it when stopped", async () => {
     const api = voiceApi({ voice: true, realtime: false });
     const { user, transport, urls, field, container } = setup(api);

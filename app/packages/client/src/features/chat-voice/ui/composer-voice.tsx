@@ -60,6 +60,8 @@ function RealtimeToggle({ organizationId, disabled, connect }: { organizationId:
  */
 export function ComposerVoice({ organizationId, voice, disabled = false, onTranscript, seams }: ComposerVoiceProps) {
   const t = useTranslations("chat.voice");
+  // The budget refusal reads like the chat's (status line: `errors.<CODE>`).
+  const tErrors = useTranslations("errors");
   const [inserted, setInserted] = useState(false);
   const talk = usePushToTalk({
     organizationId,
@@ -74,7 +76,8 @@ export function ComposerVoice({ organizationId, voice, disabled = false, onTrans
     talk.start();
   };
   const idle = inserted ? t("inserted") : "";
-  const status = talk.problem !== undefined ? t(`problem.${talk.problem}`) : talk.phase === "idle" ? idle : t(talk.phase);
+  const problem = talk.problem === "budget" ? tErrors("BUDGET_EXCEEDED") : talk.problem === undefined ? undefined : t(`problem.${talk.problem}`);
+  const status = problem !== undefined ? problem : talk.phase === "idle" ? idle : t(talk.phase);
   return (
     <>
       <PushToTalkButton phase={talk.phase} onStart={start} onStop={talk.stop} onCancel={talk.cancel} disabled={disabled} />

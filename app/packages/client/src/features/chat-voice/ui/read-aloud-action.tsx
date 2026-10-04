@@ -23,6 +23,7 @@ export type ReadAloudActionProps = {
  */
 export function ReadAloudAction({ organizationId, text, autoPlay = false, seams }: ReadAloudActionProps) {
   const t = useTranslations("chat.voice");
+  const tErrors = useTranslations("errors");
   const { playback, play, stop } = useSpeechPlayback({ organizationId, text, seams });
   const started = useRef(false);
 
@@ -34,6 +35,10 @@ export function ReadAloudAction({ organizationId, text, autoPlay = false, seams 
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one automatic start per mount
   }, [autoPlay]);
 
+  // The budget refusal reads like the chat's (status line: `errors.<CODE>`).
+  const errorTextOf = (reason: "unavailable" | "budget" | "failed"): string =>
+    reason === "budget" ? tErrors("BUDGET_EXCEEDED") : t(reason === "unavailable" ? "readUnavailable" : "readFailed");
+
   const active = playback.status === "loading" || playback.status === "ready";
   return (
     <>
@@ -43,7 +48,7 @@ export function ReadAloudAction({ organizationId, text, autoPlay = false, seams 
       {playback.status === "ready" ? <AudioPlayer label={t("player")} src={playback.url} autoPlay onEnded={stop} className="basis-full" /> : null}
       <span role="status" className={playback.status === "error" ? "text-xs text-destructive-text" : "sr-only"}>
         {playback.status === "loading" ? t("loadingAudio") : ""}
-        {playback.status === "error" ? t(playback.reason === "unavailable" ? "readUnavailable" : "readFailed") : ""}
+        {playback.status === "error" ? errorTextOf(playback.reason) : ""}
       </span>
     </>
   );

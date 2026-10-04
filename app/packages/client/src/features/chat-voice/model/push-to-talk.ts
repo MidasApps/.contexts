@@ -27,6 +27,8 @@ export type PushToTalkProblem =
   | "empty"
   /** Voice was switched off on the server (503 `FEATURE_UNAVAILABLE`). */
   | "unavailable"
+  /** The organization reached its AI budget (429 `BUDGET_EXCEEDED`, decision 0065). */
+  | "budget"
   | "failed";
 
 export type PushToTalkState = { readonly phase: PushToTalkPhase; readonly problem: PushToTalkProblem | undefined };

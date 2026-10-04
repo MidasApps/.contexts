@@ -10,8 +10,14 @@ export type SpeechPlayback =
   | { readonly status: "loading" }
   /** The audio is ready: `url` is an object URL of the returned blob. */
   | { readonly status: "ready"; readonly url: string }
-  /** `unavailable`: voice was switched off on the server. */
-  | { readonly status: "error"; readonly reason: "unavailable" | "failed" };
+  /** `unavailable`: voice was switched off on the server; `budget`: the organization reached its AI budget. */
+  | { readonly status: "error"; readonly reason: "unavailable" | "budget" | "failed" };
+
+const reasonOf = (error: unknown): "unavailable" | "budget" | "failed" => {
+  if (!(error instanceof ApiError)) return "failed";
+  if (error.code === "BUDGET_EXCEEDED") return "budget";
+  return error.code === "FEATURE_UNAVAILABLE" ? "unavailable" : "failed";
+};
 
 export type SpeechPlaybackSeams = { readonly createUrl: (blob: Blob) => string; readonly revokeUrl: (url: string) => void };
 
@@ -51,7 +57,7 @@ export const useSpeechPlayback = (args: { organizationId: string; text: string; 
       },
       (error: unknown) => {
         if (controller.signal.aborted) return;
-        setPlayback({ status: "error", reason: error instanceof ApiError && error.code === "FEATURE_UNAVAILABLE" ? "unavailable" : "failed" });
+        setPlayback({ status: "error", reason: reasonOf(error) });
       },
     );
   };
