@@ -210,6 +210,60 @@ function CardList<TData extends RowData>({
   );
 }
 
+/** Pages of the list; hidden while the list failed (the error replaces it). */
+function ListPagination({
+  pagination,
+  status,
+}: {
+  pagination: DataTablePaginationProps | undefined;
+  status: DataTableStatus;
+}) {
+  return pagination === undefined || status.kind === "error" ? null : <DataTablePagination {...pagination} />;
+}
+
+/** The body rows: none on error, skeletons while loading, else the page (or its empty state). */
+function TableRows<TData extends RowData>({
+  table,
+  status,
+  loadingRows,
+  columnIds,
+  empty,
+}: {
+  table: Instance<TData>;
+  status: DataTableStatus;
+  loadingRows: number;
+  columnIds: string[];
+  empty: ReactNode;
+}) {
+  if (status.kind === "error") return null;
+  if (status.kind === "loading") return <SkeletonRows rows={loadingRows} columnIds={columnIds} />;
+  return <DataRows table={table} empty={empty} columnCount={columnIds.length} />;
+}
+
+/** What follows the table: the loading announcement, the error state and the pages. */
+function TableFooter({
+  status,
+  headingLevel,
+  pagination,
+}: {
+  status: DataTableStatus;
+  headingLevel: 2 | 3;
+  pagination: DataTablePaginationProps | undefined;
+}) {
+  const t = useTranslations("common.states");
+  return (
+    <>
+      {status.kind === "loading" ? (
+        <p role="status" className="sr-only">
+          {t("loading")}
+        </p>
+      ) : null}
+      {status.kind === "error" ? <TableError status={status} headingLevel={headingLevel} /> : null}
+      <ListPagination pagination={pagination} status={status} />
+    </>
+  );
+}
+
 /**
  * List organism over TanStack Table v9 (server-driven: no client sorting/filtering). Caption and
  * `scope="col"` headers always; loading keeps the header and shows skeleton rows (`aria-busy`
@@ -233,7 +287,6 @@ export function DataTable<TData extends RowData>({
   minTableWidth,
   className,
 }: DataTableProps<TData>) {
-  const t = useTranslations("common.states");
   const [observeWidth, cards] = useCardLayout(
     renderCard !== undefined,
     minTableWidth ?? Math.max(TABLE_MIN_WIDTH, columns.length * COLUMN_MIN_WIDTH),
@@ -245,7 +298,6 @@ export function DataTable<TData extends RowData>({
     getRowId: (row) => getRowId(row),
   });
   const columnIds = table.getAllLeafColumns().map((column) => column.id);
-  const busy = status.kind === "loading";
   if (cards && renderCard !== undefined) {
     return (
       <div
@@ -265,32 +317,22 @@ export function DataTable<TData extends RowData>({
           loadingRows={loadingRows}
           headingLevel={headingLevel}
         />
-        {pagination === undefined || status.kind === "error" ? null : <DataTablePagination {...pagination} />}
+        <ListPagination pagination={pagination} status={status} />
       </div>
     );
   }
   return (
     <div ref={observeWidth} data-slot="data-table" data-layout="table" className={cn("flex flex-col gap-3", className)}>
-      <Table scrollLabel={caption} aria-busy={busy || undefined}>
+      <Table scrollLabel={caption} aria-busy={status.kind === "loading" || undefined}>
         <TableCaption className={cn(captionHidden && "sr-only")}>{caption}</TableCaption>
         <TableHeader>
           <HeaderRows table={table} />
         </TableHeader>
         <TableBody>
-          {status.kind === "error" ? null : busy ? (
-            <SkeletonRows rows={loadingRows} columnIds={columnIds} />
-          ) : (
-            <DataRows table={table} empty={empty} columnCount={columnIds.length} />
-          )}
+          <TableRows table={table} status={status} loadingRows={loadingRows} columnIds={columnIds} empty={empty} />
         </TableBody>
       </Table>
-      {busy ? (
-        <p role="status" className="sr-only">
-          {t("loading")}
-        </p>
-      ) : null}
-      {status.kind === "error" ? <TableError status={status} headingLevel={headingLevel} /> : null}
-      {pagination === undefined || status.kind === "error" ? null : <DataTablePagination {...pagination} />}
+      <TableFooter status={status} headingLevel={headingLevel} pagination={pagination} />
     </div>
   );
 }

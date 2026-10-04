@@ -108,6 +108,31 @@ const fitsType = (widget: SchemaFormWidget, core: z.core.$ZodType): boolean => {
 
 type Candidate = { plan: FieldPlan; order: number; index: number };
 
+type FieldUi = NonNullable<ReturnType<typeof readFieldMeta>>["ui"];
+
+/** The declared widget (checked against the field type), else the one the type implies. */
+const resolveWidget = (
+  contractId: string,
+  name: string,
+  declared: string | undefined,
+  core: z.core.$ZodType,
+): SchemaFormWidget | undefined => {
+  if (declared === undefined) return inferWidget(core);
+  if (!isWidget(declared)) throw new SchemaFormDefinitionError(contractId, name, `unknown widget "${declared}"`);
+  if (!fitsType(declared, core)) {
+    throw new SchemaFormDefinitionError(contractId, name, `widget "${declared}" does not fit the field type`);
+  }
+  return declared;
+};
+
+/** Whether the field gets a control: it has a visible widget and the viewer holds its `visibleWith` permission. */
+const isRendered = (
+  widget: SchemaFormWidget | undefined,
+  visibleWith: string | undefined,
+  can: (permission: string) => boolean,
+): widget is FieldPlan["widget"] =>
+  widget !== undefined && widget !== "hidden" && (visibleWith === undefined || can(visibleWith));
+
 const planField = (
   contractId: string,
   name: string,
@@ -115,18 +140,11 @@ const planField = (
   index: number,
   can: (permission: string) => boolean,
 ) => {
-  const meta = readFieldMeta(field, z.globalRegistry);
+  const ui: FieldUi = readFieldMeta(field, z.globalRegistry)?.ui;
   const core = unwrap(field);
-  const declared = meta?.ui?.widget;
-  if (declared !== undefined && !isWidget(declared))
-    throw new SchemaFormDefinitionError(contractId, name, `unknown widget "${declared}"`);
-  if (declared !== undefined && !fitsType(declared, core)) {
-    throw new SchemaFormDefinitionError(contractId, name, `widget "${declared}" does not fit the field type`);
-  }
-  const widget = declared ?? inferWidget(core);
-  const visibleWith = meta?.ui?.visibleWith;
-  if (widget === undefined || widget === "hidden" || (visibleWith !== undefined && !can(visibleWith))) return undefined;
-  const labelKey = meta?.ui?.labelKey;
+  const widget = resolveWidget(contractId, name, ui?.widget, core);
+  if (!isRendered(widget, ui?.visibleWith, can)) return undefined;
+  const labelKey = ui?.labelKey;
   if (labelKey === undefined)
     throw new SchemaFormDefinitionError(contractId, name, "a rendered field needs ui.labelKey");
   const def = core._zod.def as LooseDef;
@@ -138,9 +156,9 @@ const planField = (
     required: widget !== "switch" && !isFieldOptional(field),
     options: widget === "select" ? Object.values(def.entries ?? {}) : [],
     integer: def.type === "number" && def.format !== undefined && def.format.includes("int"),
-    group: meta?.ui?.group,
+    group: ui?.group,
   };
-  return { plan, order: meta?.ui?.order ?? Number.MAX_SAFE_INTEGER, index } satisfies Candidate;
+  return { plan, order: ui?.order ?? Number.MAX_SAFE_INTEGER, index } satisfies Candidate;
 };
 
 const toSections = (plans: readonly FieldPlan[]): FieldSection[] =>
