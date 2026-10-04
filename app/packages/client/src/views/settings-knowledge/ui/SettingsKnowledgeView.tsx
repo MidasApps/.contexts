@@ -1,20 +1,13 @@
 "use client";
 
 import type { AccessContext, KnowledgeDocument } from "@core/contracts";
-import { useId, useMemo, useState } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "use-intl";
-import {
-  collectionOfNamespace,
-  namespaceOfTarget,
-  ORGANIZATION_NAMESPACE,
-  useKnowledgeDocuments,
-} from "#/entities/knowledge/index.ts";
-import { useProjects } from "#/entities/project/index.ts";
+import { namespaceOfTarget, ORGANIZATION_NAMESPACE, useKnowledgeDocuments } from "#/entities/knowledge/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { DeleteKnowledgeDocumentDialog } from "#/features/delete-knowledge-document/index.ts";
 import { AddKnowledgeDocumentDialog, type StartedKnowledgeIngestion } from "#/features/knowledge-upload/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
-import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
@@ -25,12 +18,10 @@ import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { ALL_COLLECTIONS, useKnowledgeCollection } from "../model/use-knowledge-collection.ts";
 import { useStartedIngestions } from "../model/use-started-ingestions.ts";
 import { IngestionNotices } from "./IngestionNotices.tsx";
 import { documentName, KnowledgeDocumentsTable, useCollectionName } from "./KnowledgeDocumentsTable.tsx";
-
-/** The picker value that lists every namespace the organization can read. */
-const ALL = "all";
 
 /** Runs started here whose document is not in the list yet (the workflow registers it once it fetched the content). */
 const stillIndexing = (
@@ -61,7 +52,7 @@ function CollectionPicker({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ALL}>{t("collections.all")}</SelectItem>
+          <SelectItem value={ALL_COLLECTIONS}>{t("collections.all")}</SelectItem>
           <SelectItem value={ORGANIZATION_NAMESPACE}>{t("collections.organization")}</SelectItem>
           {projects.map((project) => (
             <SelectItem key={project.id} value={namespaceOfTarget(project.id)}>
@@ -74,36 +65,39 @@ function CollectionPicker({
   );
 }
 
+/** The empty list: it says how documents get here, with the add action when the viewer can add one now. */
+function NoDocuments({ canWrite, onAdd }: { canWrite: boolean; onAdd: (() => void) | null }) {
+  const t = useTranslations("settings.knowledge");
+  return (
+    <EmptyState
+      frame="plain"
+      headingLevel={2}
+      icon="file-text"
+      title={t("emptyTitle")}
+      description={canWrite ? t("emptyDescription") : t("emptyDescriptionNoPermission")}
+      action={onAdd === null ? undefined : <Button onClick={onAdd}>{t("addAction")}</Button>}
+    />
+  );
+}
+
 function SettingsKnowledge({ context }: { context: AccessContext }) {
   const t = useTranslations("settings.knowledge");
   const online = useOnlineStatus();
   const { organization, permissions } = context;
-  // The collection lives in the URL (`?collection=`): a reload or a shared link opens the same one.
-  const search = useSettingsSearch(["collection"]);
-  const selected = search.values.collection ?? ALL;
-  const setSelected = (next: string): void => search.set({ collection: next === ALL ? undefined : next });
+  const collections = useKnowledgeCollection(organization.id);
   const [adding, setAdding] = useState(false);
   const [deleting, setDeleting] = useState<KnowledgeDocument | null>(null);
   const ingestions = useStartedIngestions(organization.id);
   const { started } = ingestions;
-  const projects = useProjects(organization.id);
-  const projectNames = useMemo(
-    () => new Map((projects.data ?? []).map((project) => [String(project.id), project.name] as const)),
-    [projects.data],
-  );
-  const collectionName = useCollectionName(projectNames, projects.isSuccess && !projects.hasNextPage);
+  const collectionName = useCollectionName(collections.projectNames, collections.projectsComplete);
   const allowed = permissions.includes("core.knowledge.read");
-  const documents = useKnowledgeDocuments(organization.id, selected === ALL ? undefined : selected, {
+  const documents = useKnowledgeDocuments(organization.id, collections.namespace, {
     poll: started.length > 0,
     enabled: allowed,
   });
   const indexing = stillIndexing(started, documents.data ?? []);
-  // An upload goes to the collection being looked at; "all" has no single target, so it goes to the organization.
-  const collection = collectionOfNamespace(selected === ALL ? ORGANIZATION_NAMESPACE : selected);
-  const targetProjectId = collection.kind === "project" ? collection.projectId : undefined;
   const canWrite = permissions.includes("core.knowledge.write");
   const canDelete = permissions.includes("core.knowledge.delete");
-  const openAdd = canWrite && online ? () => setAdding(true) : null;
   return (
     <SettingsPageFrame
       width="wide"
@@ -131,9 +125,9 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
         <AlertDescription>{t("collectionsNote.description")}</AlertDescription>
       </Alert>
       <CollectionPicker
-        value={selected}
-        onChange={setSelected}
-        projects={(projects.data ?? []).map((project) => ({ id: String(project.id), name: project.name }))}
+        value={collections.selected}
+        onChange={collections.setSelected}
+        projects={collections.projectOptions}
       />
       <IngestionNotices
         organizationId={organization.id}
@@ -147,21 +141,12 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
         documents={documents}
         collectionName={collectionName}
         onDelete={canDelete && online ? setDeleting : null}
-        empty={
-          <EmptyState
-            frame="plain"
-            headingLevel={2}
-            icon="file-text"
-            title={t("emptyTitle")}
-            description={canWrite ? t("emptyDescription") : t("emptyDescriptionNoPermission")}
-            action={openAdd === null ? undefined : <Button onClick={openAdd}>{t("addAction")}</Button>}
-          />
-        }
+        empty={<NoDocuments canWrite={canWrite} onAdd={canWrite && online ? () => setAdding(true) : null} />}
       />
       {canWrite ? (
         <AddKnowledgeDocumentDialog
           organizationId={organization.id}
-          target={{ projectId: targetProjectId, label: collectionName(namespaceOfTarget(targetProjectId)) }}
+          target={{ projectId: collections.uploadProjectId, label: collectionName(collections.uploadNamespace) }}
           fileAllowed={permissions.includes("core.file.upload")}
           open={adding}
           onOpenChange={setAdding}

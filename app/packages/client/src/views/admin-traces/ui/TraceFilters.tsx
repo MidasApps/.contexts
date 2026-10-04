@@ -27,16 +27,42 @@ export type TraceFiltersProps = {
   onChange: (patch: Partial<Record<keyof TraceFilterValues, string | undefined>>) => void;
 };
 
+/** Any status, or only the traces that ended ok or in an error. */
+function StatusFilter({
+  value,
+  onChange,
+}: {
+  value: TraceFilterValues["status"];
+  onChange: (status: string | undefined) => void;
+}) {
+  const t = useTranslations("admin.traces.filters");
+  const statusText = useTranslations("common.traceViewer.status");
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id}>{t("status")}</Label>
+      <Select value={value ?? ANY_STATUS} onValueChange={(next) => onChange(next === ANY_STATUS ? undefined : next)}>
+        <SelectTrigger id={id} className="w-full lg:w-44">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ANY_STATUS}>{t("anyStatus")}</SelectItem>
+          <SelectItem value="ok">{statusText("ok")}</SelectItem>
+          <SelectItem value="error">{statusText("error")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 /**
  * Filters of the trace list: organization, status and the days apply at once; the agent is typed,
  * so it applies on submit and only when it is a valid agent key (the error names the format).
  */
 export function TraceFilters({ values, onChange }: TraceFiltersProps) {
   const t = useTranslations("admin.traces.filters");
-  const statusText = useTranslations("common.traceViewer.status");
   const agentId = useId();
   const errorId = useId();
-  const statusId = useId();
   const fromId = useId();
   const toId = useId();
   const dateHintId = useId();
@@ -63,22 +89,7 @@ export function TraceFilters({ values, onChange }: TraceFiltersProps) {
         value={values.organizationId}
         onValueChange={(organizationId) => onChange({ organizationId })}
       />
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={statusId}>{t("status")}</Label>
-        <Select
-          value={values.status ?? ANY_STATUS}
-          onValueChange={(value) => onChange({ status: value === ANY_STATUS ? undefined : value })}
-        >
-          <SelectTrigger id={statusId} className="w-full lg:w-44">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ANY_STATUS}>{t("anyStatus")}</SelectItem>
-            <SelectItem value="ok">{statusText("ok")}</SelectItem>
-            <SelectItem value="error">{statusText("error")}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <StatusFilter value={values.status} onChange={(status) => onChange({ status })} />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={fromId}>{t("from")}</Label>
         <Input

@@ -5,12 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAdminUserNames } from "#/entities/admin-user/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
-import {
-  activeVersionOf,
-  usePromptActivations,
-  usePromptSeed,
-  usePromptVersions,
-} from "#/entities/prompt-version/index.ts";
+import { activeVersionOf, usePromptActivations, usePromptVersions } from "#/entities/prompt-version/index.ts";
 import {
   PromptActivationDialog,
   type PromptActivationRequest,
@@ -29,6 +24,7 @@ import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { AdminPageFrame, type AdminQuery, AdminQuerySection, useAdminSearch } from "#/widgets/admin-nav/index.ts";
 import { PromptDiff } from "#/widgets/admin-prompt-diff/index.ts";
 import { PageNotFound } from "#/widgets/page-state/index.ts";
+import { usePromptDraft } from "../model/use-prompt-draft.ts";
 import { PromptActivationHistory } from "./PromptActivationHistory.tsx";
 import { PromptVersionsTable } from "./PromptVersionsTable.tsx";
 
@@ -221,11 +217,7 @@ function AgentPrompts({ agentId }: { agentId: PromptAgentId }) {
   const data = usePromptData(agentId, permissions.can("platform.prompt.manage"));
   const [creating, setCreating] = useState(false);
   const agentName = t(`agents.names.${agentId}`);
-  const active = data.data === undefined ? undefined : activeVersionOf(data.data.versions, data.data.activations);
-  // Without any version the editor starts from the code instructions (follow-up 86), not from nothing.
-  const firstVersion = data.data?.versions.length === 0;
-  const seed = usePromptSeed(agentId, { enabled: firstVersion });
-  const seedBody = firstVersion ? seed.data?.body : undefined;
+  const draft = usePromptDraft(agentId, data.data);
   return (
     <AdminPageFrame
       permission="platform.prompt.manage"
@@ -251,11 +243,11 @@ function AgentPrompts({ agentId }: { agentId: PromptAgentId }) {
         )}
       </AdminQuerySection>
       <PromptVersionDialog
-        key={active?.id ?? (seedBody === undefined ? "empty" : "seed")}
+        key={draft.key}
         agentId={agentId}
         agentName={agentName}
-        initialBody={active?.body ?? data.data?.versions[0]?.body ?? seedBody ?? ""}
-        initialSource={seedBody === undefined ? "active" : "seed"}
+        initialBody={draft.initialBody}
+        initialSource={draft.initialSource}
         open={creating}
         onOpenChange={setCreating}
       />

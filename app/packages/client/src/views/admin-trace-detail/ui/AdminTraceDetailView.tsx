@@ -2,7 +2,6 @@
 
 import type { TraceDetail } from "@core/contracts";
 import { useFormatter, useTranslations } from "use-intl";
-import { useAllAdminOrganizations } from "#/entities/admin-organization/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { TraceCost, TraceDuration, TraceStatusPill, useAdminTrace } from "#/entities/trace/index.ts";
 import { isApiErrorStatus } from "#/shared/api/cursor-list.ts";
@@ -12,6 +11,7 @@ import { KpiCard } from "#/widgets/admin-kpi-cards/index.ts";
 import { AdminPageFrame, AdminQuerySection } from "#/widgets/admin-nav/index.ts";
 import { PageNotFound } from "#/widgets/page-state/index.ts";
 import { TraceViewer } from "#/widgets/trace-viewer/index.ts";
+import { useTraceOrganizationName } from "../model/use-trace-organization-name.ts";
 
 /** W3C trace id (`TraceIdSchema`): anything else in the path is not a trace. */
 const TRACE_ID = /^[0-9a-f]{32}$/u;
@@ -73,15 +73,11 @@ export function AdminTraceDetailView() {
   const permissions = usePlatformPermissions();
   const allowed = permissions.can("platform.trace.read");
   const trace = useAdminTrace(traceId, { enabled: valid && allowed });
-  const organizations = useAllAdminOrganizations({
-    enabled: valid && allowed && permissions.can("platform.organization.read"),
-  });
+  const organizationName = useTraceOrganizationName(
+    trace.data?.summary.tenantId,
+    valid && allowed && permissions.can("platform.organization.read"),
+  );
   if (!valid || isApiErrorStatus(trace.error, 404)) return <PageNotFound />;
-  const tenantId = trace.data?.summary.tenantId;
-  const organizationName =
-    tenantId === null || tenantId === undefined
-      ? t("platform")
-      : (organizations.data?.find((organization) => organization.id === tenantId)?.name ?? tenantId);
   return (
     <AdminPageFrame
       permission="platform.trace.read"

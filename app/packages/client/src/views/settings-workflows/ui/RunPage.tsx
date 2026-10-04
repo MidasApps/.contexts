@@ -4,12 +4,7 @@ import type { AccessContext, WorkflowEvent, WorkflowRun } from "@core/contracts"
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useMemberNames } from "#/entities/member/index.ts";
-import {
-  isRunCancelable,
-  RunStatusPill,
-  useTenantWorkflowRun,
-  useWorkflowCatalog,
-} from "#/entities/workflow-run/index.ts";
+import { isRunCancelable, RunStatusPill, useTenantWorkflowRun } from "#/entities/workflow-run/index.ts";
 import { CancelWorkflowRunDialog } from "#/features/cancel-workflow-run/index.ts";
 import { StartWorkflowRunDialog } from "#/features/start-workflow-run/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
@@ -25,6 +20,7 @@ import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
 import { RunTimeline } from "#/widgets/run-timeline/index.ts";
 import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
+import { useRunActions } from "../model/use-run-actions.ts";
 import { useRunEvents } from "../model/use-run-events.ts";
 import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
 
@@ -139,6 +135,40 @@ function RunNotFound({ organizationId }: { organizationId: string }) {
   );
 }
 
+/** Back to the runs, plus "run again" and "cancel" when the run allows them (`null` hides one). */
+function RunHeaderActions({
+  organizationId,
+  online,
+  onRunAgain,
+  onCancel,
+}: {
+  organizationId: string;
+  online: boolean;
+  onRunAgain: (() => void) | null;
+  onCancel: (() => void) | null;
+}) {
+  const t = useTranslations("settings.workflows");
+  return (
+    <>
+      <Button variant="secondary" asChild>
+        <SettingsSectionLink organizationId={organizationId} section="workflows">
+          {t("backToRuns")}
+        </SettingsSectionLink>
+      </Button>
+      {onRunAgain === null ? null : (
+        <Button variant="outline" disabled={!online} onClick={onRunAgain}>
+          {t("run.runAgain")}
+        </Button>
+      )}
+      {onCancel === null ? null : (
+        <Button variant="outline" disabled={!online} onClick={onCancel}>
+          {t("run.cancel")}
+        </Button>
+      )}
+    </>
+  );
+}
+
 /**
  * `/o/:organizationId/settings/workflows/runs/:runId` (core.workflow-run.read): one run of the
  * organization: status, how it started, what it waits for, why it failed (with what to do next
@@ -162,18 +192,7 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
   const [rerunning, setRerunning] = useState(false);
   const router = useRouter();
   const current = run.data ?? null;
-  const canCancel =
-    context.permissions.includes("core.workflow-run.cancel") && current !== null && isRunCancelable(current.status);
-  const canStart = context.permissions.includes("core.workflow-run.start");
-  const catalog = useWorkflowCatalog(organization.id, { enabled: canStart });
-  const workflows = catalog.data ?? [];
-  // "Run again" after a failure or a guardrail stop, when the workflow can still be started by hand.
-  const rerunWorkflowId =
-    current !== null && current.failure !== undefined && current.failure !== null ? current.workflowId : null;
-  const canRunAgain =
-    canStart &&
-    rerunWorkflowId !== null &&
-    workflows.some((workflow) => workflow.id === rerunWorkflowId && workflow.startable);
+  const { canCancel, canRunAgain, rerunWorkflowId, workflows } = useRunActions(context, current);
   return (
     <SettingsPageFrame
       organizationId={organization.id}
@@ -188,23 +207,12 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
           }
           meta={current === null ? undefined : <RunStatusPill status={current.status} />}
           actions={
-            <>
-              <Button variant="secondary" asChild>
-                <SettingsSectionLink organizationId={organization.id} section="workflows">
-                  {t("backToRuns")}
-                </SettingsSectionLink>
-              </Button>
-              {canRunAgain ? (
-                <Button variant="outline" disabled={!online} onClick={() => setRerunning(true)}>
-                  {t("run.runAgain")}
-                </Button>
-              ) : null}
-              {canCancel ? (
-                <Button variant="outline" disabled={!online} onClick={() => setCanceling(true)}>
-                  {t("run.cancel")}
-                </Button>
-              ) : null}
-            </>
+            <RunHeaderActions
+              organizationId={organization.id}
+              online={online}
+              onRunAgain={canRunAgain ? () => setRerunning(true) : null}
+              onCancel={canCancel ? () => setCanceling(true) : null}
+            />
           }
         />
       }
