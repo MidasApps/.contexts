@@ -163,7 +163,7 @@ const coreAgents = (args: ComposeAgentRuntimeArgs, commands: readonly AgentComma
   PING_AGENT,
   createKnowledgeAgentDefinition(dirsOption(args.instructionsDirs)),
   createDataAgentDefinition(dirsOption(args.instructionsDirs)),
-  createActionAgentDefinition({ commands, ...dirsOption(args.instructionsDirs) }),
+  createActionAgentDefinition({ commands, moduleIds: args.modules.map((module) => module.id), ...dirsOption(args.instructionsDirs) }),
   createWebAgentDefinition(dirsOption(args.instructionsDirs)),
 ];
 

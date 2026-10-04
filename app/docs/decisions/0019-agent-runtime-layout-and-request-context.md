@@ -118,7 +118,8 @@ SP3 adds agents, tools, skills, workflows, memory, knowledge and connectors. Mas
     registry (decision 0025).
   - *Who sees what.* Module commands are action-agent tools in every organization and are
     gated by the module's permissions. Module skills still reach only organizations whose
-    `enabledAgents` names the module (decision 0029).
+    `enabledAgents` names the module (decision 0029). Since decision 0064, module commands
+    follow the same rule.
   - *Module package entries.* `@core/module-example` exports `./server` (commands, use cases;
     loaded by `apps/web` and `apps/mastra`) and `./agents` (skill, workflow; loaded by
     `apps/mastra` only). `@core/client` is an optional peer of the module, so the Mastra build
