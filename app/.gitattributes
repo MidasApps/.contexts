@@ -1,0 +1,14 @@
+# LF in the working tree on every OS: the generators (contracts catalog, OpenAPI, route trees)
+# write LF, so a CRLF checkout made every regenerated file look modified.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary
+*.woff2 binary
+
+# Generated from the Zod contracts by `pnpm contracts:catalog`; never edited by hand. Collapsed in
+# GitHub diffs and left out of language stats. Read the per-entity pages in docs/catalog/<context>/.
+docs/openapi/** linguist-generated=true
+docs/catalog/** linguist-generated=true
+apps/desktop/src/routeTree.gen.ts linguist-generated=true
