@@ -13,13 +13,14 @@ const MODULE_MESSAGES: ExtraNamespaces = {
   },
 };
 
-const wrapperFor =
-  (locale: SupportedLocale = "pt-BR") =>
-  ({ children }: { children: ReactNode }) => (
-    <IntlProvider locale={locale} messages={loadMessages(locale, MODULE_MESSAGES)} timeZone="UTC">
-      {children}
-    </IntlProvider>
-  );
+const wrapperFor = (locale: SupportedLocale = "pt-BR") =>
+  function Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <IntlProvider locale={locale} messages={loadMessages(locale, MODULE_MESSAGES)} timeZone="UTC">
+        {children}
+      </IntlProvider>
+    );
+  };
 
 describe("useWorkflowLabel", () => {
   it("names core workflows from the core catalog and module workflows from their module", () => {

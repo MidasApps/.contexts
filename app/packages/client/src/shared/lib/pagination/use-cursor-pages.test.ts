@@ -15,17 +15,17 @@ describe("useCursorPages", () => {
     const fetchNextPage = vi.fn(() => Promise.resolve());
     const { result, rerender } = renderHook(({ state }) => useCursorPages(state, 2, "Páginas"), { initialProps: { state: list([1, 2], true, fetchNextPage) } });
     expect(result.current.pagination).toMatchObject({ hasPrevious: false, hasNext: true, label: "Páginas" });
-    await act(async () => result.current.pagination?.onNext());
+    await act(() => Promise.resolve(result.current.pagination?.onNext()));
     expect(fetchNextPage).toHaveBeenCalledOnce();
     rerender({ state: list([1, 2, 3], false, fetchNextPage) });
     expect(result.current.rows).toEqual([3]);
     act(() => result.current.pagination?.onPrevious());
     expect(result.current.rows).toEqual([1, 2]);
-    await act(async () => result.current.pagination?.onNext());
+    await act(() => Promise.resolve(result.current.pagination?.onNext()));
     expect(fetchNextPage).toHaveBeenCalledOnce();
   });
 
-  it("keeps the page where the caller says (the URL) and loads the pages before a linked one", async () => {
+  it("keeps the page where the caller says (the URL) and loads the pages before a linked one", () => {
     const fetchNextPage = vi.fn(() => Promise.resolve());
     const setPage = vi.fn();
     const { result, rerender } = renderHook(({ state }) => useCursorPages(state, 2, undefined, { page: 3, setPage }), { initialProps: { state: list([1, 2], true, fetchNextPage) } });
@@ -41,7 +41,7 @@ describe("useCursorPages", () => {
 
   it("clamps the page when rows disappear", async () => {
     const { result, rerender } = renderHook(({ state }) => useCursorPages(state, 2), { initialProps: { state: list([1, 2, 3], false) } });
-    await act(async () => result.current.pagination?.onNext());
+    await act(() => Promise.resolve(result.current.pagination?.onNext()));
     rerender({ state: list([1, 2], false) });
     expect(result.current.rows).toEqual([1, 2]);
   });

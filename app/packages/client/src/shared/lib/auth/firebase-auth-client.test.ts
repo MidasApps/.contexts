@@ -15,7 +15,7 @@ const fakeSdk = () => {
   const auth = { settings: { appVerificationDisabledForTesting: false } };
   const sdk = {
     initializeApp: vi.fn((options: ClientConfig["firebase"]) => ({ options })),
-    initializeAuth: vi.fn((_app: { options: ClientConfig["firebase"] }, _deps: { persistence: string }) => auth),
+    initializeAuth: vi.fn<(app: { options: ClientConfig["firebase"] }, deps: { persistence: string }) => typeof auth>(() => auth),
     inMemoryPersistence: "in-memory",
     connectAuthEmulator: vi.fn(),
   };

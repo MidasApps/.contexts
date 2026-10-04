@@ -19,8 +19,8 @@ export type MemoryRouter = RouterPort & {
 
 const paramsOf = (route: Route | null): Record<string, string | undefined> => {
   if (route === null) return {};
-  const { id: _id, ...params } = route;
-  return Object.fromEntries(Object.entries(params).filter((entry): entry is [string, string] => typeof entry[1] === "string"));
+  // `id` names the route itself, not a path parameter.
+  return Object.fromEntries(Object.entries(route).filter((entry): entry is [string, string] => entry[0] !== "id" && typeof entry[1] === "string"));
 };
 
 const isPlainClick = (event: MouseEvent<HTMLAnchorElement>): boolean =>
@@ -46,7 +46,7 @@ export const createMemoryRouter = (initialHref = "/"): MemoryRouter => {
     entries.push(routeHref(route));
     listeners.forEach((listener) => listener());
   };
-  function Link({ to, replace, onClick, ...props }: RouterLinkProps) {
+  function Link({ to, replace, onClick, children, ...props }: RouterLinkProps) {
     return (
       <a
         href={routeHref(to)}
@@ -57,7 +57,9 @@ export const createMemoryRouter = (initialHref = "/"): MemoryRouter => {
           navigate(to, { replace: replace === true });
         }}
         {...props}
-      />
+      >
+        {children}
+      </a>
     );
   }
   return {

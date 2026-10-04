@@ -7,7 +7,9 @@ import { createBoundariesConfig } from "./boundaries.js";
 
 export { createBoundariesConfig, DEPENDENCY_POLICIES, ELEMENTS, WORKSPACE_ROOT } from "./boundaries.js";
 
-const IGNORES = ["**/node_modules/**", "**/dist/**", "**/lib/**", "**/.next/**", "**/.turbo/**", "**/.tscache/**", "**/.mastra/**", "**/src-tauri/target/**", "**/eslint/fixtures/**"];
+// `lib/**` is anchored to the package root: it is the Functions build output (`apps/functions/lib`),
+// while source folders named `lib` (FSD `shared/lib`, `entities/*/lib`) are linted.
+const IGNORES = ["**/node_modules/**", "**/dist/**", "lib/**", "**/.next/**", "**/.turbo/**", "**/.tscache/**", "**/.mastra/**", "**/src-tauri/target/**", "**/eslint/fixtures/**"];
 
 // Minimum type-aware rules from .contexts/engineering/stacks/language/typescript@7.md.
 /** @type {import("eslint").Linter.RulesRecord} */

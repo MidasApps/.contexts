@@ -2,8 +2,7 @@ import type { TraceSpan } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { buildSpanTree, hasSpanPayload } from "./span-tree.ts";
 
-const span = (spanId: string, parentSpanId: string | null, extra: Partial<TraceSpan> = {}): TraceSpan =>
-  ({
+const span = (spanId: string, parentSpanId: string | null, extra: Partial<TraceSpan> = {}): TraceSpan => ({
     spanId,
     parentSpanId,
     name: spanId,
@@ -18,7 +17,7 @@ const span = (spanId: string, parentSpanId: string | null, extra: Partial<TraceS
     outputTokens: 0,
     costMicroUsd: null,
     ...extra,
-  }) as TraceSpan;
+  });
 
 const shape = (nodes: ReturnType<typeof buildSpanTree>): unknown => nodes.map((node) => [node.span.spanId, shape([...node.children])]);
 

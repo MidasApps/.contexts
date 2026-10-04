@@ -4,7 +4,7 @@ import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { useFormatDateTime } from "./use-format-date-time.ts";
 import { useFormatMoney } from "./use-format-money.ts";
 
-const plain = (text: string | null): string => (text ?? "").replace(/[  ]/gu, " ");
+const plain = (text: string | null): string => (text ?? "").replace(/[\u00a0\u202f]/gu, " ");
 
 function Sample() {
   const money = useFormatMoney();

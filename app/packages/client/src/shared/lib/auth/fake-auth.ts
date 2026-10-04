@@ -32,6 +32,9 @@ const REAUTH_HANDLE = "reauth";
 
 const notSupported = (): Promise<never> => Promise.reject(new AuthError("AUTH_FAILED"));
 
+/** Runs `step` as a promise: a throw becomes a rejection, as in the SDK. */
+const settle = <T>(step: () => T): Promise<T> => new Promise((resolve) => resolve(step()));
+
 const checkCode = (code: string): void => {
   if (code !== FAKE_MFA_CODE) throw new AuthError("INVALID_MFA_CODE");
 };
@@ -44,34 +47,39 @@ const createFakeSecurity = (initial: FakeAuthOptions, isSignedIn: () => boolean)
   const enroll = (factor: EnrolledFactor["factor"], displayName: string, phoneNumber: string | null): void => {
     factors = [...factors, { uid: `factor-${String(factors.length + 1)}`, factor, displayName, phoneNumber, enrolledAt: FAKE_ENROLLED_AT }];
   };
-  const reauthChallenge = (): MfaChallenge => ({ hints: factors.map(({ enrolledAt: _enrolledAt, ...hint }) => hint), handle: REAUTH_HANDLE });
+  const reauthChallenge = (): MfaChallenge => ({ hints: factors.map(({ uid, factor, displayName, phoneNumber }) => ({ uid, factor, displayName, phoneNumber })), handle: REAUTH_HANDLE });
   return {
     currentPassword: () => password,
     getEnrolledFactors: () => (isSignedIn() ? [...factors] : []),
     unenrollMfa: (factorUid: string) => Promise.resolve(void (factors = factors.filter((factor) => factor.uid !== factorUid))),
-    reauthenticate: async (candidate: string) => {
-      if (candidate !== password) throw new AuthError("INVALID_CREDENTIALS");
-      recentlyReauthenticated = true;
-      return factors.length === 0 ? { kind: "signed-in" as const } : { kind: "mfa-required" as const, challenge: reauthChallenge() };
-    },
-    updatePassword: async (next: string) => {
-      if (!recentlyReauthenticated) throw new AuthError("REQUIRES_RECENT_LOGIN");
-      if (next.length < 8) throw new AuthError("WEAK_PASSWORD");
-      password = next;
-    },
+    reauthenticate: (candidate: string) =>
+      settle(() => {
+        if (candidate !== password) throw new AuthError("INVALID_CREDENTIALS");
+        recentlyReauthenticated = true;
+        return factors.length === 0 ? { kind: "signed-in" as const } : { kind: "mfa-required" as const, challenge: reauthChallenge() };
+      }),
+    updatePassword: (next: string) =>
+      settle(() => {
+        if (!recentlyReauthenticated) throw new AuthError("REQUIRES_RECENT_LOGIN");
+        if (next.length < 8) throw new AuthError("WEAK_PASSWORD");
+        password = next;
+      }),
     startTotpEnrollment: () => Promise.resolve({ secretKey: FAKE_TOTP_SECRET, uri: FAKE_TOTP_URI, handle: "totp" }),
-    finishTotpEnrollment: async (_enrollment: unknown, code: string, displayName: string) => {
-      checkCode(code);
-      enroll("totp", displayName, null);
-    },
-    startSmsEnrollment: async (phoneNumber: string) => {
-      if (!/^\+[1-9]\d{7,14}$/u.test(phoneNumber)) throw new AuthError("INVALID_PHONE_NUMBER");
-      return `verification:${phoneNumber}`;
-    },
-    finishSmsEnrollment: async (verificationId: string, code: string, displayName: string) => {
-      checkCode(code);
-      enroll("phone", displayName, verificationId.replace(/^verification:/u, ""));
-    },
+    finishTotpEnrollment: (_enrollment: unknown, code: string, displayName: string) =>
+      settle(() => {
+        checkCode(code);
+        enroll("totp", displayName, null);
+      }),
+    startSmsEnrollment: (phoneNumber: string) =>
+      settle(() => {
+        if (!/^\+[1-9]\d{7,14}$/u.test(phoneNumber)) throw new AuthError("INVALID_PHONE_NUMBER");
+        return `verification:${phoneNumber}`;
+      }),
+    finishSmsEnrollment: (verificationId: string, code: string, displayName: string) =>
+      settle(() => {
+        checkCode(code);
+        enroll("phone", displayName, verificationId.replace(/^verification:/u, ""));
+      }),
   };
 };
 
@@ -84,14 +92,15 @@ const createFakeAccounts = (initial: FakeAuthOptions, signIn: (user: Pick<AuthUs
     passwordResets: () => [...resets],
     createdAccounts: () => [...created],
     sendPasswordReset: (email: string, locale: string) => Promise.resolve(void resets.push({ email, locale })),
-    createAccount: async ({ email, password, displayName }: { email: string; password: string; displayName: string }) => {
-      if (taken.has(email)) throw new AuthError("EMAIL_ALREADY_IN_USE");
-      if (password.length < 8) throw new AuthError("WEAK_PASSWORD");
-      taken.add(email);
-      created.push({ email, displayName });
-      signIn({ email, displayName });
-      return { kind: "signed-in" as const };
-    },
+    createAccount: ({ email, password, displayName }: { email: string; password: string; displayName: string }) =>
+      settle(() => {
+        if (taken.has(email)) throw new AuthError("EMAIL_ALREADY_IN_USE");
+        if (password.length < 8) throw new AuthError("WEAK_PASSWORD");
+        taken.add(email);
+        created.push({ email, displayName });
+        signIn({ email, displayName });
+        return { kind: "signed-in" as const };
+      }),
   };
 };
 
