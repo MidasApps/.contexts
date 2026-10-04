@@ -19,6 +19,32 @@ type SchedulesApi = Pick<Mastra["schedules"], "get" | "create" | "update">;
 const isAlreadyExists = (error: unknown): boolean =>
   typeof error === "object" && error !== null && "id" in error && error.id === "SCHEDULES_ID_EXISTS";
 
+/** Creates one missing platform schedule; another instance winning the race is fine. */
+const createPlatformSchedule = async (args: {
+  readonly schedules: SchedulesApi;
+  readonly spec: PlatformSchedule;
+  readonly logger: Pick<Logger, "info">;
+}): Promise<void> => {
+  const id = platformScheduleIdOf(args.spec.workflowId);
+  try {
+    await args.schedules.create({
+      id,
+      workflowId: args.spec.workflowId,
+      cron: args.spec.cron,
+      timezone: PLATFORM_SCHEDULE_TIMEZONE,
+      inputData: {},
+      metadata: { platform: true },
+    });
+    args.logger.info("platform_schedule_created", {
+      scheduleId: id,
+      workflowId: args.spec.workflowId,
+      cron: args.spec.cron,
+    });
+  } catch (error: unknown) {
+    if (!isAlreadyExists(error)) throw error;
+  }
+};
+
 /**
  * Creates or realigns each platform schedule (idempotent; another instance creating the same row at
  * the same time is fine). A schedule an operator paused stays paused.
@@ -32,19 +58,7 @@ export const ensurePlatformSchedules = async (args: {
     const id = platformScheduleIdOf(spec.workflowId);
     const current = await args.schedules.get(id);
     if (current === null) {
-      try {
-        await args.schedules.create({
-          id,
-          workflowId: spec.workflowId,
-          cron: spec.cron,
-          timezone: PLATFORM_SCHEDULE_TIMEZONE,
-          inputData: {},
-          metadata: { platform: true },
-        });
-        args.logger.info("platform_schedule_created", { scheduleId: id, workflowId: spec.workflowId, cron: spec.cron });
-      } catch (error: unknown) {
-        if (!isAlreadyExists(error)) throw error;
-      }
+      await createPlatformSchedule({ schedules: args.schedules, spec, logger: args.logger });
       continue;
     }
     if (current.cron !== spec.cron || current.timezone !== PLATFORM_SCHEDULE_TIMEZONE) {
