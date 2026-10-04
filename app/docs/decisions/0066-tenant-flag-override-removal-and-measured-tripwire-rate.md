@@ -54,8 +54,9 @@ injected prompt. The detectors' own agents end internal `AGENT_RUN` spans.
    (`AgentRunSchema`, `recordAgentRuns`).
 6. **Writer.** The ledger exporter also handles `AGENT_RUN` spans. Every ended, **non-internal**
    agent run with a tenant in its request context becomes a row. Internal runs are the
-   detectors' own agents. It covers the supervisor, delegated agents and workflow agent steps. It
-   batches like the model calls (2 s or 50 rows, bounded retry buffer). It reuses the start
+   detectors' own agents. The exporter does not check which agent ran. The probe covered an agent
+   called directly; delegated agents and workflow agent steps should count the same way, but no
+   probe checked them. It batches like the model calls (2 s or 50 rows, bounded retry buffer). It reuses the start
    context of durable agents. `UsagePort` gains `recordAgentRuns`.
 7. **Rate.** `tripwireRate` = agent runs stopped by a guardrail over all agent runs of the last 7
    days, over active organizations. There is one count per organization under its row level
