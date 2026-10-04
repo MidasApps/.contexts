@@ -118,11 +118,39 @@ const withSearch = (path: string, search: Record<string, string | undefined>): s
 
 const organizationPath = (organizationId: string): string => `/o/${seg(organizationId)}`;
 
+type OrganizationRoute = Extract<Route, { organizationId: string }>;
+
+/** Routes inside an organization (`/o/:organizationId/…`). */
+const organizationRouteHref = (route: OrganizationRoute): string => {
+  const organization = organizationPath(route.organizationId);
+  switch (route.id) {
+    case "organization":
+      return organization;
+    case "project":
+      return withSearch(`${organization}/p/${seg(route.projectId)}`, { unit: route.unit });
+    case "module": {
+      const base = `${organization}/p/${seg(route.projectId)}/m/${seg(route.moduleId)}${tail(route.rest)}`;
+      return withSearch(base, { unit: route.unit });
+    }
+    case "chat": {
+      const conversation = route.conversationId === undefined ? "" : `/${seg(route.conversationId)}`;
+      return withSearch(`${organization}/p/${seg(route.projectId)}/chat${conversation}`, { unit: route.unit });
+    }
+    case "settings":
+      return withSearch(`${organization}/settings/${route.section}${tail(route.rest ?? "")}`, route.search ?? {});
+    case "settings-index":
+      return `${organization}/settings`;
+    case "settings-module":
+      return `${organization}/settings/m/${seg(route.moduleId)}`;
+  }
+};
+
 /**
  * The href of a route (path + search + hash), e.g. `{ id: "project", organizationId: "a",
  * projectId: "b", unit: "c" }` → `/o/a/p/b?unit=c`. Segments are URI-encoded.
  */
 export const routeHref = (route: Route): string => {
+  if ("organizationId" in route) return organizationRouteHref(route);
   switch (route.id) {
     case "sign-in":
       return withSearch("/sign-in", { next: route.next });
@@ -138,27 +166,6 @@ export const routeHref = (route: Route): string => {
       return "/";
     case "organizations":
       return "/organizations";
-    case "organization":
-      return organizationPath(route.organizationId);
-    case "project":
-      return withSearch(`${organizationPath(route.organizationId)}/p/${seg(route.projectId)}`, { unit: route.unit });
-    case "module": {
-      const base = `${organizationPath(route.organizationId)}/p/${seg(route.projectId)}/m/${seg(route.moduleId)}${tail(route.rest)}`;
-      return withSearch(base, { unit: route.unit });
-    }
-    case "chat": {
-      const base = `${organizationPath(route.organizationId)}/p/${seg(route.projectId)}/chat${route.conversationId === undefined ? "" : `/${seg(route.conversationId)}`}`;
-      return withSearch(base, { unit: route.unit });
-    }
-    case "settings":
-      return withSearch(
-        `${organizationPath(route.organizationId)}/settings/${route.section}${tail(route.rest ?? "")}`,
-        route.search ?? {},
-      );
-    case "settings-index":
-      return `${organizationPath(route.organizationId)}/settings`;
-    case "settings-module":
-      return `${organizationPath(route.organizationId)}/settings/m/${seg(route.moduleId)}`;
     case "profile":
       return `/profile/${route.section}`;
     case "admin":

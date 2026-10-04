@@ -20,51 +20,71 @@ const split = (href: string): Parts => {
   return { segments, search: url.searchParams, hash: new URLSearchParams(url.hash.slice(1)) };
 };
 
-const parseOrganizationRoute = ([organizationId, ...rest]: string[], search: URLSearchParams): Route | null => {
-  if (organizationId === undefined) return null;
-  const [kind, second, third, fourth, ...more] = rest;
-  if (kind === undefined) return { id: "organization", organizationId };
-  if (kind === "settings" && second === undefined) return { id: "settings-index", organizationId };
-  if (kind === "settings" && second === "m" && third !== undefined && fourth === undefined) {
-    return { id: "settings-module", organizationId, moduleId: third };
+/** `/o/:organizationId/settings/…`: the index, a module's settings, a section or a section's detail page. */
+const parseSettingsRoute = (organizationId: string, segments: string[]): Route | null => {
+  const [section, detail, extra] = segments;
+  if (section === undefined) return { id: "settings-index", organizationId };
+  if (section === "m" && detail !== undefined && extra === undefined) {
+    return { id: "settings-module", organizationId, moduleId: detail };
   }
-  if (kind === "settings" && isOneOf<SettingsSection>(SETTINGS_SECTIONS, second)) {
-    if (third === undefined) return { id: "settings", organizationId, section: second };
-    // Detail pages (an approval, a trace, a workflow run) live under their section.
-    return isOneOf(SETTINGS_DETAIL_SECTIONS, second)
-      ? { id: "settings", organizationId, section: second, rest: rest.slice(2).join("/") }
-      : null;
-  }
-  if (kind !== "p" || second === undefined) return null;
-  const unit = optional(search.get("unit"));
-  if (third === undefined) return { id: "project", organizationId, projectId: second, unit };
-  if (third === "chat")
-    return more.length > 0 ? null : { id: "chat", organizationId, projectId: second, conversationId: fourth, unit };
-  if (third !== "m" || fourth === undefined) return null;
-  return { id: "module", organizationId, projectId: second, moduleId: fourth, rest: more.join("/"), unit };
+  if (!isOneOf<SettingsSection>(SETTINGS_SECTIONS, section)) return null;
+  if (detail === undefined) return { id: "settings", organizationId, section };
+  // Detail pages (an approval, a trace, a workflow run) live under their section.
+  return isOneOf(SETTINGS_DETAIL_SECTIONS, section)
+    ? { id: "settings", organizationId, section, rest: segments.slice(1).join("/") }
+    : null;
 };
+
+/** `/o/:organizationId/p/:projectId/…`: the project, its chat or one of its modules. */
+const parseProjectRoute = (organizationId: string, segments: string[], search: URLSearchParams): Route | null => {
+  const [projectId, kind, id, ...more] = segments;
+  if (projectId === undefined) return null;
+  const unit = optional(search.get("unit"));
+  if (kind === undefined) return { id: "project", organizationId, projectId, unit };
+  if (kind === "chat")
+    return more.length > 0 ? null : { id: "chat", organizationId, projectId, conversationId: id, unit };
+  if (kind !== "m" || id === undefined) return null;
+  return { id: "module", organizationId, projectId, moduleId: id, rest: more.join("/"), unit };
+};
+
+const parseOrganizationRoute = ([organizationId, kind, ...rest]: string[], search: URLSearchParams): Route | null => {
+  if (organizationId === undefined) return null;
+  if (kind === undefined) return { id: "organization", organizationId };
+  if (kind === "settings") return parseSettingsRoute(organizationId, rest);
+  if (kind === "p") return parseProjectRoute(organizationId, rest, search);
+  return null;
+};
+
+/** Pages addressed by one segment. A `Map`, so a segment like `constructor` finds nothing. */
+const PAGE_ROUTES = new Map<string, (parts: Parts) => Route>([
+  ["sign-in", ({ search }) => ({ id: "sign-in", next: optional(search.get("next")) })],
+  ["invite", ({ hash }) => ({ id: "invite", token: optional(hash.get("token")) })],
+  ["sign-up", ({ search }) => ({ id: "sign-up", next: optional(search.get("next")) })],
+  ["reset-password", () => ({ id: "reset-password" })],
+  ["organizations", () => ({ id: "organizations" })],
+]);
 
 /**
  * The route of an href (inverse of `routeHref`; locale already stripped), or `null` for a path
  * outside the route map (the app renders not-found). Unknown sections are `null` too.
  */
 export const parseRoute = (href: string): Route | null => {
-  const { segments, search, hash } = split(href);
+  const parts = split(href);
+  const { segments, search } = parts;
   const [first, second, ...rest] = segments;
   if (first === undefined) return { id: "home" };
-  if (first === "o") return second === undefined ? null : parseOrganizationRoute([second, ...rest], search);
+  if (first === "o") return parseOrganizationRoute(segments.slice(1), search);
   if (first === "admin") {
-    const rest = segments.slice(1).join("/");
-    return search.size === 0 ? { id: "admin", rest } : { id: "admin", rest, search: Object.fromEntries(search) };
+    const tail = segments.slice(1).join("/");
+    return search.size === 0
+      ? { id: "admin", rest: tail }
+      : { id: "admin", rest: tail, search: Object.fromEntries(search) };
   }
-  if (second !== undefined && first === "profile" && rest.length === 0) {
-    return isOneOf<ProfileSection>(PROFILE_SECTIONS, second) ? { id: "profile", section: second } : null;
+  if (first === "profile") {
+    return rest.length === 0 && isOneOf<ProfileSection>(PROFILE_SECTIONS, second)
+      ? { id: "profile", section: second }
+      : null;
   }
   if (second !== undefined) return null;
-  if (first === "sign-in") return { id: "sign-in", next: optional(search.get("next")) };
-  if (first === "invite") return { id: "invite", token: optional(hash.get("token")) };
-  if (first === "sign-up") return { id: "sign-up", next: optional(search.get("next")) };
-  if (first === "reset-password") return { id: "reset-password" };
-  if (first === "organizations") return { id: "organizations" };
-  return null;
+  return PAGE_ROUTES.get(first)?.(parts) ?? null;
 };
