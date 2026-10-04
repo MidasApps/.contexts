@@ -1,10 +1,7 @@
 "use client";
 
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type Ref, useEffect, useRef } from "react";
 import { useTranslations } from "use-intl";
-import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
-import { authErrorCode } from "#/shared/lib/auth/auth-error-code.ts";
-import type { AuthErrorCode } from "#/shared/lib/auth/auth-port.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import {
@@ -16,13 +13,104 @@ import {
   DialogTitle,
 } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
-import { CODE_PATTERN, CodeField, EnrollmentAlert, FactorNameField } from "./enrollment-fields.tsx";
+import { useSmsEnrollment } from "../model/use-sms-enrollment.ts";
+import { CodeField, EnrollmentAlert, FactorNameField } from "./enrollment-fields.tsx";
 
 type Props = { open: boolean; onOpenChange: (open: boolean) => void; onEnrolled: () => Promise<void> };
 
-const E164 = /^\+[1-9]\d{7,14}$/u;
+/** The phone number in international format; read-only once the code went to it. */
+function PhoneField({
+  inputRef,
+  phone,
+  locked,
+  onPhoneChange,
+  error,
+}: {
+  inputRef: Ref<HTMLInputElement>;
+  phone: string;
+  locked: boolean;
+  onPhoneChange: (phone: string) => void;
+  error: string | undefined;
+}) {
+  const t = useTranslations("profile.security.mfa");
+  return (
+    <Field>
+      <FieldLabel>{t("phone")}</FieldLabel>
+      <FieldControl>
+        <Input
+          ref={inputRef}
+          type="tel"
+          autoComplete="tel"
+          required
+          readOnly={locked}
+          value={phone}
+          onChange={(event) => onPhoneChange(event.target.value)}
+        />
+      </FieldControl>
+      <FieldDescription>{t("phoneHint")}</FieldDescription>
+      <FieldError errors={[error]} />
+    </Field>
+  );
+}
 
-type Step = { verificationId: string | null; phone: string };
+/** Announces where the code went (live status, empty before) and, once sent, asks for the name and the code. */
+function SentCodeFields({
+  sentTo,
+  name,
+  onNameChange,
+  code,
+  onCodeChange,
+  error,
+  codeInput,
+}: {
+  sentTo: string | null;
+  name: string;
+  onNameChange: (name: string) => void;
+  code: string;
+  onCodeChange: (code: string) => void;
+  error: string | undefined;
+  codeInput: Ref<HTMLInputElement>;
+}) {
+  const t = useTranslations("profile.security.mfa");
+  return (
+    <>
+      <p role="status" className="text-sm text-muted-foreground empty:hidden">
+        {sentTo === null ? "" : t("codeSent", { phone: sentTo })}
+      </p>
+      {sentTo === null ? null : (
+        <>
+          <FactorNameField value={name} onChange={onNameChange} />
+          <CodeField value={code} onChange={onCodeChange} error={error} inputRef={codeInput} hint={t("smsCodeHint")} />
+        </>
+      )}
+    </>
+  );
+}
+
+/** "Send code" before the code went out; "change phone" and "verify" after. */
+function SmsEnrollmentActions({
+  codeSent,
+  pending,
+  onChangePhone,
+}: {
+  codeSent: boolean;
+  pending: boolean;
+  onChangePhone: () => void;
+}) {
+  const t = useTranslations("profile.security.mfa");
+  return (
+    <DialogFooter>
+      {codeSent ? (
+        <Button type="button" variant="ghost" disabled={pending} onClick={onChangePhone}>
+          {t("changePhone")}
+        </Button>
+      ) : null}
+      <Button type="submit" pending={pending}>
+        {codeSent ? t("verify") : t("sendCode")}
+      </Button>
+    </DialogFooter>
+  );
+}
 
 /**
  * SMS enrollment (the factor the Auth Emulator supports, SP1 §3.4): phone number in international
@@ -30,131 +118,51 @@ type Step = { verificationId: string | null; phone: string };
  */
 function EnrollSmsDialogBody({ onOpenChange, onEnrolled }: Props) {
   const t = useTranslations("profile.security.mfa");
-  const auth = useAuth();
-  const [step, setStep] = useState<Step>({ verificationId: null, phone: "" });
-  const [name, setName] = useState(t("smsDefaultName"));
-  const [code, setCode] = useState("");
-  const [errors, setErrors] = useState<{ phone?: string | undefined; code?: string | undefined }>({});
-  const [failure, setFailure] = useState<AuthErrorCode | null>(null);
-  const [pending, setPending] = useState(false);
   const phoneInput = useRef<HTMLInputElement>(null);
   const codeInput = useRef<HTMLInputElement>(null);
   const recaptcha = useRef<HTMLDivElement>(null);
-
+  const enrollment = useSmsEnrollment({
+    onEnrolled,
+    onClose: () => onOpenChange(false),
+    phoneInput,
+    codeInput,
+    recaptcha,
+  });
+  const { step, errors, failure, pending } = enrollment;
+  // The code field mounts once the SMS is sent; move focus to it then.
   useEffect(() => {
     if (step.verificationId !== null) codeInput.current?.focus();
   }, [step.verificationId]);
-
-  const run = async (action: () => Promise<void>): Promise<void> => {
-    setFailure(null);
-    setPending(true);
-    try {
-      await action();
-    } finally {
-      setPending(false);
-    }
-  };
-
-  const sendCode = (): Promise<void> =>
-    run(async () => {
-      const phone = step.phone.replace(/[\s()-]/gu, "");
-      if (!E164.test(phone)) {
-        setErrors({ phone: t("phoneInvalid") });
-        return phoneInput.current?.focus();
-      }
-      setErrors({});
-      if (recaptcha.current === null) return;
-      try {
-        const verificationId = await auth.startSmsEnrollment(phone, recaptcha.current);
-        setStep({ verificationId, phone });
-      } catch (error: unknown) {
-        const failed = authErrorCode(error);
-        if (failed !== "INVALID_PHONE_NUMBER") return setFailure(failed);
-        setErrors({ phone: t("phoneInvalid") });
-        phoneInput.current?.focus();
-      }
-    });
-
-  const verify = (verificationId: string): Promise<void> =>
-    run(async () => {
-      if (!CODE_PATTERN.test(code)) {
-        setErrors({ code: t(code === "" ? "codeRequired" : "codeInvalid") });
-        return codeInput.current?.focus();
-      }
-      try {
-        await auth.finishSmsEnrollment(verificationId, code, name.trim() === "" ? t("smsDefaultName") : name.trim());
-        await onEnrolled();
-        onOpenChange(false);
-      } catch (error: unknown) {
-        const failed = authErrorCode(error);
-        setCode("");
-        if (failed !== "INVALID_MFA_CODE") return setFailure(failed);
-        setErrors({ code: t("codeWrong") });
-        codeInput.current?.focus();
-      }
-    });
-
-  const submit = (event: FormEvent<HTMLFormElement>): void => {
-    event.preventDefault();
-    if (pending) return;
-    void (step.verificationId === null ? sendCode() : verify(step.verificationId));
-  };
-
   return (
     <>
       <DialogHeader>
         <DialogTitle>{t("smsTitle")}</DialogTitle>
         <DialogDescription>{t("smsDescription")}</DialogDescription>
       </DialogHeader>
-      <form noValidate onSubmit={submit} className="flex flex-col gap-5">
+      <form noValidate onSubmit={enrollment.submit} className="flex flex-col gap-5">
         {failure === null ? null : <EnrollmentAlert code={failure} />}
-        <Field>
-          <FieldLabel>{t("phone")}</FieldLabel>
-          <FieldControl>
-            <Input
-              ref={phoneInput}
-              type="tel"
-              autoComplete="tel"
-              required
-              readOnly={step.verificationId !== null}
-              value={step.phone}
-              onChange={(event) => setStep({ verificationId: null, phone: event.target.value })}
-            />
-          </FieldControl>
-          <FieldDescription>{t("phoneHint")}</FieldDescription>
-          <FieldError errors={[errors.phone]} />
-        </Field>
-        <p role="status" className="text-sm text-muted-foreground empty:hidden">
-          {step.verificationId === null ? "" : t("codeSent", { phone: step.phone })}
-        </p>
-        {step.verificationId === null ? null : (
-          <>
-            <FactorNameField value={name} onChange={setName} />
-            <CodeField
-              value={code}
-              onChange={setCode}
-              error={errors.code}
-              inputRef={codeInput}
-              hint={t("smsCodeHint")}
-            />
-          </>
-        )}
+        <PhoneField
+          inputRef={phoneInput}
+          phone={step.phone}
+          locked={step.verificationId !== null}
+          onPhoneChange={enrollment.changePhone}
+          error={errors.phone}
+        />
+        <SentCodeFields
+          sentTo={step.verificationId === null ? null : step.phone}
+          name={enrollment.name}
+          onNameChange={enrollment.setName}
+          code={enrollment.code}
+          onCodeChange={enrollment.setCode}
+          error={errors.code}
+          codeInput={codeInput}
+        />
         <div ref={recaptcha} />
-        <DialogFooter>
-          {step.verificationId === null ? null : (
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={pending}
-              onClick={() => setStep((current) => ({ ...current, verificationId: null }))}
-            >
-              {t("changePhone")}
-            </Button>
-          )}
-          <Button type="submit" pending={pending}>
-            {step.verificationId === null ? t("sendCode") : t("verify")}
-          </Button>
-        </DialogFooter>
+        <SmsEnrollmentActions
+          codeSent={step.verificationId !== null}
+          pending={pending}
+          onChangePhone={enrollment.editPhone}
+        />
       </form>
     </>
   );

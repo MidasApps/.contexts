@@ -60,6 +60,17 @@ export const cronOfDraft = (draft: CronDraft): string | null => {
 const NUMBER = /^\d{1,2}$/u;
 const pad = (value: number): string => String(value).padStart(2, "0");
 
+/** The preset that fires at `time` on these cron day fields (daily, weekdays, weekly, monthly), or `null`. */
+const timedPresetOf = (time: string, monthDay: string, weekday: string): CronDraft | null => {
+  if (monthDay === "*" && weekday === "*") return { ...DEFAULT_CRON_DRAFT, kind: "daily", time };
+  if (monthDay === "*" && weekday === "1-5") return { ...DEFAULT_CRON_DRAFT, kind: "weekdays", time };
+  if (monthDay === "*" && /^[0-6]$/u.test(weekday))
+    return { ...DEFAULT_CRON_DRAFT, kind: "weekly", time, weekday: Number(weekday) };
+  if (weekday === "*" && NUMBER.test(monthDay) && inRange(Number(monthDay), 1, 28))
+    return { ...DEFAULT_CRON_DRAFT, kind: "monthly", time, monthDay: Number(monthDay) };
+  return null;
+};
+
 /**
  * The draft that shows an existing cron: one of the presets when the expression has exactly that
  * shape, else `custom` with the expression as written (nothing is lost on edit).
@@ -72,11 +83,5 @@ export const draftOfCron = (cron: string): CronDraft => {
     return { ...DEFAULT_CRON_DRAFT, kind: "hourly", minute: Number(minute) };
   if (!NUMBER.test(hour) || !inRange(Number(hour), 0, 23)) return custom;
   const time = `${pad(Number(hour))}:${pad(Number(minute))}`;
-  if (monthDay === "*" && weekday === "*") return { ...DEFAULT_CRON_DRAFT, kind: "daily", time };
-  if (monthDay === "*" && weekday === "1-5") return { ...DEFAULT_CRON_DRAFT, kind: "weekdays", time };
-  if (monthDay === "*" && /^[0-6]$/u.test(weekday))
-    return { ...DEFAULT_CRON_DRAFT, kind: "weekly", time, weekday: Number(weekday) };
-  if (weekday === "*" && NUMBER.test(monthDay) && inRange(Number(monthDay), 1, 28))
-    return { ...DEFAULT_CRON_DRAFT, kind: "monthly", time, monthDay: Number(monthDay) };
-  return custom;
+  return timedPresetOf(time, monthDay, weekday) ?? custom;
 };

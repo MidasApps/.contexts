@@ -160,6 +160,52 @@ function PiiMode({
   );
 }
 
+function SaveFailureAlert({ failure }: { failure: Failure }) {
+  const t = useTranslations("admin.agentSettings");
+  return (
+    <Alert variant="destructive">
+      <AlertTitle>{t("failed")}</AlertTitle>
+      <AlertDescription>
+        {failure.requestId === undefined
+          ? failure.message
+          : t("failedWithReference", { message: failure.message, requestId: failure.requestId })}
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+/** Asks before a risky change, naming the organization; `onConfirm` receives the change that was asked about. */
+function ConfirmRiskyChangeDialog({
+  risky,
+  organizationName,
+  onClose,
+  onConfirm,
+}: {
+  risky: RiskyChange | null;
+  organizationName: string;
+  onClose: () => void;
+  onConfirm: (change: RiskyChange) => void;
+}) {
+  const t = useTranslations("admin.agentSettings");
+  return (
+    <ConfirmDialog
+      open={risky !== null}
+      onOpenChange={(open) => (open ? undefined : onClose())}
+      title={
+        risky?.kind === "web"
+          ? t(`confirm.${risky.tool}Title`, { organization: organizationName })
+          : t("confirm.piiTitle", { organization: organizationName })
+      }
+      description={risky?.kind === "web" ? t("confirm.webDescription") : t("confirm.piiDescription")}
+      confirmLabel={risky?.kind === "web" ? t("confirm.webConfirm") : t("confirm.piiConfirm")}
+      destructive={risky?.kind === "pii"}
+      onConfirm={() => {
+        if (risky !== null) onConfirm(risky);
+      }}
+    />
+  );
+}
+
 /**
  * Agent settings of one organization edited by staff (`PUT /v1/admin/organizations/{id}/agent-settings`,
  * platform.agent.manage, audited with the organization as target): which subagents the supervisor
@@ -218,16 +264,7 @@ export function AgentEnablementPanel({
 
   return (
     <div data-slot="agent-enablement" aria-busy={saving || undefined} className="flex flex-col gap-6">
-      {failure === null ? null : (
-        <Alert variant="destructive">
-          <AlertTitle>{t("failed")}</AlertTitle>
-          <AlertDescription>
-            {failure.requestId === undefined
-              ? failure.message
-              : t("failedWithReference", { message: failure.message, requestId: failure.requestId })}
-          </AlertDescription>
-        </Alert>
-      )}
+      {failure === null ? null : <SaveFailureAlert failure={failure} />}
       {online ? null : <p className="text-xs text-muted-foreground">{t("offline")}</p>}
       <Group title={t("agents.title")} description={t("agents.description")}>
         <ul className="divide-y divide-border">
@@ -262,21 +299,14 @@ export function AgentEnablementPanel({
         </ul>
       </Group>
       <PiiMode value={settings.guardrails.pii} disabled={disabled} onChange={setPii} />
-      <ConfirmDialog
-        open={risky !== null}
-        onOpenChange={(open) => (open ? undefined : setRisky(null))}
-        title={
-          risky?.kind === "web"
-            ? t(`confirm.${risky.tool}Title`, { organization: organizationName })
-            : t("confirm.piiTitle", { organization: organizationName })
-        }
-        description={risky?.kind === "web" ? t("confirm.webDescription") : t("confirm.piiDescription")}
-        confirmLabel={risky?.kind === "web" ? t("confirm.webConfirm") : t("confirm.piiConfirm")}
-        destructive={risky?.kind === "pii"}
-        onConfirm={() => {
+      <ConfirmRiskyChangeDialog
+        risky={risky}
+        organizationName={organizationName}
+        onClose={() => setRisky(null)}
+        onConfirm={(change) => {
           // The dialog closes at once; the save shows its own outcome (toast or the alert above).
-          if (risky?.kind === "web") toggleWebTool(risky.tool, true);
-          else if (risky?.kind === "pii") setPii("warn");
+          if (change.kind === "web") toggleWebTool(change.tool, true);
+          else setPii("warn");
         }}
       />
     </div>

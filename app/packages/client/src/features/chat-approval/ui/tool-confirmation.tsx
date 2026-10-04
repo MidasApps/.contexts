@@ -18,7 +18,7 @@ import {
 } from "#/shared/ui/ai/confirmation.tsx";
 import { Spinner } from "#/shared/ui/atoms/Spinner/Spinner.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
-import { type ApprovalDecision, useToolApproval } from "../model/use-tool-approval.ts";
+import { type ApprovalDecision, type ToolApproval, useToolApproval } from "../model/use-tool-approval.ts";
 
 export type ToolConfirmationProps = {
   /** The tool part in an approval state (for a delegated command, the `tool-agent-action` part). */
@@ -70,6 +70,116 @@ function Outcome({ tool }: { tool: ToolPartView }) {
   );
 }
 
+/** What will run and under which permission: the question while it waits, the summary afterwards. */
+function ToolHeading({
+  requested,
+  summary,
+  permission,
+}: {
+  requested: boolean;
+  summary: string;
+  permission: string | undefined;
+}) {
+  const t = useTranslations("chat.approval");
+  const permissionLabel = usePermissionLabel();
+  return (
+    <div className="flex items-start gap-2.5">
+      <ShieldQuestionIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber" />
+      <div className="min-w-0 space-y-0.5">
+        <ConfirmationTitle>{requested ? t("title") : summary}</ConfirmationTitle>
+        {requested ? <p className="text-body text-foreground">{summary}</p> : null}
+        {permission === undefined ? null : (
+          <p className="text-body-sm text-muted-foreground">
+            {t("permission")}: <span title={permission}>{permissionLabel(permission)}</span>
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** The before/after (or that there is none) and, while the call waits, its arguments. */
+function ToolDetails({ requested, diff, args }: { requested: boolean; diff: ReactNode; args: unknown }) {
+  const t = useTranslations("chat.approval");
+  return (
+    <>
+      {diff ?? (requested ? <p className="text-body-sm text-muted-foreground">{t("noPreview")}</p> : null)}
+      {args === undefined || !requested ? null : <CodeBlock code={toJson(args)} language="json" label={t("details")} />}
+    </>
+  );
+}
+
+/** The optional decline reason; it only mounts when the member starts declining, and takes the focus. */
+function DeclineReasonField({ approval, locked }: { approval: ToolApproval; locked: boolean }) {
+  const t = useTranslations("chat.approval");
+  const reasonId = useId();
+  const hintId = useId();
+  const reasonRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    reasonRef.current?.focus();
+  }, []);
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={reasonId} className="text-body font-medium text-foreground">
+        {t("reasonLabel")}
+      </label>
+      <Textarea
+        id={reasonId}
+        ref={reasonRef}
+        value={approval.reason}
+        onChange={(event) => approval.setReason(event.target.value)}
+        maxLength={MAX_APPROVAL_REASON_CHARS}
+        aria-describedby={hintId}
+        disabled={locked}
+        className="min-h-16"
+      />
+      <p id={hintId} className="text-body-sm text-muted-foreground">
+        {t("reasonHint")}
+      </p>
+    </div>
+  );
+}
+
+/** Decline / approve, or — while asking for a reason — cancel / confirm the decline. */
+function ApprovalActions({
+  approval,
+  locked,
+  interactive,
+}: {
+  approval: ToolApproval;
+  locked: boolean;
+  interactive: boolean;
+}) {
+  const t = useTranslations("chat.approval");
+  if (approval.stage === "asking-reason") {
+    return (
+      <ConfirmationActions>
+        <ConfirmationAction variant="ghost" onClick={approval.cancelDecline} disabled={locked}>
+          {t("cancelDecline")}
+        </ConfirmationAction>
+        <ConfirmationAction
+          variant="destructive"
+          onClick={approval.confirmDecline}
+          disabled={!interactive}
+          pending={approval.sent === "declined"}
+        >
+          {approval.sent === "declined" ? t("declining") : t("confirmDecline")}
+        </ConfirmationAction>
+      </ConfirmationActions>
+    );
+  }
+  return (
+    <ConfirmationActions>
+      <ConfirmationAction variant="outline" onClick={approval.startDecline} disabled={locked}>
+        {t("decline")}
+      </ConfirmationAction>
+      <ConfirmationAction onClick={approval.approve} disabled={!interactive} pending={approval.sent === "approved"}>
+        {approval.sent === "approved" ? t("approving") : t("approve")}
+      </ConfirmationAction>
+    </ConfirmationActions>
+  );
+}
+
 /**
  * The approval card of a mutation tool (decision 0032): what will run, under which permission,
  * with which data and — when the tool can preview it — the before/after. Approve, or decline
@@ -80,20 +190,12 @@ function Outcome({ tool }: { tool: ToolPartView }) {
 export function ToolConfirmation({ tool, preview, request, onRespond, diff, interactive }: ToolConfirmationProps) {
   const t = useTranslations("chat.approval");
   const approval = useToolApproval({ approvalId: tool.approval?.id ?? "", onRespond });
-  const reasonId = useId();
-  const hintId = useId();
-  const reasonRef = useRef<HTMLTextAreaElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const toolLabel = useToolLabel();
-  const permissionLabel = usePermissionLabel();
   const toolName = request?.toolName ?? preview?.toolName ?? tool.toolName;
   const summary = preview?.summary ?? t("fallbackSummary", { tool: toolLabel(toolName) });
   const requested = tool.state === "approval-requested";
   const locked = approval.sent !== null || !interactive;
-
-  useEffect(() => {
-    if (approval.stage === "asking-reason") reasonRef.current?.focus();
-  }, [approval.stage]);
 
   useEffect(() => {
     // Only when this card took the decision in this session: history cards must not steal focus.
@@ -108,73 +210,11 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
       label={t("label", { summary })}
       data-tool-call={tool.toolCallId}
     >
-      <div className="flex items-start gap-2.5">
-        <ShieldQuestionIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber" />
-        <div className="min-w-0 space-y-0.5">
-          <ConfirmationTitle>{requested ? t("title") : summary}</ConfirmationTitle>
-          {requested ? <p className="text-body text-foreground">{summary}</p> : null}
-          {preview?.permission === undefined ? null : (
-            <p className="text-body-sm text-muted-foreground">
-              {t("permission")}: <span title={preview.permission}>{permissionLabel(preview.permission)}</span>
-            </p>
-          )}
-        </div>
-      </div>
-      {diff ?? (requested ? <p className="text-body-sm text-muted-foreground">{t("noPreview")}</p> : null)}
-      {request?.args === undefined || !requested ? null : (
-        <CodeBlock code={toJson(request.args)} language="json" label={t("details")} />
-      )}
+      <ToolHeading requested={requested} summary={summary} permission={preview?.permission} />
+      <ToolDetails requested={requested} diff={diff} args={request?.args} />
       <ConfirmationRequest>
-        {approval.stage === "asking-reason" ? (
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor={reasonId} className="text-body font-medium text-foreground">
-              {t("reasonLabel")}
-            </label>
-            <Textarea
-              id={reasonId}
-              ref={reasonRef}
-              value={approval.reason}
-              onChange={(event) => approval.setReason(event.target.value)}
-              maxLength={MAX_APPROVAL_REASON_CHARS}
-              aria-describedby={hintId}
-              disabled={locked}
-              className="min-h-16"
-            />
-            <p id={hintId} className="text-body-sm text-muted-foreground">
-              {t("reasonHint")}
-            </p>
-          </div>
-        ) : null}
-        <ConfirmationActions>
-          {approval.stage === "asking-reason" ? (
-            <>
-              <ConfirmationAction variant="ghost" onClick={approval.cancelDecline} disabled={locked}>
-                {t("cancelDecline")}
-              </ConfirmationAction>
-              <ConfirmationAction
-                variant="destructive"
-                onClick={approval.confirmDecline}
-                disabled={!interactive}
-                pending={approval.sent === "declined"}
-              >
-                {approval.sent === "declined" ? t("declining") : t("confirmDecline")}
-              </ConfirmationAction>
-            </>
-          ) : (
-            <>
-              <ConfirmationAction variant="outline" onClick={approval.startDecline} disabled={locked}>
-                {t("decline")}
-              </ConfirmationAction>
-              <ConfirmationAction
-                onClick={approval.approve}
-                disabled={!interactive}
-                pending={approval.sent === "approved"}
-              >
-                {approval.sent === "approved" ? t("approving") : t("approve")}
-              </ConfirmationAction>
-            </>
-          )}
-        </ConfirmationActions>
+        {approval.stage === "asking-reason" ? <DeclineReasonField approval={approval} locked={locked} /> : null}
+        <ApprovalActions approval={approval} locked={locked} interactive={interactive} />
       </ConfirmationRequest>
       <div ref={resultRef} tabIndex={-1}>
         <Outcome tool={tool} />

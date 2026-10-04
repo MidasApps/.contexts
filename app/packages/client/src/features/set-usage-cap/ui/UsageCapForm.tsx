@@ -1,15 +1,9 @@
 "use client";
 
-import { type BudgetCaps, updateAgentSettingsEndpoint } from "@core/contracts";
+import type { BudgetCaps } from "@core/contracts";
 import type { MoneyValue } from "@core/i18n";
-import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
-import { tenantAgentSettingsKeys } from "#/entities/agent-settings/index.ts";
-import { usageKeys } from "#/entities/usage/index.ts";
-import { useCallEndpoint } from "#/shared/api/api-context.tsx";
-import { ApiError } from "#/shared/api/api-error.ts";
-import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { microUsdToMoney, moneyToMicroUsd, useFormatMicroUsd } from "#/shared/lib/format/use-format-micro-usd.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
@@ -23,8 +17,8 @@ import {
 } from "#/shared/ui/molecules/Field/Field.tsx";
 import { IntegerInput } from "#/shared/ui/molecules/IntegerInput/IntegerInput.tsx";
 import { MoneyInput } from "#/shared/ui/molecules/MoneyInput/MoneyInput.tsx";
-import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
+import { useSaveUsageCap } from "../model/use-save-usage-cap.ts";
 
 export type UsageCapFormProps = {
   organizationId: string;
@@ -60,11 +54,60 @@ function CapSource({ caps, ownBudget }: { caps: BudgetCaps; ownBudget: BudgetCap
   );
 }
 
-/** The API answers 400 `VALIDATION_FAILED` with issue `ABOVE_PLAN` when the own cap exceeds the plan. */
-const isAbovePlan = (error: unknown): boolean =>
-  error instanceof ApiError &&
-  error.code === "VALIDATION_FAILED" &&
-  (error.details ?? []).some((detail) => detail.issue === "ABOVE_PLAN");
+type CapProblems = { spend?: true; tokens?: true };
+
+/** The monthly spend (dollars) and token caps, each with its problem once the form was sent. */
+function CapFields({
+  spend,
+  onSpendChange,
+  tokens,
+  onTokensChange,
+  onTokensParseError,
+  problems,
+  disabled,
+}: {
+  spend: MoneyValue | null;
+  onSpendChange: (spend: MoneyValue | null) => void;
+  tokens: number | null;
+  onTokensChange: (tokens: number | null) => void;
+  onTokensParseError: (invalid: boolean) => void;
+  problems: CapProblems;
+  disabled: boolean;
+}) {
+  const t = useTranslations("settings.usage.ownCap");
+  return (
+    <FieldGroup>
+      <Field>
+        <FieldLabel>{t("spend")}</FieldLabel>
+        <FieldControl>
+          <MoneyInput
+            value={spend}
+            currency="USD"
+            onValueChange={onSpendChange}
+            disabled={disabled}
+            className="sm:w-64"
+          />
+        </FieldControl>
+        <FieldDescription>{t("spendHint")}</FieldDescription>
+        <FieldError errors={[problems.spend === true ? t("problems.spend") : undefined]} />
+      </Field>
+      <Field>
+        <FieldLabel>{t("tokens")}</FieldLabel>
+        <FieldControl>
+          <IntegerInput
+            value={tokens}
+            disabled={disabled}
+            onValueChange={onTokensChange}
+            onParseError={onTokensParseError}
+            className="sm:w-64"
+          />
+        </FieldControl>
+        <FieldDescription>{t("tokensHint")}</FieldDescription>
+        <FieldError errors={[problems.tokens === true ? t("problems.tokens") : undefined]} />
+      </Field>
+    </FieldGroup>
+  );
+}
 
 /**
  * The organization's own monthly cap (`PATCH /v1/agent-settings { budget }`,
@@ -75,43 +118,12 @@ const isAbovePlan = (error: unknown): boolean =>
  */
 export function UsageCapForm({ organizationId, caps, ownBudget, disabled = false }: UsageCapFormProps) {
   const t = useTranslations("settings.usage.ownCap");
-  const describe = useDescribeError();
-  const callEndpoint = useCallEndpoint();
-  const queryClient = useQueryClient();
   const [spend, setSpend] = useState<MoneyValue | null>(() => microUsdToMoney(caps.monthlyMicroUsd));
   const [tokens, setTokens] = useState<number | null>(caps.monthlyTokens);
   const [tokensInvalid, setTokensInvalid] = useState(false);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
-  const [problems, setProblems] = useState<{ spend?: true; tokens?: true }>({});
-  const [failure, setFailure] = useState<string | null>(null);
-  const [pending, setPending] = useState<"save" | "remove" | null>(null);
-
-  /** Resolves `true` once saved; a failure is shown above the form. */
-  const send = async (budget: BudgetCaps | null, kind: "save" | "remove"): Promise<boolean> => {
-    setPending(kind);
-    setFailure(null);
-    try {
-      await callEndpoint(updateAgentSettingsEndpoint, { query: { organizationId }, body: { budget } });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: tenantAgentSettingsKeys.one(organizationId) }),
-        queryClient.invalidateQueries({ queryKey: usageKeys.all(organizationId) }),
-      ]);
-      notify.success(t(kind === "save" ? "saved" : "removed"));
-      return true;
-    } catch (error: unknown) {
-      const described = describe(error);
-      setFailure(
-        isAbovePlan(error)
-          ? t("abovePlan")
-          : described.requestId === undefined
-            ? described.message
-            : t("failureWithReference", { message: described.message, requestId: described.requestId }),
-      );
-      return false;
-    } finally {
-      setPending(null);
-    }
-  };
+  const [problems, setProblems] = useState<CapProblems>({});
+  const { send, pending, failure } = useSaveUsageCap(organizationId);
 
   const submit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -133,30 +145,15 @@ export function UsageCapForm({ organizationId, caps, ownBudget, disabled = false
           <AlertDescription>{failure}</AlertDescription>
         </Alert>
       )}
-      <FieldGroup>
-        <Field>
-          <FieldLabel>{t("spend")}</FieldLabel>
-          <FieldControl>
-            <MoneyInput value={spend} currency="USD" onValueChange={setSpend} disabled={disabled} className="sm:w-64" />
-          </FieldControl>
-          <FieldDescription>{t("spendHint")}</FieldDescription>
-          <FieldError errors={[problems.spend === true ? t("problems.spend") : undefined]} />
-        </Field>
-        <Field>
-          <FieldLabel>{t("tokens")}</FieldLabel>
-          <FieldControl>
-            <IntegerInput
-              value={tokens}
-              disabled={disabled}
-              onValueChange={setTokens}
-              onParseError={setTokensInvalid}
-              className="sm:w-64"
-            />
-          </FieldControl>
-          <FieldDescription>{t("tokensHint")}</FieldDescription>
-          <FieldError errors={[problems.tokens === true ? t("problems.tokens") : undefined]} />
-        </Field>
-      </FieldGroup>
+      <CapFields
+        spend={spend}
+        onSpendChange={setSpend}
+        tokens={tokens}
+        onTokensChange={setTokens}
+        onTokensParseError={setTokensInvalid}
+        problems={problems}
+        disabled={disabled}
+      />
       <div className="flex flex-wrap gap-2">
         <Button type="submit" pending={pending === "save"} disabled={disabled || pending === "remove"}>
           {t("save")}

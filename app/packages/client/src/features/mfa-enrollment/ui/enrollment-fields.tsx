@@ -8,7 +8,7 @@ import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 
-export const CODE_PATTERN = /^\d{6}$/u;
+export { CODE_PATTERN } from "../model/one-time-code.ts";
 
 /** A focused alert for failures that are not about one field (`auth.errors.<code>`). */
 export function EnrollmentAlert({ code }: { code: AuthErrorCode }) {

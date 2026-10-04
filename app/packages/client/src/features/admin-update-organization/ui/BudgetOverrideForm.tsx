@@ -18,6 +18,15 @@ import { useOrganizationWrites } from "../model/use-organization-writes.ts";
 
 type FieldErrors = { money?: string; tokens?: string };
 
+function FieldError({ id, message }: { id: string; message: string | undefined }) {
+  if (message === undefined) return null;
+  return (
+    <p id={id} className="text-sm font-medium text-destructive-text">
+      {message}
+    </p>
+  );
+}
+
 /** "Back to the plan": clears the staff override behind a confirmation. */
 function ClearOverride({ organization, disabled }: { organization: OrganizationAdminSummary; disabled: boolean }) {
   const t = useTranslations("admin.organizationDetail.budget");
@@ -116,11 +125,7 @@ export function BudgetOverrideForm({ organization }: { organization: Organizatio
             aria-invalid={errors.money !== undefined}
             aria-describedby={errors.money === undefined ? undefined : ids.moneyError}
           />
-          {errors.money === undefined ? null : (
-            <p id={ids.moneyError} className="text-sm font-medium text-destructive-text">
-              {errors.money}
-            </p>
-          )}
+          <FieldError id={ids.moneyError} message={errors.money} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={ids.tokens}>{t("tokens")}</Label>
@@ -136,11 +141,7 @@ export function BudgetOverrideForm({ organization }: { organization: Organizatio
             aria-invalid={errors.tokens !== undefined}
             aria-describedby={errors.tokens === undefined ? undefined : ids.tokensError}
           />
-          {errors.tokens === undefined ? null : (
-            <p id={ids.tokensError} className="text-sm font-medium text-destructive-text">
-              {errors.tokens}
-            </p>
-          )}
+          <FieldError id={ids.tokensError} message={errors.tokens} />
         </div>
       </div>
       {save.error === undefined ? null : (

@@ -95,6 +95,75 @@ const defaultPreviews = {
   revoke: (url: string): void => URL.revokeObjectURL(url),
 };
 
+/** A new queue entry: `pending`, or already `rejected` with `TOO_MANY` when the message is full. */
+const newUploadItem = (args: {
+  id: string;
+  source: UploadSource;
+  purpose: FilePurpose;
+  overLimit: boolean;
+  previewUrl: string | undefined;
+}): UploadItem => ({
+  id: args.id,
+  name: args.source.name,
+  mediaType: args.source.mediaType,
+  sizeBytes: args.source.sizeBytes,
+  purpose: args.purpose,
+  status: args.overLimit ? "rejected" : "pending",
+  progress: 0,
+  ...(args.overLimit ? { problem: "TOO_MANY" as const } : {}),
+  ...(args.previewUrl === undefined ? {} : { previewUrl: args.previewUrl }),
+});
+
+/** What a message carries for a `ready` chat attachment (the caller checked `fileId`). */
+const toAttachment = (item: UploadItem): MessageAttachment =>
+  ({
+    fileId: item.fileId,
+    name: item.name,
+    mediaType: item.mediaType,
+    sizeBytes: item.sizeBytes,
+  }) as MessageAttachment;
+
+/**
+ * One entry from start to `ready` or `rejected`: sign, send the bytes, wait for the server's
+ * validation and — for knowledge — add it as a source. Each step reports through `report`;
+ * errors (abort included) propagate for the queue to settle.
+ */
+const uploadEntry = async (
+  deps: UploadQueueDeps,
+  entry: Entry,
+  report: (patch: Partial<UploadItem>) => void,
+): Promise<void> => {
+  const { source, controller } = entry;
+  const { signal } = controller;
+  const organizationId = deps.getOrganizationId();
+  const ticket = await requestUpload(deps.callEndpoint, {
+    organizationId,
+    purpose: entry.item.purpose,
+    source,
+    signal,
+  });
+  report({ status: "uploading", fileId: ticket.fileId, progress: 0, slow: false });
+  await sendBytes(ticket.upload, source.blob, {
+    ...deps.transfer,
+    signal,
+    onProgress: (progress) => report({ progress }),
+  });
+  report({ status: "validating", progress: 1 });
+  const file = await waitForValidation(deps.callEndpoint, ticket.fileId, {
+    ...deps.wait,
+    signal,
+    onSlow: () => report({ slow: true }),
+  });
+  if (file.status === "rejected") {
+    report({ status: "rejected", problem: file.rejectionReason ?? "CONTENT_MISMATCH" });
+    return;
+  }
+  if (entry.item.purpose === "knowledge")
+    await addKnowledgeSource(deps.callEndpoint, { organizationId, fileId: ticket.fileId, signal });
+  // The server's view of the file (detected type, real size) is what the message shows.
+  report({ status: "ready", mediaType: file.contentType, sizeBytes: file.sizeBytes, slow: false });
+};
+
 let counter = 0;
 const nextId = (): string => `upload-${(counter += 1)}`;
 
@@ -129,36 +198,8 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
   const run = async (id: string): Promise<void> => {
     const entry = entries.get(id);
     if (entry === undefined) return;
-    const { source, controller } = entry;
-    const { signal } = controller;
-    const organizationId = deps.getOrganizationId();
     try {
-      const ticket = await requestUpload(deps.callEndpoint, {
-        organizationId,
-        purpose: entry.item.purpose,
-        source,
-        signal,
-      });
-      update(id, { status: "uploading", fileId: ticket.fileId, progress: 0, slow: false });
-      await sendBytes(ticket.upload, source.blob, {
-        ...deps.transfer,
-        signal,
-        onProgress: (progress) => update(id, { progress }),
-      });
-      update(id, { status: "validating", progress: 1 });
-      const file = await waitForValidation(deps.callEndpoint, ticket.fileId, {
-        ...deps.wait,
-        signal,
-        onSlow: () => update(id, { slow: true }),
-      });
-      if (file.status === "rejected") {
-        update(id, { status: "rejected", problem: file.rejectionReason ?? "CONTENT_MISMATCH" });
-        return;
-      }
-      if (entry.item.purpose === "knowledge")
-        await addKnowledgeSource(deps.callEndpoint, { organizationId, fileId: ticket.fileId, signal });
-      // The server's view of the file (detected type, real size) is what the message shows.
-      update(id, { status: "ready", mediaType: file.contentType, sizeBytes: file.sizeBytes, slow: false });
+      await uploadEntry(deps, entry, (patch) => update(id, patch));
     } catch (error: unknown) {
       settle(id, error);
     }
@@ -181,17 +222,7 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
       const id = (deps.newId ?? nextId)();
       const overLimit = purpose === "chat-attachment" && chatCount() >= max;
       const previewUrl = !overLimit && source.mediaType.startsWith("image/") ? previews.create(source.blob) : undefined;
-      const item: UploadItem = {
-        id,
-        name: source.name,
-        mediaType: source.mediaType,
-        sizeBytes: source.sizeBytes,
-        purpose,
-        status: overLimit ? "rejected" : "pending",
-        progress: 0,
-        ...(overLimit ? { problem: "TOO_MANY" as const } : {}),
-        ...(previewUrl === undefined ? {} : { previewUrl }),
-      };
+      const item = newUploadItem({ id, source, purpose, overLimit, previewUrl });
       entries.set(id, { item, source, controller: new AbortController() });
       if (!overLimit) started.push(id);
     }
@@ -222,15 +253,7 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
       const ready = [...entries.values()].filter(
         ({ item }) => item.purpose === "chat-attachment" && item.status === "ready" && item.fileId !== undefined,
       );
-      const attachments = ready.map(
-        ({ item }) =>
-          ({
-            fileId: item.fileId,
-            name: item.name,
-            mediaType: item.mediaType,
-            sizeBytes: item.sizeBytes,
-          }) as MessageAttachment,
-      );
+      const attachments = ready.map(({ item }) => toAttachment(item));
       ready.forEach(({ item }) => drop(item.id));
       if (ready.length > 0) publish();
       return attachments;

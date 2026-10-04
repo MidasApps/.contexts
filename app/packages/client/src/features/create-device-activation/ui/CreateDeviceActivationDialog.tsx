@@ -1,7 +1,7 @@
 "use client";
 
 import { createDeviceActivationEndpoint, type Role, type RoleRef } from "@core/contracts";
-import { type FormEvent, useRef, useState } from "react";
+import { type FormEvent, type Ref, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { NodeSelect, type TenantNodeInput } from "#/entities/project/index.ts";
 import { DEVICE_SYSTEM_ROLES, RoleChecklist, useRoleOptions } from "#/entities/role/index.ts";
@@ -47,6 +47,62 @@ const emptyDraft = (organizationId: string): Draft => ({
   roles: DEVICE_ROLE,
 });
 
+type DraftProblems = { label?: string; roles?: string };
+
+/** Device name, node and roles of the code to create. */
+function DeviceActivationFields({
+  organization,
+  options,
+  draft,
+  onDraftChange,
+  problems,
+  labelInput,
+}: {
+  organization: { id: string; name: string };
+  options: ReturnType<typeof useRoleOptions>;
+  draft: Draft;
+  onDraftChange: (draft: Draft) => void;
+  problems: DraftProblems;
+  labelInput: Ref<HTMLInputElement>;
+}) {
+  const t = useTranslations("settings.devices.createDialog");
+  return (
+    <FieldGroup>
+      <Field>
+        <FieldLabel>{t("label")}</FieldLabel>
+        <FieldControl>
+          <Input
+            ref={labelInput}
+            required
+            value={draft.label}
+            onChange={(event) => onDraftChange({ ...draft, label: event.target.value })}
+          />
+        </FieldControl>
+        <FieldDescription>{t("labelHint")}</FieldDescription>
+        <FieldError errors={[problems.label]} />
+      </Field>
+      <Field>
+        <FieldLabel>{t("node")}</FieldLabel>
+        <FieldControl>
+          <NodeSelect
+            organization={organization}
+            value={draft.node}
+            onValueChange={(node) => onDraftChange({ ...draft, node })}
+          />
+        </FieldControl>
+        <FieldDescription>{t("nodeHint")}</FieldDescription>
+      </Field>
+      <RoleChecklist
+        legend={t("roles")}
+        options={options}
+        value={draft.roles}
+        onChange={(roles) => onDraftChange({ ...draft, roles })}
+        error={problems.roles}
+      />
+    </FieldGroup>
+  );
+}
+
 /**
  * Creates a one-time device activation code (`POST …/device-activations`, core.device.create):
  * device name, node and roles (no escalation). The code is shown once with a 10-minute countdown;
@@ -64,7 +120,7 @@ function CreateDeviceActivationDialogBody({
   const resetKey = idempotency.reset;
   const options = useRoleOptions(customRoles, DEVICE_SYSTEM_ROLES);
   const [draft, setDraft] = useState<Draft>(() => emptyDraft(organization.id));
-  const [problems, setProblems] = useState<{ label?: string; roles?: string }>({});
+  const [problems, setProblems] = useState<DraftProblems>({});
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
   const [activation, setActivation] = useState<{ label: string; code: string; expiresAt: string } | null>(null);
@@ -130,39 +186,14 @@ function CreateDeviceActivationDialogBody({
       ) : (
         <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
           {failure === null ? null : <ApiErrorAlert error={failure} />}
-          <FieldGroup>
-            <Field>
-              <FieldLabel>{t("label")}</FieldLabel>
-              <FieldControl>
-                <Input
-                  ref={labelInput}
-                  required
-                  value={draft.label}
-                  onChange={(event) => setDraft({ ...draft, label: event.target.value })}
-                />
-              </FieldControl>
-              <FieldDescription>{t("labelHint")}</FieldDescription>
-              <FieldError errors={[problems.label]} />
-            </Field>
-            <Field>
-              <FieldLabel>{t("node")}</FieldLabel>
-              <FieldControl>
-                <NodeSelect
-                  organization={organization}
-                  value={draft.node}
-                  onValueChange={(node) => setDraft({ ...draft, node })}
-                />
-              </FieldControl>
-              <FieldDescription>{t("nodeHint")}</FieldDescription>
-            </Field>
-            <RoleChecklist
-              legend={t("roles")}
-              options={options}
-              value={draft.roles}
-              onChange={(roles) => setDraft({ ...draft, roles })}
-              error={problems.roles}
-            />
-          </FieldGroup>
+          <DeviceActivationFields
+            organization={organization}
+            options={options}
+            draft={draft}
+            onDraftChange={setDraft}
+            problems={problems}
+            labelInput={labelInput}
+          />
           <DialogFooter>
             <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
               {t("cancel")}

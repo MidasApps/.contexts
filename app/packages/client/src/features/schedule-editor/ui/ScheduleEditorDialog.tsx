@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createScheduleEndpoint,
-  type Schedule,
-  ScheduleSlugSchema,
-  updateScheduleEndpoint,
-  type WorkflowCatalogEntry,
-} from "@core/contracts";
+import { type Schedule, ScheduleSlugSchema, type WorkflowCatalogEntry } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { CircleAlertIcon } from "lucide-react";
 import { type FormEvent, useState } from "react";
@@ -40,8 +34,12 @@ import {
 import { TimeZoneSelect } from "#/shared/ui/molecules/TimeZoneSelect/TimeZoneSelect.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { JsonSchemaFields } from "#/shared/ui/organisms/JsonSchemaFields/JsonSchemaFields.tsx";
-import { useJsonSchemaInput } from "#/shared/ui/organisms/JsonSchemaFields/use-json-schema-input.ts";
+import {
+  type JsonSchemaInput,
+  useJsonSchemaInput,
+} from "#/shared/ui/organisms/JsonSchemaFields/use-json-schema-input.ts";
 import { type CronDraft, cronOfDraft, DEFAULT_CRON_DRAFT, draftOfCron } from "../model/cron-presets.ts";
+import { saveSchedule } from "../model/save-schedule.ts";
 import { CronFields } from "./CronFields.tsx";
 import { NextFires } from "./NextFires.tsx";
 
@@ -166,6 +164,56 @@ function IdentityFields({
   );
 }
 
+/** The IANA zone the cron is read in. */
+function TimeZoneField({
+  value,
+  onChange,
+  invalid,
+}: {
+  value: string;
+  onChange: (timezone: string) => void;
+  invalid: boolean;
+}) {
+  const t = useTranslations("settings.workflows.editor");
+  return (
+    <Field>
+      <FieldLabel>{t("timezone")}</FieldLabel>
+      <FieldControl>
+        <TimeZoneSelect className="w-full" value={value === "" ? undefined : value} onValueChange={onChange} />
+      </FieldControl>
+      <FieldDescription>{t("timezoneHint")}</FieldDescription>
+      <FieldError errors={[invalid ? t("errors.timezone") : undefined]} />
+    </Field>
+  );
+}
+
+/** The input of every fire: fields from the workflow's JSON Schema, or JSON text. */
+function ScheduleInputFields({
+  workflowId,
+  input,
+  onEdited,
+}: {
+  workflowId: string;
+  input: JsonSchemaInput;
+  onEdited: () => void;
+}) {
+  const t = useTranslations("settings.workflows.editor");
+  const inputLabel = useWorkflowInputLabel();
+  return (
+    <JsonSchemaFields
+      plan={input.plan}
+      draft={input.draft}
+      onDraftChange={(next) => {
+        input.setDraft(next);
+        onEdited();
+      }}
+      problems={input.problems}
+      labelOf={(field) => inputLabel(workflowId, field)}
+      jsonHint={t("inputHint")}
+    />
+  );
+}
+
 function ScheduleEditorForm({
   organizationId,
   schedule,
@@ -197,21 +245,6 @@ function ScheduleEditorForm({
     ),
     stored,
   );
-  const inputLabel = useWorkflowInputLabel();
-
-  const save = async (cron: string, inputData: Record<string, unknown>): Promise<string> => {
-    const shared = { cron, timezone: draft.timezone, inputData };
-    if (schedule !== null)
-      return (
-        await callEndpoint(updateScheduleEndpoint, {
-          params: { scheduleId: schedule.id },
-          query: { organizationId },
-          body: shared,
-        })
-      ).data.workflowId;
-    const body = { workflowId: draft.workflowId ?? "", slug: draft.slug, ...shared };
-    return (await callEndpoint(createScheduleEndpoint, { query: { organizationId }, body })).data.workflowId;
-  };
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -224,7 +257,16 @@ function ScheduleEditorForm({
     if (found.size > 0 || cron === null || inputData === null) return;
     setPending(true);
     try {
-      const workflow = await save(cron, inputData);
+      const workflow = await saveSchedule({
+        callEndpoint,
+        organizationId,
+        schedule,
+        workflowId: draft.workflowId,
+        slug: draft.slug,
+        cron,
+        timezone: draft.timezone,
+        inputData,
+      });
       await queryClient.invalidateQueries({ queryKey: tenantScheduleKeys.all(organizationId) });
       notify.success(t(creating ? "created" : "updated", { workflow: workflowLabel.name(workflow) }));
       onOpenChange(false);
@@ -253,30 +295,13 @@ function ScheduleEditorForm({
           onChange={(cron) => setDraft({ ...draft, cron })}
           invalid={problems.has("cron")}
         />
-        <Field>
-          <FieldLabel>{t("timezone")}</FieldLabel>
-          <FieldControl>
-            <TimeZoneSelect
-              className="w-full"
-              value={draft.timezone === "" ? undefined : draft.timezone}
-              onValueChange={(timezone) => setDraft({ ...draft, timezone })}
-            />
-          </FieldControl>
-          <FieldDescription>{t("timezoneHint")}</FieldDescription>
-          <FieldError errors={[problems.has("timezone") ? t("errors.timezone") : undefined]} />
-        </Field>
+        <TimeZoneField
+          value={draft.timezone}
+          onChange={(timezone) => setDraft({ ...draft, timezone })}
+          invalid={problems.has("timezone")}
+        />
         {draft.workflowId === undefined ? null : (
-          <JsonSchemaFields
-            plan={input.plan}
-            draft={input.draft}
-            onDraftChange={(next) => {
-              input.setDraft(next);
-              setDirty(true);
-            }}
-            problems={input.problems}
-            labelOf={(field) => inputLabel(draft.workflowId ?? "", field)}
-            jsonHint={t("inputHint")}
-          />
+          <ScheduleInputFields workflowId={draft.workflowId} input={input} onEdited={() => setDirty(true)} />
         )}
       </FieldGroup>
       <NextFires organizationId={organizationId} cron={cronOfDraft(draft.cron)} timezone={draft.timezone} />

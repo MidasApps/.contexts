@@ -53,6 +53,71 @@ type Summary =
   | { readonly status: "done"; readonly text: string }
   | { readonly status: "failed"; readonly message: string };
 
+/** The summary of one conversation: a spinner while the model writes it, then the text or why it failed. */
+function SummaryDialog({ title, summary, onClose }: { title: string; summary: Summary; onClose: () => void }) {
+  const t = useTranslations("chat.history");
+  return (
+    <Dialog open={summary.status !== "closed"} onOpenChange={(open) => (open ? undefined : onClose())}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("summary.title", { title })}</DialogTitle>
+          <DialogDescription>{t("summary.description")}</DialogDescription>
+        </DialogHeader>
+        {summary.status === "loading" ? <LoadingState variant="spinner" label={t("summary.loading")} /> : null}
+        {summary.status === "done" ? (
+          <p className="text-sm whitespace-pre-wrap text-foreground">{summary.text}</p>
+        ) : null}
+        {summary.status === "failed" ? (
+          <p role="alert" className="text-sm text-destructive-text">
+            {summary.message}
+          </p>
+        ) : null}
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="secondary">{t("summary.close")}</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Asks before deleting (the messages go too); a failure stays in the dialog until it closes. */
+function DeleteConversationDialog({
+  open,
+  onOpenChange,
+  title,
+  onDelete,
+  onDeleted,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  onDelete: () => Promise<void>;
+  onDeleted: () => void;
+}) {
+  const t = useTranslations("chat.history");
+  const remove = useConfirmedAction(onDelete, () => {
+    notify.success(t("delete.done"));
+    onDeleted();
+  });
+  return (
+    <ConfirmDialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) remove.reset();
+        onOpenChange(next);
+      }}
+      title={t("delete.title", { title })}
+      description={t("delete.description")}
+      confirmLabel={t("delete.confirm")}
+      destructive
+      onConfirm={remove.confirm}
+      error={remove.error}
+    />
+  );
+}
+
 /**
  * The actions of one conversation in the history (SP4 spec §4.1): rename, pin, archive,
  * summarize and delete. Deleting asks first — it removes the messages too. The summary is shown
@@ -73,14 +138,6 @@ export function ConversationActionsMenu({
   // Rename moves the focus into the row's form. The form opens once the menu has closed (its
   // focus scope would take the focus back), and the menu does not return the focus to its trigger.
   const renameAfterClose = useRef(false);
-
-  const remove = useConfirmedAction(
-    () => actions.remove(conversation),
-    () => {
-      notify.success(t("delete.done"));
-      onDeleted?.(conversation.id);
-    },
-  );
 
   // Pin and archive are locked until their change and the list refresh settle: until then the
   // row still shows the old label, and a second activation would flip it back.
@@ -154,44 +211,14 @@ export function ConversationActionsMenu({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <ConfirmDialog
+      <DeleteConversationDialog
         open={confirmingDelete}
-        onOpenChange={(open) => {
-          if (!open) remove.reset();
-          setConfirmingDelete(open);
-        }}
-        title={t("delete.title", { title })}
-        description={t("delete.description")}
-        confirmLabel={t("delete.confirm")}
-        destructive
-        onConfirm={remove.confirm}
-        error={remove.error}
+        onOpenChange={setConfirmingDelete}
+        title={title}
+        onDelete={() => actions.remove(conversation)}
+        onDeleted={() => onDeleted?.(conversation.id)}
       />
-      <Dialog
-        open={summary.status !== "closed"}
-        onOpenChange={(open) => (open ? undefined : setSummary({ status: "closed" }))}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("summary.title", { title })}</DialogTitle>
-            <DialogDescription>{t("summary.description")}</DialogDescription>
-          </DialogHeader>
-          {summary.status === "loading" ? <LoadingState variant="spinner" label={t("summary.loading")} /> : null}
-          {summary.status === "done" ? (
-            <p className="text-sm whitespace-pre-wrap text-foreground">{summary.text}</p>
-          ) : null}
-          {summary.status === "failed" ? (
-            <p role="alert" className="text-sm text-destructive-text">
-              {summary.message}
-            </p>
-          ) : null}
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="secondary">{t("summary.close")}</Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SummaryDialog title={title} summary={summary} onClose={() => setSummary({ status: "closed" })} />
     </>
   );
 }

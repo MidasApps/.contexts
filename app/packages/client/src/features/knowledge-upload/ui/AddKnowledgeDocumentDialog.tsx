@@ -1,6 +1,5 @@
 "use client";
 
-import { addKnowledgeSourceEndpoint, type KnowledgeSource } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
@@ -36,27 +35,14 @@ import {
   KNOWLEDGE_MAX_BYTES,
   type KnowledgeFileProblem,
 } from "../model/knowledge-file-policy.ts";
-import {
-  KnowledgeUploadError,
-  type SendBytes,
-  UPLOAD_STEPS,
-  type UploadStep,
-  uploadKnowledgeFile,
-} from "../model/upload-knowledge-file.ts";
+import { type StartedKnowledgeIngestion, startKnowledgeIngestion } from "../model/start-knowledge-ingestion.ts";
+import { KnowledgeUploadError, type SendBytes, UPLOAD_STEPS, type UploadStep } from "../model/upload-knowledge-file.ts";
+
+// Defined with the code that builds it; re-exported because it is part of the dialog's contract (`onAdded`).
+export type { StartedKnowledgeIngestion } from "../model/start-knowledge-ingestion.ts";
 
 /** Where the new document goes: the whole organization, or one project (`project:<id>`). */
 export type KnowledgeUploadTarget = { readonly projectId?: string | undefined; readonly label: string };
-
-/** A started ingestion: the workflow run to follow and what the user added. */
-export type StartedKnowledgeIngestion = {
-  readonly runId: string;
-  readonly label: string;
-  /** What the indexed document will carry as `sourceRef`: the file id or the URL. */
-  readonly sourceRef: string;
-  readonly projectId: string | undefined;
-  /** What was sent to `POST …/knowledge/sources`, so a failed run can be started again. */
-  readonly source: KnowledgeSource;
-};
 
 export type AddKnowledgeDocumentDialogProps = {
   organizationId: string;
@@ -100,6 +86,86 @@ function Failure({ error }: { error: unknown }) {
   );
 }
 
+/** File or page: the two sources as tabs, each with its field and its problem while it is the chosen one. */
+function SourceTabs({
+  kind,
+  onKindChange,
+  pending,
+  fileAllowed,
+  onFile,
+  url,
+  onUrl,
+  problem,
+}: {
+  kind: Kind;
+  onKindChange: (kind: Kind) => void;
+  pending: boolean;
+  fileAllowed: boolean;
+  onFile: (file: File | null) => void;
+  url: string;
+  onUrl: (url: string) => void;
+  problem: Problem | null;
+}) {
+  const t = useTranslations("settings.knowledge.add");
+  const format = useFormatter();
+  const message = problem === null ? undefined : t(`problems.${problem}`, { size: KNOWLEDGE_MAX_BYTES / MIB });
+  const hint = t("fileHint", {
+    types: format.list([...KNOWLEDGE_EXTENSIONS], { type: "conjunction" }),
+    size: KNOWLEDGE_MAX_BYTES / MIB,
+  });
+  return (
+    <Tabs value={kind} onValueChange={(value) => onKindChange(value === "url" ? "url" : "file")}>
+      <TabsList aria-label={t("sourceLabel")}>
+        <TabsTrigger value="file" disabled={pending || !fileAllowed}>
+          {t("fileTab")}
+        </TabsTrigger>
+        <TabsTrigger value="url" disabled={pending}>
+          {t("urlTab")}
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="file">
+        <FieldGroup>
+          <Field>
+            <FieldLabel>{t("file")}</FieldLabel>
+            <FieldControl>
+              <Input
+                type="file"
+                required
+                disabled={pending}
+                accept={KNOWLEDGE_EXTENSIONS.join(",")}
+                onChange={(event) => onFile(event.target.files?.[0] ?? null)}
+              />
+            </FieldControl>
+            <FieldDescription>{hint}</FieldDescription>
+            <FieldError errors={[kind === "file" ? message : undefined]} />
+          </Field>
+        </FieldGroup>
+      </TabsContent>
+      <TabsContent value="url">
+        <FieldGroup>
+          <Field>
+            <FieldLabel>{t("url")}</FieldLabel>
+            <FieldControl>
+              <Input
+                type="url"
+                required
+                disabled={pending}
+                inputMode="url"
+                maxLength={2048}
+                placeholder="https://"
+                value={url}
+                onChange={(event) => onUrl(event.target.value)}
+              />
+            </FieldControl>
+            <FieldDescription>{t("urlHint")}</FieldDescription>
+            <FieldError errors={[kind === "url" ? message : undefined]} />
+          </Field>
+        </FieldGroup>
+      </TabsContent>
+    </Tabs>
+  );
+}
+
 function AddKnowledgeDocumentBody({
   organizationId,
   target,
@@ -110,7 +176,6 @@ function AddKnowledgeDocumentBody({
   fileAllowed = true,
 }: AddKnowledgeDocumentDialogProps) {
   const t = useTranslations("settings.knowledge.add");
-  const format = useFormatter();
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const [kind, setKind] = useState<Kind>(fileAllowed ? "file" : "url");
@@ -129,31 +194,6 @@ function AddKnowledgeDocumentBody({
     return file === null ? "FILE_REQUIRED" : checkKnowledgeFile(file);
   };
 
-  const start = async (): Promise<StartedKnowledgeIngestion> => {
-    const projectId = target.projectId;
-    if (kind === "file" && file !== null) {
-      const { runId, fileId, source } = await uploadKnowledgeFile({
-        callEndpoint,
-        organizationId,
-        projectId,
-        file,
-        onStep: setStep,
-        onSlow: () => setSlow(true),
-        sendBytes,
-        wait,
-      });
-      return { runId, label: file.name, sourceRef: fileId, projectId, source };
-    }
-    const address = url.trim();
-    const source: KnowledgeSource = { kind: "url", url: address };
-    const started = await callEndpoint(addKnowledgeSourceEndpoint, {
-      params: { organizationId },
-      query: projectId === undefined ? {} : { projectId },
-      body: source,
-    });
-    return { runId: started.data.runId, label: address, sourceRef: address, projectId, source };
-  };
-
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     if (pending) return;
@@ -163,7 +203,16 @@ function AddKnowledgeDocumentBody({
     if (found !== null) return;
     setPending(true);
     try {
-      const started = await start();
+      const started = await startKnowledgeIngestion({
+        callEndpoint,
+        organizationId,
+        projectId: target.projectId,
+        choice: kind === "file" && file !== null ? { kind: "file", file } : { kind: "url", url },
+        onStep: setStep,
+        onSlow: () => setSlow(true),
+        sendBytes,
+        wait,
+      });
       await queryClient.invalidateQueries({ queryKey: knowledgeKeys.all(organizationId) });
       notify.success(t("started", { name: started.label }));
       onAdded?.(started);
@@ -177,10 +226,6 @@ function AddKnowledgeDocumentBody({
     }
   };
 
-  const hint = t("fileHint", {
-    types: format.list([...KNOWLEDGE_EXTENSIONS], { type: "conjunction" }),
-    size: KNOWLEDGE_MAX_BYTES / MIB,
-  });
   return (
     <>
       <DialogHeader>
@@ -189,73 +234,19 @@ function AddKnowledgeDocumentBody({
       </DialogHeader>
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
         <Failure error={failure} />
-        <Tabs
-          value={kind}
-          onValueChange={(value) => {
-            setKind(value === "url" ? "url" : "file");
+        <SourceTabs
+          kind={kind}
+          onKindChange={(next) => {
+            setKind(next);
             setProblem(null);
           }}
-        >
-          <TabsList aria-label={t("sourceLabel")}>
-            <TabsTrigger value="file" disabled={pending || !fileAllowed}>
-              {t("fileTab")}
-            </TabsTrigger>
-            <TabsTrigger value="url" disabled={pending}>
-              {t("urlTab")}
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="file">
-            <FieldGroup>
-              <Field>
-                <FieldLabel>{t("file")}</FieldLabel>
-                <FieldControl>
-                  <Input
-                    type="file"
-                    required
-                    disabled={pending}
-                    accept={KNOWLEDGE_EXTENSIONS.join(",")}
-                    onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-                  />
-                </FieldControl>
-                <FieldDescription>{hint}</FieldDescription>
-                <FieldError
-                  errors={[
-                    kind === "file" && problem !== null
-                      ? t(`problems.${problem}`, { size: KNOWLEDGE_MAX_BYTES / MIB })
-                      : undefined,
-                  ]}
-                />
-              </Field>
-            </FieldGroup>
-          </TabsContent>
-          <TabsContent value="url">
-            <FieldGroup>
-              <Field>
-                <FieldLabel>{t("url")}</FieldLabel>
-                <FieldControl>
-                  <Input
-                    type="url"
-                    required
-                    disabled={pending}
-                    inputMode="url"
-                    maxLength={2048}
-                    placeholder="https://"
-                    value={url}
-                    onChange={(event) => setUrl(event.target.value)}
-                  />
-                </FieldControl>
-                <FieldDescription>{t("urlHint")}</FieldDescription>
-                <FieldError
-                  errors={[
-                    kind === "url" && problem !== null
-                      ? t(`problems.${problem}`, { size: KNOWLEDGE_MAX_BYTES / MIB })
-                      : undefined,
-                  ]}
-                />
-              </Field>
-            </FieldGroup>
-          </TabsContent>
-        </Tabs>
+          pending={pending}
+          fileAllowed={fileAllowed}
+          onFile={setFile}
+          url={url}
+          onUrl={setUrl}
+          problem={problem}
+        />
         {fileAllowed ? null : <p className="text-sm text-muted-foreground">{t("fileNotAllowed")}</p>}
         <Progress step={step} slow={slow} />
         <DialogFooter>

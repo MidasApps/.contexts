@@ -4,7 +4,7 @@ import type { Unit, UnitTypeDefinition } from "@core/contracts";
 import { useId, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { buildUnitTree, MAX_TREE_UNITS, unitPathIn, useUnitTree, useUnitTypes } from "#/entities/unit/index.ts";
-import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
+import { type ConfirmedAction, useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
@@ -88,6 +88,136 @@ function SelectionBar(props: {
   );
 }
 
+/** The tree to pick a unit from, or the empty state (with the create action when it can succeed). */
+function UnitTreeOrEmpty(props: {
+  project: UnitTreeEditorProps["project"];
+  nodes: ReturnType<typeof buildUnitTree>;
+  unitCount: number;
+  canCreate: boolean;
+  canNest: boolean;
+  selectedId: string | undefined;
+  onSelect: (id: string | undefined) => void;
+  onCreate: () => void;
+}) {
+  const t = useTranslations("settings.units");
+  const { project, selectedId } = props;
+  return (
+    <>
+      {props.nodes.length === 0 ? (
+        <EmptyState
+          headingLevel={3}
+          icon="network"
+          title={t("emptyTitle")}
+          description={
+            props.canCreate ? t("emptyDescription", { project: project.name }) : t("emptyDescriptionNoPermission")
+          }
+          action={
+            props.canCreate && props.canNest ? <Button onClick={props.onCreate}>{t("createRoot")}</Button> : undefined
+          }
+        />
+      ) : (
+        <div className="rounded-lg border border-border p-2">
+          <TreeView
+            label={t("treeLabel", { project: project.name })}
+            nodes={props.nodes}
+            selectedId={selectedId}
+            onSelect={(id) => props.onSelect(id === selectedId ? undefined : id)}
+          />
+        </div>
+      )}
+      {props.unitCount >= MAX_TREE_UNITS ? (
+        <p className="text-xs text-muted-foreground">{t("truncated", { max: MAX_TREE_UNITS })}</p>
+      ) : null}
+    </>
+  );
+}
+
+/** Create, rename, move and delete of the selected unit (create works at the project root too). */
+function UnitDialogs(props: {
+  project: UnitTreeEditorProps["project"];
+  dialog: Dialog;
+  onDialogChange: (dialog: Dialog) => void;
+  selected: Unit | null;
+  units: readonly Unit[];
+  unitTypes: readonly UnitTypeDefinition[];
+  creatable: ReturnType<typeof typesAllowedUnder>;
+  mutations: ReturnType<typeof useUnitMutations>;
+  removal: ConfirmedAction;
+  pathOf: (unit: Unit) => string;
+}) {
+  const t = useTranslations("settings.units");
+  const typeLabel = useTypeLabel();
+  const { project, dialog, onDialogChange, selected, mutations, removal, pathOf } = props;
+  const subtree = selected === null ? 0 : descendantIds(props.units, selected.id).size;
+  return (
+    <>
+      <UnitNameDialog
+        open={dialog === "create"}
+        onOpenChange={(open) => onDialogChange(open ? "create" : null)}
+        title={t("createTitle")}
+        description={
+          selected === null
+            ? t("createUnderProject", { project: project.name })
+            : t("createUnder", { parent: pathOf(selected) })
+        }
+        submitLabel={t("createSubmit")}
+        types={props.creatable}
+        typeLabel={typeLabel}
+        onSubmit={async ({ name, type }) => {
+          const unit = await mutations.create({ name, type: type ?? "", parentUnitId: selected?.id ?? null });
+          notify.success(t("created", { name: unit.name }));
+        }}
+      />
+      <UnitNameDialog
+        open={dialog === "rename"}
+        onOpenChange={(open) => onDialogChange(open ? "rename" : null)}
+        title={t("renameTitle")}
+        description={t("renameDescription")}
+        submitLabel={t("renameSubmit")}
+        initialName={selected?.name ?? ""}
+        onSubmit={async ({ name }) => {
+          if (selected === null || name === selected.name) return;
+          await mutations.rename(selected.id, name);
+          notify.success(t("renamed", { name }));
+        }}
+      />
+      <MoveUnitDialog
+        unitName={dialog === "move" && selected !== null ? selected.name : null}
+        targets={
+          selected === null
+            ? []
+            : moveTargets({
+                unit: selected,
+                units: props.units,
+                types: props.unitTypes,
+                projectLabel: t("projectRoot", { project: project.name }),
+                pathOf,
+              })
+        }
+        onOpenChange={(open) => !open && onDialogChange(null)}
+        onMove={async (parentUnitId) => {
+          if (selected === null) return;
+          await mutations.move(selected.id, parentUnitId);
+          notify.success(t("moved", { name: selected.name }));
+        }}
+      />
+      <ConfirmDialog
+        open={dialog === "delete" && selected !== null}
+        onOpenChange={(open) => {
+          if (!open) removal.reset();
+          onDialogChange(open ? "delete" : null);
+        }}
+        title={t("deleteTitle", { name: selected?.name ?? "" })}
+        description={t("deleteDescription", { count: subtree })}
+        confirmLabel={t("deleteConfirm")}
+        destructive
+        onConfirm={removal.confirm}
+        error={removal.error}
+      />
+    </>
+  );
+}
+
 /**
  * Unit tree of one project (SP2 spec §8 settings/units): WAI-ARIA tree to pick a unit, then create
  * a child (type limited to what the parent allows), rename, move ("Move to…" dialog) or delete
@@ -109,9 +239,6 @@ export function UnitTreeEditor({ organizationId, project, can }: UnitTreeEditorP
     unitPathIn(units, unit.id)
       .map((segment) => segment.name)
       .join(" › ");
-  const typeOf = (id: string) => types.data?.find((type) => type.id === id);
-  const creatable = typesAllowedUnder(types.data ?? [], selected === null ? "project" : selected.type);
-  const subtree = selected === null ? 0 : descendantIds(units, selected.id).size;
   const removal = useConfirmedAction(
     async () => {
       if (selected === null) return;
@@ -128,7 +255,8 @@ export function UnitTreeEditor({ organizationId, project, can }: UnitTreeEditorP
       <ApiErrorState error={tree.error ?? types.error} onRetry={retry} retrying={tree.isFetching || types.isFetching} />
     );
   }
-  const selectedType = selected === null ? undefined : typeOf(selected.type);
+  const creatable = typesAllowedUnder(types.data, selected === null ? "project" : selected.type);
+  const selectedType = selected === null ? undefined : types.data.find((type) => type.id === selected.type);
   return (
     <div className="flex flex-col gap-4">
       <SelectionBar
@@ -139,95 +267,27 @@ export function UnitTreeEditor({ organizationId, project, can }: UnitTreeEditorP
         can={can}
         open={setDialog}
       />
-      {nodes.length === 0 ? (
-        <EmptyState
-          headingLevel={3}
-          icon="network"
-          title={t("emptyTitle")}
-          description={
-            can.create ? t("emptyDescription", { project: project.name }) : t("emptyDescriptionNoPermission")
-          }
-          action={
-            can.create && creatable.length > 0 ? (
-              <Button onClick={() => setDialog("create")}>{t("createRoot")}</Button>
-            ) : undefined
-          }
-        />
-      ) : (
-        <div className="rounded-lg border border-border p-2">
-          <TreeView
-            label={t("treeLabel", { project: project.name })}
-            nodes={nodes}
-            selectedId={selectedId}
-            onSelect={(id) => setSelectedId(id === selectedId ? undefined : id)}
-          />
-        </div>
-      )}
-      {units.length >= MAX_TREE_UNITS ? (
-        <p className="text-xs text-muted-foreground">{t("truncated", { max: MAX_TREE_UNITS })}</p>
-      ) : null}
-      <UnitNameDialog
-        open={dialog === "create"}
-        onOpenChange={(open) => setDialog(open ? "create" : null)}
-        title={t("createTitle")}
-        description={
-          selected === null
-            ? t("createUnderProject", { project: project.name })
-            : t("createUnder", { parent: pathOf(selected) })
-        }
-        submitLabel={t("createSubmit")}
-        types={creatable}
-        typeLabel={typeLabel}
-        onSubmit={async ({ name, type }) => {
-          const unit = await mutations.create({ name, type: type ?? "", parentUnitId: selected?.id ?? null });
-          notify.success(t("created", { name: unit.name }));
-        }}
+      <UnitTreeOrEmpty
+        project={project}
+        nodes={nodes}
+        unitCount={units.length}
+        canCreate={can.create}
+        canNest={creatable.length > 0}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        onCreate={() => setDialog("create")}
       />
-      <UnitNameDialog
-        open={dialog === "rename"}
-        onOpenChange={(open) => setDialog(open ? "rename" : null)}
-        title={t("renameTitle")}
-        description={t("renameDescription")}
-        submitLabel={t("renameSubmit")}
-        initialName={selected?.name ?? ""}
-        onSubmit={async ({ name }) => {
-          if (selected === null || name === selected.name) return;
-          await mutations.rename(selected.id, name);
-          notify.success(t("renamed", { name }));
-        }}
-      />
-      <MoveUnitDialog
-        unitName={dialog === "move" && selected !== null ? selected.name : null}
-        targets={
-          selected === null
-            ? []
-            : moveTargets({
-                unit: selected,
-                units,
-                types: types.data,
-                projectLabel: t("projectRoot", { project: project.name }),
-                pathOf,
-              })
-        }
-        onOpenChange={(open) => !open && setDialog(null)}
-        onMove={async (parentUnitId) => {
-          if (selected === null) return;
-          await mutations.move(selected.id, parentUnitId);
-          notify.success(t("moved", { name: selected.name }));
-        }}
-      />
-      <ConfirmDialog
-        open={dialog === "delete" && selected !== null}
-        onOpenChange={(open) => {
-          if (!open) removal.reset();
-          setDialog(open ? "delete" : null);
-        }}
-        title={t("deleteTitle", { name: selected?.name ?? "" })}
-        description={t("deleteDescription", { count: subtree })}
-        confirmLabel={t("deleteConfirm")}
-        destructive
-        onConfirm={removal.confirm}
-        error={removal.error}
+      <UnitDialogs
+        project={project}
+        dialog={dialog}
+        onDialogChange={setDialog}
+        selected={selected}
+        units={units}
+        unitTypes={types.data}
+        creatable={creatable}
+        mutations={mutations}
+        removal={removal}
+        pathOf={pathOf}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleAlertIcon } from "lucide-react";
-import { type FormEvent, type RefObject, useEffect, useRef, useState } from "react";
+import { type FormEvent, type Ref, type RefObject, useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { authErrorCode } from "#/shared/lib/auth/auth-error-code.ts";
@@ -92,6 +92,96 @@ const useSmsCode = (
   return { sending, send };
 };
 
+/** Send (or resend) the SMS code; once sent, a live status names the phone it went to. */
+function SmsCodeStep({
+  phoneNumber,
+  sent,
+  sending,
+  onSend,
+}: {
+  phoneNumber: string | null | undefined;
+  sent: boolean;
+  sending: boolean;
+  onSend: () => void;
+}) {
+  const t = useTranslations("auth.mfa");
+  return (
+    <div className="flex flex-col gap-2">
+      <p role="status" className="text-sm text-muted-foreground empty:hidden">
+        {sent ? t("codeSent", { phone: phoneNumber ?? "" }) : ""}
+      </p>
+      <Button type="button" variant={sent ? "outline" : "default"} pending={sending} onClick={onSend}>
+        {sent ? t("resendCode") : t("sendCode")}
+      </Button>
+    </div>
+  );
+}
+
+/** The six-digit code; only digits are kept as the member types or pastes. */
+function CodeField({
+  inputRef,
+  totp,
+  code,
+  onCodeChange,
+  error,
+}: {
+  inputRef: Ref<HTMLInputElement>;
+  totp: boolean;
+  code: string;
+  onCodeChange: (code: string) => void;
+  error: string | undefined;
+}) {
+  const t = useTranslations("auth.mfa");
+  return (
+    <Field>
+      <FieldLabel>{t("code")}</FieldLabel>
+      <FieldDescription>{totp ? t("codeHintTotp") : t("codeHintSms")}</FieldDescription>
+      <FieldControl>
+        <Input
+          ref={inputRef}
+          name="code"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          required
+          value={code}
+          onChange={(event) => onCodeChange(event.target.value.replace(/\D/gu, ""))}
+          className="font-mono tracking-[0.3em]"
+        />
+      </FieldControl>
+      <FieldError errors={[error]} />
+    </Field>
+  );
+}
+
+/** "Verify" (once a code can be typed) and the way out: the caller's cancel, or "use another account". */
+function ChallengeActions({
+  canVerify,
+  pending,
+  onCancel,
+  cancelLabel,
+}: {
+  canVerify: boolean;
+  pending: boolean;
+  onCancel: (() => void) | undefined;
+  cancelLabel: string | undefined;
+}) {
+  const t = useTranslations("auth.mfa");
+  const session = useSession();
+  return (
+    <div className="flex flex-col gap-2">
+      {canVerify ? (
+        <Button type="submit" pending={pending} className="w-full">
+          {t("verify")}
+        </Button>
+      ) : null}
+      <Button type="button" variant="ghost" className="w-full" onClick={onCancel ?? session.cancelMfa}>
+        {cancelLabel ?? t("cancel")}
+      </Button>
+    </div>
+  );
+}
+
 /**
  * Second factor of a sign-in (SP1 spec §3.4): TOTP from an authenticator app or an SMS code
  * (the Auth Emulator supports SMS only), chosen per enrolled hint. A wrong code is a field error
@@ -173,51 +263,24 @@ export function MfaChallengeForm({ challenge, onResolved, onCancel, cancelLabel 
         />
       ) : null}
       {hint?.factor === "phone" ? (
-        <div className="flex flex-col gap-2">
-          <p role="status" className="text-sm text-muted-foreground empty:hidden">
-            {step.verificationId === undefined ? "" : t("mfa.codeSent", { phone: hint.phoneNumber ?? "" })}
-          </p>
-          <Button
-            type="button"
-            variant={needsSms ? "default" : "outline"}
-            pending={sms.sending}
-            onClick={() => void sendCode()}
-          >
-            {needsSms ? t("mfa.sendCode") : t("mfa.resendCode")}
-          </Button>
-        </div>
+        <SmsCodeStep
+          phoneNumber={hint.phoneNumber}
+          sent={step.verificationId !== undefined}
+          sending={sms.sending}
+          onSend={() => void sendCode()}
+        />
       ) : null}
       {needsSms ? null : (
-        <Field>
-          <FieldLabel>{t("mfa.code")}</FieldLabel>
-          <FieldDescription>{hint?.factor === "totp" ? t("mfa.codeHintTotp") : t("mfa.codeHintSms")}</FieldDescription>
-          <FieldControl>
-            <Input
-              ref={codeInput}
-              name="code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              required
-              value={code}
-              onChange={(event) => setCode(event.target.value.replace(/\D/gu, ""))}
-              className="font-mono tracking-[0.3em]"
-            />
-          </FieldControl>
-          <FieldError errors={[codeError]} />
-        </Field>
+        <CodeField
+          inputRef={codeInput}
+          totp={hint?.factor === "totp"}
+          code={code}
+          onCodeChange={setCode}
+          error={codeError}
+        />
       )}
       <div ref={recaptcha} data-slot="recaptcha" />
-      <div className="flex flex-col gap-2">
-        {needsSms ? null : (
-          <Button type="submit" pending={pending} className="w-full">
-            {t("mfa.verify")}
-          </Button>
-        )}
-        <Button type="button" variant="ghost" className="w-full" onClick={onCancel ?? session.cancelMfa}>
-          {cancelLabel ?? t("mfa.cancel")}
-        </Button>
-      </div>
+      <ChallengeActions canVerify={!needsSms} pending={pending} onCancel={onCancel} cancelLabel={cancelLabel} />
     </form>
   );
 }

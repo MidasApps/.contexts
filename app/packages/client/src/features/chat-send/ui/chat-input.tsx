@@ -1,7 +1,7 @@
 "use client";
 
 import { MAX_CHAT_TEXT_CHARS } from "@core/contracts";
-import { type ClipboardEvent, type DragEvent, type ReactNode, type Ref, useId, useState } from "react";
+import { type ReactNode, type Ref, useId } from "react";
 import { useTranslations } from "use-intl";
 import {
   PromptInput,
@@ -11,6 +11,8 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from "#/shared/ui/ai/prompt-input.tsx";
+import { useChatDraft } from "../model/use-chat-draft.ts";
+import { useComposerFileDrop } from "../model/use-composer-file-drop.ts";
 
 export type ChatInputProps = {
   status: PromptInputStatus;
@@ -41,6 +43,33 @@ export type ChatInputProps = {
 /** Characters left before the counter shows up: quiet until the limit is in sight. */
 const COUNTER_FROM = 0.9;
 
+/** "count / max" once the draft nears the limit, in the destructive colour past it. */
+function CharacterCounter({ count, max }: { count: number; max: number }) {
+  const t = useTranslations("chat.input");
+  if (count < max * COUNTER_FROM) return null;
+  return (
+    <span
+      className={
+        count > max
+          ? "font-mono text-caption text-destructive-text tabular-nums"
+          : "font-mono text-caption text-muted-foreground tabular-nums"
+      }
+    >
+      {t("counter", { count, max })}
+    </span>
+  );
+}
+
+/** Why sending must wait, as a live status; stays in the DOM (empty, visually hidden) so it is announced. */
+function SendProblem({ id, problem, tooLong }: { id: string; problem: string | null; tooLong: boolean }) {
+  const tone = tooLong ? "text-body-sm text-destructive-text" : "text-body-sm text-amber-foreground";
+  return (
+    <p id={id} role="status" className={problem === null ? "sr-only" : tone}>
+      {problem ?? ""}
+    </p>
+  );
+}
+
 /**
  * The chat composer (chat.html §23.2): Enter sends, Shift+Enter breaks the line, Esc stops the
  * answer. While the answer streams the field stays editable — the next message can be drafted —
@@ -63,41 +92,14 @@ export function ChatInput({
   maxLength = MAX_CHAT_TEXT_CHARS,
 }: ChatInputProps) {
   const t = useTranslations("chat.input");
-  const [ownText, setOwnText] = useState("");
-  const text = value ?? ownText;
-  const setText = (next: string) => {
-    setOwnText(next);
-    onValueChange?.(next);
-  };
+  const { text, setText, trimmed, over, tooLong } = useChatDraft({ value, onValueChange, maxLength });
+  const fileDrop = useComposerFileDrop(onFiles);
   const hintId = useId();
   const problemId = useId();
   const busy = status === "submitted" || status === "streaming";
-  const trimmed = text.trim();
-  const over = trimmed.length - maxLength;
-  const tooLong = over > 0;
-  const canSend = !busy && !offline && !disabled && trimmed !== "" && !tooLong && blocked === undefined;
   const problem = tooLong ? t("tooLong", { max: maxLength, over }) : offline ? t("offline") : (blocked ?? null);
-
-  const [dragging, setDragging] = useState(false);
-  const carriesFiles = (types: readonly string[]): boolean => onFiles !== undefined && types.includes("Files");
-  // Pasted or dropped files join the message like picked ones; plain pasted text stays text.
-  const onPaste = (event: ClipboardEvent<HTMLFormElement>) => {
-    const files = [...event.clipboardData.files];
-    if (onFiles === undefined || files.length === 0) return;
-    event.preventDefault();
-    onFiles(files);
-  };
-  const onDragOver = (event: DragEvent<HTMLFormElement>) => {
-    if (!carriesFiles([...event.dataTransfer.types])) return;
-    event.preventDefault();
-    setDragging(true);
-  };
-  const onDrop = (event: DragEvent<HTMLFormElement>) => {
-    setDragging(false);
-    if (!carriesFiles([...event.dataTransfer.types])) return;
-    event.preventDefault();
-    onFiles?.([...event.dataTransfer.files]);
-  };
+  // No problem means: not too long, online and nothing blocking.
+  const canSend = problem === null && !busy && !disabled && trimmed !== "";
 
   const submit = () => {
     if (!canSend) return;
@@ -110,11 +112,11 @@ export function ChatInput({
       <PromptInput
         onSubmit={submit}
         aria-label={t("label")}
-        onPaste={onPaste}
-        onDragOver={onDragOver}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        data-dragging={dragging || undefined}
+        onPaste={fileDrop.onPaste}
+        onDragOver={fileDrop.onDragOver}
+        onDragLeave={fileDrop.onDragLeave}
+        onDrop={fileDrop.onDrop}
+        data-dragging={fileDrop.dragging || undefined}
         className="data-dragging:border-ring data-dragging:bg-accent"
       >
         {attachments}
@@ -132,34 +134,12 @@ export function ChatInput({
         <PromptInputFooter>
           <PromptInputTools>{tools}</PromptInputTools>
           <div className="flex items-center gap-2">
-            {trimmed.length >= maxLength * COUNTER_FROM ? (
-              <span
-                className={
-                  tooLong
-                    ? "font-mono text-caption text-destructive-text tabular-nums"
-                    : "font-mono text-caption text-muted-foreground tabular-nums"
-                }
-              >
-                {t("counter", { count: trimmed.length, max: maxLength })}
-              </span>
-            ) : null}
+            <CharacterCounter count={trimmed.length} max={maxLength} />
             <PromptInputSubmit status={status} onStop={onStop} disabled={!canSend} />
           </div>
         </PromptInputFooter>
       </PromptInput>
-      <p
-        id={problemId}
-        role="status"
-        className={
-          problem === null
-            ? "sr-only"
-            : tooLong
-              ? "text-body-sm text-destructive-text"
-              : "text-body-sm text-amber-foreground"
-        }
-      >
-        {problem ?? ""}
-      </p>
+      <SendProblem id={problemId} problem={problem} tooLong={tooLong} />
       {/* Keyboard keys mean nothing on a touch screen; the hint stays in the field description. */}
       <p id={hintId} className="text-caption text-muted-foreground pointer-coarse:hidden">
         {t("hint")}

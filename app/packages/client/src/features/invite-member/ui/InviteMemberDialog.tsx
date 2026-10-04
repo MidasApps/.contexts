@@ -3,7 +3,7 @@
 import { createInvitationEndpoint, type Role, type RoleRef } from "@core/contracts";
 import { isSupportedLocale } from "@core/i18n";
 import { useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useRef, useState } from "react";
+import { type FormEvent, type Ref, useRef, useState } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { z } from "zod";
 import { invitationKeys } from "#/entities/invitation/index.ts";
@@ -109,6 +109,61 @@ function InvitationLink({
   );
 }
 
+/** Email, node and roles of the invitation. */
+function InvitationFields({
+  organization,
+  options,
+  draft,
+  onDraftChange,
+  problems,
+  emailInput,
+}: {
+  organization: { id: string; name: string };
+  options: ReturnType<typeof useRoleOptions>;
+  draft: Draft;
+  onDraftChange: (draft: Draft) => void;
+  problems: Problems;
+  emailInput: Ref<HTMLInputElement>;
+}) {
+  const t = useTranslations("settings.invitations.inviteDialog");
+  return (
+    <FieldGroup>
+      <Field>
+        <FieldLabel>{t("email")}</FieldLabel>
+        <FieldControl>
+          <Input
+            ref={emailInput}
+            type="email"
+            autoComplete="off"
+            required
+            value={draft.email}
+            onChange={(event) => onDraftChange({ ...draft, email: event.target.value })}
+          />
+        </FieldControl>
+        <FieldError errors={[problems.email === undefined ? undefined : t(`errors.${problems.email}`)]} />
+      </Field>
+      <Field>
+        <FieldLabel>{t("node")}</FieldLabel>
+        <FieldControl>
+          <NodeSelect
+            organization={organization}
+            value={draft.node}
+            onValueChange={(node) => onDraftChange({ ...draft, node })}
+          />
+        </FieldControl>
+        <FieldDescription>{t("nodeHint")}</FieldDescription>
+      </Field>
+      <RoleChecklist
+        legend={t("roles")}
+        options={options}
+        value={draft.roles}
+        onChange={(roles) => onDraftChange({ ...draft, roles })}
+        error={problems.roles === true ? t("errors.roles") : undefined}
+      />
+    </FieldGroup>
+  );
+}
+
 /**
  * Invites an email at a node with roles (`POST …/invitations`, core.member.invite, no escalation).
  * One `Idempotency-Key` per attempt. The answer's `acceptUrl` is shown once with a copy button;
@@ -182,40 +237,14 @@ function InviteMemberDialogBody({ organization, customRoles, onOpenChange }: Inv
       ) : (
         <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
           {failure === null ? null : <ApiErrorAlert error={failure} />}
-          <FieldGroup>
-            <Field>
-              <FieldLabel>{t("email")}</FieldLabel>
-              <FieldControl>
-                <Input
-                  ref={emailInput}
-                  type="email"
-                  autoComplete="off"
-                  required
-                  value={draft.email}
-                  onChange={(event) => setDraft({ ...draft, email: event.target.value })}
-                />
-              </FieldControl>
-              <FieldError errors={[problems.email === undefined ? undefined : t(`errors.${problems.email}`)]} />
-            </Field>
-            <Field>
-              <FieldLabel>{t("node")}</FieldLabel>
-              <FieldControl>
-                <NodeSelect
-                  organization={organization}
-                  value={draft.node}
-                  onValueChange={(node) => setDraft({ ...draft, node })}
-                />
-              </FieldControl>
-              <FieldDescription>{t("nodeHint")}</FieldDescription>
-            </Field>
-            <RoleChecklist
-              legend={t("roles")}
-              options={options}
-              value={draft.roles}
-              onChange={(roles) => setDraft({ ...draft, roles })}
-              error={problems.roles === true ? t("errors.roles") : undefined}
-            />
-          </FieldGroup>
+          <InvitationFields
+            organization={organization}
+            options={options}
+            draft={draft}
+            onDraftChange={setDraft}
+            problems={problems}
+            emailInput={emailInput}
+          />
           <DialogFooter>
             <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
               {t("cancel")}

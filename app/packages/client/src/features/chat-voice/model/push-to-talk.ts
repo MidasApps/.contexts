@@ -92,13 +92,27 @@ type Session = {
   discarded: boolean;
 };
 
+/** A press of the button: nothing granted, recorded or decided yet. */
+const newSession = (): Session => ({
+  stream: undefined,
+  recorder: undefined,
+  chunks: [],
+  timer: undefined,
+  controller: new AbortController(),
+  released: false,
+  stopRequested: false,
+  discarded: false,
+});
+
+const defaultSetTimer = (run: () => void, ms: number): unknown => setTimeout(run, ms);
+const defaultClearTimer = (timer: unknown): void => clearTimeout(timer as ReturnType<typeof setTimeout>);
+
 export const createPushToTalk = (deps: PushToTalkDeps): PushToTalk => {
   const listeners = new Set<() => void>();
   let state: PushToTalkState = { phase: "idle", problem: undefined };
   let session: Session | undefined;
-  const setTimer = deps.setTimer ?? ((run: () => void, ms: number): unknown => setTimeout(run, ms));
-  const clearTimer =
-    deps.clearTimer ?? ((timer: unknown): void => clearTimeout(timer as ReturnType<typeof setTimeout>));
+  const setTimer = deps.setTimer ?? defaultSetTimer;
+  const clearTimer = deps.clearTimer ?? defaultClearTimer;
 
   const set = (next: PushToTalkState): void => {
     state = next;
@@ -174,16 +188,7 @@ export const createPushToTalk = (deps: PushToTalkDeps): PushToTalk => {
     getSnapshot: () => state,
     start: () => {
       if (session !== undefined) return;
-      const current: Session = {
-        stream: undefined,
-        recorder: undefined,
-        chunks: [],
-        timer: undefined,
-        controller: new AbortController(),
-        released: false,
-        stopRequested: false,
-        discarded: false,
-      };
+      const current = newSession();
       session = current;
       set({ phase: "requesting", problem: undefined });
       deps.getUserMedia().then(
