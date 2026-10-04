@@ -2,7 +2,7 @@
 
 Batch B5 of `consolidated.md`: U-09, U-10, U-11, U-37, U-38, U-41, U-44, U-45, U-68. Every finding
 still held when re-checked on `140151d3` (none was already fixed). Decision:
-`app/docs/decisions/0049-right-panel-closes-itself-and-keeps-its-place.md`. Paths are relative to
+`app/docs/decisions/0070-right-panel-closes-itself-and-keeps-its-place.md`. Paths are relative to
 `app/packages/client/src/` unless they start with `app/`.
 
 **Pre-check asked by the batch (C-03):** `/v1/chat` does not refuse a user turn sent past an
@@ -22,8 +22,8 @@ guard is follow-up row 104.
 | U-44 chat height ignores the banners | C-14 | fixed | `fix(chat): fit the chat page under the shell banners` | `shared/lib/media/use-element-height.test.tsx`; `app-shell/app-layout.test.tsx` "tells the page how tall the banners above it are…" |
 | U-41 open conversation unnamed, three names | C-11, P-06 | fixed | `fix(chat): name the open conversation and the feature once`; `test(chat): follow the chat navigation item under its new name` | `chat-panel.history.test.tsx` "names the open conversation in its header…", "calls a conversation without a title untitled", "shows the title the server generates once the first answer of a new conversation ends"; `chat-view.test.tsx` (h1, region, nav link) |
 
-The ADR was written as 0048 and renumbered in `docs(client): renumber the right panel decision to
-0049`, because B1 landed its own 0048 first.
+The ADR was written as 0048, renumbered to 0049 because B1 landed its own 0048 first, and to
+0070 when the batch was integrated, because the console review had taken 0049.
 
 ## What changed
 

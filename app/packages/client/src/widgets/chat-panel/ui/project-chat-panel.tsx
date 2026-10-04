@@ -83,7 +83,7 @@ function NoProjectPanel({ onClose }: RightPanelProps) {
   );
 }
 
-/** The conversation the side panel holds at a project, kept while the panel is closed (decision 0049). */
+/** The conversation the side panel holds at a project, kept while the panel is closed (decision 0070). */
 const useSidePanelConversation = (key: string) => {
   const conversationId = useShellUi((state) => state.rightPanel[key]);
   const remember = useShellUi((state) => state.rememberRightPanel);
