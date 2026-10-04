@@ -33,5 +33,6 @@
   "FEATURE_DISABLED": "This feature is turned off right now.",
   "EVAL_REQUIRED": "Run an evaluation that passes before activating this version.",
   "EVAL_DATASET_MISSING": "This agent has no evaluation set yet.",
-  "CUSTOM_LIMIT_REACHED": "The plan's limit was reached. Delete an item or talk to whoever manages the plan."
+  "CUSTOM_LIMIT_REACHED": "The plan's limit was reached. Delete an item or talk to whoever manages the plan.",
+  "BUDGET_EXCEEDED": "The organization's AI budget ran out. Contact an administrator."
 }

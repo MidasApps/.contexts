@@ -1,6 +1,7 @@
 // Voice `/v1` descriptors (SP4 spec §4.5, decision 0034). Every route answers 503
 // FEATURE_UNAVAILABLE while voice is off for the platform (compliance gate) or not configured;
-// audio that is too large, of another type or longer than 60 s answers 400 VALIDATION_FAILED.
+// audio that is too large, of another type or longer than 60 s answers 400 VALIDATION_FAILED;
+// an organization over its monthly AI budget gets 429 BUDGET_EXCEEDED before any provider call.
 import { z } from "zod";
 import { none, personal } from "../field-docs.ts";
 import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
@@ -25,7 +26,7 @@ export const transcribeVoiceEndpoint = defineEndpoint({
   auth: "user",
   query: organizationQuery,
   responses: { 200: dataEnvelope(TranscriptionSchema) },
-  errors: { 403: ["FORBIDDEN"] },
+  errors: { 403: ["FORBIDDEN"], 429: ["BUDGET_EXCEEDED"] },
   rateLimit: "voice-call",
   summary: "Transcribes a push-to-talk recording (multipart field audio, ≤ 5 MB, ≤ 60 s) (core.voice.use).",
 });
@@ -38,7 +39,7 @@ export const synthesizeSpeechEndpoint = defineEndpoint({
   query: organizationQuery,
   body: SpeechRequestSchema,
   responses: { 200: SpeechAudioSchema },
-  errors: { 403: ["FORBIDDEN"] },
+  errors: { 403: ["FORBIDDEN"], 429: ["BUDGET_EXCEEDED"] },
   rateLimit: "voice-call",
   summary: "Reads text aloud and streams the audio (core.voice.use).",
 });
@@ -50,7 +51,7 @@ export const createRealtimeSessionEndpoint = defineEndpoint({
   auth: "user",
   query: organizationQuery,
   responses: { 201: dataEnvelope(RealtimeSessionSchema) },
-  errors: { 403: ["FORBIDDEN"] },
+  errors: { 403: ["FORBIDDEN"], 429: ["BUDGET_EXCEEDED"] },
   rateLimit: "voice-call",
   summary: "Mints an ephemeral realtime voice secret without tools; 503 while the experimental flag is off (core.voice.use).",
 });

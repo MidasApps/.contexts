@@ -43,6 +43,8 @@ export const CORE_ERROR_CODES = [
   "EVAL_DATASET_MISSING",
   // 422: the plan's cap of custom agents or skills is reached (decision 0046).
   "CUSTOM_LIMIT_REACHED",
+  // 429: the organization reached its monthly AI budget; voice answers it over HTTP, the chat as a tripwire (decision 0065).
+  "BUDGET_EXCEEDED",
 ] as const;
 
 export const CoreErrorCodeSchema = z.enum(CORE_ERROR_CODES);

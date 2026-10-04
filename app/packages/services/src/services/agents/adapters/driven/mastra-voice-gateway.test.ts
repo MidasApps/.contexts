@@ -25,6 +25,11 @@ describe("Mastra voice gateway errors", () => {
     expect(await transcribe(() => new Response(null, { status: 503 }))).toEqual({ ok: false, error: { code: "FEATURE_UNAVAILABLE", status: 503 } });
   });
 
+  it("keeps the tenant budget refusal: 429 BUDGET_EXCEEDED, not RATE_LIMITED (follow-up #29)", async () => {
+    const result = await transcribe(() => Response.json({ error: { code: "BUDGET_EXCEEDED", message: "The organization reached its AI budget." } }, { status: 429 }));
+    expect(result).toEqual({ ok: false, error: { code: "BUDGET_EXCEEDED", status: 429 } });
+  });
+
   it("maps a refused audio by status when its code is not a core code", async () => {
     const result = await transcribe(() => Response.json({ error: { code: "PAYLOAD_TOO_LARGE" } }, { status: 413 }));
     expect(result).toEqual({ ok: false, error: { code: "VALIDATION_FAILED", status: 400 } });

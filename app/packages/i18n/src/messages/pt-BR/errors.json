@@ -33,5 +33,6 @@
   "FEATURE_DISABLED": "Este recurso está desativado no momento.",
   "EVAL_REQUIRED": "Execute uma avaliação aprovada antes de ativar esta versão.",
   "EVAL_DATASET_MISSING": "Este agente ainda não tem um conjunto de avaliação.",
-  "CUSTOM_LIMIT_REACHED": "O limite do plano foi atingido. Exclua um item ou fale com quem administra o plano."
+  "CUSTOM_LIMIT_REACHED": "O limite do plano foi atingido. Exclua um item ou fale com quem administra o plano.",
+  "BUDGET_EXCEEDED": "O orçamento de IA da organização acabou. Fale com um administrador."
 }

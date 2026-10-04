@@ -95,6 +95,13 @@ describe("/v1/voice", () => {
     expect((await errorOf(refused)).code).toBe("FEATURE_UNAVAILABLE");
   });
 
+  it("answers 429 BUDGET_EXCEEDED when the organization is over its AI budget (follow-up #29)", async () => {
+    const { routes } = setup({ transcribe: { ok: false, error: { code: "BUDGET_EXCEEDED", status: 429 } } });
+    const refused = await upload(routes, WEBM);
+    expect(refused.status).toBe(429);
+    expect((await errorOf(refused)).code).toBe("BUDGET_EXCEEDED");
+  });
+
   it("streams speech audio without caching it", async () => {
     const { routes } = setup();
     const response = await routes["voice.synthesize"]!(
