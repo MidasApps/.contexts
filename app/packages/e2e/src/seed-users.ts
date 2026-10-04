@@ -61,6 +61,17 @@ const ensureUnit = async (api: V1Client, projectId: string, name: string): Promi
   );
 };
 
+/**
+ * Enables an installed module for the organization (decision 0064): its id in
+ * `agent-settings.enabledAgents`. Reads first and writes only when it is missing.
+ */
+const ensureModuleEnabled = async (api: V1Client, organizationId: string, moduleId: string): Promise<void> => {
+  const settingsPath = `/v1/agent-settings?organizationId=${organizationId}`;
+  const { enabledAgents } = await api.get<{ enabledAgents: string[] }>(settingsPath);
+  if (enabledAgents.includes(moduleId)) return;
+  await api.patch(settingsPath, { enabledAgents: [...enabledAgents, moduleId] });
+};
+
 const ensureCoreOnlyRole = async (api: V1Client, organizationId: string): Promise<string> => {
   const existing = (await api.get<Page<Named>>(`/v1/organizations/${organizationId}/roles?limit=100`)).find(
     (role) => role.name === CORE_ONLY_ROLE.name,
@@ -135,6 +146,8 @@ const seedStructure = async (owner: V1Client) => {
   const growth = await ensureProject(owner, alpha.id, "Alpha Growth");
   const north = await ensureUnit(owner, launch.id, "North Area");
   const coreOnlyRoleId = await ensureCoreOnlyRole(owner, alpha.id);
+  // Alpha's journeys use the example module (its page, its settings, the note form in the chat).
+  await ensureModuleEnabled(owner, alpha.id, "example");
   return {
     alpha: { ...alpha, projects: { launch, growth }, units: { north }, coreOnlyRoleId },
     beta: { ...beta, projects: { pilot } },
@@ -143,6 +156,7 @@ const seedStructure = async (owner: V1Client) => {
 
 /**
  * Idempotent e2e world: the five accounts, "Alpha Org" (two projects, a unit, a core-only role,
+ * the example module enabled,
  * the viewer, the restricted member and the project-only member on "Alpha Growth") and a pristine "Beta Org" (empty-state lists). The owner's
  * last context is Alpha. Staff gets `platform-admin` and an SMS second factor.
  */
