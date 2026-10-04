@@ -77,7 +77,9 @@ export const buildEvalHarness = (args: {
   });
   const ports = createFakeRuntimePorts({
     access,
-    settings: createFakeSettingsPort(),
+    // The eval organization has the note module installed and enabled: the datasets ask the data
+    // agent for note forms, and a disabled module's commands are not offered (decision 0064).
+    settings: createFakeSettingsPort({ enabledAgents: ["knowledge", "data", "action", "example"] }),
     knowledge: args.knowledge?.(models) ?? createCorpusKnowledgePort(embedWith(models)),
     ...(args.prompts === undefined ? {} : { prompts: args.prompts }),
   });
