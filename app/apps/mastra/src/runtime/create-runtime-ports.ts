@@ -39,7 +39,7 @@ import {
   type ServicesEnv,
   systemClock,
 } from "@core/services";
-import { createCoreServer } from "@core/services/composition";
+import { type CoreServer, createCoreServer } from "@core/services/composition";
 import type { AppModule } from "../modules.ts";
 import { bindAccessPort } from "./access-port-binding.ts";
 import { bindApprovalsPort } from "./approvals-port-binding.ts";
@@ -109,6 +109,174 @@ export type RuntimePortsAdapters = {
   readonly commandExecutors?: readonly AgentCommandExecutor[];
 };
 
+type RuntimeSql = ReturnType<typeof createPostgresClient>;
+type RuntimeModules = readonly Pick<AppModule, "manifest" | "createCommands">[];
+
+const createRuntimeCore = (args: {
+  env: RuntimePortsEnv;
+  firebase: FirebaseAdmin;
+  logger: Logger;
+  modules?: RuntimeModules | undefined;
+  adapters: RuntimePortsAdapters;
+}): CoreServer =>
+  createCoreServer({
+    env: { API_KEY_PREFIX: args.env.API_KEY_PREFIX },
+    firebase: args.firebase,
+    logger: args.logger,
+    ...(args.modules === undefined ? {} : { modules: args.modules.map((module) => module.manifest) }),
+    adapters: {
+      ...(args.adapters.accessReaders === undefined ? {} : { accessReaders: args.adapters.accessReaders }),
+      ...(args.adapters.apiKeyAuthenticator === undefined
+        ? {}
+        : { apiKeyAuthenticator: args.adapters.apiKeyAuthenticator }),
+    },
+  });
+
+/** Knowledge search and chunks, ready uploads and the knowledge event log. */
+const createKnowledgePorts = (args: {
+  env: RuntimePortsEnv;
+  firebase: FirebaseAdmin;
+  logger: Logger;
+  sql: RuntimeSql;
+}): Pick<AgentRuntimePorts, "knowledge" | "files" | "knowledgeEvents"> => {
+  const knowledge = createKnowledgeServices({
+    repository: createPostgresKnowledgeRepository(args.sql),
+    embeddingModel: embeddingModelIdOf(args.env),
+  });
+  const files = createFirebaseFilesServices({ firebase: args.firebase, env: args.env, logger: args.logger });
+  return {
+    knowledge: bindKnowledgePort(knowledge),
+    files: bindFilesPort(files),
+    knowledgeEvents: createLogKnowledgeEventPublisher(args.logger),
+  };
+};
+
+/** Active tenant connectors, the secret store and the Firecrawl web content behind it. */
+const createConnectorPorts = (args: {
+  env: RuntimePortsEnv;
+  firebase: FirebaseAdmin;
+  core: CoreServer;
+}): Pick<AgentRuntimePorts, "connectors" | "secrets" | "webContent"> => {
+  const connectors = createFirebaseConnectorsServices({
+    firebase: args.firebase,
+    env: args.env,
+    audit: args.core.audit,
+    clock: systemClock,
+  });
+  return {
+    connectors: {
+      listActive: ({ tenantId }) => connectors.listActiveConnectors({ tenantId: TenantIdSchema.parse(tenantId) }),
+      recordLoad: ({ tenantId, connectorId, lastError }) =>
+        connectors.recordConnectorLoad({
+          tenantId: TenantIdSchema.parse(tenantId),
+          connectorId: ConnectorIdSchema.parse(connectorId),
+          lastError,
+        }),
+    },
+    secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
+    webContent: createWebContentPort({
+      env: args.env,
+      secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
+    }),
+  };
+};
+
+/** The command registry, the agent and workflow command ports and their approval kinds. */
+const createCommandPorts = (args: {
+  firebase: FirebaseAdmin;
+  core: CoreServer;
+  modules?: RuntimeModules | undefined;
+  extraExecutors?: readonly AgentCommandExecutor[] | undefined;
+}): Pick<AgentRuntimePorts, "commands" | "commandRegistry" | "workflowApprovals" | "workflowCommands"> => {
+  const { core } = args;
+  const moduleDeps = { firestore: args.firebase.firestore, access: core.access, audit: core.audit };
+  const commandRegistry = [
+    ...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
+    ...(args.modules ?? []).flatMap((module) => module.createCommands(moduleDeps)),
+  ];
+  const executors = [...commandRegistry, ...(args.extraExecutors ?? [])];
+  const commands = registerAgentCommandApprovals({
+    approvals: core.approvals,
+    executors,
+    access: core.access,
+    idempotency: core.pipeline.idempotency,
+  });
+  // Decided in /v1; registered here so SP1 accepts requests of the kind (decision 0036).
+  registerWorkflowApprovals({ approvals: core.approvals, settler: RUNTIME_SIDE_SETTLER });
+  return {
+    commands,
+    commandRegistry,
+    workflowApprovals: bindWorkflowApprovalsPort(core.approvals),
+    workflowCommands: bindWorkflowCommandsPort({
+      executors: agentCommandExecutors(executors),
+      access: core.access,
+      commands,
+    }),
+  };
+};
+
+/** Tenant console state the agents read: agent settings, flags and custom agents. */
+const createConsolePorts = (args: {
+  env: RuntimePortsEnv;
+  firebase: FirebaseAdmin;
+  core: CoreServer;
+  sql: RuntimeSql;
+}): Pick<AgentRuntimePorts, "settings" | "flags" | "customAgents"> => {
+  const customAgents = createFirebaseCustomAgentsServices({
+    firebase: args.firebase,
+    audit: args.core.audit,
+    clock: systemClock,
+  });
+  const settings = createFirebaseConsoleServices({
+    firebase: args.firebase,
+    sql: args.sql,
+    audit: args.core.audit,
+    clock: systemClock,
+  });
+  // Remote Config outside local, Firestore in local; the agents cache the values 30 s (decision 0039).
+  const flags = createFirebaseFlagsServices({
+    firebase: args.firebase,
+    appEnv: args.env.APP_ENV,
+    audit: args.core.audit,
+    clock: systemClock,
+    environmentDefaults: flagEnvironmentDefaults(args.env),
+  });
+  return {
+    // SP5 Task 10: `agent-settings/{tenantId}` (defaults when missing), so the PII mode and enabled agents are the tenant's.
+    settings: { getAgentSettings: ({ tenantId }) => settings.getAgentSettings({ tenantId }) },
+    flags: { getValues: ({ tenantId }) => flags.getFlagValues({ tenantId }) },
+    // Decision 0046: tenant-defined agents and skills (Firestore), read server side per run.
+    customAgents: bindCustomAgentsPort(customAgents.runtime),
+  };
+};
+
+/** Scheduled maintenance: usage reports, approval sweeps, conversation purge and eval export. */
+const createMaintenancePorts = (args: {
+  env: RuntimePortsEnv;
+  firebase: FirebaseAdmin;
+  logger: Logger;
+  core: CoreServer;
+  sql: RuntimeSql;
+}): Pick<AgentRuntimePorts, "usageReport" | "approvalSweeps" | "conversationPurge" | "evalExport"> => {
+  const sinkEnv = {
+    USAGE_SINK: args.env.USAGE_SINK ?? "none",
+    BIGQUERY_DATASET_AI_OBSERVABILITY: args.env.BIGQUERY_DATASET_AI_OBSERVABILITY ?? "ai_observability",
+    FIREBASE_PROJECT_ID: args.env.FIREBASE_PROJECT_ID,
+  } as const;
+  return {
+    usageReport: bindUsageReportPort({
+      env: sinkEnv,
+      sql: args.sql,
+      firestore: args.firebase.firestore,
+      audit: args.core.audit,
+      logger: args.logger,
+    }),
+    approvalSweeps: bindApprovalSweepPort(args.core.approvals),
+    conversationPurge: bindConversationPurgePort(args.firebase.firestore),
+    evalExport: bindEvalExportPort({ env: sinkEnv, logger: args.logger }),
+  };
+};
+
 /**
  * Binds `AgentRuntimePorts` to SP1/SP3 services (spec §3.3, decision 0019).
  * - access: `createCoreServer().verifyBearer` + access core (Firestore readers,
@@ -147,72 +315,14 @@ export const createRuntimePorts = (args: {
   env: RuntimePortsEnv;
   firebase: FirebaseAdmin;
   logger: Logger;
-  modules?: readonly Pick<AppModule, "manifest" | "createCommands">[];
+  modules?: RuntimeModules;
   adapters?: RuntimePortsAdapters;
 }): AgentRuntimePorts => {
   const { adapters = {} } = args;
-  const core = createCoreServer({
-    env: { API_KEY_PREFIX: args.env.API_KEY_PREFIX },
-    firebase: args.firebase,
-    logger: args.logger,
-    ...(args.modules === undefined ? {} : { modules: args.modules.map((module) => module.manifest) }),
-    adapters: {
-      ...(adapters.accessReaders === undefined ? {} : { accessReaders: adapters.accessReaders }),
-      ...(adapters.apiKeyAuthenticator === undefined ? {} : { apiKeyAuthenticator: adapters.apiKeyAuthenticator }),
-    },
-  });
+  const core = createRuntimeCore({ ...args, adapters });
   // postgres.js connects lazily: no connection until the first query.
   const sql = createPostgresClient({ DATABASE_URL: args.env.DATABASE_URL });
-  const runner = createPostgresSemanticRunner(sql);
-  const knowledge = createKnowledgeServices({
-    repository: createPostgresKnowledgeRepository(sql),
-    embeddingModel: embeddingModelIdOf(args.env),
-  });
-  const files = createFirebaseFilesServices({ firebase: args.firebase, env: args.env, logger: args.logger });
-  const connectors = createFirebaseConnectorsServices({
-    firebase: args.firebase,
-    env: args.env,
-    audit: core.audit,
-    clock: systemClock,
-  });
-  const sinkEnv = {
-    USAGE_SINK: args.env.USAGE_SINK ?? "none",
-    BIGQUERY_DATASET_AI_OBSERVABILITY: args.env.BIGQUERY_DATASET_AI_OBSERVABILITY ?? "ai_observability",
-    FIREBASE_PROJECT_ID: args.env.FIREBASE_PROJECT_ID,
-  } as const;
-  const moduleDeps = { firestore: args.firebase.firestore, access: core.access, audit: core.audit };
-  const commandRegistry = [
-    ...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
-    ...(args.modules ?? []).flatMap((module) => module.createCommands(moduleDeps)),
-  ];
-  const executors = [...commandRegistry, ...(adapters.commandExecutors ?? [])];
-  const commands = registerAgentCommandApprovals({
-    approvals: core.approvals,
-    executors,
-    access: core.access,
-    idempotency: core.pipeline.idempotency,
-  });
-  // Decided in /v1; registered here so SP1 accepts requests of the kind (decision 0036).
-  registerWorkflowApprovals({ approvals: core.approvals, settler: RUNTIME_SIDE_SETTLER });
-  // Remote Config outside local, Firestore in local; the agents cache the values 30 s (decision 0039).
-  const customAgents = createFirebaseCustomAgentsServices({
-    firebase: args.firebase,
-    audit: core.audit,
-    clock: systemClock,
-  });
-  const settings = createFirebaseConsoleServices({
-    firebase: args.firebase,
-    sql,
-    audit: core.audit,
-    clock: systemClock,
-  });
-  const flags = createFirebaseFlagsServices({
-    firebase: args.firebase,
-    appEnv: args.env.APP_ENV,
-    audit: core.audit,
-    clock: systemClock,
-    environmentDefaults: flagEnvironmentDefaults(args.env),
-  });
+  const shared = { env: args.env, firebase: args.firebase, logger: args.logger, core, sql };
   return {
     access: bindAccessPort({
       verifyBearer: core.verifyBearer,
@@ -224,52 +334,17 @@ export const createRuntimePorts = (args: {
       runSemanticQuery: makeRunSemanticQuery({
         views: createSemanticViewRegistry([]),
         guard: guardSemanticSql,
-        runner,
+        runner: createPostgresSemanticRunner(sql),
       }),
     },
-    // SP5 Task 10: `agent-settings/{tenantId}` (defaults when missing), so the PII mode and enabled agents are the tenant's.
-    settings: { getAgentSettings: ({ tenantId }) => settings.getAgentSettings({ tenantId }) },
     approvals: bindApprovalsPort(core.approvals),
-    commands,
-    connectors: {
-      listActive: ({ tenantId }) => connectors.listActiveConnectors({ tenantId: TenantIdSchema.parse(tenantId) }),
-      recordLoad: ({ tenantId, connectorId, lastError }) =>
-        connectors.recordConnectorLoad({
-          tenantId: TenantIdSchema.parse(tenantId),
-          connectorId: ConnectorIdSchema.parse(connectorId),
-          lastError,
-        }),
-    },
-    secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
-    webContent: createWebContentPort({
-      env: args.env,
-      secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
-    }),
-    knowledge: bindKnowledgePort(knowledge),
-    files: bindFilesPort(files),
-    knowledgeEvents: createLogKnowledgeEventPublisher(args.logger),
+    ...createKnowledgePorts(shared),
+    ...createConnectorPorts(shared),
+    ...createCommandPorts({ ...shared, modules: args.modules, extraExecutors: adapters.commandExecutors }),
+    ...createConsolePorts(shared),
     usage: bindUsagePort(createUsageServices({ repository: createPostgresUsageRepository(sql), clock: systemClock })),
-    commandRegistry,
-    workflowApprovals: bindWorkflowApprovalsPort(core.approvals),
-    workflowCommands: bindWorkflowCommandsPort({
-      executors: agentCommandExecutors(executors),
-      access: core.access,
-      commands,
-    }),
     notifications: createLogNotificationPort(args.logger),
-    flags: { getValues: ({ tenantId }) => flags.getFlagValues({ tenantId }) },
     prompts: bindPromptStorePort(createPostgresPromptRepository(sql)),
-    usageReport: bindUsageReportPort({
-      env: sinkEnv,
-      sql,
-      firestore: args.firebase.firestore,
-      audit: core.audit,
-      logger: args.logger,
-    }),
-    approvalSweeps: bindApprovalSweepPort(core.approvals),
-    conversationPurge: bindConversationPurgePort(args.firebase.firestore),
-    evalExport: bindEvalExportPort({ env: sinkEnv, logger: args.logger }),
-    // Decision 0046: tenant-defined agents and skills (Firestore), read server side per run.
-    customAgents: bindCustomAgentsPort(customAgents.runtime),
+    ...createMaintenancePorts(shared),
   };
 };
