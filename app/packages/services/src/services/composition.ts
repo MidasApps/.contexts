@@ -215,32 +215,19 @@ const buildTenancy = (
   });
 };
 
-/**
- * Builds the core server once per process. Adapters keep references only, so building
- * touches neither Firestore nor Auth.
- * @param env `API_KEY_PREFIX` of the validated services env.
- * @param modules installed modules: their permissions join the registry, their settings are
- *   served under `/v1/.../module-settings/{moduleId}` and their unit types are exposed for tenancy.
- * @throws {PermissionRegistryError} when module permissions conflict (startup bug).
- * @throws {UnitTypeRegistryError} when module unit types conflict (startup bug).
- * @throws {ModuleSettingsRegistryError} when two modules declare settings under one id.
- */
-export const createCoreServer = (args: CoreServerArgs): CoreServer => {
-  const clock = args.clock ?? systemClock;
-  const { firestore, auth } = args.firebase;
-  const audit = makeRecordAudit({ writer: createFirestoreAuditLogWriter({ firestore }), clock });
-  const apiKeys = createFirestoreApiKeyServices({
-    firestore,
-    audit,
-    clock,
-    randomBytes: args.adapters?.randomBytes ?? randomBytes,
-    logger: args.logger,
-    apiKeyPrefix: args.env.API_KEY_PREFIX,
-  });
-  const access = buildAccess(args, clock, audit, apiKeys);
-  const tenancyAdapters = args.adapters?.tenancy ?? createFirestoreTenancyAdapters({ firestore });
-  const tenancy = buildTenancy(args, clock, audit, access.services, tenancyAdapters);
-  const identity = createIdentityServices({
+type BuiltAccess = ReturnType<typeof buildAccess>;
+
+const buildIdentity = (deps: {
+  args: CoreServerArgs;
+  clock: Clock;
+  audit: AuditWriter;
+  access: BuiltAccess;
+  tenancy: TenancyServices;
+  tenancyAdapters: FirestoreTenancyAdapters;
+}): IdentityServices => {
+  const { firestore, auth } = deps.args.firebase;
+  const { access, tenancy } = deps;
+  return createIdentityServices({
     users: createFirestoreUserRepository({ firestore }),
     accounts: createFirebaseAuthAccountReader({ auth }),
     staff: access.readers.principals,
@@ -248,13 +235,18 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     projections: access.services.projections,
     membership: access.services,
     syncClaims: access.services.syncClaims,
-    organizations: tenancyAdapters.organizations,
+    organizations: deps.tenancyAdapters.organizations,
     loadNode: tenancy.loadNode,
     mayCreateOrganization: tenancy.mayCreateOrganization,
-    audit,
+    audit: deps.audit,
     unitOfWork: createFirestoreUnitOfWork({ firestore }),
-    clock,
+    clock: deps.clock,
   });
+};
+
+/** Platform staff, four-eyes approvals and the audit log listing. */
+const buildOperations = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, access: BuiltAccess) => {
+  const { firestore, auth } = args.firebase;
   const platform = createFirestorePlatformServices({
     firestore,
     customTokens: createFirebaseCustomTokenIssuer({ auth }),
@@ -272,13 +264,26 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     clock,
     logger: args.logger,
   });
-  const auditLogs = createFirestoreAuditLogServices({ firestore });
+  return { platform, approvals, auditLogs: createFirestoreAuditLogServices({ firestore }) };
+};
+
+/** The dependencies every `withApiRoute` shares, around the Bearer verification (ID token or API key). */
+const buildPipeline = (deps: {
+  args: CoreServerArgs;
+  clock: Clock;
+  audit: AuditWriter;
+  access: AccessCore;
+  apiKeys: ApiKeyServices;
+  platform: PlatformServices;
+}): ApiRouteDeps => {
+  const { args, clock } = deps;
+  const { firestore, auth } = args.firebase;
   const verifyBearer = makeVerifyBearer({
     tokenVerifier: args.adapters?.tokenVerifier ?? createFirebaseTokenVerifier({ auth }),
-    apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? apiKeys.authenticator,
+    apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? deps.apiKeys.authenticator,
     apiKeyPrefix: args.env.API_KEY_PREFIX,
   });
-  const pipeline: ApiRouteDeps = {
+  return {
     logger: args.logger,
     clock,
     rateLimiter: createFirestoreRateLimiter({ firestore, clock }),
@@ -286,31 +291,68 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     verifyBearer,
     apiKeyPrefix: args.env.API_KEY_PREFIX,
     ...(args.env.TRUSTED_PROXY_HOPS === undefined ? {} : { trustedProxyHops: args.env.TRUSTED_PROXY_HOPS }),
-    access: access.core,
-    audit,
-    onImpersonatedRequest: platform.auditImpersonatedRequest,
+    access: deps.access,
+    audit: deps.audit,
+    onImpersonatedRequest: deps.platform.auditImpersonatedRequest,
   };
+};
+
+/** Web and desktop sessions, then the devices that sign in through the session vertical. */
+const buildSessionsAndDevices = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, access: BuiltAccess) => {
+  const randomness = args.adapters?.randomBytes ?? randomBytes;
   const sessionVertical = createFirebaseSessionVertical({
     firebase: args.firebase,
     principals: access.readers.principals,
     audit,
     clock,
     logger: args.logger,
-    randomBytes: args.adapters?.randomBytes ?? randomBytes,
+    randomBytes: randomness,
     env: args.env,
   });
-  const { sessions } = sessionVertical;
   const devices = createFirestoreDeviceServices({
-    firestore,
+    firestore: args.firebase.firestore,
     access: access.services,
     accessCore: access.core,
     customTokens: sessionVertical.customTokens,
     authUsers: sessionVertical.authUsers,
     audit,
     clock,
-    randomBytes: args.adapters?.randomBytes ?? randomBytes,
+    randomBytes: randomness,
     logger: args.logger,
   });
+  return { sessionVertical, devices };
+};
+
+/**
+ * Builds the core server once per process. Adapters keep references only, so building
+ * touches neither Firestore nor Auth.
+ * @param env `API_KEY_PREFIX` of the validated services env.
+ * @param modules installed modules: their permissions join the registry, their settings are
+ *   served under `/v1/.../module-settings/{moduleId}` and their unit types are exposed for tenancy.
+ * @throws {PermissionRegistryError} when module permissions conflict (startup bug).
+ * @throws {UnitTypeRegistryError} when module unit types conflict (startup bug).
+ * @throws {ModuleSettingsRegistryError} when two modules declare settings under one id.
+ */
+export const createCoreServer = (args: CoreServerArgs): CoreServer => {
+  const clock = args.clock ?? systemClock;
+  const { firestore } = args.firebase;
+  const audit = makeRecordAudit({ writer: createFirestoreAuditLogWriter({ firestore }), clock });
+  const apiKeys = createFirestoreApiKeyServices({
+    firestore,
+    audit,
+    clock,
+    randomBytes: args.adapters?.randomBytes ?? randomBytes,
+    logger: args.logger,
+    apiKeyPrefix: args.env.API_KEY_PREFIX,
+  });
+  const access = buildAccess(args, clock, audit, apiKeys);
+  const tenancyAdapters = args.adapters?.tenancy ?? createFirestoreTenancyAdapters({ firestore });
+  const tenancy = buildTenancy(args, clock, audit, access.services, tenancyAdapters);
+  const identity = buildIdentity({ args, clock, audit, access, tenancy, tenancyAdapters });
+  const { platform, approvals, auditLogs } = buildOperations(args, clock, audit, access);
+  const pipeline = buildPipeline({ args, clock, audit, access: access.core, apiKeys, platform });
+  const { sessionVertical, devices } = buildSessionsAndDevices(args, clock, audit, access);
+  const { sessions } = sessionVertical;
   const modules = args.modules ?? [];
   const moduleSettings = createFirestoreModuleSettingsServices({
     firestore,
@@ -337,7 +379,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
   const moduleUnitTypes = modules.flatMap((module) => module.unitTypes ?? []);
   return {
     routes,
-    verifyBearer,
+    verifyBearer: pipeline.verifyBearer,
     access: access.core,
     accessServices: access.services,
     members: access.members,
