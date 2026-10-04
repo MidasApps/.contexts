@@ -14,6 +14,7 @@ catalog:
   "@ai-sdk/openai": 4.0.81
   "@ai-sdk/provider": 4.0.19 # LanguageModelV4 types for the fake models
   "@ai-sdk/react": 4.0.125 # useChat for the chat panel; pins ai 7.0.122 exactly (4.0.129 needs ai 7.0.126: bump with the ai train, decision 0035)
+  "@biomejs/biome": 2.5.15 # formatter only; ESLint keeps the rules (decision 0068)
   "@axe-core/playwright": 4.13.0 # axe in the e2e journeys (web, desktop-web)
   "@eslint/js": 9.39.5
   "@firebase/rules-unit-testing": 5.0.2
