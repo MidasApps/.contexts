@@ -182,6 +182,25 @@ function ApprovalActions({
   );
 }
 
+/** The decision while the call waits, or — once the conversation moved past it — that it expired. */
+function ApprovalRequest(props: { expired: boolean; approval: ToolApproval; locked: boolean; interactive: boolean }) {
+  const t = useTranslations("chat.approval");
+  if (props.expired)
+    return (
+      <p data-slot="approval-expired" className="text-body-sm text-muted-foreground">
+        {t("expired")}
+      </p>
+    );
+  return (
+    <ConfirmationRequest>
+      {props.approval.stage === "asking-reason" ? (
+        <DeclineReasonField approval={props.approval} locked={props.locked} />
+      ) : null}
+      <ApprovalActions approval={props.approval} locked={props.locked} interactive={props.interactive} />
+    </ConfirmationRequest>
+  );
+}
+
 /**
  * The approval card of a mutation tool (decision 0032): what will run, under which permission,
  * with which data and — when the tool can preview it — the before/after. Approve, or decline
@@ -224,16 +243,7 @@ export function ToolConfirmation({
     >
       <ToolHeading requested={requested} summary={summary} permission={preview?.permission} />
       <ToolDetails requested={requested} diff={diff} args={request?.args} />
-      {expired ? (
-        <p data-slot="approval-expired" className="text-body-sm text-muted-foreground">
-          {t("expired")}
-        </p>
-      ) : (
-        <ConfirmationRequest>
-          {approval.stage === "asking-reason" ? <DeclineReasonField approval={approval} locked={locked} /> : null}
-          <ApprovalActions approval={approval} locked={locked} interactive={interactive} />
-        </ConfirmationRequest>
-      )}
+      <ApprovalRequest expired={expired} approval={approval} locked={locked} interactive={interactive} />
       <div ref={resultRef} tabIndex={-1}>
         <Outcome tool={tool} />
       </div>

@@ -14,6 +14,41 @@ import type { GenerativeComponentProps } from "../../model/ui-registry.ts";
 const statusClass = (sent: boolean, note: string): string =>
   sent ? "text-body text-emerald-foreground" : note === "" ? "sr-only" : "text-body-sm text-muted-foreground";
 
+type PickerChoicesProps = {
+  props: PickerProps;
+  baseId: string;
+  shown: readonly string[];
+  locked: boolean;
+  onToggle: (value: string, on: boolean) => void;
+  onPick: (value: string) => void;
+};
+
+/** The options: checkboxes for a multiple choice, a radio group otherwise. */
+function PickerChoices({ props, baseId, shown, locked, onToggle, onPick }: PickerChoicesProps) {
+  if (props.multiple)
+    return props.options.map((option, index) => (
+      <div key={option.value} className="flex items-center gap-2.5">
+        <Checkbox
+          id={`${baseId}-${index}`}
+          checked={shown.includes(option.value)}
+          onCheckedChange={(state) => onToggle(option.value, state === true)}
+          disabled={locked}
+        />
+        <Label htmlFor={`${baseId}-${index}`}>{option.label}</Label>
+      </div>
+    ));
+  return (
+    <RadioGroup aria-labelledby={`${baseId}-legend`} value={shown[0] ?? ""} onValueChange={onPick} disabled={locked}>
+      {props.options.map((option, index) => (
+        <div key={option.value} className="flex items-center gap-2.5">
+          <RadioGroupItem id={`${baseId}-${index}`} value={option.value} />
+          <Label htmlFor={`${baseId}-${index}`}>{option.label}</Label>
+        </div>
+      ))}
+    </RadioGroup>
+  );
+}
+
 /**
  * `picker` (SP4 spec §5.2): a single (radio) or multiple (checkbox) choice the member answers
  * in the conversation. The group is a `fieldset` named by its legend; confirming with nothing
@@ -25,7 +60,7 @@ export function PickerPart({
   toolCallId,
   toolName,
   interactive,
-  stale = false,
+  stale,
   answer,
 }: GenerativeComponentProps<PickerProps>) {
   const t = useTranslations("chat.ui.picker");
@@ -40,7 +75,7 @@ export function PickerPart({
   const sent = submitted || answered !== undefined;
   const locked = sent || !interactive;
   const shown = submitted || answered === undefined ? chosen : answered;
-  const note = sent ? t("submitted") : stale ? t("inactive") : "";
+  const note = sent ? t("submitted") : stale === true ? t("inactive") : "";
 
   const toggle = (value: string, on: boolean) => {
     setMissing(false);
@@ -80,36 +115,17 @@ export function PickerPart({
         <legend id={`${baseId}-legend`} className="mb-3 text-sm font-semibold text-foreground">
           {props.multiple ? t("legendMultiple") : t("legend")}
         </legend>
-        {props.multiple ? (
-          props.options.map((option, index) => (
-            <div key={option.value} className="flex items-center gap-2.5">
-              <Checkbox
-                id={`${baseId}-${index}`}
-                checked={shown.includes(option.value)}
-                onCheckedChange={(state) => toggle(option.value, state === true)}
-                disabled={locked}
-              />
-              <Label htmlFor={`${baseId}-${index}`}>{option.label}</Label>
-            </div>
-          ))
-        ) : (
-          <RadioGroup
-            aria-labelledby={`${baseId}-legend`}
-            value={shown[0] ?? ""}
-            onValueChange={(value) => {
-              setMissing(false);
-              setChosen([value]);
-            }}
-            disabled={locked}
-          >
-            {props.options.map((option, index) => (
-              <div key={option.value} className="flex items-center gap-2.5">
-                <RadioGroupItem id={`${baseId}-${index}`} value={option.value} />
-                <Label htmlFor={`${baseId}-${index}`}>{option.label}</Label>
-              </div>
-            ))}
-          </RadioGroup>
-        )}
+        <PickerChoices
+          props={props}
+          baseId={baseId}
+          shown={shown}
+          locked={locked}
+          onToggle={toggle}
+          onPick={(value) => {
+            setMissing(false);
+            setChosen([value]);
+          }}
+        />
       </fieldset>
       <p id={errorId} role="alert" className={missing ? "text-body-sm text-destructive-text" : "sr-only"}>
         {missing ? t("required") : ""}
