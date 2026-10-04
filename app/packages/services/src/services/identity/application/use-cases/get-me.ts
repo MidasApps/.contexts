@@ -1,5 +1,5 @@
 import type { Me, User, UserPrincipal } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { AccountMissingError } from "../../domain/errors/account-missing-error.ts";
 import { type MeDeps, toMe } from "../me-deps.ts";
 import type { AuthAccount } from "../ports/driven/auth-account-reader.ts";

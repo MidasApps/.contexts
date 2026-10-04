@@ -1,6 +1,6 @@
 import { type CreateDeviceActivationInput, OrganizationIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { nodes, user } from "../../../access/application/use-cases/access-write.fixture.ts";
+import { nodes, user } from "#/services/access/application/use-cases/access-write.fixture.ts";
 import { buildDeviceWorld } from "./device.fixture.ts";
 
 const tenantId = OrganizationIdSchema.parse("org-a");

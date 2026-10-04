@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { REQUEST_ID, userOf } from "../../../tenancy/application/use-cases/tenancy.fixture.ts";
+import { REQUEST_ID, userOf } from "#/services/tenancy/application/use-cases/tenancy.fixture.ts";
 import { makeMeWorld } from "./me.fixture.ts";
 
 describe("getMe", () => {

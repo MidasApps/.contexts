@@ -1,5 +1,5 @@
 import { type Connector, type ConnectorId, ConnectorIdSchema } from "@core/contracts";
-import { paginateInMemory } from "../../../shared/pagination/page.ts";
+import { paginateInMemory } from "#/services/shared/pagination/page.ts";
 import type { ConnectorRepository, SecretStore } from "../../application/ports/connector-ports.ts";
 
 /** In-memory `ConnectorRepository` for unit tests; newest first like the Firestore index. */

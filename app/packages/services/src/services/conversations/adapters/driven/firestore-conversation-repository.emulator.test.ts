@@ -1,7 +1,7 @@
 import { type Conversation, TenantIdSchema, type UserId } from "@core/contracts";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createFirebaseAdmin } from "../../../shared/firebase/firebase-admin.ts";
-import { decodeCursor } from "../../../shared/pagination/cursor.ts";
+import { createFirebaseAdmin } from "#/services/shared/firebase/firebase-admin.ts";
+import { decodeCursor } from "#/services/shared/pagination/cursor.ts";
 import { createConversation } from "../../domain/conversation.ts";
 import { CONVERSATIONS_COLLECTION } from "./conversation-storage.ts";
 import { createFirestoreConversationRepository } from "./firestore-conversation-repository.ts";

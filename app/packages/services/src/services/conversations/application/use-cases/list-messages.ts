@@ -1,8 +1,8 @@
 import { ChatUiMessageSchema, type Conversation } from "@core/contracts";
 import { z } from "zod";
-import type { AgentCallScope, GatewayError } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { ChatRuntimeGateway } from "../../../agents/application/ports/chat-runtime-gateway.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { AgentCallScope, GatewayError } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { ChatRuntimeGateway } from "#/services/agents/application/ports/chat-runtime-gateway.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 
 const MessagesSchema = z.array(ChatUiMessageSchema);
 type UiMessage = z.infer<typeof ChatUiMessageSchema>;

@@ -1,6 +1,6 @@
 import type { EvalExperimentSummary } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { fixedClock } from "../../../shared/clock/clock.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
 import { createInMemoryConsoleStores } from "../../adapters/driven/in-memory-console-stores.ts";
 import type { ApprovalStats } from "../ports/console-ports.ts";
 import { makeGetAdminOverview } from "./get-admin-overview.ts";

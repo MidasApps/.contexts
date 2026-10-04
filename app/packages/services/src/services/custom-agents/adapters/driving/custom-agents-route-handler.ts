@@ -8,20 +8,20 @@ import {
   type TenantId,
   updateCustomAgentEndpoint,
 } from "@core/contracts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { apiError, dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { deniedResponse } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
-import type { Logger } from "../../../shared/observability/logger.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { apiError, dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 import {
   runtimeCallScope,
   tenantOfCall,
   workflowCallScope,
   workflowGatewayErrorResponse,
-} from "../../../workflows/adapters/driving/workflow-call-scope.ts";
-import type { WorkflowRuntimeGateway } from "../../../workflows/application/ports/workflow-runtime-gateway.ts";
+} from "#/services/workflows/adapters/driving/workflow-call-scope.ts";
+import type { WorkflowRuntimeGateway } from "#/services/workflows/application/ports/workflow-runtime-gateway.ts";
 import {
   CUSTOM_AGENTS_READ_PERMISSION,
   CUSTOM_AGENTS_WRITE_PERMISSION,

@@ -1,8 +1,8 @@
 import type { ImpersonationSession, ImpersonationSessionId, UserPrincipal } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { RequestAccess } from "../../../access/composition.ts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { ImpersonationNotFoundError } from "../../domain/errors/impersonation-errors.ts";
 import type { PlatformDeps } from "../platform-deps.ts";
 import { requireImpersonateRight } from "../platform-guard.ts";

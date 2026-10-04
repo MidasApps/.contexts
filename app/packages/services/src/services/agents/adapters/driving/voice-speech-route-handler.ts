@@ -1,6 +1,6 @@
 import { synthesizeSpeechEndpoint } from "@core/contracts";
-import { withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import { gatewayErrorResponse } from "../driven/mastra-error-mapper.ts";
 import { type VoiceRoutesDeps, voiceScopeOf } from "./voice-http.ts";
 

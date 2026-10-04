@@ -1,4 +1,4 @@
-import type { Logger } from "../../../shared/observability/logger.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 import type { UsageSink } from "../../application/ports/usage-sink.ts";
 
 /** `UsageSink` of `local` (and `USAGE_SINK=none`): nothing leaves the machine; one log line per export. */

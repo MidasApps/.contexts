@@ -1,8 +1,8 @@
 import { FileIdSchema, type StoredFile, StoredFileSchema } from "@core/contracts";
 import type { Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
-import { CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
+import { CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter, toFirestoreUpdate } from "#/services/shared/firestore/contract-converter.ts";
 import type { FileRepository, FileSettlement } from "../../application/ports/file-ports.ts";
 
 /** Top-level Firestore collection of file records; clients never read it (they use `/v1`). */

@@ -1,6 +1,6 @@
 import { ADMIN_USAGE_MAX_DAYS, type AdminUsage, AdminUsageSchema, type AdminUsageTotals } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
-import { utcMonthStart } from "../../../usage/application/use-cases/usage-month.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
+import { utcMonthStart } from "#/services/usage/application/use-cases/usage-month.ts";
 import type { ConsoleDeps } from "../console-deps.ts";
 import type { UsageBucket } from "../ports/console-ports.ts";
 

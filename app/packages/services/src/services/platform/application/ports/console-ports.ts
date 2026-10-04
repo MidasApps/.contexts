@@ -1,5 +1,5 @@
 import type { AgentSettings, BudgetCaps, OrganizationStatus, Plan, PlanLimits } from "@core/contracts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /** Plans (Firestore `plans`, automatic ids; decision 0039). */
 export type PlanRepository = {

@@ -15,10 +15,10 @@ import {
   listTracesEndpoint,
   startEvalExperimentEndpoint,
 } from "@core/contracts";
-import { requireStaff, requireTenant } from "../../../platform/adapters/driving/console-guards.ts";
-import { apiError, dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { requireStaff, requireTenant } from "#/services/platform/adapters/driving/console-guards.ts";
+import { apiError, dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { ConsoleError, ConsoleResult } from "../../application/ports/console-gateway.ts";
 import type { ObservabilityServices } from "../../composition.ts";
 

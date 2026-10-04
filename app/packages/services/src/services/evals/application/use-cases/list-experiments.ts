@@ -1,4 +1,4 @@
-import type { ConsoleGateway, PageNumber } from "../../../observability/application/ports/console-gateway.ts";
+import type { ConsoleGateway, PageNumber } from "#/services/observability/application/ports/console-gateway.ts";
 
 export type ListExperiments = (
   query: { readonly tenantId: string | null } & PageNumber,

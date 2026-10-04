@@ -1,6 +1,6 @@
 import type { AdminUserSearchBy, AdminUserSummary } from "@core/contracts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
-import { normalizeSearchText } from "../../../shared/text/search-text.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
+import { normalizeSearchText } from "#/services/shared/text/search-text.ts";
 import type { AdminUserDirectory } from "../ports/admin-user-directory.ts";
 
 export type FindAdminUsers = (input: {

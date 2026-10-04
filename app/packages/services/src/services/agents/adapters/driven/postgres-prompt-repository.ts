@@ -5,7 +5,7 @@ import {
   PromptVersionSchema,
 } from "@core/contracts";
 import type { Sql, TransactionSql } from "postgres";
-import { withTenantTransaction } from "../../../shared/postgres/with-tenant-transaction.ts";
+import { withTenantTransaction } from "#/services/shared/postgres/with-tenant-transaction.ts";
 import type { ActivePrompts, PromptKey, PromptRepository } from "../../application/ports/prompt-repository.ts";
 
 export const PROMPTS_RUNTIME_ROLE = "prompts_runtime";

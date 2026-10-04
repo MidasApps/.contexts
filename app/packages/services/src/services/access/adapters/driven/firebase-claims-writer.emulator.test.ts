@@ -1,6 +1,6 @@
 import { OrganizationIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import { emulatorFirebase } from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import { ClaimsTooLargeError, createFirebaseClaimsWriter, MAX_CLAIMS_BYTES } from "./firebase-claims-writer.ts";
 
 // Runs inside `firebase emulators:exec`, which exports FIREBASE_AUTH_EMULATOR_HOST.

@@ -1,8 +1,8 @@
 import type { Permission, Principal, Project, ProjectId, TenantNodeRef, Unit, UnitId } from "@core/contracts";
-import { requirePermission } from "../../../access/application/grant-checks.ts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { requirePermission } from "#/services/access/application/grant-checks.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { TenancyNotFoundError } from "../../domain/errors/tenancy-not-found-error.ts";
 import { projectNode, type TenancyDeps, unitNode } from "../tenancy-deps.ts";
 

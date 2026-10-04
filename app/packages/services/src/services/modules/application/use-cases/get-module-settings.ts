@@ -1,6 +1,6 @@
 import type { ModuleSettings } from "@core/contracts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { ok, type Result } from "../../../shared/result/result.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { ok, type Result } from "#/services/shared/result/result.ts";
 import type { UnknownModuleError } from "../../domain/module-settings-errors.ts";
 import {
   loadAuthorizedDefinition,

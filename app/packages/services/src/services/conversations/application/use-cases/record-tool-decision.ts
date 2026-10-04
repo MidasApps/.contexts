@@ -5,8 +5,8 @@ import {
   ToolApprovalDecisionSchema,
   type ToolApprovalResponsePart,
 } from "@core/contracts";
-import type { AuditWriter } from "../../../audit/application/use-cases/record-audit.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
+import type { AuditWriter } from "#/services/audit/application/use-cases/record-audit.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
 
 const APPROVAL_SEPARATOR = "::";
 const TOOL_PREFIX = "tool-";

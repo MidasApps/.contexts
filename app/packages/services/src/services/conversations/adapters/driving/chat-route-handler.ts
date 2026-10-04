@@ -1,9 +1,9 @@
 import { sendChatMessageEndpoint } from "@core/contracts";
-import { gatewayErrorResponse } from "../../../agents/adapters/driven/mastra-error-mapper.ts";
-import { apiError } from "../../../shared/http/api-errors.ts";
-import { deniedResponse } from "../../../shared/http/api-list.ts";
-import { withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { gatewayErrorResponse } from "#/services/agents/adapters/driven/mastra-error-mapper.ts";
+import { apiError } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse } from "#/services/shared/http/api-list.ts";
+import { withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import { makeRecordToolDecisions } from "../../application/use-cases/record-tool-decision.ts";
 import { makeResolveAttachments } from "../../application/use-cases/resolve-attachments.ts";
 import { makeSendChatMessage, type SendChatError } from "../../application/use-cases/send-chat-message.ts";

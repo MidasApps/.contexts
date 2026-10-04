@@ -1,6 +1,6 @@
 import { type AdminUserSummary, AdminUserSummarySchema } from "@core/contracts";
-import { type Page, type PageRequest, paginateInMemory } from "../../../shared/pagination/page.ts";
-import { normalizeSearchText } from "../../../shared/text/search-text.ts";
+import { type Page, type PageRequest, paginateInMemory } from "#/services/shared/pagination/page.ts";
+import { normalizeSearchText } from "#/services/shared/text/search-text.ts";
 import type { AdminUserDirectory } from "../../application/ports/admin-user-directory.ts";
 
 export type AdminUserSeed = {

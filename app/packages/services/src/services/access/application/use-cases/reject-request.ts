@@ -1,6 +1,6 @@
 import type { ApprovalRequest } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import type { Result } from "../../../shared/result/result.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import type { Result } from "#/services/shared/result/result.ts";
 import { type DecideCommand, type DecisionError, decidePending, loadDecidable } from "../approval-decision.ts";
 import type { ApprovalDeps } from "../approval-deps.ts";
 

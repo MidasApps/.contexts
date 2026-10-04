@@ -1,8 +1,8 @@
 import type { BudgetCaps, TenantId, UserPrincipal } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
 import { createInMemoryConsoleStores } from "../../adapters/driven/in-memory-console-stores.ts";
 import { createConsoleServices } from "../../composition.ts";
 

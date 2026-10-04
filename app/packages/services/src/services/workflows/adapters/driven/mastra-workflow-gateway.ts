@@ -12,10 +12,10 @@ import {
   mapMastraStatus,
   UPSTREAM_TIMEOUT,
   UPSTREAM_UNAVAILABLE,
-} from "../../../agents/adapters/driven/mastra-error-mapper.ts";
-import { buildForwardedHeaders, type MastraConnection } from "../../../agents/adapters/driven/mastra-request.ts";
-import type { ServerlessIdTokenSource } from "../../../agents/adapters/driven/serverless-id-token.ts";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+} from "#/services/agents/adapters/driven/mastra-error-mapper.ts";
+import { buildForwardedHeaders, type MastraConnection } from "#/services/agents/adapters/driven/mastra-request.ts";
+import type { ServerlessIdTokenSource } from "#/services/agents/adapters/driven/serverless-id-token.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
 import type {
   WorkflowGatewayError,
   WorkflowGatewayResult,

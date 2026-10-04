@@ -1,9 +1,9 @@
 import { callMcpEndpoint, FORWARDED_HEADERS, type Principal, type TenantId } from "@core/contracts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { authorizeOrganization } from "../../../knowledge/adapters/driving/knowledge-documents-route-handler.ts";
-import { apiError } from "../../../shared/http/api-errors.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { authorizeOrganization } from "#/services/knowledge/adapters/driving/knowledge-documents-route-handler.ts";
+import { apiError } from "#/services/shared/http/api-errors.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type {
   AgentCallScope,
   AgentRuntimeGateway,

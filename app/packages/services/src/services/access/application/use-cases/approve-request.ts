@@ -1,6 +1,6 @@
 import { ApprovalFailureCodeSchema, type ApprovalRequest, type Principal, type UserPrincipal } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { nextApprovalStatus } from "../../domain/approval-state.ts";
 import { type DecideCommand, type DecisionError, decidePending, loadDecidable } from "../approval-decision.ts";
 import type { ApprovalDeps } from "../approval-deps.ts";

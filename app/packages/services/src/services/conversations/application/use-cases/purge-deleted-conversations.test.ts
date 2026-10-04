@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fixedClock } from "../../../shared/clock/clock.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
 import type { DeletedConversation, DeletedConversationStore } from "../ports/deleted-conversation-store.ts";
 import { makePurgeDeletedConversations } from "./purge-deleted-conversations.ts";
 

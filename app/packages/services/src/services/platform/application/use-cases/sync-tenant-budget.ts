@@ -1,5 +1,5 @@
 import { type BudgetCaps, TenantIdSchema } from "@core/contracts";
-import { resolveTenantCaps, type TenantCaps } from "../../../usage/domain/budget-policy.ts";
+import { resolveTenantCaps, type TenantCaps } from "#/services/usage/domain/budget-policy.ts";
 import type { ConsoleDeps } from "../console-deps.ts";
 import type { AgentSettingsFields, StoredAgentSettings } from "../ports/console-ports.ts";
 

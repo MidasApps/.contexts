@@ -1,9 +1,9 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
-import { backfillUserSearchNames } from "../../../shared/firestore/backfill-user-search-names.ts";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { userSearchFields } from "../../../shared/firestore/user-search-fields.ts";
-import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import { backfillUserSearchNames } from "#/services/shared/firestore/backfill-user-search-names.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { userSearchFields } from "#/services/shared/firestore/user-search-fields.ts";
+import { emulatorFirebase } from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import { createFirestoreAdminUserDirectory } from "./firestore-admin-user-directory.ts";
 
 const { firestore } = emulatorFirebase();

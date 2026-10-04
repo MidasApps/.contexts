@@ -1,6 +1,6 @@
 import type { Invitation, InvitationStatus, Principal, TenantId } from "@core/contracts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
-import { ok, type Result } from "../../../shared/result/result.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
+import { ok, type Result } from "#/services/shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import type { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
 import { invitationView } from "../../domain/invitation-state.ts";

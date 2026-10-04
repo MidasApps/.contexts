@@ -1,5 +1,5 @@
 import type { ActivatePromptVersionInput, PromptActivation, UserPrincipal } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { PromptKey } from "../ports/prompt-repository.ts";
 import type { PromptActor, PromptDeps } from "../prompt-deps.ts";
 import { recordPromptAudit } from "./prompt-audit.ts";

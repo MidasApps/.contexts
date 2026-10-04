@@ -1,11 +1,11 @@
 import { type Principal, TenantIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { createApprovalHandlerRegistry } from "../../../access/application/approval-handler-registry.ts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { createInMemoryIdempotencyStore } from "../../../shared/idempotency/in-memory-idempotency-store.ts";
-import { err, ok } from "../../../shared/result/result.ts";
-import type { TenancyServices } from "../../../tenancy/composition.ts";
+import { createApprovalHandlerRegistry } from "#/services/access/application/approval-handler-registry.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { createInMemoryIdempotencyStore } from "#/services/shared/idempotency/in-memory-idempotency-store.ts";
+import { err, ok } from "#/services/shared/result/result.ts";
+import type { TenancyServices } from "#/services/tenancy/composition.ts";
 import { agentCommandExecutors, DuplicateCommandError } from "./agent-command-executor.ts";
 import { CREATE_PROJECT_COMMAND_ID, createCoreAgentCommandExecutors } from "./core-agent-command-executors.ts";
 import { registerAgentCommandApprovals } from "./register-agent-command-approvals.ts";

@@ -1,4 +1,4 @@
-import type { Clock } from "../../../shared/clock/clock.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
 import type { DeletedConversationStore } from "../ports/deleted-conversation-store.ts";
 
 /** Days a deleted conversation is kept before it is purged (SP5 spec §3.2). */

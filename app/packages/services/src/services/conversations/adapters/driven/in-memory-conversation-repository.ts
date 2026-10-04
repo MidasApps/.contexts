@@ -1,5 +1,5 @@
 import { type Conversation, ConversationIdSchema } from "@core/contracts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { ConversationListQuery, ConversationRepository } from "../../application/ports/conversation-repository.ts";
 import { endRunOf } from "../../domain/conversation.ts";
 import { conversationPosition, parseConversationPosition } from "./conversation-storage.ts";

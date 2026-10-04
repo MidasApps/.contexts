@@ -6,8 +6,8 @@ import {
   type TenantId,
   UserIdSchema,
 } from "@core/contracts";
-import type { Clock } from "../../../shared/clock/clock.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { checkUpload, storagePathOf, type UploadRejectionReason } from "../../domain/file-policy.ts";
 import type { FileRepository, FileUrlSigner } from "../ports/file-ports.ts";
 import { canUpload, type FilesCaller, uploaderIdOf } from "./file-access.ts";

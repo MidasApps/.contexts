@@ -1,4 +1,4 @@
-import type { Logger } from "../../../shared/observability/logger.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 import type { FinalizeOutcome, FinalizeUpload } from "../../application/use-cases/finalize-upload.ts";
 
 /** The fields of a Cloud Storage `StorageObjectData` the handler reads (`size` arrives as a string). */

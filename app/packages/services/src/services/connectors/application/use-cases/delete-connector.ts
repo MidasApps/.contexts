@@ -1,6 +1,6 @@
 import type { ConnectorId } from "@core/contracts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { ConnectorNotFoundError } from "../../domain/connector-errors.ts";
 import { connectorSecretName } from "../../domain/connector-policy.ts";
 import {

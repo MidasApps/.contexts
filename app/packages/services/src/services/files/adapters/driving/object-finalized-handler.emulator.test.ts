@@ -1,7 +1,7 @@
 import { type StoredFile, StoredFileSchema } from "@core/contracts";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { createFirebaseAdmin } from "../../../shared/firebase/firebase-admin.ts";
-import { createLogger } from "../../../shared/observability/logger.ts";
+import { createFirebaseAdmin } from "#/services/shared/firebase/firebase-admin.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
 import { makeFinalizeUpload } from "../../application/use-cases/finalize-upload.ts";
 import { createEmulatorUrlSigner } from "../driven/emulator-signed-url.ts";
 import { detectContentType } from "../driven/file-type-detector.ts";

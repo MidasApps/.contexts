@@ -1,7 +1,7 @@
 import { type Device, type DeviceId, type RedeemDeviceActivationResponse, type UserPrincipal } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import { isAtOrBefore } from "../../../shared/clock/clock.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { isAtOrBefore } from "#/services/shared/clock/clock.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { hashActivationCode, normalizeActivationCode } from "../../domain/activation-code.ts";
 import type { DeviceActivationRecord } from "../../domain/device-activation-record.schema.ts";
 import { SessionInvalidError } from "../../domain/errors/session-errors.ts";

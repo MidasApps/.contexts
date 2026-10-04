@@ -1,6 +1,6 @@
 import type { MessageAttachment, StoredFile } from "@core/contracts";
-import type { GetReadyFile, ReadFileBytes } from "../../../files/application/use-cases/read-file-bytes.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { GetReadyFile, ReadFileBytes } from "#/services/files/application/use-cases/read-file-bytes.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 
 /** Bytes `/v1` inlines per attachment (decision 0035, D4-08). */
 export const MAX_INLINE_ATTACHMENT_BYTES = 10 * 1024 * 1024;

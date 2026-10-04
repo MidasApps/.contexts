@@ -1,5 +1,5 @@
 import type { Conversation, ConversationId } from "@core/contracts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 import type { RunEndFacts } from "../../domain/conversation.ts";
 
 /** Filters of the history list (spec §4.1): always one owner in one tenant, never deleted ones. */

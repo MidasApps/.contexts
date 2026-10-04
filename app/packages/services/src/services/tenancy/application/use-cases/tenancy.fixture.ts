@@ -9,8 +9,8 @@ import {
   UserIdSchema,
   type UserPrincipal,
 } from "@core/contracts";
-import { makeAccessWriteWorld, REQUEST_ID } from "../../../access/application/use-cases/access-write.fixture.ts";
-import type { Clock } from "../../../shared/clock/clock.ts";
+import { makeAccessWriteWorld, REQUEST_ID } from "#/services/access/application/use-cases/access-write.fixture.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
 import { createInMemoryTenancyStore } from "../../adapters/driven/in-memory-tenancy-store.ts";
 import { createTenancyServices } from "../../composition.ts";
 

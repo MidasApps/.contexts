@@ -1,7 +1,7 @@
 import type { ImpersonationSessionId, SessionId, UserId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
-import type { SessionRecord } from "../../../domain/session-record.schema.ts";
+import type { SessionRecord } from "#/services/identity/domain/session-record.schema.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /** Rotation of a desktop secret (sliding expiry). */
 export type SessionRotation = {

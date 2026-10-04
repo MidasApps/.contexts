@@ -1,6 +1,6 @@
 import { CoreErrorCodeSchema } from "@core/contracts";
 import { z } from "zod";
-import { apiError } from "../../../shared/http/api-errors.ts";
+import { apiError } from "#/services/shared/http/api-errors.ts";
 import type { GatewayError } from "../../application/ports/agent-runtime-gateway.ts";
 
 const BY_STATUS: Readonly<Record<number, GatewayError>> = {

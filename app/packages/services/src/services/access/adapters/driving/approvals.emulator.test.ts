@@ -1,14 +1,14 @@
 import { OrganizationIdSchema, type PermissionDefinition } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { AUDIT_LOG_COLLECTIONS } from "../../../audit/adapters/driven/firestore-audit-log-writer.ts";
+import { AUDIT_LOG_COLLECTIONS } from "#/services/audit/adapters/driven/firestore-audit-log-writer.ts";
 import {
   buildEmulatorServer,
   clearCoreCollections,
   emulatorFirebase,
   ensureAuthUser,
   seedActiveUser,
-} from "../../../shared/testing/core-server-emulator.fixture.ts";
+} from "#/services/shared/testing/core-server-emulator.fixture.ts";
 
 // A module permission that needs a second person; members hold it, admins may approve it.
 const DELETE_INVOICE: PermissionDefinition = {

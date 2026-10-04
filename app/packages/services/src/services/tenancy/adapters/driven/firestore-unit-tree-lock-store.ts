@@ -1,8 +1,8 @@
 import { IsoDateTimeSchema, ProjectIdSchema, TenantIdSchema, UnitIdSchema } from "@core/contracts";
 import type { Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter } from "#/services/shared/firestore/contract-converter.ts";
 import type { TreeLock, UnitTreeLockStore } from "../../application/ports/driven/unit-tree-lock-store.ts";
 
 const StoredTreeLockSchema = z.object({

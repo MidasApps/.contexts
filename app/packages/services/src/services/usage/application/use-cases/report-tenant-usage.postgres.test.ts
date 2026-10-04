@@ -1,9 +1,9 @@
 import { type LlmCall, LlmCallSchema, type UsageDailyRollup } from "@core/contracts";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { createPostgresClient } from "../../../shared/postgres/postgres-client.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { createPostgresClient } from "#/services/shared/postgres/postgres-client.ts";
 import { createPostgresUsageReportRepository } from "../../adapters/driven/postgres-usage-report-repository.ts";
 import { createPostgresUsageRepository } from "../../adapters/driven/postgres-usage-repository.ts";
 import type { UsageSink } from "../ports/usage-sink.ts";

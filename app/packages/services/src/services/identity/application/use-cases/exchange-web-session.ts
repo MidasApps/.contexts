@@ -1,5 +1,5 @@
-import { resolveRequestId } from "../../../shared/observability/request-id.ts";
-import { ok, type Result } from "../../../shared/result/result.ts";
+import { resolveRequestId } from "#/services/shared/observability/request-id.ts";
+import { ok, type Result } from "#/services/shared/result/result.ts";
 import type { SessionInvalidError } from "../../domain/errors/session-errors.ts";
 import type { SessionDeps } from "../session-deps.ts";
 import { loadWebSession } from "./require-web-session.ts";

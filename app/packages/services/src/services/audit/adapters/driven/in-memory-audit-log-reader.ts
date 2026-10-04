@@ -1,6 +1,6 @@
 import type { AuditLogEntry } from "@core/contracts";
-import type { CursorPosition } from "../../../shared/pagination/cursor.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import type { CursorPosition } from "#/services/shared/pagination/cursor.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { AuditLogFilters, AuditLogReader } from "../../application/ports/driven/audit-log-reader.ts";
 import type { InMemoryAuditLogWriter } from "./in-memory-audit-log-writer.ts";
 

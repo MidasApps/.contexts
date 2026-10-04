@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import { createFlagsServices } from "../../composition.ts";
 import { createInMemoryFlagStores } from "../driven/in-memory-flags.ts";
 import { buildAdminFlagsRoutes } from "./admin-flags-route-handler.ts";

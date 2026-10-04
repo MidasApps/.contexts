@@ -11,6 +11,9 @@
     "./platform/health-route-handler": "./src/services/platform/adapters/driving/health-route-handler.ts",
     "./composition": "./src/services/composition.ts"
   },
+  "imports": {
+    "#/*": "./src/*"
+  },
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

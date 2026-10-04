@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, date, index, integer, pgPolicy, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
-import { usageSchema } from "../../../shared/postgres/drizzle-schemas.ts";
+import { usageSchema } from "#/services/shared/postgres/drizzle-schemas.ts";
 
 /**
  * Usage ledger tables (SP3 spec §12, decision 0026): source of the Drizzle

@@ -5,11 +5,11 @@ import {
   revokeAllSessionsEndpoint,
   revokeSessionEndpoint,
 } from "@core/contracts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { apiError, dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { apiError, dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { SessionNotFoundError } from "../../domain/errors/session-errors.ts";
 import type { SessionServices } from "../../session-composition.ts";
 

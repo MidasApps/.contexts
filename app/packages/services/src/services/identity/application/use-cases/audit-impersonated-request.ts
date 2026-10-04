@@ -1,6 +1,6 @@
 import type { AuditOutcome, UserPrincipal } from "@core/contracts";
-import type { DenyReason } from "../../../access/domain/authorization.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
+import type { DenyReason } from "#/services/access/domain/authorization.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
 import type { PlatformDeps } from "../platform-deps.ts";
 
 /** A `/v1` request served to an impersonated principal (the pipeline reports each one). */

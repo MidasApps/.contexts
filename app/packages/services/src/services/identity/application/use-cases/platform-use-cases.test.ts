@@ -6,7 +6,7 @@ import {
   UserIdSchema,
 } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { nodes } from "../../../access/application/use-cases/access-write.fixture.ts";
+import { nodes } from "#/services/access/application/use-cases/access-write.fixture.ts";
 import { buildPlatformWorld, staffPrincipal } from "./platform.fixture.ts";
 
 const tenantId = OrganizationIdSchema.parse("org-a");

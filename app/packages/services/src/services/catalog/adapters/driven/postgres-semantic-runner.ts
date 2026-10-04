@@ -1,5 +1,5 @@
 import type { ParameterOrJSON, Sql } from "postgres";
-import { withTenantTransaction } from "../../../shared/postgres/with-tenant-transaction.ts";
+import { withTenantTransaction } from "#/services/shared/postgres/with-tenant-transaction.ts";
 import type { SemanticQueryRows, SemanticQueryRunner } from "../../application/ports/driven/semantic-sql-ports.ts";
 import { wrapWithLimit } from "./sql-guard.ts";
 

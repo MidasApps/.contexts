@@ -5,8 +5,8 @@ import {
   type ImpersonationSessionId,
   type UserPrincipal,
 } from "@core/contracts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { ImpersonationNotFoundError } from "../../domain/errors/impersonation-errors.ts";
 import type { PlatformDeps } from "../platform-deps.ts";
 

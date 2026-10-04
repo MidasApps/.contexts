@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { createPostgresClient } from "../../../shared/postgres/postgres-client.ts";
+import { createPostgresClient } from "#/services/shared/postgres/postgres-client.ts";
 import { createPostgresPromptRepository, PROMPTS_RUNTIME_ROLE } from "./postgres-prompt-repository.ts";
 
 // Needs the compose container and `pnpm db:migrate` (migrations 0010/0011).

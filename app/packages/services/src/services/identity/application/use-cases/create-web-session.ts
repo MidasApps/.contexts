@@ -1,5 +1,5 @@
 import type { SessionId } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { RecentSignInRequiredError, SessionInvalidError } from "../../domain/errors/session-errors.ts";
 import { hashSessionSecret } from "../../domain/session-secret.ts";
 import { summarizeUserAgent } from "../../domain/user-agent.ts";

@@ -1,5 +1,5 @@
 import type { PromptEvalResult, UserPrincipal } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { PromptEvalError } from "../ports/prompt-eval-gateway.ts";
 import type { PromptKey } from "../ports/prompt-repository.ts";
 import type { PromptDeps } from "../prompt-deps.ts";

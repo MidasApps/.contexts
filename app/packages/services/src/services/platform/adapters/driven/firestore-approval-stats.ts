@@ -1,5 +1,5 @@
 import { type Firestore, Timestamp } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
 import type { ApprovalStats } from "../../application/ports/console-ports.ts";
 
 // Every request an approver let through: still `approved`, or executed / failed after approval.

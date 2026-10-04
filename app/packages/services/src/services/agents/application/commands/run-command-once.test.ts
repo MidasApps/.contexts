@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInMemoryIdempotencyStore } from "../../../shared/idempotency/in-memory-idempotency-store.ts";
+import { createInMemoryIdempotencyStore } from "#/services/shared/idempotency/in-memory-idempotency-store.ts";
 import { AgentCommandError } from "./agent-command-error.ts";
 import { createCommandIdempotency } from "./run-command-once.ts";
 

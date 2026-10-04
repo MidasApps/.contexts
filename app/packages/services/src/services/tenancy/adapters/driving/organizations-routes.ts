@@ -4,9 +4,9 @@ import {
   getOrganizationEndpoint,
   updateOrganizationEndpoint,
 } from "@core/contracts";
-import { dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { TenancyServices } from "../../composition.ts";
 import { tenancyErrorResponse } from "./tenancy-error-response.ts";
 

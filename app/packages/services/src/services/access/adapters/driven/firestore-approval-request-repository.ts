@@ -1,8 +1,8 @@
 import { type ApprovalRequest, ApprovalRequestIdSchema, ApprovalRequestSchema } from "@core/contracts";
 import { FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter, toFirestoreUpdate } from "#/services/shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { ApprovalRequestRepository } from "../../application/ports/driven/approval-request-repository.ts";
 
 const contract = { schema: ApprovalRequestSchema };

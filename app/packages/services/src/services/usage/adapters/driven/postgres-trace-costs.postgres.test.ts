@@ -1,6 +1,6 @@
 import { type LlmCall, LlmCallSchema } from "@core/contracts";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { createPostgresClient } from "../../../shared/postgres/postgres-client.ts";
+import { createPostgresClient } from "#/services/shared/postgres/postgres-client.ts";
 import { createPostgresTraceCosts } from "./postgres-trace-costs.ts";
 import { createPostgresUsageRepository } from "./postgres-usage-repository.ts";
 

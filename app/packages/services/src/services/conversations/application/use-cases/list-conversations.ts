@@ -1,5 +1,5 @@
 import type { Conversation } from "@core/contracts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 import { queryTokens } from "../../domain/search-tokens.ts";
 import type { ConversationRepository } from "../ports/conversation-repository.ts";
 

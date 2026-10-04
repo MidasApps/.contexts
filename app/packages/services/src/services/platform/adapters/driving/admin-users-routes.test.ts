@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createLogger } from "../../../shared/observability/logger.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import { createInMemoryAdminUserDirectory } from "../driven/in-memory-admin-user-directory.ts";
 import { buildAdminUsersRoutes } from "./admin-users-route-handler.ts";
 

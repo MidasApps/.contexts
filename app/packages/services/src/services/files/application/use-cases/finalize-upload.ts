@@ -1,7 +1,7 @@
 import type { StoredFile } from "@core/contracts";
 import { ulid } from "ulid";
-import type { Clock } from "../../../shared/clock/clock.ts";
-import type { Logger } from "../../../shared/observability/logger.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 import {
   contentMatchesDeclared,
   normalizeContentType,

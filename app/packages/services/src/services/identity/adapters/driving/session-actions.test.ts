@@ -1,6 +1,6 @@
 import { ImpersonationSessionIdSchema, TenantIdSchema, UserIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { createLogger } from "../../../shared/observability/logger.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
 import { buildSessionWorld, WORLD_NOW } from "../../application/use-cases/session.fixture.ts";
 import { type CookieJar, makeSessionActions, SESSION_COOKIE_NAME } from "./session-actions.ts";
 import { makeSessionGuards } from "./session-guards.ts";

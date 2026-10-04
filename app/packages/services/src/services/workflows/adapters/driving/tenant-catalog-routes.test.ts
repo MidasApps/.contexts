@@ -1,8 +1,8 @@
 import type { AgentCatalogEntry, RegionalSettings, WorkflowCatalogEntry } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import type { WorkflowRuntimeGateway } from "../../application/ports/workflow-runtime-gateway.ts";
 import { buildTenantCatalogRoutes } from "./tenant-catalog-route-handler.ts";
 

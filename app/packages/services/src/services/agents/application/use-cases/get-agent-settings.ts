@@ -1,8 +1,8 @@
 import type { AgentSettings } from "@core/contracts";
-import type { ConsoleDeps } from "../../../platform/application/console-deps.ts";
-import { agentSettingsOf } from "../../../platform/application/ports/console-ports.ts";
-import { baseCapsOf, storedSettingsOf } from "../../../platform/application/use-cases/sync-tenant-budget.ts";
-import { resolveTenantCaps } from "../../../usage/domain/budget-policy.ts";
+import type { ConsoleDeps } from "#/services/platform/application/console-deps.ts";
+import { agentSettingsOf } from "#/services/platform/application/ports/console-ports.ts";
+import { baseCapsOf, storedSettingsOf } from "#/services/platform/application/use-cases/sync-tenant-budget.ts";
+import { resolveTenantCaps } from "#/services/usage/domain/budget-policy.ts";
 
 export type GetAgentSettings = (input: { readonly tenantId: string }) => Promise<AgentSettings>;
 

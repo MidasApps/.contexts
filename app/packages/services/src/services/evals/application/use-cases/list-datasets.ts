@@ -1,4 +1,4 @@
-import type { ConsoleGateway } from "../../../observability/application/ports/console-gateway.ts";
+import type { ConsoleGateway } from "#/services/observability/application/ports/console-gateway.ts";
 
 export type ListDatasets = (query: { readonly tenantId: string | null }) => ReturnType<ConsoleGateway["listDatasets"]>;
 

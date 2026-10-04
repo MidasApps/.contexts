@@ -1,6 +1,6 @@
 import type { CreateDesktopSessionResponse, UserPrincipal } from "@core/contracts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { ok, type Result } from "../../../shared/result/result.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { ok, type Result } from "#/services/shared/result/result.ts";
 import { generateSessionSecret, hashSessionSecret } from "../../domain/session-secret.ts";
 import { summarizeUserAgent } from "../../domain/user-agent.ts";
 import { DAY_MS, refuseImpersonation, type SessionDeps } from "../session-deps.ts";

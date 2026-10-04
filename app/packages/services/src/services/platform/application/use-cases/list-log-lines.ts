@@ -1,5 +1,5 @@
 import type { LogLine, LogLineLevel } from "@core/contracts";
-import type { LogRecord } from "../../../shared/observability/logger.ts";
+import type { LogRecord } from "#/services/shared/observability/logger.ts";
 
 export type LogLinesQuery = {
   /** Minimum level. */

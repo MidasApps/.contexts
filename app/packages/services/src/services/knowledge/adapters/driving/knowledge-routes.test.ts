@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import type {
   AgentRuntimeGateway,
   WorkflowStartInput,
-} from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { GetReadyFile } from "../../../files/application/use-cases/read-file-bytes.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import type { ErrorEnvelope } from "../../../shared/http/error-envelope.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+} from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { GetReadyFile } from "#/services/files/application/use-cases/read-file-bytes.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import type { ErrorEnvelope } from "#/services/shared/http/error-envelope.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import type { KnowledgeRepository } from "../../application/ports/knowledge-repository.ts";
 import { createKnowledgeServices } from "../../composition.ts";
 import { buildKnowledgeDocumentsRoutes } from "./knowledge-documents-route-handler.ts";

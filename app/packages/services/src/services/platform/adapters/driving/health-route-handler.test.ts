@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createLogger, type LogRecord } from "../../../shared/observability/logger.ts";
+import { createLogger, type LogRecord } from "#/services/shared/observability/logger.ts";
 import { makeHealthRouteHandler } from "./health-route-handler.ts";
 
 const VALID_ULID = "01K6BZ3YQ8X4M7N2P5R9T0V1W2";

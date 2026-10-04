@@ -1,6 +1,6 @@
 import type { FeatureFlag, TenantId, UserPrincipal } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { findFlag, type RegisteredFlag } from "../../flag-registry.ts";
 import type { FlagsDeps } from "../flags-deps.ts";
 import { environmentValueFor, toFeatureFlag } from "./list-flags.ts";

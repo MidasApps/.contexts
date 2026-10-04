@@ -1,6 +1,6 @@
 import { TenantIdSchema } from "@core/contracts";
-import type { AuditWriter } from "../../../audit/application/use-cases/record-audit.ts";
-import type { Clock } from "../../../shared/clock/clock.ts";
+import type { AuditWriter } from "#/services/audit/application/use-cases/record-audit.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
 import { resolveBudget } from "../../domain/budget-policy.ts";
 import type { UsageReportRepository } from "../ports/usage-report-repository.ts";
 import type { UsageRepository } from "../ports/usage-repository.ts";

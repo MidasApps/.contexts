@@ -1,6 +1,6 @@
 import type { Membership, MembershipId, RoleId, RoleRef, TenantId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /**
  * Source of truth of grants (`memberships`, SP1 spec §4). Reads take the use case's

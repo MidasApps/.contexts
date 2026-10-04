@@ -1,6 +1,6 @@
 import type { Sql } from "postgres";
-import type { TraceCostReader, TraceLedgerCost } from "../../../observability/application/ports/trace-cost-reader.ts";
-import { withTenantTransaction } from "../../../shared/postgres/with-tenant-transaction.ts";
+import type { TraceCostReader, TraceLedgerCost } from "#/services/observability/application/ports/trace-cost-reader.ts";
+import { withTenantTransaction } from "#/services/shared/postgres/with-tenant-transaction.ts";
 import { USAGE_RUNTIME_ROLE } from "./postgres-usage-repository.ts";
 
 type CostRow = { trace_id: string; cost_micro_usd: string; unpriced_calls: string };

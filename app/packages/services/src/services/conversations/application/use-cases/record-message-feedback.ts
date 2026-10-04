@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 import type { MessageFeedback, MessageFeedbackInput, UserPrincipal } from "@core/contracts";
-import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
-import type { DenyReason } from "../../../access/domain/authorization.ts";
-import type { ConsoleGateway } from "../../../observability/application/ports/console-gateway.ts";
-import type { Clock } from "../../../shared/clock/clock.ts";
-import type { Logger } from "../../../shared/observability/logger.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { Authorize } from "#/services/access/application/ports/driving/authorize.ts";
+import type { DenyReason } from "#/services/access/domain/authorization.ts";
+import type { ConsoleGateway } from "#/services/observability/application/ports/console-gateway.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { MessageFeedbackStore } from "../ports/message-feedback-store.ts";
 import type { GetConversation } from "./get-conversation.ts";
 

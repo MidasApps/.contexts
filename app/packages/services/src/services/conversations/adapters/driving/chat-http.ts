@@ -1,10 +1,10 @@
 import { type Conversation, FORWARDED_HEADERS, type UserPrincipal } from "@core/contracts";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { ChatRuntimeGateway, ChatStreamAnswer } from "../../../agents/application/ports/chat-runtime-gateway.ts";
-import type { GetReadyFile, ReadFileBytes } from "../../../files/application/use-cases/read-file-bytes.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import type { ApiRouteDeps } from "../../../shared/http/api-route.ts";
-import type { Logger } from "../../../shared/observability/logger.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { ChatRuntimeGateway, ChatStreamAnswer } from "#/services/agents/application/ports/chat-runtime-gateway.ts";
+import type { GetReadyFile, ReadFileBytes } from "#/services/files/application/use-cases/read-file-bytes.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import type { ApiRouteDeps } from "#/services/shared/http/api-route.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 import { conversationNode, type SendChatDeps } from "../../application/use-cases/send-chat-message.ts";
 import type { ConversationsServices } from "../../composition.ts";
 import { trackRunStream } from "./run-stream.ts";

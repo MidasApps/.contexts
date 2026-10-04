@@ -1,5 +1,5 @@
 import type { NodeRef, Permission, Principal } from "@core/contracts";
-import type { AuthorizeDecision, DenyReason } from "../../../domain/authorization.ts";
+import type { AuthorizeDecision, DenyReason } from "#/services/access/domain/authorization.ts";
 
 export type AuthorizeRequest = {
   readonly principal: Principal;

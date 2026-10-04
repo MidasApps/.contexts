@@ -1,5 +1,5 @@
 import type { StoredFile } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { FileRepository } from "../ports/file-ports.ts";
 import { canReadFile, type FilesCaller } from "./file-access.ts";
 

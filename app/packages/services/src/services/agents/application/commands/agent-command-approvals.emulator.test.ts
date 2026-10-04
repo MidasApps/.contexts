@@ -6,18 +6,18 @@ import {
 } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { AUDIT_LOG_COLLECTIONS } from "../../../audit/adapters/driven/firestore-audit-log-writer.ts";
+import { AUDIT_LOG_COLLECTIONS } from "#/services/audit/adapters/driven/firestore-audit-log-writer.ts";
 import {
   createFirestoreIdempotencyStore,
   IDEMPOTENCY_RECORDS_COLLECTION,
-} from "../../../shared/idempotency/firestore-idempotency-store.ts";
+} from "#/services/shared/idempotency/firestore-idempotency-store.ts";
 import {
   buildEmulatorServer,
   clearCoreCollections,
   emulatorFirebase,
   ensureAuthUser,
   seedActiveUser,
-} from "../../../shared/testing/core-server-emulator.fixture.ts";
+} from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import { defineAgentCommandExecutor } from "./agent-command-executor.ts";
 import { registerAgentCommandApprovals } from "./register-agent-command-approvals.ts";
 

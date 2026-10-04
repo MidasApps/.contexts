@@ -1,6 +1,6 @@
 import type { Conversation, ConversationPatch } from "@core/contracts";
-import type { Clock } from "../../../shared/clock/clock.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { applyConversationPatch, isVisibleTo } from "../../domain/conversation.ts";
 import type { ConversationRepository } from "../ports/conversation-repository.ts";
 import { CONVERSATION_NOT_FOUND, type ConversationNotFound } from "./get-conversation.ts";

@@ -1,8 +1,8 @@
 import type { ProjectId, Unit, UnitId } from "@core/contracts";
-import type { DenyReason } from "../../../access/domain/authorization.ts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { DenyReason } from "#/services/access/domain/authorization.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { type TenancyCommand, type TenancyDeps, unitNode } from "../tenancy-deps.ts";
 import { loadTreeParent, type UnitError } from "./unit-access.ts";
 

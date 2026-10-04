@@ -1,8 +1,8 @@
 import { stopChatRunEndpoint } from "@core/contracts";
-import { gatewayErrorResponse } from "../../../agents/adapters/driven/mastra-error-mapper.ts";
-import { noContentResponse } from "../../../shared/http/api-errors.ts";
-import { withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { gatewayErrorResponse } from "#/services/agents/adapters/driven/mastra-error-mapper.ts";
+import { noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import { CONVERSATION_SEND_PERMISSION } from "../../application/use-cases/send-chat-message.ts";
 import { type ChatRoutesDeps, endRunOnClose } from "./chat-http.ts";
 import { loadOwnedRun } from "./chat-stream-route-handler.ts";

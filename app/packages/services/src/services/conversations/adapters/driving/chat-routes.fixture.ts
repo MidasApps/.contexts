@@ -1,21 +1,21 @@
 // Unit-test harness of the `/v1/chat` and `/v1/conversations` routes: in-memory pipeline,
 // conversations and files, and a scripted chat gateway that records every call.
 import type { StoredFile, TenantId } from "@core/contracts";
-import type { AgentCallScope, GatewayResult } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+import type { AgentCallScope, GatewayResult } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
 import type {
   ChatRuntimeGateway,
   ChatStreamAnswer,
   ChatTurnBody,
-} from "../../../agents/application/ports/chat-runtime-gateway.ts";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
+} from "#/services/agents/application/ports/chat-runtime-gateway.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
 import {
   createInMemoryFileRepository,
   createInMemoryObjectStore,
-} from "../../../files/adapters/driven/in-memory-file-adapters.ts";
-import { makeGetReadyFile, makeReadFileBytes } from "../../../files/application/use-cases/read-file-bytes.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+} from "#/services/files/adapters/driven/in-memory-file-adapters.ts";
+import { makeGetReadyFile, makeReadFileBytes } from "#/services/files/application/use-cases/read-file-bytes.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import { createConversationsServices } from "../../composition.ts";
 import { createInMemoryConversationRepository } from "../driven/in-memory-conversation-repository.ts";
 import type { ChatRoutesDeps } from "./chat-http.ts";

@@ -1,7 +1,7 @@
 import type { TenantId } from "@core/contracts";
-import type { GrantRecord } from "../../../domain/grant.ts";
+import type { GrantRecord } from "#/services/access/domain/grant.ts";
 
-export type { GrantRecord } from "../../../domain/grant.ts";
+export type { GrantRecord } from "#/services/access/domain/grant.ts";
 
 /** Reads memberships of one principal on a set of nodes (Firestore adapter in Task 9). */
 export type GrantReader = {

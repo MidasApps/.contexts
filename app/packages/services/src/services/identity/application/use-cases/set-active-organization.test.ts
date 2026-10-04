@@ -1,6 +1,6 @@
 import type { RoleRef, TenantNodeRef } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { ids, REQUEST_ID, userOf } from "../../../tenancy/application/use-cases/tenancy.fixture.ts";
+import { ids, REQUEST_ID, userOf } from "#/services/tenancy/application/use-cases/tenancy.fixture.ts";
 import { makeMeWorld } from "./me.fixture.ts";
 
 const PAGE = { after: undefined, limit: 10 };

@@ -1,7 +1,7 @@
 import type { AdminAgent, AdminSchedule, AdminWorkflowRun, Connector, TenantId } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import type { LogRecord } from "../../../shared/observability/logger.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import type { LogRecord } from "#/services/shared/observability/logger.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import type { OperationsGateway } from "../../application/ports/operations-gateway.ts";
 import { createMastraOperationsGateway } from "../driven/mastra-operations-gateway.ts";
 import { buildAdminLogsRoutes } from "./admin-logs-route-handler.ts";

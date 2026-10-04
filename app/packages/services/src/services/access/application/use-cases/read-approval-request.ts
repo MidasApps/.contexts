@@ -1,5 +1,5 @@
 import type { ApprovalRequest, ApprovalRequestId, Principal } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import { approvalView } from "../../domain/approval-state.ts";
 import { ApprovalNotFoundError } from "../../domain/errors/approval-errors.ts";

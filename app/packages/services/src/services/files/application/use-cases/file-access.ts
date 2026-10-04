@@ -1,5 +1,5 @@
 import type { Principal, StoredFile, TenantId } from "@core/contracts";
-import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
+import type { Authorize } from "#/services/access/application/ports/driving/authorize.ts";
 
 export const FILE_UPLOAD_PERMISSION = "core.file.upload";
 export const KNOWLEDGE_READ_PERMISSION = "core.knowledge.read";

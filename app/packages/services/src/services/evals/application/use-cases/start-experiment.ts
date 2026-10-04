@@ -1,5 +1,5 @@
 import type { AgentSettings, StartEvalExperimentInput, UserPrincipal } from "@core/contracts";
-import type { ConsoleGateway, ConsoleResult } from "../../../observability/application/ports/console-gateway.ts";
+import type { ConsoleGateway, ConsoleResult } from "#/services/observability/application/ports/console-gateway.ts";
 
 /** The supervisor always runs; any other agent must be enabled in the organization's settings. */
 export const SUPERVISOR_AGENT_ID = "assistant";

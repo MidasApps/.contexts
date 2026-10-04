@@ -1,5 +1,5 @@
 import { type AccessProjection, type Membership, MembershipIdSchema, type Role, RoleIdSchema } from "@core/contracts";
-import { paginateInMemory } from "../../../shared/pagination/page.ts";
+import { paginateInMemory } from "#/services/shared/pagination/page.ts";
 import type { AccessProjectionStore } from "../../application/ports/driven/access-projection-writer.ts";
 import type { ClaimsWriter, CoreClaims } from "../../application/ports/driven/claims-writer.ts";
 import type { GrantReader } from "../../application/ports/driven/grant-reader.ts";

@@ -1,8 +1,8 @@
 import { type LlmCall, LlmCallSchema } from "@core/contracts";
 import type { TransactionSql } from "postgres";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { createPostgresClient } from "../../../shared/postgres/postgres-client.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { createPostgresClient } from "#/services/shared/postgres/postgres-client.ts";
 import { makeCheckTenantBudget } from "../../application/use-cases/check-tenant-budget.ts";
 import { makeGetUsageSummary } from "../../application/use-cases/get-usage-summary.ts";
 import { type AgentRun, AgentRunSchema } from "../../application/use-cases/record-agent-runs.schema.ts";

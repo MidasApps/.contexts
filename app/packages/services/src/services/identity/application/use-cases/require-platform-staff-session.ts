@@ -1,5 +1,5 @@
 import type { PlatformRole, SessionId, UserPrincipal } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { NotPlatformStaffError, type SessionInvalidError } from "../../domain/errors/session-errors.ts";
 import type { SessionDeps } from "../session-deps.ts";
 import { loadWebSession } from "./require-web-session.ts";

@@ -1,8 +1,8 @@
 import { type ApiKeyId, type Principal, type RegionalSettings, TenantIdSchema, UserIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import type { ErrorEnvelope } from "../../../shared/http/error-envelope.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import type { ErrorEnvelope } from "#/services/shared/http/error-envelope.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import type { AgentRuntimeGateway, McpCallInput } from "../../application/ports/agent-runtime-gateway.ts";
 import { buildMcpRoutes } from "./mcp-route-handler.ts";
 

@@ -1,7 +1,7 @@
 import type { CreateUnitInput, ProjectId, Unit } from "@core/contracts";
-import { requirePermission } from "../../../access/application/grant-checks.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { requirePermission } from "#/services/access/application/grant-checks.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { InvalidUnitParentError } from "../../domain/errors/invalid-unit-parent-error.ts";
 import { UnitTreeBusyError } from "../../domain/errors/unit-tree-busy-error.ts";
 import { placementUnder } from "../../domain/unit-tree.ts";

@@ -1,5 +1,5 @@
 import type { EvalExperimentSummary } from "@core/contracts";
-import type { Logger } from "../../../shared/observability/logger.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 import type { EvalRunSink } from "../../application/ports/eval-run-sink.ts";
 
 export const EVAL_RUNS_TABLE = "eval_runs";

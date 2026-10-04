@@ -8,12 +8,12 @@ import {
   UserIdSchema,
 } from "@core/contracts";
 import { z } from "zod";
-import { createInMemoryAccessStore } from "../../../access/adapters/driven/in-memory-access-store.ts";
-import { createAccessCore } from "../../../access/composition.ts";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
+import { createInMemoryAccessStore } from "#/services/access/adapters/driven/in-memory-access-store.ts";
+import { createAccessCore } from "#/services/access/composition.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { inMemoryUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
 import { createInMemoryModuleSettingsRepository } from "../../adapters/driven/in-memory-module-settings-repository.ts";
 import { createModuleSettingsServices } from "../../composition.ts";
 import type { ModuleSettingsDefinition } from "../../domain/module-settings-registry.ts";

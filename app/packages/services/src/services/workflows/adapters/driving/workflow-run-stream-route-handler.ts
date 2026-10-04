@@ -1,8 +1,8 @@
 import { streamWorkflowRunEndpoint, type WorkflowEvent, type WorkflowRunStatus } from "@core/contracts";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { WorkflowRuntimeGateway } from "../../application/ports/workflow-runtime-gateway.ts";
 import { type GetRunEvents, makeGetRunEvents } from "../../application/use-cases/get-run.ts";
 import {

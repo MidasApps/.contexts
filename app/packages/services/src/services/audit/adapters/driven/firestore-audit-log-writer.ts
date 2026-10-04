@@ -1,7 +1,7 @@
 import { AuditLogEntryContract, AuditLogEntryIdSchema, PlatformAuditLogEntryContract } from "@core/contracts";
 import type { DocumentData, Firestore } from "firebase-admin/firestore";
-import { withCreateAudit } from "../../../shared/firestore/audit-fields.ts";
-import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
+import { withCreateAudit } from "#/services/shared/firestore/audit-fields.ts";
+import { createContractConverter } from "#/services/shared/firestore/contract-converter.ts";
 import type { AuditLogAppend, AuditLogWriter } from "../../application/ports/driven/audit-log-writer.ts";
 
 /** Top-level, append-only collections (SP1 spec §4); no TTL until compliance.md is filled. */

@@ -1,15 +1,15 @@
 // Test world of the files routes: the SP1 pipeline over in-memory access, audit and
 // idempotency adapters, plus in-memory files adapters. Two organizations, one member each.
 import type { Principal } from "@core/contracts";
-import { createInMemoryAccessStore } from "../../../access/adapters/driven/in-memory-access-store.ts";
-import { createAccessCore } from "../../../access/composition.ts";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import type { ApiRouteDeps } from "../../../shared/http/api-route.ts";
-import { createInMemoryIdempotencyStore } from "../../../shared/idempotency/in-memory-idempotency-store.ts";
-import { createLogger } from "../../../shared/observability/logger.ts";
-import { createInMemoryRateLimiter } from "../../../shared/rate-limit/in-memory-rate-limiter.ts";
+import { createInMemoryAccessStore } from "#/services/access/adapters/driven/in-memory-access-store.ts";
+import { createAccessCore } from "#/services/access/composition.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import type { ApiRouteDeps } from "#/services/shared/http/api-route.ts";
+import { createInMemoryIdempotencyStore } from "#/services/shared/idempotency/in-memory-idempotency-store.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
+import { createInMemoryRateLimiter } from "#/services/shared/rate-limit/in-memory-rate-limiter.ts";
 import {
   createFakeUrlSigner,
   createInMemoryFileRepository,

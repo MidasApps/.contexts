@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { ApiKeyIdSchema, type CreateApiKeyInput, OrganizationIdSchema, UserIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { authenticateRequest } from "../../../shared/http/authenticate-request.ts";
-import { createInMemoryRateLimiter } from "../../../shared/rate-limit/in-memory-rate-limiter.ts";
+import { authenticateRequest } from "#/services/shared/http/authenticate-request.ts";
+import { createInMemoryRateLimiter } from "#/services/shared/rate-limit/in-memory-rate-limiter.ts";
 import { createFakeTokenVerifier } from "../../adapters/driven/fake-token-verifier.ts";
 import { API_KEY_NOW, buildApiKeyWorld } from "./api-key.fixture.ts";
 import { makeVerifyBearer } from "./resolve-principal.ts";

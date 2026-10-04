@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { decodeCursor } from "../../../shared/pagination/cursor.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { decodeCursor } from "#/services/shared/pagination/cursor.ts";
 import { createInMemoryConsoleStores } from "../../adapters/driven/in-memory-console-stores.ts";
 import { makeListOrganizationsAdmin, ORGANIZATION_SCAN_BUDGET } from "./list-organizations-admin.ts";
 

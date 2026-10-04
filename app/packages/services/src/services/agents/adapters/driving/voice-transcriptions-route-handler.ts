@@ -1,8 +1,8 @@
 import { TranscriptionSchema, transcribeVoiceEndpoint } from "@core/contracts";
 import { z } from "zod";
-import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
-import { withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { apiError, dataResponse } from "#/services/shared/http/api-errors.ts";
+import { withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import { gatewayErrorResponse } from "../driven/mastra-error-mapper.ts";
 import { sniffAudioType, type VoiceRoutesDeps, voiceScopeOf } from "./voice-http.ts";
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { buildAgentSettingsRoutes } from "../../../agents/adapters/driving/agent-settings-route-handler.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import { buildAgentSettingsRoutes } from "#/services/agents/adapters/driving/agent-settings-route-handler.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import { createConsoleServices } from "../../composition.ts";
 import { createInMemoryConsoleStores } from "../driven/in-memory-console-stores.ts";
 import { buildAdminPlatformRoutes } from "./admin-platform-route-handler.ts";

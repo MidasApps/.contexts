@@ -1,7 +1,7 @@
 import { TenantIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { emulatorFirebase } from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import type { AgentSettingsFields } from "../../application/ports/console-ports.ts";
 import {
   createFirestoreAgentSettingsRepository,

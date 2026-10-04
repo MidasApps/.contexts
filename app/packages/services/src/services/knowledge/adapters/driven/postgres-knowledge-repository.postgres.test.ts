@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { createPostgresClient } from "../../../shared/postgres/postgres-client.ts";
+import { createPostgresClient } from "#/services/shared/postgres/postgres-client.ts";
 import type { NewChunk, NewKnowledgeDocument } from "../../application/ports/knowledge-repository.ts";
 import { makeReplaceDocumentChunks } from "../../application/use-cases/replace-document-chunks.ts";
 import { makeSearchChunks } from "../../application/use-cases/search-chunks.ts";

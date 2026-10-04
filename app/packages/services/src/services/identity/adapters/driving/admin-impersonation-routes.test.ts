@@ -1,9 +1,9 @@
 import { type ImpersonationSession, ImpersonationSessionSchema } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { inMemoryUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import {
   makeEndImpersonationSession,
   makeListImpersonationSessions,

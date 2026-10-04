@@ -1,6 +1,6 @@
 import type { Me, UpdateMeInput, User, UserPreferences, UserPrincipal } from "@core/contracts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { AccountMissingError } from "../../domain/errors/account-missing-error.ts";
 import type { MeDeps } from "../me-deps.ts";
 import type { UserProfilePatch } from "../ports/driven/user-repository.ts";

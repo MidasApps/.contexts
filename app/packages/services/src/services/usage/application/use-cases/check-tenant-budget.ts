@@ -1,4 +1,4 @@
-import type { Clock } from "../../../shared/clock/clock.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
 import { type BudgetDecision, evaluateBudget, resolveBudget } from "../../domain/budget-policy.ts";
 import type { UsageRepository } from "../ports/usage-repository.ts";
 import { utcMonthStart } from "./usage-month.ts";

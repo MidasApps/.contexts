@@ -1,5 +1,5 @@
 import type { Permission, Principal, Role, RoleId } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import type { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
 import { AccessNotFoundError } from "../../domain/errors/access-not-found-error.ts";

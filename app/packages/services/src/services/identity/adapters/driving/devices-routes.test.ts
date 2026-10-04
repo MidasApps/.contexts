@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { createInMemoryAccessStore } from "../../../access/adapters/driven/in-memory-access-store.ts";
-import { createAccessCore } from "../../../access/composition.ts";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import type { ApiRouteDeps } from "../../../shared/http/api-route.ts";
-import { createInMemoryIdempotencyStore } from "../../../shared/idempotency/in-memory-idempotency-store.ts";
-import { createLogger } from "../../../shared/observability/logger.ts";
-import { createInMemoryRateLimiter } from "../../../shared/rate-limit/in-memory-rate-limiter.ts";
+import { createInMemoryAccessStore } from "#/services/access/adapters/driven/in-memory-access-store.ts";
+import { createAccessCore } from "#/services/access/composition.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import type { ApiRouteDeps } from "#/services/shared/http/api-route.ts";
+import { createInMemoryIdempotencyStore } from "#/services/shared/idempotency/in-memory-idempotency-store.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
+import { createInMemoryRateLimiter } from "#/services/shared/rate-limit/in-memory-rate-limiter.ts";
 import { buildDeviceWorld, DEVICE_NOW } from "../../application/use-cases/device.fixture.ts";
 import { buildDevicesRoutes } from "./devices-routes.ts";
 

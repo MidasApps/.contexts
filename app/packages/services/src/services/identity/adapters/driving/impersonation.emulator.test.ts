@@ -1,9 +1,12 @@
 import { OrganizationIdSchema, UserIdSchema } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
-import { AUDIT_LOG_COLLECTIONS } from "../../../audit/adapters/driven/firestore-audit-log-writer.ts";
-import { createCoreServer } from "../../../composition.ts";
-import { createLogger, type LogRecord } from "../../../shared/observability/logger.ts";
-import { signInWithCustomToken, signInWithPasswordAndSms } from "../../../shared/testing/auth-emulator-rest.fixture.ts";
+import { AUDIT_LOG_COLLECTIONS } from "#/services/audit/adapters/driven/firestore-audit-log-writer.ts";
+import { createCoreServer } from "#/services/composition.ts";
+import { createLogger, type LogRecord } from "#/services/shared/observability/logger.ts";
+import {
+  signInWithCustomToken,
+  signInWithPasswordAndSms,
+} from "#/services/shared/testing/auth-emulator-rest.fixture.ts";
 import {
   buildEmulatorServer,
   clearCoreCollections,
@@ -11,7 +14,7 @@ import {
   emulatorFirebase,
   ensureAuthUser,
   seedActiveUser,
-} from "../../../shared/testing/core-server-emulator.fixture.ts";
+} from "#/services/shared/testing/core-server-emulator.fixture.ts";
 
 const STAFF = { uid: "imp-staff", email: "imp-staff@example.com", password: "correct-horse-battery" };
 const OWNER = "imp-owner";

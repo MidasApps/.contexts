@@ -6,12 +6,12 @@ import {
   type TenantId,
   type UserPrincipal,
 } from "@core/contracts";
-import { requireNoEscalation, requirePermission } from "../../../access/application/grant-checks.ts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import type { EscalationForbiddenError } from "../../../access/domain/errors/escalation-forbidden-error.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { requireNoEscalation, requirePermission } from "#/services/access/application/grant-checks.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import type { EscalationForbiddenError } from "#/services/access/domain/errors/escalation-forbidden-error.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { formatApiKey, generateApiKeyParts } from "../../domain/api-key-format.ts";
 import { ApiKeyExpiryInvalidError } from "../../domain/errors/api-key-errors.ts";
 import type { ApiKeyDeps } from "../api-key-deps.ts";

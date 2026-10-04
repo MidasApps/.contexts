@@ -1,5 +1,5 @@
 import { type AdminOverview, AdminOverviewSchema } from "@core/contracts";
-import { utcMonthStart } from "../../../usage/application/use-cases/usage-month.ts";
+import { utcMonthStart } from "#/services/usage/application/use-cases/usage-month.ts";
 import type { ConsoleDeps } from "../console-deps.ts";
 import type { OrganizationListItem } from "../ports/console-ports.ts";
 

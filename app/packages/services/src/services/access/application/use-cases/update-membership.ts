@@ -1,7 +1,7 @@
 import { type Membership, type MembershipId, type RoleRef, UserIdSchema, type UserPrincipal } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import { AccessNotFoundError } from "../../domain/errors/access-not-found-error.ts";
 import { LastOwnerError } from "../../domain/errors/last-owner-error.ts";

@@ -10,11 +10,11 @@ import {
   type TenantNodeRef,
   updateMeEndpoint,
 } from "@core/contracts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { apiError, dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { apiError, dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { AccessContextResolution } from "../../application/use-cases/resolve-access-context.ts";
 import type { IdentityServices } from "../../composition.ts";
 import type { AccountMissingError } from "../../domain/errors/account-missing-error.ts";

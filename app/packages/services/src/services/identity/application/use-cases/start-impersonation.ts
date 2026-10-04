@@ -4,10 +4,10 @@ import type {
   StartImpersonationResponse,
   UserPrincipal,
 } from "@core/contracts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { AccessNotFoundError } from "../../../access/domain/errors/access-not-found-error.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { AccessNotFoundError } from "#/services/access/domain/errors/access-not-found-error.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { PlatformDeps } from "../platform-deps.ts";
 import { requireImpersonateRight } from "../platform-guard.ts";
 

@@ -1,7 +1,7 @@
 import { PromptVersionIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import type { PromptEvalGateway } from "../../application/ports/prompt-eval-gateway.ts";
 import { createPromptServices } from "../../prompt-composition.ts";
 import { createInMemoryPromptRepository } from "../driven/in-memory-prompt-repository.ts";

@@ -1,8 +1,8 @@
 import type { Connector } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
-import type { ErrorEnvelope } from "../../../shared/http/error-envelope.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import { inMemoryUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
+import type { ErrorEnvelope } from "#/services/shared/http/error-envelope.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import { createConnectorsServices } from "../../composition.ts";
 import {
   createInMemoryConnectorRepository,

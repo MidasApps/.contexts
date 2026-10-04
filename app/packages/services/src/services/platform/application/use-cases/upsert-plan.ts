@@ -1,6 +1,6 @@
 import type { Plan, UpsertPlanInput, UserPrincipal } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { ConsoleDeps } from "../console-deps.ts";
 import { syncTenantBudget, tightenTenantBudget } from "./sync-tenant-budget.ts";
 

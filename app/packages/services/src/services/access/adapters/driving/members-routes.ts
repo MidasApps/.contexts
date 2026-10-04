@@ -1,8 +1,8 @@
 import { listMembersEndpoint, removeMemberEndpoint } from "@core/contracts";
-import { noContentResponse } from "../../../shared/http/api-errors.ts";
-import { invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { MemberServices } from "../../member-composition.ts";
 import { accessErrorResponse } from "./access-error-response.ts";
 

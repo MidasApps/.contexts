@@ -1,5 +1,5 @@
 import type { Conversation } from "@core/contracts";
-import type { Clock } from "../../../shared/clock/clock.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
 import { createConversation, type NewConversation } from "../../domain/conversation.ts";
 import type { ConversationRepository } from "../ports/conversation-repository.ts";
 

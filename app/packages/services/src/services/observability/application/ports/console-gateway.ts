@@ -1,5 +1,5 @@
 import type { EvalDataset, EvalDatasetItem, EvalExperimentSummary, TraceDetail, TraceSummary } from "@core/contracts";
-import type { Result } from "../../../shared/result/result.ts";
+import type { Result } from "#/services/shared/result/result.ts";
 
 /** A console call refused or failed upstream: the status and code `/v1` answers with. */
 export type ConsoleError = { readonly code: string; readonly status: number };

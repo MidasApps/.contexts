@@ -1,6 +1,6 @@
 import { type UsageSummary, UsageSummarySchema } from "@core/contracts";
 import { z } from "zod";
-import type { Clock } from "../../../shared/clock/clock.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
 import { resolveBudget } from "../../domain/budget-policy.ts";
 import type { UsageRepository } from "../ports/usage-repository.ts";
 import type { UsageValidationError } from "./record-llm-calls.ts";

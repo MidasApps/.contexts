@@ -1,5 +1,5 @@
-import { apiError, type DomainErrorMapping, mapDomainError } from "../../../shared/http/api-errors.ts";
-import { deniedResponse } from "../../../shared/http/api-list.ts";
+import { apiError, type DomainErrorMapping, mapDomainError } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse } from "#/services/shared/http/api-list.ts";
 import { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
 import { UnknownRoleError } from "../../domain/errors/unknown-role-error.ts";
 

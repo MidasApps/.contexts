@@ -1,10 +1,10 @@
 import type { MyGrant, TenantId, UserPrincipal } from "@core/contracts";
-import { LEVEL_ORDER } from "../../../access/application/organization-membership.ts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import { nodeIdOf } from "../../../access/domain/access-projection.ts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { type Page, type PageRequest, paginateInMemory } from "../../../shared/pagination/page.ts";
-import { ok, type Result } from "../../../shared/result/result.ts";
+import { LEVEL_ORDER } from "#/services/access/application/organization-membership.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import { nodeIdOf } from "#/services/access/domain/access-projection.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { type Page, type PageRequest, paginateInMemory } from "#/services/shared/pagination/page.ts";
+import { ok, type Result } from "#/services/shared/result/result.ts";
 import type { MeDeps } from "../me-deps.ts";
 
 export type ListMyGrants = (command: {

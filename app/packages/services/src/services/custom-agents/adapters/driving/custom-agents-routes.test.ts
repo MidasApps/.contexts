@@ -8,12 +8,12 @@ import type {
   TenantId,
 } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
-import type { ErrorEnvelope } from "../../../shared/http/error-envelope.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
-import type { WorkflowGatewayResult } from "../../../workflows/application/ports/workflow-runtime-gateway.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { inMemoryUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
+import type { ErrorEnvelope } from "#/services/shared/http/error-envelope.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
+import type { WorkflowGatewayResult } from "#/services/workflows/application/ports/workflow-runtime-gateway.ts";
 import { createCustomAgentsServices } from "../../composition.ts";
 import {
   createInMemoryCustomAgentRepository,

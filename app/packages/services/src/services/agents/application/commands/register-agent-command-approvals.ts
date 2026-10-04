@@ -1,6 +1,6 @@
-import type { ApprovalServices } from "../../../access/approval-composition.ts";
-import type { AccessCore } from "../../../access/composition.ts";
-import type { IdempotencyStore } from "../../../shared/idempotency/idempotency-store.ts";
+import type { ApprovalServices } from "#/services/access/approval-composition.ts";
+import type { AccessCore } from "#/services/access/composition.ts";
+import type { IdempotencyStore } from "#/services/shared/idempotency/idempotency-store.ts";
 import { AGENT_COMMAND_HANDLER_KIND, createAgentCommandApprovalHandler } from "./agent-command-approval-handler.ts";
 import { type AgentCommandExecutor, agentCommandExecutors } from "./agent-command-executor.ts";
 import { type CommandIdempotency, createCommandIdempotency } from "./run-command-once.ts";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
 import { createMastraWorkflowGateway } from "./mastra-workflow-gateway.ts";
 
 const scope: AgentCallScope = {

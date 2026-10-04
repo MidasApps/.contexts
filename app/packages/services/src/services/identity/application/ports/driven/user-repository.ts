@@ -1,6 +1,6 @@
 import type { OrganizationId, User, UserId, UserPreferences } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { NewUserProfile } from "../../../../access/application/ports/driven/user-access-version.ts";
+import type { NewUserProfile } from "#/services/access/application/ports/driven/user-access-version.ts";
 
 /** The preferences that shape regional settings (SP1 spec §4). */
 export type RegionalPreferences = Pick<UserPreferences, "locale" | "timeZone" | "currency">;

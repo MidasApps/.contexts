@@ -1,7 +1,7 @@
-import { sha256Hex } from "../../../shared/crypto/sha256.ts";
-import type { IdempotencyStore } from "../../../shared/idempotency/idempotency-store.ts";
-import { idempotencyScopeKey } from "../../../shared/idempotency/idempotency-store.ts";
-import { canonicalJson } from "../../../shared/idempotency/request-hash.ts";
+import { sha256Hex } from "#/services/shared/crypto/sha256.ts";
+import type { IdempotencyStore } from "#/services/shared/idempotency/idempotency-store.ts";
+import { idempotencyScopeKey } from "#/services/shared/idempotency/idempotency-store.ts";
+import { canonicalJson } from "#/services/shared/idempotency/request-hash.ts";
 import { AgentCommandError } from "./agent-command-error.ts";
 
 /** One command execution keyed by `runId:toolCallId` (decision 0025, follow-up #26). */

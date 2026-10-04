@@ -1,11 +1,11 @@
 import { type Conversation, resumeChatStreamEndpoint, type UserPrincipal } from "@core/contracts";
-import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
-import { gatewayErrorResponse } from "../../../agents/adapters/driven/mastra-error-mapper.ts";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import { apiError, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { deniedResponse } from "../../../shared/http/api-list.ts";
-import { withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import type { Authorize } from "#/services/access/application/ports/driving/authorize.ts";
+import { gatewayErrorResponse } from "#/services/agents/adapters/driven/mastra-error-mapper.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import { apiError, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse } from "#/services/shared/http/api-list.ts";
+import { withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import { CONVERSATION_SEND_PERMISSION, conversationNode } from "../../application/use-cases/send-chat-message.ts";
 import { liveActiveRunId } from "../../domain/conversation.ts";
 import { type ChatRoutesDeps, chatScopeOf, chatStreamResponse, endRunOnClose } from "./chat-http.ts";

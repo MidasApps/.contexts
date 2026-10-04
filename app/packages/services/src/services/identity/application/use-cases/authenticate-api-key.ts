@@ -1,5 +1,5 @@
 import type { ApiKey, ServicePrincipal } from "@core/contracts";
-import { isAtOrBefore } from "../../../shared/clock/clock.ts";
+import { isAtOrBefore } from "#/services/shared/clock/clock.ts";
 import { parseApiKey } from "../../domain/api-key-format.ts";
 import { secretHashesMatch } from "../../domain/session-secret.ts";
 import type { ApiKeyDeps } from "../api-key-deps.ts";

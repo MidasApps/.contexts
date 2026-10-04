@@ -5,10 +5,10 @@ import {
   listApprovalRequestsEndpoint,
   rejectApprovalRequestEndpoint,
 } from "@core/contracts";
-import { apiError, type DomainErrorMapping, dataResponse, mapDomainError } from "../../../shared/http/api-errors.ts";
-import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { apiError, type DomainErrorMapping, dataResponse, mapDomainError } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { ApprovalServices } from "../../approval-composition.ts";
 import { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
 import { ApprovalInputInvalidError } from "../../domain/errors/approval-errors.ts";

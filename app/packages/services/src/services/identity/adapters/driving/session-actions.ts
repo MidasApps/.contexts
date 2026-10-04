@@ -1,7 +1,7 @@
 import { ImpersonationSessionIdSchema, type RequestId } from "@core/contracts";
 import { z } from "zod";
-import type { Logger } from "../../../shared/observability/logger.ts";
-import { resolveRequestId } from "../../../shared/observability/request-id.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
+import { resolveRequestId } from "#/services/shared/observability/request-id.ts";
 import { CreateWebSessionInputSchema } from "../../application/use-cases/create-web-session.schema.ts";
 import type { SessionServices } from "../../session-composition.ts";
 

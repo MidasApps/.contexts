@@ -1,5 +1,5 @@
 import type { UserId } from "@core/contracts";
-import type { NewUserProfile } from "../../../../access/application/ports/driven/user-access-version.ts";
+import type { NewUserProfile } from "#/services/access/application/ports/driven/user-access-version.ts";
 
 /**
  * Reads the Firebase Auth account of a user, for the profile a new `users/{uid}` doc

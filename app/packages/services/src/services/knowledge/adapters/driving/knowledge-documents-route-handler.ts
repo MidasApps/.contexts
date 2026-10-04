@@ -5,11 +5,11 @@ import {
   type Principal,
   type TenantId,
 } from "@core/contracts";
-import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
-import { apiError, dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { deniedResponse } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import type { Authorize } from "#/services/access/application/ports/driving/authorize.ts";
+import { apiError, dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { DeleteDocument } from "../../application/use-cases/delete-document.ts";
 import type { GetDocument } from "../../application/use-cases/get-document.ts";
 import type { KnowledgeInputError } from "../../application/use-cases/knowledge-input.schema.ts";

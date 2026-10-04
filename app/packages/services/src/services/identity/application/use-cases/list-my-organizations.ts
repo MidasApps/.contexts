@@ -1,6 +1,6 @@
 import { type Organization, OrganizationIdSchema, type UserPrincipal } from "@core/contracts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 import type { MeDeps } from "../me-deps.ts";
 
 export type ListMyOrganizations = (command: {

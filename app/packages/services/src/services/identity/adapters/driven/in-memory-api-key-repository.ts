@@ -1,5 +1,5 @@
 import { type ApiKey, ApiKeyIdSchema } from "@core/contracts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { ApiKeyRepository, StoredApiKey } from "../../application/ports/driven/api-key-repository.ts";
 
 type Row = { apiKey: ApiKey; secretHash: string };

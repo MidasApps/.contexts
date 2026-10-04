@@ -1,9 +1,9 @@
 import { getVoiceAvailabilityEndpoint, type TenantId, type VoiceAvailability } from "@core/contracts";
-import { dataResponse } from "../../../shared/http/api-errors.ts";
-import { deniedResponse } from "../../../shared/http/api-list.ts";
-import { withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
-import { processLogger } from "../../../shared/observability/process-logger.ts";
+import { dataResponse } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse } from "#/services/shared/http/api-list.ts";
+import { withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
+import { processLogger } from "#/services/shared/observability/process-logger.ts";
 import { VOICE_USE_PERMISSION, type VoiceRoutesDeps } from "./voice-http.ts";
 
 /** Flag keys of the voice gate (flags registry, decision 0039). */

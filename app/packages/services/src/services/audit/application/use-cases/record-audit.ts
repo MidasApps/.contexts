@@ -6,7 +6,7 @@ import {
   PlatformAuditLogEntrySchema,
 } from "@core/contracts";
 import type { z } from "zod";
-import type { Clock } from "../../../shared/clock/clock.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
 import { AuditEntryRejectedError } from "../../domain/audit-entry-rejected-error.ts";
 import { findForbiddenAuditKeys } from "../../domain/forbidden-audit-keys.ts";
 import type { AuditLogAppend, AuditLogWriter, AuditTransaction } from "../ports/driven/audit-log-writer.ts";

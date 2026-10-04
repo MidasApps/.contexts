@@ -1,5 +1,5 @@
 import type { Conversation } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { isVisibleTo } from "../../domain/conversation.ts";
 import type { ConversationRepository } from "../ports/conversation-repository.ts";
 

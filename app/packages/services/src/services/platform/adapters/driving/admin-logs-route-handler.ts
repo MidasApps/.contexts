@@ -1,8 +1,8 @@
 import { adminListLogsEndpoint } from "@core/contracts";
-import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
-import type { LogRecord } from "../../../shared/observability/logger.ts";
+import { apiError, dataResponse } from "#/services/shared/http/api-errors.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
+import type { LogRecord } from "#/services/shared/observability/logger.ts";
 import { listLogLines } from "../../application/use-cases/list-log-lines.ts";
 import { requireStaff } from "./console-guards.ts";
 

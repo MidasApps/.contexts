@@ -1,5 +1,5 @@
 import type { FilePurpose, StoredFile } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { FileObjectStore, FileRepository } from "../ports/file-ports.ts";
 
 export type ReadFileBytesError =

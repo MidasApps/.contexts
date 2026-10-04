@@ -1,8 +1,8 @@
 import { IsoDateTimeSchema, type Project, ProjectIdSchema, ProjectSchema } from "@core/contracts";
 import { FieldPath, FieldValue, type Firestore } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter, toFirestoreUpdate } from "#/services/shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { ProjectRepository } from "../../application/ports/driven/project-repository.ts";
 
 /** Stored project: the contract plus `deletedAt` (audit fields and `schemaVersion` are stripped on read). */

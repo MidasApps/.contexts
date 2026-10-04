@@ -1,5 +1,5 @@
 import { type ImpersonationSession, ImpersonationSessionIdSchema, type PlatformStaff } from "@core/contracts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { ImpersonationSessionRepository } from "../../application/ports/driven/impersonation-session-repository.ts";
 import type { PlatformStaffRepository } from "../../application/ports/driven/platform-staff-repository.ts";
 

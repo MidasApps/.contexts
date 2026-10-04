@@ -7,8 +7,8 @@ import {
 import type {
   ApprovalActionContext,
   ApprovalActionHandler,
-} from "../../../access/application/ports/driven/approval-action-handler.ts";
-import type { AccessCore } from "../../../access/composition.ts";
+} from "#/services/access/application/ports/driven/approval-action-handler.ts";
+import type { AccessCore } from "#/services/access/composition.ts";
 import { AgentCommandError } from "./agent-command-error.ts";
 import type { AgentCommandExecutor, AgentCommandExecutors } from "./agent-command-executor.ts";
 import type { CommandIdempotency } from "./run-command-once.ts";

@@ -1,11 +1,11 @@
 import type { NodeRef, Permission, Principal, RegionalSettings, TenantNodeRef } from "@core/contracts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import {
   type NodeDetails,
   regionalSettingsAt,
-} from "../../../tenancy/application/use-cases/resolve-regional-settings.ts";
+} from "#/services/tenancy/application/use-cases/resolve-regional-settings.ts";
 import type { MeDeps } from "../me-deps.ts";
 import type { RegionalPreferences } from "../ports/driven/user-repository.ts";
 

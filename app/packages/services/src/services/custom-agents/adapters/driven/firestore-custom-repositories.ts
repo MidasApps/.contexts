@@ -15,9 +15,9 @@ import {
   type Transaction,
 } from "firebase-admin/firestore";
 import type { z } from "zod";
-import { CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { CorruptDocumentError } from "../../../shared/firestore/corrupt-document-error.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { CorruptDocumentError } from "#/services/shared/firestore/corrupt-document-error.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import {
   type CustomAgentRepository,
   type CustomSkillRepository,

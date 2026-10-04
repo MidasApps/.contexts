@@ -1,5 +1,5 @@
 import type { Firestore } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
 
 const PAGE = 500;
 

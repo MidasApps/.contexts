@@ -1,5 +1,5 @@
 import { type Device, DeviceActivationIdSchema, DeviceIdSchema } from "@core/contracts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { DeviceActivationRepository } from "../../application/ports/driven/device-activation-repository.ts";
 import type { DeviceRepository } from "../../application/ports/driven/device-repository.ts";
 import type { DeviceActivationRecord } from "../../domain/device-activation-record.schema.ts";

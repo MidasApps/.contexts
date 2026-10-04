@@ -1,5 +1,5 @@
 import type { ExchangeDesktopSessionResponse } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { SessionInvalidError } from "../../domain/errors/session-errors.ts";
 import { MAX_PREVIOUS_SECRET_HASHES, type SessionRecord } from "../../domain/session-record.schema.ts";
 import { generateSessionSecret, hashSessionSecret, secretHashesMatch } from "../../domain/session-secret.ts";

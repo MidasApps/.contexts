@@ -9,8 +9,8 @@ import {
 // Subpaths, not the root: the root also loads every message catalog.
 import { SOURCE_LOCALE, type SupportedLocale } from "@core/i18n/locales";
 import { negotiateLocale } from "@core/i18n/negotiate-locale";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import { normalizeEmail } from "../../domain/email.ts";
 import { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";

@@ -1,6 +1,6 @@
 import type { LlmCall } from "@core/contracts";
 import type { Sql, TransactionSql } from "postgres";
-import { withTenantTransaction } from "../../../shared/postgres/with-tenant-transaction.ts";
+import { withTenantTransaction } from "#/services/shared/postgres/with-tenant-transaction.ts";
 import type {
   ModelTotals,
   StoredBudget,

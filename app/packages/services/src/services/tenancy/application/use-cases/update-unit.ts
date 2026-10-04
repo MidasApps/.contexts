@@ -1,8 +1,8 @@
 import type { Unit, UnitId, UpdateUnitInput } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import { requirePermission } from "../../../access/application/grant-checks.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { requirePermission } from "#/services/access/application/grant-checks.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { InvalidUnitParentError } from "../../domain/errors/invalid-unit-parent-error.ts";
 import { SubtreeTooLargeError } from "../../domain/errors/subtree-too-large-error.ts";
 import { TenancyNotFoundError } from "../../domain/errors/tenancy-not-found-error.ts";

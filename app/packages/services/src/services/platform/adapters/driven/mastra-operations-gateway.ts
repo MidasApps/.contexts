@@ -7,7 +7,7 @@ import {
   PromptSeedSchema,
 } from "@core/contracts";
 import { z } from "zod";
-import type { ServerlessIdTokenSource } from "../../../agents/adapters/driven/serverless-id-token.ts";
+import type { ServerlessIdTokenSource } from "#/services/agents/adapters/driven/serverless-id-token.ts";
 import type {
   OperationsError,
   OperationsGateway,

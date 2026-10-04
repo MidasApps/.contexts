@@ -6,8 +6,8 @@ import {
   type Unit,
   UnitIdSchema,
 } from "@core/contracts";
-import type { InMemoryAccessStore } from "../../../access/adapters/driven/in-memory-access-store.ts";
-import { paginateInMemory } from "../../../shared/pagination/page.ts";
+import type { InMemoryAccessStore } from "#/services/access/adapters/driven/in-memory-access-store.ts";
+import { paginateInMemory } from "#/services/shared/pagination/page.ts";
 import type { OrganizationRepository } from "../../application/ports/driven/organization-repository.ts";
 import type { ProjectRepository } from "../../application/ports/driven/project-repository.ts";
 import type { UnitRepository } from "../../application/ports/driven/unit-repository.ts";

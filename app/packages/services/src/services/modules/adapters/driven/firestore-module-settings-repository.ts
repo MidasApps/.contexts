@@ -1,7 +1,7 @@
 import { IsoDateTimeSchema, ModuleIdSchema, TenantIdSchema } from "@core/contracts";
 import type { DocumentReference, Firestore, Transaction } from "firebase-admin/firestore";
 import { z } from "zod";
-import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
+import { createContractConverter } from "#/services/shared/firestore/contract-converter.ts";
 import type {
   ModuleSettingsKey,
   ModuleSettingsRepository,

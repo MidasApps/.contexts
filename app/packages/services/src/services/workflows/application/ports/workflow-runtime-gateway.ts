@@ -9,7 +9,7 @@ import type {
   WorkflowRun,
   WorkflowRunStatus,
 } from "@core/contracts";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
 
 /**
  * Driven port of `/v1` to the SP5 custom Mastra routes of workflow runs and tenant schedules

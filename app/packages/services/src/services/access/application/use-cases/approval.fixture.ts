@@ -3,10 +3,10 @@
 // in-memory approval store and audit log, and a movable clock.
 import { OrganizationIdSchema, type PermissionDefinition, UserIdSchema, type UserPrincipal } from "@core/contracts";
 import { z } from "zod";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
-import { createLogger } from "../../../shared/observability/logger.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { inMemoryUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
 import { createInMemoryApprovalRequestRepository } from "../../adapters/driven/in-memory-approval-request-repository.ts";
 import { createApprovalServices } from "../../approval-composition.ts";
 import { createAccessCore } from "../../composition.ts";

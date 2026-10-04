@@ -1,7 +1,7 @@
 import { CreateProjectInputContract } from "@core/contracts";
 import { z } from "zod";
-import type { AccessCore } from "../../../access/composition.ts";
-import type { TenancyServices } from "../../../tenancy/composition.ts";
+import type { AccessCore } from "#/services/access/composition.ts";
+import type { TenancyServices } from "#/services/tenancy/composition.ts";
 import { AgentCommandError } from "./agent-command-error.ts";
 import { type ContractCommand, defineContractCommand } from "./contract-command.ts";
 

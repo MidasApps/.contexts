@@ -1,9 +1,9 @@
 import type { ApiKey, ApiKeyId, ApiKeyRevokedReason, UserPrincipal } from "@core/contracts";
-import { requirePermission } from "../../../access/application/grant-checks.ts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { type AuditActor, auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { requirePermission } from "#/services/access/application/grant-checks.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { type AuditActor, auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { ApiKeyNotFoundError } from "../../domain/errors/api-key-errors.ts";
 import type { ApiKeyDeps } from "../api-key-deps.ts";
 

@@ -1,5 +1,5 @@
 import type { SessionSummary, UserPrincipal } from "@core/contracts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 import { isSessionOpen, type SessionDeps, toSessionSummary } from "../session-deps.ts";
 
 export type ListSessions = (command: { actor: UserPrincipal; page: PageRequest }) => Promise<Page<SessionSummary>>;

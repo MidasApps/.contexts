@@ -7,7 +7,7 @@ import type {
   TenantId,
 } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /** Most records one tenant read returns (plan caps are far below it). */
 export const MAX_CUSTOM_RECORDS_PER_TENANT = 200;

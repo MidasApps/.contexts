@@ -14,7 +14,7 @@ import {
   UnitIdSchema,
   UserIdSchema,
 } from "@core/contracts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
 import { createInMemoryAccessStore, type InMemoryAccessStore } from "../../adapters/driven/in-memory-access-store.ts";
 import {
   CORE_PERMISSION_SOURCE,

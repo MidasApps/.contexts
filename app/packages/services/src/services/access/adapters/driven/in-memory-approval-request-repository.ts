@@ -1,5 +1,5 @@
 import { type ApprovalRequest, ApprovalRequestIdSchema } from "@core/contracts";
-import { paginateInMemory } from "../../../shared/pagination/page.ts";
+import { paginateInMemory } from "#/services/shared/pagination/page.ts";
 import type { ApprovalRequestRepository } from "../../application/ports/driven/approval-request-repository.ts";
 
 export type InMemoryApprovalRequestRepository = ApprovalRequestRepository & {

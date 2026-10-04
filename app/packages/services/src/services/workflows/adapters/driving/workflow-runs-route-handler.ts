@@ -4,10 +4,10 @@ import {
   listWorkflowRunsEndpoint,
   startWorkflowRunEndpoint,
 } from "@core/contracts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { dataResponse } from "../../../shared/http/api-errors.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { dataResponse } from "#/services/shared/http/api-errors.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { WorkflowRuntimeGateway } from "../../application/ports/workflow-runtime-gateway.ts";
 import { makeCancelRun } from "../../application/use-cases/cancel-run.ts";
 import { makeGetRun } from "../../application/use-cases/get-run.ts";

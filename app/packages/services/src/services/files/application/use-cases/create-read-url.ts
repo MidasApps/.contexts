@@ -1,6 +1,6 @@
 import type { FileReadUrl } from "@core/contracts";
-import type { Clock } from "../../../shared/clock/clock.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { dispositionOf } from "../../domain/file-policy.ts";
 import type { FileRepository, FileUrlSigner } from "../ports/file-ports.ts";
 import type { FilesCaller } from "./file-access.ts";

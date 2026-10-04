@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fixedClock } from "../../../shared/clock/clock.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
 import { createInMemoryAuditLogWriter } from "../../adapters/driven/in-memory-audit-log-writer.ts";
 import { AuditEntryRejectedError } from "../../domain/audit-entry-rejected-error.ts";
 import { type AuditRecordInput, makeRecordAudit } from "./record-audit.ts";

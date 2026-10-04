@@ -1,5 +1,5 @@
 import type { Conversation, ConversationId } from "@core/contracts";
-import type { Clock } from "../../../shared/clock/clock.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
 import { ACTIVE_RUN_TTL_MS, MAX_ACTIVE_STREAMS_PER_TENANT } from "../../domain/conversation.ts";
 import type { ConversationRepository } from "../ports/conversation-repository.ts";
 

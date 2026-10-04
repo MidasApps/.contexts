@@ -1,5 +1,5 @@
 import type { PromptEvalResult } from "@core/contracts";
-import type { Result } from "../../../shared/result/result.ts";
+import type { Result } from "#/services/shared/result/result.ts";
 
 export type PromptEvalError =
   | { readonly code: "NOT_FOUND"; readonly status: 404 }

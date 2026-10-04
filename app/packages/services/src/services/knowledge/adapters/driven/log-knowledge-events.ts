@@ -1,6 +1,6 @@
 import type { KnowledgeDocumentSource } from "@core/contracts";
 import { ulid } from "ulid";
-import type { Logger } from "../../../shared/observability/logger.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 
 /** `KNOWLEDGE_DOCUMENT_INDEXED` (contracts/events.md naming): a document's chunks are searchable. */
 export type KnowledgeDocumentIndexedEvent = {

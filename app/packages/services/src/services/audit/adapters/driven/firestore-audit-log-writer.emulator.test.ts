@@ -1,10 +1,10 @@
 import { AuditLogEntryContract, PlatformAuditLogEntryContract } from "@core/contracts";
 import { Timestamp } from "firebase-admin/firestore";
 import { beforeEach, describe, expect, it } from "vitest";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { createFirebaseAdmin } from "../../../shared/firebase/firebase-admin.ts";
-import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
-import { runInTransaction } from "../../../shared/firestore/transaction-runner.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { createFirebaseAdmin } from "#/services/shared/firebase/firebase-admin.ts";
+import { createContractConverter } from "#/services/shared/firestore/contract-converter.ts";
+import { runInTransaction } from "#/services/shared/firestore/transaction-runner.ts";
 import { type AuditRecordInput, makeRecordAudit } from "../../application/use-cases/record-audit.ts";
 import { AuditEntryRejectedError } from "../../domain/audit-entry-rejected-error.ts";
 import { AUDIT_LOG_COLLECTIONS, createFirestoreAuditLogWriter } from "./firestore-audit-log-writer.ts";

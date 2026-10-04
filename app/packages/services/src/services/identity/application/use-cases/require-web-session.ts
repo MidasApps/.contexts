@@ -1,5 +1,5 @@
 import type { SessionId, UserPrincipal } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { SessionInvalidError } from "../../domain/errors/session-errors.ts";
 import type { SessionRecord } from "../../domain/session-record.schema.ts";
 import { hashSessionSecret } from "../../domain/session-secret.ts";

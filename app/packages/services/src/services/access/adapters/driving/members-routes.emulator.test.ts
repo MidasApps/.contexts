@@ -1,13 +1,13 @@
 import { OrganizationIdSchema, type RoleRef, type TenantNodeRef, UserIdSchema } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
 import {
   buildEmulatorServer,
   clearCoreCollections,
   emulatorFirebase,
   ensureAuthUser,
   seedActiveUser,
-} from "../../../shared/testing/core-server-emulator.fixture.ts";
+} from "#/services/shared/testing/core-server-emulator.fixture.ts";
 
 const firebase = emulatorFirebase();
 const { firestore, auth } = firebase;

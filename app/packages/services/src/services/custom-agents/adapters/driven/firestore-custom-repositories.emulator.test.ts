@@ -7,8 +7,8 @@ import {
 } from "@core/contracts";
 import { Timestamp } from "firebase-admin/firestore";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createFirebaseAdmin } from "../../../shared/firebase/firebase-admin.ts";
-import { createFirestoreUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
+import { createFirebaseAdmin } from "#/services/shared/firebase/firebase-admin.ts";
+import { createFirestoreUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
 import {
   CUSTOM_AGENTS_COLLECTION,
   CUSTOM_SKILLS_COLLECTION,

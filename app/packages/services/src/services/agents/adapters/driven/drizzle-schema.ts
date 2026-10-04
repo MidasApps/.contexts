@@ -11,7 +11,7 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-import { agentsSchema } from "../../../shared/postgres/drizzle-schemas.ts";
+import { agentsSchema } from "#/services/shared/postgres/drizzle-schemas.ts";
 
 /**
  * Prompt store tables (SP5 spec §4, decision 0038): source of the Drizzle migrations only;

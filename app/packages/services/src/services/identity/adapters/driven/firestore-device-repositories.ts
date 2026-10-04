@@ -1,8 +1,8 @@
 import { type Device, DeviceActivationIdSchema, DeviceIdSchema, DeviceSchema } from "@core/contracts";
 import { FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter, toFirestoreUpdate } from "#/services/shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { DeviceActivationRepository } from "../../application/ports/driven/device-activation-repository.ts";
 import type { DeviceRepository } from "../../application/ports/driven/device-repository.ts";
 import { DeviceActivationRecordSchema } from "../../domain/device-activation-record.schema.ts";

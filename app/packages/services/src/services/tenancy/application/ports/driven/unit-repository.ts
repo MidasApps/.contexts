@@ -1,7 +1,7 @@
 import type { ProjectId, TenantId, Unit, UnitId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
-import type { TreeRewrite } from "../../../domain/unit-tree.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
+import type { TreeRewrite } from "#/services/tenancy/domain/unit-tree.ts";
 
 /** `units` (SP1 spec §4); reads return live units only. */
 export type UnitRepository = {

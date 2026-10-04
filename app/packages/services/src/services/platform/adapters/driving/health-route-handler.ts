@@ -1,6 +1,6 @@
-import { type RouteHandler, withRouteBoundary } from "../../../shared/http/route-boundary.ts";
-import type { Logger } from "../../../shared/observability/logger.ts";
-import { processLogger } from "../../../shared/observability/process-logger.ts";
+import { type RouteHandler, withRouteBoundary } from "#/services/shared/http/route-boundary.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
+import { processLogger } from "#/services/shared/observability/process-logger.ts";
 
 /**
  * Liveness only: answers while the process can serve requests. It checks no

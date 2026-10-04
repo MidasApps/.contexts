@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { ErrorEnvelope } from "../../../shared/http/error-envelope.ts";
-import { callRoute } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import type { ErrorEnvelope } from "#/services/shared/http/error-envelope.ts";
+import { callRoute } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import { buildChatRoutes } from "./chat-route-handler.ts";
 import { NOW, ORG_A, ORG_B, setupChatRoutes, storedFileOf, UI_STREAM } from "./chat-routes.fixture.ts";
 

@@ -1,6 +1,6 @@
 import { TenantIdSchema, UserIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import { emulatorFirebase } from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import { feedbackKeyOf } from "../../application/use-cases/record-message-feedback.ts";
 import {
   createFirestoreMessageFeedbackStore,

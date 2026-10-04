@@ -1,10 +1,10 @@
 import type { Principal, TenantId } from "@core/contracts";
-import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
-import type { AuditWriter } from "../../../audit/application/use-cases/record-audit.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { authorizeOrganization } from "../../../knowledge/adapters/driving/knowledge-documents-route-handler.ts";
-import { apiError } from "../../../shared/http/api-errors.ts";
-import { tenantOfCall } from "../../../workflows/adapters/driving/workflow-call-scope.ts";
+import type { Authorize } from "#/services/access/application/ports/driving/authorize.ts";
+import type { AuditWriter } from "#/services/audit/application/use-cases/record-audit.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { authorizeOrganization } from "#/services/knowledge/adapters/driving/knowledge-documents-route-handler.ts";
+import { apiError } from "#/services/shared/http/api-errors.ts";
+import { tenantOfCall } from "#/services/workflows/adapters/driving/workflow-call-scope.ts";
 
 /** What the console guards read from a `/v1` handler context. */
 export type GuardContext = {

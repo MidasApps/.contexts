@@ -1,9 +1,9 @@
 import type { Device, TenantId, UserPrincipal } from "@core/contracts";
-import { requirePermission } from "../../../access/application/grant-checks.ts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
-import { ok, type Result } from "../../../shared/result/result.ts";
+import { requirePermission } from "#/services/access/application/grant-checks.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
+import { ok, type Result } from "#/services/shared/result/result.ts";
 import type { DeviceDeps } from "../device-deps.ts";
 
 export type ListDevices = (command: {

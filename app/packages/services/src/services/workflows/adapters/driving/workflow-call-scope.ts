@@ -1,9 +1,9 @@
 import { FORWARDED_HEADERS, type Principal, type TenantId } from "@core/contracts";
-import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { authorizeOrganization } from "../../../knowledge/adapters/driving/knowledge-documents-route-handler.ts";
-import { apiError } from "../../../shared/http/api-errors.ts";
+import type { Authorize } from "#/services/access/application/ports/driving/authorize.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { authorizeOrganization } from "#/services/knowledge/adapters/driving/knowledge-documents-route-handler.ts";
+import { apiError } from "#/services/shared/http/api-errors.ts";
 import type { WorkflowGatewayError } from "../../application/ports/workflow-runtime-gateway.ts";
 
 const BEARER = /^Bearer\s+(\S+)$/i;

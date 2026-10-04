@@ -10,8 +10,8 @@ import {
 } from "@core/contracts";
 import type { Firestore, FirestoreDataConverter } from "firebase-admin/firestore";
 import { z } from "zod";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter } from "#/services/shared/firestore/contract-converter.ts";
 import type { PrincipalStatusReader } from "../../application/ports/driven/principal-status-reader.ts";
 
 // Each reader parses only the status fields `authorize()` needs from the source docs,

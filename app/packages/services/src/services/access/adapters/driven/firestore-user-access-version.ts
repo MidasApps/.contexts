@@ -1,9 +1,9 @@
 import { DEFAULT_USER_PREFERENCES, OrganizationIdSchema, type User, UserContract } from "@core/contracts";
 import type { Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
-import { userSearchFields } from "../../../shared/firestore/user-search-fields.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter, toFirestoreUpdate } from "#/services/shared/firestore/contract-converter.ts";
+import { userSearchFields } from "#/services/shared/firestore/user-search-fields.ts";
 import type { UserAccessVersionStore } from "../../application/ports/driven/user-access-version.ts";
 
 // Only the access fields are read, so a users doc written by another context stays readable.

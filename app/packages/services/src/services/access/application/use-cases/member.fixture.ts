@@ -1,8 +1,8 @@
 // Test world of the members and invitations vertical: the access write world plus
 // in-memory invitations, a settable clock, a fake directory and a fake key revoker.
 import { type UserId, UserIdSchema } from "@core/contracts";
-import type { Clock } from "../../../shared/clock/clock.ts";
-import { createLogger } from "../../../shared/observability/logger.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
 import { createInMemoryInvitationRepository } from "../../adapters/driven/in-memory-invitation-repository.ts";
 import { createMemberServices } from "../../member-composition.ts";
 import type { MemberDeps } from "../member-deps.ts";

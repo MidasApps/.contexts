@@ -10,11 +10,11 @@ import {
   UserIdSchema,
   type UserPrincipal,
 } from "@core/contracts";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
-import { createLogger, type LogRecord } from "../../../shared/observability/logger.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { inMemoryUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
+import { createLogger, type LogRecord } from "#/services/shared/observability/logger.ts";
 import { createInMemoryAccessStore } from "../../adapters/driven/in-memory-access-store.ts";
 import { createInMemoryAccessWriteStore } from "../../adapters/driven/in-memory-access-write-store.ts";
 import { createAccessCore, createAccessServices } from "../../composition.ts";

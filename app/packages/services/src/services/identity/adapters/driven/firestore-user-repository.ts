@@ -1,12 +1,12 @@
 import { DEFAULT_USER_PREFERENCES, type User, UserContract, type UserId, UserPreferencesSchema } from "@core/contracts";
 import { type DocumentData, FieldValue, type Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
-import type { NewUserProfile } from "../../../access/application/ports/driven/user-access-version.ts";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
-import { CorruptDocumentError } from "../../../shared/firestore/corrupt-document-error.ts";
-import { runInTransaction } from "../../../shared/firestore/transaction-runner.ts";
-import { userSearchFields } from "../../../shared/firestore/user-search-fields.ts";
+import type { NewUserProfile } from "#/services/access/application/ports/driven/user-access-version.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter, toFirestoreUpdate } from "#/services/shared/firestore/contract-converter.ts";
+import { CorruptDocumentError } from "#/services/shared/firestore/corrupt-document-error.ts";
+import { runInTransaction } from "#/services/shared/firestore/transaction-runner.ts";
+import { userSearchFields } from "#/services/shared/firestore/user-search-fields.ts";
 import type { UserRepository } from "../../application/ports/driven/user-repository.ts";
 
 const converter = createContractConverter(UserContract);

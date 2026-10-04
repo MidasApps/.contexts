@@ -1,6 +1,6 @@
 import type { Conversation, UserId } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { callRoute } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import { callRoute } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import { ORG_A, ORG_B, setupChatRoutes } from "./chat-routes.fixture.ts";
 import { buildConversationsRoutes } from "./conversations-route-handler.ts";
 

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createPostgresClient } from "../../../shared/postgres/postgres-client.ts";
+import { createPostgresClient } from "#/services/shared/postgres/postgres-client.ts";
 import { makeRunSemanticQuery } from "../../application/use-cases/run-semantic-query.ts";
 import { createSemanticViewRegistry } from "../../domain/semantic-view.ts";
 import { createBigQuerySemanticRunner } from "./bigquery-semantic-runner.ts";

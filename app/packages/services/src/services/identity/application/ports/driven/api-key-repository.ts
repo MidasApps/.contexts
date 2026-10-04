@@ -1,6 +1,6 @@
 import type { ApiKey, ApiKeyId, ApiKeyRevokedReason, TenantId, UserId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /** A key with the hash of its secret, for authentication only. */
 export type StoredApiKey = { readonly apiKey: ApiKey; readonly secretHash: string };

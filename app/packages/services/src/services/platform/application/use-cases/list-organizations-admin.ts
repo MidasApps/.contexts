@@ -4,11 +4,11 @@ import {
   OrganizationAdminSummarySchema,
   type OrganizationStatus,
 } from "@core/contracts";
-import { encodeCursor } from "../../../shared/pagination/cursor.ts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
-import { normalizeSearchText } from "../../../shared/text/search-text.ts";
-import { utcMonthStart } from "../../../usage/application/use-cases/usage-month.ts";
-import { resolveTenantCaps } from "../../../usage/domain/budget-policy.ts";
+import { encodeCursor } from "#/services/shared/pagination/cursor.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
+import { normalizeSearchText } from "#/services/shared/text/search-text.ts";
+import { utcMonthStart } from "#/services/usage/application/use-cases/usage-month.ts";
+import { resolveTenantCaps } from "#/services/usage/domain/budget-policy.ts";
 import type { ConsoleDeps } from "../console-deps.ts";
 import type { OrganizationListItem } from "../ports/console-ports.ts";
 import { baseCapsOf } from "./sync-tenant-budget.ts";

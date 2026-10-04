@@ -1,6 +1,6 @@
 import type { BudgetCaps, OrganizationStatus, Plan } from "@core/contracts";
 import { PlanIdSchema } from "@core/contracts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type {
   AgentSettingsRepository,
   ConsoleUsage,

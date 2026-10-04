@@ -1,12 +1,12 @@
 import { ImpersonationSessionIdSchema, UserIdSchema } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { signInWithCustomToken, signUpWithPassword } from "../../../shared/testing/auth-emulator-rest.fixture.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { signInWithCustomToken, signUpWithPassword } from "#/services/shared/testing/auth-emulator-rest.fixture.ts";
 import {
   buildEmulatorServer,
   clearCoreCollections,
   emulatorFirebase,
-} from "../../../shared/testing/core-server-emulator.fixture.ts";
+} from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import { createFirestoreSessionRepository } from "../driven/firestore-session-repository.ts";
 
 const firebase = emulatorFirebase();

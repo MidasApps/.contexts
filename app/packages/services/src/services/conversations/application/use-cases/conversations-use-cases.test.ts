@@ -1,6 +1,6 @@
 import type { Conversation, ProjectId, TenantId, UserId } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { fixedClock } from "../../../shared/clock/clock.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
 import { createInMemoryConversationRepository } from "../../adapters/driven/in-memory-conversation-repository.ts";
 import { createConversationsServices } from "../../composition.ts";
 import { createConversation } from "../../domain/conversation.ts";

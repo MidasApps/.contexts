@@ -5,14 +5,14 @@ import {
   type TenantId,
   type TenantNodeRef,
 } from "@core/contracts";
-import { gatewayErrorResponse } from "../../../agents/adapters/driven/mastra-error-mapper.ts";
-import type { AgentCallScope, AgentRuntimeGateway } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { GetReadyFile } from "../../../files/application/use-cases/read-file-bytes.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
-import { deniedResponse } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { gatewayErrorResponse } from "#/services/agents/adapters/driven/mastra-error-mapper.ts";
+import type { AgentCallScope, AgentRuntimeGateway } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { GetReadyFile } from "#/services/files/application/use-cases/read-file-bytes.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { apiError, dataResponse } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 
 export const KNOWLEDGE_WRITE_PERMISSION = "core.knowledge.write";
 /** Mastra workflow id (`@core/agents` `KNOWLEDGE_INGEST_WORKFLOW_ID`). */

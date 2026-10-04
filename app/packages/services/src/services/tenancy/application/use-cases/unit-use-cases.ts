@@ -1,7 +1,7 @@
 import type { Unit, UnitId, UnitTypeDefinition } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { type Page, type PageRequest, paginateInMemory } from "../../../shared/pagination/page.ts";
-import { err, type Result } from "../../../shared/result/result.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { type Page, type PageRequest, paginateInMemory } from "#/services/shared/pagination/page.ts";
+import { err, type Result } from "#/services/shared/result/result.ts";
 import { SubtreeTooLargeError } from "../../domain/errors/subtree-too-large-error.ts";
 import { TenancyNotFoundError } from "../../domain/errors/tenancy-not-found-error.ts";
 import type { UnitTreeBusyError } from "../../domain/errors/unit-tree-busy-error.ts";

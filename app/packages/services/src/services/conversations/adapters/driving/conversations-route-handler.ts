@@ -8,13 +8,13 @@ import {
   type UserPrincipal,
   updateConversationEndpoint,
 } from "@core/contracts";
-import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
-import { gatewayErrorResponse } from "../../../agents/adapters/driven/mastra-error-mapper.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { apiError, dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import type { Authorize } from "#/services/access/application/ports/driving/authorize.ts";
+import { gatewayErrorResponse } from "#/services/agents/adapters/driven/mastra-error-mapper.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { apiError, dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
+import { withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import { makeListMessages } from "../../application/use-cases/list-messages.ts";
 import { conversationNode } from "../../application/use-cases/send-chat-message.ts";
 import { makeSummarizeConversation } from "../../application/use-cases/summarize-conversation.ts";

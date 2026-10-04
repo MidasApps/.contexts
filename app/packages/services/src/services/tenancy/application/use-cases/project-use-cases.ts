@@ -1,8 +1,8 @@
 import type { CreateProjectInput, Permission, Project, ProjectId, TenantId, UpdateProjectInput } from "@core/contracts";
-import { requirePermission } from "../../../access/application/grant-checks.ts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { requirePermission } from "#/services/access/application/grant-checks.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { TenancyNotFoundError } from "../../domain/errors/tenancy-not-found-error.ts";
 import {
   changedKeys,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { ErrorEnvelope } from "../../../shared/http/error-envelope.ts";
-import { makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import type { ErrorEnvelope } from "#/services/shared/http/error-envelope.ts";
+import { makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import type { AgentCallScope, GatewayResult } from "../../application/ports/agent-runtime-gateway.ts";
 import type { VoiceRuntimeGateway } from "../../application/ports/chat-runtime-gateway.ts";
 import { buildVoiceRoutes } from "./realtime-session-route-handler.ts";

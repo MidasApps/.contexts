@@ -5,9 +5,9 @@ import {
   type Principal,
   type TenantId,
 } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { sha256Hex } from "../../../shared/crypto/sha256.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { sha256Hex } from "#/services/shared/crypto/sha256.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
 import {

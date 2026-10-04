@@ -1,6 +1,6 @@
 import type { Principal, Role, RoleId, UpdateRoleInput } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { ok, type Result } from "../../../shared/result/result.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { ok, type Result } from "#/services/shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import type { AccessNotFoundError } from "../../domain/errors/access-not-found-error.ts";
 import type { AccessWriteDeps } from "../access-write-deps.ts";

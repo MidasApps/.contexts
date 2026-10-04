@@ -1,7 +1,7 @@
 import { listAuditLogsEndpoint } from "@core/contracts";
-import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { AuditLogServices } from "../../composition.ts";
 
 /** `GET /v1/organizations/{organizationId}/audit-logs` (SP1 spec §7.3, audit row): the SP5 audit viewer. */

@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { emulatorFirebase } from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import { createFirestoreApprovalStats } from "./firestore-approval-stats.ts";
 
 const firebase = emulatorFirebase();

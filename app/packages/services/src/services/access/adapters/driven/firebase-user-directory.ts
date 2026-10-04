@@ -2,8 +2,8 @@ import { type UserId, UserIdSchema } from "@core/contracts";
 import type { Auth, UserRecord } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter } from "#/services/shared/firestore/contract-converter.ts";
 import type { DirectoryEntry, UserDirectory } from "../../application/ports/driven/user-directory.ts";
 
 // Only the profile fields; a users doc created by access (status/version only) has no email yet.

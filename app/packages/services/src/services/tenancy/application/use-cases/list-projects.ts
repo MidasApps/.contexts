@@ -1,8 +1,8 @@
 import type { Project, TenantId } from "@core/contracts";
-import type { DenyReason } from "../../../access/domain/authorization.ts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { type Page, type PageRequest, paginateInMemory } from "../../../shared/pagination/page.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { DenyReason } from "#/services/access/domain/authorization.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { type Page, type PageRequest, paginateInMemory } from "#/services/shared/pagination/page.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import {
   organizationNode,
   projectionPrincipalIdOf,

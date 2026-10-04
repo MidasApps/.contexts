@@ -1,5 +1,5 @@
 import { SessionIdSchema } from "@core/contracts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { SessionRepository } from "../../application/ports/driven/session-repository.ts";
 import type { SessionRecord } from "../../domain/session-record.schema.ts";
 

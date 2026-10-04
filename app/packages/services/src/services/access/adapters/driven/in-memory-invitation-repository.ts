@@ -1,5 +1,5 @@
 import { type Invitation, InvitationIdSchema } from "@core/contracts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { InvitationRepository } from "../../application/ports/driven/invitation-repository.ts";
 
 type Row = { invitation: Invitation; tokenHash: string };

@@ -1,9 +1,9 @@
 import { FORWARDED_HEADERS, type TenantId, type UserPrincipal } from "@core/contracts";
-import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
-import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
-import { apiError } from "../../../shared/http/api-errors.ts";
-import { deniedResponse } from "../../../shared/http/api-list.ts";
-import type { ApiRouteDeps } from "../../../shared/http/api-route.ts";
+import type { Authorize } from "#/services/access/application/ports/driving/authorize.ts";
+import type { ResolveAccessContext } from "#/services/identity/application/use-cases/resolve-access-context.ts";
+import { apiError } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse } from "#/services/shared/http/api-list.ts";
+import type { ApiRouteDeps } from "#/services/shared/http/api-route.ts";
 import type { AgentCallScope } from "../../application/ports/agent-runtime-gateway.ts";
 import type { VoiceRuntimeGateway } from "../../application/ports/chat-runtime-gateway.ts";
 

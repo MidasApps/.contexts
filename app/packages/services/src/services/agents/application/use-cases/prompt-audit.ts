@@ -1,5 +1,5 @@
 import { type AuditAction, TenantIdSchema, type UserPrincipal } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
 import type { PromptKey } from "../ports/prompt-repository.ts";
 import type { PromptDeps } from "../prompt-deps.ts";
 

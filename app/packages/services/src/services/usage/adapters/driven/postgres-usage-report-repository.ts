@@ -1,6 +1,6 @@
 import { type LlmCall, LlmCallSchema, type UsageDailyRollup, UsageDailyRollupSchema } from "@core/contracts";
 import type { Sql, TransactionSql } from "postgres";
-import { withTenantTransaction } from "../../../shared/postgres/with-tenant-transaction.ts";
+import { withTenantTransaction } from "#/services/shared/postgres/with-tenant-transaction.ts";
 import type { UsageReportRepository } from "../../application/ports/usage-report-repository.ts";
 import { USAGE_RUNTIME_ROLE } from "./postgres-usage-repository.ts";
 

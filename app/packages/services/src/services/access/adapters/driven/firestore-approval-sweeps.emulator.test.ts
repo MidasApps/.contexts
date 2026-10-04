@@ -1,6 +1,6 @@
 import { type ApprovalRequest, ApprovalRequestSchema, type ApprovalStatus } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import { emulatorFirebase } from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import { createFirestoreApprovalRequestRepository } from "./firestore-approval-request-repository.ts";
 
 // The cross-tenant sweep query (decisions 0030 A3 and 0036) against the Firestore emulator:

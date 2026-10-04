@@ -1,6 +1,6 @@
 import type { Project, ProjectId, TenantId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /** `projects` (SP1 spec §4); reads return live projects only. */
 export type ProjectRepository = {

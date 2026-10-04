@@ -8,11 +8,11 @@ import type {
   TenantId,
   UserPrincipal,
 } from "@core/contracts";
-import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
-import type { DenyReason } from "../../../access/domain/authorization.ts";
-import type { AgentCallScope, GatewayError } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { ChatRuntimeGateway, ChatStreamAnswer } from "../../../agents/application/ports/chat-runtime-gateway.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { Authorize } from "#/services/access/application/ports/driving/authorize.ts";
+import type { DenyReason } from "#/services/access/domain/authorization.ts";
+import type { AgentCallScope, GatewayError } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { ChatRuntimeGateway, ChatStreamAnswer } from "#/services/agents/application/ports/chat-runtime-gateway.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { ConversationsServices } from "../../composition.ts";
 import { decisionOf, type RecordToolDecisions } from "./record-tool-decision.ts";
 import type { AttachmentIssue, ResolveAttachments } from "./resolve-attachments.ts";

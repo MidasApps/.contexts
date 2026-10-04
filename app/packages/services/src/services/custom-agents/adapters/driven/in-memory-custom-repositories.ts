@@ -5,7 +5,7 @@ import {
   type CustomSkill,
   CustomSkillIdSchema,
 } from "@core/contracts";
-import { paginateInMemory } from "../../../shared/pagination/page.ts";
+import { paginateInMemory } from "#/services/shared/pagination/page.ts";
 import type {
   CustomAgentRepository,
   CustomLimitsReader,

@@ -1,9 +1,9 @@
 import { type ImpersonationSession, ImpersonationSessionSchema } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { runInTransaction } from "../../../shared/firestore/transaction-runner.ts";
-import { type CursorPosition, decodeCursor } from "../../../shared/pagination/cursor.ts";
-import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { runInTransaction } from "#/services/shared/firestore/transaction-runner.ts";
+import { type CursorPosition, decodeCursor } from "#/services/shared/pagination/cursor.ts";
+import { emulatorFirebase } from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import { createFirestoreImpersonationSessionRepository } from "./firestore-platform-repositories.ts";
 
 const { firestore } = emulatorFirebase();

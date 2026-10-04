@@ -1,7 +1,7 @@
 import { type StoredFile, StoredFileSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { createLogger } from "../../../shared/observability/logger.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
 import { detectContentType } from "../../adapters/driven/file-type-detector.ts";
 import {
   createInMemoryFileRepository,

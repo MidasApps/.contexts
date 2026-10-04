@@ -10,10 +10,10 @@ import {
   listAddendumActivationsEndpoint,
   listAddendumVersionsEndpoint,
 } from "@core/contracts";
-import { requireStaff, requireTenant } from "../../../platform/adapters/driving/console-guards.ts";
-import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { requireStaff, requireTenant } from "#/services/platform/adapters/driving/console-guards.ts";
+import { apiError, dataResponse } from "#/services/shared/http/api-errors.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { PromptEvalError } from "../../application/ports/prompt-eval-gateway.ts";
 import type { PromptKey } from "../../application/ports/prompt-repository.ts";
 import type { ActivationError } from "../../application/use-cases/activate-prompt-version.ts";

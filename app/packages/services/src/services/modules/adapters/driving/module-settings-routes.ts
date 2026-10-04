@@ -1,9 +1,9 @@
 import { getModuleSettingsEndpoint, updateModuleSettingsEndpoint } from "@core/contracts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
-import { deniedResponse } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { apiError, dataResponse } from "#/services/shared/http/api-errors.ts";
+import { deniedResponse } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { ModuleSettingsServices } from "../../composition.ts";
 import { InvalidModuleSettingsError, UnknownModuleError } from "../../domain/module-settings-errors.ts";
 

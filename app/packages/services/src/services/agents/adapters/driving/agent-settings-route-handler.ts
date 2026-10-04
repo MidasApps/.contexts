@@ -4,12 +4,12 @@ import {
   updateAgentSettingsEndpoint,
   updateOrganizationAgentSettingsEndpoint,
 } from "@core/contracts";
-import { CONSOLE_PERMISSIONS } from "../../../platform/adapters/driving/admin-platform-route-handler.ts";
-import { requireStaff, requireTenant } from "../../../platform/adapters/driving/console-guards.ts";
-import type { ConsoleServices } from "../../../platform/composition.ts";
-import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { CONSOLE_PERMISSIONS } from "#/services/platform/adapters/driving/admin-platform-route-handler.ts";
+import { requireStaff, requireTenant } from "#/services/platform/adapters/driving/console-guards.ts";
+import type { ConsoleServices } from "#/services/platform/composition.ts";
+import { apiError, dataResponse } from "#/services/shared/http/api-errors.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 
 export const AGENT_SETTINGS_PERMISSIONS = {
   read: "core.agent-settings.read",

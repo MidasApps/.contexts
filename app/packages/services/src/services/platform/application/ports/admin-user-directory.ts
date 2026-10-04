@@ -1,5 +1,5 @@
 import type { AdminUserSummary } from "@core/contracts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /**
  * Staff reads over `users/{uid}` (decision 0044). Prefix searches take text that is already

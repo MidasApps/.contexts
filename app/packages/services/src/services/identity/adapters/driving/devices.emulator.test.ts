@@ -1,16 +1,16 @@
 import { OrganizationIdSchema } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
-import { createCoreServer } from "../../../composition.ts";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { createLogger } from "../../../shared/observability/logger.ts";
-import { signInWithCustomToken } from "../../../shared/testing/auth-emulator-rest.fixture.ts";
+import { createCoreServer } from "#/services/composition.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
+import { signInWithCustomToken } from "#/services/shared/testing/auth-emulator-rest.fixture.ts";
 import {
   buildEmulatorServer,
   clearCoreCollections,
   EMULATOR_APP_URL,
   emulatorFirebase,
   ensureAuthUser,
-} from "../../../shared/testing/core-server-emulator.fixture.ts";
+} from "#/services/shared/testing/core-server-emulator.fixture.ts";
 
 const firebase = emulatorFirebase();
 const { firestore, auth } = firebase;

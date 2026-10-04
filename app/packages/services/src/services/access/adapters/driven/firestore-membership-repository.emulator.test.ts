@@ -1,15 +1,15 @@
 import { OrganizationIdSchema, ProjectIdSchema, type TenantNodeRef, UnitIdSchema, UserIdSchema } from "@core/contracts";
 import { beforeEach, describe, expect, it } from "vitest";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { createFirestoreUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { createFirestoreUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
 import {
   clearCoreCollections,
   emulatorFirebase,
   seedActiveUser,
-} from "../../../shared/testing/core-server-emulator.fixture.ts";
+} from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import type { AccessWriteDeps } from "../../application/access-write-deps.ts";
 import { prepareGrant } from "../../application/membership-writes.ts";
 import { createAccessCore } from "../../composition.ts";

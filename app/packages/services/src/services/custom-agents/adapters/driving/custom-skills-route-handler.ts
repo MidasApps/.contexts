@@ -5,11 +5,11 @@ import {
   listCustomSkillsEndpoint,
   updateCustomSkillEndpoint,
 } from "@core/contracts";
-import { dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
-import { tenantOfCall } from "../../../workflows/adapters/driving/workflow-call-scope.ts";
+import { dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
+import { withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
+import { tenantOfCall } from "#/services/workflows/adapters/driving/workflow-call-scope.ts";
 import {
   type CustomAgentsRouteDeps,
   customAgentErrorResponse,

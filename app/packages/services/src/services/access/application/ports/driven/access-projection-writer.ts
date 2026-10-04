@@ -1,6 +1,6 @@
 import type { AccessProjection, TenantId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /**
  * Writes the read model `access/{tenantId}_{principalId}` (SP1 spec §5.4); only list

@@ -7,7 +7,7 @@ import {
   TraceSummarySchema,
 } from "@core/contracts";
 import { z } from "zod";
-import type { ServerlessIdTokenSource } from "../../../agents/adapters/driven/serverless-id-token.ts";
+import type { ServerlessIdTokenSource } from "#/services/agents/adapters/driven/serverless-id-token.ts";
 import type { ConsoleError, ConsoleGateway, ConsoleResult } from "../../application/ports/console-gateway.ts";
 
 const UNAVAILABLE: ConsoleError = { code: "UPSTREAM_UNAVAILABLE", status: 502 };

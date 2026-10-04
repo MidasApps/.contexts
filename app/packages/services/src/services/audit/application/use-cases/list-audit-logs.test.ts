@@ -1,9 +1,9 @@
 import { OrganizationIdSchema, type Principal } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { createInMemoryAccessStore } from "../../../access/adapters/driven/in-memory-access-store.ts";
-import { createAccessCore } from "../../../access/composition.ts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import { createInMemoryAccessStore } from "#/services/access/adapters/driven/in-memory-access-store.ts";
+import { createAccessCore } from "#/services/access/composition.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import { createInMemoryAuditLogReader } from "../../adapters/driven/in-memory-audit-log-reader.ts";
 import { createInMemoryAuditLogWriter } from "../../adapters/driven/in-memory-audit-log-writer.ts";
 import { buildAuditLogsRoutes } from "../../adapters/driving/audit-logs-routes.ts";

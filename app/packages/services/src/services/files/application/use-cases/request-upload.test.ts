@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ErrorEnvelope } from "../../../shared/http/error-envelope.ts";
+import type { ErrorEnvelope } from "#/services/shared/http/error-envelope.ts";
 import { makeFilesWorld, ORG_A, ORG_B } from "./files-route.fixture.ts";
 
 const UPLOAD = "files.requestUpload";

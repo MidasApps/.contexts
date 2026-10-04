@@ -13,9 +13,9 @@ import {
   Timestamp,
   type Transaction,
 } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter, toFirestoreUpdate } from "#/services/shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { MembershipRepository } from "../../application/ports/driven/membership-repository.ts";
 import { nodeIdOf } from "../../domain/access-projection.ts";
 import { customRoleIdsOf, holdsOwner } from "../../domain/role-permissions.ts";

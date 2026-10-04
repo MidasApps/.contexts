@@ -1,8 +1,8 @@
 import { AgentSettingsSchema, BudgetCapsSchema, type OrganizationStatus, type Plan, PlanSchema } from "@core/contracts";
 import { FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { CorruptDocumentError } from "../../../shared/firestore/corrupt-document-error.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { CorruptDocumentError } from "#/services/shared/firestore/corrupt-document-error.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type {
   AgentSettingsFields,
   AgentSettingsRepository,

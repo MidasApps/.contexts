@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import { emulatorFirebase } from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import { listLiveOrganizationIds } from "./firestore-live-organization-ids.ts";
 
 // Platform listing of live organizations (SP5 usage-report) against the Firestore emulator.

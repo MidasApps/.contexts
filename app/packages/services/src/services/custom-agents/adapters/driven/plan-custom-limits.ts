@@ -1,5 +1,5 @@
 import { CUSTOM_AGENT_LIMIT_DEFAULTS, type CustomAgentLimits, type PlanLimits } from "@core/contracts";
-import type { OrganizationAdminStore, PlanRepository } from "../../../platform/application/ports/console-ports.ts";
+import type { OrganizationAdminStore, PlanRepository } from "#/services/platform/application/ports/console-ports.ts";
 import type { CustomLimitsReader } from "../../application/ports/custom-agent-ports.ts";
 
 /** A plan's custom agent limits; what it does not set is the platform default (decision 0046 §12). */

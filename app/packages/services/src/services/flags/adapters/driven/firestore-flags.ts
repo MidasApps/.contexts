@@ -1,5 +1,5 @@
 import { FieldPath, FieldValue, type Firestore, Timestamp } from "firebase-admin/firestore";
-import { CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
+import { CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
 import type { EnvironmentFlagValues, TenantFlagOverrides } from "../../application/ports/flag-store.ts";
 
 /**

@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
-import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
+import { emulatorFirebase } from "#/services/shared/testing/core-server-emulator.fixture.ts";
 import {
   createFirestoreDeletedConversationStore,
   PURGEABLE_CONVERSATIONS_COLLECTION,

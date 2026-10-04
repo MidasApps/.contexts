@@ -1,8 +1,8 @@
 import { type Conversation, MAX_SUMMARY_CHARS } from "@core/contracts";
-import type { AgentCallScope, GatewayError } from "../../../agents/application/ports/agent-runtime-gateway.ts";
-import type { ChatRuntimeGateway } from "../../../agents/application/ports/chat-runtime-gateway.ts";
-import type { Clock } from "../../../shared/clock/clock.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { AgentCallScope, GatewayError } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
+import type { ChatRuntimeGateway } from "#/services/agents/application/ports/chat-runtime-gateway.ts";
+import type { Clock } from "#/services/shared/clock/clock.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { buildSearchTokens } from "../../domain/search-tokens.ts";
 import type { ConversationRepository } from "../ports/conversation-repository.ts";
 

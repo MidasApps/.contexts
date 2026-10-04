@@ -4,9 +4,9 @@ import {
   mapMastraStatus,
   UPSTREAM_TIMEOUT,
   UPSTREAM_UNAVAILABLE,
-} from "../../../agents/adapters/driven/mastra-error-mapper.ts";
-import type { ServerlessIdTokenSource } from "../../../agents/adapters/driven/serverless-id-token.ts";
-import type { GatewayResult } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+} from "#/services/agents/adapters/driven/mastra-error-mapper.ts";
+import type { ServerlessIdTokenSource } from "#/services/agents/adapters/driven/serverless-id-token.ts";
+import type { GatewayResult } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
 import type { SettleOutcome, WorkflowApprovalSettler } from "../../application/ports/workflow-approval-settler.ts";
 
 /** A settle waits for the run's next suspension or end (decision 0036). */

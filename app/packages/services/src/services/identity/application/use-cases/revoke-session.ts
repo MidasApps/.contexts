@@ -1,6 +1,6 @@
 import type { SessionId, UserPrincipal } from "@core/contracts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { SessionNotFoundError } from "../../domain/errors/session-errors.ts";
 import { recordSessionAudit, refuseImpersonation, type SessionDeps } from "../session-deps.ts";
 

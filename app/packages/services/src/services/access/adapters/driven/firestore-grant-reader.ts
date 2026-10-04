@@ -1,6 +1,6 @@
 import type { Firestore } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter } from "#/services/shared/firestore/contract-converter.ts";
 import type { GrantReader } from "../../application/ports/driven/grant-reader.ts";
 import { nodeIdOf } from "../../domain/access-projection.ts";
 import { StoredMembershipSchema } from "./firestore-membership-repository.ts";

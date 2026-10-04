@@ -1,8 +1,8 @@
 import { type Conversation, ConversationSchema } from "@core/contracts";
 import { type DocumentData, Timestamp } from "firebase-admin/firestore";
-import { CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { CorruptDocumentError } from "../../../shared/firestore/corrupt-document-error.ts";
-import type { CursorPosition } from "../../../shared/pagination/cursor.ts";
+import { CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { CorruptDocumentError } from "#/services/shared/firestore/corrupt-document-error.ts";
+import type { CursorPosition } from "#/services/shared/pagination/cursor.ts";
 
 /** Top-level collection of chat conversation metadata (decision 0033). */
 export const CONVERSATIONS_COLLECTION = "conversations";

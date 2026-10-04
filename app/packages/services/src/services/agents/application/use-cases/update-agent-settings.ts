@@ -1,14 +1,14 @@
 import type { AgentSettings, TenantId, UpdateAgentSettingsInput, UserPrincipal } from "@core/contracts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import type { ConsoleDeps } from "../../../platform/application/console-deps.ts";
-import { type AgentSettingsFields, agentSettingsOf } from "../../../platform/application/ports/console-ports.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import type { ConsoleDeps } from "#/services/platform/application/console-deps.ts";
+import { type AgentSettingsFields, agentSettingsOf } from "#/services/platform/application/ports/console-ports.ts";
 import {
   baseCapsOf,
   changeTenantBudget,
   storedSettingsOf,
-} from "../../../platform/application/use-cases/sync-tenant-budget.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
-import { resolveTenantCaps, selfCapWithin } from "../../../usage/domain/budget-policy.ts";
+} from "#/services/platform/application/use-cases/sync-tenant-budget.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
+import { resolveTenantCaps, selfCapWithin } from "#/services/usage/domain/budget-policy.ts";
 
 /** The organization's own cap is above the plan (or staff override): it may only lower it. */
 export type AgentSettingsError = { readonly code: "ABOVE_PLAN" };

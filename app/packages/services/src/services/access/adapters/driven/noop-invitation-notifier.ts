@@ -1,4 +1,4 @@
-import type { Logger } from "../../../shared/observability/logger.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 import type { InvitationNotifier } from "../../application/ports/driven/invitation-notifier.ts";
 
 /**

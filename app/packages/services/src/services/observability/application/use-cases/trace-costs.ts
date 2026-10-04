@@ -1,5 +1,5 @@
 import type { TraceSummary } from "@core/contracts";
-import type { Logger } from "../../../shared/observability/logger.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 import type { TraceCostReader } from "../ports/trace-cost-reader.ts";
 
 export type TraceCostDeps = {

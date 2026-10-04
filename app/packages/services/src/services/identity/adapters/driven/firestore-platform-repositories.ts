@@ -6,9 +6,9 @@ import {
   Timestamp,
   type Transaction,
 } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter } from "#/services/shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { ImpersonationSessionRepository } from "../../application/ports/driven/impersonation-session-repository.ts";
 import type { PlatformStaffRepository } from "../../application/ports/driven/platform-staff-repository.ts";
 

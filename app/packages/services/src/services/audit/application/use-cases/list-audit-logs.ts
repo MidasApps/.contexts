@@ -1,8 +1,8 @@
 import type { AuditLogEntry, Principal, TenantId } from "@core/contracts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import type { AuditLogFilters, AuditLogReader } from "../ports/driven/audit-log-reader.ts";
 
 export type ListAuditLogsCommand = {

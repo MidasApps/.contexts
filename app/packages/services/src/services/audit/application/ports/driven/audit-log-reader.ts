@@ -1,5 +1,5 @@
 import type { AuditAction, AuditLogEntry, TenantId } from "@core/contracts";
-import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /** Filters of the tenant audit log; the window bounds are exclusive (ISO 8601 UTC). */
 export type AuditLogFilters = {

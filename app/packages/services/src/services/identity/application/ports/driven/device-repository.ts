@@ -1,6 +1,6 @@
 import type { Device, DeviceId, TenantId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /** `devices` (SP1 spec §4, §6.4); the document id is also the device's Auth uid. */
 export type DeviceRepository = {

@@ -1,12 +1,12 @@
 import { type LlmCall, LlmCallSchema, type TenantId, type UserPrincipal } from "@core/contracts";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { fixedClock } from "../../../shared/clock/clock.ts";
-import { createPostgresClient } from "../../../shared/postgres/postgres-client.ts";
-import { createPostgresUsageRepository } from "../../../usage/adapters/driven/postgres-usage-repository.ts";
-import { makeCheckTenantBudget } from "../../../usage/application/use-cases/check-tenant-budget.ts";
-import { makeRecordLlmCalls } from "../../../usage/application/use-cases/record-llm-calls.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
+import { createPostgresClient } from "#/services/shared/postgres/postgres-client.ts";
+import { createPostgresUsageRepository } from "#/services/usage/adapters/driven/postgres-usage-repository.ts";
+import { makeCheckTenantBudget } from "#/services/usage/application/use-cases/check-tenant-budget.ts";
+import { makeRecordLlmCalls } from "#/services/usage/application/use-cases/record-llm-calls.ts";
 import { createInMemoryConsoleStores } from "../../adapters/driven/in-memory-console-stores.ts";
 import { createConsoleServices, createPostgresConsoleUsage } from "../../composition.ts";
 

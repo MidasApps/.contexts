@@ -4,10 +4,10 @@ import {
   revokeMembershipEndpoint,
   updateMembershipEndpoint,
 } from "@core/contracts";
-import { dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { AccessServices } from "../../composition.ts";
 import type { MemberServices } from "../../member-composition.ts";
 import { accessErrorResponse } from "./access-error-response.ts";

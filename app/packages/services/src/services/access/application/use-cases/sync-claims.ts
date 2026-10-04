@@ -1,5 +1,5 @@
 import { type UserId, UserIdSchema } from "@core/contracts";
-import type { Logger } from "../../../shared/observability/logger.ts";
+import type { Logger } from "#/services/shared/observability/logger.ts";
 import type { AccessProjectionStore } from "../ports/driven/access-projection-writer.ts";
 import type { ClaimsWriter, CoreClaims } from "../ports/driven/claims-writer.ts";
 import type { PrincipalStatusReader } from "../ports/driven/principal-status-reader.ts";

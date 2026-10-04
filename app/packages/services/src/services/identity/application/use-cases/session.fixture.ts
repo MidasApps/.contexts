@@ -2,11 +2,11 @@
 // and an in-memory audit log, with a movable clock.
 
 import type { SessionId, UserId } from "@core/contracts";
-import type { PlatformStaffRecord } from "../../../access/application/ports/driven/principal-status-reader.ts";
-import { createInMemoryAuditLogWriter } from "../../../audit/adapters/driven/in-memory-audit-log-writer.ts";
-import { makeRecordAudit } from "../../../audit/application/use-cases/record-audit.ts";
-import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
-import { createLogger } from "../../../shared/observability/logger.ts";
+import type { PlatformStaffRecord } from "#/services/access/application/ports/driven/principal-status-reader.ts";
+import { createInMemoryAuditLogWriter } from "#/services/audit/adapters/driven/in-memory-audit-log-writer.ts";
+import { makeRecordAudit } from "#/services/audit/application/use-cases/record-audit.ts";
+import { inMemoryUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
+import { createLogger } from "#/services/shared/observability/logger.ts";
 import { createFakeFirebaseAuth } from "../../adapters/driven/fake-firebase-auth.ts";
 import { createInMemoryImpersonationSessionRepository } from "../../adapters/driven/in-memory-platform-repositories.ts";
 import { createInMemorySessionRepository } from "../../adapters/driven/in-memory-session-repository.ts";

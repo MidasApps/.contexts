@@ -5,11 +5,11 @@ import {
   type TenantId,
   type UserPrincipal,
 } from "@core/contracts";
-import type { GrantCheckError } from "../../../access/application/grant-checks.ts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { GrantCheckError } from "#/services/access/application/grant-checks.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { generateActivationCode, hashActivationCode } from "../../domain/activation-code.ts";
 import type { DeviceActivationRecord } from "../../domain/device-activation-record.schema.ts";
 import type { DeviceDeps } from "../device-deps.ts";

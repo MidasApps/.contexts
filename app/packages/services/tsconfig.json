@@ -1,4 +1,5 @@
 {
+  "//": "Own files import through `#/` (package.json `imports`, resolved by Node, Vitest and Next). `paths` repeats it for bundlers that only read tsconfig (the Mastra deployer bundles this package). No emit, so `.ts` extensions are not rewritten (decision 0068).",
   "extends": "@core/config/tsconfig/nodenext.json",
   "compilerOptions": {
     "noEmit": true,
@@ -8,7 +9,11 @@
     "allowJs": true,
     "checkJs": true,
     "incremental": true,
-    "tsBuildInfoFile": ".tscache/tsbuildinfo"
+    "tsBuildInfoFile": ".tscache/tsbuildinfo",
+    "rewriteRelativeImportExtensions": false,
+    "paths": {
+      "#/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*.ts", "*.ts", "*.js"],
   "exclude": ["node_modules"]

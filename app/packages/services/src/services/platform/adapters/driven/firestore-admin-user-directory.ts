@@ -1,8 +1,8 @@
 import { type AdminUserSummary, AdminUserSummarySchema } from "@core/contracts";
 import { type DocumentSnapshot, FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
-import { USER_SEARCH_NAME_FIELD } from "../../../shared/firestore/user-search-fields.ts";
-import { type Page, type PageRequest, pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_COLLECTIONS } from "#/services/shared/firestore/collections.ts";
+import { USER_SEARCH_NAME_FIELD } from "#/services/shared/firestore/user-search-fields.ts";
+import { type Page, type PageRequest, pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { AdminUserDirectory } from "../../application/ports/admin-user-directory.ts";
 
 // The last code point Firestore orders, so `[prefix, prefix + END)` is every value with the prefix.

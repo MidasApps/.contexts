@@ -1,5 +1,5 @@
 import type { TenantNodeRef } from "@core/contracts";
-import type { NodeChain } from "../../../domain/node-chain.ts";
+import type { NodeChain } from "#/services/access/domain/node-chain.ts";
 
 /**
  * Loads the chain organization → project → unit ancestors → unit of a node

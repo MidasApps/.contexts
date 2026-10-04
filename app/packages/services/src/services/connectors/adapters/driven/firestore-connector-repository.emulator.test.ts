@@ -1,8 +1,8 @@
 import { type Connector, ConnectorSchema, TenantIdSchema } from "@core/contracts";
 import { Timestamp } from "firebase-admin/firestore";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createFirebaseAdmin } from "../../../shared/firebase/firebase-admin.ts";
-import { createFirestoreUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
+import { createFirebaseAdmin } from "#/services/shared/firebase/firebase-admin.ts";
+import { createFirestoreUnitOfWork } from "#/services/shared/firestore/unit-of-work.ts";
 import { CONNECTORS_COLLECTION, createFirestoreConnectorRepository } from "./firestore-connector-repository.ts";
 import { createLocalSecretStore, LOCAL_SECRETS_COLLECTION } from "./local-secret-store.ts";
 

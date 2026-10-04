@@ -1,5 +1,5 @@
 import type { Invitation, InvitationPreview } from "@core/contracts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { maskEmail } from "../../domain/email.ts";
 import { AccessNotFoundError } from "../../domain/errors/access-not-found-error.ts";
 import { checkInvitationUsable, type InvitationUseError } from "../../domain/invitation-state.ts";

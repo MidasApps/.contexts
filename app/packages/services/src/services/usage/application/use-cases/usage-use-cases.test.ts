@@ -1,6 +1,6 @@
 import { type LlmCall, LlmCallContract } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { fixedClock } from "../../../shared/clock/clock.ts";
+import { fixedClock } from "#/services/shared/clock/clock.ts";
 import type { StoredBudget, UsageBreakdowns, UsageRepository, UsageTotals } from "../ports/usage-repository.ts";
 import { BudgetTenantMissingError, makeCheckTenantBudget } from "./check-tenant-budget.ts";
 import { makeGetUsageSummary } from "./get-usage-summary.ts";

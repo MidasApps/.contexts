@@ -1,7 +1,7 @@
 import { type AuditLogEntry, AuditLogEntryContract } from "@core/contracts";
 import { FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
-import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { createContractConverter } from "#/services/shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { AuditLogReader } from "../../application/ports/driven/audit-log-reader.ts";
 import { AUDIT_LOG_COLLECTIONS } from "./firestore-audit-log-writer.ts";
 

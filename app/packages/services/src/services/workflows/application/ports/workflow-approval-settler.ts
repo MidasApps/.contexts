@@ -1,4 +1,4 @@
-import type { GatewayResult } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+import type { GatewayResult } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
 
 /** What the Mastra settle route did (decision 0036). */
 export type SettleOutcome =

@@ -6,9 +6,9 @@ import {
   type QueryDocumentSnapshot,
   Timestamp,
 } from "firebase-admin/firestore";
-import { CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { CorruptDocumentError } from "../../../shared/firestore/corrupt-document-error.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { CorruptDocumentError } from "#/services/shared/firestore/corrupt-document-error.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { ConnectorRepository } from "../../application/ports/connector-ports.ts";
 
 /** Top-level collection of tenant connectors (SP3 spec §9); Security Rules deny every client. */

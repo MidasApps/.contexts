@@ -1,8 +1,8 @@
 import { adminClearFlagOverrideEndpoint, adminListFlagsEndpoint, adminSetFlagEndpoint } from "@core/contracts";
-import { requireStaff } from "../../../platform/adapters/driving/console-guards.ts";
-import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { requireStaff } from "#/services/platform/adapters/driving/console-guards.ts";
+import { apiError, dataResponse } from "#/services/shared/http/api-errors.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { FlagsServices } from "../../composition.ts";
 import { FLAG_PERMISSIONS, flagErrorResponse } from "./flags-route-handler.ts";
 

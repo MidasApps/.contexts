@@ -1,7 +1,7 @@
 import type { CreateOrganizationInput, Organization, UserPrincipal } from "@core/contracts";
-import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { organizationNode, recordTenancyAudit, type TenancyCommand, type TenancyDeps } from "../tenancy-deps.ts";
 
 export type CreateOrganizationCommand = TenancyCommand & {

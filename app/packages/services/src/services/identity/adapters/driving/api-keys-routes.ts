@@ -1,9 +1,9 @@
 import { createApiKeyEndpoint, listApiKeysEndpoint, revokeApiKeyEndpoint } from "@core/contracts";
-import { accessErrorResponse } from "../../../access/adapters/driving/access-error-response.ts";
-import { apiError, dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
-import { invalidCursorResponse, listResponse, pageRequestOf } from "../../../shared/http/api-list.ts";
-import { type ApiRouteDeps, withApiRoute } from "../../../shared/http/api-route.ts";
-import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
+import { accessErrorResponse } from "#/services/access/adapters/driving/access-error-response.ts";
+import { apiError, dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
+import { invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
+import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
+import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
 import type { ApiKeyServices } from "../../api-key-composition.ts";
 import { ApiKeyExpiryInvalidError } from "../../domain/errors/api-key-errors.ts";
 

@@ -1,4 +1,4 @@
-import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
+import type { AgentCallScope } from "#/services/agents/application/ports/agent-runtime-gateway.ts";
 import type { ListRunsQuery, WorkflowRuntimeGateway } from "../ports/workflow-runtime-gateway.ts";
 
 export type ListRuns = (scope: AgentCallScope, query: ListRunsQuery) => ReturnType<WorkflowRuntimeGateway["listRuns"]>;

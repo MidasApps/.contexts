@@ -5,10 +5,10 @@ import {
   CustomSkillSchema,
   type UpdateCustomSkillInput,
 } from "@core/contracts";
-import type { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
-import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
-import { err, ok, type Result } from "../../../shared/result/result.ts";
+import type { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
+import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
+import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import {
   CustomLimitReachedError,
   CustomSkillNameTakenError,

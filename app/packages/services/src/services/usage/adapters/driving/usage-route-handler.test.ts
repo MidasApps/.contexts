@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
+import { callRoute, makeInMemoryPipeline } from "#/services/shared/testing/in-memory-api-pipeline.fixture.ts";
 import type { UsageRepository, UsageTotals } from "../../application/ports/usage-repository.ts";
 import { makeGetUsageSummary } from "../../application/use-cases/get-usage-summary.ts";
 import { buildUsageRoutes } from "./usage-route-handler.ts";

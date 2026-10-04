@@ -1,8 +1,8 @@
 import { IsoDateTimeSchema, type Role, RoleIdSchema, RoleSchema } from "@core/contracts";
 import { FieldPath, type Firestore } from "firebase-admin/firestore";
-import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
-import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
-import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "#/services/shared/firestore/collections.ts";
+import { createContractConverter, toFirestoreUpdate } from "#/services/shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "#/services/shared/pagination/page.ts";
 import type { RoleRepository } from "../../application/ports/driven/role-repository.ts";
 
 /** Stored custom role: the contract plus `deletedAt` (audit fields and `schemaVersion` stripped on read). */

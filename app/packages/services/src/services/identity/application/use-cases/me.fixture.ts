@@ -1,7 +1,7 @@
 // Test world of the `/v1/me*` use cases: the tenancy world (in-memory organizations,
 // projects, units, grants and projections) plus an in-memory users store and Auth accounts.
 import type { User } from "@core/contracts";
-import { makeTenancyWorld } from "../../../tenancy/application/use-cases/tenancy.fixture.ts";
+import { makeTenancyWorld } from "#/services/tenancy/application/use-cases/tenancy.fixture.ts";
 import { createInMemoryUserRepository } from "../../adapters/driven/in-memory-user-repository.ts";
 import { createIdentityServices } from "../../composition.ts";
 import type { AuthAccount } from "../ports/driven/auth-account-reader.ts";

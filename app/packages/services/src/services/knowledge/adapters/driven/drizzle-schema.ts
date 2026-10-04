@@ -12,7 +12,7 @@ import {
   uuid,
   vector,
 } from "drizzle-orm/pg-core";
-import { aiSchema } from "../../../shared/postgres/drizzle-schemas.ts";
+import { aiSchema } from "#/services/shared/postgres/drizzle-schemas.ts";
 
 /**
  * Knowledge base tables (SP3 spec §11, decisions 0022 and 0023): source of the

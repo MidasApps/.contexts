@@ -7,7 +7,7 @@ import type {
   UserId,
 } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /** A status change: the decision fields are set once, when the request leaves `pending`. */
 export type ApprovalStatusChange = {

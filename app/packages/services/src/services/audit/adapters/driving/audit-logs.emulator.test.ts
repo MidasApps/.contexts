@@ -6,7 +6,7 @@ import {
   emulatorFirebase,
   ensureAuthUser,
   seedActiveUser,
-} from "../../../shared/testing/core-server-emulator.fixture.ts";
+} from "#/services/shared/testing/core-server-emulator.fixture.ts";
 
 const firebase = emulatorFirebase();
 const { firestore, auth } = firebase;

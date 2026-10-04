@@ -7,9 +7,9 @@ import {
 } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { createApprovalHandlerRegistry } from "../../../access/application/approval-handler-registry.ts";
-import type { RequestAccess } from "../../../access/composition.ts";
-import { createInMemoryIdempotencyStore } from "../../../shared/idempotency/in-memory-idempotency-store.ts";
+import { createApprovalHandlerRegistry } from "#/services/access/application/approval-handler-registry.ts";
+import type { RequestAccess } from "#/services/access/composition.ts";
+import { createInMemoryIdempotencyStore } from "#/services/shared/idempotency/in-memory-idempotency-store.ts";
 import { AGENT_COMMAND_HANDLER_KIND, createAgentCommandApprovalHandler } from "./agent-command-approval-handler.ts";
 import { agentCommandExecutors, defineAgentCommandExecutor } from "./agent-command-executor.ts";
 import { createCommandIdempotency } from "./run-command-once.ts";

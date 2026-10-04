@@ -1,6 +1,6 @@
 import type { Connector, ConnectorId, ConnectorLoadError, TenantId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
+import type { Page, PageRequest } from "#/services/shared/pagination/page.ts";
 
 /** Firestore `connectors/{autoId}` (tenant data; Security Rules deny clients). */
 export type ConnectorRepository = {
