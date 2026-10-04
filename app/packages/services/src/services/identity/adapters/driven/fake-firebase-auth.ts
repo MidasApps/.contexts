@@ -19,6 +19,8 @@ export type FakeFirebaseAuth = {
 /**
  * Test double of Firebase Auth for sessions and devices. Custom tokens are
  * `custom:<uid>:<claims JSON>`; `revokeRefreshTokens` kills every cookie issued so far.
+ * Like Firebase, one ID token always yields the same session cookie: two sign-ins of one user in
+ * the same second carry identical tokens, so their cookies are identical too.
  */
 export const createFakeFirebaseAuth = (): FakeFirebaseAuth => {
   const idTokens = new Map<string, VerifiedSignIn>();
@@ -27,15 +29,13 @@ export const createFakeFirebaseAuth = (): FakeFirebaseAuth => {
   const revoked: string[] = [];
   const disabled: string[] = [];
   const accounts: string[] = [];
-  let sequence = 0;
   return {
     cookies: {
       verifyIdToken: (token) => Promise.resolve(idTokens.get(token) ?? null),
       createSessionCookie: (idToken) => {
         const signIn = idTokens.get(idToken);
         if (signIn === undefined) return Promise.reject(new Error("auth/invalid-id-token"));
-        sequence += 1;
-        const cookie = `cookie-${sequence}-${signIn.uid}`;
+        const cookie = `cookie-of-${idToken}-${signIn.uid}`;
         liveCookies.set(cookie, signIn.uid);
         return Promise.resolve(cookie);
       },

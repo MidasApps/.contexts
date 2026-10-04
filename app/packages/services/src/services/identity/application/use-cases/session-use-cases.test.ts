@@ -46,6 +46,18 @@ describe("web sessions", () => {
     });
   });
 
+  it("keeps one session per cookie when two sign-ins yield the same cookie", async () => {
+    const world = buildSessionWorld();
+    world.auth.addIdToken("id-twin", { uid, authTimeSeconds: nowSeconds - 10, mfa: false });
+    const first = await world.services.createWebSession({ idToken: "id-twin", userAgent: null });
+    const second = await world.services.createWebSession({ idToken: "id-twin", userAgent: null });
+    if (!first.ok || !second.ok) throw new Error("expected both sign-ins to open a session");
+    expect(second.data.sessionId).toBe(first.data.sessionId);
+    expect(world.repository.all()).toHaveLength(1);
+    await world.services.revokeSession({ actor, sessionId: second.data.sessionId, requestId: "r1" });
+    expect(await world.services.requireWebSession({ cookie: first.data.cookie })).toMatchObject({ ok: false });
+  });
+
   it("refuses to exchange a signed-out (revoked) session", async () => {
     const world = buildSessionWorld();
     const { cookie } = await world.webSession(uid, { mfa: false });

@@ -3,7 +3,7 @@ import { err, ok, type Result } from "#/services/shared/result/result.ts";
 import { RecentSignInRequiredError, SessionInvalidError } from "../../domain/errors/session-errors.ts";
 import { hashSessionSecret } from "../../domain/session-secret.ts";
 import { summarizeUserAgent } from "../../domain/user-agent.ts";
-import { DAY_MS, type SessionDeps } from "../session-deps.ts";
+import { DAY_MS, isSessionOpen, type SessionDeps } from "../session-deps.ts";
 
 /** A sign-in older than this cannot open a web session (decision 0007 §1). */
 export const RECENT_SIGN_IN_SECONDS = 5 * 60;
@@ -25,7 +25,7 @@ export type CreateWebSession = (command: {
 /**
  * `createSession({ idToken })` (SP1 spec §3.3): verifies the ID token with revocation, needs
  * `auth_time` within 5 minutes, creates the session cookie (`SESSION_MAX_AGE_DAYS`) and a
- * `sessions` record holding only `sha256(cookie)`.
+ * `sessions` record holding only `sha256(cookie)` (reused when an open record already holds it).
  */
 export const makeCreateWebSession =
   (deps: SessionDeps): CreateWebSession =>
@@ -37,6 +37,12 @@ export const makeCreateWebSession =
       return err(new RecentSignInRequiredError());
     const expiresInMs = deps.sessionMaxAgeDays * DAY_MS;
     const cookie = await deps.cookies.createSessionCookie(idToken, { expiresInMs });
+    // Two sign-ins of one user in the same second carry identical ID tokens, so their cookies are
+    // identical: one credential is one session, or revoking one twin would leave the other open
+    // (decision 0069).
+    const twin = await deps.sessions.findByCookieHash(hashSessionSecret(cookie));
+    if (twin !== null && twin.kind === "web" && isSessionOpen(twin, now))
+      return ok({ sessionId: twin.id, cookie, maxAgeSeconds: expiresInMs / 1000, expiresAt: twin.expiresAt });
     const sessionId = deps.sessions.newId();
     const expiresAt = new Date(now.getTime() + expiresInMs).toISOString();
     await deps.sessions.create({
