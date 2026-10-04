@@ -1,4 +1,5 @@
 import type { LlmCall } from "@core/contracts";
+import type { AgentRun } from "../use-cases/record-agent-runs.schema.ts";
 
 /**
  * Driven port of the usage ledger (SP3 spec §12, decision 0026). Every call
@@ -34,6 +35,8 @@ export type UsageRepository = {
    * @returns how many rows were new.
    */
   readonly insertCalls: (calls: readonly LlmCall[]) => Promise<number>;
+  /** Appends agent runs (`usage.agent_runs`, decision 0066) like `insertCalls`: a stored id is skipped. */
+  readonly insertAgentRuns: (runs: readonly AgentRun[]) => Promise<number>;
   /** Totals of the tenant's calls in the UTC month that starts at `monthStart` (view `usage.tenant_month_spend`). */
   readonly getMonthSpend: (input: { readonly tenantId: string; readonly monthStart: Date }) => Promise<UsageTotals>;
   /** The same month split by provider and model, largest cost first. */

@@ -1,6 +1,7 @@
 import type { LlmCall } from "@core/contracts";
 import type { Sql, TransactionSql } from "postgres";
 import { withTenantTransaction } from "../../../shared/postgres/with-tenant-transaction.ts";
+import type { AgentRun } from "../../application/use-cases/record-agent-runs.schema.ts";
 import type { ModelTotals, StoredBudget, UsageBreakdowns, UsageRepository, UsageTotals } from "../../application/ports/usage-repository.ts";
 
 /** NOLOGIN role every usage query runs as (migration 0007): no BYPASSRLS, append-only on the ledger. */
@@ -54,6 +55,32 @@ const insertCalls = (sql: Sql) => async (calls: readonly LlmCall[]): Promise<num
     inserted += await withTenantTransaction(sql, { tenantId }, async (tx) => {
       await asRuntime(tx);
       const result = await tx`INSERT INTO usage.llm_calls ${tx(rows.map(toRow))} ON CONFLICT (id) DO NOTHING RETURNING id`;
+      return result.length;
+    });
+  }
+  return inserted;
+};
+
+const toRunRow = (run: AgentRun) => ({
+  id: run.id,
+  request_id: run.requestId,
+  trace_id: run.traceId,
+  tenant_id: run.tenantId,
+  user_id: run.userId,
+  agent_id: run.agentId,
+  tripwire_processor_id: run.tripwireProcessorId,
+  occurred_at: new Date(run.occurredAt),
+});
+
+// Same shape as insertCalls: one transaction per tenant, a retried row (same id) is skipped.
+const insertAgentRuns = (sql: Sql) => async (runs: readonly AgentRun[]): Promise<number> => {
+  const groups = new Map<string, AgentRun[]>();
+  for (const run of runs) groups.set(run.tenantId, [...(groups.get(run.tenantId) ?? []), run]);
+  let inserted = 0;
+  for (const [tenantId, rows] of groups) {
+    inserted += await withTenantTransaction(sql, { tenantId }, async (tx) => {
+      await asRuntime(tx);
+      const result = await tx`INSERT INTO usage.agent_runs ${tx(rows.map(toRunRow))} ON CONFLICT (id) DO NOTHING RETURNING id`;
       return result.length;
     });
   }
@@ -160,6 +187,21 @@ export const listActiveUserIds = (sql: Sql) => (input: { readonly tenantId: stri
     return rows.map((row) => row.user_id);
   });
 
+/**
+ * A tenant's agent runs since an instant and how many a guardrail stopped (the staff overview's
+ * tripwire rate, decision 0066): one count on `agent_runs_tenant_occurred_idx`, under the tenant's
+ * row level security like every other read here.
+ */
+export const countAgentRuns = (sql: Sql) => (input: { readonly tenantId: string; readonly since: Date }): Promise<{ readonly runs: number; readonly stopped: number }> =>
+  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+    await asRuntime(tx);
+    const [row] = await tx<{ runs: string; stopped: string }[]>`
+      SELECT count(*) AS runs, count(*) FILTER (WHERE tripwire_processor_id IS NOT NULL) AS stopped
+      FROM usage.agent_runs
+      WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${input.since}`;
+    return { runs: Number(row?.runs ?? 0), stopped: Number(row?.stopped ?? 0) };
+  });
+
 type BucketRow = TotalsRow & { day: string; provider: string; model: string };
 
 /**
@@ -185,6 +227,7 @@ export const listUsageBuckets =
 
 export const createPostgresUsageRepository = (sql: Sql): UsageRepository => ({
   insertCalls: insertCalls(sql),
+  insertAgentRuns: insertAgentRuns(sql),
   getMonthSpend: getMonthSpend(sql),
   getMonthByModel: getMonthByModel(sql),
   getMonthBreakdowns: getMonthBreakdowns(sql),

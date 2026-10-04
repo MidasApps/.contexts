@@ -19,6 +19,7 @@ export const createInMemoryConsoleStores = (
   const budgets = new Map<string, BudgetCaps>();
   const costs = new Map<string, number>();
   const activity: { tenantId: string; userId: string; at: Date }[] = [];
+  const agentRuns: { tenantId: string; at: Date; stoppedBy: string | null }[] = [];
   /** Ledger rows already grouped by tenant, UTC day and model (what the Postgres adapter answers). */
   const usageRows: (UsageBucket & { tenantId: string })[] = [];
   let sequence = 0;
@@ -79,6 +80,10 @@ export const createInMemoryConsoleStores = (
           .map((row): UsageBucket => ({ day: row.day, provider: row.provider, model: row.model, calls: row.calls, inputTokens: row.inputTokens, outputTokens: row.outputTokens, costMicroUsd: row.costMicroUsd, unpricedCalls: row.unpricedCalls })),
       ),
     activeUserIds: ({ tenantId, since }) => Promise.resolve([...new Set(activity.filter((row) => row.tenantId === tenantId && row.at >= since).map((row) => row.userId))]),
+    agentRunCounts: ({ tenantId, since }) => {
+      const runs = agentRuns.filter((row) => row.tenantId === tenantId && row.at >= since);
+      return Promise.resolve({ runs: runs.length, stopped: runs.filter((row) => row.stoppedBy !== null).length });
+    },
   };
-  return { stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage }, plans, organizations, assignments, settings, budgets, costs, activity, usageRows };
+  return { stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage }, plans, organizations, assignments, settings, budgets, costs, activity, agentRuns, usageRows };
 };

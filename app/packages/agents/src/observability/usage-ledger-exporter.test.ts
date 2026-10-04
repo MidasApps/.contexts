@@ -2,6 +2,7 @@ import type { LlmCall } from "@core/contracts";
 import { type AnyExportedSpan, SpanType, type TracingEvent, TracingEventType } from "@mastra/core/observability";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type ModelPrice, priceTableFor } from "../models/model-prices.ts";
+import type { AgentRunRecord } from "../runtime/runtime-ports.ts";
 import { createUsageLedgerExporter, LEDGER_FLUSH_MS, LEDGER_FLUSH_ROWS, type LedgerLogger } from "./usage-ledger-exporter.ts";
 
 const TRACE_ID = "4bf92f3577b34da6a3ce929d0e0e4736";
@@ -32,6 +33,24 @@ const generationSpan = (overrides: Partial<AnyExportedSpan> = {}, attributes: Re
     ...overrides,
   }) as AnyExportedSpan;
 
+/** An agent run span; `tripwireAbort` is what Mastra sets when a processor stopped the run. */
+const agentRunSpan = (overrides: Partial<AnyExportedSpan> = {}, attributes: Record<string, unknown> = {}): AnyExportedSpan =>
+  ({
+    id: "run-1",
+    traceId: TRACE_ID,
+    name: "agent run: 'assistant'",
+    type: SpanType.AGENT_RUN,
+    entityType: "agent",
+    entityId: "assistant",
+    startTime: new Date("2026-09-30T10:00:00.000Z"),
+    endTime: new Date("2026-09-30T10:00:02.000Z"),
+    isEvent: false,
+    isRootSpan: true,
+    requestContext: { tenantId: "tenantA", userId: "uid-1", requestId: REQUEST_ID, principalKind: "user" },
+    attributes,
+    ...overrides,
+  }) as AnyExportedSpan;
+
 /** A span as a durable agent ends it: rebuilt, without the request-context snapshot. */
 const withoutContext = (span: AnyExportedSpan): AnyExportedSpan => {
   const rebuilt = { ...span };
@@ -52,6 +71,7 @@ const recordingLogger = () => {
 
 const setup = (recordLlmCalls: (calls: readonly LlmCall[]) => Promise<void> = () => Promise.resolve(), extra: { prices?: Readonly<Record<string, ModelPrice>> } = {}) => {
   const batches: LlmCall[][] = [];
+  const runBatches: AgentRunRecord[][] = [];
   const { logger, lines } = recordingLogger();
   let sequence = 0;
   const exporter = createUsageLedgerExporter({
@@ -60,12 +80,16 @@ const setup = (recordLlmCalls: (calls: readonly LlmCall[]) => Promise<void> = ()
         batches.push([...calls]);
         await recordLlmCalls(calls);
       },
+      recordAgentRuns: (runs) => {
+        runBatches.push([...runs]);
+        return Promise.resolve();
+      },
     },
     logger,
     newId: () => `01928f6e-7b2a-7c3d-9e4f-${(sequence++).toString(16).padStart(12, "0")}`,
     ...extra,
   });
-  return { exporter, batches, lines };
+  return { exporter, batches, runBatches, lines };
 };
 
 beforeEach(() => {
@@ -124,11 +148,54 @@ describe("usage ledger exporter", () => {
   });
 
   it("ignores other span types and span starts", async () => {
-    const { exporter, batches } = setup();
-    await exporter.exportTracingEvent(ended(generationSpan({ type: SpanType.AGENT_RUN })));
+    const { exporter, batches, runBatches } = setup();
+    await exporter.exportTracingEvent(ended(generationSpan({ type: SpanType.TOOL_CALL })));
+    await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: agentRunSpan() });
     await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: generationSpan() });
     await exporter.flush();
     expect(batches).toEqual([]);
+    expect(runBatches).toEqual([]);
+  });
+
+  it("records every ended agent run, with the guardrail that stopped it (decision 0066)", async () => {
+    const { exporter, runBatches, batches } = setup();
+    const tripwireAbort = { reason: "Prompt injection detected.", processorId: "prompt-injection-detector" };
+    await exporter.exportTracingEvent(ended(agentRunSpan({ id: "run-stopped" }, { tripwireAbort })));
+    await exporter.exportTracingEvent(ended(agentRunSpan({ id: "run-ok", entityId: "knowledge", isRootSpan: false })));
+    await exporter.flush();
+    expect(batches).toEqual([]);
+    expect(runBatches).toEqual([
+      [
+        {
+          id: "01928f6e-7b2a-7c3d-9e4f-000000000000",
+          requestId: REQUEST_ID,
+          traceId: TRACE_ID,
+          tenantId: "tenantA",
+          userId: "uid-1",
+          agentId: "assistant",
+          tripwireProcessorId: "prompt-injection-detector",
+          occurredAt: "2026-09-30T10:00:02.000Z",
+        },
+        expect.objectContaining({ agentId: "knowledge", tripwireProcessorId: null }),
+      ],
+    ]);
+  });
+
+  it("skips internal agent runs (the guardrail detectors' own agents) and runs without a tenant", async () => {
+    const { exporter, runBatches, lines } = setup();
+    await exporter.exportTracingEvent(ended(agentRunSpan({ entityId: "prompt-injection-detector", isInternal: true, isRootSpan: false })));
+    await exporter.exportTracingEvent(ended(agentRunSpan({ requestContext: { userId: "uid-1" } })));
+    await exporter.flush();
+    expect(runBatches).toEqual([]);
+    expect(lines).toEqual([{ level: "warn", message: "usage_span_without_tenant", fields: { agentId: "assistant" } }]);
+  });
+
+  it("uses the context of an agent run's own start when its end carries none (durable agents)", async () => {
+    const { exporter, runBatches } = setup();
+    await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: agentRunSpan({ id: "run-durable" }) });
+    await exporter.exportTracingEvent(ended(withoutContext(agentRunSpan({ id: "run-durable" }, { tripwireAbort: { processorId: "tenant-budget-guard" } }))));
+    await exporter.flush();
+    expect(runBatches.flat().map((run) => [run.tenantId, run.userId, run.tripwireProcessorId])).toEqual([["tenantA", "uid-1", "tenant-budget-guard"]]);
   });
 
   it("skips a span whose request context names no tenant, whatever its metadata says", async () => {

@@ -67,6 +67,8 @@ export type ConsoleUsage = {
   readonly monthCostMicroUsd: (input: { readonly tenantId: string; readonly monthStart: Date }) => Promise<number>;
   /** Distinct users of the tenant's ledger rows since an instant (the overview's active users). */
   readonly activeUserIds: (input: { readonly tenantId: string; readonly since: Date }) => Promise<readonly string[]>;
+  /** The tenant's agent runs since an instant and how many a guardrail stopped (the overview's tripwire rate, decision 0066). */
+  readonly agentRunCounts: (input: { readonly tenantId: string; readonly since: Date }) => Promise<{ readonly runs: number; readonly stopped: number }>;
   /** The tenant's calls in `[from, to)` grouped by UTC day, provider and model (`/v1/admin/usage`). */
   readonly usageBuckets: (input: { readonly tenantId: string; readonly from: Date; readonly to: Date }) => Promise<readonly UsageBucket[]>;
 };

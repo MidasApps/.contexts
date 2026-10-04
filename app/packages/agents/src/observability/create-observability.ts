@@ -54,7 +54,7 @@ export type CreateObservabilityArgs = {
   /** `AI_MODE`: fake mode prices the fake models with nominal prices (`priceTableFor`); real by default. */
   readonly aiMode?: "fake" | "real";
   /** The ledger port; without it no ledger exporter is registered. */
-  readonly usage?: Pick<UsagePort, "recordLlmCalls">;
+  readonly usage?: Pick<UsagePort, "recordLlmCalls" | "recordAgentRuns">;
   /** Replaces every exporter (tests). */
   readonly exporters?: ObservabilityExporter[];
   /** OTLP span exporter seam (tests); the default is http/protobuf to the endpoint. */

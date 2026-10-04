@@ -6,9 +6,10 @@ import { createPostgresClient } from "../../../shared/postgres/postgres-client.t
 import { makeCheckTenantBudget } from "../../application/use-cases/check-tenant-budget.ts";
 import { makeGetUsageSummary } from "../../application/use-cases/get-usage-summary.ts";
 import { makeRecordLlmCalls } from "../../application/use-cases/record-llm-calls.ts";
-import { createPostgresUsageRepository, listActiveUserIds, listUsageBuckets, USAGE_RUNTIME_ROLE } from "./postgres-usage-repository.ts";
+import { type AgentRun, AgentRunSchema } from "../../application/use-cases/record-agent-runs.schema.ts";
+import { countAgentRuns, createPostgresUsageRepository, listActiveUserIds, listUsageBuckets, USAGE_RUNTIME_ROLE } from "./postgres-usage-repository.ts";
 
-// Needs the compose container and `pnpm db:migrate` (migrations 0006/0007).
+// Needs the compose container and `pnpm db:migrate` (migrations 0006/0007, 0012/0013 for agent runs).
 const LOCAL_DATABASE_URL = "postgresql://app:app@127.0.0.1:5432/app";
 const sql = createPostgresClient({ DATABASE_URL: process.env.DATABASE_URL ?? LOCAL_DATABASE_URL }, { max: 2 });
 const repository = createPostgresUsageRepository(sql);
@@ -42,6 +43,19 @@ const call = (overrides: Partial<Record<keyof LlmCall, unknown>> = {}): LlmCall 
     ...overrides,
   });
 
+const agentRun = (overrides: Partial<Record<keyof AgentRun, unknown>> = {}): AgentRun =>
+  AgentRunSchema.parse({
+    id: nextId(),
+    requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+    traceId: "4bf92f3577b34da6a3ce929d0e0e4736",
+    tenantId: TENANT_A,
+    userId: "uid-1",
+    agentId: "assistant",
+    tripwireProcessorId: null,
+    occurredAt: "2026-09-29T10:00:00.000Z",
+    ...overrides,
+  });
+
 const asTenant = async <T>(tenantId: string, fn: (tx: TransactionSql) => Promise<T>): Promise<T> =>
   (await sql.begin(async (tx) => {
     await tx`SELECT set_config('app.tenant_id', ${tenantId}, true)`;
@@ -52,6 +66,7 @@ const asTenant = async <T>(tenantId: string, fn: (tx: TransactionSql) => Promise
 // The runtime role cannot delete ledger rows (append-only), so cleanup runs as the login role.
 const cleanup = async (): Promise<void> => {
   await sql`DELETE FROM usage.llm_calls WHERE tenant_id IN (${TENANT_A}, ${TENANT_B})`;
+  await sql`DELETE FROM usage.agent_runs WHERE tenant_id IN (${TENANT_A}, ${TENANT_B})`;
   await sql`DELETE FROM usage.tenant_budgets WHERE tenant_id IN (${TENANT_A}, ${TENANT_B})`;
 };
 
@@ -116,6 +131,18 @@ describe("postgres usage repository", () => {
   it("keeps the ledger append-only for the runtime role", async () => {
     await repository.insertCalls([call()]);
     await expect(asTenant(TENANT_A, (tx) => tx`DELETE FROM usage.llm_calls`)).rejects.toThrow(/permission denied/);
+  });
+
+  it("counts a tenant's agent runs and guardrail stops since an instant, append-only and per tenant (decision 0066)", async () => {
+    const stopped = agentRun({ tripwireProcessorId: "prompt-injection-detector" });
+    expect(await repository.insertAgentRuns([stopped, agentRun(), agentRun({ occurredAt: "2026-09-20T10:00:00.000Z", tripwireProcessorId: "moderation" }), agentRun({ tenantId: TENANT_B, tripwireProcessorId: "moderation" })])).toBe(4);
+    expect(await repository.insertAgentRuns([stopped])).toBe(0);
+    const since = new Date("2026-09-23T12:00:00.000Z");
+    expect(await countAgentRuns(sql)({ tenantId: TENANT_A, since })).toEqual({ runs: 2, stopped: 1 });
+    expect(await countAgentRuns(sql)({ tenantId: TENANT_B, since })).toEqual({ runs: 1, stopped: 1 });
+    await expect(asTenant(TENANT_A, (tx) => tx`DELETE FROM usage.agent_runs`)).rejects.toThrow(/permission denied/);
+    const forged = (tx: TransactionSql) => tx`INSERT INTO usage.agent_runs (id, tenant_id, agent_id, occurred_at) VALUES (${nextId()}, ${TENANT_B}, 'forged', now())`;
+    await expect(asTenant(TENANT_A, forged)).rejects.toThrow(/row-level security/);
   });
 
   it("reads the stored caps and falls back to the plan default without a row", async () => {

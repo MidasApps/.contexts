@@ -93,7 +93,7 @@ export type VoiceFeatureGate = (input: { readonly tenantId: string; readonly fea
 
 export const createVoiceGovernance = (deps: {
   readonly isEnabled: VoiceFeatureGate;
-  readonly usage: UsagePort;
+  readonly usage: Pick<UsagePort, "recordLlmCalls" | "checkTenantBudget">;
   readonly audit: AuditPort;
   readonly logger: Logger;
   readonly now?: () => Date;

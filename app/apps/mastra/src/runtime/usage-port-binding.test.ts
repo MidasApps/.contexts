@@ -6,11 +6,14 @@ import { bindUsagePort, UsageRowsRejectedError } from "./usage-port-binding.ts";
 const [example] = LlmCallContract.meta.examples as [LlmCall];
 const ZERO: UsageTotals = { calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0, unpricedCalls: 0 };
 
-const repository = (spend: UsageTotals = ZERO): UsageRepository & { rows: LlmCall[] } => {
+const repository = (spend: UsageTotals = ZERO): UsageRepository & { rows: LlmCall[]; runs: unknown[] } => {
   const rows: LlmCall[] = [];
+  const runs: unknown[] = [];
   return {
     rows,
+    runs,
     insertCalls: (calls) => (rows.push(...calls), Promise.resolve(calls.length)),
+    insertAgentRuns: (added) => (runs.push(...added), Promise.resolve(added.length)),
     getMonthSpend: () => Promise.resolve(spend),
     getMonthByModel: () => Promise.resolve([]),
     getMonthBreakdowns: () => Promise.resolve({ byDay: [], byAgent: [], byUser: [] }),
@@ -34,6 +37,26 @@ describe("usage port binding", () => {
       .catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(UsageRowsRejectedError);
     expect((error as UsageRowsRejectedError).fields).toEqual(["0.outputTokens"]);
+  });
+
+  it("records agent runs, and rejects a run without an agent naming only the field (decision 0066)", async () => {
+    const run = {
+      id: "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+      requestId: null,
+      traceId: null,
+      tenantId: "Jd8sK2lPq0WnR5tYu3bV",
+      userId: null,
+      agentId: "assistant",
+      tripwireProcessorId: "moderation",
+      occurredAt: "2026-09-30T00:00:00.000Z",
+    };
+    const repo = repository();
+    await bind(repo).recordAgentRuns([run]);
+    expect(repo.runs).toEqual([run]);
+    const error = await bind(repo)
+      .recordAgentRuns([{ ...run, agentId: "" }])
+      .catch((caught: unknown) => caught);
+    expect((error as UsageRowsRejectedError).fields).toEqual(["0.agentId"]);
   });
 
   it("answers the budget check from the ledger", async () => {

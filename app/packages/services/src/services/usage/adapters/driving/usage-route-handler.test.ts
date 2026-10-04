@@ -22,6 +22,7 @@ const setup = () => {
   // Only organization A spent anything, so a leak across tenants would show its totals.
   const repository: UsageRepository = {
     insertCalls: () => Promise.resolve(0),
+    insertAgentRuns: () => Promise.resolve(0),
     getMonthSpend: ({ tenantId, monthStart }) => {
       reads.push({ tenantId, monthStart: monthStart.toISOString() });
       return Promise.resolve(tenantId === ORG_A ? TOTALS : EMPTY);

@@ -1,14 +1,17 @@
 import { type LlmCall, LlmCallSchema } from "@core/contracts";
 import { type AnyExportedSpan, type ObservabilityExporter, SpanType, type TracingEvent, TracingEventType } from "@mastra/core/observability";
 import { estimateCostMicroUsd, MODEL_PRICES, type ModelPrice } from "../models/model-prices.ts";
-import type { UsagePort } from "../runtime/runtime-ports.ts";
+import type { AgentRunRecord, UsagePort } from "../runtime/runtime-ports.ts";
 import { uuidv7 } from "./uuidv7.ts";
 
 /**
  * Usage ledger exporter (SP3 spec §12, decision 0026): every ended
- * `MODEL_GENERATION` span becomes a `usage.llm_calls` row, written in batches
- * (≤ 2 s or 50 rows). It never throws into the agent: a failed write is logged
- * and the rows are retried with the next flush (bounded buffer).
+ * `MODEL_GENERATION` span becomes a `usage.llm_calls` row, and every ended
+ * non-internal `AGENT_RUN` span a `usage.agent_runs` row with the guardrail that
+ * stopped it, if any (decision 0066; internal runs are the guardrail detectors' own
+ * agents). Both are written in batches (≤ 2 s or 50 rows). It never throws into
+ * the agent: a failed write is logged and the rows are retried with the next flush
+ * (bounded buffer).
  *
  * Tenant, user and request id come from the span's request-context snapshot,
  * which only the server middleware writes; span metadata is ignored for them,
@@ -35,7 +38,7 @@ export type LedgerLogger = {
 };
 
 export type UsageLedgerExporterOptions = {
-  readonly usage: Pick<UsagePort, "recordLlmCalls">;
+  readonly usage: Pick<UsagePort, "recordLlmCalls" | "recordAgentRuns">;
   /** Defaults to the logger Mastra hands every exporter (`__setLogger`). */
   readonly logger?: LedgerLogger;
   /** Price table (`priceTableFor(AI_MODE)`); the verified prices by default. */
@@ -93,30 +96,28 @@ const toRow = (span: AnyExportedSpan, context: SpanContext, tenantId: string, id
 
 const SILENT_LOGGER: LedgerLogger = { warn: () => undefined, error: () => undefined };
 
+type BufferedWriter<Row> = { readonly push: (row: Row) => void; readonly flush: () => Promise<void> };
+
 /**
- * @returns a Mastra `ObservabilityExporter`; register it next to the storage/OTLP exporters.
+ * Batches rows to one port call (≤ `LEDGER_FLUSH_MS` or `LEDGER_FLUSH_ROWS`); flushes run one after
+ * another, so a retry never races a newer batch, and a failed batch is kept for the next flush.
  */
-export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): ObservabilityExporter => {
-  let logger: LedgerLogger = options.logger ?? SILENT_LOGGER;
-  const newId = options.newId ?? (() => uuidv7());
-  const prices = options.prices ?? MODEL_PRICES;
-  const warnedModels = new Set<string>();
-  let buffer: LlmCall[] = [];
+const createBufferedWriter = <Row>(write: (rows: Row[]) => Promise<void>, log: () => LedgerLogger, failure: { flush: string; dropped: string }): BufferedWriter<Row> => {
+  let buffer: Row[] = [];
   let timer: ReturnType<typeof setTimeout> | undefined;
   let flushing: Promise<void> = Promise.resolve();
 
-  const writeBatch = async (rows: LlmCall[]): Promise<void> => {
+  const writeBatch = async (rows: Row[]): Promise<void> => {
     try {
-      await options.usage.recordLlmCalls(rows);
+      await write(rows);
     } catch (error: unknown) {
-      logger.error("usage_ledger_flush_failed", { rowCount: rows.length, error: error instanceof Error ? error.message : String(error) });
+      log().error(failure.flush, { rowCount: rows.length, error: error instanceof Error ? error.message : String(error) });
       const kept = [...rows, ...buffer];
-      if (kept.length > LEDGER_MAX_BUFFERED_ROWS) logger.error("usage_ledger_rows_dropped", { rowCount: kept.length - LEDGER_MAX_BUFFERED_ROWS });
+      if (kept.length > LEDGER_MAX_BUFFERED_ROWS) log().error(failure.dropped, { rowCount: kept.length - LEDGER_MAX_BUFFERED_ROWS });
       buffer = kept.slice(-LEDGER_MAX_BUFFERED_ROWS);
     }
   };
 
-  // Flushes run one after another, so a retry never races a newer batch.
   const flush = (): Promise<void> => {
     if (timer !== undefined) clearTimeout(timer);
     timer = undefined;
@@ -129,7 +130,53 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
     return flushing;
   };
 
-  // Request context of started generation spans, by span id (insertion order = age).
+  const push = (row: Row): void => {
+    buffer.push(row);
+    if (buffer.length >= LEDGER_FLUSH_ROWS) void flush();
+    else timer ??= setTimeout(() => void flush(), LEDGER_FLUSH_MS);
+  };
+
+  return { push, flush };
+};
+
+type TripwireAttributes = { tripwireAbort?: { processorId?: unknown } };
+
+const toRunRecord = (span: AnyExportedSpan, context: SpanContext, tenantId: string, id: string): AgentRunRecord => {
+  const tripwire = (span.attributes as TripwireAttributes | undefined)?.tripwireAbort;
+  return {
+    id,
+    requestId: stringOf(context["requestId"]),
+    traceId: TRACE_ID_PATTERN.test(span.traceId) ? span.traceId : null,
+    tenantId,
+    userId: stringOf(context["userId"]),
+    agentId: stringOf(span.entityId) ?? stringOf(span.entityName) ?? "unknown",
+    // A tripwire without a processor id still stopped the run.
+    tripwireProcessorId: tripwire === undefined ? null : (stringOf(tripwire.processorId) ?? "unknown"),
+    occurredAt: (span.endTime ?? span.startTime).toISOString(),
+  };
+};
+
+/**
+ * @returns a Mastra `ObservabilityExporter`; register it next to the storage/OTLP exporters.
+ */
+export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): ObservabilityExporter => {
+  let logger: LedgerLogger = options.logger ?? SILENT_LOGGER;
+  const newId = options.newId ?? (() => uuidv7());
+  const prices = options.prices ?? MODEL_PRICES;
+  const warnedModels = new Set<string>();
+  const calls = createBufferedWriter<LlmCall>((rows) => options.usage.recordLlmCalls(rows), () => logger, {
+    flush: "usage_ledger_flush_failed",
+    dropped: "usage_ledger_rows_dropped",
+  });
+  const runs = createBufferedWriter<AgentRunRecord>((rows) => options.usage.recordAgentRuns(rows), () => logger, {
+    flush: "usage_ledger_runs_flush_failed",
+    dropped: "usage_ledger_runs_dropped",
+  });
+  const flush = async (): Promise<void> => {
+    await Promise.all([calls.flush(), runs.flush()]);
+  };
+
+  // Request context of started generation and agent run spans, by span id (insertion order = age).
   const started = new Map<string, SpanContext>();
 
   const remember = (span: AnyExportedSpan): void => {
@@ -148,14 +195,19 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
     return stringOf(span.requestContext?.["tenantId"]) === null ? (atStart ?? {}) : (span.requestContext ?? {});
   };
 
-  const enqueue = (span: AnyExportedSpan): void => {
+  /** The tenant of an ended span, or null (logged) when its context names none. */
+  const tenantContextOf = (span: AnyExportedSpan): { readonly context: SpanContext; readonly tenantId: string } | null => {
     const context = contextOf(span);
     const tenantId = stringOf(context["tenantId"]);
-    if (tenantId === null) {
-      logger.warn("usage_span_without_tenant", { agentId: span.entityId ?? null });
-      return;
-    }
-    const { row, priced } = toRow(span, context, tenantId, newId(), prices);
+    if (tenantId !== null) return { context, tenantId };
+    logger.warn("usage_span_without_tenant", { agentId: span.entityId ?? null });
+    return null;
+  };
+
+  const enqueueCall = (span: AnyExportedSpan): void => {
+    const owner = tenantContextOf(span);
+    if (owner === null) return;
+    const { row, priced } = toRow(span, owner.context, owner.tenantId, newId(), prices);
     if (row === null) {
       logger.warn("usage_span_invalid", { agentId: span.entityId ?? null });
       return;
@@ -165,10 +217,18 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
       warnedModels.add(modelKey);
       logger.warn("usage_price_missing", { provider: row.provider, model: row.model });
     }
-    buffer.push(row);
-    if (buffer.length >= LEDGER_FLUSH_ROWS) void flush();
-    else timer ??= setTimeout(() => void flush(), LEDGER_FLUSH_MS);
+    calls.push(row);
   };
+
+  const enqueueRun = (span: AnyExportedSpan): void => {
+    const owner = tenantContextOf(span);
+    if (owner !== null) runs.push(toRunRecord(span, owner.context, owner.tenantId, newId()));
+  };
+
+  const LEDGER_SPANS: ReadonlyMap<SpanType, (span: AnyExportedSpan) => void> = new Map([
+    [SpanType.MODEL_GENERATION, enqueueCall],
+    [SpanType.AGENT_RUN, enqueueRun],
+  ]);
 
   return {
     name: USAGE_LEDGER_EXPORTER_NAME,
@@ -176,9 +236,12 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
       if (options.logger === undefined) logger = mastraLogger;
     },
     exportTracingEvent: (event: TracingEvent) => {
-      if (event.exportedSpan.type !== SpanType.MODEL_GENERATION) return Promise.resolve();
-      if (event.type === TracingEventType.SPAN_STARTED) remember(event.exportedSpan);
-      if (event.type === TracingEventType.SPAN_ENDED) enqueue(event.exportedSpan);
+      const span = event.exportedSpan;
+      const enqueue = LEDGER_SPANS.get(span.type);
+      // Internal agent runs are the guardrail detectors' own agents, not runs of the tenant.
+      if (enqueue === undefined || (span.type === SpanType.AGENT_RUN && span.isInternal === true)) return Promise.resolve();
+      if (event.type === TracingEventType.SPAN_STARTED) remember(span);
+      if (event.type === TracingEventType.SPAN_ENDED) enqueue(span);
       return Promise.resolve();
     },
     flush,

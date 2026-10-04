@@ -35,6 +35,14 @@ const approvalRateOf = async (deps: OverviewDeps, since: Date): Promise<number> 
   return approved + rejected === 0 ? 0 : approved / (approved + rejected);
 };
 
+// Agent runs stopped by a guardrail over every agent run of the window (decision 0066); 0 without runs.
+const tripwireRateOf = async (deps: OverviewDeps, organizations: readonly OrganizationListItem[], since: Date): Promise<number> => {
+  const counts = await Promise.all(organizations.map((org) => deps.usage.agentRunCounts({ tenantId: org.id, since })));
+  const runs = counts.reduce((sum, count) => sum + count.runs, 0);
+  const stopped = counts.reduce((sum, count) => sum + count.stopped, 0);
+  return runs === 0 ? 0 : stopped / runs;
+};
+
 // The latest finished experiment of any source (CI gate, prompt eval, tenant run) across tenants;
 // the runtime being unreachable is `unknown`, never a failed overview.
 const evalStatusOf = async (deps: OverviewDeps): Promise<AdminOverview["evalStatus"]> => {
@@ -53,10 +61,10 @@ const evalStatusOf = async (deps: OverviewDeps): Promise<AdminOverview["evalStat
  *   per organization, under each tenant's row level security);
  * - approval rate of the last 7 days: approved (executed and failed included) over approved plus
  *   rejected, 0 without decisions;
- * - eval status: verdict of the latest finished experiment (`unknown` when none or unreachable).
- * The tripwire rate stays 0 and is listed in `unmeasured`, so the console never shows it as a
- * measurement: a guardrail stop aborts the run but is recorded neither in the audit log nor in the
- * ledger (follow-up 57: persist tripwires, compute it here and drop it from `unmeasured`).
+ * - eval status: verdict of the latest finished experiment (`unknown` when none or unreachable);
+ * - tripwire rate of the last 7 days: agent runs a guardrail stopped over every agent run in
+ *   `usage.agent_runs` (decision 0066; one read per organization), 0 without runs. Nothing is
+ *   `unmeasured` any more.
  */
 export const makeGetAdminOverview =
   (deps: OverviewDeps): GetAdminOverview =>
@@ -64,20 +72,21 @@ export const makeGetAdminOverview =
     const now = deps.clock.now();
     const since = new Date(now.getTime() - WINDOW_MS);
     const organizations = (await allLiveOrganizations(deps)).filter((org) => org.status === "active");
-    const [costs, activeUsers7d, approvalRate, evalStatus] = await Promise.all([
+    const [costs, activeUsers7d, approvalRate, evalStatus, tripwireRate] = await Promise.all([
       Promise.all(organizations.map((org) => deps.usage.monthCostMicroUsd({ tenantId: org.id, monthStart: utcMonthStart(now) }))),
       activeUsersOf(deps, organizations, since),
       approvalRateOf(deps, since),
       evalStatusOf(deps),
+      tripwireRateOf(deps, organizations, since),
     ]);
     return AdminOverviewSchema.parse({
       organizations: organizations.length,
       activeUsers7d,
       costMtdMicroUsd: costs.reduce((sum, cost) => sum + cost, 0),
-      tripwireRate: 0,
+      tripwireRate,
       approvalRate,
       evalStatus,
       generatedAt: now.toISOString(),
-      unmeasured: ["tripwireRate"],
+      unmeasured: [],
     });
   };

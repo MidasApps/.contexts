@@ -128,8 +128,24 @@ export type BudgetCheck =
   | { readonly allowed: true; readonly alert: boolean }
   | { readonly allowed: false; readonly reason: "BUDGET_EXCEEDED" };
 
+/**
+ * One agent run for the usage ledger (`usage.agent_runs`, decision 0066); the `usage` context
+ * validates it. `tripwireProcessorId` names the guardrail that stopped the run, null when none did.
+ */
+export type AgentRunRecord = {
+  readonly id: string;
+  readonly requestId: string | null;
+  readonly traceId: string | null;
+  readonly tenantId: string;
+  readonly userId: string | null;
+  readonly agentId: string;
+  readonly tripwireProcessorId: string | null;
+  readonly occurredAt: string;
+};
+
 export type UsagePort = {
   readonly recordLlmCalls: (calls: readonly LlmCall[]) => Promise<void>;
+  readonly recordAgentRuns: (runs: readonly AgentRunRecord[]) => Promise<void>;
   readonly checkTenantBudget: (input: { tenantId: string }) => Promise<BudgetCheck>;
 };
 

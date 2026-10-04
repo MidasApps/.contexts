@@ -19,6 +19,7 @@ const fakeRepository = (state: { spend?: UsageTotals; budget?: StoredBudget | nu
       inserted.push(...calls);
       return Promise.resolve(calls.length);
     },
+    insertAgentRuns: (runs) => Promise.resolve(runs.length),
     getMonthSpend: ({ monthStart }) => {
       monthStarts.push(monthStart);
       return Promise.resolve(state.spend ?? ZERO);

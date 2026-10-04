@@ -87,9 +87,27 @@ describe("admin overview", () => {
     expect((await setup({ experiments: () => Promise.reject(new Error("mastra down")) }).getOverview()).evalStatus).toBe("unknown");
   });
 
-  it("keeps the tripwire rate at 0 and says it is not measured: guardrail stops are not recorded anywhere yet", async () => {
+  it("computes the tripwire rate from the agent runs of the last 7 days of active organizations, and says it is measured", async () => {
+    const { memory, getOverview } = setup();
+    const run = (tenantId: string, days: number, stoppedBy: string | null = null) => ({ tenantId, at: ago(days), stoppedBy });
+    memory.agentRuns.push(
+      run("OrgA", 1, "prompt-injection-detector"),
+      run("OrgA", 2),
+      run("OrgA", 3),
+      run("OrgB", 6, "tenant-budget-guard"),
+      run("OrgB", 6),
+      // Outside the window, or of a suspended organization: not counted.
+      run("OrgB", 8, "moderation"),
+      run("OrgC", 1, "moderation"),
+    );
+    const overview = await getOverview();
+    expect(overview.tripwireRate).toBe(2 / 5);
+    expect(overview.unmeasured).toEqual([]);
+  });
+
+  it("answers a tripwire rate of 0 without agent runs, still as a measurement", async () => {
     const overview = await setup().getOverview();
     expect(overview.tripwireRate).toBe(0);
-    expect(overview.unmeasured).toEqual(["tripwireRate"]);
+    expect(overview.unmeasured).toEqual([]);
   });
 });

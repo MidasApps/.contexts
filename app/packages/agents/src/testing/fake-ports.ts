@@ -11,6 +11,7 @@ import type {
   CommandIdempotencyPort,
   CustomAgentsPort,
   AuditPort,
+  AgentRunRecord,
   BudgetCheck,
   FilesPort,
   FlagsPort,
@@ -169,14 +170,20 @@ export const createFakeCommandIdempotency = (): FakeCommandIdempotency => {
   };
 };
 
-export type FakeUsagePort = UsagePort & { readonly calls: LlmCall[] };
+export type FakeUsagePort = UsagePort & { readonly calls: LlmCall[]; readonly runs: AgentRunRecord[] };
 
 export const createFakeUsagePort = (budget: BudgetCheck = { allowed: true, alert: false }): FakeUsagePort => {
   const calls: LlmCall[] = [];
+  const runs: AgentRunRecord[] = [];
   return {
     calls,
+    runs,
     recordLlmCalls: (rows) => {
       calls.push(...rows);
+      return Promise.resolve();
+    },
+    recordAgentRuns: (rows) => {
+      runs.push(...rows);
       return Promise.resolve();
     },
     checkTenantBudget: () => Promise.resolve(budget),

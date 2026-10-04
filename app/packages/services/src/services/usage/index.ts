@@ -3,6 +3,9 @@ export type { ModelTotals, StoredBudget, UsageRepository, UsageTotals } from "./
 export type { UsageSink } from "./application/ports/usage-sink.ts";
 export { createPostgresTraceCosts } from "./adapters/driven/postgres-trace-costs.ts";
 export { makeRecordLlmCalls, MAX_LLM_CALLS_PER_BATCH, type RecordLlmCalls, type UsageValidationError } from "./application/use-cases/record-llm-calls.ts";
+// Decision 0066: agent runs and their guardrail stops (the overview's tripwire rate).
+export { makeRecordAgentRuns, type RecordAgentRuns } from "./application/use-cases/record-agent-runs.ts";
+export { type AgentRun, AgentRunSchema } from "./application/use-cases/record-agent-runs.schema.ts";
 export { BudgetTenantMissingError, type CheckTenantBudget, makeCheckTenantBudget } from "./application/use-cases/check-tenant-budget.ts";
 export { type GetUsageSummary, type GetUsageSummaryInput, GetUsageSummaryInputSchema, makeGetUsageSummary } from "./application/use-cases/get-usage-summary.ts";
 export { utcMonthStart } from "./application/use-cases/usage-month.ts";
@@ -15,7 +18,7 @@ export {
   type MonthSpend,
   resolveBudget,
 } from "./domain/budget-policy.ts";
-export { usageLlmCalls, usageTenantBudgets } from "./adapters/driven/drizzle-schema.ts";
+export { usageAgentRuns, usageLlmCalls, usageTenantBudgets } from "./adapters/driven/drizzle-schema.ts";
 export { createPostgresUsageRepository, USAGE_RUNTIME_ROLE } from "./adapters/driven/postgres-usage-repository.ts";
 export {
   BIGQUERY_INSERT_BATCH,

@@ -46,6 +46,7 @@ export type {
   SemanticQueryPort,
   SettingsPort,
   UsagePort,
+  AgentRunRecord,
   WebContentPort,
   WebPage,
   WorkflowApprovalPort,

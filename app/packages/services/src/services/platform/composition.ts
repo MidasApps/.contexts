@@ -6,7 +6,7 @@ import type { AuditWriter } from "../audit/application/use-cases/record-audit.ts
 import type { Clock } from "../shared/clock/clock.ts";
 import type { FirebaseAdmin } from "../shared/firebase/firebase-admin.ts";
 import type { ConsoleGateway } from "../observability/application/ports/console-gateway.ts";
-import { createPostgresUsageRepository, listActiveUserIds, listUsageBuckets } from "../usage/adapters/driven/postgres-usage-repository.ts";
+import { countAgentRuns, createPostgresUsageRepository, listActiveUserIds, listUsageBuckets } from "../usage/adapters/driven/postgres-usage-repository.ts";
 import { createFirestoreApprovalStats } from "./adapters/driven/firestore-approval-stats.ts";
 import { createFirestoreAgentSettingsRepository, createFirestoreOrganizationAdminStore, createFirestorePlanRepository } from "./adapters/driven/firestore-console-stores.ts";
 import type { ConsoleDeps } from "./application/console-deps.ts";
@@ -59,6 +59,7 @@ export const createPostgresConsoleUsage = (sql: Sql): ConsoleUsage => {
     setTenantBudget: repository.setTenantBudget,
     monthCostMicroUsd: async (input) => (await repository.getMonthSpend(input)).costMicroUsd,
     activeUserIds: listActiveUserIds(sql),
+    agentRunCounts: countAgentRuns(sql),
     usageBuckets: listUsageBuckets(sql),
   };
 };
