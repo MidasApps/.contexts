@@ -60,6 +60,7 @@ import { createListEntitiesTool } from "../tools/catalog/list-entities.tool.ts";
 import { createRenderFormTool } from "../tools/catalog/render-form.tool.ts";
 import { type AgentCommand, commandIdOf, formCommandsOf } from "../tools/commands/agent-command.ts";
 import { commandToolsOf } from "../tools/commands/command-tools.ts";
+import { createCommandOfferedCheck } from "../tools/commands/module-commands.ts";
 import { CORE_SKILL_DIRS, CORE_SKILLS, createSkillsResolver, loadSkill } from "../skills/resolve-skills.ts";
 import { composeCustomAgents, createCustomAgentAccess, CUSTOM_AGENT_RUN_IDS, type CustomAgentRuntime } from "../custom/compose-custom-agents.ts";
 import { CUSTOM_AGENT_ID } from "../custom/custom-agent-tools.ts";
@@ -182,7 +183,12 @@ const coreTools = (args: ComposeAgentRuntimeArgs, models: AgentModels, commands:
   return [
     createListEntitiesTool({ catalog }),
     createDescribeEntityTool({ catalog }),
-    createRenderFormTool({ catalog, commands: { get: (id) => formCommands.get(id) }, access: args.ports.access }),
+    createRenderFormTool({
+      catalog,
+      commands: { get: (id) => formCommands.get(id) },
+      access: args.ports.access,
+      isCommandOffered: createCommandOfferedCheck(args.ports.settings, args.modules.map((module) => module.id)),
+    }),
     createQuerySemanticSqlTool({ catalog: args.ports.catalog }),
     createSearchKnowledgeTool({ knowledge: args.ports.knowledge, embedding: models.embedding, catalog }),
     ...createFirecrawlTools(web),

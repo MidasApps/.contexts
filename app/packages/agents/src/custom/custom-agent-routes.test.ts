@@ -7,7 +7,8 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import type { ConnectorToolsResolver } from "../connectors/connector-registry.ts";
 import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
-import { createFakeAccessPort, createFakeApprovalPort, createFakeAuditPort, createFakeCustomAgentsPort } from "../testing/fake-ports.ts";
+import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
+import { createFakeAccessPort, createFakeApprovalPort, createFakeAuditPort, createFakeCustomAgentsPort, createFakeSettingsPort } from "../testing/fake-ports.ts";
 import { defineCoreTool } from "../tools/define-core-tool.ts";
 import { createToolRegistry } from "../tools/tool-registry.ts";
 import { buildCustomAgent, buildCustomSkill, CUSTOM_AGENT_TEST_ID, OTHER_TENANT } from "./custom-agent.fixture.ts";
@@ -42,13 +43,14 @@ const coreSkills = { "knowledge-citations": createSkill({ name: "knowledge-citat
 const noConnectors = Object.assign(() => Promise.resolve({}), { close: () => Promise.resolve() }) as ConnectorToolsResolver;
 const silentLogger = { info: () => undefined, error: () => undefined };
 
-const setup = (permissions: readonly string[]) => {
+const setup = (permissions: readonly string[], enabledAgents: readonly string[] = ["knowledge", "data", "action", "example"]) => {
   const port = createFakeCustomAgentsPort({ agents: [buildCustomAgent()] });
   const loader = createCustomAgentLoader(port);
   const deps: CustomAgentRouteDeps = {
     access: createFakeAccessPort({ memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions }] }),
     registry: registryOf(),
     moduleIds: ["example"],
+    tenantSettings: createTenantAgentSettingsReader(createFakeSettingsPort({ enabledAgents: [...enabledAgents] })),
     coreSkills,
     loader,
     logger: silentLogger,
@@ -79,6 +81,13 @@ describe("custom agent runtime routes", () => {
       ["command.example.CreateNoteCommand", "mutation", "module"],
     ]);
     expect(body.data.coreSkills).toEqual([{ name: "knowledge-citations", description: "How to cite." }]);
+  });
+
+  it("lists no command of a module the organization did not enable", async () => {
+    const { deps } = setup(["core.agent-settings.read"], ["knowledge", "data", "action"]);
+    const response = await handleCustomAgentOptions(deps)(inputs(["core.agent-settings.read"]));
+    const body = (await response.json()) as { data: CustomAgentRuntimeOptions };
+    expect(body.data.tools.map((item) => item.id)).toEqual(["catalog.listEntities"]);
   });
 
   it("answers 403 for the options without the read permission and 401 without a context", async () => {

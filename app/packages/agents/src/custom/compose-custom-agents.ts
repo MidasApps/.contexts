@@ -64,7 +64,7 @@ export type CustomAgentRuntime = {
 
 /** The custom agent, its chat resolver, its runtime routes and its catalog entries. */
 export const composeCustomAgents = (args: {
-  readonly deps: Pick<AgentFactoryDeps, "models" | "guardrails" | "memory" | "connectorTools">;
+  readonly deps: Pick<AgentFactoryDeps, "models" | "guardrails" | "memory" | "connectorTools" | "tenantSettings">;
   readonly loader: CustomAgentLoader;
   readonly registry: ToolRegistry;
   readonly toolDeps: CoreToolDeps;
@@ -79,7 +79,7 @@ export const composeCustomAgents = (args: {
   const agent = createCustomAgent({
     deps,
     loader,
-    tools: createCustomToolsResolver({ registry, toolDeps: args.toolDeps, connectorTools: deps.connectorTools }),
+    tools: createCustomToolsResolver({ registry, toolDeps: args.toolDeps, connectorTools: deps.connectorTools, moduleIds, tenantSettings: deps.tenantSettings }),
     coreSkills,
     ...(args.instructionsDirs === undefined ? {} : { instructionsDirs: args.instructionsDirs }),
   });
@@ -87,7 +87,7 @@ export const composeCustomAgents = (args: {
   return {
     agent,
     resolveChatAgent: createCustomChatResolver(loader),
-    routes: createCustomAgentRoutes({ access: args.access, registry, moduleIds, coreSkills, loader, logger: args.logger }),
+    routes: createCustomAgentRoutes({ access: args.access, registry, moduleIds, tenantSettings: deps.tenantSettings, coreSkills, loader, logger: args.logger }),
     catalogEntries: (input) => customCatalogEntriesOf(catalogDeps, input),
   };
 };

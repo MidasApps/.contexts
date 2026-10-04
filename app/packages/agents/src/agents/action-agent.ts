@@ -1,8 +1,9 @@
 import { Agent } from "@mastra/core/agent";
 import { AgentRuntimeContextSchema } from "../context/write-agent-context.ts";
 import type { AgentDefinition } from "../runtime/agent-module.ts";
-import { CORE_SKILLS, isModuleEnabled } from "../skills/resolve-skills.ts";
+import { CORE_SKILLS } from "../skills/resolve-skills.ts";
 import type { AgentCommand } from "../tools/commands/agent-command.ts";
+import { isCommandOffered } from "../tools/commands/module-commands.ts";
 import { SUBAGENT_MAX_STEPS } from "./data-agent.ts";
 import { loadInstructions } from "./load-instructions.ts";
 
@@ -17,10 +18,7 @@ export const actionCeilingOf = (commands: readonly AgentCommand[]): string[] => 
  * when the tenant enabled the module (same rule as module skills, decision 0064).
  */
 export const offeredCommandsOf = (commands: readonly AgentCommand[], moduleIds: readonly string[], enabledAgents: ReadonlySet<string>): AgentCommand[] =>
-  commands.filter(({ tool }) => {
-    const owner = moduleIds.find((moduleId) => tool.id.startsWith(`command.${moduleId}.`));
-    return owner === undefined || isModuleEnabled(owner, enabledAgents);
-  });
+  commands.filter(({ tool }) => isCommandOffered(tool.id, moduleIds, enabledAgents));
 
 /**
  * `action` subagent (spec §6, §8.4): runs command tools (`command.<contractId>`) after the

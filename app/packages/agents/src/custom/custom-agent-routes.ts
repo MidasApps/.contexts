@@ -2,9 +2,11 @@ import { type AgentCatalogEntry, type AgentCatalogSkill, type AgentCatalogTool, 
 import type { Logger } from "@core/services";
 import type { InlineSkill } from "@mastra/core/skills";
 import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
+import type { TenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import type { ConnectorToolsResolver } from "../connectors/connector-registry.ts";
 import type { RequestContextReader } from "../context/agent-request-context.ts";
 import type { AccessPort, CustomAgentsPort } from "../runtime/runtime-ports.ts";
+import { offeredToolsOf } from "../tools/commands/module-commands.ts";
 import { SEARCH_KNOWLEDGE_TOOL_ID } from "../tools/knowledge/search-knowledge.tool.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
 import { authorizeCaller, dataJson, inputsOf, type RouteInputs, routeError } from "../workflows/runs/workflow-route-http.ts";
@@ -27,6 +29,8 @@ export type CustomAgentRouteDeps = {
   readonly registry: Pick<ToolRegistry, "ids" | "get" | "has">;
   /** Ids of the installed agent modules (a tool `<moduleId>.…` or `command.<moduleId>.…` is theirs). */
   readonly moduleIds: readonly string[];
+  /** The caller's tenant settings: commands of modules it did not enable are not listed (decision 0064). */
+  readonly tenantSettings: TenantAgentSettingsReader;
   readonly coreSkills: Readonly<Record<string, InlineSkill>>;
   readonly loader: Pick<CustomAgentLoader, "invalidate">;
   readonly logger: Pick<Logger, "info" | "error">;
@@ -37,10 +41,10 @@ const moduleOf = (id: string, moduleIds: readonly string[]): string | undefined 
 
 const sourceOf = (id: string, moduleIds: readonly string[]): "core" | "module" => (moduleOf(id, moduleIds) === undefined ? "core" : "module");
 
-/** The models, tools and platform skills a custom agent may select in this runtime. */
-export const customAgentOptionsOf = (deps: Pick<CustomAgentRouteDeps, "registry" | "moduleIds" | "coreSkills">): CustomAgentRuntimeOptions => ({
+/** The models, tools and platform skills a custom agent may select in this runtime, for a tenant with these enabled agents. */
+export const customAgentOptionsOf = (deps: Pick<CustomAgentRouteDeps, "registry" | "moduleIds" | "coreSkills">, enabledAgents: ReadonlySet<string>): CustomAgentRuntimeOptions => ({
   models: [...CUSTOM_AGENT_MODELS],
-  tools: selectableToolsOf(deps.registry).map((tool) => ({ id: tool.id, kind: tool.kind, source: sourceOf(tool.id, deps.moduleIds), description: tool.description.slice(0, 2000) })),
+  tools: offeredToolsOf(selectableToolsOf(deps.registry), deps.moduleIds, enabledAgents).map((tool) => ({ id: tool.id, kind: tool.kind, source: sourceOf(tool.id, deps.moduleIds), description: tool.description.slice(0, 2000) })),
   coreSkills: Object.values(deps.coreSkills).map((skill) => ({ name: skill.name, description: skill.description.slice(0, 1024) })),
 });
 
@@ -58,7 +62,8 @@ export const handleCustomAgentOptions = (deps: CustomAgentRouteDeps) =>
   guarded(deps, "custom_agent_options_failed", async ({ requestContext }) => {
     const caller = await authorizeCaller({ access: deps.access, requestContext, permission: CUSTOM_AGENT_PERMISSIONS.read });
     if (!caller.ok) return caller.response;
-    return dataJson(customAgentOptionsOf(deps));
+    const { enabledAgents } = await deps.tenantSettings(requestContext);
+    return dataJson(customAgentOptionsOf(deps, enabledAgents));
   });
 
 /** `POST /tenant-catalog/custom-agents/invalidate` (`core.agent-settings.update`): drops the caller's tenant's cached records. */

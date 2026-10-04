@@ -124,10 +124,24 @@ describe("custom agent chat (fake mode, in-process Mastra)", { timeout: 30_000 }
     expect(chunks.some((chunk) => chunk.type === "tool-output-available")).toBe(true);
   });
 
+  it("drops a selected command of a module the organization did not enable", async () => {
+    const executed: string[] = [];
+    const customAgents = createFakeCustomAgentsPort({ agents: [buildCustomAgent({ tools: ["command.example.CreateNoteCommand"] })] });
+    const harness = buildSupervisorHarness({ ports: { customAgents }, modules: [noteModule(executed)], settings: { enabledAgents: ["knowledge", "data", "action"] } });
+    const deps = { ...harness.runtime.chat, logger: silentLogger, newRunId: () => "run-1" };
+    const response = await handleChatPost(
+      { request: chatRequest('[[fake:tool-call {"toolName":"command_example_CreateNoteCommand","input":{"text":"hello"}}]]'), agentId: CUSTOM_AGENT_TEST_ID, requestContext: contextFor(), mastra: harness.mastra },
+      deps,
+    );
+    const chunks = await readChunks(response);
+    expect(chunks.some((chunk) => chunk.type === "tool-approval-request")).toBe(false);
+    expect(executed).toEqual([]);
+  });
+
   it("asks for an approval before a selected mutation and does not run it", async () => {
     const executed: string[] = [];
     const customAgents = createFakeCustomAgentsPort({ agents: [buildCustomAgent({ tools: ["command.example.CreateNoteCommand"] })] });
-    const harness = buildSupervisorHarness({ ports: { customAgents }, modules: [noteModule(executed)] });
+    const harness = buildSupervisorHarness({ ports: { customAgents }, modules: [noteModule(executed)], settings: { enabledAgents: ["knowledge", "data", "action", "example"] } });
     const deps = { ...harness.runtime.chat, logger: silentLogger, newRunId: () => "run-1" };
     const response = await handleChatPost(
       { request: chatRequest('[[fake:tool-call {"toolName":"command_example_CreateNoteCommand","input":{"text":"hello"}}]]'), agentId: CUSTOM_AGENT_TEST_ID, requestContext: contextFor(), mastra: harness.mastra },

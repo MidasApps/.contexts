@@ -2,6 +2,7 @@ import { ContractIdSchema, ToolUiSchema } from "@core/contracts";
 import { z } from "zod";
 import type { AccessPort } from "../../runtime/runtime-ports.ts";
 import { type CoreToolContext, defineCoreTool } from "../define-core-tool.ts";
+import { commandToolIdOf } from "../commands/command-tools.ts";
 import { CoreToolError, toolFailure } from "../tool-errors.ts";
 import type { AiCatalogReader } from "./ai-catalog-reader.ts";
 import { CATALOG_READ_PERMISSION } from "./list-entities.tool.ts";
@@ -38,9 +39,11 @@ const assertCommandAllowed = async (access: AccessPort, command: FormCommand, ct
   if (!decision.allowed) throw new CoreToolError({ code: "FORBIDDEN", toolId: TOOL_ID, details: { reason: decision.reason } });
 };
 
-const resolveCommand = (deps: RenderFormDeps, input: { commandId: string; contractId: string }, ctx: CoreToolContext): FormCommand => {
+const resolveCommand = async (deps: RenderFormDeps, input: { commandId: string; contractId: string }, ctx: CoreToolContext): Promise<FormCommand> => {
   const command = deps.commands.get(input.commandId);
-  if (command === undefined) throw toolFailure(TOOL_ID, "COMMAND_NOT_FOUND", "No command with this id is registered.");
+  // A command of a module the tenant did not enable answers like an unknown one (decision 0064).
+  const offered = command !== undefined && (deps.isCommandOffered === undefined || (await deps.isCommandOffered(commandToolIdOf(command.commandId), ctx)));
+  if (command === undefined || !offered) throw toolFailure(TOOL_ID, "COMMAND_NOT_FOUND", "No command with this id is registered.");
   if (command.targetContractId !== input.contractId) {
     throw toolFailure(TOOL_ID, "COMMAND_CONTRACT_MISMATCH", "This command does not create or update that contract.");
   }
@@ -50,7 +53,13 @@ const resolveCommand = (deps: RenderFormDeps, input: { commandId: string; contra
   return command;
 };
 
-export type RenderFormDeps = { readonly catalog: AiCatalogReader; readonly commands: FormCommandCatalog; readonly access: AccessPort };
+export type RenderFormDeps = {
+  readonly catalog: AiCatalogReader;
+  readonly commands: FormCommandCatalog;
+  readonly access: AccessPort;
+  /** False for a command of a module the run's tenant did not enable; absent: every command is offered. */
+  readonly isCommandOffered?: (toolId: string, ctx: CoreToolContext) => Promise<boolean>;
+};
 
 /**
  * `catalog.renderForm` (spec §8.2): asks the chat to render `SchemaForm` for a
@@ -73,7 +82,7 @@ export const createRenderFormTool = (deps: RenderFormDeps) =>
     outputSchema: z.strictObject({ ui: ToolUiSchema }),
     ui: { component: SCHEMA_FORM_COMPONENT },
     execute: async (input, ctx) => {
-      const command = resolveCommand(deps, input, ctx);
+      const command = await resolveCommand(deps, input, ctx);
       await assertCommandAllowed(deps.access, command, ctx);
       const initialValues = filterInitialValues(command.inputSchema, input.initialValues ?? {});
       const props = { contractId: input.contractId, commandId: input.commandId, mode: input.mode, initialValues };

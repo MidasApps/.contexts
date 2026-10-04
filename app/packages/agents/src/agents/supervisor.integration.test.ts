@@ -25,7 +25,8 @@ describe("assistant supervisor (fake mode, in-process Mastra)", { timeout: 30_00
   });
 
   it("asks the data subagent to render the form of a create request", async () => {
-    const harness = buildSupervisorHarness();
+    // The note command belongs to the example module, so the organization enables it (decision 0064).
+    const harness = buildSupervisorHarness({ settings: { enabledAgents: ["knowledge", "data", "action", "example"] } });
     const result = await supervisorOf(harness).generate("Please create a note for me", { requestContext: memberContext() });
     const serialized = JSON.stringify(result.steps);
     expect(serialized).toContain("agent-data");

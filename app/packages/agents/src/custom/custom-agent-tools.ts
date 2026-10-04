@@ -1,8 +1,10 @@
 import { CUSTOM_AGENT_RUNTIME_ID, type CustomAgent, type CustomAgentKnowledgeScope } from "@core/contracts";
 import { CONNECTOR_TOOL_PERMISSION } from "../connectors/openapi/openapi-to-tools.ts";
+import type { TenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import type { ConnectorTool, ConnectorToolsResolver } from "../connectors/connector-registry.ts";
 import type { RequestContextReader } from "../context/agent-request-context.ts";
 import { CATALOG_READ_PERMISSION } from "../tools/catalog/ai-catalog-reader.ts";
+import { offeredToolsOf } from "../tools/commands/module-commands.ts";
 import type { CoreToolDefinition, CoreToolDeps } from "../tools/define-core-tool.ts";
 import { KNOWLEDGE_READ_PERMISSION, SEARCH_KNOWLEDGE_TOOL_ID } from "../tools/knowledge/search-knowledge.tool.ts";
 import { bindCoreTool, type BoundCoreTool, type ToolRegistry } from "../tools/tool-registry.ts";
@@ -87,6 +89,9 @@ export type CustomToolsDeps = {
   readonly registry: Pick<ToolRegistry, "has" | "get">;
   readonly toolDeps: CoreToolDeps;
   readonly connectorTools: ConnectorToolsResolver;
+  /** Ids of the installed modules: their commands reach only tenants that enabled them (decision 0064). */
+  readonly moduleIds: readonly string[];
+  readonly tenantSettings: TenantAgentSettingsReader;
 };
 
 export type CustomToolsResolver = (loaded: LoadedCustomAgent, requestContext: RequestContextReader | undefined) => Promise<Record<string, BoundCoreTool | ConnectorTool>>;
@@ -94,7 +99,8 @@ export type CustomToolsResolver = (loaded: LoadedCustomAgent, requestContext: Re
 /**
  * The tools of a custom agent run: the selected registry tools and the scoped knowledge search,
  * bound as `custom-agent` (so the ceiling never depends on what Mastra reports as the caller), and
- * the read-only connector tools when the record opted in. Bound tools are kept per definition.
+ * the read-only connector tools when the record opted in. A selected command of a module the
+ * tenant did not enable is dropped (decision 0064). Bound tools are kept per definition.
  */
 export const createCustomToolsResolver = (deps: CustomToolsDeps): CustomToolsResolver => {
   const bound = new Map<string, BoundCoreTool>();
@@ -108,9 +114,13 @@ export const createCustomToolsResolver = (deps: CustomToolsDeps): CustomToolsRes
     if (scope === "none" || definition === undefined) return {};
     return { [SEARCH_KNOWLEDGE_TOOL_ID]: bind(`${SEARCH_KNOWLEDGE_TOOL_ID}#${scope}`, scopedKnowledgeTool(definition, scope)) };
   };
-  return async ({ agent }, requestContext) => ({
-    ...(agent.connectorTools ? await deps.connectorTools(requestContext, "supervisor") : {}),
-    ...Object.fromEntries(selectedToolsOf(agent, deps.registry).map((tool) => [tool.id, bind(tool.id, tool)])),
-    ...knowledgeOf(agent.knowledgeScope),
-  });
+  return async ({ agent }, requestContext) => {
+    const { enabledAgents } = await deps.tenantSettings(requestContext);
+    const selected = offeredToolsOf(selectedToolsOf(agent, deps.registry), deps.moduleIds, enabledAgents);
+    return {
+      ...(agent.connectorTools ? await deps.connectorTools(requestContext, "supervisor") : {}),
+      ...Object.fromEntries(selected.map((tool) => [tool.id, bind(tool.id, tool)])),
+      ...knowledgeOf(agent.knowledgeScope),
+    };
+  };
 };
