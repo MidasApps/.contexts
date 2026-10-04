@@ -99,6 +99,9 @@ test.describe("theme", () => {
 
 test("revokes another session, which then has to sign in again", async ({ page, browser, world, createUser }) => {
   const user = await signInFresh(page, createUser, world.alpha.id);
+  // Sign-ins within one second carry identical tokens, hence one shared session: start the next second.
+  const signedInSecond = Math.floor(Date.now() / 1000);
+  await expect.poll(() => Math.floor(Date.now() / 1000)).toBeGreaterThan(signedInSecond);
   const other = await browser.newContext({ storageState: { cookies: [], origins: [] } });
   const otherPage = await other.newPage();
   await signInThroughUi(otherPage, user);
