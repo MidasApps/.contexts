@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-10-04
-- **Scope:** `app/packages/contracts` (`http/error-codes.ts`, `voice/endpoints.ts`), `app/packages/i18n` (`errors.json` in the three locales), `app/packages/services` (voice gateway and route tests), `app/docs/openapi/v1.yaml` (local decision; the framework is unchanged)
+- **Scope:** `app/packages/contracts` (`http/error-codes.ts`, `voice/endpoints.ts`), `app/packages/i18n` (`errors.json` in the three locales), `app/packages/services` (voice gateway and route tests), `app/packages/client` (`features/chat-voice`: push-to-talk and read aloud), `app/docs/openapi/v1.yaml` (local decision; the framework is unchanged)
 - **Refines:** decisions 0026 (budgets and usage ledger), 0034 (chat voice, 2026-09-30 amendment); follow-up #29
 
 ## Context
@@ -32,7 +32,10 @@ apart.
    OpenAPI lists it next to `RATE_LIMITED`.
 3. **Copy.** `errors.BUDGET_EXCEEDED` is added in `en-US`, `pt-BR` and `es-419` with the chat
    tripwire's wording; the client parity test requires a message for every core code.
-4. **No new ledger field.** Voice rows keep 0 tokens and `costMicroUsd: null`. The AI SDK's
+4. **Client.** Push-to-talk (problem `budget`) and read aloud (reason `budget`) map
+   `BUDGET_EXCEEDED` to its own state and show `errors.BUDGET_EXCEEDED`, as the chat's status
+   line shows `errors.<CODE>` for a failed turn. Other failures keep their voice copy.
+5. **No new ledger field.** Voice rows keep 0 tokens and `costMicroUsd: null`. The AI SDK's
    `transcribe` and `generateSpeech` results report no usage, and the price table only lists
    prices read from the provider's pricing page; audio prices (per minute, per character) are not
    verified yet. A seconds column would have no reader. The budget still refuses voice once chat
@@ -42,8 +45,8 @@ apart.
 
 - Clients can program against `BUDGET_EXCEEDED` on voice routes; `RATE_LIMITED` is again only the
   `voice-call` rate limit.
-- The push-to-talk and read-aloud hooks still show their generic "failed" state for this code.
-  Showing the budget message there is a client follow-up.
+- Push-to-talk and read aloud tell a member over budget that the organization's AI budget ran out,
+  in the same words as the chat, instead of "try again".
 - Voice calls do not add to the spend that the cap measures until audio is priced; that work
   belongs with the price table (decision 0026), not here.
 - Realtime sessions stay outside the ledger (decision 0034 amendment): the minted secret is
