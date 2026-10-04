@@ -27,30 +27,28 @@ const errorOf = (status: number): ConsoleError =>
 const paged = <S extends z.ZodType>(schema: S) =>
   z.object({ data: z.array(schema), meta: z.object({ hasMore: z.boolean() }) });
 
-/**
- * `ConsoleGateway` over the runtime's `/console/*` routes (decision 0040; the plan's "Mastra traces
- * reader" also covers experiments and datasets). Sends no user credential, only `X-Request-Id`
- * and, outside local, the serverless token: `/v1` already authorized the caller and fixes the tenant.
- * Every answer is parsed against the contracts; a malformed one is 502.
- */
-export const createMastraConsoleGateway = (options: {
+type ConsoleRequest = {
+  method: "GET" | "POST" | "DELETE";
+  path: string;
+  query?: Record<string, string | number | undefined>;
+  body?: unknown;
+  requestId?: string;
+};
+
+/** One call to a `/console/*` route, its answer parsed against `schema`. */
+type ConsoleCall = <S extends z.ZodType>(request: ConsoleRequest, schema: S) => Promise<ConsoleResult<z.infer<S>>>;
+
+type ConsoleGatewayOptions = {
   readonly baseUrl: string;
   readonly serverlessToken: ServerlessIdTokenSource | null;
   readonly timeoutMs?: number;
   readonly fetch?: typeof fetch;
-}): ConsoleGateway => {
+};
+
+const createConsoleCall = (options: ConsoleGatewayOptions): ConsoleCall => {
   const baseUrl = options.baseUrl.replace(/\/+$/, "");
   const fetchFn = options.fetch ?? fetch;
-  const call = async <S extends z.ZodType>(
-    request: {
-      method: "GET" | "POST" | "DELETE";
-      path: string;
-      query?: Record<string, string | number | undefined>;
-      body?: unknown;
-      requestId?: string;
-    },
-    schema: S,
-  ): Promise<ConsoleResult<z.infer<S>>> => {
+  return async (request, schema) => {
     const params = new URLSearchParams(
       Object.entries(request.query ?? {}).flatMap(([key, value]) =>
         value === undefined ? [] : [[key, String(value)] as [string, string]],
@@ -82,114 +80,141 @@ export const createMastraConsoleGateway = (options: {
       return { ok: false, error: UNAVAILABLE };
     }
   };
-  const tenant = (tenantId: string | null) => (tenantId === null ? {} : { tenantId });
-  const unwrapPage = <T>(result: ConsoleResult<{ data: T[]; meta: { hasMore: boolean } }>) =>
-    result.ok ? { ok: true as const, data: { items: result.data.data, hasMore: result.data.meta.hasMore } } : result;
-  return {
-    listTraces: async (query) => {
-      const result = unwrapPage(
-        await call(
-          {
-            method: "GET",
-            path: "/traces",
-            query: {
-              ...tenant(query.tenantId),
-              page: query.page,
-              perPage: query.perPage,
-              agentId: query.agentId,
-              status: query.status,
-              startedAfter: query.startedAfter,
-              startedBefore: query.startedBefore,
-            },
-          },
-          paged(TraceSummarySchema),
-        ),
-      );
-      return result.ok ? { ok: true, data: { traces: result.data.items, hasMore: result.data.hasMore } } : result;
-    },
-    getTrace: async (query) => {
-      const result = await call(
-        { method: "GET", path: `/traces/${encodeURIComponent(query.traceId)}`, query: tenant(query.tenantId) },
-        z.object({ data: TraceDetailSchema }),
-      );
-      return result.ok ? { ok: true, data: result.data.data } : result;
-    },
-    listExperiments: async (query) => {
-      const result = unwrapPage(
-        await call(
-          {
-            method: "GET",
-            path: "/experiments",
-            query: { ...tenant(query.tenantId), page: query.page, perPage: query.perPage },
-          },
-          paged(EvalExperimentSummarySchema),
-        ),
-      );
-      return result.ok ? { ok: true, data: { experiments: result.data.items, hasMore: result.data.hasMore } } : result;
-    },
-    getExperiment: async (query) => {
-      const result = await call(
+};
+
+const tenant = (tenantId: string | null) => (tenantId === null ? {} : { tenantId });
+
+const unwrapPage = <T>(result: ConsoleResult<{ data: T[]; meta: { hasMore: boolean } }>) =>
+  result.ok ? { ok: true as const, data: { items: result.data.data, hasMore: result.data.meta.hasMore } } : result;
+
+const traceMethods = (call: ConsoleCall): Pick<ConsoleGateway, "listTraces" | "getTrace"> => ({
+  listTraces: async (query) => {
+    const result = unwrapPage(
+      await call(
         {
           method: "GET",
-          path: `/experiments/${encodeURIComponent(query.experimentId)}`,
-          query: tenant(query.tenantId),
-        },
-        z.object({ data: EvalExperimentSummarySchema }),
-      );
-      return result.ok ? { ok: true, data: result.data.data } : result;
-    },
-    listDatasets: async (query) => {
-      const result = await call(
-        { method: "GET", path: "/datasets", query: tenant(query.tenantId) },
-        z.object({ data: z.array(EvalDatasetSchema) }),
-      );
-      return result.ok ? { ok: true, data: result.data.data } : result;
-    },
-    listDatasetItems: async (query) => {
-      const result = unwrapPage(
-        await call(
-          {
-            method: "GET",
-            path: `/datasets/${encodeURIComponent(query.datasetId)}/items`,
-            query: { tenantId: query.tenantId, page: query.page, perPage: query.perPage },
+          path: "/traces",
+          query: {
+            ...tenant(query.tenantId),
+            page: query.page,
+            perPage: query.perPage,
+            agentId: query.agentId,
+            status: query.status,
+            startedAfter: query.startedAfter,
+            startedBefore: query.startedBefore,
           },
-          paged(EvalDatasetItemSchema),
-        ),
-      );
-      return result.ok ? { ok: true, data: { items: result.data.items, hasMore: result.data.hasMore } } : result;
-    },
-    addDatasetItem: async ({ datasetId, ...body }) => {
-      const result = await call(
-        { method: "POST", path: `/datasets/${encodeURIComponent(datasetId)}/items`, body },
-        z.object({ data: EvalDatasetItemSchema }),
-      );
-      return result.ok ? { ok: true, data: result.data.data } : result;
-    },
-    deleteDatasetItem: async (input) => {
-      const path = `/datasets/${encodeURIComponent(input.datasetId)}/items/${encodeURIComponent(input.itemId)}`;
-      const result = await call(
-        { method: "DELETE", path, query: { tenantId: input.tenantId } },
-        z.object({ data: z.object({ itemId: z.string().min(1) }) }),
-      );
-      return result.ok ? { ok: true, data: result.data.data } : result;
-    },
-    createDataset: async (body) => {
-      const result = await call({ method: "POST", path: "/datasets", body }, z.object({ data: EvalDatasetSchema }));
-      return result.ok ? { ok: true, data: result.data.data } : result;
-    },
-    startExperiment: async ({ requestId, ...body }) => {
-      const result = await call(
-        { method: "POST", path: "/experiments", body, requestId },
-        z.object({ data: z.object({ experimentId: z.string().min(1) }) }),
-      );
-      return result.ok ? { ok: true, data: result.data.data } : result;
-    },
-    addFeedbackItem: async (body) => {
-      const result = await call(
-        { method: "POST", path: "/feedback-items", body },
-        z.object({ data: z.object({ datasetId: z.string().min(1), itemId: z.string().min(1) }) }),
-      );
-      return result.ok ? { ok: true, data: result.data.data } : result;
-    },
-  };
+        },
+        paged(TraceSummarySchema),
+      ),
+    );
+    return result.ok ? { ok: true, data: { traces: result.data.items, hasMore: result.data.hasMore } } : result;
+  },
+  getTrace: async (query) => {
+    const result = await call(
+      { method: "GET", path: `/traces/${encodeURIComponent(query.traceId)}`, query: tenant(query.tenantId) },
+      z.object({ data: TraceDetailSchema }),
+    );
+    return result.ok ? { ok: true, data: result.data.data } : result;
+  },
+});
+
+const experimentMethods = (
+  call: ConsoleCall,
+): Pick<ConsoleGateway, "listExperiments" | "getExperiment" | "startExperiment"> => ({
+  listExperiments: async (query) => {
+    const result = unwrapPage(
+      await call(
+        {
+          method: "GET",
+          path: "/experiments",
+          query: { ...tenant(query.tenantId), page: query.page, perPage: query.perPage },
+        },
+        paged(EvalExperimentSummarySchema),
+      ),
+    );
+    return result.ok ? { ok: true, data: { experiments: result.data.items, hasMore: result.data.hasMore } } : result;
+  },
+  getExperiment: async (query) => {
+    const result = await call(
+      {
+        method: "GET",
+        path: `/experiments/${encodeURIComponent(query.experimentId)}`,
+        query: tenant(query.tenantId),
+      },
+      z.object({ data: EvalExperimentSummarySchema }),
+    );
+    return result.ok ? { ok: true, data: result.data.data } : result;
+  },
+  startExperiment: async ({ requestId, ...body }) => {
+    const result = await call(
+      { method: "POST", path: "/experiments", body, requestId },
+      z.object({ data: z.object({ experimentId: z.string().min(1) }) }),
+    );
+    return result.ok ? { ok: true, data: result.data.data } : result;
+  },
+});
+
+const datasetMethods = (
+  call: ConsoleCall,
+): Pick<
+  ConsoleGateway,
+  "listDatasets" | "listDatasetItems" | "addDatasetItem" | "deleteDatasetItem" | "createDataset" | "addFeedbackItem"
+> => ({
+  listDatasets: async (query) => {
+    const result = await call(
+      { method: "GET", path: "/datasets", query: tenant(query.tenantId) },
+      z.object({ data: z.array(EvalDatasetSchema) }),
+    );
+    return result.ok ? { ok: true, data: result.data.data } : result;
+  },
+  listDatasetItems: async (query) => {
+    const result = unwrapPage(
+      await call(
+        {
+          method: "GET",
+          path: `/datasets/${encodeURIComponent(query.datasetId)}/items`,
+          query: { tenantId: query.tenantId, page: query.page, perPage: query.perPage },
+        },
+        paged(EvalDatasetItemSchema),
+      ),
+    );
+    return result.ok ? { ok: true, data: { items: result.data.items, hasMore: result.data.hasMore } } : result;
+  },
+  addDatasetItem: async ({ datasetId, ...body }) => {
+    const result = await call(
+      { method: "POST", path: `/datasets/${encodeURIComponent(datasetId)}/items`, body },
+      z.object({ data: EvalDatasetItemSchema }),
+    );
+    return result.ok ? { ok: true, data: result.data.data } : result;
+  },
+  deleteDatasetItem: async (input) => {
+    const path = `/datasets/${encodeURIComponent(input.datasetId)}/items/${encodeURIComponent(input.itemId)}`;
+    const result = await call(
+      { method: "DELETE", path, query: { tenantId: input.tenantId } },
+      z.object({ data: z.object({ itemId: z.string().min(1) }) }),
+    );
+    return result.ok ? { ok: true, data: result.data.data } : result;
+  },
+  createDataset: async (body) => {
+    const result = await call({ method: "POST", path: "/datasets", body }, z.object({ data: EvalDatasetSchema }));
+    return result.ok ? { ok: true, data: result.data.data } : result;
+  },
+  addFeedbackItem: async (body) => {
+    const result = await call(
+      { method: "POST", path: "/feedback-items", body },
+      z.object({ data: z.object({ datasetId: z.string().min(1), itemId: z.string().min(1) }) }),
+    );
+    return result.ok ? { ok: true, data: result.data.data } : result;
+  },
+});
+
+/**
+ * `ConsoleGateway` over the runtime's `/console/*` routes (decision 0040; the plan's "Mastra traces
+ * reader" also covers experiments and datasets). Sends no user credential, only `X-Request-Id`
+ * and, outside local, the serverless token: `/v1` already authorized the caller and fixes the tenant.
+ * Every answer is parsed against the contracts; a malformed one is 502.
+ */
+export const createMastraConsoleGateway = (options: ConsoleGatewayOptions): ConsoleGateway => {
+  const call = createConsoleCall(options);
+  return { ...traceMethods(call), ...experimentMethods(call), ...datasetMethods(call) };
 };
