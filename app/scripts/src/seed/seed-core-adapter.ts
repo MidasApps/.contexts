@@ -32,136 +32,166 @@ const named = (node: { id: string; name: string }): Named => ({ id: node.id, nam
 
 const actorOf = (uid: string) => ({ type: "user", uid: UserIdSchema.parse(uid), mfa: false }) as const;
 
-/** Binds the seed port to the services use cases (`createCoreServer` without modules). */
-export const createCoreSeedAdapter = (args: { server: CoreServer; firebase: FirebaseAdmin }): SeedCore => {
-  const { server, firebase } = args;
-  const scope = (uid: string) => ({
-    actor: actorOf(uid),
-    access: server.access.forRequest(),
-    requestId: resolveRequestId(null),
-  });
-  return {
-    ensureProfile: async (uid) => {
-      unwrap(await server.identity.getMe({ actor: actorOf(uid) }), "profile");
-    },
-    listOrganizations: async (uid) =>
-      (
-        await server.identity.listMyOrganizations({
-          actor: actorOf(uid),
-          access: server.access.forRequest(),
-          page: PAGE,
-        })
-      ).items.map(named),
-    createOrganization: async ({ uid, name }) =>
-      named(
-        unwrap(
-          await server.tenancy.createOrganization({ ...scope(uid), input: { name, defaults: SEED_DEFAULTS } }),
-          "organization",
-        ),
-      ),
-    listProjects: async ({ uid, organizationId }) =>
+type SeedScope = (uid: string) => ReturnType<typeof scopeOf>;
+
+const scopeOf = (server: CoreServer, uid: string) => ({
+  actor: actorOf(uid),
+  access: server.access.forRequest(),
+  requestId: resolveRequestId(null),
+});
+
+/** Organizations, projects and units, read and created through the tenancy use cases. */
+const createTenancyNodesSeed = (
+  server: CoreServer,
+  scope: SeedScope,
+): Pick<
+  SeedCore,
+  "listOrganizations" | "createOrganization" | "listProjects" | "createProject" | "listUnits" | "createUnit"
+> => ({
+  listOrganizations: async (uid) =>
+    (
+      await server.identity.listMyOrganizations({
+        actor: actorOf(uid),
+        access: server.access.forRequest(),
+        page: PAGE,
+      })
+    ).items.map(named),
+  createOrganization: async ({ uid, name }) =>
+    named(
       unwrap(
-        await server.tenancy.listProjects({
+        await server.tenancy.createOrganization({ ...scope(uid), input: { name, defaults: SEED_DEFAULTS } }),
+        "organization",
+      ),
+    ),
+  listProjects: async ({ uid, organizationId }) =>
+    unwrap(
+      await server.tenancy.listProjects({
+        ...scope(uid),
+        tenantId: OrganizationIdSchema.parse(organizationId),
+        page: PAGE,
+      }),
+      "project list",
+    ).items.map(named),
+  createProject: async ({ uid, organizationId, name }) =>
+    named(
+      unwrap(
+        await server.tenancy.createProject({
           ...scope(uid),
           tenantId: OrganizationIdSchema.parse(organizationId),
-          page: PAGE,
+          input: { name },
         }),
-        "project list",
-      ).items.map(named),
-    createProject: async ({ uid, organizationId, name }) =>
-      named(
-        unwrap(
-          await server.tenancy.createProject({
-            ...scope(uid),
-            tenantId: OrganizationIdSchema.parse(organizationId),
-            input: { name },
-          }),
-          "project",
-        ),
+        "project",
       ),
-    listUnits: async ({ uid, projectId, parentUnitId }) => {
-      const parent = parentUnitId === null ? null : UnitIdSchema.parse(parentUnitId);
-      return unwrap(
-        await server.tenancy.listUnits({
-          ...scope(uid),
-          projectId: ProjectIdSchema.parse(projectId),
-          parentUnitId: parent,
-          page: PAGE,
-        }),
-        "unit list",
-      ).items.map(named);
-    },
-    createUnit: async ({ uid, projectId, parentUnitId, name }) => {
-      const input = {
-        name,
-        type: SEED_UNIT_TYPE,
-        parentUnitId: parentUnitId === null ? null : UnitIdSchema.parse(parentUnitId),
-      };
-      return named(
-        unwrap(
-          await server.tenancy.createUnit({ ...scope(uid), projectId: ProjectIdSchema.parse(projectId), input }),
-          "unit",
-        ),
-      );
-    },
-    grantRole: async ({ actorUid, principalUid, node, role }) => {
-      const tenantId = OrganizationIdSchema.parse(node.organizationId);
-      const nodeRef =
-        node.level === "organization"
-          ? ({ level: "organization", tenantId } as const)
-          : ({ level: "project", tenantId, projectId: ProjectIdSchema.parse(node.projectId) } as const);
-      const granted = await server.accessServices.grantMembership({
-        ...scope(actorUid),
-        tenantId,
-        principal: { type: "user", id: principalUid },
-        node: nodeRef,
-        roles: [{ kind: "system", key: role }],
-      });
-      if (!granted.ok && granted.error.code === "MEMBERSHIP_EXISTS") return "unchanged";
-      unwrap(granted, "grant");
-      return "granted";
-    },
-    ensureActiveOrganization: async ({ uid, organizationId }) => {
-      const me = unwrap(await server.identity.getMe({ actor: actorOf(uid) }), "profile");
-      if (me.lastContext.organizationId === organizationId) return "unchanged";
+    ),
+  listUnits: async ({ uid, projectId, parentUnitId }) => {
+    const parent = parentUnitId === null ? null : UnitIdSchema.parse(parentUnitId);
+    return unwrap(
+      await server.tenancy.listUnits({
+        ...scope(uid),
+        projectId: ProjectIdSchema.parse(projectId),
+        parentUnitId: parent,
+        page: PAGE,
+      }),
+      "unit list",
+    ).items.map(named);
+  },
+  createUnit: async ({ uid, projectId, parentUnitId, name }) => {
+    const input = {
+      name,
+      type: SEED_UNIT_TYPE,
+      parentUnitId: parentUnitId === null ? null : UnitIdSchema.parse(parentUnitId),
+    };
+    return named(
       unwrap(
-        await server.identity.setActiveOrganization({
-          ...scope(uid),
-          organizationId: OrganizationIdSchema.parse(organizationId),
-        }),
-        "active organization",
-      );
-      return "set";
-    },
-    // Read-only check of the staff doc; the grant itself goes through the platform use case.
-    staffRoleOf: async (uid) => {
-      const staff = (await firebase.firestore.collection(CORE_COLLECTIONS.platformStaff).doc(uid).get()).data();
-      return staff?.["isActive"] === true && typeof staff["role"] === "string" ? staff["role"] : null;
-    },
-    grantStaff: async ({ uid, role }) => {
-      await server.platform.grantPlatformStaff({
-        uid: UserIdSchema.parse(uid),
-        role,
-        requestId: resolveRequestId(null),
-      });
-    },
-    ensurePhoneFactor: async ({ uid, phoneNumber }) => {
-      const factors = (await firebase.auth.getUser(uid)).multiFactor?.enrolledFactors ?? [];
-      const enrolled =
-        factors.length === 1 &&
-        factors[0]?.factorId === "phone" &&
-        "phoneNumber" in factors[0] &&
-        factors[0].phoneNumber === phoneNumber;
-      if (enrolled) return "unchanged";
-      // The Auth Emulator's accounts:update needs an explicit enrollment id (`uid`).
-      const factor = {
-        uid: SEED_PHONE_ENROLLMENT_ID,
-        factorId: "phone",
-        phoneNumber,
-        displayName: "Seed phone",
-      } as const;
-      await firebase.auth.updateUser(uid, { multiFactor: { enrolledFactors: [factor] } });
-      return "enrolled";
-    },
+        await server.tenancy.createUnit({ ...scope(uid), projectId: ProjectIdSchema.parse(projectId), input }),
+        "unit",
+      ),
+    );
+  },
+});
+
+/** The user's profile, grants and active organization (identity and access use cases). */
+const createMembershipSeed = (
+  server: CoreServer,
+  scope: SeedScope,
+): Pick<SeedCore, "ensureProfile" | "grantRole" | "ensureActiveOrganization"> => ({
+  ensureProfile: async (uid) => {
+    unwrap(await server.identity.getMe({ actor: actorOf(uid) }), "profile");
+  },
+  grantRole: async ({ actorUid, principalUid, node, role }) => {
+    const tenantId = OrganizationIdSchema.parse(node.organizationId);
+    const nodeRef =
+      node.level === "organization"
+        ? ({ level: "organization", tenantId } as const)
+        : ({ level: "project", tenantId, projectId: ProjectIdSchema.parse(node.projectId) } as const);
+    const granted = await server.accessServices.grantMembership({
+      ...scope(actorUid),
+      tenantId,
+      principal: { type: "user", id: principalUid },
+      node: nodeRef,
+      roles: [{ kind: "system", key: role }],
+    });
+    if (!granted.ok && granted.error.code === "MEMBERSHIP_EXISTS") return "unchanged";
+    unwrap(granted, "grant");
+    return "granted";
+  },
+  ensureActiveOrganization: async ({ uid, organizationId }) => {
+    const me = unwrap(await server.identity.getMe({ actor: actorOf(uid) }), "profile");
+    if (me.lastContext.organizationId === organizationId) return "unchanged";
+    unwrap(
+      await server.identity.setActiveOrganization({
+        ...scope(uid),
+        organizationId: OrganizationIdSchema.parse(organizationId),
+      }),
+      "active organization",
+    );
+    return "set";
+  },
+});
+
+/** Platform staff and the Auth second factor (Firebase Admin reads, platform use case writes). */
+const createPlatformAccountSeed = (
+  server: CoreServer,
+  firebase: FirebaseAdmin,
+): Pick<SeedCore, "staffRoleOf" | "grantStaff" | "ensurePhoneFactor"> => ({
+  // Read-only check of the staff doc; the grant itself goes through the platform use case.
+  staffRoleOf: async (uid) => {
+    const staff = (await firebase.firestore.collection(CORE_COLLECTIONS.platformStaff).doc(uid).get()).data();
+    return staff?.["isActive"] === true && typeof staff["role"] === "string" ? staff["role"] : null;
+  },
+  grantStaff: async ({ uid, role }) => {
+    await server.platform.grantPlatformStaff({
+      uid: UserIdSchema.parse(uid),
+      role,
+      requestId: resolveRequestId(null),
+    });
+  },
+  ensurePhoneFactor: async ({ uid, phoneNumber }) => {
+    const factors = (await firebase.auth.getUser(uid)).multiFactor?.enrolledFactors ?? [];
+    const enrolled =
+      factors.length === 1 &&
+      factors[0]?.factorId === "phone" &&
+      "phoneNumber" in factors[0] &&
+      factors[0].phoneNumber === phoneNumber;
+    if (enrolled) return "unchanged";
+    // The Auth Emulator's accounts:update needs an explicit enrollment id (`uid`).
+    const factor = {
+      uid: SEED_PHONE_ENROLLMENT_ID,
+      factorId: "phone",
+      phoneNumber,
+      displayName: "Seed phone",
+    } as const;
+    await firebase.auth.updateUser(uid, { multiFactor: { enrolledFactors: [factor] } });
+    return "enrolled";
+  },
+});
+
+/** Binds the seed port to the services use cases (`createCoreServer` without modules). */
+export const createCoreSeedAdapter = (args: { server: CoreServer; firebase: FirebaseAdmin }): SeedCore => {
+  const scope: SeedScope = (uid) => scopeOf(args.server, uid);
+  return {
+    ...createMembershipSeed(args.server, scope),
+    ...createTenancyNodesSeed(args.server, scope),
+    ...createPlatformAccountSeed(args.server, args.firebase),
   };
 };
