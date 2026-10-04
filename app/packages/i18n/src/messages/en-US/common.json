@@ -158,7 +158,13 @@
       "when": "Deadline",
       "updated": "Updated on {when}",
       "reason": "Reason given: {reason}",
-      "failed": "The action was approved but did not run. Ask the requester to ask again."
+      "failed": "The action was approved but did not run. Ask the requester to ask again.",
+      "failureReason": {
+        "EXECUTION_INTERRUPTED": "The run was interrupted before it finished. Check whether the action took effect before asking again.",
+        "UNKNOWN_APPROVAL_ACTION": "This app no longer recognizes this action.",
+        "other": "The action returned an error while running."
+      },
+      "failureReference": "Reference: {requestId} ({code})"
     },
     "preview": {
       "before": "Before",

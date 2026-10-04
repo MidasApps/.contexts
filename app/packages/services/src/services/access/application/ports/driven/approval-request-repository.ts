@@ -1,4 +1,4 @@
-import type { ApprovalRequest, ApprovalRequestId, ApprovalStatus, TenantId, UserId } from "@core/contracts";
+import type { ApprovalFailure, ApprovalRequest, ApprovalRequestId, ApprovalStatus, TenantId, UserId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import type { Page, PageRequest } from "../../../../shared/pagination/page.ts";
 
@@ -8,6 +8,8 @@ export type ApprovalStatusChange = {
   readonly status: ApprovalStatus;
   readonly decidedBy?: UserId;
   readonly reason?: string | null;
+  /** Set only with `failed` (decision 0067). */
+  readonly failure?: ApprovalFailure;
   readonly updatedAt: string;
   readonly actorId: string;
 };

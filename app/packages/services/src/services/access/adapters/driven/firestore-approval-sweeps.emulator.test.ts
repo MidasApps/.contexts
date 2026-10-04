@@ -44,4 +44,13 @@ describe("approval-requests sweep query (Firestore emulator)", () => {
     const stale = await repository.listByStatusBefore({ status: "approved", field: "updatedAt", before: "2001-01-01T12:00:00.000Z", limit: 10 });
     expect(stale.filter((request) => request.tenantId.endsWith(RUN)).map((request) => request.id)).toEqual([approved.id]);
   });
+
+  it("stores the failure of a failed execution and reads it back (decision 0067)", async () => {
+    const approved = await stored({ tenantId: `failA${RUN}`, status: "approved", expiresAt: "2001-01-01T00:00:00.000Z", updatedAt: "2001-01-01T00:00:00.000Z" });
+    const failure = { code: "EXECUTION_INTERRUPTED", requestId: `sweep-${RUN}` };
+    await firebase.firestore.runTransaction((tx) =>
+      Promise.resolve(repository.setStatus(tx, { id: approved.id, status: "failed", failure, updatedAt: "2001-01-01T00:15:00.000Z", actorId: "system" })),
+    );
+    expect(await repository.get(undefined, approved.id)).toEqual({ ...approved, status: "failed", failure, updatedAt: "2001-01-01T00:15:00.000Z" });
+  });
 });

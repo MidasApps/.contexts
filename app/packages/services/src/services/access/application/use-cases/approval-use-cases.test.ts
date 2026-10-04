@@ -79,10 +79,22 @@ describe("approveRequest", () => {
   it("records a handler failure as failed without re-executing", async () => {
     const world = await buildApprovalWorld({ failWith: Object.assign(new Error("boom"), { code: "INVOICE_LOCKED" }) });
     const created = await request(world);
-    expect(await decide(world, "approveRequest", as("admin"), created.id)).toMatchObject({ ok: true, data: { status: "failed" } });
+    const failure = { code: "INVOICE_LOCKED", requestId: "r" };
+    expect(await decide(world, "approveRequest", as("admin"), created.id)).toMatchObject({ ok: true, data: { status: "failed", failure } });
+    expect(world.approvals.rowOf(created.id)?.failure).toEqual(failure);
     expect(world.actions()).toContain("APPROVAL_FAILED");
     expect(await decide(world, "approveRequest", as("owner"), created.id)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
     expect(world.executions).toHaveLength(1);
+  });
+
+  it("stores a generic code when the handler's error has no safe code, and no failure on success", async () => {
+    const failing = await buildApprovalWorld({ failWith: new Error("SELECT * FROM invoices") });
+    const created = await request(failing);
+    expect(await decide(failing, "approveRequest", as("admin"), created.id)).toMatchObject({ ok: true, data: { failure: { code: "APPROVAL_HANDLER_FAILED", requestId: "r" } } });
+    const working = await buildApprovalWorld();
+    const done = await request(working);
+    await decide(working, "approveRequest", as("admin"), done.id);
+    expect(working.approvals.rowOf(done.id)?.failure).toBeUndefined();
   });
 
   it("leaves an interrupted execution approved: listed by status for an operator, never re-executed", async () => {

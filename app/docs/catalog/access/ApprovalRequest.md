@@ -20,6 +20,7 @@ A four-eyes approval request for an action whose permission requires approval.
 | `createdAt` | yes | `none` | When the request was created (UTC). |  |
 | `decidedBy` | yes | `personal` | Approver or rejecter; null while pending. |  |
 | `expiresAt` | yes | `none` | When a pending request expires (UTC), 7 days after creation. |  |
+| `failure` | no | `none` | Why an approved action failed; absent otherwise. |  |
 | `id` | yes | `none` | Automatic id of the request. |  |
 | `node` | yes | `none` | Node where the action runs; approvers need its permission there. |  |
 | `permission` | yes | `none` | Permission of the action (one that requiresApproval). |  |

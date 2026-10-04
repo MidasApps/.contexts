@@ -776,6 +776,12 @@
           "required": true
         },
         {
+          "description": "Why an approved action failed; absent otherwise.",
+          "name": "failure",
+          "pii": "none",
+          "required": false
+        },
+        {
           "description": "Automatic id of the request.",
           "name": "id",
           "pii": "none",
@@ -905,6 +911,31 @@
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
             "type": "string",
+            "x-pii": "none"
+          },
+          "failure": {
+            "additionalProperties": false,
+            "description": "Why an approved action failed; absent otherwise.",
+            "properties": {
+              "code": {
+                "description": "Why the approved action did not run.",
+                "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "requestId": {
+                "description": "Request id of the failed execution, for support.",
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "code",
+              "requestId"
+            ],
+            "type": "object",
             "x-pii": "none"
           },
           "id": {

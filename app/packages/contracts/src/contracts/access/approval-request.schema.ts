@@ -36,6 +36,20 @@ export const ApprovalRequesterSchema = z.object({
   id: z.string().min(1).meta(personal("Uid, device id or API key id of the requester.")),
 });
 
+/** A stable SCREAMING_SNAKE code; free text (an SDK message, a host) never fits it. */
+export const ApprovalFailureCodeSchema = z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/, { error: "Expected a SCREAMING_SNAKE code." });
+
+/**
+ * The safe part of a failed execution (decision 0067): the handler's code, or a core code
+ * (`APPROVAL_HANDLER_FAILED`, `UNKNOWN_APPROVAL_ACTION`, `EXECUTION_INTERRUPTED`), and the
+ * request id that logged it. Never the error message or a stack (rule `error-handling`).
+ */
+export const ApprovalFailureSchema = z.strictObject({
+  code: ApprovalFailureCodeSchema.meta(none("Why the approved action did not run.")),
+  requestId: z.string().min(1).max(128).meta(none("Request id of the failed execution, for support.")),
+});
+export type ApprovalFailure = z.infer<typeof ApprovalFailureSchema>;
+
 export const ApprovalRequestSchema = z.object({
   id: ApprovalRequestIdSchema.meta(none("Automatic id of the request.")),
   tenantId: TenantIdSchema.meta(none("Organization of the request.")),
@@ -49,6 +63,8 @@ export const ApprovalRequestSchema = z.object({
   expiresAt: IsoDateTimeSchema.meta(none("When a pending request expires (UTC), 7 days after creation.")),
   createdAt: IsoDateTimeSchema.meta(none("When the request was created (UTC).")),
   updatedAt: IsoDateTimeSchema.meta(none("When the request last changed (UTC).")),
+  // Optional: added after the first release (additive, schemas rule); only a `failed` request has it.
+  failure: ApprovalFailureSchema.optional().meta(none("Why an approved action failed; absent otherwise.")),
 });
 export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
 

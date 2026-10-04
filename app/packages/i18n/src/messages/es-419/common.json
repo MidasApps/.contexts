@@ -158,7 +158,13 @@
       "when": "Plazo",
       "updated": "Actualizada el {when}",
       "reason": "Motivo informado: {reason}",
-      "failed": "La acción fue aprobada, pero no se ejecutó. Pide a quien la solicitó que la pida de nuevo."
+      "failed": "La acción fue aprobada, pero no se ejecutó. Pide a quien la solicitó que la pida de nuevo.",
+      "failureReason": {
+        "EXECUTION_INTERRUPTED": "La ejecución se interrumpió antes de terminar. Revisa si la acción tuvo efecto antes de pedirla de nuevo.",
+        "UNKNOWN_APPROVAL_ACTION": "Esta app ya no reconoce esta acción.",
+        "other": "La acción dio un error al ejecutarse."
+      },
+      "failureReference": "Referencia: {requestId} ({code})"
     },
     "preview": {
       "before": "Antes",

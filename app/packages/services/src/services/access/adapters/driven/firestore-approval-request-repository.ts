@@ -35,13 +35,14 @@ export const createFirestoreApprovalRequestRepository = (deps: { firestore: Fire
       const query = typed().where("status", "==", status).where(field, "<=", Timestamp.fromDate(new Date(before))).orderBy(field, "asc").limit(limit);
       return (await query.get()).docs.map((doc) => doc.data());
     },
-    setStatus: (tx, { id, status, decidedBy, reason, updatedAt, actorId }) =>
+    setStatus: (tx, { id, status, decidedBy, reason, failure, updatedAt, actorId }) =>
       void tx.update(
         raw().doc(id),
         toFirestoreUpdate(contract, {
           status,
           ...(decidedBy === undefined ? {} : { decidedBy }),
           ...(reason === undefined ? {} : { reason }),
+          ...(failure === undefined ? {} : { failure }),
           updatedAt,
           updatedBy: actorId,
         }),

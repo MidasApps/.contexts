@@ -93,6 +93,31 @@
       "type": "string",
       "x-pii": "none"
     },
+    "failure": {
+      "additionalProperties": false,
+      "description": "Why an approved action failed; absent otherwise.",
+      "properties": {
+        "code": {
+          "description": "Why the approved action did not run.",
+          "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "requestId": {
+          "description": "Request id of the failed execution, for support.",
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "code",
+        "requestId"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
     "id": {
       "description": "Automatic id of the request.",
       "minLength": 1,

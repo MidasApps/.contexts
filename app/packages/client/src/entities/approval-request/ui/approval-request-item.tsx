@@ -1,6 +1,6 @@
 "use client";
 
-import type { ApprovalRequest, ApprovalStatus } from "@core/contracts";
+import type { ApprovalFailure, ApprovalRequest, ApprovalStatus } from "@core/contracts";
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
@@ -79,6 +79,22 @@ function Preview({ request }: Pick<ApprovalRequestItemProps, "request">) {
   return <p className="text-sm text-muted-foreground">{t("none")}</p>;
 }
 
+// Core codes with their own copy; a module's code reads as the generic reason (decision 0067).
+const FAILURE_REASONS = ["EXECUTION_INTERRUPTED", "UNKNOWN_APPROVAL_ACTION"] as const;
+type FailureReason = (typeof FAILURE_REASONS)[number] | "other";
+const failureReasonOf = (code: string): FailureReason => FAILURE_REASONS.find((known) => known === code) ?? "other";
+
+/** Why an approved action did not run, and the reference support looks it up by. */
+function FailureDetails({ failure }: { failure: ApprovalFailure }) {
+  const t = useTranslations("common.approvals.item");
+  return (
+    <>
+      <p className="text-sm">{t(`failureReason.${failureReasonOf(failure.code)}`)}</p>
+      <p className="font-mono text-caption break-all text-muted-foreground">{t("failureReference", { requestId: failure.requestId, code: failure.code })}</p>
+    </>
+  );
+}
+
 /**
  * One approval request (SP5 spec §3.4): summary, status, requester, node, expiry and the preview of
  * its action kind. Decisions are passed in as `actions`, so the entity stays read-only.
@@ -121,6 +137,7 @@ export function ApprovalRequestItem({ request, requesterName, node, titleRoute, 
       {request.reason === null ? null : <p className="text-sm">{t("item.reason", { reason: request.reason })}</p>}
       {/* Approved but not done: said where the request stays (history, its page), not only in a toast. */}
       {request.status === "failed" ? <p className="text-sm font-medium text-destructive-text">{t("item.failed")}</p> : null}
+      {request.status === "failed" && request.failure !== undefined ? <FailureDetails failure={request.failure} /> : null}
       <Preview request={request} />
       {actions === undefined || actions === null ? null : <footer className="flex flex-col gap-2">{actions}</footer>}
     </article>

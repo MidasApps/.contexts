@@ -16,6 +16,19 @@ describe("ApprovalRequestItem", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("says why an approved action failed and quotes its reference (decision 0067)", async () => {
+    const interrupted = buildApprovalRequest({ status: "failed", decidedBy: "admin-uid", failure: { code: "EXECUTION_INTERRUPTED", requestId: "01J9Z3K8M2Q4R6T8V0W2X4Y6Z8" } });
+    const { container, unmount } = renderApp(<ApprovalRequestItem request={interrupted} />);
+    expect(await screen.findByText(/A execução foi interrompida antes de terminar/u)).toBeTruthy();
+    expect(screen.getByText("Referência: 01J9Z3K8M2Q4R6T8V0W2X4Y6Z8 (EXECUTION_INTERRUPTED)")).toBeTruthy();
+    await expectNoAxeViolations(container);
+    unmount();
+    // A module's own code has no copy of its own: the generic reason; the code stays beside the reference.
+    renderApp(<ApprovalRequestItem request={{ ...interrupted, failure: { code: "INVOICE_LOCKED", requestId: "req-7" } }} />, { locale: "en-US" });
+    expect(await screen.findByText("The action returned an error while running.")).toBeTruthy();
+    expect(screen.getByText("Reference: req-7 (INVOICE_LOCKED)")).toBeTruthy();
+  });
+
   it("shows the before/after of an agent command in English", async () => {
     const request = buildApprovalRequest({ action: { kind: "agent-command", input: { preview: { before: { name: "A" }, after: { name: "B" } } }, summary: "Rename project" } });
     renderApp(<ApprovalRequestItem request={request} />, { locale: "en-US" });

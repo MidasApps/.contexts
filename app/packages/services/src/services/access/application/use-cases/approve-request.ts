@@ -1,4 +1,4 @@
-import type { ApprovalRequest, Principal, UserPrincipal } from "@core/contracts";
+import { ApprovalFailureCodeSchema, type ApprovalRequest, type Principal, type UserPrincipal } from "@core/contracts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { nextApprovalStatus } from "../../domain/approval-state.ts";
@@ -9,11 +9,11 @@ export type ApproveRequest = (command: DecideCommand) => Promise<Result<Approval
 
 type Execution = { readonly status: "executed" } | { readonly status: "failed"; readonly errorCode: string };
 
-const ERROR_CODE = /^[A-Z][A-Z0-9_]{0,63}$/;
-
+// Only a stable code reaches the request (decision 0067); anything else reads as the generic one.
 const errorCodeOf = (error: unknown): string => {
   const code = typeof error === "object" && error !== null && "code" in error ? error.code : undefined;
-  return typeof code === "string" && ERROR_CODE.test(code) ? code : "APPROVAL_HANDLER_FAILED";
+  const parsed = ApprovalFailureCodeSchema.safeParse(code);
+  return parsed.success ? parsed.data : "APPROVAL_HANDLER_FAILED";
 };
 
 // The one execution of an approved request; a handler error is recorded, never rethrown.
@@ -36,7 +36,9 @@ const recordExecution = (deps: ApprovalDeps, approved: ApprovalRequest, executio
     const status = nextApprovalStatus(current.status, execution.status === "executed" ? "execute" : "fail");
     if (status === null) return current;
     const updatedAt = deps.clock.now().toISOString();
-    deps.approvals.setStatus(tx, { id: current.id, status, updatedAt, actorId: "system" });
+    // Decision 0067: the failed request keeps its safe code and the request id that logged the error.
+    const failure = execution.status === "failed" ? { failure: { code: execution.errorCode, requestId } } : {};
+    deps.approvals.setStatus(tx, { id: current.id, status, ...failure, updatedAt, actorId: "system" });
     await deps.audit.record(
       {
         log: "tenant",
@@ -51,7 +53,7 @@ const recordExecution = (deps: ApprovalDeps, approved: ApprovalRequest, executio
       },
       tx,
     );
-    return { ...current, status, updatedAt };
+    return { ...current, status, ...failure, updatedAt };
   });
 
 /**

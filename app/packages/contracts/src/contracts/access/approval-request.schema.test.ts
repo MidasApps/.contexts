@@ -27,6 +27,14 @@ describe("ApprovalRequestSchema", () => {
     }
   });
 
+  it("keeps the safe failure of a failed request and refuses free text as its code (decision 0067)", () => {
+    const [example] = ApprovalRequestContract.meta.examples;
+    const failed = { ...(example as object), status: "failed", failure: { code: "EXECUTION_INTERRUPTED", requestId: "01J9Z3K8M2Q4R6T8V0W2X4Y6Z8" } };
+    expect(ApprovalRequestSchema.parse(failed).failure).toEqual(failed.failure);
+    expect(ApprovalRequestSchema.safeParse({ ...failed, failure: { ...failed.failure, code: "connection refused at 10.0.0.1" } }).success).toBe(false);
+    expect(ApprovalRequestSchema.parse(example).failure).toBeUndefined();
+  });
+
   it("rejects an unknown status", () => {
     const [example] = ApprovalRequestContract.meta.examples;
     expect(ApprovalRequestSchema.safeParse({ ...(example as object), status: "done" }).success).toBe(false);

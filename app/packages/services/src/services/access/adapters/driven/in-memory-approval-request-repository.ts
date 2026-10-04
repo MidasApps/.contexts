@@ -23,10 +23,10 @@ export const createInMemoryApprovalRequestRepository = (): InMemoryApprovalReque
       const items = [...rows.values()].filter((row) => row.tenantId === tenantId && (statuses === undefined || statuses.includes(row.status)));
       return Promise.resolve(paginateInMemory({ items, page, positionOf: (row) => [descending(row.createdAt), descending(row.id)] }));
     },
-    setStatus: (_tx, { id, status, decidedBy, reason, updatedAt }) => {
+    setStatus: (_tx, { id, status, decidedBy, reason, failure, updatedAt }) => {
       const row = rows.get(id);
       if (row === undefined) return;
-      rows.set(id, { ...row, status, ...(decidedBy === undefined ? {} : { decidedBy }), ...(reason === undefined ? {} : { reason }), updatedAt });
+      rows.set(id, { ...row, status, ...(decidedBy === undefined ? {} : { decidedBy }), ...(reason === undefined ? {} : { reason }), ...(failure === undefined ? {} : { failure }), updatedAt });
     },
     listByStatusBefore: ({ status, field, before, limit }) =>
       Promise.resolve(

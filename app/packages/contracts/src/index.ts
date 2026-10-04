@@ -445,10 +445,11 @@ export {
   type InvitationId, type InvitationPreview, type InvitationStatus, type InvitationTokenInput,
 } from "./contracts/access/invitation.schema.ts";
 export {
-  APPROVAL_STATUSES, APPROVAL_TTL_DAYS, ApprovalActionKindSchema, ApprovalRequestContract, ApprovalRequesterSchema,
+  APPROVAL_STATUSES, APPROVAL_TTL_DAYS, ApprovalActionKindSchema, ApprovalFailureCodeSchema, ApprovalFailureSchema,
+  ApprovalRequestContract, ApprovalRequesterSchema,
   ApprovalRequestIdSchema, ApprovalRequestSchema, ApprovalStatusSchema, CreateApprovalRequestInputContract,
   CreateApprovalRequestInputSchema, DecideApprovalRequestInputContract, DecideApprovalRequestInputSchema,
-  type ApprovalRequest, type ApprovalRequestId, type ApprovalStatus, type CreateApprovalRequestInput,
+  type ApprovalFailure, type ApprovalRequest, type ApprovalRequestId, type ApprovalStatus, type CreateApprovalRequestInput,
   type DecideApprovalRequestInput,
 } from "./contracts/access/approval-request.schema.ts";
 export {
