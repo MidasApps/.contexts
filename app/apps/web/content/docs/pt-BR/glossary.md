@@ -10,6 +10,7 @@ Os termos que aparecem no app e nesta documentação, em ordem alfabética. Cada
 | Agente | Um assistente de IA com instruções, modelo e ferramentas próprios. Há agentes da plataforma, da organização e de módulos. | [Agentes e habilidades](/docs/agents) |
 | Aprovação | Um pedido para uma pessoa autorizar uma ação sensível antes de ela acontecer, como uma ferramenta que altera dados. | [Aprovações](/docs/approvals) |
 | Assistente | O chat de IA do projeto. Abre em página própria ou no painel à direita da tela. | [Assistente (chat)](/docs/chat) |
+| Auditoria | O registro de quem fez o quê na organização, com data, ação, alvo e resultado. Mostra os campos alterados, nunca os valores. | [Auditoria](/docs/audit-log) |
 | Avaliação (eval) | Um conjunto de casos de teste que mede a qualidade das respostas de um agente, com notas. | [Avaliações](/docs/evals) |
 | Base de conhecimento | Os documentos e páginas que a organização envia para o assistente consultar e citar. | [Base de conhecimento](/docs/knowledge) |
 | Chave de API | Uma credencial para outro sistema chamar o app pela API `/v1`, sem uma pessoa conectada. | [Chaves de API e integração](/docs/api-keys) |

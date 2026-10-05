@@ -82,7 +82,7 @@ Exemplo: um `platform-support` que abre `/admin` vê os números e seis cartões
 
 ## Auditoria das ações da equipe
 
-As ações da equipe que alteram algo ficam no registro de auditoria da plataforma. Quando a ação atinge uma organização, o registro indica qual. O acesso de suporte também é registrado na auditoria da própria organização.
+As ações da equipe que alteram algo ficam no registro de auditoria da plataforma. Quando a ação atinge uma organização, o registro indica qual. O acesso de suporte também é registrado na auditoria da própria organização, que o Proprietário consulta em [Auditoria](/docs/audit-log).
 
 | Ação | Código na auditoria |
 |---|---|

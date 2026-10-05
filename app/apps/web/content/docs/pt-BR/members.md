@@ -1,12 +1,12 @@
 # Membros e convites
 
-Esta página mostra como ver quem tem acesso à organização, convidar pessoas, trocar os papéis de um membro e remover acessos. Tudo isso fica nas seções **Membros** e **Convites** das configurações.
+Esta página mostra como ver quem tem acesso à organização, convidar pessoas, dar a um membro acesso em outro projeto ou unidade, trocar os papéis de um membro e remover acessos. Tudo isso fica nas seções **Membros** e **Convites** das configurações.
 
 ## O que é
 
 - **Membro** é uma pessoa que tem pelo menos um acesso na organização.
-- Cada acesso diz **onde vale** (a organização inteira ou um projeto) e **quais papéis** a pessoa tem ali. Um membro pode ter vários acessos, por exemplo papel Membro em um projeto e papel Leitor em outro.
-- O acesso vale no nível escolhido e em tudo abaixo dele: um acesso no projeto vale também para todas as unidades do projeto.
+- Cada acesso diz **onde vale** (a organização inteira, um projeto ou uma unidade de um projeto) e **quais papéis** a pessoa tem ali. Um membro pode ter vários acessos, por exemplo papel Membro em um projeto e papel Leitor em outro.
+- O acesso vale no nível escolhido e em tudo abaixo dele: um acesso no projeto vale também para todas as unidades do projeto, e um acesso numa unidade vale também para as sub-unidades dela.
 - **Convite** é a forma de dar acesso a alguém. Ele é vinculado a um e-mail, vale por 7 dias e só pode ser usado uma vez, pela conta com aquele e-mail.
 
 Importante: o app **não envia o convite por e-mail**. Ao criar o convite, você recebe um link e precisa enviá-lo à pessoa pelo canal que preferir. Por segurança, o link aparece uma única vez.
@@ -17,8 +17,8 @@ Importante: o app **não envia o convite por e-mail**. Ao criar o convite, você
 |---|---|---|
 | Ver a seção **Membros** | `core.member.read` | Proprietário, Administrador, Membro |
 | Convidar pessoas, ver a seção **Convites** e revogar convites | `core.member.invite` | Proprietário, Administrador |
-| Alterar papéis de membros | `core.member.update` | Proprietário, Administrador |
-| Remover membros | `core.member.remove` | Proprietário, Administrador |
+| Dar acesso em outro lugar e alterar papéis de membros | `core.member.update` | Proprietário, Administrador |
+| Revogar um acesso e remover membros | `core.member.remove` | Proprietário, Administrador |
 
 O papel Leitor não vê a seção **Membros**. Quem não tem `core.member.invite` não vê a seção **Convites** nem o botão **Convidar**.
 
@@ -52,7 +52,7 @@ As duas seções ficam no grupo **Organização** do menu de configurações.
 
 1. Em **Configurações → Membros** ou **Configurações → Convites**, clique em **Convidar**.
 2. Em **E-mail**, digite o e-mail da pessoa.
-3. Em **Onde vale**, escolha **Toda a organização** ou um projeto (use **Buscar projeto** para filtrar). O acesso vale no nível escolhido e em tudo abaixo dele.
+3. Em **Onde vale**, escolha **Toda a organização** ou um projeto (use **Buscar projeto** para filtrar). Ao escolher um projeto, aparece o campo **Unidade**: deixe **Todo o projeto** ou escolha uma unidade (as sub-unidades aparecem como **Unidade › Sub-unidade**). O acesso vale no nível escolhido e em tudo abaixo dele.
 4. Em **Papéis**, marque um ou mais papéis (até 10). O papel **Membro** já vem marcado.
 5. Clique em **Enviar convite**.
 6. Aparece **Convite criado para {e-mail}** com o campo **Link do convite**. Clique em **Copiar** e envie o link à pessoa.
@@ -95,6 +95,28 @@ Se a pessoa já tem acesso em um lugar e aceita um convite para esse mesmo lugar
 
 Um convite também deixa de funcionar se quem convidou perder a permissão de conceder aqueles papéis antes do aceite (por exemplo, se deixou de ser administrador). Nesse caso, outra pessoa com permissão precisa convidar de novo.
 
+### Dar acesso a um membro em outro lugar
+
+Use quando a pessoa já é membro e precisa de acesso em mais um projeto ou unidade, sem convite novo.
+
+1. Em **Configurações → Membros**, na coluna **Acesso** da pessoa, clique em **Dar acesso**.
+2. Em **Onde vale**, escolha **Toda a organização** ou um projeto.
+3. Se escolheu um projeto, em **Unidade** deixe **Todo o projeto** ou escolha uma unidade.
+4. Em **Papéis**, marque os papéis desse novo acesso.
+5. Clique em **Dar acesso**. Aparece a confirmação **Acesso de {nome} adicionado.**
+
+Se a pessoa já tem acesso naquele lugar, o app avisa: **Esta pessoa já tem acesso neste lugar.** Nesse caso, altere os papéis do acesso existente com o lápis.
+
+### Revogar um acesso de um membro
+
+Quando a pessoa tem mais de um acesso, cada um mostra o ícone **×** (**Revogar este acesso de {nome}**).
+
+1. Clique no **×** ao lado do acesso que quer tirar.
+2. A janela mostra onde o acesso valia. Clique em **Revogar acesso**.
+3. A pessoa continua com os outros acessos. Aparece a confirmação **Acesso de {nome} revogado.**
+
+Quando a pessoa tem um único acesso, use **Remover** (abaixo).
+
 ### Remover um membro
 
 1. Em **Configurações → Membros**, clique em **Remover** na linha da pessoa.
@@ -120,6 +142,8 @@ Membros depois dos aceites:
 | Sofia Prado (Você) | Toda a organização — Proprietário |
 | João Lima | Toda a organização — Administrador |
 | Bruno Reis | Projeto: Clientes PJ — Membro; Projeto: Clientes PF — Leitor |
+
+Mais tarde, a sócia usa **Dar acesso** para que Carla também atenda a filial de Campinas, que é uma unidade do projeto Clientes PJ: **Onde vale** = Clientes PJ, **Unidade** = Campinas, **Papéis** = Membro. Como Carla já tinha acesso ao projeto inteiro, esse acesso extra só faz diferença se os papéis forem outros, por exemplo Administrador só em Campinas.
 
 Como um convite aparece na API (formato do contrato `access.Invitation`, valores ilustrativos). O convite de Carla vale no projeto, então o campo `node` traz `level: "project"`:
 
@@ -172,6 +196,7 @@ Diálogo entre a sócia e a nova colaboradora:
 | Você não pode conceder permissões que não possui. | Um dos papéis escolhidos tem permissões que você não tem. | Escolha outro papel ou peça a um Proprietário. |
 | Digite um e-mail válido, por exemplo nome@empresa.com. | O e-mail está fora do formato. | Corrija o e-mail. |
 | Escolha pelo menos um papel. | Nenhum papel foi marcado. | Marque ao menos um papel. |
+| Esta pessoa já tem acesso neste lugar. | Já existe um acesso da pessoa no lugar escolhido em **Dar acesso**. | Use o lápis desse acesso para mudar os papéis. |
 | Este convite expirou. Peça um novo convite. | Passaram os 7 dias. | Crie um convite novo. |
 | Este convite já foi usado. | O link já foi aceito. | Nada a fazer; a pessoa já é membro. |
 | Este convite foi enviado para outro e-mail. Entre com a conta convidada. | A pessoa entrou com outra conta. | Ela deve usar **Entrar com outra conta**. |
@@ -183,5 +208,6 @@ Diálogo entre a sócia e a nova colaboradora:
 - [Papéis e permissões](/docs/roles)
 - [Organizações e projetos](/docs/organizations)
 - [Unidades](/docs/units)
+- [Auditoria](/docs/audit-log)
 - [Chaves de API](/docs/api-keys)
 - [Primeiros passos](/docs/getting-started)

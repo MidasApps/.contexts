@@ -154,6 +154,7 @@ Como o acesso desce na árvore:
 - A árvore mostra as primeiras 500 unidades de um projeto. Se o projeto crescer além disso, considere dividi-lo em mais projetos.
 - Mover uma unidade com muitas subunidades pode ser recusado. Nesse caso, mova partes menores.
 - Unidades a que você não tem acesso aparecem como **Unidade restrita** no caminho.
+- Para dar a alguém acesso só a uma unidade, escolha a unidade no campo **Unidade** do convite ou use **Dar acesso** em **Configurações → Membros**. Veja [Membros e convites](/docs/members).
 
 ## Erros comuns
 

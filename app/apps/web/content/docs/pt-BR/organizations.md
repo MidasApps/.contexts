@@ -1,6 +1,6 @@
 # Organizações e projetos
 
-Esta página explica como escolher e criar organizações, como os projetos organizam o trabalho dentro delas e como ajustar o nome e os padrões regionais da organização em **Configurações → Geral**.
+Esta página explica como escolher e criar organizações, como os projetos organizam o trabalho dentro delas, como editar, arquivar e excluir um projeto e como ajustar ou excluir a organização em **Configurações → Geral**.
 
 ## O que é
 
@@ -21,7 +21,7 @@ O acesso dado em um nível vale para tudo o que está abaixo dele. Quem recebe a
 
 Uma organização pode aparecer com o selo **Suspensa**. Enquanto estiver suspensa, nenhuma permissão dentro dela vale, para ninguém, até ela ser reativada pela equipe da plataforma.
 
-Um projeto pode aparecer com o selo **Arquivado**. Ele continua legível, mas sai das listas padrão.
+Um projeto pode aparecer com o selo **Arquivado**. Ele continua na lista de projetos e com os mesmos dados; o selo avisa que ele não está mais em uso. Quem pode alterar o projeto pode reativá-lo a qualquer momento.
 
 ## Quem pode usar
 
@@ -31,10 +31,15 @@ Um projeto pode aparecer com o selo **Arquivado**. Ele continua legível, mas sa
 | Alterar nome e padrões da organização | `core.organization.update` | Proprietário, Administrador |
 | Ver projetos | `core.project.read` | Proprietário, Administrador, Membro, Leitor |
 | Criar projetos | `core.project.create` | Proprietário, Administrador |
+| Editar, arquivar e reativar um projeto | `core.project.update` | Proprietário, Administrador |
+| Excluir um projeto | `core.project.delete` | Proprietário, Administrador |
+| Excluir a organização | `core.organization.delete` | Proprietário |
 
 **Criar uma organização** não depende de papel: o servidor decide se a sua conta pode criar organizações. Quando pode, a página **Organizações** mostra o cartão **Nova organização**; quando não pode, o cartão não aparece e a página pede que você solicite um convite. Quem cria a organização vira o **Proprietário** dela.
 
 Sem `core.organization.update`, a seção **Geral** aparece somente para leitura, com o aviso **Somente administradores podem alterar estes dados.**
+
+As permissões de projeto valem no projeto: quem recebeu um papel com `core.project.update` só em um projeto pode editar aquele projeto, e não os outros. Sem `core.project.update` e `core.project.delete`, o botão **Configurar projeto** não aparece.
 
 ## Onde encontrar
 
@@ -99,6 +104,29 @@ Se o cartão não aparece, a sua conta não pode criar organizações. Peça um 
    - **Módulos** que você pode abrir no projeto, cada um com **Abrir módulo**.
 3. Se você pode criar unidades, aparece o botão **Gerenciar unidades**, que leva a **Configurações → Unidades**.
 
+### Editar o nome e a descrição de um projeto
+
+1. Abra a **Visão geral** do projeto.
+2. Clique em **Configurar projeto**, no topo da página, e escolha **Editar nome e descrição**.
+3. Altere **Nome do projeto** ou **Descrição**. Para remover a descrição, deixe o campo em branco.
+4. Clique em **Salvar**. Aparece a confirmação **Projeto {nome} atualizado.**
+
+### Arquivar ou reativar um projeto
+
+Arquive um projeto que terminou, mas cujos dados você quer manter à mão.
+
+1. Na **Visão geral** do projeto, clique em **Configurar projeto → Arquivar projeto**.
+2. Confirme em **Arquivar**. O projeto ganha o selo **Arquivado** e aparece a confirmação **Projeto {nome} arquivado.**
+3. Para voltar a usá-lo, abra o projeto e clique em **Configurar projeto → Reativar projeto**.
+
+### Excluir um projeto
+
+1. Na **Visão geral** do projeto, clique em **Configurar projeto → Excluir projeto**.
+2. Leia o aviso: o projeto e **todas as unidades dele** deixam de existir para todos os membros, e não é possível desfazer pelo app.
+3. Clique em **Excluir projeto**. O app volta para a página da organização com a confirmação **Projeto {nome} excluído.**
+
+Se o projeto só não é mais usado, prefira arquivar.
+
 ### Alterar nome e padrões da organização
 
 1. Vá em **Configurações → Geral**.
@@ -106,6 +134,17 @@ Se o cartão não aparece, a sua conta não pode criar organizações. Peça um 
 3. Clique em **Salvar**.
 
 Os padrões valem para quem não escolheu os seus e para valores novos. Cada pessoa pode ter as próprias preferências de idioma, fuso e moeda no perfil. A data de criação aparece no rodapé da seção (**Criada em {data}.**).
+
+### Excluir a organização
+
+Só o **Proprietário** vê esta opção.
+
+1. Vá em **Configurações → Geral** e desça até o cartão **Excluir organização**.
+2. Clique em **Excluir organização**.
+3. Digite o nome da organização exatamente como ele aparece, com maiúsculas e acentos, e clique em **Excluir para sempre**.
+4. Todos os membros, dispositivos e chaves de API perdem o acesso na hora. O app abre a página **Organizações** com a confirmação **Organização {nome} excluída.**
+
+Não é possível desfazer pelo app. Se você só quer parar de usar a organização por um tempo, fale com o suporte da plataforma.
 
 ## Exemplo
 
@@ -165,6 +204,8 @@ Conversa típica entre a gerente e o administrador:
 | Este item foi alterado por outra pessoa. Recarregue e tente novamente. | Alguém salvou alterações antes de você. | Recarregue a página e refaça a alteração. |
 | Alguns campos estão inválidos. Revise e tente novamente. | Algum campo ficou vazio ou fora do formato. | Revise os campos destacados. |
 | Selo **Suspensa** na organização | A organização está suspensa e nenhuma permissão vale. | Fale com o suporte da plataforma. |
+| O nome digitado não é igual ao da organização. | Ao excluir a organização, o nome digitado não confere. | Digite o nome exatamente como aparece no título da janela. |
+| Não vejo **Configurar projeto** | Você não tem `core.project.update` nem `core.project.delete` naquele projeto. | Peça o papel adequado a um administrador. |
 
 ## Veja também
 
@@ -172,4 +213,5 @@ Conversa típica entre a gerente e o administrador:
 - [Unidades](/docs/units)
 - [Membros e convites](/docs/members)
 - [Papéis e permissões](/docs/roles)
+- [Auditoria](/docs/audit-log)
 - [Módulos](/docs/modules)

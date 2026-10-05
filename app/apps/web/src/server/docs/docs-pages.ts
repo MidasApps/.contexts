@@ -21,6 +21,7 @@ export const DOCS_GROUPS: readonly DocsNavGroup[] = [
       { slug: "members", title: "Membros e convites" },
       { slug: "roles", title: "Papéis e permissões" },
       { slug: "units", title: "Unidades" },
+      { slug: "audit-log", title: "Auditoria" },
     ],
   },
   {

@@ -77,7 +77,7 @@ A tabela traz as permissões da plataforma, com o texto que aparece no seletor d
 | `core.role.create` / `update` / `delete` | Criar, alterar e excluir papéis | P, A |
 | `core.api-key.read` / `create` / `revoke` | Ver, criar e revogar chaves de API | P, A |
 | `core.device.read` / `create` / `revoke` | Ver, ativar e revogar dispositivos | P, A |
-| `core.audit-log.read` | Ver o registro de auditoria | P, A |
+| `core.audit-log.read` | Ver a auditoria da organização (**Configurações → Auditoria**) | P, A |
 | `core.approval.read` | Ver pedidos de aprovação | P, A, M |
 | `core.approval.decide` | Aprovar ou recusar pedidos | P, A |
 | `core.chat.use` | Usar o chat | P, A, M |
