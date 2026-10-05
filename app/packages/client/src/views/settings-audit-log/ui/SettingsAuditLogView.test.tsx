@@ -89,7 +89,10 @@ describe("SettingsAuditLogView", () => {
   it("has a label for every audited action in every locale", () => {
     for (const [locale, catalog] of Object.entries(CORE_MESSAGES)) {
       const labels = (catalog.settings as { auditLog: { actions: Record<string, string> } }).auditLog.actions;
-      expect(AUDIT_ACTIONS.filter((action) => labels[action] === undefined), locale).toEqual([]);
+      expect(
+        AUDIT_ACTIONS.filter((action) => labels[action] === undefined),
+        locale,
+      ).toEqual([]);
     }
   });
 });

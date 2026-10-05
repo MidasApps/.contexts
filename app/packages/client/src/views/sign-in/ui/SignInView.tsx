@@ -90,14 +90,17 @@ export function SignInView({ brand, footer }: { brand?: ReactNode; footer?: Reac
 
   const { state } = session;
   return (
-    <AuthTemplate brand={brand ?? <AuthBrand />} footer={
+    <AuthTemplate
+      brand={brand ?? <AuthBrand />}
+      footer={
         footer ?? (
           <>
             <EntryLocaleSwitcher />
             <GuideLink />
           </>
         )
-      }>
+      }
+    >
       {state.status === "mfa-required" ? (
         <>
           <Heading title={t("mfa.title")} description={t("mfa.description")} />
