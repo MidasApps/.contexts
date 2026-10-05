@@ -1,10 +1,13 @@
 "use client";
 
 import type { AccessContext, Organization } from "@core/contracts";
+import { useState } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
+import { DeleteOrganizationDialog } from "#/features/delete-organization/index.ts";
 import { UpdateOrganizationForm } from "#/features/update-organization/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { currencyLabel } from "#/shared/ui/molecules/CurrencySelect/CurrencySelect.tsx";
 import { endonym } from "#/shared/ui/molecules/LocaleSelect/LocaleSelect.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
@@ -33,6 +36,20 @@ function OrganizationDetails({ organization }: { organization: Organization }) {
         </div>
       ))}
     </dl>
+  );
+}
+
+/** Owners only (core.organization.delete): the way out, apart from the everyday settings. */
+function DeleteOrganizationSection({ organization }: { organization: Organization }) {
+  const t = useTranslations("settings.general.delete");
+  const [open, setOpen] = useState(false);
+  return (
+    <SectionCard tone="danger" title={t("sectionTitle")} description={t("sectionDescription")}>
+      <Button variant="destructive" className="self-start" onClick={() => setOpen(true)}>
+        {t("action")}
+      </Button>
+      <DeleteOrganizationDialog organization={organization} open={open} onOpenChange={setOpen} />
+    </SectionCard>
   );
 }
 
@@ -67,6 +84,9 @@ function SettingsGeneral({ context }: { context: AccessContext }) {
             <OrganizationDetails organization={organization} />
           )}
         </SectionCard>
+        {context.permissions.includes("core.organization.delete") ? (
+          <DeleteOrganizationSection organization={organization} />
+        ) : null}
         <p className="text-xs text-muted-foreground">
           {t("createdAt", { date: formatDateTime(organization.createdAt, "date") })}
         </p>
@@ -77,7 +97,8 @@ function SettingsGeneral({ context }: { context: AccessContext }) {
 
 /**
  * `/o/:organizationId/settings/general` (SP2 spec §8): name and regional defaults (locale, time
- * zone, currency) — editable with core.organization.update, read-only otherwise.
+ * zone, currency) — editable with core.organization.update, read-only otherwise — and, for
+ * core.organization.delete, deleting the organization.
  */
 export function SettingsGeneralView() {
   const t = useTranslations("settings.general");

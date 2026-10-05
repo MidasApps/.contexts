@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, type FakeRequest, type FakeRoutes, ok } from "#/shared/testing/fake-api.ts";
+import { apiError, type FakeRequest, type FakeRoutes, noContent, ok } from "#/shared/testing/fake-api.ts";
 import { buildOrganization, IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsGeneralView } from "./SettingsGeneralView.tsx";
 
@@ -56,5 +56,31 @@ describe("SettingsGeneralView", () => {
     expect(within(list.closest("dl") as HTMLElement).getByText("Português (Brasil)")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Salvar" })).toBeNull();
     await expectNoAxeViolations(container);
+  });
+  it("deletes the organization only after its name is typed, then opens the organizations list", async () => {
+    const { user, api, router } = renderView(["core.organization.read", "core.organization.delete"], {
+      "DELETE /v1/organizations/:organizationId": noContent(),
+    });
+    await user.click(await screen.findByRole("button", { name: "Excluir organização" }));
+    const dialog = await screen.findByRole("dialog", { name: "Excluir Northwind?" });
+    await expectNoAxeViolations(dialog);
+    const input = within(dialog).getByRole("textbox", { name: "Digite Northwind para confirmar" });
+    await user.type(input, "northwind");
+    await user.click(within(dialog).getByRole("button", { name: "Excluir para sempre" }));
+    expect(await within(dialog).findByText("O nome digitado não é igual ao da organização.")).toBeDefined();
+    expect(api.callLines()).not.toContain(`DELETE /v1/organizations/${IDS.organization}`);
+
+    await user.clear(input);
+    await user.type(input, "Northwind");
+    await user.click(within(dialog).getByRole("button", { name: "Excluir para sempre" }));
+    expect(await screen.findByText("Organização Northwind excluída.")).toBeDefined();
+    expect(api.callLines()).toContain(`DELETE /v1/organizations/${IDS.organization}`);
+    expect(router.current()).toBe("/organizations");
+  });
+
+  it("offers no deletion without core.organization.delete", async () => {
+    renderView(["core.organization.read", "core.organization.update"]);
+    await screen.findByRole("textbox", { name: /Nome/u });
+    expect(screen.queryByRole("button", { name: "Excluir organização" })).toBeNull();
   });
 });

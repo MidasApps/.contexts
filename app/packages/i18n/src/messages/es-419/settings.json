@@ -39,6 +39,19 @@
       "locale": "Idioma predeterminado",
       "timeZone": "Zona horaria predeterminada",
       "currency": "Moneda predeterminada"
+    },
+    "delete": {
+      "sectionTitle": "Eliminar organización",
+      "sectionDescription": "Quita la organización y el acceso de todos los miembros, dispositivos y claves de API a ella. Úsalo solo cuando la organización ya no se use.",
+      "action": "Eliminar organización",
+      "title": "¿Eliminar {name}?",
+      "dialogDescription": "Todos los miembros pierden el acceso de inmediato, y los proyectos, unidades y configuraciones dejan de aparecer en la app. No se puede deshacer desde la app.",
+      "confirmLabel": "Escribe {name} para confirmar",
+      "confirmHint": "El nombre debe ser igual al de la organización, con mayúsculas y acentos.",
+      "mismatch": "El nombre escrito no es igual al de la organización.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar para siempre",
+      "done": "Organización {name} eliminada."
     }
   },
   "members": {

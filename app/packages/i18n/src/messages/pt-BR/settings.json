@@ -39,6 +39,19 @@
       "locale": "Idioma padrão",
       "timeZone": "Fuso horário padrão",
       "currency": "Moeda padrão"
+    },
+    "delete": {
+      "sectionTitle": "Excluir organização",
+      "sectionDescription": "Remove a organização e o acesso de todos os membros, dispositivos e chaves de API a ela. Use só quando a organização não for mais usada.",
+      "action": "Excluir organização",
+      "title": "Excluir {name}?",
+      "dialogDescription": "Todos os membros perdem o acesso na hora, e os projetos, unidades e configurações deixam de aparecer no app. Não é possível desfazer pelo app.",
+      "confirmLabel": "Digite {name} para confirmar",
+      "confirmHint": "O nome precisa ser igual ao da organização, com maiúsculas e acentos.",
+      "mismatch": "O nome digitado não é igual ao da organização.",
+      "cancel": "Cancelar",
+      "confirm": "Excluir para sempre",
+      "done": "Organização {name} excluída."
     }
   },
   "members": {

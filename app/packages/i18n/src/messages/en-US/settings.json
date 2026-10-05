@@ -39,6 +39,19 @@
       "locale": "Default language",
       "timeZone": "Default time zone",
       "currency": "Default currency"
+    },
+    "delete": {
+      "sectionTitle": "Delete organization",
+      "sectionDescription": "Removes the organization and the access of every member, device and API key to it. Use it only when the organization is no longer used.",
+      "action": "Delete organization",
+      "title": "Delete {name}?",
+      "dialogDescription": "Every member loses access at once, and the projects, units and settings stop showing in the app. This cannot be undone from the app.",
+      "confirmLabel": "Type {name} to confirm",
+      "confirmHint": "The name must match the organization's, including capitals and accents.",
+      "mismatch": "The name you typed does not match the organization's.",
+      "cancel": "Cancel",
+      "confirm": "Delete forever",
+      "done": "Organization {name} deleted."
     }
   },
   "members": {
