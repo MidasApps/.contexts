@@ -106,6 +106,7 @@ export function DocsMarkdown({ children }: { children: string }) {
     <div
       role="group"
       aria-label={t("table")}
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a scrollable region must be reachable by keyboard (WCAG 2.1.1)
       tabIndex={0}
       className="overflow-x-auto rounded-sm focus-visible:outline-2 focus-visible:outline-ring"
     >
