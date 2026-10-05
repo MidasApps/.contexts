@@ -347,10 +347,13 @@ export {
   type AuditLogQuery,
   AuditLogQueryContract,
   AuditLogQuerySchema,
+  type PlatformAuditLogQuery,
+  PlatformAuditLogQueryContract,
+  PlatformAuditLogQuerySchema,
 } from "./contracts/audit/audit-log-query.schema.ts";
 // SP1 audit.
 export { AUDIT_CONTRACTS } from "./contracts/audit/contracts.ts";
-export { AUDIT_ENDPOINTS, listAuditLogsEndpoint } from "./contracts/audit/endpoints.ts";
+export { AUDIT_ENDPOINTS, listAuditLogsEndpoint, listPlatformAuditLogsEndpoint } from "./contracts/audit/endpoints.ts";
 export {
   type ApprovalDiffProps,
   ApprovalDiffPropsContract,

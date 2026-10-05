@@ -1166,5 +1166,13 @@
       "open": "Abrir o Cloud Logging",
       "newTab": "(abre em nova aba)"
     }
+  },
+  "auditLog": {
+    "title": "Auditoria da plataforma",
+    "description": "O que a equipe fez na plataforma: planos, orçamentos, recursos, modelos, acessos de suporte e tentativas recusadas, do mais recente ao mais antigo.",
+    "caption": "Auditoria da plataforma",
+    "platformWide": "Toda a plataforma",
+    "organizationFilter": "Só da organização",
+    "clearOrganization": "Ver todas as organizações"
   }
 }

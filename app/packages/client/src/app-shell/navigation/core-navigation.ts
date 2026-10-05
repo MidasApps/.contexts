@@ -57,6 +57,7 @@ const ADMIN: { name: string; icon: IconName; permission: Permission; group: NavG
   { name: "workflows", icon: "workflow", permission: "platform.workflow.manage", group: "operations" },
   { name: "flags", icon: "flag", permission: "platform.flag.manage", group: "operations" },
   { name: "connectors", icon: "plug", permission: "platform.connector.read", group: "operations" },
+  { name: "audit", icon: "history", permission: "platform.audit-log.read", group: "operations" },
 ];
 
 const HOMES: ShellNavItem[] = [

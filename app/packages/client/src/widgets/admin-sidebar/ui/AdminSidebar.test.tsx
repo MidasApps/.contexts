@@ -52,7 +52,7 @@ describe("AdminSidebar", () => {
       within(within(nav).getByRole("list", { name: "Operação" }))
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["Conectores"]);
+    ).toEqual(["Conectores", "Auditoria"]);
     expect(within(customers).getByRole("link", { name: "Usuários" }).getAttribute("aria-current")).toBe("page");
     expect(within(nav).getByRole("link", { name: "Voltar ao app" }).getAttribute("href")).toBe("/");
     expect(screen.getByRole("link", { name: "Administração" }).getAttribute("href")).toBe("/admin");

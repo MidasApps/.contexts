@@ -1713,7 +1713,8 @@
       "action": "Acción",
       "actor": "Quién",
       "target": "Objetivo",
-      "outcome": "Resultado"
+      "outcome": "Resultado",
+      "organization": "Organización"
     },
     "outcomes": {
       "success": "Hecho",

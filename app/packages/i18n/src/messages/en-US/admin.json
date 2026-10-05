@@ -1166,5 +1166,13 @@
       "open": "Open Cloud Logging",
       "newTab": "(opens in a new tab)"
     }
+  },
+  "auditLog": {
+    "title": "Platform audit log",
+    "description": "What staff did on the platform: plans, budgets, flags, models, support access and refused attempts, newest first.",
+    "caption": "Platform audit log",
+    "platformWide": "Whole platform",
+    "organizationFilter": "Only the organization",
+    "clearOrganization": "See every organization"
   }
 }

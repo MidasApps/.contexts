@@ -573,6 +573,101 @@ paths:
       tags:
         - prompts
       x-auth: user
+  /v1/admin/audit-logs:
+    get:
+      operationId: admin.listAuditLogs
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      $ref: "#/components/schemas/audit.PlatformAuditLogEntry"
+                    type: array
+                    x-pii: personal
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the platform audit log, newest first (staff, platform.audit-log.read).
+      tags:
+        - admin
+      x-auth: user
   /v1/admin/connectors:
     get:
       operationId: admin.listConnectors
@@ -20302,6 +20397,127 @@ components:
       x-kind: entity
       x-permission: platform.audit-log.read
       x-pii: personal
+      x-relations: []
+      x-tenancyScope: platform
+    audit.PlatformAuditLogQuery:
+      additionalProperties: false
+      description: Filters and page of the platform audit log (platform.audit-log.read).
+      examples:
+        - action: PLAN_DELETED
+          limit: 50
+      properties:
+        action:
+          description: Only entries of this action.
+          enum:
+            - ORGANIZATION_CREATED
+            - ORGANIZATION_UPDATED
+            - ORGANIZATION_DELETED
+            - PROJECT_CREATED
+            - PROJECT_UPDATED
+            - PROJECT_DELETED
+            - UNIT_CREATED
+            - UNIT_UPDATED
+            - UNIT_MOVED
+            - UNIT_DELETED
+            - MODULE_SETTINGS_UPDATED
+            - MODULE_RECORD_CREATED
+            - MODULE_RECORD_UPDATED
+            - ROLE_CREATED
+            - ROLE_UPDATED
+            - ROLE_DELETED
+            - MEMBERSHIP_GRANTED
+            - MEMBERSHIP_UPDATED
+            - MEMBERSHIP_REVOKED
+            - MEMBER_REMOVED
+            - INVITATION_CREATED
+            - INVITATION_ACCEPTED
+            - INVITATION_REVOKED
+            - API_KEY_CREATED
+            - API_KEY_REVOKED
+            - DEVICE_ACTIVATION_CREATED
+            - DEVICE_ACTIVATED
+            - DEVICE_REVOKED
+            - ACTIVE_ORGANIZATION_CHANGED
+            - SESSION_REVOKED
+            - ALL_SESSIONS_REVOKED
+            - DESKTOP_SESSION_REUSE_DETECTED
+            - IMPERSONATION_STARTED
+            - IMPERSONATION_ENDED
+            - IMPERSONATION_EXPIRED
+            - IMPERSONATED_REQUEST_SERVED
+            - IMPERSONATED_WRITE_DENIED
+            - APPROVAL_REQUESTED
+            - APPROVAL_APPROVED
+            - APPROVAL_REJECTED
+            - APPROVAL_EXECUTED
+            - APPROVAL_FAILED
+            - APPROVAL_EXPIRED
+            - APPROVAL_CANCELLED
+            - PLATFORM_STAFF_GRANTED
+            - PLATFORM_ACCESS_DENIED
+            - AGENT_TOOL_EXECUTED
+            - SEMANTIC_QUERY_EXECUTED
+            - KNOWLEDGE_DOCUMENT_INDEXED
+            - KNOWLEDGE_DOCUMENT_INGESTED
+            - KNOWLEDGE_DOCUMENT_DELETED
+            - FILE_UPLOADED
+            - FILE_REJECTED
+            - CONNECTOR_CREATED
+            - CONNECTOR_UPDATED
+            - CONNECTOR_DELETED
+            - CONNECTOR_SECRET_SET
+            - AGENT_TOOL_CALL_APPROVED
+            - AGENT_TOOL_CALL_DECLINED
+            - CONVERSATION_DELETED
+            - VOICE_TRANSCRIBED
+            - VOICE_SYNTHESIZED
+            - BUDGET_THRESHOLD_REACHED
+            - FEATURE_FLAG_UPDATED
+            - PLAN_CREATED
+            - PLAN_UPDATED
+            - PLAN_DELETED
+            - MODEL_SETTINGS_UPDATED
+            - TENANT_BUDGET_UPDATED
+            - AGENT_SETTINGS_UPDATED
+            - PROMPT_VERSION_CREATED
+            - PROMPT_EVALUATED
+            - PROMPT_ACTIVATED
+            - PROMPT_ACTIVATION_FORCED
+            - WORKFLOW_RUN_CANCELED
+            - SCHEDULE_PAUSED
+            - SCHEDULE_RESUMED
+            - SCHEDULE_RUN_REQUESTED
+            - CUSTOM_AGENT_CREATED
+            - CUSTOM_AGENT_UPDATED
+            - CUSTOM_AGENT_DELETED
+            - CUSTOM_SKILL_CREATED
+            - CUSTOM_SKILL_UPDATED
+            - CUSTOM_SKILL_DELETED
+          type: string
+          x-pii: none
+        cursor:
+          description: Cursor returned by the previous page.
+          minLength: 1
+          type: string
+          x-pii: none
+        limit:
+          default: 20
+          description: Page size, 1-100 (default 20).
+          maximum: 100
+          minimum: 1
+          type: integer
+          x-pii: none
+        organizationId:
+          description: Only entries whose staff action touched this organization.
+          minLength: 1
+          type: string
+          x-pii: none
+      required:
+        - limit
+      type: object
+      x-kind: query
+      x-permission: platform.audit-log.read
+      x-pii: none
       x-relations: []
       x-tenancyScope: platform
     chat.ApprovalDiffProps:

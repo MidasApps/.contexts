@@ -1,6 +1,6 @@
 # Administração: operações
 
-Esta página cobre as áreas do grupo **Operação** da administração da plataforma: **Workflows**, **Flags** e **Conectores**. Nelas a equipe acompanha e cancela execuções de todas as organizações, pausa ou dispara agendamentos, liga e desliga funcionalidades por ambiente ou por organização e consulta os conectores que cada organização configurou. Para saber quem pode entrar na administração, veja [Administração da plataforma](/docs/admin).
+Esta página cobre as áreas do grupo **Operação** da administração da plataforma: **Workflows**, **Flags**, **Conectores** e **Auditoria** (esta explicada em [Administração da plataforma](/docs/admin)). Nelas a equipe acompanha e cancela execuções de todas as organizações, pausa ou dispara agendamentos, liga e desliga funcionalidades por ambiente ou por organização e consulta os conectores que cada organização configurou. Para saber quem pode entrar na administração, veja [Administração da plataforma](/docs/admin).
 
 ## Workflows
 

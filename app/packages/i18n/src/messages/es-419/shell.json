@@ -86,7 +86,8 @@
       "plans": "Planes",
       "evals": "Evaluaciones",
       "logs": "Logs",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "audit": "Auditoría"
     },
     "chat": "Asistente",
     "groups": {

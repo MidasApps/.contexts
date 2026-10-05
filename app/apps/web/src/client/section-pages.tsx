@@ -9,6 +9,7 @@ import {
 } from "@core/client/shared/lib/router";
 import { AdminAgentPromptsView } from "@core/client/views/admin-agent-prompts";
 import { AdminAgentsView } from "@core/client/views/admin-agents";
+import { AdminAuditLogView } from "@core/client/views/admin-audit-log";
 import { AdminConnectorsView } from "@core/client/views/admin-connectors";
 import { AdminCostsView } from "@core/client/views/admin-costs";
 import { AdminEvalsView } from "@core/client/views/admin-evals";
@@ -125,6 +126,7 @@ const ADMIN_AREA_VIEWS: Readonly<Record<string, (segments: readonly string[]) =>
   costs: only(AdminCostsView),
   workflows: only(AdminWorkflowsView),
   flags: only(AdminFlagsView),
+  audit: only(AdminAuditLogView),
 };
 
 /** The view of an `/admin` path: the overview at the root, the area's view below it. */

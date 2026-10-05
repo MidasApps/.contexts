@@ -1,6 +1,6 @@
 "use client";
 
-import { type AuditAction, listAuditLogsEndpoint } from "@core/contracts";
+import { type AuditAction, listAuditLogsEndpoint, listPlatformAuditLogsEndpoint } from "@core/contracts";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -45,4 +45,33 @@ export const useAuditLog = (organizationId: string | undefined, filters: { actio
     ...auditLogQuery(callEndpoint, organizationId ?? "", filters),
     enabled: signedIn && organizationId !== undefined && organizationId !== "",
   });
+};
+
+/** Platform log filters: one action and/or one touched organization. */
+export type PlatformAuditLogFilters = { action?: AuditAction | undefined; organizationId?: string | undefined };
+
+/** `GET /v1/admin/audit-logs` (staff, platform.audit-log.read), newest first; merged pages. */
+export const platformAuditLogQuery = (callEndpoint: CallEndpoint, filters: PlatformAuditLogFilters = {}) =>
+  cursorListQuery({
+    queryKey: [
+      "admin",
+      "audit-log",
+      { action: filters.action ?? null, organizationId: filters.organizationId ?? null },
+    ],
+    fetchPage: async (cursor, signal) =>
+      callEndpoint(listPlatformAuditLogsEndpoint, {
+        query: {
+          ...pageQuery(cursor, AUDIT_LOG_PAGE_LIMIT),
+          ...(filters.action === undefined ? {} : { action: filters.action }),
+          ...(filters.organizationId === undefined ? {} : { organizationId: filters.organizationId }),
+        },
+        signal,
+      }),
+  });
+
+/** The platform audit log; `enabled: false` while the viewer's staff permissions are unknown or missing. */
+export const usePlatformAuditLog = (filters: PlatformAuditLogFilters, options: { enabled: boolean }) => {
+  const callEndpoint = useCallEndpoint();
+  const signedIn = useIsSignedIn();
+  return useInfiniteQuery({ ...platformAuditLogQuery(callEndpoint, filters), enabled: signedIn && options.enabled });
 };

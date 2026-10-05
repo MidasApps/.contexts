@@ -4,13 +4,18 @@ import type { Firestore } from "firebase-admin/firestore";
 import { type Clock, systemClock } from "../shared/clock/clock.ts";
 import { createFirestoreAuditLogReader } from "./adapters/driven/firestore-audit-log-reader.ts";
 import { createFirestoreAuditLogWriter } from "./adapters/driven/firestore-audit-log-writer.ts";
+import type { AuditLogReader } from "./application/ports/driven/audit-log-reader.ts";
 import { type ListAuditLogs, makeListAuditLogs } from "./application/use-cases/list-audit-logs.ts";
 import { type AuditWriter, makeRecordAudit } from "./application/use-cases/record-audit.ts";
 
 export type AuditServices = { readonly audit: AuditWriter };
 
-/** Read side of the tenant audit log (the SP5 audit viewer). */
-export type AuditLogServices = { readonly listAuditLogs: ListAuditLogs };
+/** Read side of the audit logs: the tenant one (the SP5 audit viewer) and the platform one (staff). */
+export type AuditLogServices = {
+  readonly listAuditLogs: ListAuditLogs;
+  /** Unauthorized read: the `/v1/admin/audit-logs` handler requires `platform.audit-log.read` first. */
+  readonly listPlatformAuditLogs: AuditLogReader["listPlatform"];
+};
 
 /** Wires the audit writer (SP1 Task 7). */
 export const createAuditServices = (args: { firestore: Firestore; clock?: Clock }): AuditServices => ({
@@ -21,6 +26,7 @@ export const createAuditServices = (args: { firestore: Firestore; clock?: Clock 
 });
 
 /** Wires the tenant audit log listing over Firestore (SP1 Task 18). */
-export const createFirestoreAuditLogServices = (args: { firestore: Firestore }): AuditLogServices => ({
-  listAuditLogs: makeListAuditLogs({ reader: createFirestoreAuditLogReader({ firestore: args.firestore }) }),
-});
+export const createFirestoreAuditLogServices = (args: { firestore: Firestore }): AuditLogServices => {
+  const reader = createFirestoreAuditLogReader({ firestore: args.firestore });
+  return { listAuditLogs: makeListAuditLogs({ reader }), listPlatformAuditLogs: reader.listPlatform };
+};

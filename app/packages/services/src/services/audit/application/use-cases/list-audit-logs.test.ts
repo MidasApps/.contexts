@@ -1,4 +1,4 @@
-import { OrganizationIdSchema, type Principal } from "@core/contracts";
+import { OrganizationIdSchema, type Principal, TenantIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { createInMemoryAccessStore } from "#/services/access/adapters/driven/in-memory-access-store.ts";
 import { createAccessCore } from "#/services/access/composition.ts";
@@ -98,6 +98,11 @@ describe("listAuditLogs", () => {
   });
 });
 
+const auditLogServicesOf = (writer: ReturnType<typeof createInMemoryAuditLogWriter>) => {
+  const reader = createInMemoryAuditLogReader({ writer });
+  return { listAuditLogs: makeListAuditLogs({ reader }), listPlatformAuditLogs: reader.listPlatform };
+};
+
 describe("GET /v1/organizations/{organizationId}/audit-logs", () => {
   it("answers 400 when occurredAfter is not before occurredBefore, and 403 to a member", async () => {
     const { pipeline } = makeInMemoryPipeline({
@@ -110,7 +115,7 @@ describe("GET /v1/organizations/{organizationId}/audit-logs", () => {
     const writer = createInMemoryAuditLogWriter();
     const routes = buildAuditLogsRoutes({
       pipeline,
-      auditLogs: { listAuditLogs: makeListAuditLogs({ reader: createInMemoryAuditLogReader({ writer }) }) },
+      auditLogs: auditLogServicesOf(writer),
     });
     const window = "occurredAfter=2026-09-30T12:00:00.000Z&occurredBefore=2026-09-30T11:00:00.000Z";
     const invalid = await callRoute(routes, "audit.listAuditLogs", `/v1/organizations/org-a/audit-logs?${window}`, {
@@ -127,5 +132,45 @@ describe("GET /v1/organizations/{organizationId}/audit-logs", () => {
     expect(
       (await callRoute(routes, "audit.listAuditLogs", "/v1/organizations/org-a/audit-logs", { as: "member" })).status,
     ).toBe(403);
+  });
+});
+
+describe("GET /v1/admin/audit-logs", () => {
+  it("lists the platform log to staff (support too), newest first and filtered, and refuses others", async () => {
+    const { pipeline } = makeInMemoryPipeline({
+      now: NOW,
+      members: [{ uid: "admin", tenantId: "org-a", role: "admin" }],
+      staff: [
+        { uid: "sam", role: "platform-admin", mfa: true },
+        { uid: "sue", role: "platform-support", mfa: true },
+      ],
+    });
+    const writer = createInMemoryAuditLogWriter();
+    const entry = (action: "PLAN_CREATED" | "TENANT_BUDGET_UPDATED", minute: number, targetTenantId?: string) =>
+      writer.append({
+        log: "platform",
+        entry: {
+          occurredAt: `2026-09-30T10:${String(minute).padStart(2, "0")}:00.000Z`,
+          action,
+          actor: { type: "user", id: "sam" },
+          target: { type: "plan", id: "p1" },
+          outcome: "success",
+          requestId: `req-${String(minute)}`,
+          ...(targetTenantId === undefined ? {} : { targetTenantId: TenantIdSchema.parse(targetTenantId) }),
+        },
+      });
+    await entry("PLAN_CREATED", 1);
+    await entry("TENANT_BUDGET_UPDATED", 2, "org-a");
+    await entry("TENANT_BUDGET_UPDATED", 3, "org-b");
+    const routes = buildAuditLogsRoutes({ pipeline, auditLogs: auditLogServicesOf(writer) });
+    const list = async (query: string, as: string) =>
+      callRoute(routes, "admin.listAuditLogs", `/v1/admin/audit-logs${query}`, { as });
+    const body = async (response: Response) =>
+      ((await response.json()) as { data: { requestId: string }[] }).data.map((item) => item.requestId);
+
+    expect(await body(await list("", "sam"))).toEqual(["req-3", "req-2", "req-1"]);
+    expect(await body(await list("?action=TENANT_BUDGET_UPDATED&organizationId=org-a", "sam"))).toEqual(["req-2"]);
+    expect((await list("", "sue")).status).toBe(200);
+    expect((await list("", "admin")).status).toBe(403);
   });
 });

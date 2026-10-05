@@ -98,7 +98,16 @@ As ações da equipe que alteram algo ficam no registro de auditoria da platafor
 | Iniciar, encerrar ou deixar expirar um acesso de suporte | `IMPERSONATION_STARTED`, `IMPERSONATION_ENDED`, `IMPERSONATION_EXPIRED` |
 | Cada requisição feita durante o acesso de suporte | `IMPERSONATED_REQUEST_SERVED` ou, se for uma tentativa de alteração recusada, `IMPERSONATED_WRITE_DENIED` |
 
-A administração não tem uma área para consultar o registro de auditoria da plataforma.
+### Consultar a auditoria da plataforma
+
+A área **Auditoria** (`/admin/audit`, grupo **Operação**) lista esses registros, do mais recente ao mais antigo. Os dois papéis da equipe (`platform.audit-log.read`) podem consultá-la.
+
+1. Em **Administração**, abra **Auditoria**.
+2. A tabela mostra **Quando**, **Ação**, **Quem**, **Alvo**, **Organização** (ou **Toda a plataforma**) e **Resultado**. Tentativas de acesso recusadas aparecem como **Acesso à plataforma negado**, com o resultado **Negado**.
+3. Para ver só um tipo de ação, use o filtro **Todas as ações**.
+4. Para ver só o que tocou uma organização, abra o endereço com `?organizationId={organização}`, ou clique no identificador da organização na tabela para abrir a página dela. **Ver todas as organizações** tira esse filtro.
+
+As ações dentro de cada organização (membros, papéis, projetos) ficam na auditoria da própria organização. Veja [Auditoria](/docs/audit-log).
 
 ## Acesso de suporte como outro usuário
 
