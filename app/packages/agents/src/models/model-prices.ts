@@ -9,8 +9,12 @@
  * (deprecated, decision 0022 amendment) is not listed, so it has no entry.
  * Cached input tokens are priced as regular input (overestimates slightly; never
  * underestimates).
+ *
+ * Source (2026-10-05): https://developers.openai.com/api/docs/pricing, "Standard" tier,
+ * short context (up to 272K input tokens). A call above that is billed at the long-context
+ * rate (about twice the input price), so its cost here is an underestimate.
  */
-export const PRICES_VERIFIED_AT = "2026-09-29";
+export const PRICES_VERIFIED_AT = "2026-10-05";
 
 export type ModelPrice = {
   readonly inputMicroUsdPerMTok: number;
@@ -21,6 +25,10 @@ export const MODEL_PRICES: Readonly<Record<string, ModelPrice>> = {
   "google/gemini-3.5-flash": { inputMicroUsdPerMTok: 1_500_000, outputMicroUsdPerMTok: 9_000_000 },
   "google/gemini-3.5-flash-lite": { inputMicroUsdPerMTok: 300_000, outputMicroUsdPerMTok: 2_500_000 },
   "google/gemini-embedding-2": { inputMicroUsdPerMTok: 200_000, outputMicroUsdPerMTok: 0 },
+  "openai/gpt-6-astra": { inputMicroUsdPerMTok: 10_000_000, outputMicroUsdPerMTok: 50_000_000 },
+  "openai/gpt-6-sol": { inputMicroUsdPerMTok: 2_000_000, outputMicroUsdPerMTok: 10_000_000 },
+  "openai/gpt-6-luna": { inputMicroUsdPerMTok: 100_000, outputMicroUsdPerMTok: 500_000 },
+  "openai/text-embedding-3-small": { inputMicroUsdPerMTok: 20_000, outputMicroUsdPerMTok: 0 },
 };
 
 /**
