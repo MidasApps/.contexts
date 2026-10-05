@@ -111,13 +111,18 @@ const REQUIRED = [
 ];
 
 /**
- * Cross-tenant indexes of server-only platform jobs (decisions 0030 A3 and 0036: the approval
- * expiry and interrupted-execution sweeps). No client query can use them: Rules deny the
+ * Cross-tenant indexes of server-only platform reads (decisions 0030 A3 and 0036: the approval
+ * expiry and interrupted-execution sweeps; decision 0075: the staff audit log). No client query can use them: Rules deny the
  * collection, and only the sweeps run these queries.
  */
 const PLATFORM_SWEEP_INDEXES: readonly string[] = [
   signature("approval-requests", ["status:ASCENDING", "expiresAt:ASCENDING"]),
   signature("approval-requests", ["status:ASCENDING", "updatedAt:ASCENDING"]),
+  // The platform audit log (decision 0075): a platform-wide, server-only collection read by staff
+  // through `/v1/admin/audit-logs`; it has no tenant to start with.
+  signature("platform-audit-logs", ["action:ASCENDING", "occurredAt:DESCENDING"]),
+  signature("platform-audit-logs", ["targetTenantId:ASCENDING", "occurredAt:DESCENDING"]),
+  signature("platform-audit-logs", ["action:ASCENDING", "targetTenantId:ASCENDING", "occurredAt:DESCENDING"]),
 ];
 
 const TTL_COLLECTIONS = [

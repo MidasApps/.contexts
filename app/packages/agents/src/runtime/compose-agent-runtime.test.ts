@@ -133,6 +133,8 @@ describe("composeAgentRuntime", () => {
       "GET /console/datasets",
       "POST /console/feedback-items",
       "POST /console/datasets",
+      "PATCH /console/datasets/:datasetId",
+      "DELETE /console/datasets/:datasetId",
       "GET /console/datasets/:datasetId/items",
       "POST /console/datasets/:datasetId/items",
       "DELETE /console/datasets/:datasetId/items/:itemId",
