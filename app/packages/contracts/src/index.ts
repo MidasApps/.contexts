@@ -946,6 +946,17 @@ export {
   AdminOverviewSchema,
 } from "./contracts/platform/admin-overview.schema.ts";
 export {
+  type SetPlatformStaffRoleInput,
+  SetPlatformStaffRoleInputContract,
+  SetPlatformStaffRoleInputSchema,
+} from "./contracts/platform/admin-staff.schema.ts";
+export {
+  ADMIN_STAFF_ENDPOINTS,
+  adminListStaffEndpoint,
+  adminRevokeStaffEndpoint,
+  adminSetStaffRoleEndpoint,
+} from "./contracts/platform/admin-staff-endpoints.ts";
+export {
   ADMIN_USAGE_MAX_DAYS,
   type AdminUsage,
   AdminUsageContract,

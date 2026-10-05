@@ -33,6 +33,7 @@ export {
   buildAdminImpersonationRoutes,
   IMPERSONATION_ADMIN_PERMISSIONS,
 } from "./adapters/driving/admin-impersonation-routes.ts";
+export { type AdminStaffRouteDeps, buildAdminStaffRoutes } from "./adapters/driving/admin-staff-routes.ts";
 export {
   type CookieJar,
   makeSessionActions,

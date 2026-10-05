@@ -1174,5 +1174,67 @@
     "platformWide": "Toda la plataforma",
     "organizationFilter": "Solo de la organización",
     "clearOrganization": "Ver todas las organizaciones"
+  },
+  "team": {
+    "title": "Equipo de la plataforma",
+    "description": "Quién opera la plataforma y con qué rol. Todos necesitan la verificación en dos pasos para abrir la administración.",
+    "loading": "Cargando el equipo…",
+    "caption": "Equipo de la plataforma",
+    "emptyTitle": "Aún no hay nadie en el equipo",
+    "you": "Tú",
+    "active": "Activo",
+    "revoked": "Revocado",
+    "changeRole": "Cambiar rol",
+    "changeRoleNamed": "Cambiar el rol de {name}",
+    "restore": "Devolver acceso",
+    "restoreNamed": "Devolver el acceso de {name}",
+    "revokeAction": "Revocar",
+    "revokeNamed": "Revocar el acceso de {name}",
+    "columns": {
+      "person": "Persona",
+      "role": "Rol",
+      "status": "Estado",
+      "updatedAt": "Modificado",
+      "actions": "Acciones"
+    },
+    "roles": {
+      "legend": "Rol en el equipo",
+      "platform-admin": {
+        "name": "Administrador de la plataforma",
+        "description": "Puede todo en la administración: planes, organizaciones, modelos, funciones y el propio equipo."
+      },
+      "platform-support": {
+        "name": "Soporte de la plataforma",
+        "description": "Consulta organizaciones, usuarios, trazas, logs y costos, y hace el acceso de soporte. No cambia configuraciones."
+      }
+    },
+    "add": {
+      "action": "Agregar al equipo",
+      "title": "Agregar al equipo",
+      "description": "La persona ya debe tener cuenta en la app. Verá la administración después de activar la verificación en dos pasos.",
+      "email": "Correo de la cuenta",
+      "emailHint": "El correo exacto con el que la persona entra a la app.",
+      "errors": {
+        "required": "Escribe el correo de la persona.",
+        "invalid": "Escribe un correo válido, por ejemplo nombre@empresa.com.",
+        "notFound": "Ninguna cuenta usa este correo. La persona debe crear la cuenta antes."
+      },
+      "cancel": "Cancelar",
+      "submit": "Agregar",
+      "done": "{email} ahora forma parte del equipo."
+    },
+    "role": {
+      "title": "Rol de {name}",
+      "description": "El cambio aplica de inmediato. Si la persona estaba revocada, recupera el acceso.",
+      "cancel": "Cancelar",
+      "submit": "Guardar rol",
+      "done": "Rol de {name} actualizado."
+    },
+    "revoke": {
+      "title": "¿Revocar el acceso de {name}?",
+      "description": "La persona pierde de inmediato los permisos de la plataforma, y los accesos de soporte que abrió se cierran. Su cuenta en la app sigue existiendo.",
+      "confirm": "Revocar acceso",
+      "done": "Acceso de {name} revocado."
+    }
   }
 }

@@ -78,6 +78,7 @@ describe("core navigation", () => {
       ["core.admin.flags", "platform.flag.manage"],
       ["core.admin.connectors", "platform.connector.read"],
       ["core.admin.audit", "platform.audit-log.read"],
+      ["core.admin.team", "platform.staff.manage"],
     ]);
     // Grouped by what staff come to do (decision 0055).
     expect(registry.visibleItems("admin", all).map((entry) => entry.group)).toEqual([
@@ -90,6 +91,7 @@ describe("core navigation", () => {
       "ai",
       "ai",
       "ai",
+      "operations",
       "operations",
       "operations",
       "operations",

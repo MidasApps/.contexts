@@ -14,7 +14,6 @@ import { EvalExperimentSummaryContract } from "./observability/eval-experiment-s
 import { TraceDetailContract } from "./observability/trace-detail.schema.ts";
 import { TraceSummaryContract } from "./observability/trace-summary.schema.ts";
 import { AdminAgentContract } from "./platform/admin-agent.schema.ts";
-import { ModelSettingsContract, UpdateModelSettingsInputContract } from "./platform/model-settings.schema.ts";
 import { AdminImpersonationSessionContract } from "./platform/admin-impersonation.schema.ts";
 import {
   AdminScheduleContract,
@@ -22,6 +21,7 @@ import {
   LogLineContract,
 } from "./platform/admin-operations.schema.ts";
 import { AdminOverviewContract } from "./platform/admin-overview.schema.ts";
+import { SetPlatformStaffRoleInputContract } from "./platform/admin-staff.schema.ts";
 import { AdminUsageContract } from "./platform/admin-usage.schema.ts";
 import { AdminUserSummaryContract } from "./platform/admin-user.schema.ts";
 import {
@@ -30,6 +30,7 @@ import {
   SetFeatureFlagValueInputContract,
   TenantFlagValueInputContract,
 } from "./platform/feature-flag.schema.ts";
+import { ModelSettingsContract, UpdateModelSettingsInputContract } from "./platform/model-settings.schema.ts";
 import {
   OrganizationAdminDetailContract,
   OrganizationAdminSummaryContract,
@@ -100,6 +101,7 @@ export const SP5_CONTRACTS: readonly ContractDefinition[] = [
   LogLineContract,
   AdminUserSummaryContract,
   AdminImpersonationSessionContract,
+  SetPlatformStaffRoleInputContract,
   AdminAgentContract,
   AdminUsageContract,
 ];

@@ -1174,5 +1174,67 @@
     "platformWide": "Toda a plataforma",
     "organizationFilter": "Só da organização",
     "clearOrganization": "Ver todas as organizações"
+  },
+  "team": {
+    "title": "Equipe da plataforma",
+    "description": "Quem opera a plataforma e com qual papel. Todos precisam da verificação em duas etapas para abrir a administração.",
+    "loading": "Carregando a equipe…",
+    "caption": "Equipe da plataforma",
+    "emptyTitle": "Ninguém na equipe ainda",
+    "you": "Você",
+    "active": "Ativo",
+    "revoked": "Revogado",
+    "changeRole": "Mudar papel",
+    "changeRoleNamed": "Mudar o papel de {name}",
+    "restore": "Devolver acesso",
+    "restoreNamed": "Devolver o acesso de {name}",
+    "revokeAction": "Revogar",
+    "revokeNamed": "Revogar o acesso de {name}",
+    "columns": {
+      "person": "Pessoa",
+      "role": "Papel",
+      "status": "Situação",
+      "updatedAt": "Alterado em",
+      "actions": "Ações"
+    },
+    "roles": {
+      "legend": "Papel na equipe",
+      "platform-admin": {
+        "name": "Administrador da plataforma",
+        "description": "Pode tudo na administração: planos, organizações, modelos, recursos e a própria equipe."
+      },
+      "platform-support": {
+        "name": "Suporte da plataforma",
+        "description": "Consulta organizações, usuários, rastros, logs e custos, e faz o acesso de suporte. Não altera configurações."
+      }
+    },
+    "add": {
+      "action": "Adicionar à equipe",
+      "title": "Adicionar à equipe",
+      "description": "A pessoa precisa já ter conta no app. Ela passa a ver a administração depois de ativar a verificação em duas etapas.",
+      "email": "E-mail da conta",
+      "emailHint": "O e-mail exato com que a pessoa entra no app.",
+      "errors": {
+        "required": "Digite o e-mail da pessoa.",
+        "invalid": "Digite um e-mail válido, por exemplo nome@empresa.com.",
+        "notFound": "Nenhuma conta usa este e-mail. A pessoa precisa criar a conta antes."
+      },
+      "cancel": "Cancelar",
+      "submit": "Adicionar",
+      "done": "{email} agora faz parte da equipe."
+    },
+    "role": {
+      "title": "Papel de {name}",
+      "description": "A mudança vale na hora. Se a pessoa estava revogada, ela volta a ter acesso.",
+      "cancel": "Cancelar",
+      "submit": "Salvar papel",
+      "done": "Papel de {name} atualizado."
+    },
+    "revoke": {
+      "title": "Revogar o acesso de {name}?",
+      "description": "A pessoa perde na hora as permissões da plataforma, e os acessos de suporte abertos por ela são encerrados. A conta dela no app continua existindo.",
+      "confirm": "Revogar acesso",
+      "done": "Acesso de {name} revogado."
+    }
   }
 }

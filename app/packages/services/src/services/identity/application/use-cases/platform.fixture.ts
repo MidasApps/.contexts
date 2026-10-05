@@ -45,6 +45,8 @@ export const buildPlatformWorld = async () => {
   const auth = createFakeFirebaseAuth();
   const platform = createPlatformServices({
     staff,
+    // Every uid the tests name is a user, but "ghost".
+    users: { exists: (uid) => Promise.resolve(uid !== "ghost") },
     impersonations,
     customTokens: auth.customTokens,
     syncClaims: world.deps.syncClaims,

@@ -37,5 +37,6 @@
   "BUDGET_EXCEEDED": "The organization's AI budget ran out. Contact an administrator.",
   "PLAN_IN_USE": "Organizations are still on this plan. Move them to another plan before deleting it.",
   "DATASET_IN_USE": "Experiments already ran on this dataset. It is kept so their results still make sense.",
-  "DATASET_RESERVED": "The feedback dataset receives the answers rated in the chat; it cannot be renamed or deleted, and no other dataset can take its name."
+  "DATASET_RESERVED": "The feedback dataset receives the answers rated in the chat; it cannot be renamed or deleted, and no other dataset can take its name.",
+  "STAFF_SELF_CHANGE": "You cannot change or revoke your own staff access. Ask another platform admin."
 }

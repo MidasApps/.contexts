@@ -2791,6 +2791,210 @@ paths:
       tags:
         - admin
       x-auth: user
+  /v1/admin/staff:
+    get:
+      operationId: admin.listStaff
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/identity.PlatformStaff"
+                    type: array
+                required:
+                  - data
+                type: object
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the platform staff, active and revoked, with their roles (staff, platform.staff.manage).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/staff/{userId}:
+    delete:
+      operationId: admin.revokeStaff
+      parameters:
+        - description: Uid of the user.
+          in: path
+          name: userId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: personal
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: STAFF_SELF_CHANGE
+          x-error-codes:
+            - STAFF_SELF_CHANGE
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Revokes a staff member and ends their open support sessions; never oneself (staff, platform.staff.manage, audited PLATFORM_STAFF_REVOKED).
+      tags:
+        - admin
+      x-auth: user
+    put:
+      operationId: admin.setStaffRole
+      parameters:
+        - description: Uid of the user.
+          in: path
+          name: userId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: personal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/platform.SetPlatformStaffRoleInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/identity.PlatformStaff"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: STAFF_SELF_CHANGE
+          x-error-codes:
+            - STAFF_SELF_CHANGE
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Makes a user staff with a role, or changes it; never one's own (staff, platform.staff.manage, audited PLATFORM_STAFF_GRANTED).
+      tags:
+        - admin
+      x-auth: user
   /v1/admin/traces:
     get:
       operationId: traces.adminList
@@ -19845,6 +20049,7 @@ components:
             - APPROVAL_EXPIRED
             - APPROVAL_CANCELLED
             - PLATFORM_STAFF_GRANTED
+            - PLATFORM_STAFF_REVOKED
             - PLATFORM_ACCESS_DENIED
             - AGENT_TOOL_EXECUTED
             - SEMANTIC_QUERY_EXECUTED
@@ -20179,6 +20384,7 @@ components:
             - APPROVAL_EXPIRED
             - APPROVAL_CANCELLED
             - PLATFORM_STAFF_GRANTED
+            - PLATFORM_STAFF_REVOKED
             - PLATFORM_ACCESS_DENIED
             - AGENT_TOOL_EXECUTED
             - SEMANTIC_QUERY_EXECUTED
@@ -20326,6 +20532,7 @@ components:
             - APPROVAL_EXPIRED
             - APPROVAL_CANCELLED
             - PLATFORM_STAFF_GRANTED
+            - PLATFORM_STAFF_REVOKED
             - PLATFORM_ACCESS_DENIED
             - AGENT_TOOL_EXECUTED
             - SEMANTIC_QUERY_EXECUTED
@@ -20655,6 +20862,7 @@ components:
             - APPROVAL_EXPIRED
             - APPROVAL_CANCELLED
             - PLATFORM_STAFF_GRANTED
+            - PLATFORM_STAFF_REVOKED
             - PLATFORM_ACCESS_DENIED
             - AGENT_TOOL_EXECUTED
             - SEMANTIC_QUERY_EXECUTED
@@ -27686,6 +27894,27 @@ components:
       type: object
       x-kind: command
       x-permission: platform.flag.manage
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: platform
+    platform.SetPlatformStaffRoleInput:
+      additionalProperties: false
+      description: Grants a staff role to a user, or changes it; staff still need MFA to use it.
+      examples:
+        - role: platform-support
+      properties:
+        role:
+          description: "`platform-admin` (every platform permission) or `platform-support` (reads)."
+          enum:
+            - platform-admin
+            - platform-support
+          type: string
+          x-pii: none
+      required:
+        - role
+      type: object
+      x-kind: command
+      x-permission: platform.staff.manage
       x-pii: none
       x-relations: []
       x-tenancyScope: platform

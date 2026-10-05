@@ -21,6 +21,7 @@ export const createInMemoryPlatformStaffRepository = (
       rows.set(staff.uid, staff);
       args.onWrite?.(staff);
     },
+    list: () => Promise.resolve([...rows.values()]),
     rowOf: (uid) => rows.get(uid),
   };
 };

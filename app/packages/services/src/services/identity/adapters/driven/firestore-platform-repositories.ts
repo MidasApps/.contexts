@@ -36,6 +36,7 @@ export const createFirestorePlatformStaffRepository = (deps: { firestore: Firest
         },
         { merge: true },
       ),
+    list: async () => (await raw().withConverter(staffConverter).get()).docs.map((doc) => doc.data()),
   };
 };
 

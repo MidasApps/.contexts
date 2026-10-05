@@ -50,6 +50,8 @@ export const CORE_ERROR_CODES = [
   // 409/422: a dataset experiments ran on, or the organization's feedback dataset (decision 0075).
   "DATASET_IN_USE",
   "DATASET_RESERVED",
+  // 422: staff never change or revoke their own staff role (decision 0075).
+  "STAFF_SELF_CHANGE",
 ] as const;
 
 export const CoreErrorCodeSchema = z.enum(CORE_ERROR_CODES);

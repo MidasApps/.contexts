@@ -1828,7 +1828,8 @@
       "CUSTOM_SKILL_CREATED": "Skill created",
       "CUSTOM_SKILL_UPDATED": "Skill updated",
       "CUSTOM_SKILL_DELETED": "Skill deleted",
-      "PLAN_DELETED": "Plan deleted"
+      "PLAN_DELETED": "Plan deleted",
+      "PLATFORM_STAFF_REVOKED": "Platform staff access revoked"
     },
     "targetTypes": {
       "organization": "Organization",

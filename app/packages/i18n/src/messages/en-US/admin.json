@@ -1174,5 +1174,67 @@
     "platformWide": "Whole platform",
     "organizationFilter": "Only the organization",
     "clearOrganization": "See every organization"
+  },
+  "team": {
+    "title": "Platform team",
+    "description": "Who runs the platform and with which role. Everyone needs two-step verification to open the console.",
+    "loading": "Loading the team…",
+    "caption": "Platform team",
+    "emptyTitle": "Nobody on the team yet",
+    "you": "You",
+    "active": "Active",
+    "revoked": "Revoked",
+    "changeRole": "Change role",
+    "changeRoleNamed": "Change the role of {name}",
+    "restore": "Give access back",
+    "restoreNamed": "Give {name} access back",
+    "revokeAction": "Revoke",
+    "revokeNamed": "Revoke the access of {name}",
+    "columns": {
+      "person": "Person",
+      "role": "Role",
+      "status": "Status",
+      "updatedAt": "Changed",
+      "actions": "Actions"
+    },
+    "roles": {
+      "legend": "Team role",
+      "platform-admin": {
+        "name": "Platform admin",
+        "description": "Can do everything in the console: plans, organizations, models, flags and the team itself."
+      },
+      "platform-support": {
+        "name": "Platform support",
+        "description": "Reads organizations, users, traces, logs and costs, and does support access. Changes no settings."
+      }
+    },
+    "add": {
+      "action": "Add to the team",
+      "title": "Add to the team",
+      "description": "The person needs an account in the app already. They see the console once they turn on two-step verification.",
+      "email": "Account email",
+      "emailHint": "The exact email the person signs in with.",
+      "errors": {
+        "required": "Type the person's email.",
+        "invalid": "Type a valid email, for example name@company.com.",
+        "notFound": "No account uses this email. The person needs to create one first."
+      },
+      "cancel": "Cancel",
+      "submit": "Add",
+      "done": "{email} is now on the team."
+    },
+    "role": {
+      "title": "Role of {name}",
+      "description": "The change applies at once. A revoked person gets access back.",
+      "cancel": "Cancel",
+      "submit": "Save role",
+      "done": "Role of {name} updated."
+    },
+    "revoke": {
+      "title": "Revoke the access of {name}?",
+      "description": "The person loses the platform permissions at once, and the support sessions they opened end. Their app account stays.",
+      "confirm": "Revoke access",
+      "done": "Access of {name} revoked."
+    }
   }
 }

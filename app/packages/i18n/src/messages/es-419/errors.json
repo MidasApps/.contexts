@@ -37,5 +37,6 @@
   "BUDGET_EXCEEDED": "Se agotó el presupuesto de IA de la organización. Habla con un administrador.",
   "PLAN_IN_USE": "Este plan todavía está en uso por organizaciones. Cambia su plan antes de eliminarlo.",
   "DATASET_IN_USE": "Ya se ejecutaron evaluaciones con este conjunto. Se conserva para que sus resultados sigan teniendo sentido.",
-  "DATASET_RESERVED": "El conjunto feedback recibe las respuestas evaluadas en el chat; no se puede renombrar ni eliminar, y ningún otro conjunto puede usar su nombre."
+  "DATASET_RESERVED": "El conjunto feedback recibe las respuestas evaluadas en el chat; no se puede renombrar ni eliminar, y ningún otro conjunto puede usar su nombre.",
+  "STAFF_SELF_CHANGE": "No puedes cambiar ni revocar tu propio acceso de equipo. Pídeselo a otro administrador de la plataforma."
 }

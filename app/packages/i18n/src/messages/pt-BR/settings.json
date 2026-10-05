@@ -1828,7 +1828,8 @@
       "CUSTOM_SKILL_CREATED": "Habilidade criada",
       "CUSTOM_SKILL_UPDATED": "Habilidade alterada",
       "CUSTOM_SKILL_DELETED": "Habilidade excluída",
-      "PLAN_DELETED": "Plano excluído"
+      "PLAN_DELETED": "Plano excluído",
+      "PLATFORM_STAFF_REVOKED": "Acesso de equipe da plataforma revogado"
     },
     "targetTypes": {
       "organization": "Organização",

@@ -10,6 +10,8 @@ import type { PlatformStaffRepository } from "./ports/driven/platform-staff-repo
 /** Dependencies of the platform staff and impersonation use cases (SP1 Task 16). */
 export type PlatformDeps = {
   readonly staff: PlatformStaffRepository;
+  /** Whether a user account exists (`users/{uid}`): staff are granted to existing users only. */
+  readonly users: { readonly exists: (uid: string) => Promise<boolean> };
   readonly impersonations: ImpersonationSessionRepository;
   readonly customTokens: CustomTokenIssuer;
   /** Staff claims carry `platformRole` (SP1 spec §5.4). */

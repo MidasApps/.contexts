@@ -14,6 +14,19 @@ Se faltar qualquer uma delas, o endereço `/admin` responde como se não existis
 
 A administração existe só na versão web. O app de desktop não tem `/admin`.
 
+### Gerenciar a equipe
+
+Um `platform-admin` gerencia a equipe em **Administração → Equipe** (`/admin/team`, permissão `platform.staff.manage`).
+
+- **Adicionar:** clique em **Adicionar à equipe**, digite o **E-mail da conta** (a pessoa precisa já ter conta no app), escolha o **Papel na equipe** e clique em **Adicionar**.
+- **Mudar papel:** na linha da pessoa, clique em **Mudar papel**, escolha o papel e clique em **Salvar papel**.
+- **Revogar:** clique em **Revogar** e confirme em **Revogar acesso**. A pessoa perde as permissões da plataforma na hora e os acessos de suporte abertos por ela são encerrados. A conta dela no app continua existindo.
+- **Devolver acesso:** quem foi revogado continua na lista, como **Revogado**. Clique em **Devolver acesso** e escolha o papel.
+
+Ninguém altera nem revoga o próprio acesso; a sua linha aparece com o selo **Você**. Assim a plataforma nunca fica sem o administrador que fez a mudança. As mudanças ficam na auditoria da plataforma (`PLATFORM_STAFF_GRANTED` e `PLATFORM_STAFF_REVOKED`).
+
+Os dois papéis são fixos: não é possível criar outros papéis de equipe nem mudar o que cada um permite. A primeira pessoa da equipe de uma instalação nova ainda é cadastrada pelo comando `pnpm platform:grant-staff`, feito por quem cuida da infraestrutura.
+
 ### Verificação em duas etapas
 
 Toda chamada da administração exige uma sessão confirmada com o segundo fator. Se a página abrir, mas as chamadas da administração forem recusadas por falta do segundo fator, cada área mostra o aviso **Confirme a verificação em duas etapas**, com o texto "A administração só responde a sessões confirmadas com o segundo fator. Saia e entre de novo informando o código." e o botão **Abrir segurança da conta**.
@@ -43,6 +56,8 @@ Há dois papéis na equipe da plataforma. O `platform-admin` tem todas as permis
 | Workflows | `/admin/workflows` | `platform.workflow.manage` | Sim | Não |
 | Flags | `/admin/flags` | `platform.flag.manage` | Sim | Não |
 | Conectores | `/admin/connectors` | `platform.connector.read` | Sim | Sim |
+| Auditoria | `/admin/audit` | `platform.audit-log.read` | Sim | Sim |
+| Equipe | `/admin/team` | `platform.staff.manage` | Sim | Não |
 
 A barra lateral **Administração** agrupa as áreas em **Clientes**, **IA** e **Operação** e mostra só as que o seu papel pode abrir. Se você chegar por link a uma área sem permissão, verá a mensagem "Seu papel na equipe da plataforma não dá acesso a esta área. Peça a um administrador da plataforma."
 
@@ -52,7 +67,7 @@ As áreas estão detalhadas em:
 
 - [Administração: clientes](/docs/admin-customers): Organizações, Planos e Usuários.
 - [Administração: IA](/docs/admin-ai): Agentes e prompts, Modelos, Avaliações, Traces, Logs e Custos.
-- [Administração: operações](/docs/admin-operations): Workflows, Flags e Conectores.
+- [Administração: operações](/docs/admin-operations): Workflows, Flags e Conectores. A Auditoria e a Equipe estão explicadas nesta página.
 
 ## Página inicial da administração
 
@@ -87,6 +102,7 @@ As ações da equipe que alteram algo ficam no registro de auditoria da platafor
 | Ação | Código na auditoria |
 |---|---|
 | Criar, editar ou excluir um plano | `PLAN_CREATED`, `PLAN_UPDATED`, `PLAN_DELETED` |
+| Dar, mudar ou revogar o acesso de alguém da equipe | `PLATFORM_STAFF_GRANTED`, `PLATFORM_STAFF_REVOKED` |
 | Trocar o plano, suspender ou reativar uma organização | `ORGANIZATION_UPDATED` |
 | Salvar ou remover o ajuste de orçamento | `TENANT_BUDGET_UPDATED` |
 | Alterar os agentes, as ferramentas web ou o modo de PII de uma organização | `AGENT_SETTINGS_UPDATED` |

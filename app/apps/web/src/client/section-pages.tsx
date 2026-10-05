@@ -21,6 +21,7 @@ import { AdminOrganizationsView } from "@core/client/views/admin-organizations";
 import { AdminOverviewView } from "@core/client/views/admin-overview";
 import { AdminPlansView } from "@core/client/views/admin-plans";
 import { AdminSlotView } from "@core/client/views/admin-slot";
+import { AdminTeamView } from "@core/client/views/admin-team";
 import { AdminTraceDetailView } from "@core/client/views/admin-trace-detail";
 import { AdminTracesView } from "@core/client/views/admin-traces";
 import { AdminUsersView } from "@core/client/views/admin-users";
@@ -127,6 +128,7 @@ const ADMIN_AREA_VIEWS: Readonly<Record<string, (segments: readonly string[]) =>
   workflows: only(AdminWorkflowsView),
   flags: only(AdminFlagsView),
   audit: only(AdminAuditLogView),
+  team: only(AdminTeamView),
 };
 
 /** The view of an `/admin` path: the overview at the root, the area's view below it. */
