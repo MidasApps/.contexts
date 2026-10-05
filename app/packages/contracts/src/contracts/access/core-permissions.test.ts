@@ -146,6 +146,7 @@ describe("SP5_PERMISSIONS (SP5 spec §2.1)", () => {
         "platform.plan.manage",
         "platform.organization.update",
         "platform.agent.manage",
+        "platform.model.manage",
         "platform.prompt.manage",
         "platform.connector.read",
         "platform.eval.manage",
