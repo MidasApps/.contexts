@@ -64,6 +64,8 @@ export type RenderAppOptions = {
   establish?: SessionBridgePort["establish"];
   /** Overrides `sessionBridge.leaveImpersonation` (e.g. to fail the return to staff). */
   leaveImpersonation?: SessionBridgePort["leaveImpersonation"];
+  /** Host the app runs in (default `web`). */
+  platform?: "web" | "desktop";
 };
 
 export type RenderAppResult = RenderResult & {
@@ -106,7 +108,7 @@ export const renderApp = (ui: ReactElement, options: RenderAppOptions = {}): Ren
       auth,
       router,
       sessionBridge,
-      platform: { kind: "web", apiBaseUrl: "" },
+      platform: { kind: options.platform ?? "web", apiBaseUrl: "" },
       fetch: api.fetch,
       shellUiStorage: memoryStorage(),
       reportError: (error) => void reported.push(error),

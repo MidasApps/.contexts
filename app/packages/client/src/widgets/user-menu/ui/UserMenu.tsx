@@ -5,6 +5,7 @@ import { usePermissions } from "#/entities/permission/index.ts";
 import { useCurrentNode, useMe } from "#/entities/session/index.ts";
 import { useSignOut } from "#/features/sign-out/index.ts";
 import { useSaveThemePreference } from "#/features/update-preferences/index.ts";
+import { usePlatform } from "#/shared/lib/platform/platform-context.tsx";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { navItemRoute } from "#/shared/lib/shell/nav-item-route.ts";
 import { useNavigationRegistry } from "#/shared/lib/shell/shell-registry-context.tsx";
@@ -84,9 +85,10 @@ function ApprovalsMenuItem({ organizationId, count }: { organizationId: string; 
   );
 }
 
-/** Entry to the user guide (decision 0073). */
+/** Entry to the user guide (decision 0073); the guide is a web page, so the desktop has none. */
 function DocsMenuItem() {
   const t = useTranslations("shell.userMenu");
+  if (usePlatform().kind !== "web") return null;
   return (
     <DropdownMenuItem asChild>
       <RouteLink to={{ id: "docs", page: "" }}>

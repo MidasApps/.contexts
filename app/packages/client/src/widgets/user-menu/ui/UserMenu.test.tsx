@@ -20,7 +20,15 @@ describe("UserMenu", () => {
     expect(screen.getByRole("menuitem", { name: "Sessões" }).getAttribute("href")).toBe("/profile/sessions");
     expect(screen.getByRole("menuitem", { name: "Idioma e região" }).getAttribute("href")).toBe("/profile/preferences");
     expect(screen.getByRole("menuitem", { name: "Tema" })).toBeDefined();
+    expect(screen.getByRole("menuitem", { name: "Documentação" }).getAttribute("href")).toBe("/docs");
     await expectNoAxeViolations(document.body);
+  });
+
+  it("offers no guide on the desktop, which has no /docs page", async () => {
+    const { user } = renderWidget(<UserMenu />, { path: `/o/${IDS.organization}`, platform: "desktop" });
+    await user.click(await screen.findByRole("button", { name: "Ana Souza, menu da conta" }));
+    expect(await screen.findByRole("menuitem", { name: "Conta" })).toBeDefined();
+    expect(screen.queryByRole("menuitem", { name: "Documentação" })).toBeNull();
   });
 
   it("signs out through the session bridge and lands on sign-in", async () => {
