@@ -17,6 +17,7 @@ describe("SignInView", () => {
     expect(screen.getByText("Core")).toBeDefined();
     expect(screen.getByRole("combobox", { name: "Idioma" })).toBeDefined();
     expect(screen.queryByRole("link", { name: "Criar conta" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Documentação" }).getAttribute("href")).toBe("/docs");
     await expectNoAxeViolations(container);
     await user.type(screen.getByLabelText("E-mail"), "ana@example.com");
     await user.type(screen.getByLabelText("Senha"), "s3cret-pass");

@@ -5,6 +5,7 @@ import { useTranslations } from "use-intl";
 import { SignInForm } from "#/features/auth-by-email/index.ts";
 import { MfaChallengeForm } from "#/features/mfa-challenge/index.ts";
 import { useClientConfig } from "#/shared/config/config-context.tsx";
+import { usePlatform } from "#/shared/lib/platform/platform-context.tsx";
 import { nextRoute } from "#/shared/lib/router/entry-routes.ts";
 import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { useSession } from "#/shared/lib/session/session-context.tsx";
@@ -55,6 +56,17 @@ function SignUpPrompt({ next }: { next: string | null }) {
   );
 }
 
+/** Link to the user guide (decision 0073), on web only: the desktop has no `/docs`. */
+function GuideLink() {
+  const t = useTranslations("shell.userMenu");
+  if (usePlatform().kind !== "web") return null;
+  return (
+    <RouteLink to={{ id: "docs", page: "" }} className="underline underline-offset-4 hover:text-foreground">
+      {t("docs")}
+    </RouteLink>
+  );
+}
+
 /**
  * `/sign-in?next=` (SP2 spec §4): email + password, then the second factor when the account has
  * one. A signed-in session is sent to `next` (internal routes only) or home. Brand and language
@@ -78,7 +90,14 @@ export function SignInView({ brand, footer }: { brand?: ReactNode; footer?: Reac
 
   const { state } = session;
   return (
-    <AuthTemplate brand={brand ?? <AuthBrand />} footer={footer ?? <EntryLocaleSwitcher />}>
+    <AuthTemplate brand={brand ?? <AuthBrand />} footer={
+        footer ?? (
+          <>
+            <EntryLocaleSwitcher />
+            <GuideLink />
+          </>
+        )
+      }>
       {state.status === "mfa-required" ? (
         <>
           <Heading title={t("mfa.title")} description={t("mfa.description")} />
