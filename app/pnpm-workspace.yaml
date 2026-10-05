@@ -192,3 +192,15 @@ minimumReleaseAgeExclude:
 # override once firecrawl depends on axios >= 1.20.0.
 overrides:
   "firecrawl>axios": 1.20.0
+  # High advisories found by the first GitHub CI run (decision 0071). Drop each once its parent
+  # depends on the patched version.
+  "@firebase/firestore>@grpc/grpc-js": 1.14.5
+  "get-uri>basic-ftp": 6.2.1
+  "mocha>serialize-javascript": 7.0.3
+
+# High advisories with no patched release, reachable only from dev and build tooling (decision 0071).
+auditConfig:
+  ignoreGhsas:
+    - GHSA-jmr9-qjv8-65gv # extract-zip: desktop native test tooling (@wdio > @puppeteer/browsers)
+    - GHSA-7pqw-9j4j-h8q3 # extract-zip: same path
+    - GHSA-vfj7-8cjw-p6xm # braces: lint plugins, firebase-tools and the Mastra deployer (build time)
