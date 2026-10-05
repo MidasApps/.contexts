@@ -20,7 +20,7 @@ O app reúne, num só lugar, a sua equipe, os seus dados e assistentes de inteli
 |---|---|---|
 | Organização | O espaço da sua empresa no app. Tem membros, papéis, configurações e orçamento próprios. | "Clínica Vet Exemplo" |
 | Projeto | Uma área de trabalho dentro da organização. O assistente e os módulos funcionam dentro de um projeto. | "Atendimento", "Financeiro" |
-| Unidade | Uma divisão do projeto, como uma filial ou um setor, que pode ter fuso horário próprio. | "Filial Centro", "Filial Norte" |
+| Unidade | Uma divisão do projeto, como uma filial ou um setor. | "Filial Centro", "Filial Norte" |
 | Membro | Uma pessoa com acesso à organização. | Ana, recepcionista |
 | Papel | Um conjunto de permissões dado a membros. | Proprietário, Administrador, Membro |
 | Agente | Um assistente de IA com instruções e ferramentas próprias. | "Assistente de agendamento" |
@@ -59,7 +59,7 @@ Este roteiro mostra como as partes do app se encaixam. Cada passo tem a página 
    > **Assistente:** Pela tabela de vacinas da clínica, o filhote toma a V10 em três doses, a partir de 45 dias, e a antirrábica aos 4 meses. (Fonte 1: Tabela de vacinas)
 
    A resposta indica de qual documento veio a informação. Veja [Assistente (chat)](/docs/chat).
-5. **Automação com controle.** Bruno cria um agendamento semanal que prepara o resumo de retornos. Uma ação sensível do fluxo para e espera aprovação. Veja [Fluxos e agendamentos](/docs/workflows) e [Aprovações](/docs/approvals).
+5. **Ação com controle.** Uma ação sensível, como criar um registro por um fluxo de trabalho, para e espera a aprovação de outra pessoa antes de acontecer. Bruno recebe o pedido na caixa de aprovações e decide. Os fluxos disponíveis dependem da instalação e dos módulos. Veja [Fluxos e agendamentos](/docs/workflows) e [Aprovações](/docs/approvals).
 6. **Custos.** No fim do mês, Marta confere em **Uso e orçamento** quanto a IA consumiu e ajusta o limite. Veja [Uso e orçamento](/docs/usage).
 
 ## Endereços das páginas

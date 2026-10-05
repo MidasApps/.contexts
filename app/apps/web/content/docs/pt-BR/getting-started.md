@@ -177,6 +177,7 @@ Exemplo: você é o responsável por começar a usar o app em uma clínica veter
 
 ## Dicas e boas práticas
 
+- Esta documentação abre sem login: use o link **Documentação** no rodapé da página **Entrar** ou, já dentro do app, o menu da conta.
 - Ative a verificação em duas etapas logo no primeiro acesso.
 - Use sempre a mesma conta (o mesmo e-mail) para aceitar convites de organizações diferentes. Uma conta pode participar de várias organizações.
 - Se o app mostrar **Você está sem conexão. Algumas ações ficam indisponíveis até a conexão voltar.**, aguarde a conexão voltar antes de salvar alterações.
