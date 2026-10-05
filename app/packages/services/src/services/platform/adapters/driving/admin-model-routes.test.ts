@@ -28,6 +28,7 @@ const SETTINGS: ModelSettings = {
       outputMicroUsdPerMTok: 500_000,
       source: "staff",
       available: true,
+      kind: "text",
     },
   ],
   updatedAt: NOW,

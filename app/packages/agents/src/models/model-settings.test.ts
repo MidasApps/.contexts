@@ -102,6 +102,16 @@ describe("model settings", () => {
     expect(sol?.available).toBe(false);
   });
 
+  it("refuses a text role on an embedding model, and says which models are embeddings", async () => {
+    const { service } = setup();
+    expect(
+      await service.update({ ...INPUT, roles: { ...INPUT.roles, chat: "openai/text-embedding-3-small" } }, "sam"),
+    ).toEqual({ ok: false, error: { code: "VALIDATION_FAILED", field: "roles.chat", issue: "NOT_A_TEXT_MODEL" } });
+    const kinds = Object.fromEntries((await service.view()).models.map((model) => [model.modelId, model.kind]));
+    expect(kinds["openai/text-embedding-3-small"]).toBe("embedding");
+    expect(kinds["openai/gpt-6-sol"]).toBe("text");
+  });
+
   it("accepts a model staff priced themselves, and does not ask for keys in fake mode", async () => {
     const { service } = setup({ aiMode: "fake", configured: [] });
     const input: UpdateModelSettingsInput = {

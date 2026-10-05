@@ -46,6 +46,13 @@ export const FAKE_MODEL_PRICES: Readonly<Record<string, ModelPrice>> = {
   "fake/fake-embedding": { inputMicroUsdPerMTok: 10_000_000, outputMicroUsdPerMTok: 0 },
 };
 
+/** Priced models that produce vectors, not text: no text role may run on them (decision 0072). */
+export const EMBEDDING_MODEL_IDS: ReadonlySet<string> = new Set([
+  "google/gemini-embedding-2",
+  "openai/text-embedding-3-small",
+  "fake/fake-embedding",
+]);
+
 const FAKE_MODE_PRICES: Readonly<Record<string, ModelPrice>> = { ...MODEL_PRICES, ...FAKE_MODEL_PRICES };
 
 /** The table the ledger prices with: the verified prices, plus the fake ones in fake mode only. */

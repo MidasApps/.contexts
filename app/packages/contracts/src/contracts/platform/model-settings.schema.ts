@@ -35,6 +35,9 @@ export type ModelPriceInput = z.infer<typeof ModelPriceInputSchema>;
 export const ModelCatalogEntrySchema = ModelPriceInputSchema.extend({
   source: z.enum(["code", "staff"]).meta(none("Whether the price ships with the code or was set by staff.")),
   available: z.boolean().meta(none("Whether the runtime holds a key for the model's provider.")),
+  kind: z
+    .enum(["text", "embedding"])
+    .meta(none("What the model produces; only text models can run a text role. Models staff add are text.")),
 });
 export type ModelCatalogEntry = z.infer<typeof ModelCatalogEntrySchema>;
 
@@ -73,7 +76,7 @@ export const ModelSettingsContract = defineContract(ModelSettingsSchema, {
     {
       aiMode: "real",
       roles: [{ role: "chat", modelId: "openai/gpt-6-sol", source: "staff", editable: true }],
-      models: [{ ...PRICE_EXAMPLE, source: "code", available: true }],
+      models: [{ ...PRICE_EXAMPLE, source: "code", available: true, kind: "text" }],
       updatedAt: EXAMPLE_TIMES.created,
     },
   ],

@@ -8,6 +8,7 @@
         {
           "available": true,
           "inputMicroUsdPerMTok": 100000,
+          "kind": "text",
           "modelId": "openai/gpt-6-luna",
           "outputMicroUsdPerMTok": 500000,
           "source": "code"
@@ -51,6 +52,15 @@
             "type": "integer",
             "x-pii": "none"
           },
+          "kind": {
+            "description": "What the model produces; only text models can run a text role. Models staff add are text.",
+            "enum": [
+              "text",
+              "embedding"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
           "modelId": {
             "description": "Model id as <provider>/<model>.",
             "maxLength": 120,
@@ -80,7 +90,8 @@
           "inputMicroUsdPerMTok",
           "outputMicroUsdPerMTok",
           "source",
-          "available"
+          "available",
+          "kind"
         ],
         "type": "object"
       },

@@ -7,7 +7,7 @@ import {
   type UpdateModelSettingsInput,
 } from "@core/contracts";
 import type { Logger, ModelSettingsRepository, StoredModelSettings } from "@core/services";
-import type { ModelPrice } from "./model-prices.ts";
+import { EMBEDDING_MODEL_IDS, type ModelPrice } from "./model-prices.ts";
 import { MODEL_ROLES, type ModelProvider, parseModelId } from "./model-roles.ts";
 
 /** Roles staff cannot change here: a new embedding model needs a reindex, and voice follows its own flags (decision 0072). */
@@ -75,6 +75,8 @@ const refusalOf = (args: ModelSettingsServiceArgs, input: UpdateModelSettingsInp
   for (const role of EDITABLE_MODEL_ROLES) {
     const modelId = input.roles[role];
     if (prices[modelId] === undefined) return { code: "VALIDATION_FAILED", field: `roles.${role}`, issue: "UNPRICED" };
+    if (EMBEDDING_MODEL_IDS.has(modelId))
+      return { code: "VALIDATION_FAILED", field: `roles.${role}`, issue: "NOT_A_TEXT_MODEL" };
     // Fake mode never calls a provider, so a missing key blocks nothing there.
     if (args.aiMode === "real" && !args.isConfigured(parseModelId(modelId).provider))
       return { code: "VALIDATION_FAILED", field: `roles.${role}`, issue: "PROVIDER_NOT_CONFIGURED" };
@@ -142,6 +144,7 @@ export const createModelSettingsService = (args: ModelSettingsServiceArgs): Mode
         ...price,
         source: staffPriced.has(modelId) ? ("staff" as const) : ("code" as const),
         available: args.aiMode === "fake" || args.isConfigured(parseModelId(modelId).provider),
+        kind: EMBEDDING_MODEL_IDS.has(modelId) ? ("embedding" as const) : ("text" as const),
       }))
       .sort((left, right) => left.modelId.localeCompare(right.modelId));
     return { aiMode: args.aiMode, roles, models, updatedAt: stored?.updatedAt ?? null };

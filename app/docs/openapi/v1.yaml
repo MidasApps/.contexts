@@ -26687,6 +26687,7 @@ components:
           models:
             - available: true
               inputMicroUsdPerMTok: 100000
+              kind: text
               modelId: openai/gpt-6-luna
               outputMicroUsdPerMTok: 500000
               source: code
@@ -26719,6 +26720,13 @@ components:
                 minimum: 0
                 type: integer
                 x-pii: none
+              kind:
+                description: What the model produces; only text models can run a text role. Models staff add are text.
+                enum:
+                  - text
+                  - embedding
+                type: string
+                x-pii: none
               modelId:
                 description: Model id as <provider>/<model>.
                 maxLength: 120
@@ -26744,6 +26752,7 @@ components:
               - outputMicroUsdPerMTok
               - source
               - available
+              - kind
             type: object
           type: array
           x-pii: none

@@ -45,7 +45,8 @@ _None._
         "inputMicroUsdPerMTok": 100000,
         "outputMicroUsdPerMTok": 500000,
         "source": "code",
-        "available": true
+        "available": true,
+        "kind": "text"
       }
     ],
     "updatedAt": "2026-09-29T14:30:00.000Z"
