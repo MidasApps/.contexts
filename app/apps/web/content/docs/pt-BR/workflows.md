@@ -75,6 +75,10 @@ A lista mostra 20 execuções por página. No celular, cada execução aparece c
 
 ### Entender a página de uma execução
 
+![Página de uma execução suspensa aguardando aprovação](/guide/workflows-run.svg)
+
+*Ilustração com dados de exemplo: uma execução **Suspensa** que aguarda aprovação, com a **Linha do tempo** e os botões **Abrir aprovações** e **Cancelar execução**.*
+
 A página **Execução de {fluxo}** mostra:
 
 - **Linha do tempo**: o fluxo, o **Identificador** da execução, quem a iniciou e o estado atual.

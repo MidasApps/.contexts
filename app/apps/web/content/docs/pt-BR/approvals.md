@@ -85,6 +85,10 @@ A lista se atualiza sozinha a cada 15 segundos e quando você volta para a janel
 
 ### Aprovar um pedido
 
+![Página Solicitação de aprovação com os detalhes do pedido, o motivo e os botões Aprovar e Recusar](/guide/approvals-detail.svg)
+
+*Ilustração com dados de exemplo: a **Solicitação de aprovação**, com os detalhes, o **Motivo (opcional)** e os botões **Aprovar** e **Recusar**.*
+
 1. Na aba **Aguardando minha decisão**, clique no resumo do pedido para abrir a **Solicitação de aprovação**.
 2. Confira os detalhes: **Pedida em**, **Expira em**, **Permissão da ação** e **Referência**. Confira também a prévia.
 3. Se quiser, escreva um **Motivo (opcional)**. Quem pediu vê o motivo, e ele fica na auditoria. O limite é de 500 caracteres.

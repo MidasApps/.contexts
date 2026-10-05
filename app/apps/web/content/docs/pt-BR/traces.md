@@ -50,6 +50,10 @@ A equipe da plataforma tem uma área própria de rastros, com acesso a logs. Na 
 
 ### Ler um rastro
 
+![Página de um rastro com o resumo e a árvore de spans](/guide/traces-detail.svg)
+
+*Ilustração com dados de exemplo: o resumo do rastro e a árvore de spans, com tokens e duração de cada etapa.*
+
 1. No topo, veja o nome do rastro e o status.
 2. O **Resumo do rastro** mostra **Agente ou fluxo**, **Início**, **Duração**, **Tokens (entrada / saída)**, **Custo** e **Id do rastro**.
 3. Abaixo, a árvore de spans mostra quantos spans o rastro tem, por exemplo "7 spans".

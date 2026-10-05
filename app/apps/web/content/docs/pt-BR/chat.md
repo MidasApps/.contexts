@@ -48,6 +48,10 @@ O Assistente funciona na versão web e no aplicativo de desktop.
 
 *A página do **Assistente**: as conversas à esquerda e a caixa de mensagem embaixo.*
 
+![Painel do assistente aberto à direita de uma página do projeto](/guide/chat-panel.svg)
+
+*Ilustração com dados de exemplo: o painel do **Assistente** aberto à direita, com uma resposta que cita a fonte.*
+
 ## Passo a passo
 
 ### Começar uma conversa

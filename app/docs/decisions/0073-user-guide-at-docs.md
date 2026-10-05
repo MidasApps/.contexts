@@ -24,7 +24,7 @@ The app has no guide for its users. Each module explains itself only through the
    - `src/server/docs/docs-pages.ts` lists the pages in reading order, grouped for the sidebar.
    - The page reads its file with `node:fs` from the web app's folder, at request time inside `<Suspense>`, so an edited file shows at once. Only a slug from that list reaches the file system.
    - No MDX and no build step: a page is plain Markdown that any team member can edit.
-   - Screenshots of the real screens, taken from the local stack with the demo seed, live in `apps/web/public/guide/` (JPEG, 1280×800). Pages show them as `![texto](/guide/<nome>.jpg)` with a caption. The proxy leaves `/guide/` alone, so they load without a locale.
+   - Screenshots of the real screens, taken from the local stack with the demo seed, live in `apps/web/public/guide/` (JPEG, 1280×800). Pages show them as `![texto](/guide/<nome>.jpg)` with a caption. The proxy leaves `/guide/` alone, so they load without a locale. Screens that only show with data (an invitation, an approval request, a workflow run, a trace, the chat panel) are drawn as SVG mockups in the app's look, with the catalog labels and example data, and their captions say they are illustrations.
 3. **Portuguese only, with a notice elsewhere.**
    - The guide is written in pt-BR, the source locale.
    - In `en-US` and `es-419` the same page opens with a translated notice, and the article carries `lang="pt-BR"`.
@@ -48,7 +48,7 @@ The app has no guide for its users. Each module explains itself only through the
 ## Alternatives rejected
 
 - **Serve `app/docs/` (decisions, catalog).** It is written for developers, in English, and changes with the code rather than with what users see.
-- **Drawn mockups instead of screenshots.** They would have to be drawn and kept by hand, and would drift from the real screens just as fast; a screenshot shows exactly what the user sees.
+- **Only drawn mockups.** A screenshot shows exactly what the user sees, so screens the demo seed fills are screenshots; mockups are kept for screens that need data the seed does not have.
 - **MDX pages.** They would add a compiler and allow components in content. Plain Markdown covers tables, examples and code, and keeps the content editable by non-developers.
 - **A separate documentation site.** It means another deploy and another domain, and it cannot link into the app's own routes with the user's locale.
 - **Translate the guide into the three locales now.** That would triple the work and the drift on every change. A translated page can be added later as `content/docs/<locale>/<slug>.md` once the loader picks the UI locale first.

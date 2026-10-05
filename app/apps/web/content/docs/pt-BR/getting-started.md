@@ -60,6 +60,10 @@ Se você chegou à página de entrada por um link interno do app, depois de entr
 
 ### Criar conta (quando o cadastro está aberto)
 
+![Página Criar conta com Seu nome, E-mail e Senha](/guide/getting-started-sign-up.svg)
+
+*Ilustração com dados de exemplo: a página **Criar conta**.*
+
 1. Na página **Entrar**, clique em **Criar conta** (o link aparece abaixo de **Ainda não tem conta?**).
 2. Preencha **Seu nome** (aparece para os outros membros), **E-mail** e **Senha** (pelo menos 8 caracteres).
 3. Clique em **Criar conta**.
@@ -68,6 +72,10 @@ Se você chegou à página de entrada por um link interno do app, depois de entr
 Se a página mostrar **Contas novas só por convite**, peça um convite a quem administra a sua organização e use o link recebido. Clique em **Ir para Entrar** se você já tem conta.
 
 ### Aceitar um convite
+
+![Página do convite com os botões Aceitar convite e Agora não](/guide/getting-started-invite.svg)
+
+*Ilustração com dados de exemplo: o convite aberto pelo link, com **Aceitar convite** e **Agora não**.*
 
 O convite é vinculado a um e-mail e chega até você **como um link**, que a pessoa que convidou copia no app e envia pelo canal que preferir (e-mail, mensagem etc.). O app não envia esse e-mail sozinho.
 
@@ -93,6 +101,10 @@ Se você cadastrou um segundo fator no perfil, ele é pedido a cada entrada.
 Para cadastrar ou remover fatores, veja [Seu perfil](/docs/profile).
 
 ### Redefinir a senha
+
+![Página Redefinir senha com o campo E-mail](/guide/getting-started-reset-password.svg)
+
+*Ilustração com dados de exemplo: a página **Redefinir senha**.*
 
 1. Na página **Entrar**, clique em **Esqueci minha senha**.
 2. Em **E-mail**, informe o e-mail da sua conta e clique em **Enviar link**.

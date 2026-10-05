@@ -23,7 +23,7 @@ const isBlock = (props: CodeProps): boolean => "data-block" in props;
 const isGuideHref = (href: string): boolean => href === "/docs" || href.startsWith("/docs/");
 const isExternalHref = (href: string): boolean => /^https?:\/\//u.test(href);
 /** Screenshots of the guide: the web app's public `/guide/` folder. */
-const isGuideImage = (src: string): boolean => /^\/guide\/[\w-]+\.(?:jpg|png|webp)$/u.test(src);
+const isGuideImage = (src: string): boolean => /^\/guide\/[\w-]+\.(?:jpg|png|webp|svg)$/u.test(src);
 
 /**
  * Keeps guide links, absolute http(s) links and the guide's own screenshots; drops every other
