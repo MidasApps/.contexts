@@ -31,10 +31,11 @@ const SAMPLES: Record<RouteId, readonly Route[]> = {
   "settings-module": [{ id: "settings-module", organizationId: "org-1", moduleId: "example" }],
   profile: [{ id: "profile", section: "security" }],
   admin: [{ id: "admin", rest: "" }],
+  docs: [{ id: "docs", page: "" }],
 };
 
 /** The desktop file route that must serve each route id. */
-const DESKTOP_ROUTE: Record<Exclude<RouteId, "admin">, string> = {
+const DESKTOP_ROUTE: Record<Exclude<RouteId, "admin" | "docs">, string> = {
   "sign-in": "/sign-in",
   invite: "/invite",
   "sign-up": "/sign-up",
@@ -70,7 +71,7 @@ describe("desktop route tree", () => {
   )("serves %s at %s", async (id, href) => {
     const match = await matchHref(href);
 
-    expect(match).toEqual({ routeId: DESKTOP_ROUTE[id as Exclude<RouteId, "admin">], notFound: false });
+    expect(match).toEqual({ routeId: DESKTOP_ROUTE[id as Exclude<RouteId, "admin" | "docs">], notFound: false });
   });
 
   it("has no /admin surface: the web-only routes are not found on desktop", async () => {

@@ -80,6 +80,7 @@ export const parseRoute = (href: string): Route | null => {
       ? { id: "admin", rest: tail }
       : { id: "admin", rest: tail, search: Object.fromEntries(search) };
   }
+  if (first === "docs") return rest.length === 0 ? { id: "docs", page: second ?? "" } : null;
   if (first === "profile") {
     return rest.length === 0 && isOneOf<ProfileSection>(PROFILE_SECTIONS, second)
       ? { id: "profile", section: second }

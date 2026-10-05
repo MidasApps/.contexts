@@ -27,7 +27,8 @@ export const proxy = createProxy({
   cspMode: "static",
 });
 
-// Static assets carry no request context worth correlating.
+// Static assets carry no request context worth correlating; `/guide/` holds the user guide's
+// screenshots (public files, decision 0073), served without a locale.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|guide/).*)"],
 };

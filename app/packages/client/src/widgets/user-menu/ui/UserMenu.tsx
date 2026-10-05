@@ -84,11 +84,24 @@ function ApprovalsMenuItem({ organizationId, count }: { organizationId: string; 
   );
 }
 
+/** Entry to the user guide (decision 0073). */
+function DocsMenuItem() {
+  const t = useTranslations("shell.userMenu");
+  return (
+    <DropdownMenuItem asChild>
+      <RouteLink to={{ id: "docs", page: "" }}>
+        <Icon name="file-text" />
+        {t("docs")}
+      </RouteLink>
+    </DropdownMenuItem>
+  );
+}
+
 /**
  * User menu at the sidebar footer (sidebar-07 nav-user): who is signed in, the profile sections
  * from the `user-menu` navigation slot, the approvals inbox with its waiting count (holders of
  * `core.approval.read` in the organization), theme (system/light/dark), language (profile
- * preferences) and sign out.
+ * preferences), the user guide and sign out.
  */
 export function UserMenu() {
   const t = useTranslations();
@@ -176,6 +189,7 @@ export function UserMenu() {
                 {t("shell.userMenu.language")}
               </RouteLink>
             </DropdownMenuItem>
+            <DocsMenuItem />
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => void signOut()}>
               <Icon name="log-out" />

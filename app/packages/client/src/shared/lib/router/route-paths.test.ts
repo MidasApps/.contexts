@@ -46,6 +46,10 @@ const SAMPLES: Record<RouteId, Route[]> = {
     { id: "admin", rest: "organizations/org-1" },
     { id: "admin", rest: "traces", search: { status: "error", organizationId: "org 1", page: "2" } },
   ],
+  docs: [
+    { id: "docs", page: "" },
+    { id: "docs", page: "api-keys" },
+  ],
 };
 
 describe("route paths", () => {
@@ -92,5 +96,6 @@ describe("route paths", () => {
     expect(parseRoute("/profile/unknown")).toBeNull();
     expect(parseRoute("/o/a/p/b/x")).toBeNull();
     expect(parseRoute("/o/a/p/b/chat/c1/extra")).toBeNull();
+    expect(parseRoute("/docs/chat/extra")).toBeNull();
   });
 });

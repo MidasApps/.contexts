@@ -138,7 +138,8 @@
     "profile": "Perfil",
     "admin": "Administração",
     "notFound": "Página não encontrada",
-    "chat": "Assistente"
+    "chat": "Assistente",
+    "docs": "Documentação"
   },
   "approvals": {
     "status": {
@@ -362,5 +363,17 @@
     "editAsForm": "Editar como formulário",
     "invalid": "Escreva um objeto JSON válido.",
     "switchBlocked": "Corrija o JSON para voltar ao formulário."
+  },
+  "docs": {
+    "nav": "Páginas da documentação",
+    "pages": "Páginas",
+    "backToApp": "Ir para o app",
+    "fallback": "Esta documentação está disponível apenas em português.",
+    "previous": "Anterior",
+    "next": "Próxima",
+    "code": "Código",
+    "codeWithLanguage": "Código {language}",
+    "newTab": "(abre em nova aba)",
+    "steps": "Página anterior e próxima"
   }
 }

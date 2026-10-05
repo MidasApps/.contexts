@@ -24,6 +24,8 @@ const STATIC_LABEL_KEYS: Readonly<Record<Exclude<RouteId, DynamicLabelRouteId>, 
   "sign-up": undefined,
   "reset-password": undefined,
   admin: undefined,
+  // The guide has its own frame, outside the shell's top bar.
+  docs: undefined,
 };
 
 /** The i18n key of a route's page label; a module page takes its manifest's label. */

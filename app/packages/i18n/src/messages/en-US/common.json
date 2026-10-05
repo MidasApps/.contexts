@@ -138,7 +138,8 @@
     "profile": "Profile",
     "admin": "Administration",
     "notFound": "Page not found",
-    "chat": "Assistant"
+    "chat": "Assistant",
+    "docs": "Documentation"
   },
   "approvals": {
     "status": {
@@ -362,5 +363,17 @@
     "editAsForm": "Edit as form",
     "invalid": "Write a valid JSON object.",
     "switchBlocked": "Fix the JSON to go back to the form."
+  },
+  "docs": {
+    "nav": "Documentation pages",
+    "pages": "Pages",
+    "backToApp": "Go to the app",
+    "fallback": "This documentation is only available in Portuguese.",
+    "previous": "Previous",
+    "next": "Next",
+    "code": "Code",
+    "codeWithLanguage": "{language} code",
+    "newTab": "(opens in a new tab)",
+    "steps": "Previous and next page"
   }
 }

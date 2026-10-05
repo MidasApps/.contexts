@@ -177,7 +177,8 @@
       "light": "Light",
       "dark": "Dark"
     },
-    "language": "Language and region"
+    "language": "Language and region",
+    "docs": "Documentation"
   },
   "projects": {
     "create": {

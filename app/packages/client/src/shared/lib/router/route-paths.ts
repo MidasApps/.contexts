@@ -79,7 +79,9 @@ export type Route =
   | { id: "settings-index"; organizationId: string }
   | { id: "settings-module"; organizationId: string; moduleId: string }
   | { id: "profile"; section: ProfileSection }
-  | { id: "admin"; rest: string; search?: Readonly<Record<string, string>> | undefined };
+  | { id: "admin"; rest: string; search?: Readonly<Record<string, string>> | undefined }
+  /** The user guide (decision 0073): `page` is the slug of one guide page, "" for its index. Readable signed out. */
+  | { id: "docs"; page: string };
 
 export type RouteId = Route["id"];
 
@@ -99,10 +101,11 @@ export const ROUTE_IDS = [
   "settings-module",
   "profile",
   "admin",
+  "docs",
 ] as const satisfies readonly RouteId[];
 
-/** Routes that exist only on web (the desktop has no `/admin`, decision 0012). */
-export const WEB_ONLY_ROUTE_IDS: readonly RouteId[] = ["admin"];
+/** Routes that exist only on web (the desktop has no `/admin`, decision 0012, nor the guide, decision 0073). */
+export const WEB_ONLY_ROUTE_IDS: readonly RouteId[] = ["admin", "docs"];
 
 const seg = (value: string): string => encodeURIComponent(value);
 
@@ -170,5 +173,7 @@ export const routeHref = (route: Route): string => {
       return `/profile/${route.section}`;
     case "admin":
       return withSearch(`/admin${tail(route.rest)}`, route.search ?? {});
+    case "docs":
+      return route.page === "" ? "/docs" : `/docs/${seg(route.page)}`;
   }
 };
