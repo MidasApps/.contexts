@@ -190,6 +190,30 @@
       "submit": "Create project",
       "created": "Project {name} created.",
       "createdStatus": "Project created."
+    },
+    "edit": {
+      "title": "Edit project",
+      "description": "The name and description show to everyone with access to the project.",
+      "name": "Project name",
+      "descriptionField": "Description",
+      "descriptionFieldHint": "Optional. Leave it blank to remove the description.",
+      "saved": "Project {name} updated."
+    },
+    "actions": {
+      "menu": "Project settings",
+      "edit": "Edit name and description",
+      "archive": "Archive project",
+      "reactivate": "Reactivate project",
+      "delete": "Delete project",
+      "archiveTitle": "Archive {name}?",
+      "archiveDescription": "The project stays accessible with the same data, but it is marked as archived. You can reactivate it at any time.",
+      "archiveConfirm": "Archive",
+      "archived": "Project {name} archived.",
+      "reactivated": "Project {name} reactivated.",
+      "deleteTitle": "Delete {name}?",
+      "deleteDescription": "The project and all its units stop existing for every member. This cannot be undone from the app.",
+      "deleteConfirm": "Delete project",
+      "deleted": "Project {name} deleted."
     }
   },
   "organizationHome": {

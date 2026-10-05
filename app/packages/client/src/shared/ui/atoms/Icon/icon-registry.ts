@@ -1,6 +1,7 @@
 import {
   ActivityIcon,
   AlertTriangleIcon,
+  ArchiveIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
   BellIcon,
@@ -30,6 +31,7 @@ import {
   FolderIcon,
   FolderOpenIcon,
   GlobeIcon,
+  HistoryIcon,
   HouseIcon,
   InboxIcon,
   InfoIcon,
@@ -76,6 +78,7 @@ import {
 export const ICONS = {
   activity: ActivityIcon,
   "alert-triangle": AlertTriangleIcon,
+  archive: ArchiveIcon,
   "arrow-left": ArrowLeftIcon,
   "arrow-right": ArrowRightIcon,
   bell: BellIcon,
@@ -105,6 +108,7 @@ export const ICONS = {
   folder: FolderIcon,
   "folder-open": FolderOpenIcon,
   globe: GlobeIcon,
+  history: HistoryIcon,
   home: HouseIcon,
   inbox: InboxIcon,
   info: InfoIcon,

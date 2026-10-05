@@ -190,6 +190,30 @@
       "submit": "Criar projeto",
       "created": "Projeto {name} criado.",
       "createdStatus": "Projeto criado."
+    },
+    "edit": {
+      "title": "Editar projeto",
+      "description": "O nome e a descrição aparecem para todos que acessam o projeto.",
+      "name": "Nome do projeto",
+      "descriptionField": "Descrição",
+      "descriptionFieldHint": "Opcional. Deixe em branco para remover a descrição.",
+      "saved": "Projeto {name} atualizado."
+    },
+    "actions": {
+      "menu": "Configurar projeto",
+      "edit": "Editar nome e descrição",
+      "archive": "Arquivar projeto",
+      "reactivate": "Reativar projeto",
+      "delete": "Excluir projeto",
+      "archiveTitle": "Arquivar {name}?",
+      "archiveDescription": "O projeto continua acessível e com os mesmos dados, mas fica marcado como arquivado. Você pode reativá-lo quando quiser.",
+      "archiveConfirm": "Arquivar",
+      "archived": "Projeto {name} arquivado.",
+      "reactivated": "Projeto {name} reativado.",
+      "deleteTitle": "Excluir {name}?",
+      "deleteDescription": "O projeto e todas as unidades dele deixam de existir para todos os membros. Não é possível desfazer pelo app.",
+      "deleteConfirm": "Excluir projeto",
+      "deleted": "Projeto {name} excluído."
     }
   },
   "organizationHome": {

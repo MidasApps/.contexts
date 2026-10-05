@@ -5,8 +5,8 @@ import { defineClientModule } from "#/app-shell/modules/define-client-module.ts"
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { MEMBER_PERMISSIONS, shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, page } from "#/shared/testing/fake-api.ts";
-import { IDS } from "#/shared/testing/fixtures.ts";
+import { apiError, type FakeRequest, noContent, ok, page } from "#/shared/testing/fake-api.ts";
+import { buildProject, IDS } from "#/shared/testing/fixtures.ts";
 import { ProjectHomeView } from "./ProjectHomeView.tsx";
 
 const sampleModule = defineClientModule({
@@ -87,5 +87,70 @@ describe("ProjectHomeView", () => {
     empty.unmount();
     renderView({ routes: { "GET /v1/me/context": apiError(404, "NOT_FOUND") } });
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
+  });
+  describe("project settings", () => {
+    const MANAGER = [...MEMBER_PERMISSIONS, "core.project.update", "core.project.delete"];
+
+    it("renames the project, sending only what changed", async () => {
+      const bodies: unknown[] = [];
+      const { user } = renderView({
+        permissions: MANAGER,
+        routes: {
+          "PATCH /v1/projects/:projectId": (request: FakeRequest) => {
+            bodies.push(request.body);
+            return ok(buildProject({ name: "Launch 2" }));
+          },
+        },
+      });
+      await user.click(await screen.findByRole("button", { name: "Configurar projeto" }));
+      await user.click(await screen.findByRole("menuitem", { name: "Editar nome e descrição" }));
+      const dialog = await screen.findByRole("dialog", { name: "Editar projeto" });
+      const name = within(dialog).getByRole("textbox", { name: "Nome do projeto (obrigatório)" });
+      await user.clear(name);
+      await user.type(name, "Launch 2");
+      await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
+      expect(await screen.findByText("Projeto Launch 2 atualizado.")).toBeDefined();
+      expect(bodies).toEqual([{ name: "Launch 2" }]);
+    });
+
+    it("archives after confirming", async () => {
+      const bodies: unknown[] = [];
+      const { user } = renderView({
+        permissions: MANAGER,
+        routes: {
+          "PATCH /v1/projects/:projectId": (request: FakeRequest) => {
+            bodies.push(request.body);
+            return ok(buildProject({ status: "archived" }));
+          },
+        },
+      });
+      await user.click(await screen.findByRole("button", { name: "Configurar projeto" }));
+      await user.click(await screen.findByRole("menuitem", { name: "Arquivar projeto" }));
+      const confirm = await screen.findByRole("alertdialog", { name: "Arquivar Launch?" });
+      await expectNoAxeViolations(confirm);
+      await user.click(within(confirm).getByRole("button", { name: "Arquivar" }));
+      expect(await screen.findByText("Projeto Launch arquivado.")).toBeDefined();
+      expect(bodies).toEqual([{ status: "archived" }]);
+    });
+
+    it("deletes after confirming and goes back to the organization", async () => {
+      const { user, router, api } = renderView({
+        permissions: MANAGER,
+        routes: { "DELETE /v1/projects/:projectId": noContent() },
+      });
+      await user.click(await screen.findByRole("button", { name: "Configurar projeto" }));
+      await user.click(await screen.findByRole("menuitem", { name: "Excluir projeto" }));
+      const confirm = await screen.findByRole("alertdialog", { name: "Excluir Launch?" });
+      await user.click(within(confirm).getByRole("button", { name: "Excluir projeto" }));
+      expect(await screen.findByText("Projeto Launch excluído.")).toBeDefined();
+      expect(api.callLines()).toContain(`DELETE /v1/projects/${IDS.project}`);
+      expect(router.current()).toBe(`/o/${IDS.organization}`);
+    });
+
+    it("is hidden without core.project.update and core.project.delete", async () => {
+      renderView();
+      await screen.findByRole("heading", { level: 1, name: "Launch" });
+      expect(screen.queryByRole("button", { name: "Configurar projeto" })).toBeNull();
+    });
   });
 });

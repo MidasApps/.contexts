@@ -4,6 +4,7 @@ import type { AccessContext } from "@core/contracts";
 import { useTranslations } from "use-intl";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { UnitBreadcrumb, useUnitPath, useUnits } from "#/entities/unit/index.ts";
+import { ProjectActionsMenu } from "#/features/manage-project/index.ts";
 import type { NodeParams } from "#/shared/api/core-queries.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { navItemRoute } from "#/shared/lib/shell/nav-item-route.ts";
@@ -124,6 +125,13 @@ function ProjectHome({ context, node }: { context: ProjectContext; node: NodePar
         title={project.name}
         description={project.description === undefined || project.description === "" ? undefined : project.description}
         meta={project.status === "archived" ? <StatusPill tone="neutral">{t("archived")}</StatusPill> : undefined}
+        actions={
+          <ProjectActionsMenu
+            project={project}
+            canUpdate={context.permissions.includes("core.project.update")}
+            canDelete={context.permissions.includes("core.project.delete")}
+          />
+        }
       />
       {context.unit === undefined ? null : (
         <p className="-mt-3 mb-6 flex items-center gap-2 text-sm">
@@ -156,7 +164,8 @@ const hasProject = (context: AccessContext): context is ProjectContext => contex
 /**
  * `/o/:organizationId/p/:projectId?unit=` (SP2 spec §4, `core.project.read`): project overview —
  * name, description and status, the units at the current level (links set `?unit=`) and the
- * entry points of the modules the viewer may open here.
+ * entry points of the modules the viewer may open here. "Project settings" edits, archives or
+ * deletes the project (core.project.update / core.project.delete at it).
  */
 export function ProjectHomeView() {
   const t = useTranslations("shell.projectHome");
