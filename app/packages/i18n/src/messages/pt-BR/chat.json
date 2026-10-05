@@ -388,5 +388,17 @@
       "search": "Pesquisar na web",
       "scrape": "Ler uma página da web"
     }
+  },
+  "feedback": {
+    "up": "Resposta boa",
+    "down": "Resposta ruim",
+    "thanks": "Obrigado pela avaliação.",
+    "downTitle": "O que não ficou bom?",
+    "downDescription": "Sua avaliação ajuda a melhorar o assistente. O comentário é opcional.",
+    "comment": "Comentário",
+    "commentHint": "Por exemplo: citou o documento errado, ou a resposta ficou incompleta.",
+    "addToDataset": "Usar esta resposta nas avaliações da organização",
+    "cancel": "Cancelar",
+    "submit": "Enviar avaliação"
   }
 }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "use-intl";
 import { ChatMessage, textOf } from "#/entities/message/index.ts";
 import { ReadAloudAction, type ReadAloudActionProps } from "#/features/chat-voice/index.ts";
+import { RateAnswerActions } from "#/features/rate-answer/index.ts";
 import { MessageAction, MessageActions } from "#/shared/ui/ai/message.tsx";
 import type { ChatSession } from "../model/use-chat-session.ts";
 import { createCoreToolRenderer } from "./chat-tool-part.tsx";
@@ -20,16 +21,21 @@ type AnswerSpeech = {
   readonly seams: ReadAloudActionProps["seams"];
 };
 
+/** Rating needs the stored conversation (a new one has no id until its first answer starts). */
+type AnswerRating = { readonly conversationId: string; readonly canAddToDataset: boolean };
+
 function AnswerActions({
   message,
   canRegenerate,
   onRegenerate,
   speech,
+  rating,
 }: {
   message: UIMessage;
   canRegenerate: boolean;
   onRegenerate: () => void;
   speech?: AnswerSpeech | undefined;
+  rating?: AnswerRating | undefined;
 }) {
   const t = useTranslations("chat.message");
   const [copied, setCopied] = useState(false);
@@ -66,6 +72,13 @@ function AnswerActions({
           seams={speech.seams}
         />
       )}
+      {rating === undefined || text === "" ? null : (
+        <RateAnswerActions
+          conversationId={rating.conversationId}
+          messageId={message.id}
+          canAddToDataset={rating.canAddToDataset}
+        />
+      )}
       <span role="status" className="sr-only">
         {copied ? t("copied") : ""}
       </span>
@@ -81,11 +94,13 @@ export type ThreadMessagesProps = {
   /** Voice preferences of the member; `undefined` while voice is off. */
   voice: { readonly autoRead: boolean } | undefined;
   speechSeams?: ReadAloudActionProps["seams"];
+  /** Permissions of the member at the chat's node (`core.eval.write` offers the feedback dataset). */
+  can?: ((permission: string) => boolean) | undefined;
 };
 
 /**
  * The messages of the thread. A settled answer gets its actions (copy, regenerate on the last
- * one, read aloud); the one that just finished reads itself aloud when "read answers aloud" is on.
+ * one, read aloud, thumbs up or down); the one that just finished reads itself aloud when "read answers aloud" is on.
  */
 export function ThreadMessages({
   session,
@@ -94,6 +109,7 @@ export function ThreadMessages({
   assistantName,
   voice,
   speechSeams,
+  can,
 }: ThreadMessagesProps) {
   const { messages, phase, busy } = session;
   const renderTool = createCoreToolRenderer(session);
@@ -104,6 +120,10 @@ export function ThreadMessages({
     voice === undefined
       ? undefined
       : { organizationId, autoPlay: voice.autoRead && messageId === finishedAnswerId, seams: speechSeams };
+  const rating: AnswerRating | undefined =
+    session.conversationId === undefined
+      ? undefined
+      : { conversationId: session.conversationId, canAddToDataset: can?.("core.eval.write") === true };
   return messages.map((message) => {
     const last = message.id === lastId;
     const settled = !(busy && last);
@@ -125,6 +145,7 @@ export function ThreadMessages({
               canRegenerate={last && phase !== "awaiting-approval"}
               onRegenerate={session.regenerate}
               speech={speechFor(message.id)}
+              rating={rating}
             />
           ) : undefined
         }

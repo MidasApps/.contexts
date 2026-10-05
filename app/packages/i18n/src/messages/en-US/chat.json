@@ -388,5 +388,17 @@
       "search": "Search the web",
       "scrape": "Read a web page"
     }
+  },
+  "feedback": {
+    "up": "Good answer",
+    "down": "Bad answer",
+    "thanks": "Thanks for the rating.",
+    "downTitle": "What was wrong?",
+    "downDescription": "Your rating helps improve the assistant. The comment is optional.",
+    "comment": "Comment",
+    "commentHint": "For example: it cited the wrong document, or the answer was incomplete.",
+    "addToDataset": "Use this answer in the organization's evaluations",
+    "cancel": "Cancel",
+    "submit": "Send rating"
   }
 }

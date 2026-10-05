@@ -201,6 +201,7 @@ export function ChatThread(props: ChatThreadProps) {
               assistantName={props.assistantName}
               voice={voice}
               speechSeams={props.speechSeams}
+              can={props.can}
             />
           )}
           {waitingFirstChunk ? <PendingAnswer assistantName={props.assistantName} /> : null}
