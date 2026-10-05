@@ -58,13 +58,17 @@ test.describe("after a chat turn of the organization", () => {
     await expect(
       root.getByRole("button", { name: "Recolher os spans de agent run: 'assistant-chat'" }),
     ).toHaveAttribute("aria-expanded", "true");
-    // Model spans carry their tokens.
-    await expect(
-      spans
-        .getByRole("definition")
-        .filter({ hasText: /^[1-9][\d.]* de entrada · \d[\d.]* de saída$/ })
-        .first(),
-    ).toBeVisible();
+    // Model spans carry their tokens. Their usage can reach the trace store in a later batch than
+    // the row that listed the trace, so reload until it is there.
+    await expect(async () => {
+      await staffPage.reload();
+      await expect(
+        spans
+          .getByRole("definition")
+          .filter({ hasText: /^[1-9][\d.]* de entrada · \d[\d.]* de saída$/ })
+          .first(),
+      ).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
     await expect(staffPage.getByRole("link", { name: "Ver logs deste trace" })).toHaveAttribute(
       "href",
       /\/admin\/logs\?traceId=[0-9a-f]{32}$/,
@@ -93,7 +97,7 @@ test.describe("after a chat turn of the organization", () => {
     // first read can come before it: reload until it is there.
     await expect(async () => {
       await staffPage.reload();
-      await expect(status).toHaveText(/em [1-9]\d* chamadas e [\d.]+ tokens\./, { timeout: 5_000 });
+      await expect(status).toHaveText(/em [1-9][\d.]* chamadas e [\d.]+ tokens\./, { timeout: 5_000 });
     }).toPass({ timeout: 60_000 });
     await expect(status).not.toContainText(/US\$\s?0,00 em/);
     await expect(usage.getByText(/chamadas? sem preço conhecido/)).toHaveCount(0);
@@ -110,7 +114,8 @@ test.describe("after a chat turn of the organization", () => {
     await usage.getByRole("textbox", { name: "Até" }).fill("2020-01-02");
     await expect(usage.getByRole("heading", { name: "Nenhum uso no período" })).toBeVisible();
     await usage.getByRole("button", { name: "Voltar ao mês atual" }).click();
-    await expect(status).toHaveText(/em [1-9]\d* chamadas/);
+    // The count is grouped by thousands ("1.181 chamadas") once the organization has that many.
+    await expect(status).toHaveText(/em [1-9][\d.]* chamadas/);
 
     const budgets = staffPage.getByRole("table", { name: "Orçamentos por organização" });
     await expect(budgets.getByRole("row").filter({ hasText: sp5Org.name })).toContainText("US$ 50,00");

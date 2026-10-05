@@ -27,7 +27,10 @@ export default defineConfig({
   workers: isCi ? 4 : 2,
   timeout: 60_000,
   expect: { timeout: 10_000 },
-  reporter: isCi ? [["html", { open: "never" }], ["github"]] : [["list"], ["html", { open: "never" }]],
+  // CI lists each journey as it ends, so a run that stalls names the journey it stalled on.
+  reporter: isCi ? [["list"], ["html", { open: "never" }], ["github"]] : [["list"], ["html", { open: "never" }]],
+  // A stalled CI run ends itself and still writes its report, before the job's own limit cancels it.
+  ...(isCi ? { globalTimeout: 50 * 60_000 } : {}),
   use: {
     baseURL: `${env.E2E_WEB_ORIGIN}/pt-BR/`,
     locale: "pt-BR",
