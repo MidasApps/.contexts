@@ -289,6 +289,21 @@ jobs:
     name: e2e (Playwright)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
+    # scripts/e2e.ts recreates the app_e2e database on this server (Mastra storage, knowledge).
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U app -d app"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
