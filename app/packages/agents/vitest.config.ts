@@ -40,7 +40,9 @@ export default defineConfig({
     ...(coverage ? { coverage } : {}),
     projects: [
       defineProject({ name: "unit", include, exclude: [EMULATOR_TESTS, POSTGRES_TESTS, EVAL_TESTS] }),
-      defineProject({ name: "postgres", include: [POSTGRES_TESTS] }),
+      // Mastra's `storage.init()` creates its tables on an empty database (CI): one file at a time,
+      // with the emulators' longer hooks, so the first init does not race the others past 10 s.
+      defineProject({ name: "postgres", include: [POSTGRES_TESTS], overrides: EMULATOR_PROJECT_DEFAULTS }),
       defineProject({ name: "emulators", include: [EMULATOR_TESTS], overrides: EMULATOR_PROJECT_DEFAULTS }),
       defineProject({ name: "evals", include: [EVAL_TESTS] }),
       defineProject({ name: "evals-real", include: [EVAL_TESTS], env: { AI_MODE: "real" } }),
