@@ -139,11 +139,55 @@ describe("dataset items in the evals page (decision 0062)", () => {
     expect(api.calls.some((call) => call.path === "/v1/evals/datasets/ds_new/items")).toBe(true);
   });
 
+  it("renames a dataset and keeps the feedback dataset unchangeable", async () => {
+    const feedback = buildDataset({ id: "ds_feedback", name: "feedback", tenantId: IDS.organization });
+    const bodies: unknown[] = [];
+    const { user } = renderView({
+      "GET /v1/evals/datasets": ok([REFUNDS, feedback]),
+      "PATCH /v1/evals/datasets/:datasetId": (request: FakeRequest) => {
+        bodies.push([request.params["datasetId"], request.body, organizationOf(request)]);
+        return ok({ ...REFUNDS, name: "returns" });
+      },
+    });
+    await screen.findByRole("button", { name: "Renomear o conjunto refunds" });
+    expect(screen.queryByRole("button", { name: "Renomear o conjunto feedback" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Excluir o conjunto feedback" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Renomear o conjunto refunds" }));
+    const dialog = await screen.findByRole("dialog", { name: "Renomear refunds" });
+    const name = within(dialog).getByRole("textbox", { name: "Nome" });
+    await user.clear(name);
+    await user.type(name, "returns");
+    await user.click(within(dialog).getByRole("button", { name: "Salvar nome" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(bodies).toEqual([["ds_refunds", { name: "returns" }, IDS.organization]]);
+  });
+
+  it("deletes a dataset after confirming, and explains DATASET_IN_USE", async () => {
+    const { user, api } = renderView({
+      "DELETE /v1/evals/datasets/:datasetId": apiError(409, "DATASET_IN_USE"),
+    });
+    await user.click(await screen.findByRole("button", { name: "Excluir o conjunto refunds" }));
+    const confirm = await screen.findByRole("alertdialog", { name: "Excluir o conjunto refunds?" });
+    await user.click(within(confirm).getByRole("button", { name: "Excluir conjunto" }));
+    expect((await within(confirm).findByRole("alert")).textContent).toContain("Já rodaram avaliações");
+    api.route("DELETE /v1/evals/datasets/:datasetId", noContent());
+    api.route("GET /v1/evals/datasets", ok([]));
+    await user.click(within(confirm).getByRole("button", { name: "Excluir conjunto" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+  });
+
   it("offers no create, add or delete without core.eval.write", async () => {
     renderView({}, READER, "?tab=datasets&dataset=ds_refunds");
     await screen.findByRole("table", { name: "Itens de refunds" });
     expect(screen.queryByRole("button", { name: "Adicionar item" })).toBeNull();
     expect(screen.queryByRole("button", { name: /Excluir o item/u })).toBeNull();
+  });
+
+  it("offers no rename or delete of a dataset without core.eval.write", async () => {
+    renderView({}, READER);
+    await screen.findByRole("button", { name: "Ver os itens de refunds" });
+    expect(screen.queryByRole("button", { name: /Renomear o conjunto/u })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Excluir o conjunto/u })).toBeNull();
   });
 
   it("shows the items error with its reference", async () => {

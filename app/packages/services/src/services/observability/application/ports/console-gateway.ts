@@ -47,6 +47,10 @@ export type ConsoleGateway = {
     readonly tenantId: string;
     readonly name: string;
   }) => Promise<ConsoleResult<EvalDataset>>;
+  /** Decision 0075: a name the tenant uses is `CONFLICT`; the `feedback` dataset is `DATASET_RESERVED`. */
+  readonly renameDataset: (input: TenantDataset & { readonly name: string }) => Promise<ConsoleResult<EvalDataset>>;
+  /** Decision 0075: `DATASET_IN_USE` once an experiment ran on it; the `feedback` one is `DATASET_RESERVED`. */
+  readonly deleteDataset: (input: TenantDataset) => Promise<ConsoleResult<{ readonly datasetId: string }>>;
   readonly startExperiment: (input: {
     readonly tenantId: string;
     readonly userId: string;

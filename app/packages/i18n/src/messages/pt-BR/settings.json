@@ -893,6 +893,22 @@
         "submit": "Criar",
         "cancel": "Cancelar",
         "done": "Conjunto {name} criado."
+      },
+      "renameNamed": "Renomear o conjunto {name}",
+      "deleteNamed": "Excluir o conjunto {name}",
+      "rename": {
+        "action": "Renomear",
+        "title": "Renomear {name}",
+        "description": "As avaliações que já rodaram continuam ligadas a este conjunto.",
+        "submit": "Salvar nome",
+        "done": "Conjunto renomeado para {name}."
+      },
+      "delete": {
+        "action": "Excluir",
+        "title": "Excluir o conjunto {name}?",
+        "description": "O conjunto e todos os itens dele são apagados. Só é possível excluir um conjunto em que nenhuma avaliação rodou.",
+        "confirm": "Excluir conjunto",
+        "done": "Conjunto {name} excluído."
       }
     },
     "compare": {

@@ -10,9 +10,12 @@ import {
   addDatasetItem,
   addFeedbackItem,
   createTenantDataset,
+  type DatasetChangeError,
   deleteDatasetItem,
+  deleteTenantDataset,
   listDatasetItems,
   listDatasets,
+  renameTenantDataset,
 } from "./dataset-console.ts";
 import {
   EvalRunRecordSchema,
@@ -260,6 +263,13 @@ const FeedbackItemSchema = z.strictObject({
 
 const TenantIdSchema = z.string().min(1).max(128);
 const CreateDatasetSchema = z.strictObject({ tenantId: TenantIdSchema, name: z.string().trim().min(1).max(200) });
+const RenameDatasetSchema = z.strictObject({ tenantId: TenantIdSchema, name: z.string().trim().min(1).max(200) });
+const CHANGE_STATUS: Record<DatasetChangeError, number> = {
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  DATASET_IN_USE: 409,
+  DATASET_RESERVED: 422,
+};
 const AddItemSchema = z.strictObject({
   tenantId: TenantIdSchema,
   input: z.string().trim().min(1).max(4000),
@@ -276,6 +286,33 @@ const datasetItemRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
       if (!input.success) return fail(400, "VALIDATION_FAILED");
       const created = await createTenantDataset(ctx.mastra.datasets, input.data);
       return created.ok ? json(201, { data: created.data }) : fail(409, created.code);
+    }),
+  }),
+  // Rename and delete (decision 0075): tenant-only, like the items.
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets/:datasetId`, {
+    method: "PATCH",
+    requiresAuth: false,
+    handler: guarded(deps, "console_dataset_rename_failed", async (ctx) => {
+      const input = RenameDatasetSchema.safeParse(await ctx.json().catch(() => null));
+      if (!input.success) return fail(400, "VALIDATION_FAILED");
+      const renamed = await renameTenantDataset(ctx.mastra.datasets, {
+        ...input.data,
+        datasetId: ctx.param("datasetId"),
+      });
+      return renamed.ok ? json(200, { data: renamed.data }) : fail(CHANGE_STATUS[renamed.code], renamed.code);
+    }),
+  }),
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets/:datasetId`, {
+    method: "DELETE",
+    requiresAuth: false,
+    handler: guarded(deps, "console_dataset_delete_failed", async (ctx) => {
+      const tenantId = TenantIdSchema.safeParse(ctx.query("tenantId"));
+      if (!tenantId.success) return fail(400, "VALIDATION_FAILED");
+      const deleted = await deleteTenantDataset(ctx.mastra.datasets, {
+        tenantId: tenantId.data,
+        datasetId: ctx.param("datasetId"),
+      });
+      return deleted.ok ? json(200, { data: deleted.data }) : fail(CHANGE_STATUS[deleted.code], deleted.code);
     }),
   }),
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets/:datasetId/items`, {

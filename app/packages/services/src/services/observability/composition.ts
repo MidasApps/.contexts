@@ -12,9 +12,11 @@ import { type ListExperiments, makeListExperiments } from "../evals/application/
 import {
   type AddDatasetItem,
   type CreateDataset,
+  type DeleteDataset,
   type DeleteDatasetItem,
   type ListDatasetItems,
   makeDatasetItemUseCases,
+  type RenameDataset,
 } from "../evals/application/use-cases/manage-dataset-items.ts";
 import { makeStartExperiment, type StartExperiment } from "../evals/application/use-cases/start-experiment.ts";
 import type { Clock } from "../shared/clock/clock.ts";
@@ -32,6 +34,8 @@ export type ObservabilityServices = {
   readonly addDatasetItem: AddDatasetItem;
   readonly deleteDatasetItem: DeleteDatasetItem;
   readonly createDataset: CreateDataset;
+  readonly renameDataset: RenameDataset;
+  readonly deleteDataset: DeleteDataset;
   readonly listExperiments: ListExperiments;
   readonly getExperiment: GetExperiment;
   readonly startExperiment: StartExperiment;

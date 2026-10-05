@@ -6,8 +6,11 @@ import {
   addFeedbackItem,
   createTenantDataset,
   deleteDatasetItem,
+  deleteTenantDataset,
+  feedbackDatasetOf,
   listDatasetItems,
   listDatasets,
+  renameTenantDataset,
 } from "./dataset-console.ts";
 
 const TENANT = "org_a";
@@ -120,5 +123,65 @@ describe("tenant dataset items over Mastra datasets (follow-up 66)", () => {
     expect(
       await listDatasetItems(datasets, { tenantId: TENANT, datasetId: platform.id, page: 0, perPage: 20 }),
     ).toBeNull();
+  });
+});
+
+describe("renaming and deleting a tenant dataset (decision 0075)", () => {
+  it("renames a dataset, refusing a name the tenant uses and the feedback name", async () => {
+    const datasets = datasetsOf();
+    const refunds = await createTenantDataset(datasets, { tenantId: TENANT, name: "refunds" });
+    await createTenantDataset(datasets, { tenantId: TENANT, name: "billing" });
+    if (!refunds.ok) throw new Error("dataset not created");
+    const datasetId = refunds.data.id;
+    expect(await renameTenantDataset(datasets, { tenantId: TENANT, datasetId, name: "returns" })).toMatchObject({
+      ok: true,
+      data: { id: datasetId, name: "returns" },
+    });
+    expect(await renameTenantDataset(datasets, { tenantId: TENANT, datasetId, name: "billing" })).toEqual({
+      ok: false,
+      code: "CONFLICT",
+    });
+    expect(await renameTenantDataset(datasets, { tenantId: TENANT, datasetId, name: "feedback" })).toEqual({
+      ok: false,
+      code: "DATASET_RESERVED",
+    });
+    expect(await renameTenantDataset(datasets, { tenantId: OTHER, datasetId, name: "x" })).toEqual({
+      ok: false,
+      code: "NOT_FOUND",
+    });
+  });
+
+  it("deletes a dataset with its items, never the feedback one nor another tenant's", async () => {
+    const datasets = datasetsOf();
+    const refunds = await createTenantDataset(datasets, { tenantId: TENANT, name: "refunds" });
+    if (!refunds.ok) throw new Error("dataset not created");
+    await addDatasetItem(datasets, { tenantId: TENANT, datasetId: refunds.data.id, input: "Question" });
+    const feedback = await feedbackDatasetOf(datasets, TENANT);
+    expect(await deleteTenantDataset(datasets, { tenantId: OTHER, datasetId: refunds.data.id })).toEqual({
+      ok: false,
+      code: "NOT_FOUND",
+    });
+    expect(await deleteTenantDataset(datasets, { tenantId: TENANT, datasetId: feedback.id })).toEqual({
+      ok: false,
+      code: "DATASET_RESERVED",
+    });
+    expect(await deleteTenantDataset(datasets, { tenantId: TENANT, datasetId: refunds.data.id })).toEqual({
+      ok: true,
+      data: { datasetId: refunds.data.id },
+    });
+    expect((await listDatasets(datasets, TENANT)).map((dataset) => dataset.name)).toEqual(["feedback"]);
+  });
+
+  it("refuses to delete a dataset an experiment ran on", async () => {
+    const datasets = datasetsOf();
+    const refunds = await createTenantDataset(datasets, { tenantId: TENANT, name: "refunds" });
+    if (!refunds.ok) throw new Error("dataset not created");
+    await addDatasetItem(datasets, { tenantId: TENANT, datasetId: refunds.data.id, input: "Question" });
+    const dataset = await datasets.get({ id: refunds.data.id, organizationId: TENANT });
+    await dataset.createExperiment({ name: "run" });
+    expect(await deleteTenantDataset(datasets, { tenantId: TENANT, datasetId: refunds.data.id })).toEqual({
+      ok: false,
+      code: "DATASET_IN_USE",
+    });
   });
 });

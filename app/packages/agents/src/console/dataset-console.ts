@@ -162,3 +162,47 @@ export const createTenantDataset = async (
   if (dataset === null) throw new Error("created dataset does not match the contract");
   return { ok: true, data: dataset };
 };
+
+/**
+ * Why a dataset change was refused: not the tenant's, a name another of its datasets has, the
+ * `feedback` dataset (recreated on the next rating, so it is never renamed or deleted, and no
+ * other dataset takes its name) or experiments that ran on it (they would lose their dataset).
+ */
+export type DatasetChangeError = "NOT_FOUND" | "CONFLICT" | "DATASET_RESERVED" | "DATASET_IN_USE";
+
+type DatasetChange<T> =
+  | { readonly ok: true; readonly data: T }
+  | { readonly ok: false; readonly code: DatasetChangeError };
+
+/** Renames a dataset of the tenant (decision 0075). */
+export const renameTenantDataset = async (
+  datasets: Datasets,
+  input: { readonly tenantId: string; readonly datasetId: string; readonly name: string },
+): Promise<DatasetChange<EvalDataset>> => {
+  const dataset = await tenantDatasetOf(datasets, input.tenantId, input.datasetId);
+  if (dataset === null) return { ok: false, code: "NOT_FOUND" };
+  const details = await dataset.getDetails();
+  if (details.name === FEEDBACK_DATASET_NAME || input.name === FEEDBACK_DATASET_NAME)
+    return { ok: false, code: "DATASET_RESERVED" };
+  const taken = (await listDatasets(datasets, input.tenantId)).some(
+    (other) => other.name === input.name && other.id !== input.datasetId,
+  );
+  if (taken) return { ok: false, code: "CONFLICT" };
+  const renamed = toDataset(await dataset.update({ name: input.name }));
+  if (renamed === null) throw new Error("renamed dataset does not match the contract");
+  return { ok: true, data: renamed };
+};
+
+/** Deletes a dataset of the tenant with its items, only while no experiment ran on it (decision 0075). */
+export const deleteTenantDataset = async (
+  datasets: Datasets,
+  input: { readonly tenantId: string; readonly datasetId: string },
+): Promise<DatasetChange<{ readonly datasetId: string }>> => {
+  const dataset = await tenantDatasetOf(datasets, input.tenantId, input.datasetId);
+  if (dataset === null) return { ok: false, code: "NOT_FOUND" };
+  if ((await dataset.getDetails()).name === FEEDBACK_DATASET_NAME) return { ok: false, code: "DATASET_RESERVED" };
+  const experiments = await dataset.listExperiments({ perPage: 1, filters: { organizationId: input.tenantId } });
+  if (experiments.experiments.length > 0) return { ok: false, code: "DATASET_IN_USE" };
+  await datasets.delete({ id: input.datasetId, organizationId: input.tenantId });
+  return { ok: true, data: { datasetId: input.datasetId } };
+};

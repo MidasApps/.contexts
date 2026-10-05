@@ -1,6 +1,6 @@
 "use client";
 
-import { createEvalDatasetEndpoint, type EvalDataset } from "@core/contracts";
+import { type EvalDataset, renameEvalDatasetEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { tenantEvalKeys } from "#/entities/eval-experiment/index.ts";
@@ -15,40 +15,35 @@ import {
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { DatasetNameForm } from "./DatasetNameForm.tsx";
 
-export type CreateEvalDatasetDialogProps = {
+export type RenameEvalDatasetDialogProps = {
   organizationId: string;
-  open: boolean;
+  /** The dataset to rename; `null` closes the dialog. */
+  dataset: EvalDataset | null;
   onOpenChange: (open: boolean) => void;
-  /** The new dataset, so the page can open its items. */
-  onCreated: (dataset: EvalDataset) => void;
 };
 
 /**
- * "New dataset" (`POST /v1/evals/datasets`, core.eval.write, decision 0062): an empty dataset of the
- * organization that targets the assistant. A name the organization already uses shows on the field.
+ * Renames a dataset (`PATCH /v1/evals/datasets/{id}`, core.eval.write, decision 0075). Experiments
+ * keep pointing at it; a name the organization already uses shows on the field.
  */
-export function CreateEvalDatasetDialog({
-  organizationId,
-  open,
-  onOpenChange,
-  onCreated,
-}: CreateEvalDatasetDialogProps) {
-  const t = useTranslations("settings.evals.datasets.create");
+export function RenameEvalDatasetDialog({ organizationId, dataset, onOpenChange }: RenameEvalDatasetDialogProps) {
+  const t = useTranslations("settings.evals.datasets.rename");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={dataset !== null} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogTitle>{t("title", { name: dataset?.name ?? "" })}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
-        {open ? (
+        {dataset === null ? null : (
           <DatasetNameForm
-            initialName=""
+            initialName={dataset.name}
             submitLabel={t("submit")}
             save={async (name) => {
-              const { data } = await callEndpoint(createEvalDatasetEndpoint, {
+              const { data } = await callEndpoint(renameEvalDatasetEndpoint, {
+                params: { datasetId: dataset.id },
                 query: { organizationId },
                 body: { name },
               });
@@ -57,9 +52,9 @@ export function CreateEvalDatasetDialog({
               return data;
             }}
             onClose={() => onOpenChange(false)}
-            onSaved={onCreated}
+            onSaved={() => undefined}
           />
-        ) : null}
+        )}
       </DialogContent>
     </Dialog>
   );

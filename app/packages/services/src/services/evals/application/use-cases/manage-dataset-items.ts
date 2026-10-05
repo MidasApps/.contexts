@@ -2,13 +2,15 @@ import type { ConsoleGateway } from "#/services/observability/application/ports/
 
 type DatasetItemsGateway = Pick<
   ConsoleGateway,
-  "listDatasetItems" | "addDatasetItem" | "deleteDatasetItem" | "createDataset"
+  "listDatasetItems" | "addDatasetItem" | "deleteDatasetItem" | "createDataset" | "renameDataset" | "deleteDataset"
 >;
 
 export type ListDatasetItems = ConsoleGateway["listDatasetItems"];
 export type AddDatasetItem = ConsoleGateway["addDatasetItem"];
 export type DeleteDatasetItem = ConsoleGateway["deleteDatasetItem"];
 export type CreateDataset = ConsoleGateway["createDataset"];
+export type RenameDataset = ConsoleGateway["renameDataset"];
+export type DeleteDataset = ConsoleGateway["deleteDataset"];
 
 /**
  * An organization's dataset items and datasets (follow-up 66, decision 0062). `/v1` authorizes
@@ -21,4 +23,6 @@ export const makeDatasetItemUseCases = (deps: { readonly console: DatasetItemsGa
   addDatasetItem: ((input) => deps.console.addDatasetItem(input)) satisfies AddDatasetItem,
   deleteDatasetItem: ((input) => deps.console.deleteDatasetItem(input)) satisfies DeleteDatasetItem,
   createDataset: ((input) => deps.console.createDataset(input)) satisfies CreateDataset,
+  renameDataset: ((input) => deps.console.renameDataset(input)) satisfies RenameDataset,
+  deleteDataset: ((input) => deps.console.deleteDataset(input)) satisfies DeleteDataset,
 });

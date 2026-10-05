@@ -47,6 +47,9 @@ export const CORE_ERROR_CODES = [
   "BUDGET_EXCEEDED",
   // 409: a plan organizations are still on cannot be deleted (decision 0075).
   "PLAN_IN_USE",
+  // 409/422: a dataset experiments ran on, or the organization's feedback dataset (decision 0075).
+  "DATASET_IN_USE",
+  "DATASET_RESERVED",
 ] as const;
 
 export const CoreErrorCodeSchema = z.enum(CORE_ERROR_CODES);

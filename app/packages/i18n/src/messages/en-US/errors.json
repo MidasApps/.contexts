@@ -35,5 +35,7 @@
   "EVAL_DATASET_MISSING": "This agent has no evaluation set yet.",
   "CUSTOM_LIMIT_REACHED": "The plan's limit was reached. Delete an item or talk to whoever manages the plan.",
   "BUDGET_EXCEEDED": "The organization's AI budget ran out. Contact an administrator.",
-  "PLAN_IN_USE": "Organizations are still on this plan. Move them to another plan before deleting it."
+  "PLAN_IN_USE": "Organizations are still on this plan. Move them to another plan before deleting it.",
+  "DATASET_IN_USE": "Experiments already ran on this dataset. It is kept so their results still make sense.",
+  "DATASET_RESERVED": "The feedback dataset receives the answers rated in the chat; it cannot be renamed or deleted, and no other dataset can take its name."
 }

@@ -820,6 +820,7 @@ export {
   adminListExperimentsEndpoint,
   adminListTracesEndpoint,
   createEvalDatasetEndpoint,
+  deleteEvalDatasetEndpoint,
   deleteEvalDatasetItemEndpoint,
   getEvalExperimentEndpoint,
   getTraceEndpoint,
@@ -829,6 +830,7 @@ export {
   listTracesEndpoint,
   OBSERVABILITY_ENDPOINTS,
   recordMessageFeedbackEndpoint,
+  renameEvalDatasetEndpoint,
   startEvalExperimentEndpoint,
 } from "./contracts/observability/endpoints.ts";
 export {

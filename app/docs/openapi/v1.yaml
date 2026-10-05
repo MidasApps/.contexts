@@ -6107,6 +6107,207 @@ paths:
       tags:
         - evals
       x-auth: user
+  /v1/evals/datasets/{datasetId}:
+    delete:
+      operationId: evals.deleteDataset
+      parameters:
+        - description: Dataset id.
+          in: path
+          name: datasetId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: DATASET_IN_USE
+          x-error-codes:
+            - DATASET_IN_USE
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: DATASET_RESERVED
+          x-error-codes:
+            - DATASET_RESERVED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Deletes one of the organization's datasets with its items, unless an experiment ran on it (409) or it is the feedback dataset (422) (core.eval.write).
+      tags:
+        - evals
+      x-auth: user
+    patch:
+      operationId: evals.renameDataset
+      parameters:
+        - description: Dataset id.
+          in: path
+          name: datasetId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/observability.CreateEvalDatasetInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/observability.EvalDataset"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: CONFLICT
+          x-error-codes:
+            - CONFLICT
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: DATASET_RESERVED
+          x-error-codes:
+            - DATASET_RESERVED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Renames one of the organization's datasets; a name it already uses answers 409, the feedback dataset 422 (core.eval.write).
+      tags:
+        - evals
+      x-auth: user
   /v1/evals/datasets/{datasetId}/items:
     get:
       operationId: evals.listDatasetItems

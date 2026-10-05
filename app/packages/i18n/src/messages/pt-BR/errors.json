@@ -35,5 +35,7 @@
   "EVAL_DATASET_MISSING": "Este agente ainda não tem um conjunto de avaliação.",
   "CUSTOM_LIMIT_REACHED": "O limite do plano foi atingido. Exclua um item ou fale com quem administra o plano.",
   "BUDGET_EXCEEDED": "O orçamento de IA da organização acabou. Fale com um administrador.",
-  "PLAN_IN_USE": "Este plano ainda está em uso por organizações. Troque o plano delas antes de excluí-lo."
+  "PLAN_IN_USE": "Este plano ainda está em uso por organizações. Troque o plano delas antes de excluí-lo.",
+  "DATASET_IN_USE": "Já rodaram avaliações com este conjunto. Ele fica guardado para que os resultados delas continuem fazendo sentido.",
+  "DATASET_RESERVED": "O conjunto feedback recebe as respostas avaliadas no chat e não pode ser renomeado nem excluído, nem ter o nome usado por outro conjunto."
 }

@@ -6,6 +6,7 @@ import {
   adminListExperimentsEndpoint,
   adminListTracesEndpoint,
   createEvalDatasetEndpoint,
+  deleteEvalDatasetEndpoint,
   deleteEvalDatasetItemEndpoint,
   getEvalExperimentEndpoint,
   getTraceEndpoint,
@@ -13,6 +14,7 @@ import {
   listEvalDatasetsEndpoint,
   listEvalExperimentsEndpoint,
   listTracesEndpoint,
+  renameEvalDatasetEndpoint,
   startEvalExperimentEndpoint,
 } from "@core/contracts";
 import { requireStaff, requireTenant } from "#/services/platform/adapters/driving/console-guards.ts";
@@ -231,6 +233,28 @@ const buildDatasetItemRoutes = (deps: {
       (data) => ({ data }),
       201,
     );
+  }),
+  [renameEvalDatasetEndpoint.id]: withApiRoute(renameEvalDatasetEndpoint, deps.pipeline, async (ctx) => {
+    const tenantId = await requireTenant(ctx, {
+      organizationId: ctx.input.query.organizationId,
+      permission: OBSERVABILITY_PERMISSIONS.evalWrite,
+    });
+    if (tenantId instanceof Response) return tenantId;
+    const result = await deps.observability.renameDataset({
+      tenantId,
+      datasetId: ctx.input.params.datasetId,
+      name: ctx.input.body.name,
+    });
+    return answer(result, ctx.requestId, (data) => ({ data }));
+  }),
+  [deleteEvalDatasetEndpoint.id]: withApiRoute(deleteEvalDatasetEndpoint, deps.pipeline, async (ctx) => {
+    const tenantId = await requireTenant(ctx, {
+      organizationId: ctx.input.query.organizationId,
+      permission: OBSERVABILITY_PERMISSIONS.evalWrite,
+    });
+    if (tenantId instanceof Response) return tenantId;
+    const result = await deps.observability.deleteDataset({ tenantId, datasetId: ctx.input.params.datasetId });
+    return result.ok ? noContentResponse() : errorResponse(result.error, ctx.requestId);
   }),
   [listEvalDatasetItemsEndpoint.id]: withApiRoute(listEvalDatasetItemsEndpoint, deps.pipeline, async (ctx) => {
     const tenantId = await requireTenant(ctx, {

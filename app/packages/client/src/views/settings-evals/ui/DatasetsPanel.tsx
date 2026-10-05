@@ -1,9 +1,10 @@
 "use client";
 
 import type { EvalDataset } from "@core/contracts";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
 import { useTenantDatasets } from "#/entities/eval-experiment/index.ts";
+import { DeleteEvalDatasetDialog, RenameEvalDatasetDialog } from "#/features/manage-eval-datasets/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -40,23 +41,57 @@ function Targets({ dataset }: { dataset: EvalDataset }) {
   );
 }
 
-function OpenItemsButton({ dataset, onOpenItems }: { dataset: EvalDataset; onOpenItems: (datasetId: string) => void }) {
+/** The organization's rated answers land here and the runtime recreates it, so it is never changed. */
+const FEEDBACK_DATASET_NAME = "feedback";
+
+type RowActions = {
+  onOpenItems: (datasetId: string) => void;
+  /** `null` without core.eval.write (or offline). */
+  onRename: ((dataset: EvalDataset) => void) | null;
+  onDelete: ((dataset: EvalDataset) => void) | null;
+};
+
+function DatasetButtons({ dataset, actions }: { dataset: EvalDataset; actions: RowActions }) {
   const t = useTranslations("settings.evals.datasets");
+  const changeable = dataset.name !== FEEDBACK_DATASET_NAME;
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      className="self-start"
-      onClick={() => onOpenItems(dataset.id)}
-      aria-label={t("openItemsNamed", { name: dataset.name })}
-    >
-      <Icon name="list" />
-      {t("openItems")}
-    </Button>
+    <span className="flex flex-wrap gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => actions.onOpenItems(dataset.id)}
+        aria-label={t("openItemsNamed", { name: dataset.name })}
+      >
+        <Icon name="list" />
+        {t("openItems")}
+      </Button>
+      {changeable && actions.onRename !== null ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => actions.onRename?.(dataset)}
+          aria-label={t("renameNamed", { name: dataset.name })}
+        >
+          <Icon name="pencil" />
+          {t("rename.action")}
+        </Button>
+      ) : null}
+      {changeable && actions.onDelete !== null ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => actions.onDelete?.(dataset)}
+          aria-label={t("deleteNamed", { name: dataset.name })}
+        >
+          <Icon name="trash" />
+          {t("delete.action")}
+        </Button>
+      ) : null}
+    </span>
   );
 }
 
-const useColumns = (onOpenItems: (datasetId: string) => void) => {
+const useColumns = (actions: RowActions) => {
   const t = useTranslations("settings.evals.datasets");
   const format = useFormatter();
   const formatDateTime = useFormatDateTime();
@@ -84,10 +119,10 @@ const useColumns = (onOpenItems: (datasetId: string) => void) => {
       column.display({
         id: "items",
         header: () => t("columns.items"),
-        cell: ({ row }) => <OpenItemsButton dataset={row.original} onOpenItems={onOpenItems} />,
+        cell: ({ row }) => <DatasetButtons dataset={row.original} actions={actions} />,
       }),
     ],
-    [format, formatDateTime, onOpenItems, t],
+    [actions, format, formatDateTime, t],
   );
 };
 
@@ -101,12 +136,13 @@ type DatasetActions = {
 type DatasetsTableProps = DatasetActions & {
   organization: { id: string; name: string };
   datasets: readonly EvalDataset[];
+  rowActions: RowActions;
 };
 
-function DatasetsTable({ organization, datasets, onSeeExperiments, onOpenItems, onCreate }: DatasetsTableProps) {
+function DatasetsTable({ organization, datasets, onSeeExperiments, onCreate, rowActions }: DatasetsTableProps) {
   const t = useTranslations("settings.evals.datasets");
   const formatDateTime = useFormatDateTime();
-  const columns = useColumns(onOpenItems);
+  const columns = useColumns(rowActions);
   return (
     <DataTable
       caption={t("caption", { organization: organization.name })}
@@ -122,7 +158,7 @@ function DatasetsTable({ organization, datasets, onSeeExperiments, onOpenItems, 
             {t("cardMeta", { version: dataset.version, when: formatDateTime(dataset.createdAt) })}
           </span>
           <Targets dataset={dataset} />
-          <OpenItemsButton dataset={dataset} onOpenItems={onOpenItems} />
+          <DatasetButtons dataset={dataset} actions={rowActions} />
         </div>
       )}
       empty={
@@ -149,7 +185,8 @@ function DatasetsTable({ organization, datasets, onSeeExperiments, onOpenItems, 
 
 /**
  * The organization's own datasets (`GET /v1/evals/datasets`): name, version and the agents they
- * evaluate, each opening its items; creating one needs core.eval.write (decision 0062).
+ * evaluate, each opening its items; creating (decision 0062), renaming and deleting one (decision
+ * 0075) need core.eval.write, and the `feedback` dataset is never renamed or deleted.
  */
 export function DatasetsPanel({
   organization,
@@ -157,6 +194,17 @@ export function DatasetsPanel({
 }: DatasetActions & { organization: { id: string; name: string } }) {
   const t = useTranslations("settings.evals.datasets");
   const datasets = useTenantDatasets(organization.id);
+  const [renaming, setRenaming] = useState<EvalDataset | null>(null);
+  const [deleting, setDeleting] = useState<EvalDataset | null>(null);
+  const writable = actions.onCreate !== null;
+  const rowActions = useMemo<RowActions>(
+    () => ({
+      onOpenItems: actions.onOpenItems,
+      onRename: writable ? setRenaming : null,
+      onDelete: writable ? setDeleting : null,
+    }),
+    [actions.onOpenItems, writable],
+  );
   return (
     <div className="flex flex-col gap-4">
       {actions.onCreate === null ? null : (
@@ -166,8 +214,18 @@ export function DatasetsPanel({
         </Button>
       )}
       <QuerySection query={datasets} loadingLabel={t("loading")}>
-        {(data) => <DatasetsTable organization={organization} datasets={data} {...actions} />}
+        {(data) => <DatasetsTable organization={organization} datasets={data} rowActions={rowActions} {...actions} />}
       </QuerySection>
+      <RenameEvalDatasetDialog
+        organizationId={organization.id}
+        dataset={renaming}
+        onOpenChange={(open) => !open && setRenaming(null)}
+      />
+      <DeleteEvalDatasetDialog
+        organizationId={organization.id}
+        dataset={deleting}
+        onOpenChange={(open) => !open && setDeleting(null)}
+      />
     </div>
   );
 }

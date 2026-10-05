@@ -32,7 +32,7 @@ Os quatro primeiros avaliadores são **determinísticos**: seguem regras fixas e
 | Ação | Permissão necessária |
 |---|---|
 | Ver experimentos, conjuntos de dados e itens | Ver avaliações (`core.eval.read`) |
-| Iniciar experimento, criar conjunto, adicionar e excluir itens | Iniciar avaliações (`core.eval.write`) |
+| Iniciar experimento, criar, renomear e excluir conjuntos, adicionar e excluir itens | Iniciar avaliações (`core.eval.write`) |
 
 Para avaliar um agente, ele precisa estar habilitado para a organização. O assistente principal sempre pode ser avaliado. Veja [Agentes](/docs/agents).
 
@@ -70,9 +70,16 @@ Cada texto aceita até 4.000 caracteres. Experimentos novos usam a versão atual
 
 Para excluir um item, clique em **Excluir** na linha dele e confirme em **Excluir item**. Experimentos já feitos mantêm os resultados.
 
+### Renomear ou excluir um conjunto
+
+1. Na aba de conjuntos de dados, na linha do conjunto, clique em **Renomear**, digite o novo **Nome** e clique em **Salvar nome**. Os experimentos já feitos continuam ligados ao conjunto.
+2. Para excluir, clique em **Excluir** na linha e confirme em **Excluir conjunto**. O conjunto e todos os itens dele são apagados.
+
+Só é possível excluir um conjunto em que nenhum experimento rodou; caso contrário aparece "Já rodaram avaliações com este conjunto." Isso preserva o sentido dos resultados antigos. O conjunto **feedback** não tem esses botões: ele recebe as respostas avaliadas no chat e é recriado automaticamente.
+
 ### Criar itens a partir do chat
 
-Quando alguém avalia negativamente uma resposta no chat, a conversa pode virar um item do conjunto **feedback** da organização. Esse conjunto é criado no primeiro uso. Assim você reúne casos reais de respostas ruins para testar depois.
+Quando alguém clica em **Resposta ruim** no chat e marca **Usar esta resposta nas avaliações da organização**, a conversa vira um item do conjunto **feedback** da organização. Veja [Assistente (chat)](/docs/chat). Esse conjunto é criado no primeiro uso. Assim você reúne casos reais de respostas ruins para testar depois.
 
 ### Iniciar um experimento
 

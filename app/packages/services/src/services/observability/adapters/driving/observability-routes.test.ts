@@ -95,6 +95,30 @@ const fakeConsole = () => {
         },
       });
     },
+    renameDataset: (input) => {
+      calls.push({ op: "renameDataset", tenantId: input.tenantId, extra: input.name });
+      if (input.datasetId === "feedback")
+        return Promise.resolve({ ok: false, error: { code: "DATASET_RESERVED", status: 422 } });
+      return Promise.resolve({
+        ok: true,
+        data: {
+          id: input.datasetId,
+          name: input.name,
+          tenantId: TenantIdSchema.parse(input.tenantId),
+          version: 0,
+          targetIds: ["assistant"],
+          createdAt: "2026-10-01T12:00:00.000Z",
+        },
+      });
+    },
+    deleteDataset: (input) => {
+      calls.push({ op: "deleteDataset", tenantId: input.tenantId, extra: input.datasetId });
+      return Promise.resolve(
+        input.datasetId === "used"
+          ? { ok: false, error: { code: "DATASET_IN_USE", status: 409 } }
+          : { ok: true, data: { datasetId: input.datasetId } },
+      );
+    },
     addFeedbackItem: (input) => (
       calls.push({ op: "addFeedbackItem", tenantId: input.tenantId, extra: input }),
       Promise.resolve({ ok: true, data: { datasetId: "ds", itemId: "it" } })
@@ -487,5 +511,36 @@ describe("POST /v1/conversations/{id}/feedback", () => {
         })
       ).status,
     ).toBe(400);
+  });
+
+  it("renames and deletes a dataset of the organization, passing the runtime's refusals on", async () => {
+    const { routes, calls } = await setup();
+    const path = (datasetId: string) => `/v1/evals/datasets/${datasetId}?organizationId=${ORG_A}`;
+    const renamed = await callRoute(routes, "evals.renameDataset", path("ds-1"), {
+      method: "PATCH",
+      as: "alice",
+      body: { name: "returns" },
+    });
+    expect(await renamed.json()).toMatchObject({ data: { id: "ds-1", name: "returns" } });
+    const reserved = await callRoute(routes, "evals.renameDataset", path("feedback"), {
+      method: "PATCH",
+      as: "alice",
+      body: { name: "x" },
+    });
+    expect(reserved.status).toBe(422);
+    expect(
+      (await callRoute(routes, "evals.deleteDataset", path("ds-1"), { method: "DELETE", as: "alice" })).status,
+    ).toBe(204);
+    const used = await callRoute(routes, "evals.deleteDataset", path("used"), { method: "DELETE", as: "alice" });
+    expect(await used.json()).toMatchObject({ error: { code: "DATASET_IN_USE" } });
+    expect((await callRoute(routes, "evals.deleteDataset", path("ds-1"), { method: "DELETE", as: "mia" })).status).toBe(
+      403,
+    );
+    expect(calls.map((call) => [call.op, call.tenantId, call.extra])).toEqual([
+      ["renameDataset", ORG_A, "returns"],
+      ["renameDataset", ORG_A, "x"],
+      ["deleteDataset", ORG_A, "ds-1"],
+      ["deleteDataset", ORG_A, "used"],
+    ]);
   });
 });

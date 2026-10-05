@@ -11,6 +11,7 @@ import type { ServerlessIdTokenSource } from "#/services/agents/adapters/driven/
 import type { ConsoleError, ConsoleGateway, ConsoleResult } from "../../application/ports/console-gateway.ts";
 
 const UNAVAILABLE: ConsoleError = { code: "UPSTREAM_UNAVAILABLE", status: 502 };
+const DATASET_RESERVED: ConsoleError = { code: "DATASET_RESERVED", status: 422 };
 
 // Status-only mapping: an upstream error body is never read (like the Mastra gateway).
 const errorOf = (status: number): ConsoleError =>
@@ -28,7 +29,7 @@ const paged = <S extends z.ZodType>(schema: S) =>
   z.object({ data: z.array(schema), meta: z.object({ hasMore: z.boolean() }) });
 
 type ConsoleRequest = {
-  method: "GET" | "POST" | "DELETE";
+  method: "GET" | "POST" | "PATCH" | "DELETE";
   path: string;
   query?: Record<string, string | number | undefined>;
   body?: unknown;
@@ -158,7 +159,14 @@ const datasetMethods = (
   call: ConsoleCall,
 ): Pick<
   ConsoleGateway,
-  "listDatasets" | "listDatasetItems" | "addDatasetItem" | "deleteDatasetItem" | "createDataset" | "addFeedbackItem"
+  | "listDatasets"
+  | "listDatasetItems"
+  | "addDatasetItem"
+  | "deleteDatasetItem"
+  | "createDataset"
+  | "renameDataset"
+  | "deleteDataset"
+  | "addFeedbackItem"
 > => ({
   listDatasets: async (query) => {
     const result = await call(
@@ -198,6 +206,25 @@ const datasetMethods = (
   createDataset: async (body) => {
     const result = await call({ method: "POST", path: "/datasets", body }, z.object({ data: EvalDatasetSchema }));
     return result.ok ? { ok: true, data: result.data.data } : result;
+  },
+  // The runtime answers the `feedback` dataset with 422 (VALIDATION_FAILED by status) and a dataset
+  // with experiments with 409 on delete; `/v1` validated the input, so these statuses mean only that.
+  renameDataset: async ({ datasetId, ...body }) => {
+    const result = await call(
+      { method: "PATCH", path: `/datasets/${encodeURIComponent(datasetId)}`, body },
+      z.object({ data: EvalDatasetSchema }),
+    );
+    if (result.ok) return { ok: true, data: result.data.data };
+    return result.error.code === "VALIDATION_FAILED" ? { ok: false, error: DATASET_RESERVED } : result;
+  },
+  deleteDataset: async ({ tenantId, datasetId }) => {
+    const result = await call(
+      { method: "DELETE", path: `/datasets/${encodeURIComponent(datasetId)}`, query: { tenantId } },
+      z.object({ data: z.object({ datasetId: z.string().min(1) }) }),
+    );
+    if (result.ok) return { ok: true, data: result.data.data };
+    if (result.error.code === "VALIDATION_FAILED") return { ok: false, error: DATASET_RESERVED };
+    return result.error.code === "CONFLICT" ? { ok: false, error: { code: "DATASET_IN_USE", status: 409 } } : result;
   },
   addFeedbackItem: async (body) => {
     const result = await call(

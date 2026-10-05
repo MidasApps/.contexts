@@ -137,6 +137,40 @@ export const createEvalDatasetEndpoint = defineEndpoint({
     "Creates an empty dataset of the organization; a name the organization already uses answers 409 (core.eval.write).",
 });
 
+const DATASET_CHANGE_ERRORS = {
+  403: ["FORBIDDEN"],
+  404: ["NOT_FOUND"],
+  422: ["DATASET_RESERVED"],
+  503: ["UPSTREAM_UNAVAILABLE"],
+} as const;
+
+export const renameEvalDatasetEndpoint = defineEndpoint({
+  id: "evals.renameDataset",
+  method: "PATCH",
+  path: "/v1/evals/datasets/{datasetId}",
+  auth: "user",
+  params: datasetParams,
+  query: OrganizationQuerySchema,
+  body: CreateEvalDatasetInputSchema,
+  responses: { 200: dataEnvelope(EvalDatasetSchema) },
+  errors: { 400: ["VALIDATION_FAILED"], ...DATASET_CHANGE_ERRORS, 409: ["CONFLICT"] },
+  summary:
+    "Renames one of the organization's datasets; a name it already uses answers 409, the feedback dataset 422 (core.eval.write).",
+});
+
+export const deleteEvalDatasetEndpoint = defineEndpoint({
+  id: "evals.deleteDataset",
+  method: "DELETE",
+  path: "/v1/evals/datasets/{datasetId}",
+  auth: "user",
+  params: datasetParams,
+  query: OrganizationQuerySchema,
+  responses: { 204: null },
+  errors: { ...DATASET_CHANGE_ERRORS, 409: ["DATASET_IN_USE"] },
+  summary:
+    "Deletes one of the organization's datasets with its items, unless an experiment ran on it (409) or it is the feedback dataset (422) (core.eval.write).",
+});
+
 export const listEvalDatasetItemsEndpoint = defineEndpoint({
   id: "evals.listDatasetItems",
   method: "GET",
@@ -271,6 +305,8 @@ export const OBSERVABILITY_ENDPOINTS: readonly EndpointDefinition[] = [
   adminGetTraceEndpoint,
   listEvalDatasetsEndpoint,
   createEvalDatasetEndpoint,
+  renameEvalDatasetEndpoint,
+  deleteEvalDatasetEndpoint,
   listEvalDatasetItemsEndpoint,
   addEvalDatasetItemEndpoint,
   deleteEvalDatasetItemEndpoint,

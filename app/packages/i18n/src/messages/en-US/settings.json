@@ -893,6 +893,22 @@
         "submit": "Create",
         "cancel": "Cancel",
         "done": "Dataset {name} created."
+      },
+      "renameNamed": "Rename the {name} dataset",
+      "deleteNamed": "Delete the {name} dataset",
+      "rename": {
+        "action": "Rename",
+        "title": "Rename {name}",
+        "description": "Experiments that already ran stay linked to this dataset.",
+        "submit": "Save name",
+        "done": "Dataset renamed to {name}."
+      },
+      "delete": {
+        "action": "Delete",
+        "title": "Delete the {name} dataset?",
+        "description": "The dataset and all its items are erased. Only a dataset no experiment ran on can be deleted.",
+        "confirm": "Delete dataset",
+        "done": "Dataset {name} deleted."
       }
     },
     "compare": {
