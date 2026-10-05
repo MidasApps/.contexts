@@ -40,7 +40,8 @@ export default defineConfig({
     // The chat journey reaches the agent runtime through the web's /v1 (fake models).
     e2eMastraServer(env, { mastraAppDir: path.resolve(import.meta.dirname, "../mastra") }),
     {
-      command: `pnpm exec vite preview --port ${String(env.E2E_DESKTOP_PORT)} --strictPort`,
+      // Run by node for the same reason as the web server (packages/e2e/src/web-server.ts).
+      command: `node node_modules/vite/bin/vite.js preview --port ${String(env.E2E_DESKTOP_PORT)} --strictPort`,
       cwd: path.resolve(import.meta.dirname),
       url: env.E2E_DESKTOP_ORIGIN,
       reuseExistingServer: env.E2E_REUSE_SERVERS,

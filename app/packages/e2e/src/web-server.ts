@@ -13,7 +13,9 @@ const START_TIMEOUT_MS = 120_000;
  * yourself): by default it could be a dev server bound to other emulators, so the run fails.
  */
 export const e2eWebServer = (env: E2eEnv, args: { webAppDir: string }): WebServer => ({
-  command: `pnpm exec next start --port ${String(env.E2E_WEB_PORT)}`,
+  // Run by node, not through `pnpm exec`: on Linux the server outlived Playwright's kill of the
+  // wrapper and kept its stderr pipe open, so the run never ended after the last journey.
+  command: `node node_modules/next/dist/bin/next start --port ${String(env.E2E_WEB_PORT)}`,
   cwd: args.webAppDir,
   url: `${env.E2E_WEB_ORIGIN}/v1/health`,
   reuseExistingServer: env.E2E_REUSE_SERVERS,
