@@ -240,6 +240,29 @@ describe("chat routes (fake mode, in-process Mastra)", { timeout: 30_000 }, () =
     expect(projects.created.map((call) => call.input.name)).toEqual(["Launch"]);
   });
 
+  it("answers 409 to a new message while the conversation waits for an approval, and runs nothing", async () => {
+    const { harness, deps, projects } = setup();
+    const post = (message: unknown) =>
+      handleChatPost(
+        {
+          request: chatRequest({ messages: [message] }),
+          agentId: "assistant",
+          requestContext: contextFor(),
+          mastra: harness.mastra,
+        },
+        deps,
+      );
+    await readChunks(await post(userMessage('Confirm: create the project named "Launch"')));
+    expect(deps.owners.ownerOf("run-1")?.state).toBe("suspended");
+    const refused = await post({ ...userMessage("Never mind, what time is it?"), id: "m-2" });
+    expect(refused.status).toBe(409);
+    expect(await refused.json()).toMatchObject({
+      error: { code: "CONFLICT", details: [{ field: "messages.0", issue: "APPROVAL_PENDING" }] },
+    });
+    expect(deps.owners.ownerOf("run-2")).toBeUndefined();
+    expect(projects.created).toEqual([]);
+  });
+
   it("observe answers 204 for an unknown run and for a run of another owner", async () => {
     const { harness, deps } = setup();
     deps.owners.record("run-x", { resourceId: "other:uid", threadId: THREAD, agentId: "assistant" });

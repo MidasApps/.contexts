@@ -34,6 +34,8 @@ export type ChatRunOwners = {
     readonly resourceId: string;
     readonly threadId: string;
   }) => PendingUserMessage | undefined;
+  /** The thread's newest run of the caller stopped at a tool approval nobody answered yet. */
+  readonly awaitsApproval: (caller: { readonly resourceId: string; readonly threadId: string }) => boolean;
 };
 
 /** Mastra `server.timeout` (15 min): no chat stream outlives it. */
@@ -58,6 +60,15 @@ export const createChatRunOwners = (
     runs.delete(runId);
     return undefined;
   };
+  // Insertion order: the last match is the thread's newest run; another resource's run is not the caller's.
+  const newestOf = (caller: { readonly resourceId: string; readonly threadId: string }) => {
+    let newest: ChatRunEntry | undefined;
+    for (const runId of [...runs.keys()]) {
+      const entry = live(runId);
+      if (entry !== undefined && entry.threadId === caller.threadId) newest = entry;
+    }
+    return newest?.resourceId === caller.resourceId ? newest : undefined;
+  };
   return {
     record: (runId, owner) => {
       runs.delete(runId);
@@ -75,17 +86,11 @@ export const createChatRunOwners = (
       return entry !== undefined && entry.resourceId === caller.resourceId && entry.threadId === caller.threadId;
     },
     pendingMessageOf: (caller) => {
-      // Insertion order: the last match is the thread's newest run. Older runs are ignored even
-      // when they never reported their end, because their message is in memory by then.
-      let newest: ChatRunEntry | undefined;
-      for (const runId of [...runs.keys()]) {
-        const entry = live(runId);
-        if (entry !== undefined && entry.threadId === caller.threadId) newest = entry;
-      }
-      if (newest === undefined || newest.resourceId !== caller.resourceId || newest.state === "finished")
-        return undefined;
-      return newest.userMessage;
+      // Older runs are ignored even when they never reported their end: their message is in memory by then.
+      const newest = newestOf(caller);
+      return newest === undefined || newest.state === "finished" ? undefined : newest.userMessage;
     },
+    awaitsApproval: (caller) => newestOf(caller)?.state === "suspended",
   };
 };
 

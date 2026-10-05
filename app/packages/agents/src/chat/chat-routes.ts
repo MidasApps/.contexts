@@ -126,6 +126,9 @@ export const handleChatPost = async (input: ChatPostInput, deps: ChatRouteDeps):
   }
   const { runId } = resolved;
   const first = parsed.data.messages[0];
+  // A new message would leave the waiting tool call unanswered (and the history invalid for the model).
+  if (first?.role === "user" && deps.owners.awaitsApproval(caller))
+    return chatError("CONFLICT", requestContext, [{ field: "messages.0", issue: "APPROVAL_PENDING" }]);
   if (first?.role === "user")
     deps.owners.record(runId, { ...caller, agentId: input.agentId, userMessage: pendingMessageOf(first) });
   try {

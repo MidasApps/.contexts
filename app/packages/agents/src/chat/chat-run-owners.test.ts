@@ -35,6 +35,19 @@ describe("createChatRunOwners", () => {
     expect(owners.pendingMessageOf(caller)).toBeUndefined();
   });
 
+  it("says the thread waits for an approval while its newest run is suspended", () => {
+    const owners = createChatRunOwners();
+    const caller = { resourceId: OWNER.resourceId, threadId: OWNER.threadId };
+    owners.record("run-1", OWNER);
+    expect(owners.awaitsApproval(caller)).toBe(false);
+    owners.markState("run-1", "suspended");
+    expect(owners.awaitsApproval(caller)).toBe(true);
+    expect(owners.awaitsApproval({ ...caller, threadId: "Thread0000000000002" })).toBe(false);
+    expect(owners.awaitsApproval({ ...caller, resourceId: "other:uid" })).toBe(false);
+    owners.markState("run-1", "finished");
+    expect(owners.awaitsApproval(caller)).toBe(false);
+  });
+
   it("forgets a run after its time to live", () => {
     let now = 0;
     const owners = createChatRunOwners({ ttlMs: 1_000, now: () => now });
