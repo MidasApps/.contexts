@@ -14,8 +14,8 @@ export default defineCoreVitestConfig({
     // The slowest tests (dialog + typing + axe) take about 1.5 s on an idle machine; Vitest's 5 s
     // default left too little margin under load. A hung test still fails, three times later.
     testTimeout: 15_000,
-    // Outside a tenant the display zone falls back to the browser's (shell-intl-provider.tsx). Pin
-    // it to the fixtures' zone so dates read the same on a developer machine and on a UTC runner.
-    env: { TZ: "America/Sao_Paulo" },
+    // Outside a tenant the display zone falls back to the browser's (shell-intl-provider.tsx). The
+    // host zone is pinned to UTC so dates read the same on every machine (rules/testing.md §5).
+    env: { TZ: "UTC" },
   },
 });

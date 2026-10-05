@@ -98,8 +98,8 @@ describe("AdminEvalsView", () => {
         .map((cell) => cell.textContent),
     ).toEqual([
       "Avaliador",
-      "A · Assistente · assistant.v1 · 30 de set. de 2026, 09:00",
-      "B · Assistente · assistant.v1 · 30 de set. de 2026, 09:00",
+      "A · Assistente · assistant.v1 · 30 de set. de 2026, 12:00",
+      "B · Assistente · assistant.v1 · 30 de set. de 2026, 12:00",
       "Mínimo",
     ]);
     expect(
