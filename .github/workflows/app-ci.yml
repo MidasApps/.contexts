@@ -288,7 +288,8 @@ jobs:
   e2e:
     name: e2e (Playwright)
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    # About 500 web journeys (two retries in CI) plus desktop-web: 40 minutes ran out before the end.
+    timeout-minutes: 75
     # scripts/e2e.ts recreates the app_e2e database on this server (Mastra storage, knowledge).
     services:
       postgres:
@@ -330,10 +331,17 @@ jobs:
           sed -i 's/^WEB_PORT=.*/WEB_PORT=3100/; s#^NEXT_PUBLIC_APP_URL=.*#NEXT_PUBLIC_APP_URL=http://localhost:3100#' .env.local
       # Emulators (auth, firestore) + turbo build with the e2e public config +
       # Playwright for web (chromium, firefox, webkit, mobile-chrome) and desktop-web.
+      # The /admin evals journey reads the reports of a fake-model eval run (app/.evals).
+      - name: Eval reports for the e2e
+        run: pnpm evals
+        env:
+          APP_ENV: local
+          AI_MODE: fake
       - name: e2e
         run: pnpm test:e2e
+      # Also on a timeout, which cancels the job, so the reports of the failed journeys are kept.
       - name: Upload Playwright reports
-        if: failure()
+        if: failure() || cancelled()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-reports
