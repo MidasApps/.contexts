@@ -26,7 +26,8 @@ const createScopeLink = (initial: string) => {
 
 /**
  * The composer's upload queue for one chat thread: created once, read through
- * `useSyncExternalStore`, and emptied (uploads in flight cancelled) when the thread unmounts.
+ * `useSyncExternalStore`, and released when the thread unmounts: attachments in flight are
+ * cancelled, knowledge files on their way finish (follow-up 105).
  */
 export const useUploadQueue = ({
   organizationId,
@@ -36,7 +37,7 @@ export const useUploadQueue = ({
   const [scope] = useState(() => createScopeLink(organizationId));
   useEffect(() => scope.set(organizationId), [scope, organizationId]);
   const [queue] = useState(() => createUploadQueue({ callEndpoint, getOrganizationId: scope.get, ...seams }));
-  useEffect(() => () => queue.clear(), [queue]);
+  useEffect(() => () => queue.release(), [queue]);
   const items = useSyncExternalStore(queue.subscribe, queue.getSnapshot, () => NO_ITEMS);
   return { queue, items };
 };

@@ -67,8 +67,11 @@ export type UploadQueue = {
    * files that are done leave the composer too (they went to the knowledge base, not the message).
    */
   readonly take: () => readonly MessageAttachment[];
-  /** Cancels everything and empties the queue (the composer unmounted). */
-  readonly clear: () => void;
+  /**
+   * The composer unmounted: cancels the message's attachments, while a knowledge file still on its
+   * way keeps going until it reaches the knowledge base (it never travelled with the message).
+   */
+  readonly release: () => void;
 };
 
 const SERVER_REASONS: ReadonlySet<string> = new Set(["TYPE_NOT_ALLOWED", "TOO_LARGE", "CONTENT_MISMATCH"]);
@@ -267,8 +270,9 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
       if (ready.length + settledKnowledge.length > 0) publish();
       return attachments;
     },
-    clear: () => {
-      [...entries.keys()].forEach(drop);
+    release: () => {
+      const unfinishedKnowledge = (item: UploadItem) => item.purpose === "knowledge" && IN_FLIGHT.has(item.status);
+      [...entries.values()].filter(({ item }) => !unfinishedKnowledge(item)).forEach(({ item }) => drop(item.id));
       publish();
     },
   };

@@ -239,12 +239,19 @@ describe("upload queue", () => {
     expect(item()).toMatchObject({ purpose: "knowledge", status: "uploading" });
   });
 
-  it("empties the queue and cancels everything on clear", async () => {
-    const { queue, transfer } = setup();
+  it("cancels the message's attachments on release, but lets a knowledge file on its way reach the knowledge base", async () => {
+    const { api, queue, transfer } = setup({ files: { [FILE_B]: [ok(storedFile(FILE_B))] } });
     queue.add([source("a.txt", "text/plain")], "chat-attachment");
-    const sent = await transfer();
-    queue.clear();
-    expect(sent.aborted()).toBe(true);
-    expect(queue.getSnapshot()).toEqual([]);
+    const attachment = await transfer(0);
+    queue.add([source("guide.md", "text/markdown")], "knowledge");
+    const knowledge = await transfer(1);
+    queue.release();
+    expect(attachment.aborted()).toBe(true);
+    expect(knowledge.aborted()).toBe(false);
+    expect(queue.getSnapshot().map((item) => item.purpose)).toEqual(["knowledge"]);
+    knowledge.finish();
+    await vi.waitFor(() =>
+      expect(api.calls.find((call) => call.path === SOURCES_PATH)?.body).toEqual({ kind: "file", fileId: FILE_B }),
+    );
   });
 });
