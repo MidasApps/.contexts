@@ -109,11 +109,72 @@ describe("SettingsMembersView", () => {
     await waitFor(() => expect(screen.queryByRole("cell", { name: /Bruno Lima/u })).toBeNull());
   });
 
+  it("gives a member access at a unit of a project, and says when that access exists", async () => {
+    const bodies: unknown[] = [];
+    const { user } = renderView(ADMIN, {
+      "POST /v1/organizations/:organizationId/memberships": (request: FakeRequest) => {
+        bodies.push(request.body);
+        return apiError(409, "MEMBERSHIP_EXISTS");
+      },
+    });
+    await user.click(await screen.findByRole("button", { name: "Dar acesso a Bruno Lima em outro lugar" }));
+    const dialog = await screen.findByRole("dialog", { name: "Dar acesso a Bruno Lima" });
+    await user.click(within(dialog).getByRole("combobox", { name: "Onde vale" }));
+    await user.click(await screen.findByRole("option", { name: "Launch" }));
+    await user.click(within(dialog).getByRole("combobox", { name: "Unidade" }));
+    await user.click(await screen.findByRole("option", { name: "Site A › Floor 2" }));
+    await user.click(within(dialog).getByRole("button", { name: "Dar acesso" }));
+    expect((await within(dialog).findByRole("alert")).textContent).toContain("já tem acesso neste lugar");
+    expect(bodies).toEqual([
+      {
+        userId: BRUNO["uid"],
+        node: { level: "unit", tenantId: IDS.organization, projectId: IDS.project, unitId: "floor-1" },
+        roles: [{ kind: "system", key: "member" }],
+      },
+    ]);
+    await expectNoAxeViolations(dialog);
+  });
+
+  it("revokes one grant of a member who has more than one", async () => {
+    const twoGrants = buildMember({
+      uid: "uidCarla0000000000000",
+      displayName: "Carla Dias",
+      email: "carla@example.com",
+      grants: [
+        {
+          membershipId: "MbCarlaOrg0000000000",
+          node: { level: "organization", tenantId: IDS.organization },
+          roles: [{ kind: "system", key: "viewer" }],
+        },
+        {
+          membershipId: "MbCarlaProject000000",
+          node: { level: "project", tenantId: IDS.organization, projectId: IDS.project },
+          roles: [{ kind: "system", key: "admin" }],
+        },
+      ],
+    });
+    const { user, api } = renderView(ADMIN, {
+      "GET /v1/organizations/:organizationId/members": page([SELF, BRUNO, twoGrants]),
+      "DELETE /v1/memberships/:membershipId": noContent(),
+    });
+    await screen.findByText("carla@example.com");
+    // Bruno has one grant: removing him is "Remover", not a per-grant revoke.
+    expect(screen.queryByRole("button", { name: "Revogar este acesso de Bruno Lima" })).toBeNull();
+    const revokes = screen.getAllByRole("button", { name: "Revogar este acesso de Carla Dias" });
+    expect(revokes.length).toBe(2);
+    await user.click(revokes[1] as HTMLElement);
+    const confirm = await screen.findByRole("alertdialog", { name: "Revogar este acesso de Carla Dias?" });
+    await user.click(within(confirm).getByRole("button", { name: "Revogar acesso" }));
+    expect(await screen.findByText("Acesso de Carla Dias revogado.")).toBeDefined();
+    expect(api.callLines()).toContain("DELETE /v1/memberships/MbCarlaProject000000");
+  });
+
   it("hides every action without the permissions and shows no-access without core.member.read", async () => {
     const reader = renderView(["core.organization.read", "core.member.read"]);
     await screen.findByText("bruno@example.com");
     expect(screen.queryByRole("button", { name: /Editar papéis/u })).toBeNull();
     expect(screen.queryByRole("button", { name: /Remover/u })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Dar acesso/u })).toBeNull();
     expect(screen.queryByRole("button", { name: "Convidar" })).toBeNull();
     reader.unmount();
 

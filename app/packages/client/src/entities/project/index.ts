@@ -5,6 +5,7 @@ export {
   type NodeOptions,
   nodeFromOptionValue,
   nodeOptionValue,
+  nodeWithUnit,
   type TenantNodeInput,
   useNodeOptions,
 } from "./model/node-options.ts";

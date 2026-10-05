@@ -7,7 +7,12 @@ import { MEMBERS_PAGE_LIMIT, MemberChip, useMembers } from "#/entities/member/in
 import { useRoleRefLabel, useRoles } from "#/entities/role/index.ts";
 import { useAccessContext, useCurrentNode, useMe } from "#/entities/session/index.ts";
 import { InviteMemberDialog } from "#/features/invite-member/index.ts";
-import { EditGrantRolesDialog, RemoveMemberDialog } from "#/features/manage-membership/index.ts";
+import {
+  EditGrantRolesDialog,
+  GrantAccessDialog,
+  RemoveMemberDialog,
+  RevokeGrantDialog,
+} from "#/features/manage-membership/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
@@ -27,6 +32,8 @@ type Actions = {
   canUpdate: boolean;
   canRemove: boolean;
   onEdit: (member: Member, grant: Grant) => void;
+  onRevoke: (member: Member, grant: Grant) => void;
+  onGrant: (member: Member) => void;
   onRemove: (member: Member) => void;
 };
 
@@ -65,8 +72,29 @@ function Grants({ member, roles, actions }: { member: Member; roles: readonly Ro
               <span className="sr-only">{t("editRolesOf", { name: memberName(member) })}</span>
             </Button>
           ) : null}
+          {/* A single grant is the whole membership: "Remove" covers it. */}
+          {actions.canRemove && member.grants.length > 1 ? (
+            <Button variant="ghost" size="icon-xs" onClick={() => actions.onRevoke(member, grant)}>
+              <Icon name="x" />
+              <span className="sr-only">{t("revokeGrantOf", { name: memberName(member) })}</span>
+            </Button>
+          ) : null}
         </li>
       ))}
+      {actions.canUpdate ? (
+        <li>
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto p-0"
+            onClick={() => actions.onGrant(member)}
+            aria-label={t("grantNamed", { name: memberName(member) })}
+          >
+            <Icon name="plus" />
+            {t("grantAction")}
+          </Button>
+        </li>
+      ) : null}
     </ul>
   );
 }
@@ -121,12 +149,16 @@ function MembersTable({
   const roles = useRoles(organization.id);
   const self = useMe().data?.uid;
   const [editing, setEditing] = useState<{ member: Member; grant: Grant } | null>(null);
+  const [revoking, setRevoking] = useState<{ member: Member; grant: Grant } | null>(null);
+  const [granting, setGranting] = useState<Member | null>(null);
   const [removing, setRemoving] = useState<Member | null>(null);
   const actions = useMemo<Actions>(
     () => ({
       canUpdate: context.permissions.includes("core.member.update"),
       canRemove: context.permissions.includes("core.member.remove"),
       onEdit: (member, grant) => setEditing({ member, grant }),
+      onRevoke: (member, grant) => setRevoking({ member, grant }),
+      onGrant: setGranting,
       onRemove: setRemoving,
     }),
     [context.permissions],
@@ -177,6 +209,18 @@ function MembersTable({
         customRoles={roles.data}
         onOpenChange={(open) => !open && setEditing(null)}
         nodeLabel={editing === null ? null : <NodeName node={editing.grant.node} />}
+      />
+      <RevokeGrantDialog
+        organizationId={organization.id}
+        target={revoking}
+        onOpenChange={(open) => !open && setRevoking(null)}
+        nodeLabel={revoking === null ? null : <NodeName node={revoking.grant.node} />}
+      />
+      <GrantAccessDialog
+        organization={organization}
+        member={granting}
+        customRoles={roles.data}
+        onOpenChange={(open) => !open && setGranting(null)}
       />
       <RemoveMemberDialog
         organizationId={organization.id}
@@ -230,8 +274,9 @@ function SettingsMembers({ context }: { context: AccessContext }) {
 
 /**
  * `/o/:organizationId/settings/members` (SP2 spec §8, core.member.read): members with every grant
- * (node + roles), change roles per grant (core.member.update), remove (core.member.remove) and
- * invite (core.member.invite). `LAST_OWNER`/`ESCALATION_FORBIDDEN` stay in their dialogs.
+ * (node + roles), give access at one more organization, project or unit and change roles per grant
+ * (core.member.update), revoke one grant or remove the member (core.member.remove) and invite
+ * (core.member.invite). `LAST_OWNER`/`ESCALATION_FORBIDDEN` stay in their dialogs.
  */
 export function SettingsMembersView() {
   const t = useTranslations("settings.members");

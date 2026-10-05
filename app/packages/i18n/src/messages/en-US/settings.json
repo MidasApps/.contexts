@@ -16,7 +16,12 @@
     "placeholder": "Choose where it applies",
     "search": "Search projects",
     "loading": "Loading projects…",
-    "empty": "No projects found."
+    "empty": "No projects found.",
+    "wholeProject": "Whole project",
+    "unitGroup": "Units",
+    "searchUnit": "Search units",
+    "loadingUnits": "Loading units…",
+    "emptyUnits": "No units found."
   },
   "general": {
     "eyebrow": "{organization} settings",
@@ -70,7 +75,30 @@
       "confirm": "Remove member",
       "done": "{name} was removed from the organization."
     },
-    "removeNamed": "Remove {name}"
+    "removeNamed": "Remove {name}",
+    "grantAction": "Give access",
+    "grantNamed": "Give {name} access somewhere else",
+    "revokeGrantOf": "Revoke this access of {name}",
+    "grant": {
+      "title": "Give {name} access",
+      "description": "The person also gets these roles at the chosen place, on top of the access they already have.",
+      "node": "Applies to",
+      "nodeHint": "Access applies at the chosen level and everything below it.",
+      "unit": "Unit",
+      "unitHint": "Pick a unit to limit the access to it and its sub-units.",
+      "roles": "Roles",
+      "rolesRequired": "Choose at least one role.",
+      "exists": "This person already has access at this place. To change the roles, use the pencil next to that access.",
+      "cancel": "Cancel",
+      "submit": "Give access",
+      "done": "Access added for {name}."
+    },
+    "revokeGrant": {
+      "title": "Revoke this access of {name}?",
+      "description": "The person loses the roles of this access and keeps the others. The revoked access applied to:",
+      "confirm": "Revoke access",
+      "done": "Access of {name} revoked."
+    }
   },
   "invitations": {
     "eyebrow": "{organization} settings",
@@ -126,7 +154,8 @@
       "link": "Invitation link",
       "linkHint": "Valid for 7 days and usable once, with the invited email.",
       "another": "Invite someone else",
-      "done": "Done"
+      "done": "Done",
+      "unit": "Unit"
     },
     "revoke": {
       "title": "Revoke this invitation?",

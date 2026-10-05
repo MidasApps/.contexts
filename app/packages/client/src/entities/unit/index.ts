@@ -16,3 +16,4 @@ export {
 } from "./api/unit-queries.ts";
 export { buildUnitTree, unitPathIn } from "./model/build-unit-tree.ts";
 export { UnitBreadcrumb, type UnitBreadcrumbProps } from "./ui/UnitBreadcrumb.tsx";
+export { UnitSelect, type UnitSelectProps } from "./ui/UnitSelect.tsx";

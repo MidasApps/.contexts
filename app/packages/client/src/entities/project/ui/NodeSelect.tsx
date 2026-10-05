@@ -13,7 +13,7 @@ export type NodeSelectProps = Omit<ComponentProps<"button">, "value" | "onChange
 
 /**
  * Where a grant, invitation, device or API key applies: the whole organization or one project
- * (searchable). Label it with an outside `FieldLabel` (the trigger is a `combobox`).
+ * (searchable); a unit is chosen with `UnitSelect` once a project is. Label it with an outside `FieldLabel` (the trigger is a `combobox`).
  */
 export function NodeSelect({ organization, value, onValueChange, ...triggerProps }: NodeSelectProps) {
   const t = useTranslations("settings.nodes");
@@ -21,7 +21,10 @@ export function NodeSelect({ organization, value, onValueChange, ...triggerProps
   return (
     <Combobox
       groups={options.groups}
-      value={nodeOptionValue(value)}
+      // A unit node shows its project here; the unit is picked below it (`UnitSelect`).
+      value={nodeOptionValue(
+        value.level === "unit" ? { level: "project", tenantId: value.tenantId, projectId: value.projectId } : value,
+      )}
       onValueChange={(selected) => {
         const node = nodeFromOptionValue(organization.id, selected);
         if (node !== null) onValueChange(node);

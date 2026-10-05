@@ -16,7 +16,12 @@
     "placeholder": "Selecione onde vale",
     "search": "Buscar projeto",
     "loading": "Carregando projetos…",
-    "empty": "Nenhum projeto encontrado."
+    "empty": "Nenhum projeto encontrado.",
+    "wholeProject": "Todo o projeto",
+    "unitGroup": "Unidades",
+    "searchUnit": "Buscar unidade",
+    "loadingUnits": "Carregando unidades…",
+    "emptyUnits": "Nenhuma unidade encontrada."
   },
   "general": {
     "eyebrow": "Configurações de {organization}",
@@ -70,7 +75,30 @@
       "confirm": "Remover membro",
       "done": "{name} foi removido da organização."
     },
-    "removeNamed": "Remover {name}"
+    "removeNamed": "Remover {name}",
+    "grantAction": "Dar acesso",
+    "grantNamed": "Dar acesso a {name} em outro lugar",
+    "revokeGrantOf": "Revogar este acesso de {name}",
+    "grant": {
+      "title": "Dar acesso a {name}",
+      "description": "A pessoa passa a ter estes papéis também no lugar escolhido, além dos acessos que já tem.",
+      "node": "Onde vale",
+      "nodeHint": "O acesso vale no nível escolhido e em tudo abaixo dele.",
+      "unit": "Unidade",
+      "unitHint": "Escolha uma unidade para limitar o acesso a ela e às sub-unidades.",
+      "roles": "Papéis",
+      "rolesRequired": "Escolha pelo menos um papel.",
+      "exists": "Esta pessoa já tem acesso neste lugar. Para mudar os papéis, use o lápis ao lado desse acesso.",
+      "cancel": "Cancelar",
+      "submit": "Dar acesso",
+      "done": "Acesso de {name} adicionado."
+    },
+    "revokeGrant": {
+      "title": "Revogar este acesso de {name}?",
+      "description": "A pessoa perde os papéis deste acesso e continua com os outros. O acesso revogado valia em:",
+      "confirm": "Revogar acesso",
+      "done": "Acesso de {name} revogado."
+    }
   },
   "invitations": {
     "eyebrow": "Configurações de {organization}",
@@ -126,7 +154,8 @@
       "link": "Link do convite",
       "linkHint": "Vale por 7 dias e só pode ser usado uma vez, com o e-mail convidado.",
       "another": "Convidar outra pessoa",
-      "done": "Concluir"
+      "done": "Concluir",
+      "unit": "Unidade"
     },
     "revoke": {
       "title": "Revogar este convite?",

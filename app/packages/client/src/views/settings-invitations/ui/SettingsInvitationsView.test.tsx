@@ -117,6 +117,32 @@ describe("SettingsInvitationsView", () => {
     expect(screen.queryByDisplayValue(LOCALIZED_ACCEPT_URL)).toBeNull();
   });
 
+  it("invites at a unit of a project", async () => {
+    const bodies: FakeRequest[] = [];
+    const { user } = renderView({
+      "POST /v1/organizations/:organizationId/invitations": (request: FakeRequest) => {
+        bodies.push(request);
+        return ok({ invitation: buildInvitation({ email: "dora@example.com" }), acceptUrl: ACCEPT_URL }, 201);
+      },
+    });
+    await user.click(await screen.findByRole("button", { name: "Convidar" }));
+    const dialog = await screen.findByRole("dialog", { name: "Convidar pessoa" });
+    await user.type(within(dialog).getByRole("textbox", { name: "E-mail" }), "dora@example.com");
+    expect(within(dialog).queryByRole("combobox", { name: "Unidade" })).toBeNull();
+    await user.click(within(dialog).getByRole("combobox", { name: "Onde vale" }));
+    await user.click(await screen.findByRole("option", { name: "Launch" }));
+    await user.click(within(dialog).getByRole("combobox", { name: "Unidade" }));
+    await user.click(await screen.findByRole("option", { name: "Site A" }));
+    await user.click(within(dialog).getByRole("button", { name: "Enviar convite" }));
+    await within(dialog).findByRole("textbox", { name: "Link do convite" });
+    expect((bodies[0]?.body as { node: unknown }).node).toEqual({
+      level: "unit",
+      tenantId: IDS.organization,
+      projectId: IDS.project,
+      unitId: "site-1",
+    });
+  });
+
   it("asks before Escape or the close button drops the one-time link", async () => {
     const { user } = renderView({
       "POST /v1/organizations/:organizationId/invitations": ok(

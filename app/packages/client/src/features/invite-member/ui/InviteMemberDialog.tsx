@@ -7,8 +7,9 @@ import { type FormEvent, type Ref, useRef, useState } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { z } from "zod";
 import { invitationKeys } from "#/entities/invitation/index.ts";
-import { NodeSelect, type TenantNodeInput } from "#/entities/project/index.ts";
+import { NodeSelect, nodeWithUnit, type TenantNodeInput } from "#/entities/project/index.ts";
 import { RoleChecklist, useRoleOptions } from "#/entities/role/index.ts";
+import { UnitSelect } from "#/entities/unit/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
@@ -109,7 +110,7 @@ function InvitationLink({
   );
 }
 
-/** Email, node and roles of the invitation. */
+/** Email, node (organization, project or a unit of it) and roles of the invitation. */
 function InvitationFields({
   organization,
   options,
@@ -153,6 +154,19 @@ function InvitationFields({
         </FieldControl>
         <FieldDescription>{t("nodeHint")}</FieldDescription>
       </Field>
+      {draft.node.level === "organization" ? null : (
+        <Field>
+          <FieldLabel>{t("unit")}</FieldLabel>
+          <FieldControl>
+            <UnitSelect
+              organizationId={organization.id}
+              projectId={draft.node.projectId}
+              value={draft.node.level === "unit" ? draft.node.unitId : undefined}
+              onValueChange={(unitId) => onDraftChange({ ...draft, node: nodeWithUnit(draft.node, unitId) })}
+            />
+          </FieldControl>
+        </Field>
+      )}
       <RoleChecklist
         legend={t("roles")}
         options={options}

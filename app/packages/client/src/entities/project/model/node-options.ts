@@ -29,6 +29,13 @@ export const nodeFromOptionValue = (organizationId: string, value: string): Tena
   return null;
 };
 
+/** The project or unit node of `unitId` inside `node`'s project (`undefined`: the project itself). */
+export const nodeWithUnit = (node: TenantNodeInput, unitId: string | undefined): TenantNodeInput => {
+  if (node.level === "organization") return node;
+  const project = { tenantId: node.tenantId, projectId: node.projectId };
+  return unitId === undefined ? { level: "project", ...project } : { level: "unit", ...project, unitId };
+};
+
 export type NodeOptions = {
   readonly groups: readonly ComboboxGroup[];
   readonly loading: boolean;
@@ -38,8 +45,8 @@ export type NodeOptions = {
 
 /**
  * Grant targets for pickers (invitations, grants, device activations, API keys): the
- * organization and every visible project (SP1 spec §5.2 nodes). Units are granted from the units
- * page, where the tree is loaded.
+ * organization and every visible project (SP1 spec §5.2 nodes). The units of the chosen project come
+ * from `UnitSelect` (unit entity), which loads that project's tree only.
  */
 export const useNodeOptions = (organization: { id: string; name: string }): NodeOptions => {
   const t = useTranslations("settings.nodes");

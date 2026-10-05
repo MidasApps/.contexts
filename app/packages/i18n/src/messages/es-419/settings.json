@@ -16,7 +16,12 @@
     "placeholder": "Elige dónde aplica",
     "search": "Buscar proyecto",
     "loading": "Cargando proyectos…",
-    "empty": "No se encontraron proyectos."
+    "empty": "No se encontraron proyectos.",
+    "wholeProject": "Todo el proyecto",
+    "unitGroup": "Unidades",
+    "searchUnit": "Buscar unidad",
+    "loadingUnits": "Cargando unidades…",
+    "emptyUnits": "No se encontraron unidades."
   },
   "general": {
     "eyebrow": "Configuración de {organization}",
@@ -70,7 +75,30 @@
       "confirm": "Quitar miembro",
       "done": "{name} fue quitado de la organización."
     },
-    "removeNamed": "Quitar a {name}"
+    "removeNamed": "Quitar a {name}",
+    "grantAction": "Dar acceso",
+    "grantNamed": "Dar acceso a {name} en otro lugar",
+    "revokeGrantOf": "Revocar este acceso de {name}",
+    "grant": {
+      "title": "Dar acceso a {name}",
+      "description": "La persona recibe estos roles también en el lugar elegido, además de los accesos que ya tiene.",
+      "node": "Dónde aplica",
+      "nodeHint": "El acceso aplica en el nivel elegido y en todo lo que está debajo.",
+      "unit": "Unidad",
+      "unitHint": "Elige una unidad para limitar el acceso a ella y a sus subunidades.",
+      "roles": "Roles",
+      "rolesRequired": "Elige al menos un rol.",
+      "exists": "Esta persona ya tiene acceso en este lugar. Para cambiar los roles, usa el lápiz junto a ese acceso.",
+      "cancel": "Cancelar",
+      "submit": "Dar acceso",
+      "done": "Acceso de {name} agregado."
+    },
+    "revokeGrant": {
+      "title": "¿Revocar este acceso de {name}?",
+      "description": "La persona pierde los roles de este acceso y conserva los demás. El acceso revocado aplicaba en:",
+      "confirm": "Revocar acceso",
+      "done": "Acceso de {name} revocado."
+    }
   },
   "invitations": {
     "eyebrow": "Configuración de {organization}",
@@ -126,7 +154,8 @@
       "link": "Enlace de la invitación",
       "linkHint": "Vale por 7 días y solo se puede usar una vez, con el correo invitado.",
       "another": "Invitar a otra persona",
-      "done": "Listo"
+      "done": "Listo",
+      "unit": "Unidad"
     },
     "revoke": {
       "title": "¿Revocar esta invitación?",
