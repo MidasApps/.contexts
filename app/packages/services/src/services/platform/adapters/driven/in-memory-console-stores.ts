@@ -40,6 +40,7 @@ const createInMemoryPlanRepository = (plans: Map<string, Plan>): PlanRepository 
       plans.set(id, plan);
       return Promise.resolve(plan);
     },
+    remove: (planId) => Promise.resolve(plans.delete(planId)),
   };
 };
 

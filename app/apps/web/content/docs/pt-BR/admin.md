@@ -86,7 +86,7 @@ As ações da equipe que alteram algo ficam no registro de auditoria da platafor
 
 | Ação | Código na auditoria |
 |---|---|
-| Criar ou editar um plano | `PLAN_CREATED`, `PLAN_UPDATED` |
+| Criar, editar ou excluir um plano | `PLAN_CREATED`, `PLAN_UPDATED`, `PLAN_DELETED` |
 | Trocar o plano, suspender ou reativar uma organização | `ORGANIZATION_UPDATED` |
 | Salvar ou remover o ajuste de orçamento | `TENANT_BUDGET_UPDATED` |
 | Alterar os agentes, as ferramentas web ou o modo de PII de uma organização | `AGENT_SETTINGS_UPDATED` |

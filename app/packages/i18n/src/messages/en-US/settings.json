@@ -1810,7 +1810,8 @@
       "CUSTOM_AGENT_DELETED": "Agent deleted",
       "CUSTOM_SKILL_CREATED": "Skill created",
       "CUSTOM_SKILL_UPDATED": "Skill updated",
-      "CUSTOM_SKILL_DELETED": "Skill deleted"
+      "CUSTOM_SKILL_DELETED": "Skill deleted",
+      "PLAN_DELETED": "Plan deleted"
     },
     "targetTypes": {
       "organization": "Organization",

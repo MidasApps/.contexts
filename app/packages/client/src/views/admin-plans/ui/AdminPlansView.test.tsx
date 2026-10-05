@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { ADMIN_IDS, buildPlan } from "#/shared/testing/admin-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, ok } from "#/shared/testing/fake-api.ts";
+import { apiError, FAKE_REQUEST_ID, noContent, ok } from "#/shared/testing/fake-api.ts";
 import { AdminPlansView } from "./AdminPlansView.tsx";
 
 const plain = (text: string | null): string => (text ?? "").replace(/\s/gu, " ");
@@ -175,6 +175,25 @@ describe("AdminPlansView", () => {
     } finally {
       setOnline(true);
     }
+  });
+
+  it("deletes a plan after confirming, and explains PLAN_IN_USE", async () => {
+    const { user, api } = render({
+      routes: {
+        "GET /v1/admin/plans": ok([buildPlan()]),
+        "DELETE /v1/admin/plans/:planId": apiError(409, "PLAN_IN_USE"),
+      },
+    });
+    await user.click(await screen.findByRole("button", { name: "Excluir o plano Standard" }));
+    const confirm = await screen.findByRole("alertdialog", { name: "Excluir o plano Standard?" });
+    await user.click(within(confirm).getByRole("button", { name: "Excluir plano" }));
+    expect((await within(confirm).findByRole("alert")).textContent).toContain("ainda está em uso");
+
+    api.route("DELETE /v1/admin/plans/:planId", noContent());
+    api.route("GET /v1/admin/plans", ok([]));
+    await user.click(within(confirm).getByRole("button", { name: "Excluir plano" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    expect(await screen.findByText("Nenhum plano cadastrado")).toBeDefined();
   });
 
   it("is closed to the support role", async () => {

@@ -1,5 +1,6 @@
 import {
   createPlanEndpoint,
+  deletePlanEndpoint,
   getAdminOverviewEndpoint,
   getAdminUsageEndpoint,
   getOrganizationAdminEndpoint,
@@ -9,7 +10,7 @@ import {
   updateOrganizationAdminEndpoint,
   updatePlanEndpoint,
 } from "@core/contracts";
-import { apiError, dataResponse } from "#/services/shared/http/api-errors.ts";
+import { apiError, dataResponse, noContentResponse } from "#/services/shared/http/api-errors.ts";
 import { invalidCursorResponse, listResponse, pageRequestOf } from "#/services/shared/http/api-list.ts";
 import { type ApiRouteDeps, withApiRoute } from "#/services/shared/http/api-route.ts";
 import type { RouteHandler } from "#/services/shared/http/route-boundary.ts";
@@ -31,15 +32,10 @@ const organizationErrorResponse = (error: OrganizationAdminError, requestId: str
     ? apiError(404, "NOT_FOUND", requestId)
     : apiError(400, "VALIDATION_FAILED", requestId, [{ field: "planId", issue: "NOT_FOUND" }]);
 
-/**
- * `/v1/admin` plans, organizations, budgets and overview (SP5 spec §6, decisions 0039 and 0041):
- * every handler first requires staff with MFA and the `platform.*` permission (`requireStaff`),
- * and every mutation is audited on the platform log (with `targetTenantId` for an organization).
- */
-export const buildAdminPlatformRoutes = (deps: {
-  readonly pipeline: ApiRouteDeps;
-  readonly console: ConsoleServices;
-}): Record<string, RouteHandler> => ({
+type ConsoleRouteDeps = { readonly pipeline: ApiRouteDeps; readonly console: ConsoleServices };
+
+/** The plan catalog (decision 0039; deletion: decision 0075), platform.plan.manage. */
+const buildPlanRoutes = (deps: ConsoleRouteDeps): Record<string, RouteHandler> => ({
   [listPlansEndpoint.id]: withApiRoute(listPlansEndpoint, deps.pipeline, async (ctx) => {
     const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.plans });
     return denied ?? dataResponse({ data: await deps.console.listPlans() });
@@ -65,6 +61,28 @@ export const buildAdminPlatformRoutes = (deps: {
     });
     return result.ok ? dataResponse({ data: result.data }) : apiError(404, "NOT_FOUND", ctx.requestId);
   }),
+  [deletePlanEndpoint.id]: withApiRoute(deletePlanEndpoint, deps.pipeline, async (ctx) => {
+    const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.plans });
+    if (denied !== null) return denied;
+    const result = await deps.console.deletePlan({
+      actor: ctx.principal,
+      requestId: ctx.requestId,
+      planId: ctx.input.params.planId,
+    });
+    if (result.ok) return noContentResponse();
+    return result.error.code === "NOT_FOUND"
+      ? apiError(404, "NOT_FOUND", ctx.requestId)
+      : apiError(409, "PLAN_IN_USE", ctx.requestId);
+  }),
+});
+
+/**
+ * `/v1/admin` plans, organizations, budgets and overview (SP5 spec §6, decisions 0039 and 0041):
+ * every handler first requires staff with MFA and the `platform.*` permission (`requireStaff`),
+ * and every mutation is audited on the platform log (with `targetTenantId` for an organization).
+ */
+export const buildAdminPlatformRoutes = (deps: ConsoleRouteDeps): Record<string, RouteHandler> => ({
+  ...buildPlanRoutes(deps),
   [listOrganizationsAdminEndpoint.id]: withApiRoute(listOrganizationsAdminEndpoint, deps.pipeline, async (ctx) => {
     const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.organizationRead });
     if (denied !== null) return denied;

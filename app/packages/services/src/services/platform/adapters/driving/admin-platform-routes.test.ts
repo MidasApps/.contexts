@@ -47,6 +47,42 @@ const json = async <T>(response: Response) => (await response.json()) as T;
 type PlanBody = { data: { id: string } };
 
 describe("/v1/admin plans and organizations", () => {
+  it("deletes a plan no organization is on, refuses one in use and audits PLAN_DELETED", async () => {
+    const { routes, auditLog } = setup();
+    const create = async (name: string) =>
+      (
+        await json<PlanBody>(
+          await callRoute(routes, "admin.createPlan", "/v1/admin/plans", {
+            method: "POST",
+            as: "sam",
+            body: { name, limits: LIMITS },
+          }),
+        )
+      ).data.id;
+    const used = await create("Pro");
+    const unused = await create("Antigo");
+    await callRoute(routes, "admin.updateOrganization", `/v1/admin/organizations/${ORG_A}`, {
+      method: "PATCH",
+      as: "sam",
+      body: { planId: used },
+    });
+    const remove = (planId: string, as = "sam") =>
+      callRoute(routes, "admin.deletePlan", `/v1/admin/plans/${planId}`, { method: "DELETE", as });
+
+    expect((await remove(unused, "sue")).status).toBe(403);
+    expect(await json(await remove(used))).toMatchObject({ error: { code: "PLAN_IN_USE" } });
+    expect((await remove(unused)).status).toBe(204);
+    expect((await remove(unused)).status).toBe(404);
+    const plans = await json<{ data: { id: string }[] }>(
+      await callRoute(routes, "admin.listPlans", "/v1/admin/plans", { as: "sam" }),
+    );
+    expect(plans.data.map((plan) => plan.id)).toEqual([used]);
+    expect(auditLog.entries("platform").at(-1)).toMatchObject({
+      action: "PLAN_DELETED",
+      target: { type: "plan", id: unused },
+    });
+  });
+
   it("is staff only: non-staff and staff without MFA get 403, support staff may read but not write", async () => {
     const { routes } = setup();
     expect((await callRoute(routes, "admin.listPlans", "/v1/admin/plans", { as: "alice" })).status).toBe(403);

@@ -170,6 +170,14 @@
       "maxCustomInstructionCharsHint": "Déjelo en blanco para usar el valor predeterminado de la plataforma.",
       "features": "Funcionalidades",
       "featuresHint": "Claves separadas por comas, por ejemplo: web-tools, chat.voice"
+    },
+    "deleteAction": "Eliminar",
+    "deleteNamed": "Eliminar el plan {name}",
+    "delete": {
+      "title": "¿Eliminar el plan {name}?",
+      "description": "El plan sale del catálogo. Solo se puede eliminar un plan que ninguna organización usa.",
+      "confirm": "Eliminar plan",
+      "done": "Plan {name} eliminado."
     }
   },
   "models": {

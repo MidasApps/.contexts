@@ -19,6 +19,8 @@ export type PlanRepository = {
     readonly at: string;
     readonly actorId: string;
   }) => Promise<Plan | null>;
+  /** Deletes the plan document; `false` when it did not exist. */
+  readonly remove: (planId: string) => Promise<boolean>;
 };
 
 /** An organization's commercial assignment (Firestore `organization-plans/{tenantId}`). */

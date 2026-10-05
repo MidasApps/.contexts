@@ -2227,6 +2227,75 @@ paths:
         - admin
       x-auth: user
   /v1/admin/plans/{planId}:
+    delete:
+      operationId: admin.deletePlan
+      parameters:
+        - description: Plan id.
+          in: path
+          name: planId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: PLAN_IN_USE
+          x-error-codes:
+            - PLAN_IN_USE
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Deletes a plan no organization is on (staff, platform.plan.manage).
+      tags:
+        - admin
+      x-auth: user
     put:
       operationId: admin.updatePlan
       parameters:
@@ -19501,6 +19570,7 @@ components:
             - FEATURE_FLAG_UPDATED
             - PLAN_CREATED
             - PLAN_UPDATED
+            - PLAN_DELETED
             - MODEL_SETTINGS_UPDATED
             - TENANT_BUDGET_UPDATED
             - AGENT_SETTINGS_UPDATED
@@ -19834,6 +19904,7 @@ components:
             - FEATURE_FLAG_UPDATED
             - PLAN_CREATED
             - PLAN_UPDATED
+            - PLAN_DELETED
             - MODEL_SETTINGS_UPDATED
             - TENANT_BUDGET_UPDATED
             - AGENT_SETTINGS_UPDATED
@@ -19980,6 +20051,7 @@ components:
             - FEATURE_FLAG_UPDATED
             - PLAN_CREATED
             - PLAN_UPDATED
+            - PLAN_DELETED
             - MODEL_SETTINGS_UPDATED
             - TENANT_BUDGET_UPDATED
             - AGENT_SETTINGS_UPDATED

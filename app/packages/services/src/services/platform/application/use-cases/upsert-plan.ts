@@ -7,6 +7,13 @@ import { syncTenantBudget, tightenTenantBudget } from "./sync-tenant-budget.ts";
 type StaffCommand = { readonly actor: UserPrincipal; readonly requestId: string; readonly input: UpsertPlanInput };
 
 export type CreatePlan = (command: StaffCommand) => Promise<Plan>;
+export type DeletePlanError = { readonly code: "NOT_FOUND" } | { readonly code: "PLAN_IN_USE" };
+export type DeletePlan = (command: {
+  readonly actor: UserPrincipal;
+  readonly requestId: string;
+  readonly planId: string;
+}) => Promise<Result<void, DeletePlanError>>;
+
 export type UpdatePlan = (
   command: StaffCommand & { readonly planId: string },
 ) => Promise<Result<Plan, { readonly code: "NOT_FOUND" }>>;
@@ -67,4 +74,26 @@ export const makeUpdatePlan =
     await audit(deps, command, "PLAN_UPDATED", plan.id);
     for (const tenantId of tenants) await syncTenantBudget(deps, tenantId);
     return ok(plan);
+  };
+
+/**
+ * `DELETE /v1/admin/plans/{planId}`: only a plan no organization is on (`PLAN_IN_USE` otherwise, so
+ * no budget loses its source), audited `PLAN_DELETED` on the platform log. An organization assigned
+ * between the check and the delete keeps a dangling `planId`, which reads as "no plan".
+ */
+export const makeDeletePlan =
+  (deps: Pick<ConsoleDeps, "plans" | "organizations" | "audit">): DeletePlan =>
+  async (command) => {
+    if ((await deps.plans.get(command.planId)) === null) return err({ code: "NOT_FOUND" });
+    if ((await deps.organizations.tenantsOnPlan(command.planId)).length > 0) return err({ code: "PLAN_IN_USE" });
+    if (!(await deps.plans.remove(command.planId))) return err({ code: "NOT_FOUND" });
+    await deps.audit.record({
+      log: "platform",
+      action: "PLAN_DELETED",
+      actor: auditActorOf(command.actor),
+      target: { type: "plan", id: command.planId },
+      outcome: "success",
+      requestId: command.requestId,
+    });
+    return ok(undefined);
   };

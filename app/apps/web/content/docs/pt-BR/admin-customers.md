@@ -138,7 +138,14 @@ Para atribuir o plano, abra a organização em **Organizações** e use **Salvar
 1. Na linha do plano, clique em **Editar**.
 2. Altere os campos e clique em **Salvar plano**.
 
-Salvar substitui os limites do plano e atualiza o orçamento de todas as organizações que o usam. Não há como excluir um plano nesta área.
+Salvar substitui os limites do plano e atualiza o orçamento de todas as organizações que o usam.
+
+### Excluir um plano
+
+1. Na linha do plano, clique em **Excluir**.
+2. Confirme em **Excluir plano**. Aparece "Plano {nome} excluído."
+
+Só é possível excluir um plano que nenhuma organização usa. Se alguma usa, aparece "Este plano ainda está em uso por organizações. Troque o plano delas antes de excluí-lo." Troque o plano dessas organizações em **Organizações** e tente de novo. A exclusão fica na auditoria da plataforma (`PLAN_DELETED`).
 
 Exemplo de plano, como a API o recebe:
 

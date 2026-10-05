@@ -69,6 +69,13 @@ export const createFirestorePlanRepository = (deps: { readonly firestore: Firest
         tx.update(ref, { name, limits, updatedAt: stamp(at), updatedBy: actorId });
         return parsePlan(id, { name, limits, createdAt: isoOf(snapshot.get("createdAt")), updatedAt: at }, ref.path);
       }),
+    remove: (planId) =>
+      deps.firestore.runTransaction(async (tx) => {
+        const ref = plans().doc(planId);
+        if (!(await tx.get(ref)).exists) return false;
+        tx.delete(ref);
+        return true;
+      }),
   };
 };
 

@@ -34,5 +34,6 @@
   "EVAL_REQUIRED": "Run an evaluation that passes before activating this version.",
   "EVAL_DATASET_MISSING": "This agent has no evaluation set yet.",
   "CUSTOM_LIMIT_REACHED": "The plan's limit was reached. Delete an item or talk to whoever manages the plan.",
-  "BUDGET_EXCEEDED": "The organization's AI budget ran out. Contact an administrator."
+  "BUDGET_EXCEEDED": "The organization's AI budget ran out. Contact an administrator.",
+  "PLAN_IN_USE": "Organizations are still on this plan. Move them to another plan before deleting it."
 }

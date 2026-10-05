@@ -40,7 +40,9 @@ import {
 } from "./application/use-cases/update-organization-admin.ts";
 import {
   type CreatePlan,
+  type DeletePlan,
   makeCreatePlan,
+  makeDeletePlan,
   makeUpdatePlan,
   type UpdatePlan,
 } from "./application/use-cases/upsert-plan.ts";
@@ -49,6 +51,7 @@ export type ConsoleServices = {
   readonly listPlans: ListPlans;
   readonly createPlan: CreatePlan;
   readonly updatePlan: UpdatePlan;
+  readonly deletePlan: DeletePlan;
   readonly listOrganizations: ListOrganizationsAdmin;
   readonly getOrganization: GetOrganizationAdmin;
   readonly updateOrganization: UpdateOrganizationAdmin;
@@ -64,6 +67,7 @@ export const createConsoleServices = (deps: ConsoleDeps): ConsoleServices => ({
   listPlans: makeListPlans(deps),
   createPlan: makeCreatePlan(deps),
   updatePlan: makeUpdatePlan(deps),
+  deletePlan: makeDeletePlan(deps),
   listOrganizations: makeListOrganizationsAdmin(deps),
   getOrganization: makeGetOrganizationAdmin(deps),
   updateOrganization: makeUpdateOrganizationAdmin(deps),

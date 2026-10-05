@@ -170,6 +170,14 @@
       "maxCustomInstructionCharsHint": "Leave blank to use the platform default.",
       "features": "Features",
       "featuresHint": "Keys separated by commas, for example: web-tools, chat.voice"
+    },
+    "deleteAction": "Delete",
+    "deleteNamed": "Delete the {name} plan",
+    "delete": {
+      "title": "Delete the {name} plan?",
+      "description": "The plan leaves the catalog. Only a plan no organization is on can be deleted.",
+      "confirm": "Delete plan",
+      "done": "Plan {name} deleted."
     }
   },
   "models": {

@@ -54,6 +54,17 @@ export const updatePlanEndpoint = defineEndpoint({
   summary: "Replaces a plan; the budgets of organizations on it follow (staff, platform.plan.manage).",
 });
 
+export const deletePlanEndpoint = defineEndpoint({
+  id: "admin.deletePlan",
+  method: "DELETE",
+  path: "/v1/admin/plans/{planId}",
+  auth: "user",
+  params: z.object({ planId: PlanIdSchema.meta(none("Plan id.")) }),
+  responses: { 204: null },
+  errors: { ...STAFF_ERRORS, 404: ["NOT_FOUND"], 409: ["PLAN_IN_USE"] },
+  summary: "Deletes a plan no organization is on (staff, platform.plan.manage).",
+});
+
 export const listOrganizationsAdminEndpoint = defineEndpoint({
   id: "admin.listOrganizations",
   method: "GET",
@@ -198,6 +209,7 @@ export const ADMIN_PLATFORM_ENDPOINTS: readonly EndpointDefinition[] = [
   listPlansEndpoint,
   createPlanEndpoint,
   updatePlanEndpoint,
+  deletePlanEndpoint,
   listOrganizationsAdminEndpoint,
   getOrganizationAdminEndpoint,
   updateOrganizationAdminEndpoint,

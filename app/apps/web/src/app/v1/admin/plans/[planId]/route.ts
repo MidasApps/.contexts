@@ -2,3 +2,4 @@
 import { route } from "@/server/core";
 
 export const PUT = route("admin.updatePlan");
+export const DELETE = route("admin.deletePlan");

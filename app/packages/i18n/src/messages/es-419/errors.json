@@ -34,5 +34,6 @@
   "EVAL_REQUIRED": "Ejecuta una evaluación aprobada antes de activar esta versión.",
   "EVAL_DATASET_MISSING": "Este agente aún no tiene un conjunto de evaluación.",
   "CUSTOM_LIMIT_REACHED": "Se alcanzó el límite del plan. Elimine un elemento o hable con quien administra el plan.",
-  "BUDGET_EXCEEDED": "Se agotó el presupuesto de IA de la organización. Habla con un administrador."
+  "BUDGET_EXCEEDED": "Se agotó el presupuesto de IA de la organización. Habla con un administrador.",
+  "PLAN_IN_USE": "Este plan todavía está en uso por organizaciones. Cambia su plan antes de eliminarlo."
 }

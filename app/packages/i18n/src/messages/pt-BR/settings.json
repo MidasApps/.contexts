@@ -1810,7 +1810,8 @@
       "CUSTOM_AGENT_DELETED": "Agente excluído",
       "CUSTOM_SKILL_CREATED": "Habilidade criada",
       "CUSTOM_SKILL_UPDATED": "Habilidade alterada",
-      "CUSTOM_SKILL_DELETED": "Habilidade excluída"
+      "CUSTOM_SKILL_DELETED": "Habilidade excluída",
+      "PLAN_DELETED": "Plano excluído"
     },
     "targetTypes": {
       "organization": "Organização",

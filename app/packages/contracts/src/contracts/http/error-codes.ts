@@ -45,6 +45,8 @@ export const CORE_ERROR_CODES = [
   "CUSTOM_LIMIT_REACHED",
   // 429: the organization reached its monthly AI budget; voice answers it over HTTP, the chat as a tripwire (decision 0065).
   "BUDGET_EXCEEDED",
+  // 409: a plan organizations are still on cannot be deleted (decision 0075).
+  "PLAN_IN_USE",
 ] as const;
 
 export const CoreErrorCodeSchema = z.enum(CORE_ERROR_CODES);

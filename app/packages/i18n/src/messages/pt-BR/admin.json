@@ -170,6 +170,14 @@
       "maxCustomInstructionCharsHint": "Deixe em branco para usar o padrão da plataforma.",
       "features": "Funcionalidades",
       "featuresHint": "Chaves separadas por vírgula, por exemplo: web-tools, chat.voice"
+    },
+    "deleteAction": "Excluir",
+    "deleteNamed": "Excluir o plano {name}",
+    "delete": {
+      "title": "Excluir o plano {name}?",
+      "description": "O plano sai do catálogo. Só é possível excluir um plano que nenhuma organização usa.",
+      "confirm": "Excluir plano",
+      "done": "Plano {name} excluído."
     }
   },
   "models": {

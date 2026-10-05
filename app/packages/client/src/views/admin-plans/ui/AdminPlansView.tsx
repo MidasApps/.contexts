@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { usePlans } from "#/entities/plan/index.ts";
-import { PlanFormDialog } from "#/features/admin-update-plan/index.ts";
+import { DeletePlanDialog, PlanFormDialog } from "#/features/admin-update-plan/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useFormatMicroUsd } from "#/shared/lib/format/use-format-micro-usd.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
@@ -38,22 +38,35 @@ function Features({ plan }: { plan: Plan }) {
   );
 }
 
-function EditButton({ plan, onEdit, disabled }: { plan: Plan; onEdit: (plan: Plan) => void; disabled: boolean }) {
+type PlanActions = { onEdit: (plan: Plan) => void; onDelete: (plan: Plan) => void };
+
+function RowActions({ plan, actions, disabled }: { plan: Plan; actions: PlanActions; disabled: boolean }) {
   const t = useTranslations("admin.plans");
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() => onEdit(plan)}
-      disabled={disabled}
-      aria-label={t("editNamed", { name: plan.name })}
-    >
-      {t("edit")}
-    </Button>
+    <span className="flex gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => actions.onEdit(plan)}
+        disabled={disabled}
+        aria-label={t("editNamed", { name: plan.name })}
+      >
+        {t("edit")}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => actions.onDelete(plan)}
+        disabled={disabled}
+        aria-label={t("deleteNamed", { name: plan.name })}
+      >
+        {t("deleteAction")}
+      </Button>
+    </span>
   );
 }
 
-const useColumns = (onEdit: (plan: Plan) => void, online: boolean) => {
+const useColumns = (actions: PlanActions, online: boolean) => {
   const t = useTranslations("admin.plans");
   const format = useFormatter();
   const formatCost = useFormatMicroUsd();
@@ -95,28 +108,28 @@ const useColumns = (onEdit: (plan: Plan) => void, online: boolean) => {
         id: "actions",
         header: () => t("columns.actions"),
         meta: { headerHidden: true },
-        cell: ({ row }) => <EditButton plan={row.original} onEdit={onEdit} disabled={!online} />,
+        cell: ({ row }) => <RowActions plan={row.original} actions={actions} disabled={!online} />,
       }),
     ],
-    [format, formatCost, formatDateTime, onEdit, online, t],
+    [actions, format, formatCost, formatDateTime, online, t],
   );
 };
 
 function PlansTable({
   plans,
-  onEdit,
+  actions,
   onCreate,
   online,
 }: {
   plans: readonly Plan[];
-  onEdit: (plan: Plan) => void;
+  actions: PlanActions;
   onCreate: () => void;
   online: boolean;
 }) {
   const t = useTranslations("admin.plans");
   const format = useFormatter();
   const formatCost = useFormatMicroUsd();
-  const columns = useColumns(onEdit, online);
+  const columns = useColumns(actions, online);
   return (
     <DataTable
       caption={t("caption")}
@@ -137,7 +150,7 @@ function PlansTable({
           </span>
           <Features plan={plan} />
           <span className="self-start">
-            <EditButton plan={plan} onEdit={onEdit} disabled={!online} />
+            <RowActions plan={plan} actions={actions} disabled={!online} />
           </span>
         </div>
       )}
@@ -161,7 +174,7 @@ function PlansTable({
 
 /**
  * `/admin/plans` (SP5 spec §6, platform.plan.manage): the plan catalog with the spend, token and
- * connector limits each plan grants, and the create/edit dialog. Writes wait for the connection.
+ * connector limits each plan grants, the create/edit dialog and deleting a plan no organization is on. Writes wait for the connection.
  */
 export function AdminPlansView() {
   const t = useTranslations("admin.plans");
@@ -169,6 +182,8 @@ export function AdminPlansView() {
   const permissions = usePlatformPermissions();
   const plans = usePlans({ enabled: permissions.can("platform.plan.manage") });
   const [editing, setEditing] = useState<Editing>(null);
+  const [deleting, setDeleting] = useState<Plan | null>(null);
+  const actions = useMemo<PlanActions>(() => ({ onEdit: setEditing, onDelete: setDeleting }), []);
   return (
     <AdminPageFrame
       permission="platform.plan.manage"
@@ -182,13 +197,14 @@ export function AdminPlansView() {
       }
     >
       <AdminQuerySection query={plans} loadingLabel={t("loading")}>
-        {(data) => <PlansTable plans={data} onEdit={setEditing} onCreate={() => setEditing("new")} online={online} />}
+        {(data) => <PlansTable plans={data} actions={actions} onCreate={() => setEditing("new")} online={online} />}
       </AdminQuerySection>
       <PlanFormDialog
         plan={editing === "new" ? null : editing}
         open={editing !== null}
         onOpenChange={(open) => !open && setEditing(null)}
       />
+      <DeletePlanDialog plan={deleting} onOpenChange={(open) => !open && setDeleting(null)} />
     </AdminPageFrame>
   );
 }

@@ -15,7 +15,7 @@ const AT = "2026-10-01T12:00:00.000Z";
 const LIMITS = { monthlyMicroUsd: 1, monthlyTokens: 2, maxConnectors: 3, features: ["web-tools"] };
 
 describe("Firestore console stores (emulator)", () => {
-  it("creates plans with automatic ids and replaces them, keeping createdAt", async () => {
+  it("creates plans with automatic ids, replaces them keeping createdAt, and removes them", async () => {
     const plans = createFirestorePlanRepository({ firestore: firebase.firestore });
     const created = await plans.create({ name: `Plan ${RUN}`, limits: LIMITS, at: AT, actorId: "staff" });
     expect(created.id).toMatch(/^[A-Za-z0-9]{20}$/);
@@ -35,6 +35,9 @@ describe("Firestore console stores (emulator)", () => {
     expect(
       await plans.replace({ id: "missingPlanaaaaaaaaa", name: "x", limits: LIMITS, at: AT, actorId: "s" }),
     ).toBeNull();
+    expect(await plans.remove(created.id)).toBe(true);
+    expect(await plans.get(created.id)).toBeNull();
+    expect(await plans.remove(created.id)).toBe(false);
   });
 
   it("lists live organizations by id, sets status, and keeps the plan assignment apart", async () => {
