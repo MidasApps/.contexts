@@ -35,7 +35,9 @@ const mergedYaml = mergeWorkspaceOverrides({ workspaceYaml: readFileSync(WORKSPA
 if (mergedYaml !== outputYaml) {
   writeFileSync(OUTPUT_YAML, mergedYaml);
   process.stdout.write("[check-mastra-output] workspace overrides copied into the output; installing it again\n");
-  const install = pnpmIn("install --prod");
+  // The output lockfile is the deployer's own: it must take the new overrides, also in CI, where
+  // pnpm defaults to a frozen lockfile.
+  const install = pnpmIn("install --prod --no-frozen-lockfile");
   if (install.status !== 0) fail(`pnpm install in the output failed (exit ${String(install.status)})`);
 }
 const drift = findPinDrift({
