@@ -147,6 +147,8 @@ describe("permissionsForPlatformRole", () => {
         "platform.organization.update",
         "platform.agent.manage",
         "platform.prompt.manage",
+        // Decision 0072.
+        "platform.model.manage",
         "platform.connector.read",
         "platform.eval.manage",
         "platform.trace.read",

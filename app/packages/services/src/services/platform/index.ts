@@ -15,6 +15,11 @@ export {
   type InMemoryAdminUserDirectory,
 } from "./adapters/driven/in-memory-admin-user-directory.ts";
 export { createInMemoryConsoleStores } from "./adapters/driven/in-memory-console-stores.ts";
+export {
+  createFirestoreModelSettingsRepository,
+  MODEL_SETTINGS_COLLECTION,
+} from "./adapters/driven/firestore-model-settings-repository.ts";
+export { createInMemoryModelSettingsRepository } from "./adapters/driven/in-memory-model-settings-repository.ts";
 export { createMastraOperationsGateway } from "./adapters/driven/mastra-operations-gateway.ts";
 export {
   type AdminLogsRouteDeps,
@@ -42,6 +47,7 @@ export type {
   PlanRepository,
   StoredAgentSettings,
 } from "./application/ports/console-ports.ts";
+export type { ModelSettingsRepository, StoredModelSettings } from "./application/ports/model-settings-repository.ts";
 export type {
   AdminRunsQuery,
   OperationsError,

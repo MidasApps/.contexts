@@ -97,6 +97,7 @@ export const SP5_PERMISSIONS: readonly PermissionDefinition[] = [
   platform("platform.organization.update", "write", PLATFORM_ADMIN),
   platform("platform.agent.manage", "write", PLATFORM_ADMIN),
   platform("platform.prompt.manage", "write", PLATFORM_ADMIN),
+  platform("platform.model.manage", "write", PLATFORM_ADMIN),
   platform("platform.connector.read", "read", STAFF),
   platform("platform.eval.manage", "write", PLATFORM_ADMIN),
   platform("platform.trace.read", "read", STAFF),

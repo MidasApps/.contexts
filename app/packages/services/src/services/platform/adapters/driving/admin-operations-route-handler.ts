@@ -1,6 +1,7 @@
 import {
   type AuditAction,
   adminCancelWorkflowRunEndpoint,
+  adminGetModelSettingsEndpoint,
   adminGetPromptSeedEndpoint,
   adminListAgentsEndpoint,
   adminListConnectorsEndpoint,
@@ -9,6 +10,7 @@ import {
   adminPauseScheduleEndpoint,
   adminResumeScheduleEndpoint,
   adminRunScheduleNowEndpoint,
+  adminUpdateModelSettingsEndpoint,
   type Connector,
   type TenantId,
 } from "@core/contracts";
@@ -27,6 +29,7 @@ export const OPERATIONS_PERMISSIONS = {
   connectors: "platform.connector.read",
   agents: "platform.agent.manage",
   prompts: "platform.prompt.manage",
+  models: "platform.model.manage",
 } as const;
 
 export type AdminOperationsRouteDeps = {
@@ -173,6 +176,33 @@ const buildAgentCatalogRoutes = (deps: AdminOperationsRouteDeps): Record<string,
   }),
 });
 
+// Decision 0072: the runtime owns the model roles and prices; `/v1` requires staff, forwards and audits.
+const buildModelRoutes = (deps: AdminOperationsRouteDeps): Record<string, RouteHandler> => ({
+  [adminGetModelSettingsEndpoint.id]: withApiRoute(adminGetModelSettingsEndpoint, deps.pipeline, async (ctx) => {
+    const denied = await requireStaff(ctx, { permission: OPERATIONS_PERMISSIONS.models });
+    if (denied !== null) return denied;
+    const result = await deps.operations.getModelSettings({ requestId: ctx.requestId });
+    return result.ok ? dataResponse({ data: result.data }) : failed(result.error, ctx.requestId);
+  }),
+  [adminUpdateModelSettingsEndpoint.id]: withApiRoute(adminUpdateModelSettingsEndpoint, deps.pipeline, async (ctx) => {
+    const denied = await requireStaff(ctx, { permission: OPERATIONS_PERMISSIONS.models });
+    if (denied !== null) return denied;
+    const result = await deps.operations.updateModelSettings({
+      settings: ctx.input.body,
+      // `requireStaff` only passes a user principal.
+      actorId: ctx.principal.type === "user" ? ctx.principal.uid : "unknown",
+      requestId: ctx.requestId,
+    });
+    if (!result.ok) return failed(result.error, ctx.requestId);
+    await recordStaffAction(ctx, {
+      action: "MODEL_SETTINGS_UPDATED",
+      target: { type: "model-settings", id: "platform" },
+      tenantId: null,
+    });
+    return dataResponse({ data: result.data });
+  }),
+});
+
 /**
  * `/v1/admin` workflow runs, schedules and connectors (SP5 spec §6, decision 0043): every handler
  * first requires staff with MFA and the `platform.*` permission; cancel, pause, resume and
@@ -183,4 +213,5 @@ export const buildAdminOperationsRoutes = (deps: AdminOperationsRouteDeps): Reco
   ...buildScheduleRoutes(deps),
   ...buildConnectorRoutes(deps),
   ...buildAgentCatalogRoutes(deps),
+  ...buildModelRoutes(deps),
 });

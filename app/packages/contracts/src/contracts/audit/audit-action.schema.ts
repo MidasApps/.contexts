@@ -84,6 +84,7 @@ export const AUDIT_ACTIONS = [
   // SP5 console: plans, an organization's plan or budget override, agent settings (decision 0039).
   "PLAN_CREATED",
   "PLAN_UPDATED",
+  "MODEL_SETTINGS_UPDATED",
   "TENANT_BUDGET_UPDATED",
   "AGENT_SETTINGS_UPDATED",
   // SP5 prompt store (decision 0038): versions, eval verdicts, activations (forced ones apart).

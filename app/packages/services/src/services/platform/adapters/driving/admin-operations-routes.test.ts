@@ -88,6 +88,9 @@ const fakeOperations = () => {
           : { ok: false, error: { code: "NOT_FOUND", status: 404 } },
       );
     },
+    // Covered by admin-model-routes.test.ts.
+    getModelSettings: () => Promise.resolve({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } }),
+    updateModelSettings: () => Promise.resolve({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } }),
     listSchedules: (query) => (
       calls.push(["listSchedules", query.tenantId]),
       Promise.resolve({ ok: true, data: query.tenantId === null ? [PLATFORM, schedule()] : [schedule()] })

@@ -1433,6 +1433,129 @@ paths:
       tags:
         - admin
       x-auth: user
+  /v1/admin/models:
+    get:
+      operationId: admin.getModelSettings
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.ModelSettings"
+                required:
+                  - data
+                type: object
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: The model of each runtime role and the price of each model (staff, platform.model.manage).
+      tags:
+        - admin
+      x-auth: user
+    put:
+      operationId: admin.updateModelSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/platform.UpdateModelSettingsInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.ModelSettings"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Replaces the model of each text role and the staff prices; a role needs a priced model of a configured provider (staff, platform.model.manage).
+      tags:
+        - admin
+      x-auth: user
   /v1/admin/organizations:
     get:
       operationId: admin.listOrganizations
@@ -19378,6 +19501,7 @@ components:
             - FEATURE_FLAG_UPDATED
             - PLAN_CREATED
             - PLAN_UPDATED
+            - MODEL_SETTINGS_UPDATED
             - TENANT_BUDGET_UPDATED
             - AGENT_SETTINGS_UPDATED
             - PROMPT_VERSION_CREATED
@@ -19710,6 +19834,7 @@ components:
             - FEATURE_FLAG_UPDATED
             - PLAN_CREATED
             - PLAN_UPDATED
+            - MODEL_SETTINGS_UPDATED
             - TENANT_BUDGET_UPDATED
             - AGENT_SETTINGS_UPDATED
             - PROMPT_VERSION_CREATED
@@ -19855,6 +19980,7 @@ components:
             - FEATURE_FLAG_UPDATED
             - PLAN_CREATED
             - PLAN_UPDATED
+            - MODEL_SETTINGS_UPDATED
             - TENANT_BUDGET_UPDATED
             - AGENT_SETTINGS_UPDATED
             - PROMPT_VERSION_CREATED
@@ -26553,6 +26679,136 @@ components:
       x-pii: personal
       x-relations: []
       x-tenancyScope: platform
+    platform.ModelSettings:
+      additionalProperties: false
+      description: The model each role of the agent runtime runs on, and the price of each model.
+      examples:
+        - aiMode: real
+          models:
+            - available: true
+              inputMicroUsdPerMTok: 100000
+              modelId: openai/gpt-6-luna
+              outputMicroUsdPerMTok: 500000
+              source: code
+          roles:
+            - editable: true
+              modelId: openai/gpt-6-sol
+              role: chat
+              source: staff
+          updatedAt: "2026-09-29T14:30:00.000Z"
+      properties:
+        aiMode:
+          description: Mode of the runtime; in fake mode the roles run scripted models.
+          enum:
+            - fake
+            - real
+          type: string
+          x-pii: none
+        models:
+          description: Priced models a role may run on.
+          items:
+            additionalProperties: false
+            properties:
+              available:
+                description: Whether the runtime holds a key for the model's provider.
+                type: boolean
+                x-pii: none
+              inputMicroUsdPerMTok:
+                description: Price of 1M input tokens, in micro-USD.
+                maximum: 1000000000000
+                minimum: 0
+                type: integer
+                x-pii: none
+              modelId:
+                description: Model id as <provider>/<model>.
+                maxLength: 120
+                pattern: ^(google|openai|anthropic)\/[\w.:-]+$
+                type: string
+                x-pii: none
+              outputMicroUsdPerMTok:
+                description: Price of 1M output tokens, in micro-USD.
+                maximum: 1000000000000
+                minimum: 0
+                type: integer
+                x-pii: none
+              source:
+                description: Whether the price ships with the code or was set by staff.
+                enum:
+                  - code
+                  - staff
+                type: string
+                x-pii: none
+            required:
+              - modelId
+              - inputMicroUsdPerMTok
+              - outputMicroUsdPerMTok
+              - source
+              - available
+            type: object
+          type: array
+          x-pii: none
+        roles:
+          description: Every model role with its current model.
+          items:
+            additionalProperties: false
+            properties:
+              editable:
+                description: Whether staff may change the role here.
+                type: boolean
+                x-pii: none
+              modelId:
+                description: The model the role runs on.
+                maxLength: 120
+                pattern: ^(google|openai|anthropic)\/[\w.:-]+$
+                type: string
+                x-pii: none
+              role:
+                description: What the model is used for.
+                enum:
+                  - chat
+                  - fast
+                  - reasoning
+                  - judge
+                  - embedding
+                  - transcription
+                  - speech
+                  - realtime
+                type: string
+                x-pii: none
+              source:
+                description: Whether staff chose the model or it is the environment default.
+                enum:
+                  - staff
+                  - environment
+                type: string
+                x-pii: none
+            required:
+              - role
+              - modelId
+              - source
+              - editable
+            type: object
+          type: array
+          x-pii: none
+        updatedAt:
+          anyOf:
+            - format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              type: string
+            - type: "null"
+          description: When staff last saved the settings (UTC); null when never.
+          x-pii: none
+      required:
+        - aiMode
+        - roles
+        - models
+        - updatedAt
+      type: object
+      x-kind: entity
+      x-permission: platform.model.manage
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: platform
     platform.OrganizationAdminDetail:
       additionalProperties: false
       description: "One organization for staff: status, plan, budget caps, cost month to date and member count."
@@ -26993,6 +27249,95 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: organization
+    platform.UpdateModelSettingsInput:
+      additionalProperties: false
+      description: Replaces the model of each text role and the prices staff set (staff).
+      examples:
+        - models:
+            - inputMicroUsdPerMTok: 100000
+              modelId: openai/gpt-6-luna
+              outputMicroUsdPerMTok: 500000
+          roles:
+            chat: openai/gpt-6-sol
+            fast: openai/gpt-6-luna
+            judge: openai/gpt-6-luna
+            reasoning: openai/gpt-6-sol
+      properties:
+        models:
+          description: "Prices set by staff: new models, or other prices for models the code already prices."
+          items:
+            additionalProperties: false
+            properties:
+              inputMicroUsdPerMTok:
+                description: Price of 1M input tokens, in micro-USD.
+                maximum: 1000000000000
+                minimum: 0
+                type: integer
+                x-pii: none
+              modelId:
+                description: Model id as <provider>/<model>.
+                maxLength: 120
+                pattern: ^(google|openai|anthropic)\/[\w.:-]+$
+                type: string
+                x-pii: none
+              outputMicroUsdPerMTok:
+                description: Price of 1M output tokens, in micro-USD.
+                maximum: 1000000000000
+                minimum: 0
+                type: integer
+                x-pii: none
+            required:
+              - modelId
+              - inputMicroUsdPerMTok
+              - outputMicroUsdPerMTok
+            type: object
+          maxItems: 50
+          type: array
+          x-pii: none
+        roles:
+          additionalProperties: false
+          description: The model of each text role.
+          properties:
+            chat:
+              description: Model of the chat agents.
+              maxLength: 120
+              pattern: ^(google|openai|anthropic)\/[\w.:-]+$
+              type: string
+              x-pii: none
+            fast:
+              description: "Model of short tasks: titles, summaries and guardrails."
+              maxLength: 120
+              pattern: ^(google|openai|anthropic)\/[\w.:-]+$
+              type: string
+              x-pii: none
+            judge:
+              description: Model that scores real-mode evals.
+              maxLength: 120
+              pattern: ^(google|openai|anthropic)\/[\w.:-]+$
+              type: string
+              x-pii: none
+            reasoning:
+              description: Model that plans actions.
+              maxLength: 120
+              pattern: ^(google|openai|anthropic)\/[\w.:-]+$
+              type: string
+              x-pii: none
+          required:
+            - chat
+            - fast
+            - reasoning
+            - judge
+          type: object
+          x-pii: none
+      required:
+        - roles
+        - models
+      type: object
+      x-kind: command
+      x-permission: platform.model.manage
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: platform
     platform.UpdateOrganizationAdminInput:
       additionalProperties: false
       description: Staff changes an organization's plan or status (audited with targetTenantId).

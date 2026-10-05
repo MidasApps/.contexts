@@ -14,7 +14,7 @@ import type {
   StoredFile,
   WorkflowResumeActionInput,
 } from "@core/contracts";
-import type { ContractCommand, RunSemanticQuery } from "@core/services";
+import type { ContractCommand, ModelSettingsRepository, RunSemanticQuery } from "@core/services";
 
 /**
  * Ports through which `@core/agents` consumes SP1/SP3 services (decision 0019).
@@ -480,4 +480,9 @@ export type AgentRuntimePorts = {
   readonly prompts: PromptStorePort;
   /** Tenant-defined agents and skills (decision 0046); read through `createCustomAgentLoader` (60 s cache). */
   readonly customAgents: CustomAgentsPort;
+  /**
+   * Staff model settings (decision 0072); read through `createModelSettingsService` (60 s copy).
+   * Absent (tests): the roles follow the environment and nothing is kept.
+   */
+  readonly modelSettings?: ModelSettingsRepository;
 };

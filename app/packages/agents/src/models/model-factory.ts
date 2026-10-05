@@ -51,6 +51,11 @@ export type AgentModels = {
 export type CreateModelProviderOptions = {
   readonly providerFactories?: ProviderFactories;
   readonly scenarios?: FakeScenarioRegistry;
+  /**
+   * The model a text role runs on now (decision 0072: staff settings over the environment). With
+   * it, a role's model is resolved on every call, so a change needs no restart. Real mode only.
+   */
+  readonly modelIdOf?: (role: TextModelRole) => string;
 };
 
 /** Fake models outside local/dev: the env check was bypassed (defence in depth, decision 0021). */
@@ -96,6 +101,36 @@ const languageModelOf = (registry: ProviderRegistry, modelId: string): LanguageM
   return registry.get(provider).languageModel(model);
 };
 
+/**
+ * A model that picks its target on every call: agents, memory and guardrails keep one object for
+ * the life of the process, and the role behind it may change in `/admin/models` (decision 0072).
+ */
+const roleModel = (registry: ProviderRegistry, modelIdNow: () => string): LanguageModelV4 => {
+  const built = new Map<string, LanguageModelV4>();
+  const target = (): LanguageModelV4 => {
+    const modelId = modelIdNow();
+    const known = built.get(modelId);
+    if (known !== undefined) return known;
+    const model = languageModelOf(registry, modelId);
+    built.set(modelId, model);
+    return model;
+  };
+  return {
+    specificationVersion: "v4",
+    get provider() {
+      return target().provider;
+    },
+    get modelId() {
+      return target().modelId;
+    },
+    get supportedUrls() {
+      return target().supportedUrls;
+    },
+    doGenerate: (options) => target().doGenerate(options),
+    doStream: (options) => target().doStream(options),
+  };
+};
+
 const voiceModelOf = <TModel>(
   registry: ProviderRegistry,
   modelId: string,
@@ -106,13 +141,20 @@ const voiceModelOf = <TModel>(
   return build(registry.get(provider), model) ?? null;
 };
 
-const createRealModels = (env: ModelFactoryEnv, registry: ProviderRegistry): AgentModels => {
+const createRealModels = (
+  env: ModelFactoryEnv,
+  registry: ProviderRegistry,
+  modelIdOf: CreateModelProviderOptions["modelIdOf"],
+): AgentModels => {
   const embeddingModelId = env[MODEL_ROLES.embedding.envKey];
   const embeddingProvider = parseModelId(embeddingModelId).provider;
   const embeddingProviderOptions = embeddingOptionsFor(embeddingProvider);
   return {
     mode: "real",
-    language: (role) => languageModelOf(registry, env[MODEL_ROLES[role].envKey]),
+    language: (role) =>
+      modelIdOf === undefined
+        ? languageModelOf(registry, env[MODEL_ROLES[role].envKey])
+        : roleModel(registry, () => modelIdOf(role)),
     languageFallbacks: (role) => {
       const fallback = env[MODEL_ROLES[role].fallbackEnvKey];
       return fallback === undefined ? [] : [languageModelOf(registry, fallback)];
@@ -142,7 +184,8 @@ const createRealModels = (env: ModelFactoryEnv, registry: ProviderRegistry): Age
  * @throws {FakeModeNotAllowedError} for `AI_MODE=fake` outside local/dev.
  */
 export const createModelProvider = (env: ModelFactoryEnv, options: CreateModelProviderOptions = {}): AgentModels => {
-  if (env.AI_MODE === "real") return createRealModels(env, createProviderRegistry(env, options.providerFactories));
+  if (env.AI_MODE === "real")
+    return createRealModels(env, createProviderRegistry(env, options.providerFactories), options.modelIdOf);
   if (!FAKE_MODE_APP_ENVS.has(env.APP_ENV)) throw new FakeModeNotAllowedError(env.APP_ENV);
   return createFakeModels(options.scenarios ?? createFakeScenarioRegistry());
 };

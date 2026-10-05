@@ -3,6 +3,7 @@ import {
   AdminScheduleSchema,
   AdminWorkflowRunSchema,
   FORWARDED_HEADERS,
+  ModelSettingsSchema,
   PageMetaSchema,
   PromptSeedSchema,
 } from "@core/contracts";
@@ -30,10 +31,12 @@ const SchedulesSchema = z.object({ data: z.array(AdminScheduleSchema) });
 const ScheduleSchema = z.object({ data: AdminScheduleSchema });
 const AgentsSchema = z.object({ data: z.array(AdminAgentSchema) });
 const SeedSchema = z.object({ data: PromptSeedSchema });
+const ModelsSchema = z.object({ data: ModelSettingsSchema });
 
 type Call = {
-  readonly method: "GET" | "POST";
+  readonly method: "GET" | "POST" | "PUT";
   readonly path: string;
+  readonly body?: unknown;
   readonly query?: Record<string, string | number | undefined>;
   readonly requestId?: string;
 };
@@ -62,6 +65,7 @@ export const createMastraOperationsGateway = (options: {
     try {
       const headers: Record<string, string> = {
         ...(request.requestId === undefined ? {} : { [FORWARDED_HEADERS.requestId]: request.requestId }),
+        ...(request.body === undefined ? {} : { "content-type": "application/json" }),
         ...(options.serverlessToken === null
           ? {}
           : { [FORWARDED_HEADERS.serverlessAuthorization]: await options.serverlessToken.headerValue() }),
@@ -69,6 +73,7 @@ export const createMastraOperationsGateway = (options: {
       const response = await fetchFn(url, {
         method: request.method,
         headers,
+        ...(request.body === undefined ? {} : { body: JSON.stringify(request.body) }),
         signal: AbortSignal.timeout(options.timeoutMs ?? 30_000),
       });
       if (!response.ok) {
@@ -126,6 +131,17 @@ export const createMastraOperationsGateway = (options: {
       const result = await call(
         { method: "GET", path: `/agents/${encodeURIComponent(agentId)}/prompt-seed`, requestId },
         SeedSchema,
+      );
+      return result.ok ? { ok: true, data: result.data.data } : result;
+    },
+    getModelSettings: async ({ requestId }) => {
+      const result = await call({ method: "GET", path: "/models", requestId }, ModelsSchema);
+      return result.ok ? { ok: true, data: result.data.data } : result;
+    },
+    updateModelSettings: async ({ settings, actorId, requestId }) => {
+      const result = await call(
+        { method: "PUT", path: "/models", body: { settings, actorId }, requestId },
+        ModelsSchema,
       );
       return result.ok ? { ok: true, data: result.data.data } : result;
     },

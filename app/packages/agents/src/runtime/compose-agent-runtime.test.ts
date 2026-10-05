@@ -144,6 +144,8 @@ describe("composeAgentRuntime", () => {
       "POST /console/schedules/:scheduleId/run",
       "GET /console/agents",
       "GET /console/agents/:agentId/prompt-seed",
+      "GET /console/models",
+      "PUT /console/models",
       "GET /workflow-runs",
       "POST /workflow-runs/start/:workflowId",
       "GET /workflow-runs/:runId",

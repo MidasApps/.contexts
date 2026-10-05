@@ -1,4 +1,4 @@
-import { processLogger } from "@core/services";
+import { createInMemoryModelSettingsRepository, processLogger } from "@core/services";
 import type { Agent } from "@mastra/core/agent";
 import type { MCPServerBase } from "@mastra/core/mcp";
 import type { ApiRoute } from "@mastra/core/server";
@@ -19,6 +19,9 @@ import { composeCustomAgents, createCustomAgentAccess } from "../custom/compose-
 import { setMcpRequestAuth } from "../mcp-server/mcp-request-context.ts";
 import { createMemory } from "../memory/create-memory.ts";
 import { createModelProvider } from "../models/model-factory.ts";
+import { priceTableFor } from "../models/model-prices.ts";
+import { createModelSettingsService, type ModelSettingsService } from "../models/model-settings.ts";
+import { createProviderRegistry } from "../models/provider-registry.ts";
 import { createObservability } from "../observability/create-observability.ts";
 import { createGuardrailProfile } from "../processors/guardrail-profile.ts";
 import { type CoreScorer, createCoreScorers } from "../scorers/core-scorers.ts";
@@ -89,6 +92,23 @@ type AgentDepsBundle = {
   readonly toolDeps: ReturnType<typeof toolDepsOf>;
   readonly flags: FlagReader;
   readonly skillDirs: readonly string[];
+  readonly modelSettings: ModelSettingsService;
+};
+
+/** Decision 0072: the staff choice of model per text role and the live price table. */
+const createModelSettings = (args: ComposeAgentRuntimeArgs): ModelSettingsService => {
+  const registry = createProviderRegistry(args.env);
+  const modelSettings = createModelSettingsService({
+    store: args.ports.modelSettings ?? createInMemoryModelSettingsRepository(),
+    env: args.env,
+    aiMode: args.env.AI_MODE,
+    codePrices: priceTableFor(args.env.AI_MODE),
+    isConfigured: (provider) => registry.isConfigured(provider),
+    logger: processLogger,
+  });
+  // Loaded while the runtime boots; until it answers the roles follow the environment.
+  void modelSettings.refresh();
+  return modelSettings;
 };
 
 /** Models, the tool registry, guardrails, memory, settings, skills and instructions the agents are built on. */
@@ -97,7 +117,8 @@ const createAgentDeps = (
   commands: readonly AgentCommand[],
   definitions: readonly AgentDefinition[],
 ): AgentDepsBundle => {
-  const models = args.models ?? createModelProvider(args.env);
+  const modelSettings = createModelSettings(args);
+  const models = args.models ?? createModelProvider(args.env, { modelIdOf: modelSettings.modelIdOf });
   registerFakeRules(models, commands);
   // Decision 0046: the loader and per-run ceiling of custom agents; the registry is read lazily (it is bound to these deps).
   const customAccess = createCustomAgentAccess({
@@ -149,7 +170,7 @@ const createAgentDeps = (
     webTools,
     instructions,
   };
-  return { deps, customAccess, toolDeps, flags, skillDirs };
+  return { deps, customAccess, toolDeps, flags, skillDirs, modelSettings };
 };
 
 /**
@@ -161,7 +182,11 @@ const createAgentDeps = (
 export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts => {
   const commands = collectCommands(args);
   const definitions = collectAgents(args, commands);
-  const { deps, customAccess, toolDeps, flags, skillDirs } = createAgentDeps(args, commands, definitions);
+  const { deps, customAccess, toolDeps, flags, skillDirs, modelSettings } = createAgentDeps(
+    args,
+    commands,
+    definitions,
+  );
   const { models, tools, guardrails, memory } = deps;
   const { agents, subagents } = buildAgents(definitions, deps, args.instructionsDirs);
   const apiPrefix = args.apiPrefix;
@@ -215,6 +240,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       env: args.env,
       aiMode: args.env.AI_MODE,
       usage: args.ports.usage,
+      prices: modelSettings.prices,
       ...(args.exporters === undefined ? {} : { exporters: args.exporters }),
     }),
     auth,
@@ -229,6 +255,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       workflowCatalog,
       tools,
       custom,
+      modelSettings,
     }),
     tools,
     voice,

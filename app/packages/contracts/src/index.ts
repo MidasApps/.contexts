@@ -877,6 +877,29 @@ export {
 } from "./contracts/platform/admin-agent.schema.ts";
 export { ADMIN_AGENT_ENDPOINTS, adminListAgentsEndpoint } from "./contracts/platform/admin-agent-endpoints.ts";
 export {
+  ADMIN_MODEL_ENDPOINTS,
+  adminGetModelSettingsEndpoint,
+  adminUpdateModelSettingsEndpoint,
+} from "./contracts/platform/admin-model-endpoints.ts";
+export {
+  EDITABLE_MODEL_ROLES,
+  type EditableModelRole,
+  MODEL_SETTING_ROLES,
+  type ModelCatalogEntry,
+  ModelCatalogEntrySchema,
+  ModelIdSchema,
+  type ModelPriceInput,
+  ModelPriceInputSchema,
+  type ModelRoleSetting,
+  ModelRoleSettingSchema,
+  type ModelSettings,
+  ModelSettingsContract,
+  ModelSettingsSchema,
+  type UpdateModelSettingsInput,
+  UpdateModelSettingsInputContract,
+  UpdateModelSettingsInputSchema,
+} from "./contracts/platform/model-settings.schema.ts";
+export {
   ADMIN_PLATFORM_ENDPOINTS,
   createPlanEndpoint,
   getAdminOverviewEndpoint,

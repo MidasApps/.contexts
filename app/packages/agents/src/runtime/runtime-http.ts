@@ -14,6 +14,8 @@ import { CHAT_ROUTES_PATTERN, createChatRoutes, MAX_CHAT_BODY_BYTES } from "../c
 import { createWorkflowChatRoutes } from "../chat/workflow-chat-route.ts";
 import { buildAgentCatalog } from "../console/agent-catalog.ts";
 import { createConsoleRoutes } from "../console/console-routes.ts";
+import { createModelConsoleRoutes } from "../console/model-console-routes.ts";
+import type { ModelSettingsService } from "../models/model-settings.ts";
 import type { CustomAgentRuntime } from "../custom/compose-custom-agents.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
 import { MAX_AUDIO_BYTES, VOICE_ROUTES_PATTERN } from "../voice/voice-routes.ts";
@@ -81,6 +83,7 @@ export const buildRuntimeApiRoutes = (args: {
   readonly workflowCatalog: WorkflowCatalog;
   readonly tools: ToolRegistry;
   readonly custom: CustomAgentRuntime;
+  readonly modelSettings: ModelSettingsService;
 }): ApiRoute[] => {
   const { ports } = args.runtime;
   return [
@@ -105,6 +108,8 @@ export const buildRuntimeApiRoutes = (args: {
           supervisor: { id: SUPERVISOR_AGENT_ID, ceiling: SUPERVISOR_CEILING },
         }),
     }),
+    // Decision 0072: the model of each role and the model prices, for `/v1/admin/models`.
+    ...createModelConsoleRoutes({ modelSettings: args.modelSettings, logger: processLogger }),
     ...createWorkflowRunRoutes({
       access: ports.access,
       approvals: ports.workflowApprovals,

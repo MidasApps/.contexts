@@ -2,8 +2,10 @@ import type {
   AdminAgent,
   AdminSchedule,
   AdminWorkflowRun,
+  ModelSettings,
   PageMeta,
   PromptSeed,
+  UpdateModelSettingsInput,
   WorkflowRunStatus,
 } from "@core/contracts";
 import type { Result } from "#/services/shared/result/result.ts";
@@ -56,4 +58,12 @@ export type OperationsGateway = {
     readonly agentId: string;
     readonly requestId: string;
   }) => Promise<OperationsResult<PromptSeed>>;
+  /** The model of each runtime role and the model prices (`/console/models`, decision 0072). */
+  readonly getModelSettings: (input: { readonly requestId: string }) => Promise<OperationsResult<ModelSettings>>;
+  /** Saves the settings in the runtime, which validates them; `VALIDATION_FAILED` when it refuses. */
+  readonly updateModelSettings: (input: {
+    readonly settings: UpdateModelSettingsInput;
+    readonly actorId: string;
+    readonly requestId: string;
+  }) => Promise<OperationsResult<ModelSettings>>;
 };

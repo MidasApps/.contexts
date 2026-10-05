@@ -21,6 +21,7 @@ import {
   createLogKnowledgeEventPublisher,
   createPostgresClient,
   createPostgresKnowledgeRepository,
+  createFirestoreModelSettingsRepository,
   createPostgresPromptRepository,
   createPostgresSemanticRunner,
   createPostgresUsageRepository,
@@ -345,6 +346,7 @@ export const createRuntimePorts = (args: {
     usage: bindUsagePort(createUsageServices({ repository: createPostgresUsageRepository(sql), clock: systemClock })),
     notifications: createLogNotificationPort(args.logger),
     prompts: bindPromptStorePort(createPostgresPromptRepository(sql)),
+    modelSettings: createFirestoreModelSettingsRepository({ firestore: args.firebase.firestore }),
     ...createMaintenancePorts(shared),
   };
 };

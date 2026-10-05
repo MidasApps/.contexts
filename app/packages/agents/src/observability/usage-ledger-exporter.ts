@@ -47,8 +47,11 @@ export type UsageLedgerExporterOptions = {
   readonly usage: Pick<UsagePort, "recordLlmCalls" | "recordAgentRuns">;
   /** Defaults to the logger Mastra hands every exporter (`__setLogger`). */
   readonly logger?: LedgerLogger;
-  /** Price table (`priceTableFor(AI_MODE)`); the verified prices by default. */
-  readonly prices?: Readonly<Record<string, ModelPrice>>;
+  /**
+   * Price table (`priceTableFor(AI_MODE)`); the verified prices by default. A function is read for
+   * every span, so prices staff change in `/admin/models` apply without a restart (decision 0072).
+   */
+  readonly prices?: Readonly<Record<string, ModelPrice>> | (() => Readonly<Record<string, ModelPrice>>);
   /** Row id seam for tests (uuidv7 by default). */
   readonly newId?: () => string;
 };
@@ -183,7 +186,8 @@ const toRunRecord = (span: AnyExportedSpan, context: SpanContext, tenantId: stri
 export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): ObservabilityExporter => {
   let logger: LedgerLogger = options.logger ?? SILENT_LOGGER;
   const newId = options.newId ?? (() => uuidv7());
-  const prices = options.prices ?? MODEL_PRICES;
+  const pricesNow = (): Readonly<Record<string, ModelPrice>> =>
+    typeof options.prices === "function" ? options.prices() : (options.prices ?? MODEL_PRICES);
   const warnedModels = new Set<string>();
   const calls = createBufferedWriter<LlmCall>(
     (rows) => options.usage.recordLlmCalls(rows),
@@ -238,7 +242,7 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
   const enqueueCall = (span: AnyExportedSpan): void => {
     const owner = tenantContextOf(span);
     if (owner === null) return;
-    const { row, priced } = toRow(span, owner.context, owner.tenantId, newId(), prices);
+    const { row, priced } = toRow(span, owner.context, owner.tenantId, newId(), pricesNow());
     if (row === null) {
       logger.warn("usage_span_invalid", { agentId: span.entityId ?? null });
       return;

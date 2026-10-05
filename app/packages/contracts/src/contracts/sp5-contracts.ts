@@ -14,6 +14,7 @@ import { EvalExperimentSummaryContract } from "./observability/eval-experiment-s
 import { TraceDetailContract } from "./observability/trace-detail.schema.ts";
 import { TraceSummaryContract } from "./observability/trace-summary.schema.ts";
 import { AdminAgentContract } from "./platform/admin-agent.schema.ts";
+import { ModelSettingsContract, UpdateModelSettingsInputContract } from "./platform/model-settings.schema.ts";
 import { AdminImpersonationSessionContract } from "./platform/admin-impersonation.schema.ts";
 import {
   AdminScheduleContract,
@@ -69,6 +70,8 @@ export const SP5_CONTRACTS: readonly ContractDefinition[] = [
   ActivatePromptVersionInputContract,
   PlanContract,
   UpsertPlanInputContract,
+  ModelSettingsContract,
+  UpdateModelSettingsInputContract,
   FeatureFlagDefinitionContract,
   FeatureFlagContract,
   SetFeatureFlagValueInputContract,
