@@ -29,7 +29,9 @@
     "plans": "Limits each plan grants.",
     "evals": "Datasets, experiments and the eval verdict.",
     "logs": "Recent log lines of the local environment.",
-    "workflows": "Runs, pending approvals and schedules."
+    "workflows": "Runs, pending approvals and schedules.",
+    "audit": "What staff did on the platform, filtered by action and organization.",
+    "team": "Who is on the platform team and with which role."
   },
   "states": {
     "eyebrow": "Administration",

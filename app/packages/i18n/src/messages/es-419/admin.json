@@ -29,7 +29,9 @@
     "plans": "Límites que concede cada plan.",
     "evals": "Datasets, experimentos y el veredicto de las evaluaciones.",
     "logs": "Líneas de log recientes del entorno local.",
-    "workflows": "Ejecuciones, aprobaciones pendientes y programaciones."
+    "workflows": "Ejecuciones, aprobaciones pendientes y programaciones.",
+    "audit": "Lo que hizo el equipo en la plataforma, con filtros por acción y organización.",
+    "team": "Quién forma parte del equipo de la plataforma y con qué rol."
   },
   "states": {
     "eyebrow": "Administración",
