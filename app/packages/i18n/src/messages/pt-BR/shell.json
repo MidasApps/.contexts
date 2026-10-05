@@ -64,7 +64,8 @@
       "usage": "Uso e orçamento",
       "traces": "Rastros",
       "evals": "Avaliações",
-      "flags": "Recursos"
+      "flags": "Recursos",
+      "audit-log": "Auditoria"
     },
     "profile": {
       "account": "Conta",

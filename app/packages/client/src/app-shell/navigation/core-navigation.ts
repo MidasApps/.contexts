@@ -17,6 +17,7 @@ const SETTINGS: Record<SettingsSection, { icon: IconName; permission: Permission
   invitations: { icon: "user-plus", permission: "core.member.invite", group: "organization" },
   roles: { icon: "shield", permission: "core.role.read", group: "organization" },
   units: { icon: "network", permission: "core.unit.read", group: "organization" },
+  "audit-log": { icon: "history", permission: "core.audit-log.read", group: "organization" },
   "api-keys": { icon: "key", permission: "core.api-key.read", group: "access" },
   devices: { icon: "smartphone", permission: "core.device.read", group: "access" },
   agents: { icon: "bot", permission: "core.agent-settings.read", group: "ai" },

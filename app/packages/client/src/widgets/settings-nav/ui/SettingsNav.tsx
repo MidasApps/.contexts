@@ -30,7 +30,7 @@ export function SettingsNav({ organizationId }: { organizationId: string }) {
   const router = useRouter();
   const locationPath = router.useLocationPath();
   const permissions = usePermissions({ organizationId });
-  // Seventeen sections plus the modules': grouped under headings, a picker on phones (decision 0055).
+  // Eighteen sections plus the modules': grouped under headings, a picker on phones (decision 0055).
   const items = groupNavItems(
     useNavigationRegistry().visibleItems("settings", permissions.can),
     (item) => item.group,

@@ -64,7 +64,8 @@
       "usage": "Usage and budget",
       "traces": "Traces",
       "evals": "Evaluations",
-      "flags": "Features"
+      "flags": "Features",
+      "audit-log": "Audit log"
     },
     "profile": {
       "account": "Account",

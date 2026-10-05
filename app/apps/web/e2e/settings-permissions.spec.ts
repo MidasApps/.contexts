@@ -13,6 +13,7 @@ const ADMIN_ONLY: { section: string; label: string; endpoint: (organizationId: s
   { section: "traces", label: "Rastros", endpoint: (id) => `/v1/traces?organizationId=${id}` },
   { section: "evals", label: "Avaliações", endpoint: (id) => `/v1/evals/experiments?organizationId=${id}` },
   { section: "flags", label: "Recursos", endpoint: (id) => `/v1/flags?organizationId=${id}` },
+  { section: "audit-log", label: "Auditoria", endpoint: (id) => `/v1/organizations/${id}/audit-logs` },
 ];
 
 test.describe("a member without the admin permissions", () => {

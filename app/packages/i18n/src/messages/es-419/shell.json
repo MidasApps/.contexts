@@ -64,7 +64,8 @@
       "usage": "Uso y presupuesto",
       "traces": "Trazas",
       "evals": "Evaluaciones",
-      "flags": "Funciones"
+      "flags": "Funciones",
+      "audit-log": "Auditoría"
     },
     "profile": {
       "account": "Cuenta",

@@ -33,6 +33,7 @@ import { ProfileSessionsView } from "@core/client/views/profile-sessions";
 import { SettingsAgentsView } from "@core/client/views/settings-agents";
 import { SettingsApiKeysView } from "@core/client/views/settings-api-keys";
 import { SettingsApprovalsView } from "@core/client/views/settings-approvals";
+import { SettingsAuditLogView } from "@core/client/views/settings-audit-log";
 import { SettingsConnectorsView } from "@core/client/views/settings-connectors";
 import { SettingsDevicesView } from "@core/client/views/settings-devices";
 import { SettingsEvalsView } from "@core/client/views/settings-evals";
@@ -56,6 +57,7 @@ export const SETTINGS_SECTION_VIEWS: Readonly<Record<SettingsSection, ComponentT
   invitations: SettingsInvitationsView,
   roles: SettingsRolesView,
   units: SettingsUnitsView,
+  "audit-log": SettingsAuditLogView,
   "api-keys": SettingsApiKeysView,
   devices: SettingsDevicesView,
   // The agent runtime sections (SP5 spec §7); the ones with detail pages read the `rest` tail.

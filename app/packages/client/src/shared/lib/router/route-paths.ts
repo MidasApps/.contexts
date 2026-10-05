@@ -5,6 +5,7 @@ export const SETTINGS_SECTIONS = [
   "invitations",
   "roles",
   "units",
+  "audit-log",
   "api-keys",
   "devices",
   "agents",
