@@ -51,7 +51,7 @@ The two skipped journeys are the invite-link copy on Firefox and WebKit (no clip
 
 ### Open
 
-- Follow-ups #104 and #105 (from B5): the server still accepts a user turn while an approval waits, and knowledge uploads started from the chat stop when the composer unmounts.
+- Follow-ups #104 and #105 (from B5) were fixed afterwards: `984b05cd` and `539b441d`.
 - The items under "Open" in the round below still stand.
 
 ## Round of 2026-10-03
