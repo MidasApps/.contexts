@@ -77,6 +77,7 @@
       "organizations": "Organizations",
       "users": "Users",
       "agents": "Agents and prompts",
+      "models": "Models",
       "connectors": "Connectors",
       "traces": "Traces",
       "costs": "Costs",

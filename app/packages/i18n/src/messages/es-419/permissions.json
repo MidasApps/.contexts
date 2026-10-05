@@ -134,6 +134,9 @@
     "agent": {
       "manage": "Gestionar los agentes de las organizaciones"
     },
+    "model": {
+      "manage": "Gestionar modelos y precios"
+    },
     "prompt": {
       "manage": "Gestionar instrucciones de los agentes"
     },

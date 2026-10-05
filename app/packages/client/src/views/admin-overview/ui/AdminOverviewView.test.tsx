@@ -111,7 +111,7 @@ describe("AdminOverviewView", () => {
   it("gives the platform administrator every area", async () => {
     renderAdmin(<AdminOverviewView />, { routes: { "GET /v1/admin/overview": ok(buildAdminOverview()) } });
     const areas = await screen.findByRole("region", { name: "Áreas" });
-    expect(within(areas).getAllByRole("link")).toHaveLength(11);
+    expect(within(areas).getAllByRole("link")).toHaveLength(12);
   });
 
   it("keeps the areas reachable when the numbers fail, with the reference and a retry", async () => {

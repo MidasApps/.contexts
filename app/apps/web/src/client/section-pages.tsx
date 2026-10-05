@@ -14,6 +14,7 @@ import { AdminCostsView } from "@core/client/views/admin-costs";
 import { AdminEvalsView } from "@core/client/views/admin-evals";
 import { AdminFlagsView } from "@core/client/views/admin-flags";
 import { AdminLogsView } from "@core/client/views/admin-logs";
+import { AdminModelsView } from "@core/client/views/admin-models";
 import { AdminOrganizationDetailView } from "@core/client/views/admin-organization-detail";
 import { AdminOrganizationsView } from "@core/client/views/admin-organizations";
 import { AdminOverviewView } from "@core/client/views/admin-overview";
@@ -114,6 +115,7 @@ const ADMIN_AREA_VIEWS: Readonly<Record<string, (segments: readonly string[]) =>
       : segments.length === 2 && segments[1] === "prompts"
         ? AdminAgentPromptsView
         : null,
+  models: only(AdminModelsView),
   connectors: only(AdminConnectorsView),
   evals: only(AdminEvalsView),
   traces: withDetail(AdminTracesView, AdminTraceDetailView),

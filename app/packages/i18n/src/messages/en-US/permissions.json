@@ -134,6 +134,9 @@
     "agent": {
       "manage": "Manage organizations' agents"
     },
+    "model": {
+      "manage": "Manage models and prices"
+    },
     "prompt": {
       "manage": "Manage agent instructions"
     },

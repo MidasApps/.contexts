@@ -48,6 +48,7 @@ const ADMIN: { name: string; icon: IconName; permission: Permission; group: NavG
   { name: "plans", icon: "credit-card", permission: "platform.plan.manage", group: "customers" },
   { name: "users", icon: "users", permission: "platform.user.read", group: "customers" },
   { name: "agents", icon: "bot", permission: "platform.agent.manage", group: "ai" },
+  { name: "models", icon: "cpu", permission: "platform.model.manage", group: "ai" },
   { name: "evals", icon: "activity", permission: "platform.eval.manage", group: "ai" },
   { name: "traces", icon: "scroll-text", permission: "platform.trace.read", group: "ai" },
   { name: "logs", icon: "list", permission: "platform.trace.read", group: "ai" },

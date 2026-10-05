@@ -119,3 +119,54 @@ export const buildPromptEvalResult = (overrides: Json = {}): Json => ({
   ],
   ...overrides,
 });
+
+/**
+ * `GET /v1/admin/models` in real mode: the four text roles chosen by staff, embedding fixed by the
+ * environment, three code prices, one staff price, and an Anthropic model whose provider has no key.
+ */
+export const buildModelSettings = (overrides: Json = {}): Json => ({
+  aiMode: "real",
+  roles: [
+    { role: "chat", modelId: "openai/gpt-6-sol", source: "staff", editable: true },
+    { role: "fast", modelId: "openai/gpt-6-luna", source: "staff", editable: true },
+    { role: "reasoning", modelId: "openai/gpt-6-sol", source: "staff", editable: true },
+    { role: "judge", modelId: "openai/gpt-6-luna", source: "staff", editable: true },
+    { role: "embedding", modelId: "openai/text-embedding-3-small", source: "environment", editable: false },
+  ],
+  models: [
+    {
+      modelId: "anthropic/claude-test",
+      inputMicroUsdPerMTok: 3_000_000,
+      outputMicroUsdPerMTok: 15_000_000,
+      source: "staff",
+      available: false,
+      kind: "text",
+    },
+    {
+      modelId: "openai/gpt-6-astra",
+      inputMicroUsdPerMTok: 10_000_000,
+      outputMicroUsdPerMTok: 50_000_000,
+      source: "code",
+      available: true,
+      kind: "text",
+    },
+    {
+      modelId: "openai/gpt-6-luna",
+      inputMicroUsdPerMTok: 100_000,
+      outputMicroUsdPerMTok: 500_000,
+      source: "code",
+      available: true,
+      kind: "text",
+    },
+    {
+      modelId: "openai/gpt-6-sol",
+      inputMicroUsdPerMTok: 2_000_000,
+      outputMicroUsdPerMTok: 10_000_000,
+      source: "code",
+      available: true,
+      kind: "text",
+    },
+  ],
+  updatedAt: "2026-09-29T14:30:00.000Z",
+  ...overrides,
+});

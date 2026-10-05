@@ -21,6 +21,7 @@
     "organizations": "Estado, plan, costo y presupuesto de cada organización.",
     "users": "Búsqueda de usuarios y acceso de soporte, solo lectura y auditado.",
     "agents": "Agentes por organización y los prompts de la plataforma.",
+    "models": "Modelo de cada función de los agentes y costo de cada modelo.",
     "connectors": "Conectores configurados en cada organización.",
     "traces": "Ejecuciones de agentes y workflows, con tokens y costo.",
     "costs": "Uso y costos por organización.",
@@ -169,6 +170,94 @@
       "maxCustomInstructionCharsHint": "Déjelo en blanco para usar el valor predeterminado de la plataforma.",
       "features": "Funcionalidades",
       "featuresHint": "Claves separadas por comas, por ejemplo: web-tools, chat.voice"
+    }
+  },
+  "models": {
+    "title": "Modelos",
+    "description": "Elige el modelo de cada función y el costo de cada modelo.",
+    "loading": "Cargando modelos…",
+    "updatedAt": "Actualizado el {date}",
+    "fakeMode": "El runtime está en modo simulado: las funciones usan modelos guionados. Lo que guardes se aplica cuando se active el modo real.",
+    "save": "Guardar",
+    "saved": "Modelos guardados.",
+    "saveRefused": "No se pudo guardar: cada función necesita un modelo con precio y un proveedor con clave configurada.",
+    "roles": {
+      "title": "Modelo de cada función",
+      "description": "No se pueden elegir modelos de proveedores sin clave configurada.",
+      "fixedNote": "Definido en el entorno del runtime.",
+      "price": "{input} entrada · {output} salida por 1M",
+      "option": "{model} — {price}",
+      "unavailableOption": "{model} — {price} (proveedor sin clave)",
+      "noPrice": "Este modelo no tiene precio registrado.",
+      "names": {
+        "chat": "Conversación",
+        "fast": "Tareas rápidas",
+        "reasoning": "Razonamiento",
+        "judge": "Evaluador",
+        "embedding": "Embeddings",
+        "transcription": "Transcripción",
+        "speech": "Voz sintetizada",
+        "realtime": "Voz en tiempo real"
+      },
+      "hints": {
+        "chat": "Agentes de chat.",
+        "fast": "Títulos, resúmenes y verificaciones de seguridad.",
+        "reasoning": "Planificación de acciones.",
+        "judge": "Nota de los evals en modo real.",
+        "embedding": "Base de conocimiento y memoria.",
+        "transcription": "Audio convertido en texto.",
+        "speech": "Texto convertido en audio.",
+        "realtime": "Conversaciones por voz."
+      }
+    },
+    "prices": {
+      "title": "Costo de los modelos",
+      "description": "Precio por 1M de tokens, en dólares (USD). Restaurar devuelve el precio del código; un modelo sin precio en el código sale de la lista al guardar.",
+      "caption": "Precios de los modelos",
+      "columns": {
+        "model": "Modelo",
+        "input": "Entrada (US$ / 1M tokens)",
+        "output": "Salida (US$ / 1M tokens)",
+        "origin": "Origen",
+        "provider": "Proveedor",
+        "actions": "Acciones"
+      },
+      "inputNamed": "Precio de entrada de {model}",
+      "outputNamed": "Precio de salida de {model}",
+      "invalidPrice": "Ingresa un monto en dólares con hasta seis decimales.",
+      "requiredPrice": "Ingresa el precio.",
+      "origin": {
+        "code": "Código",
+        "staff": "Equipo",
+        "dropped": "Sale al guardar"
+      },
+      "provider": {
+        "available": "Disponible",
+        "unavailable": "Sin clave",
+        "unknown": "Por confirmar"
+      },
+      "restore": "Restaurar",
+      "restoreNamed": "Restaurar el precio de {model}",
+      "remove": "Quitar",
+      "removeNamed": "Quitar {model}",
+      "keep": "Mantener",
+      "keepNamed": "Mantener el precio del equipo de {model}",
+      "inUse": "En uso: {roles}",
+      "emptyTitle": "Ningún modelo con precio",
+      "emptyDescription": "Agrega un modelo para elegirlo en las funciones."
+    },
+    "add": {
+      "title": "Agregar modelo",
+      "modelId": "Modelo",
+      "modelIdHint": "En el formato proveedor/modelo, por ejemplo openai/gpt-6-luna.",
+      "input": "Entrada (US$ / 1M tokens)",
+      "output": "Salida (US$ / 1M tokens)",
+      "submit": "Agregar modelo",
+      "refusals": {
+        "INVALID_ID": "Usa proveedor/modelo, con el proveedor google, openai o anthropic.",
+        "DUPLICATE": "Este modelo ya está en la tabla.",
+        "TOO_MANY": "El equipo puede definir hasta 50 precios."
+      }
     }
   },
   "flags": {

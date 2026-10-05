@@ -21,6 +21,7 @@
     "organizations": "Status, plan, cost and budget of each organization.",
     "users": "User search and support access, read-only and audited.",
     "agents": "Agents per organization and the platform prompts.",
+    "models": "The model of each agent role and the cost of each model.",
     "connectors": "Connectors configured in each organization.",
     "traces": "Agent and workflow runs, with tokens and cost.",
     "costs": "Usage and costs per organization.",
@@ -169,6 +170,94 @@
       "maxCustomInstructionCharsHint": "Leave blank to use the platform default.",
       "features": "Features",
       "featuresHint": "Keys separated by commas, for example: web-tools, chat.voice"
+    }
+  },
+  "models": {
+    "title": "Models",
+    "description": "Choose the model of each role and the cost of each model.",
+    "loading": "Loading models…",
+    "updatedAt": "Updated {date}",
+    "fakeMode": "The runtime is in simulated mode: the roles use scripted models. What you save applies once real mode is turned on.",
+    "save": "Save",
+    "saved": "Models saved.",
+    "saveRefused": "Could not save: each role needs a priced model and a provider with a configured key.",
+    "roles": {
+      "title": "Model of each role",
+      "description": "Models of providers without a configured key cannot be chosen.",
+      "fixedNote": "Set in the runtime environment.",
+      "price": "{input} input · {output} output per 1M",
+      "option": "{model} — {price}",
+      "unavailableOption": "{model} — {price} (provider without a key)",
+      "noPrice": "This model has no price.",
+      "names": {
+        "chat": "Chat",
+        "fast": "Quick tasks",
+        "reasoning": "Reasoning",
+        "judge": "Judge",
+        "embedding": "Embeddings",
+        "transcription": "Transcription",
+        "speech": "Speech",
+        "realtime": "Realtime voice"
+      },
+      "hints": {
+        "chat": "Chat agents.",
+        "fast": "Titles, summaries and safety checks.",
+        "reasoning": "Action planning.",
+        "judge": "Eval scores in real mode.",
+        "embedding": "Knowledge base and memory.",
+        "transcription": "Audio to text.",
+        "speech": "Text to audio.",
+        "realtime": "Voice conversations."
+      }
+    },
+    "prices": {
+      "title": "Model costs",
+      "description": "Price per 1M tokens, in US dollars (USD). Restore brings back the code price; a model without a code price leaves the list when you save.",
+      "caption": "Model prices",
+      "columns": {
+        "model": "Model",
+        "input": "Input (US$ / 1M tokens)",
+        "output": "Output (US$ / 1M tokens)",
+        "origin": "Source",
+        "provider": "Provider",
+        "actions": "Actions"
+      },
+      "inputNamed": "Input price of {model}",
+      "outputNamed": "Output price of {model}",
+      "invalidPrice": "Enter an amount in dollars with up to six decimals.",
+      "requiredPrice": "Enter the price.",
+      "origin": {
+        "code": "Code",
+        "staff": "Staff",
+        "dropped": "Leaves on save"
+      },
+      "provider": {
+        "available": "Available",
+        "unavailable": "No key",
+        "unknown": "To be confirmed"
+      },
+      "restore": "Restore",
+      "restoreNamed": "Restore the price of {model}",
+      "remove": "Remove",
+      "removeNamed": "Remove {model}",
+      "keep": "Keep",
+      "keepNamed": "Keep the staff price of {model}",
+      "inUse": "In use: {roles}",
+      "emptyTitle": "No priced model",
+      "emptyDescription": "Add a model to choose it for a role."
+    },
+    "add": {
+      "title": "Add model",
+      "modelId": "Model",
+      "modelIdHint": "As provider/model, for example openai/gpt-6-luna.",
+      "input": "Input (US$ / 1M tokens)",
+      "output": "Output (US$ / 1M tokens)",
+      "submit": "Add model",
+      "refusals": {
+        "INVALID_ID": "Use provider/model, with the provider google, openai or anthropic.",
+        "DUPLICATE": "This model is already in the table.",
+        "TOO_MANY": "Staff can set up to 50 prices."
+      }
     }
   },
   "flags": {
