@@ -10,6 +10,7 @@ import { CodeBlock } from "#/shared/ui/ai/code-block.tsx";
 type AnchorProps = ComponentProps<"a"> & { node?: unknown };
 type CodeProps = ComponentProps<"code"> & { node?: unknown };
 type ImageProps = ComponentProps<"img"> & { node?: unknown };
+type TableProps = ComponentProps<"table"> & { node?: unknown };
 
 const textOf = (node: unknown): string => {
   if (typeof node === "string" || typeof node === "number") return String(node);
@@ -46,7 +47,6 @@ const PROSE = [
   "[&_h2]:mt-10 [&_h2]:border-t [&_h2]:border-border [&_h2]:pt-6 [&_h2]:text-xl [&_h2]:font-semibold",
   "[&_h3]:mt-6 [&_h3]:text-base [&_h3]:font-semibold",
   "[&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:my-1",
-  "[&_table]:block [&_table]:w-full [&_table]:overflow-x-auto [&_table]:text-body-sm",
   "[&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-2 [&_td]:align-top",
   "[&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:px-3 [&_th]:py-2 [&_th]:text-left",
   "[&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:bg-muted/40 [&_blockquote]:px-4 [&_blockquote]:py-2",
@@ -100,8 +100,21 @@ export function DocsMarkdown({ children }: { children: string }) {
       />
     ) : null;
 
+  // A wide table scrolls sideways inside a box keyboard users can focus and scroll (axe
+  // scrollable-region-focusable); `group`, not `region`, so several tables need no unique names.
+  const Table = ({ children: rows }: TableProps) => (
+    <div
+      role="group"
+      aria-label={t("table")}
+      tabIndex={0}
+      className="overflow-x-auto rounded-sm focus-visible:outline-2 focus-visible:outline-ring"
+    >
+      <table className="w-full border-collapse text-body-sm">{rows}</table>
+    </div>
+  );
+
   // Streamdown styles emphasis with spans; the native elements keep the semantics.
-  const components: Components = { a: Anchor, img: Image, strong: "strong", em: "em", code: Code };
+  const components: Components = { a: Anchor, img: Image, strong: "strong", em: "em", code: Code, table: Table };
 
   return (
     <Streamdown

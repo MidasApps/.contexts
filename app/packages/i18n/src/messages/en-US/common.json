@@ -374,6 +374,7 @@
     "code": "Code",
     "codeWithLanguage": "{language} code",
     "newTab": "(opens in a new tab)",
-    "steps": "Previous and next page"
+    "steps": "Previous and next page",
+    "table": "Table (scroll sideways to see all of it)"
   }
 }

@@ -29,6 +29,10 @@ const MARKDOWN = [
   "```bash",
   "curl https://example.com",
   "```",
+  "",
+  "| Papel | Permissão |",
+  "|---|---|",
+  "| Leitor | `core.organization.read` |",
 ].join("\n");
 
 const render = (locale: "pt-BR" | "en-US" = "pt-BR") =>
@@ -58,6 +62,13 @@ describe("DocsView", () => {
     expect(article.querySelector("a[href^='javascript']")).toBeNull();
     expect(screen.getByText("qualquer").closest("a")).toBeNull();
     expect(screen.getByRole("region", { name: "Código bash" })).toBeDefined();
+  });
+
+  it("puts tables in a box keyboard users can focus to scroll sideways", () => {
+    render();
+    const box = screen.getByRole("group", { name: "Tabela (role para o lado para ver tudo)" });
+    expect(box.getAttribute("tabindex")).toBe("0");
+    expect(box.querySelector("table")?.textContent).toContain("Leitor");
   });
 
   it("shows the guide's own screenshots and no image from elsewhere", () => {

@@ -374,6 +374,7 @@
     "code": "Código",
     "codeWithLanguage": "Código {language}",
     "newTab": "(abre em nova aba)",
-    "steps": "Página anterior e próxima"
+    "steps": "Página anterior e próxima",
+    "table": "Tabela (role para o lado para ver tudo)"
   }
 }
