@@ -200,6 +200,13 @@ overrides:
   "@firebase/firestore>@grpc/grpc-js": 1.14.5
   "get-uri>basic-ftp": 6.2.1
   "mocha>serialize-javascript": 7.0.3
+  # GHSA-6qxp-vccf-f47h (2026-10-06): @mastra/mcp (2.1.2 included) pins the MCP SDK at 2.0.0, and
+  # the OAuth client below 2.2.0 can send credentials to an authorization server the MCP server
+  # names. The client pins its core, so the three move together. Drop them once @mastra/mcp
+  # depends on 2.2.0 or newer.
+  "@mastra/mcp>@modelcontextprotocol/client": 2.2.0
+  "@mastra/mcp>@modelcontextprotocol/core": 2.2.0
+  "@mastra/mcp>@modelcontextprotocol/server": 2.2.0
   # GHSA-68fv-2mgg-jv7q (2026-10-06): about 100 paths (postcss, css-tree, ...), so not scoped
   # to one parent. Drop once postcss and css-tree depend on >= 1.2.2.
   source-map-js: 1.2.2
