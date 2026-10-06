@@ -158,7 +158,10 @@ test.describe("shell states", () => {
   });
 
   test("offers a retry when the projects fail to load", async ({ page, world }) => {
-    // Every attempt fails (the client retries on its own) until the error state is on screen.
+    // Every attempt fails (the client retries on its own) until the error state is on screen. The
+    // client waits 1 s, 2 s and 4 s between its attempts; the page's clock jumps over those waits,
+    // so the error state does not have to fit in what the expect timeout leaves after them.
+    await page.clock.install();
     let failing = true;
     await page.route(/\/v1\/organizations\/[^/]+\/projects/, async (route) => {
       if (!failing || route.request().method() !== "GET") return route.continue();
@@ -170,7 +173,11 @@ test.describe("shell states", () => {
       });
     });
     await page.goto(`o/${world.alpha.id}`);
-    await expect(page.getByRole("alert").filter({ hasText: "Algo deu errado do nosso lado" })).toBeVisible();
+    const errorState = page.getByRole("alert").filter({ hasText: "Algo deu errado do nosso lado" });
+    await expect(async () => {
+      await page.clock.fastForward(4_000);
+      await expect(errorState).toBeVisible({ timeout: 500 });
+    }).toPass();
     failing = false;
     await page.getByRole("button", { name: "Tentar novamente" }).click();
     await expect(page.getByRole("link", { name: world.alpha.projects.launch.name })).toBeVisible();
