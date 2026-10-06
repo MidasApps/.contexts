@@ -1,6 +1,7 @@
 // Public API of the knowledge context (SP3 Task 12): tables ai.documents / ai.chunks_v1 with row level security.
 
-export { CHUNKS_V1_DIMENSIONS, knowledgeChunksV1, knowledgeDocuments } from "./adapters/driven/drizzle-schema.ts";
+export { knowledgeChunksV1, knowledgeDocuments } from "./adapters/driven/drizzle-schema.ts";
+export { CHUNKS_V1_DIMENSIONS } from "./domain/chunk-dimensions.ts";
 export {
   createLogKnowledgeEventPublisher,
   type KnowledgeDocumentIndexedEvent,

@@ -1,7 +1,8 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createFirebaseAdmin } from "../firebase/firebase-admin.ts";
-import { SYSTEM_ACTOR, withCreateAudit, withUpdateAudit } from "./audit-fields.ts";
+import { SYSTEM_ACTOR } from "#/services/audit/domain/audit-actor.ts";
+import { withCreateAudit, withUpdateAudit } from "./audit-fields.ts";
 import { initialSoftDeleteFields, notDeleted, softDeleteFields } from "./soft-delete.ts";
 import { runInTransaction } from "./transaction-runner.ts";
 

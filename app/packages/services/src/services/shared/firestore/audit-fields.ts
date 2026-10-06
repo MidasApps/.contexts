@@ -1,8 +1,5 @@
 import { FieldValue } from "firebase-admin/firestore";
 
-/** Actor id for automated writes (contracts/firebase-firestore.md §5). */
-export const SYSTEM_ACTOR = "system";
-
 export type CreateAuditFields = {
   createdAt: FieldValue;
   updatedAt: FieldValue;

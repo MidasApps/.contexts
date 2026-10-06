@@ -8,7 +8,7 @@ import type {
   NewKnowledgeDocument,
   UpsertedDocument,
 } from "../../application/ports/knowledge-repository.ts";
-import { CHUNKS_V1_DIMENSIONS } from "./drizzle-schema.ts";
+import { CHUNKS_V1_DIMENSIONS } from "../../domain/chunk-dimensions.ts";
 
 /** NOLOGIN role every knowledge query runs as (migration 0004): no BYPASSRLS, DML on ai.documents/chunks_v1 only. */
 export const KNOWLEDGE_RUNTIME_ROLE = "knowledge_runtime";

@@ -5,7 +5,7 @@ import {
   PLATFORM_TENANT_ID,
 } from "@core/contracts";
 import { z } from "zod";
-import { CHUNKS_V1_DIMENSIONS } from "../../adapters/driven/drizzle-schema.ts";
+import { CHUNKS_V1_DIMENSIONS } from "../../domain/chunk-dimensions.ts";
 
 /**
  * Server-only inputs of the knowledge use cases (SP3 Task 12). Tenants come from

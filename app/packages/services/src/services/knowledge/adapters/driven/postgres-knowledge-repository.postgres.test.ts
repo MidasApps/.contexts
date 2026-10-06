@@ -3,7 +3,7 @@ import { createPostgresClient } from "#/services/shared/postgres/postgres-client
 import type { NewChunk, NewKnowledgeDocument } from "../../application/ports/knowledge-repository.ts";
 import { makeReplaceDocumentChunks } from "../../application/use-cases/replace-document-chunks.ts";
 import { makeSearchChunks } from "../../application/use-cases/search-chunks.ts";
-import { CHUNKS_V1_DIMENSIONS } from "./drizzle-schema.ts";
+import { CHUNKS_V1_DIMENSIONS } from "../../domain/chunk-dimensions.ts";
 import { createPostgresKnowledgeRepository, KNOWLEDGE_RUNTIME_ROLE } from "./postgres-knowledge-repository.ts";
 
 // Needs the compose container and `pnpm db:migrate` (migrations 0003/0004).
