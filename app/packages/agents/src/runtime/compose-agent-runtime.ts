@@ -134,6 +134,7 @@ const createAgentDeps = (
     secrets: args.ports.secrets,
     toolDeps,
     loaders: args.connectorLoaders ?? defaultConnectorLoaders(args.env.APP_ENV),
+    logger: processLogger,
   });
   const guardrails = (kind: Parameters<typeof createGuardrailProfile>[1]) =>
     createGuardrailProfile({ models, ports: args.ports }, kind);

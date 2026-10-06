@@ -33,6 +33,7 @@ import {
   SCHEDULE_ACTIONS,
 } from "./operations-console.ts";
 import { createTraceReader, type TraceStore } from "./trace-reader.ts";
+import { withRequestId } from "./console-errors.ts";
 
 /**
  * Console reads and writes over Mastra storage (decision 0040), custom routes outside the API
@@ -106,11 +107,12 @@ const storeOf = async <T>(ctx: Ctx, name: "observability" | "experiments"): Prom
 // Infrastructure errors answer 500 with no detail; the log keeps the cause.
 const guarded =
   (deps: ConsoleRouteDeps, event: string, run: (ctx: Ctx) => Promise<Response>) => async (c: HonoLike) => {
+    const requestId = c.req.header("x-request-id");
     try {
-      return await run(ctxOf(c));
+      return await withRequestId(await run(ctxOf(c)), requestId);
     } catch (error: unknown) {
-      deps.logger.error(event, { err: error });
-      return fail(500, "INTERNAL_ERROR");
+      deps.logger.error(event, { ...(requestId === undefined ? {} : { requestId }), err: error });
+      return withRequestId(fail(500, "INTERNAL_ERROR"), requestId);
     }
   };
 

@@ -103,13 +103,16 @@ const transcriptOf = (messages: readonly UIMessage[]): string =>
     .join("\n")
     .slice(-MAX_TRANSCRIPT_CHARS);
 
+/** Deadline of the one-shot summary call; the client's disconnect also aborts it. */
+export const SUMMARY_TIMEOUT_MS = 60_000;
+
 /**
  * Summary of the last 100 messages with the `fast` role (spec §4.1). The summarizer is a plain
  * agent without tools or memory, guarded by the tenant budget, so the call is traced, billed in
  * the usage ledger and capped like any other model call. 409 when there is nothing to summarize.
  */
 export const handleSummary = async (
-  input: HistoryInput,
+  input: HistoryInput & { readonly signal?: AbortSignal },
   deps: Pick<ChatRouteDeps, "chatAgents" | "resolveCustomAgent" | "logger"> & { readonly summarizer: Agent },
 ): Promise<Response> => {
   if ((await durableIdOf(deps, input.agentId, input.requestContext)) === undefined)
@@ -118,7 +121,11 @@ export const handleSummary = async (
   if (window === null) return chatError("FORBIDDEN", input.requestContext);
   const transcript = transcriptOf(await toUiMessages(window.messages));
   if (transcript === "") return chatError("CONFLICT", input.requestContext);
-  const result = await deps.summarizer.generate(transcript, { requestContext: input.requestContext });
+  const deadline = AbortSignal.timeout(SUMMARY_TIMEOUT_MS);
+  const result = await deps.summarizer.generate(transcript, {
+    requestContext: input.requestContext,
+    abortSignal: input.signal === undefined ? deadline : AbortSignal.any([input.signal, deadline]),
+  });
   const summary = result.text.trim().slice(0, MAX_SUMMARY_CHARS);
   if (summary === "") return chatError("CONFLICT", input.requestContext);
   deps.logger.info("conversation_summarized", {

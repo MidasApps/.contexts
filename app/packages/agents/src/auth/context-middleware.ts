@@ -139,10 +139,17 @@ const resolveSnapshot = async (
   };
 };
 
-const REFUSALS: Record<Exclude<ThreadAccess, "allowed">, { status: number; error: string }> = {
-  forbidden: { status: 403, error: "Forbidden" },
-  unavailable: { status: 503, error: "Service unavailable" },
+const REFUSALS: Record<Exclude<ThreadAccess, "allowed">, { status: number; code: string; message: string }> = {
+  forbidden: { status: 403, code: "FORBIDDEN", message: "You do not have access to this conversation." },
+  unavailable: { status: 503, code: "UPSTREAM_UNAVAILABLE", message: "The service is unavailable." },
 };
+
+// The api.md §6 envelope, with the forwarded request id.
+const refusal = (request: Request, status: number, code: string, message: string): Response =>
+  Response.json(
+    { error: { code, message, requestId: resolveRequestId(readHeader(request, FORWARDED_HEADERS.requestId)) } },
+    { status },
+  );
 
 // A thread of another resource (tenant:uid) is refused before the run (Mastra would fail it with 500).
 const refuseForeignThread = async (
@@ -158,8 +165,8 @@ const refuseForeignThread = async (
   if (threadIds.length === 0) return undefined;
   const access = await checkThreadAccess({ lookup: options.threadOwnerOf, threadIds, resourceId });
   if (access === "allowed") return undefined;
-  const refusal = REFUSALS[access];
-  return Response.json({ error: refusal.error }, { status: refusal.status });
+  const refused = REFUSALS[access];
+  return refusal(request, refused.status, refused.code, refused.message);
 };
 
 /**
@@ -183,7 +190,8 @@ export const createContextMiddleware = (options: ContextMiddlewareOptions): Agen
     // Before authentication, so the route auth sees (and memoizes) the same request object.
     context.req.raw = await withServerTracingOptions(context.req.raw);
     const snapshot = await resolveSnapshot(options, context.req.raw);
-    if (snapshot === "malformed") return Response.json({ error: "Invalid conversation id" }, { status: 400 });
+    if (snapshot === "malformed")
+      return refusal(context.req.raw, 400, "VALIDATION_FAILED", "The conversation id is not valid.");
     if (snapshot !== null) {
       const killed = await killedResponse(options.killSwitch, context.req.raw, snapshot.context);
       if (killed !== undefined) return killed;

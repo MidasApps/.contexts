@@ -44,12 +44,22 @@ export const runReadOnlyQuery: PostgresConnectorRunner = async ({ dsn, sql, para
 const defaultResolve: ResolveHost = async (host) =>
   (await lookup(host, { all: true, verbatim: true })).map((entry) => entry.address);
 
-/** @throws when the DSN host is an IP literal, local, or resolves to a non-public address. */
+/** The DSN host is an IP literal, local, or resolves to a non-public address. */
+export class DatabaseHostNotPublicError extends Error {
+  readonly code = "DATABASE_HOST_NOT_PUBLIC";
+
+  constructor() {
+    super("database host is not public");
+    this.name = "DatabaseHostNotPublicError";
+  }
+}
+
+/** @throws {DatabaseHostNotPublicError} when the DSN host is not public; DNS errors propagate. */
 export const assertPublicDatabaseHost = async (dsn: string, resolve: ResolveHost = defaultResolve): Promise<void> => {
   const host = new URL(dsn).hostname.replace(/^\[|\]$/g, "").toLowerCase();
-  if (host === "" || isIP(host) !== 0 || !host.includes(".")) throw new Error("DATABASE_HOST_NOT_PUBLIC");
+  if (host === "" || isIP(host) !== 0 || !host.includes(".")) throw new DatabaseHostNotPublicError();
   const addresses = await resolve(host);
-  if (addresses.length === 0 || addresses.some(isNonPublicAddress)) throw new Error("DATABASE_HOST_NOT_PUBLIC");
+  if (addresses.length === 0 || addresses.some(isNonPublicAddress)) throw new DatabaseHostNotPublicError();
 };
 
 const keyPart = (value: string): string => {
@@ -102,7 +112,8 @@ export const postgresConnectorTools = (args: {
           });
         await assertPublicDatabaseHost(dsn, args.resolve).catch((error: unknown) => {
           throw toolFailure(toolId, "CONNECTOR_UNAVAILABLE", "The connector database is not reachable.", {
-            reason: error instanceof Error ? error.message : "UNKNOWN",
+            // Only a coded reason reaches the model; a raw DNS or driver message stays out.
+            reason: error instanceof DatabaseHostNotPublicError ? error.code : "HOST_UNRESOLVED",
           });
         });
         const limit = input.limit ?? DB_DEFAULT_LIMIT;
