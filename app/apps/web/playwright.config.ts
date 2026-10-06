@@ -1,3 +1,4 @@
+import { availableParallelism } from "node:os";
 import path from "node:path";
 import { readE2eEnv } from "@core/e2e/e2e-env";
 import { e2eMastraServer } from "@core/e2e/mastra-server";
@@ -24,7 +25,9 @@ export default defineConfig({
   // Four workers in CI, two locally: each cold page restores a session through `next start` and the
   // emulators, and more parallel browsers than that made those restores slower than the timeouts. A
   // developer machine also runs the agent runtime, the emulators and its own apps (follow-up #102).
-  workers: isCi ? 4 : 2,
+  // Never more workers than CPUs in CI: on a 2-CPU runner four browsers made each journey take
+  // almost three times as long as two did, past the timeouts, and the whole run was slower too.
+  workers: isCi ? Math.min(4, availableParallelism()) : 2,
   timeout: 60_000,
   expect: { timeout: 10_000 },
   // CI lists each journey as it ends, so a run that stalls names the journey it stalled on.
