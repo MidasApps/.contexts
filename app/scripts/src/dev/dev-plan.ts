@@ -2,6 +2,7 @@
  * Pure argument builders for `pnpm dev` (scripts/dev.ts). Keeping them free of
  * I/O lets the orchestration order and the safety checks be unit-tested.
  */
+import { z } from "zod";
 
 /** `demo-*` project ids can never reach a real Firebase project (environments.md §9). */
 const DEMO_PROJECT_PREFIX = "demo-";
@@ -81,13 +82,54 @@ export const buildTurboDevArgs = (): string[] => [
   "--filter=@core/mastra",
 ];
 
+const EmulatorPortSchema = z.object({ port: z.number().int().min(1).max(65_535) });
+
+/** The emulators of `firebase.json` that `pnpm dev` probes; the file is the single source of their ports. */
+const FirebaseDevConfigSchema = z.object({
+  emulators: z.object({ ui: EmulatorPortSchema, functions: EmulatorPortSchema }),
+});
+
+/**
+ * Ports of the Emulator UI and the Functions emulator in `firebase.json`, so the readiness probes
+ * reach the emulators this workspace started, whatever ports the file gives them.
+ *
+ * @throws {Error} naming `firebase.json` and each entry that is missing or is not a port.
+ */
+export const readEmulatorPorts = (firebaseConfig: unknown): { ui: number; functions: number } => {
+  const parsed = FirebaseDevConfigSchema.safeParse(firebaseConfig);
+  if (!parsed.success) {
+    const entries = [...new Set(parsed.error.issues.map((issue) => issue.path.map(String).join(".")))];
+    throw new Error(`invalid firebase.json: expected a port between 1 and 65535 at ${entries.join(", ")}`);
+  }
+  return { ui: parsed.data.emulators.ui.port, functions: parsed.data.emulators.functions.port };
+};
+
+/**
+ * `readEmulatorPorts` from the text of `firebase.json`, so a file that is not JSON stops `pnpm dev`
+ * with the same message form as a missing port, not with the parser's own error.
+ *
+ * @throws {Error} naming `firebase.json` when the text is not JSON, or when a port is missing or is not a port.
+ */
+export const parseEmulatorPorts = (firebaseJson: string): { ui: number; functions: number } => {
+  let firebaseConfig: unknown;
+  try {
+    firebaseConfig = JSON.parse(firebaseJson);
+  } catch {
+    throw new Error("invalid firebase.json: the file is not valid JSON");
+  }
+  return readEmulatorPorts(firebaseConfig);
+};
+
+/** The Emulator UI answers once the emulators are up: the first readiness probe of `pnpm dev`. */
+export const buildEmulatorUiUrl = (port: number): string => `http://127.0.0.1:${String(port)}/`;
+
 /**
  * The Functions emulator's `healthz` (apps/functions, decision 0003). It answers
  * only after the emulator has loaded `lib/`, so it is the signal to start the
  * CPU-heavy dev servers: loading under load can hit the emulator's 10 s timeout.
  */
-export const buildFunctionsProbeUrl = (args: { projectId: string; region: string }): string =>
-  `http://127.0.0.1:5001/${args.projectId}/${args.region}/healthz`;
+export const buildFunctionsProbeUrl = (args: { projectId: string; region: string; port: number }): string =>
+  `http://127.0.0.1:${String(args.port)}/${args.projectId}/${args.region}/healthz`;
 
 export type KillTreeCommand = { command: string; args: string[] };
 
