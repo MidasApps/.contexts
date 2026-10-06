@@ -39,7 +39,7 @@ const env = loadMastraEnv({
   APP_ENV: "local",
   AI_MODE: "fake",
   FIREBASE_PROJECT_ID: "demo-core",
-  DATABASE_URL: "postgresql://app:app@127.0.0.1:5432/app",
+  DATABASE_URL: process.env["DATABASE_URL"] ?? "postgresql://app:app@127.0.0.1:5432/app",
   FIREBASE_AUTH_EMULATOR_HOST: process.env.FIREBASE_AUTH_EMULATOR_HOST,
   FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST,
 });
