@@ -84,7 +84,7 @@ export function Combobox({
           data-slot="combobox-trigger"
           className={cn(
             textControlClasses,
-            "flex h-9 cursor-pointer items-center justify-between gap-2 px-3 text-left",
+            "flex h-9 cursor-pointer items-center justify-between gap-2 px-3 text-start",
             selected === undefined && "text-muted-foreground",
             className,
           )}
@@ -122,7 +122,7 @@ export function Combobox({
                     <span className="truncate">{option.label}</span>
                     <CheckIcon
                       aria-hidden="true"
-                      className={cn("ml-auto size-4", option.value === value ? "opacity-100" : "opacity-0")}
+                      className={cn("ms-auto size-4", option.value === value ? "opacity-100" : "opacity-0")}
                     />
                   </CommandItem>
                 ))}

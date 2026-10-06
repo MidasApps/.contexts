@@ -37,7 +37,7 @@ export function TaskTrigger({ title, className, ...props }: TaskTriggerProps) {
 export function TaskContent({ className, children, ...props }: ComponentProps<typeof CollapsibleContent>) {
   return (
     <CollapsibleContent data-slot="task-content" {...props}>
-      <ul className={cn("mt-2 flex list-none flex-col gap-1.5 border-l-2 border-border pl-3", className)}>
+      <ul className={cn("mt-2 flex list-none flex-col gap-1.5 border-s-2 border-border ps-3", className)}>
         {children}
       </ul>
     </CollapsibleContent>

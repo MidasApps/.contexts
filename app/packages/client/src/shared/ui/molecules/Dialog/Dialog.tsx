@@ -96,7 +96,7 @@ export function DialogContent({
         {showCloseButton && closable ? (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute top-4 right-4 inline-flex size-7 cursor-pointer items-center justify-center rounded-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="absolute top-4 end-4 inline-flex size-7 cursor-pointer items-center justify-center rounded-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <XIcon className="size-4" aria-hidden="true" />
             <span className="sr-only">{t("close")}</span>
@@ -108,7 +108,9 @@ export function DialogContent({
 }
 
 export function DialogHeader({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="dialog-header" className={cn("flex flex-col gap-1.5 pr-8 text-left", className)} {...props} />;
+  return (
+    <div data-slot="dialog-header" className={cn("flex flex-col gap-1.5 pe-8 text-start", className)} {...props} />
+  );
 }
 
 /** Actions row: primary last (right on wide screens, top on narrow ones). */

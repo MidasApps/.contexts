@@ -64,7 +64,7 @@ export function ToolHeader({ title, state, icon, className, ...props }: ToolHead
     <CollapsibleTrigger
       data-slot="tool-header"
       className={cn(
-        "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-body",
+        "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-start text-body",
         className,
       )}
       {...props}

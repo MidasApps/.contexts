@@ -73,7 +73,7 @@ function AgentRow({ agent, canManagePrompts }: { agent: AdminAgent; canManagePro
           </Button>
         ) : null}
       </div>
-      <dl className="grid gap-3 sm:grid-cols-2 sm:pl-12">
+      <dl className="grid gap-3 sm:grid-cols-2 sm:ps-12">
         {agent.role === "supervisor" ? (
           <Detail label={t("catalog.subagents")}>
             <IdList ids={agent.subagents} empty={t("catalog.none")} />

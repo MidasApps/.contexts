@@ -102,10 +102,10 @@ export function AppTopbar({ onOpenCommandPalette, actions }: AppTopbarProps) {
   const modifier = useModifierKey();
   return (
     <>
-      <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mr-1 data-[orientation=vertical]:h-4" />
+      <SidebarTrigger className="-ms-1" />
+      <Separator orientation="vertical" className="me-1 data-[orientation=vertical]:h-4" />
       <Breadcrumbs />
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ms-auto flex items-center gap-2">
         <Button
           variant="outline"
           size="sm"

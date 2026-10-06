@@ -12,13 +12,13 @@ describe("Table", () => {
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead className="text-right">Projetos</TableHead>
+            <TableHead className="text-end">Projetos</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow>
             <TableCell>Ana</TableCell>
-            <TableCell className="text-right font-mono">3</TableCell>
+            <TableCell className="text-end font-mono">3</TableCell>
           </TableRow>
         </TableBody>
       </Table>,

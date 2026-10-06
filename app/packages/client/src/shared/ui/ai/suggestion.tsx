@@ -33,7 +33,7 @@ export function Suggestion({ title, description, prompt, onSelect, className, ..
         data-slot="suggestion"
         onClick={() => onSelect(prompt ?? title)}
         className={cn(
-          "flex h-full w-full cursor-pointer flex-col gap-1 rounded-md border border-border bg-card p-3 text-left transition-colors duration-(--duration-fast) hover:border-blue/50 hover:bg-muted",
+          "flex h-full w-full cursor-pointer flex-col gap-1 rounded-md border border-border bg-card p-3 text-start transition-colors duration-(--duration-fast) hover:border-blue/50 hover:bg-muted",
           "disabled:pointer-events-none disabled:opacity-50",
           className,
         )}

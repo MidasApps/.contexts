@@ -76,7 +76,7 @@ export function SidebarGroupAction({
     <Component
       data-slot="sidebar-group-action"
       className={cn(
-        "absolute top-3 right-3 flex size-6 cursor-pointer items-center justify-center rounded-2xs text-muted-foreground",
+        "absolute top-3 end-3 flex size-6 cursor-pointer items-center justify-center rounded-2xs text-muted-foreground",
         "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
         "group-data-[collapsible=icon]:hidden",
         className,

@@ -66,7 +66,7 @@ function PageSteps({ previous, next }: { previous: DocsNavPage | undefined; next
         </RouteLink>
       )}
       {next === undefined ? null : (
-        <RouteLink to={{ id: "docs", page: next.slug }} className={cn(step, "sm:items-end sm:text-right")}>
+        <RouteLink to={{ id: "docs", page: next.slug }} className={cn(step, "sm:items-end sm:text-end")}>
           <span className="flex items-center gap-1 text-caption text-muted-foreground">
             {t("next")}
             <Icon name="arrow-right" />

@@ -33,7 +33,7 @@ export function Reasoning({ text, streaming = false, className, ...props }: Reas
         />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="mt-2 border-l-2 border-border pl-3">
+        <div className="mt-2 border-s-2 border-border ps-3">
           <SafeMarkdown streaming={streaming} className="text-body text-muted-foreground">
             {text}
           </SafeMarkdown>

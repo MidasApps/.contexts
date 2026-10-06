@@ -98,8 +98,8 @@ export function SelectLabel({ className, ...props }: ComponentProps<typeof Selec
 
 export function SelectItem({ className, children, ...props }: ComponentProps<typeof SelectPrimitive.Item>) {
   return (
-    <SelectPrimitive.Item data-slot="select-item" className={cn(menuItemClasses, "w-full pr-8", className)} {...props}>
-      <span data-slot="select-item-indicator" className="absolute right-2 flex size-3.5 items-center justify-center">
+    <SelectPrimitive.Item data-slot="select-item" className={cn(menuItemClasses, "w-full pe-8", className)} {...props}>
+      <span data-slot="select-item-indicator" className="absolute end-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
           <CheckIcon className="size-4" aria-hidden="true" />
         </SelectPrimitive.ItemIndicator>

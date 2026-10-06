@@ -23,7 +23,7 @@ export function AppShellSkeleton({ label, sidebarOpen = true }: AppShellSkeleton
         aria-hidden="true"
         data-slot="app-shell-skeleton-sidebar"
         style={{ width: sidebarOpen ? SIDEBAR_WIDTH : SIDEBAR_WIDTH_ICON }}
-        className="sticky top-0 hidden h-svh shrink-0 flex-col gap-3 border-r border-sidebar-border bg-sidebar p-3 md:flex"
+        className="sticky top-0 hidden h-svh shrink-0 flex-col gap-3 border-e border-sidebar-border bg-sidebar p-3 md:flex"
       >
         <Skeleton className="h-8 w-full rounded-sm" />
         {Array.from({ length: NAV_ROWS }, (_, index) => (

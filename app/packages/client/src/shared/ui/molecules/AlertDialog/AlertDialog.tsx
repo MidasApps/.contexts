@@ -34,7 +34,7 @@ export function AlertDialogContent({ className, ...props }: ComponentProps<typeo
 
 export function AlertDialogHeader({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div data-slot="alert-dialog-header" className={cn("flex flex-col gap-1.5 text-left", className)} {...props} />
+    <div data-slot="alert-dialog-header" className={cn("flex flex-col gap-1.5 text-start", className)} {...props} />
   );
 }
 

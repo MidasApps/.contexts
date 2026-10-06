@@ -26,8 +26,8 @@ export function SheetClose(props: ComponentProps<typeof SheetPrimitive.Close>) {
 
 const SIDE_CLASSES = {
   right:
-    "inset-y-0 right-0 h-full w-3/4 border-l data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right sm:max-w-sm",
-  left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-sm",
+    "inset-y-0 end-0 h-full w-3/4 border-s data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right sm:max-w-sm",
+  left: "inset-y-0 start-0 h-full w-3/4 border-e data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-sm",
   top: "inset-x-0 top-0 h-auto border-b data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top",
   bottom:
     "inset-x-0 bottom-0 h-auto border-t data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom",
@@ -58,7 +58,7 @@ export function SheetContent({
         {showCloseButton ? (
           <SheetPrimitive.Close
             data-slot="sheet-close"
-            className="absolute top-4 right-4 inline-flex size-7 cursor-pointer items-center justify-center rounded-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="absolute top-4 end-4 inline-flex size-7 cursor-pointer items-center justify-center rounded-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <XIcon className="size-4" aria-hidden="true" />
             <span className="sr-only">{t("close")}</span>
@@ -70,7 +70,7 @@ export function SheetContent({
 }
 
 export function SheetHeader({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="sheet-header" className={cn("flex flex-col gap-1.5 p-4 pr-12", className)} {...props} />;
+  return <div data-slot="sheet-header" className={cn("flex flex-col gap-1.5 p-4 pe-12", className)} {...props} />;
 }
 
 export function SheetFooter({ className, ...props }: ComponentProps<"div">) {

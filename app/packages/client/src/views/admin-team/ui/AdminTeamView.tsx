@@ -2,7 +2,7 @@
 
 import type { PlatformStaff } from "@core/contracts";
 import { useMemo, useState } from "react";
-import { useTranslations } from "use-intl";
+import { useLocale, useTranslations } from "use-intl";
 import { AdminUserRef, useAdminUserNames } from "#/entities/admin-user/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { usePlatformStaff } from "#/entities/platform-staff/index.ts";
@@ -103,15 +103,19 @@ const useColumns = (actions: Actions) => {
 
 function StaffTable({ staff, actions }: { staff: readonly PlatformStaff[]; actions: Actions }) {
   const t = useTranslations("admin.team");
+  const locale = useLocale();
   const columns = useColumns(actions);
   // Active first, then by name; revoked records stay listed so access can be given back.
-  const rows = useMemo(
-    () =>
-      [...staff].sort((a, b) =>
-        a.isActive === b.isActive ? actions.labelOf(a.uid).localeCompare(actions.labelOf(b.uid)) : a.isActive ? -1 : 1,
-      ),
-    [actions, staff],
-  );
+  const rows = useMemo(() => {
+    const collator = new Intl.Collator(locale, { sensitivity: "base" });
+    return [...staff].sort((a, b) =>
+      a.isActive === b.isActive
+        ? collator.compare(actions.labelOf(a.uid), actions.labelOf(b.uid))
+        : a.isActive
+          ? -1
+          : 1,
+    );
+  }, [actions, locale, staff]);
   return (
     <DataTable
       caption={t("caption")}

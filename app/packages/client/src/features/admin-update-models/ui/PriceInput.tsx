@@ -40,7 +40,7 @@ export function PriceInput({ label, labelHidden = false, value, onValueChange, d
           autoComplete="off"
           value={text}
           disabled={disabled}
-          className="text-right font-mono tabular-nums"
+          className="text-end font-mono tabular-nums"
           onChange={(event) => {
             setText(event.target.value);
             setTouched(true);

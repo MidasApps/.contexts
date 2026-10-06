@@ -64,7 +64,7 @@ export function DropdownMenuItem({
       data-variant={variant}
       className={cn(
         menuItemClasses,
-        "data-[inset]:pl-8",
+        "data-[inset]:ps-8",
         "data-[variant=destructive]:text-destructive-text data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive-text",
         "data-[variant=destructive]:*:[svg]:!text-destructive-text",
         className,
@@ -82,10 +82,10 @@ export function DropdownMenuCheckboxItem({
   return (
     <DropdownMenuPrimitive.CheckboxItem
       data-slot="dropdown-menu-checkbox-item"
-      className={cn(menuItemClasses, "pl-8", className)}
+      className={cn(menuItemClasses, "ps-8", className)}
       {...props}
     >
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      <span className="pointer-events-none absolute start-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <CheckIcon className="size-4" aria-hidden="true" />
         </DropdownMenuPrimitive.ItemIndicator>
@@ -103,10 +103,10 @@ export function DropdownMenuRadioItem({
   return (
     <DropdownMenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
-      className={cn(menuItemClasses, "pl-8", className)}
+      className={cn(menuItemClasses, "ps-8", className)}
       {...props}
     >
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      <span className="pointer-events-none absolute start-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <span className="block size-2 rounded-full bg-current" />
         </DropdownMenuPrimitive.ItemIndicator>
@@ -127,7 +127,7 @@ export function DropdownMenuLabel({
       data-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn(
-        "px-2 pt-2 pb-1 font-mono text-tiny tracking-widest text-muted-foreground uppercase data-[inset]:pl-8",
+        "px-2 pt-2 pb-1 font-mono text-tiny tracking-widest text-muted-foreground uppercase data-[inset]:ps-8",
         className,
       )}
       {...props}
@@ -150,7 +150,7 @@ export function DropdownMenuShortcut({ className, ...props }: ComponentProps<"sp
   return (
     <span
       data-slot="dropdown-menu-shortcut"
-      className={cn("ml-auto font-mono text-xs tracking-widest text-muted-foreground", className)}
+      className={cn("ms-auto font-mono text-xs tracking-widest text-muted-foreground", className)}
       {...props}
     />
   );
@@ -168,13 +168,13 @@ export function DropdownMenuSubTrigger({
       data-inset={inset}
       className={cn(
         menuItemClasses,
-        "data-[inset]:pl-8 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+        "data-[inset]:ps-8 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
         className,
       )}
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto size-4" aria-hidden="true" />
+      <ChevronRightIcon className="ms-auto size-4" aria-hidden="true" />
     </DropdownMenuPrimitive.SubTrigger>
   );
 }

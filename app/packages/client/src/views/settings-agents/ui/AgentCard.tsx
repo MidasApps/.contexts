@@ -155,7 +155,7 @@ export function AgentCard({ organizationId, agent, status, prompt }: AgentCardPr
           <Button
             variant="ghost"
             size="sm"
-            className="-ml-2 self-start"
+            className="-ms-2 self-start"
             aria-label={t(open ? "catalog.hideDetailsNamed" : "catalog.showDetailsNamed", { name: agent.name })}
           >
             <Icon name="chevron-down" className={open ? "rotate-180 transition-transform" : "transition-transform"} />

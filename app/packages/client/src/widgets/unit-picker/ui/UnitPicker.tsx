@@ -64,7 +64,7 @@ function UnitTreeBody({
         <Icon name="folder" />
         {t("wholeProject")}
       </Button>
-      <div className="max-h-72 overflow-y-auto pr-1">
+      <div className="max-h-72 overflow-y-auto pe-1">
         <TreeView
           label={t("treeLabel", { project: projectName })}
           nodes={nodes}
@@ -105,7 +105,7 @@ export function UnitPicker() {
               ) : (
                 <UnitBreadcrumb path={path} className="text-body" />
               )}
-              <Icon name="chevron-down" className="ml-auto" />
+              <Icon name="chevron-down" className="ms-auto" />
             </SidebarMenuButton>
           </PopoverTrigger>
           <PopoverContent

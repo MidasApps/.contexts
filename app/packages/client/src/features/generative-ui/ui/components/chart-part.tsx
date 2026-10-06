@@ -173,7 +173,7 @@ export function ChartPart({ props }: GenerativeComponentProps<ChartProps>) {
   const shownSeries = props.kind === "pie" ? props.series.slice(0, 1) : props.series;
   const title = t("label", {
     kind: t(`kinds.${props.kind}`),
-    series: shownSeries.map((series) => series.label).join(", "),
+    series: format.list(shownSeries.map((series) => series.label)),
   });
   return (
     <figure

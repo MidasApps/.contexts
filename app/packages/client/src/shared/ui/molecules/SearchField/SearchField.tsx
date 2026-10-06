@@ -23,7 +23,7 @@ export function SearchField({ value, onValueChange, label, className, placeholde
   const hasLabelledBy = props["aria-labelledby"] !== undefined;
   return (
     <div data-slot="search-field" className={cn("relative flex items-center", className)}>
-      <SearchIcon className="pointer-events-none absolute left-3 size-4 text-muted-foreground" aria-hidden="true" />
+      <SearchIcon className="pointer-events-none absolute start-3 size-4 text-muted-foreground" aria-hidden="true" />
       <input
         ref={inputRef}
         type="search"
@@ -31,7 +31,7 @@ export function SearchField({ value, onValueChange, label, className, placeholde
         onChange={(event) => onValueChange(event.target.value)}
         aria-label={hasLabelledBy ? undefined : (label ?? t("label"))}
         placeholder={placeholder ?? t("placeholder")}
-        className={cn(textControlClasses, "h-9 pr-9 pl-9 [&::-webkit-search-cancel-button]:hidden")}
+        className={cn(textControlClasses, "h-9 pe-9 ps-9 [&::-webkit-search-cancel-button]:hidden")}
         {...props}
       />
       {value === "" ? null : (
@@ -41,7 +41,7 @@ export function SearchField({ value, onValueChange, label, className, placeholde
             onValueChange("");
             inputRef.current?.focus();
           }}
-          className="absolute right-1.5 inline-flex size-6 cursor-pointer items-center justify-center rounded-2xs text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="absolute end-1.5 inline-flex size-6 cursor-pointer items-center justify-center rounded-2xs text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <XIcon className="size-3.5" aria-hidden="true" />
           <span className="sr-only">{t("clear")}</span>

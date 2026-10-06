@@ -1,7 +1,7 @@
 "use client";
 
 import type { AccessContext } from "@core/contracts";
-import { useTranslations } from "use-intl";
+import { useLocale, useTranslations } from "use-intl";
 import { type CatalogSkill, skillsOfCatalog, useAgentCatalog } from "#/entities/agent-catalog/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
@@ -72,6 +72,7 @@ function SkillsTable({ skills, organizationName }: { skills: readonly CatalogSki
 
 function SettingsSkills({ context }: { context: AccessContext }) {
   const t = useTranslations("settings.skills");
+  const locale = useLocale();
   const online = useOnlineStatus();
   const { organization, permissions } = context;
   const allowed = permissions.includes("core.agent-settings.read");
@@ -108,7 +109,7 @@ function SettingsSkills({ context }: { context: AccessContext }) {
         >
           <QuerySection query={catalog} loadingLabel={t("loading")}>
             {(data) => {
-              const skills = skillsOfCatalog(data);
+              const skills = skillsOfCatalog(data, locale);
               return skills.length === 0 ? (
                 <EmptyState
                   frame="plain"

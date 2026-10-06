@@ -71,8 +71,8 @@ export function TableHead({ className, scope = "col", ...props }: ComponentProps
       data-slot="table-head"
       scope={scope}
       className={cn(
-        "h-9 px-3 text-left align-middle font-medium whitespace-nowrap text-muted-foreground",
-        "text-caption tracking-[0.06em] uppercase [&:has([role=checkbox])]:pr-0",
+        "h-9 px-3 text-start align-middle font-medium whitespace-nowrap text-muted-foreground",
+        "text-caption tracking-[0.06em] uppercase [&:has([role=checkbox])]:pe-0",
         className,
       )}
       {...props}
@@ -84,7 +84,7 @@ export function TableCell({ className, ...props }: ComponentProps<"td">) {
   return (
     <td
       data-slot="table-cell"
-      className={cn("px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0", className)}
+      className={cn("px-3 py-2.5 align-middle [&:has([role=checkbox])]:pe-0", className)}
       {...props}
     />
   );
@@ -95,7 +95,7 @@ export function TableCaption({ className, ...props }: ComponentProps<"caption">)
   return (
     <caption
       data-slot="table-caption"
-      className={cn("mb-3 text-left text-sm text-muted-foreground", className)}
+      className={cn("mb-3 text-start text-sm text-muted-foreground", className)}
       {...props}
     />
   );

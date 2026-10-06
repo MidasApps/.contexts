@@ -76,8 +76,8 @@ export function Sidebar({ side = "left", collapsible = "icon", className, childr
         className={cn(
           "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-out md:flex",
           side === "left"
-            ? "left-0 border-r border-sidebar-border group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
-            : "right-0 border-l border-sidebar-border group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
+            ? "start-0 border-e border-sidebar-border group-data-[collapsible=offcanvas]:start-[calc(var(--sidebar-width)*-1)]"
+            : "end-0 border-s border-sidebar-border group-data-[collapsible=offcanvas]:end-[calc(var(--sidebar-width)*-1)]",
           "group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
           className,
         )}
@@ -130,7 +130,7 @@ export function SidebarRail({ className, ...props }: ComponentProps<"button">) {
       onClick={toggleSidebar}
       title={t("toggle")}
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-out group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
+        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-out group-data-[side=left]:-end-4 group-data-[side=right]:start-0 sm:flex",
         "after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
         "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",

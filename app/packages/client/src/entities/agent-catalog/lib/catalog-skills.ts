@@ -7,7 +7,7 @@ export type CatalogSkill = AgentCatalogSkill & {
 };
 
 /** The skills across the catalog, unique by name and sorted by it; a skill is active when one of its agents is enabled. */
-export const skillsOfCatalog = (catalog: readonly AgentCatalogEntry[]): CatalogSkill[] => {
+export const skillsOfCatalog = (catalog: readonly AgentCatalogEntry[], locale: string): CatalogSkill[] => {
   const byName = new Map<string, CatalogSkill>();
   for (const agent of catalog) {
     for (const skill of agent.skills) {
@@ -16,5 +16,6 @@ export const skillsOfCatalog = (catalog: readonly AgentCatalogEntry[]): CatalogS
       byName.set(skill.name, { ...(known ?? skill), agents, active: agents.some((entry) => entry.enabled) });
     }
   }
-  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+  const collator = new Intl.Collator(locale, { sensitivity: "base" });
+  return [...byName.values()].sort((a, b) => collator.compare(a.name, b.name));
 };

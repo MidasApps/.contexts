@@ -55,7 +55,7 @@ function ChatWorkspace({ place }: { place: ChatPlace }) {
       onNavigate={() => setHistoryOpen(false)}
       onDeleted={onDeleted}
       onClose={compact ? () => setHistoryOpen(false) : undefined}
-      className={compact ? undefined : "w-[280px] shrink-0 border-r border-border"}
+      className={compact ? undefined : "w-[280px] shrink-0 border-e border-border"}
     />
   );
 

@@ -37,7 +37,7 @@ export function PromptEvalResultTable({ outcome }: { outcome: PromptEvalOutcome 
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead>{t("scorer")}</TableHead>
-            <TableHead className="text-right">{t("mean")}</TableHead>
+            <TableHead className="text-end">{t("mean")}</TableHead>
             <TableHead>{t("result")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -47,7 +47,7 @@ export function PromptEvalResultTable({ outcome }: { outcome: PromptEvalOutcome 
               <TableHead scope="row" className="font-mono text-body-sm font-normal">
                 {scorer.scorerId}
               </TableHead>
-              <TableCell className="text-right font-mono tabular-nums">
+              <TableCell className="text-end font-mono tabular-nums">
                 {scorer.mean === null
                   ? t("noScore")
                   : format.number(scorer.mean, { style: "percent", maximumFractionDigits: 1 })}

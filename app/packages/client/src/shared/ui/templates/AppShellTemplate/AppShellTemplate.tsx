@@ -93,7 +93,7 @@ function RightPanel({ slot, compact }: { slot: RightPanelSlot; compact: boolean 
       aria-label={slot.label}
       data-slot="right-panel"
       className={cn(
-        "sticky top-14 hidden h-[calc(100svh-3.5rem)] w-[360px] shrink-0 border-l border-border bg-card lg:flex",
+        "sticky top-14 hidden h-[calc(100svh-3.5rem)] w-[360px] shrink-0 border-s border-border bg-card lg:flex",
         !slot.open && "lg:hidden",
       )}
     >

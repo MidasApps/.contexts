@@ -56,7 +56,7 @@ function Summary({ organization, planName }: { organization: OrganizationAdminDe
         </Stat>
         <Stat label={tList("columns.cap")}>
           <span className={mono}>{formatCost(organization.budget.caps.monthlyMicroUsd)}</span>{" "}
-          <span className="ml-1 text-xs text-muted-foreground">
+          <span className="ms-1 text-xs text-muted-foreground">
             {tList(`budgetSource.${organization.budget.source}`)}
           </span>
         </Stat>
@@ -68,7 +68,7 @@ function Summary({ organization, planName }: { organization: OrganizationAdminDe
         </Stat>
         <Stat label={t("members")}>
           <span className={mono}>{format.number(organization.memberCount)}</span>{" "}
-          <span className="ml-1 text-xs text-muted-foreground">{t("membersHint")}</span>
+          <span className="ms-1 text-xs text-muted-foreground">{t("membersHint")}</span>
         </Stat>
       </dl>
     </SectionCard>

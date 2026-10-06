@@ -46,10 +46,10 @@ const PROSE = [
   "[&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:tracking-tight",
   "[&_h2]:mt-10 [&_h2]:border-t [&_h2]:border-border [&_h2]:pt-6 [&_h2]:text-xl [&_h2]:font-semibold",
   "[&_h3]:mt-6 [&_h3]:text-base [&_h3]:font-semibold",
-  "[&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:my-1",
+  "[&_ol]:list-decimal [&_ol]:ps-6 [&_ul]:list-disc [&_ul]:ps-6 [&_li]:my-1",
   "[&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-2 [&_td]:align-top",
-  "[&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:px-3 [&_th]:py-2 [&_th]:text-left",
-  "[&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:bg-muted/40 [&_blockquote]:px-4 [&_blockquote]:py-2",
+  "[&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:px-3 [&_th]:py-2 [&_th]:text-start",
+  "[&_blockquote]:border-s-4 [&_blockquote]:border-border [&_blockquote]:bg-muted/40 [&_blockquote]:px-4 [&_blockquote]:py-2",
   "[&>*+*]:mt-4",
 ].join(" ");
 
