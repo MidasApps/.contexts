@@ -3,7 +3,7 @@ import "@core/client/testing/setup";
 import { IDS, MEMBER_PERMISSIONS, renderApp, shellRoutes } from "@core/client/testing";
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { SettingsSectionPage } from "./section-pages";
+import { SettingsSectionPage } from "./settings-section-pages";
 
 describe("SettingsSectionPage", () => {
   it("renders the section named by the address", async () => {

@@ -1,4 +1,4 @@
-import { AdminPage } from "@/client/section-pages";
+import { AdminPage } from "@/client/admin-section-pages";
 import { pageMetadata } from "@/server/page-metadata";
 
 export const generateMetadata = pageMetadata("admin");

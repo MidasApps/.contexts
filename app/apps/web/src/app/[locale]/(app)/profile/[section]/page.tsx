@@ -1,4 +1,4 @@
-import { ProfileSectionPage } from "@/client/section-pages";
+import { ProfileSectionPage } from "@/client/profile-section-pages";
 import { pageMetadata } from "@/server/page-metadata";
 
 export const generateMetadata = pageMetadata("profile");
