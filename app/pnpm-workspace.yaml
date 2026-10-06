@@ -186,6 +186,9 @@ minimumReleaseAgeExclude:
   # SP3 web tools (Task 23): firecrawl 4.42.1, published 2026-09-30, admitted by pnpm at
   # install; remove after 2026-10-07 (7 days after the publish).
   - firecrawl@4.42.1
+  # source-map-js 1.2.2 (security fix, published 2026-09-30; decision 0071, addendum):
+  # remove after 2026-10-07 (7 days after the publish).
+  - source-map-js@1.2.2
 
 # firecrawl 4.42.1 (latest) pins axios 1.18.0, which has high advisories fixed in 1.20.0
 # (GHSA-r4gj-5m52-g5wh and six more; found by the Mastra output audit, SP3 Task 25). Drop this
@@ -197,6 +200,9 @@ overrides:
   "@firebase/firestore>@grpc/grpc-js": 1.14.5
   "get-uri>basic-ftp": 6.2.1
   "mocha>serialize-javascript": 7.0.3
+  # GHSA-68fv-2mgg-jv7q (2026-10-06): about 100 paths (postcss, css-tree, ...), so not scoped
+  # to one parent. Drop once postcss and css-tree depend on >= 1.2.2.
+  source-map-js: 1.2.2
 
 # High advisories with no patched release, reachable only from dev and build tooling (decision 0071).
 auditConfig:

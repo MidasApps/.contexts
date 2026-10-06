@@ -26,3 +26,7 @@ The first GitHub CI run of the branch (PR #2) failed `pnpm audit --audit-level h
 
 - `pnpm audit --audit-level high` passes. The Mastra output still runs its own `pnpm audit --prod` with the same overrides.
 - Each override is removed once its parent depends on the patched version. Each ignore is removed once a patched release exists.
+
+## Addendum (2026-10-06): `source-map-js`
+
+GHSA-68fv-2mgg-jv7q (high, `source-map-js` < 1.2.2, event-loop denial of service from crafted source maps) was published after this decision and failed the audit in CI and the Mastra output audit. It is reached through about 100 paths (`postcss`, `css-tree`, ...), so the override is global, `source-map-js: 1.2.2`, instead of scoped to one parent. 1.2.2 was published on 2026-09-30, inside pnpm's minimum release age, so it is admitted in `minimumReleaseAgeExclude` until 2026-10-07, like the Next 16.3.7 security release. Drop the override once `postcss` and `css-tree` depend on 1.2.2 or later.
