@@ -1,0 +1,20 @@
+# Secret scanning (.contexts/engineering/contracts/secrets.md §14), run by app-ci on the commits
+# of each push and pull request. The default rules apply everywhere except files that hold only
+# documented example values or test doubles: contract examples, the catalog and OpenAPI generated
+# from them, the user guide, test files and fixtures, and vendored reference material.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Example values and test doubles, never credentials"
+paths = [
+  '''^app/docs/(catalog|openapi)/''',
+  '''^app/packages/contracts/src/contracts/.*\.ts$''',
+  '''^app/apps/web/content/docs/''',
+  '''\.test\.(ts|tsx|js)$''',
+  '''_tests\.rs$''',
+  '''^app/packages/client/src/shared/testing/''',
+  '''^docs/references/''',
+  '''^\.contexts/''',
+  '''^\.claude/''',
+]
