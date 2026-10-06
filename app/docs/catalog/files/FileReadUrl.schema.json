@@ -1,0 +1,34 @@
+{
+  "additionalProperties": false,
+  "description": "A short-lived signed URL to download or preview a validated file.",
+  "examples": [
+    {
+      "expiresAt": "2026-09-29T14:40:00.000Z",
+      "url": "https://storage.googleapis.com/core-files/tenants/Jd8sK2lPq0WnR5tYu3bV/files/Fz9sK2lPq0WnR5tYu3bV?X-Goog-Signature=def"
+    }
+  ],
+  "properties": {
+    "expiresAt": {
+      "description": "When the URL stops working (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "url": {
+      "description": "Short-lived download URL of a ready file.",
+      "format": "uri",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "url",
+    "expiresAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

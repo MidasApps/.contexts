@@ -1,0 +1,14 @@
+{
+  "extends": "@core/config/tsconfig/bundler.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "paths": { "@/*": ["./src/*"] },
+    "types": ["node", "vite/client"],
+    "allowJs": true,
+    "checkJs": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tscache/tsbuildinfo"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "scripts/**/*.ts", "e2e/**/*.ts", "*.ts", "*.js"],
+  "exclude": ["node_modules", "dist", "src-tauri", "test-native"]
+}

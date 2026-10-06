@@ -1,0 +1,82 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  // Agent guidance lives in ../.contexts; stop turbo from maintaining a root AGENTS.md.
+  "agentGuidance": false,
+  "tasks": {
+    // Public client config is inlined into the web and desktop bundles, so it keys the cache
+    // (a dev build and an e2e build are different outputs).
+    "build": {
+      "dependsOn": ["^build"],
+      "env": ["NEXT_PUBLIC_*", "VITE_*"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "lib/**", ".mastra/output/**"]
+    },
+    "lint": {
+      "dependsOn": ["^build", "typecheck"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    // Needs the Emulator Suite (root `pnpm test:emulators` wraps it in
+    // `firebase emulators:exec`); the emulator hosts must reach the test process.
+    "test:emulators": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": [
+        "FIREBASE_*",
+        "FIRESTORE_EMULATOR_HOST",
+        "GCLOUD_PROJECT",
+        "PUBSUB_EMULATOR_HOST",
+        "STORAGE_EMULATOR_HOST"
+      ]
+    },
+    // Needs the compose Postgres (`docker compose up -d --wait`).
+    "test:postgres": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": ["DATABASE_URL"]
+    },
+    // Agent eval sets (packages/agents): fake models in CI, real ones opt-in.
+    "evals": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      // GITHUB_SHA stamps the eval report (app/.evals, exported to BigQuery by SP5).
+      "passThroughEnv": ["AI_*", "DATABASE_URL", "GITHUB_SHA"]
+    },
+    "evals:real": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": ["AI_*", "DATABASE_URL", "GOOGLE_*", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GITHUB_SHA"]
+    },
+    // Playwright on the e2e stack (root `pnpm test:e2e` = scripts/e2e.ts: emulators of
+    // firebase.e2e.json + the e2e env, run with --env-mode=loose --concurrency=1 because
+    // the web and desktop runs share the e2e web port).
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    // The chat journeys reach the agent runtime (`node .mastra/output/index.mjs`) through `/v1`.
+    "@core/web#test:e2e": {
+      "dependsOn": ["build", "@core/mastra#build"],
+      "cache": false
+    },
+    // The desktop-web project calls the e2e web server (`next start`), so the web build too.
+    "@core/desktop#test:e2e": {
+      "dependsOn": ["build", "@core/web#build", "@core/mastra#build"],
+      "cache": false
+    },
+    // Catalog tasks write and read app/docs, outside any package, so they are never cached.
+    "contracts:catalog": { "cache": false },
+    "contracts:check": { "cache": false },
+    // Reads packages/i18n and every modules/*/src/messages catalog; cheap, so never cached.
+    "i18n:check": { "cache": false },
+    // Started by scripts/dev.ts (root `pnpm dev`), which also runs compose and the emulators.
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["WEB_PORT"]
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "additionalProperties": false,
+  "description": "A skill (named markdown instructions) an organization wrote for its agents.",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "description": "How to write the weekly status report of a project.",
+      "enabled": true,
+      "id": "Sk7cX9zA1sD3fG5hJ7kL",
+      "instructions": "# Weekly report\n\nStart with a three-line summary, then list risks and next steps.",
+      "name": "weekly-report",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "updatedAt": "2026-09-29T14:30:00.000Z"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the skill was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdBy": {
+      "description": "Uid of the admin who created it.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "description": {
+      "description": "When an agent should use the skill; the model routes by it.",
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "enabled": {
+      "description": "Whether agents that select the skill get it.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Firestore automatic id of the skill.",
+      "pattern": "^[A-Za-z0-9]{20}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "instructions": {
+      "description": "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+      "maxLength": 20000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "name": {
+      "description": "Kebab-case name, unique in the organization.",
+      "maxLength": 60,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Owning organization.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the skill last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "name",
+    "description",
+    "instructions",
+    "enabled",
+    "createdBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.agent-settings.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

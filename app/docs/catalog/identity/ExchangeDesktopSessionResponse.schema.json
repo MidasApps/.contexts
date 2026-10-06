@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "description": "Answer of POST /v1/desktop-sessions/exchange: a custom token and the rotated secret.",
+  "examples": [
+    {
+      "customToken": "eyJhbGciOiJSUzI1NiJ9.eyJ1aWQiOiJ1QTFiMkMzZDRFNWY2RzdoOEk5aiJ9.c2lnbmF0dXJl",
+      "expiresAt": "2026-10-06T14:30:00.000Z",
+      "secret": "q1W2e3R4t5Y6u7I8o9P0a1S2d3F4g5H6j7K8l9Z0x1C"
+    }
+  ],
+  "properties": {
+    "customToken": {
+      "description": "Custom token for signInWithCustomToken (in memory).",
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "sensitive"
+    },
+    "expiresAt": {
+      "description": "When the session expires unless exchanged again (sliding, UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "secret": {
+      "description": "Rotated secret; the previous one is dead and reusing it revokes the session.",
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "type": "string",
+      "x-pii": "sensitive"
+    }
+  },
+  "required": [
+    "customToken",
+    "secret",
+    "expiresAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "sensitive",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

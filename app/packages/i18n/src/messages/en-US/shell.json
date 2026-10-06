@@ -1,0 +1,270 @@
+{
+  "skipToContent": "Skip to main content",
+  "sidebar": {
+    "title": "Navigation",
+    "description": "Sections, current organization and project.",
+    "toggle": "Show or hide the sidebar",
+    "loading": "Loading navigation…",
+    "retry": "Reload navigation",
+    "projectGroup": "Project",
+    "organizationGroup": "Organization"
+  },
+  "commandPalette": {
+    "open": "Open command palette",
+    "title": "Command palette",
+    "description": "Search pages and actions, then press Enter to run one.",
+    "search": "Search commands or pages",
+    "placeholder": "Type a command or search…",
+    "results": "Commands",
+    "empty": "No commands found.",
+    "loading": "Loading…",
+    "groupFailed": "Couldn't load this list.",
+    "switchOrganization": "Switch to {name}",
+    "openProject": "Open project {name}",
+    "slots": {
+      "project": "project",
+      "organization": "organization",
+      "settings": "settings",
+      "user-menu": "profile"
+    },
+    "groups": {
+      "recent": "Recent",
+      "navigation": "Navigation",
+      "organizations": "Organizations",
+      "projects": "Projects",
+      "actions": "Actions"
+    },
+    "actions": {
+      "createOrganization": "Create organization",
+      "createProject": "Create project",
+      "toggleTheme": "Toggle light/dark theme",
+      "changeLanguage": "Change language",
+      "openProfile": "Open profile",
+      "signOut": "Sign out"
+    }
+  },
+  "nav": {
+    "organizationHome": "Projects",
+    "organizationSettings": "Settings",
+    "projectHome": "Overview",
+    "settings": {
+      "general": "General",
+      "members": "Members",
+      "invitations": "Invitations",
+      "roles": "Roles",
+      "units": "Units",
+      "api-keys": "API keys",
+      "devices": "Devices",
+      "agents": "Agents",
+      "skills": "Skills",
+      "knowledge": "Knowledge base",
+      "connectors": "Connectors",
+      "workflows": "Workflows and schedules",
+      "approvals": "Approvals",
+      "usage": "Usage and budget",
+      "traces": "Traces",
+      "evals": "Evaluations",
+      "flags": "Features",
+      "audit-log": "Audit log"
+    },
+    "profile": {
+      "account": "Account",
+      "preferences": "Preferences",
+      "security": "Security",
+      "sessions": "Sessions",
+      "notifications": "Notifications"
+    },
+    "admin": {
+      "organizations": "Organizations",
+      "users": "Users",
+      "agents": "Agents and prompts",
+      "models": "Models",
+      "connectors": "Connectors",
+      "traces": "Traces",
+      "costs": "Costs",
+      "flags": "Flags",
+      "plans": "Plans",
+      "evals": "Evals",
+      "logs": "Logs",
+      "workflows": "Workflows",
+      "audit": "Audit log",
+      "team": "Team"
+    },
+    "chat": "Assistant",
+    "groups": {
+      "organization": "Organization",
+      "access": "Access",
+      "customers": "Customers",
+      "ai": "AI",
+      "operations": "Operations",
+      "other": "Other"
+    }
+  },
+  "routeAnnouncer": {
+    "fallback": "New page loaded"
+  },
+  "serverError": {
+    "title": "This page could not be opened",
+    "description": "The server hit an error while building the page. Try again; if it keeps happening, give the reference to support."
+  },
+  "errorBoundary": {
+    "title": "This screen stopped working",
+    "description": "An unexpected error interrupted the screen. Try reloading it; if it keeps happening, give the reference to support."
+  },
+  "units": {
+    "hiddenUnit": "Restricted unit",
+    "loading": "Loading units…",
+    "emptyTitle": "No units in this project",
+    "emptyDescription": "Project admins can create units in settings.",
+    "wholeProject": "Whole project",
+    "treeLabel": "Units of {project}",
+    "pickerTrigger": "Unit: {unit}. Choose unit",
+    "pickerTitle": "Choose a unit"
+  },
+  "organizations": {
+    "title": "Organizations",
+    "description": "Choose where to work or create a new organization.",
+    "descriptionInviteOnly": "Choose where to work.",
+    "listLabel": "Your organizations",
+    "lastUsed": "Last used",
+    "suspended": "Suspended",
+    "loading": "Loading organizations…",
+    "emptyTitle": "You're not part of any organization yet",
+    "emptyDescription": "Create an organization next to this list or ask whoever manages yours for an invitation.",
+    "emptyDescriptionInviteOnly": "Ask whoever manages your organization for an invitation. The link arrives by email; open it with the account of that address.",
+    "loadMore": "Load more",
+    "switchAccount": "Sign in with another account",
+    "create": {
+      "title": "New organization",
+      "description": "You'll be the owner. Regional defaults apply to new projects and can be changed later.",
+      "checking": "Checking what you can create…",
+      "name": "Organization name",
+      "nameHint": "Shown to every member.",
+      "regional": "Regional defaults",
+      "locale": "Default language",
+      "timeZone": "Default time zone",
+      "currency": "Default currency",
+      "submit": "Create organization",
+      "created": "Organization {name} created.",
+      "createdStatus": "Organization created."
+    }
+  },
+  "home": {
+    "title": "Home",
+    "loading": "Opening where you left off…"
+  },
+  "switcher": {
+    "organizationTrigger": "{name}, switch organization",
+    "organizationLabel": "Organization",
+    "chooseOrganization": "Choose organization",
+    "organizations": "Organizations",
+    "loadingOrganizations": "Loading organizations…",
+    "organizationsFailed": "Couldn't load. Try again",
+    "allOrganizations": "See all or create an organization",
+    "projectTrigger": "{name}, switch project",
+    "chooseProject": "Choose project",
+    "projects": "Projects",
+    "loadingProjects": "Loading projects…",
+    "projectsFailed": "Couldn't load. Try again",
+    "noProjects": "No projects yet",
+    "createProject": "New project",
+    "allProjects": "All projects",
+    "switchFailed": "Couldn't switch organization",
+    "switching": "Switching organization…"
+  },
+  "userMenu": {
+    "trigger": "{name}, account menu",
+    "theme": "Theme",
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "language": "Language and region",
+    "docs": "Documentation"
+  },
+  "projects": {
+    "create": {
+      "title": "New project",
+      "description": "Projects group units, modules and people inside the organization.",
+      "name": "Project name",
+      "descriptionField": "Description",
+      "descriptionFieldHint": "Optional. Helps people understand what the project is for.",
+      "submit": "Create project",
+      "created": "Project {name} created.",
+      "createdStatus": "Project created."
+    },
+    "edit": {
+      "title": "Edit project",
+      "description": "The name and description show to everyone with access to the project.",
+      "name": "Project name",
+      "descriptionField": "Description",
+      "descriptionFieldHint": "Optional. Leave it blank to remove the description.",
+      "saved": "Project {name} updated."
+    },
+    "actions": {
+      "menu": "Project settings",
+      "edit": "Edit name and description",
+      "archive": "Archive project",
+      "reactivate": "Reactivate project",
+      "delete": "Delete project",
+      "archiveTitle": "Archive {name}?",
+      "archiveDescription": "The project stays accessible with the same data, but it is marked as archived. You can reactivate it at any time.",
+      "archiveConfirm": "Archive",
+      "archived": "Project {name} archived.",
+      "reactivated": "Project {name} reactivated.",
+      "deleteTitle": "Delete {name}?",
+      "deleteDescription": "The project and all its units stop existing for every member. This cannot be undone from the app.",
+      "deleteConfirm": "Delete project",
+      "deleted": "Project {name} deleted."
+    }
+  },
+  "organizationHome": {
+    "description": "Projects of this organization you can access.",
+    "archived": "Archived",
+    "suspended": "Suspended",
+    "loading": "Loading the organization…",
+    "loadingProjects": "Loading projects…",
+    "projectsHeading": "Projects",
+    "emptyTitle": "No projects yet",
+    "emptyDescription": "Create the first project to organize units, modules and people.",
+    "emptyDescriptionNoPermission": "There are no projects you can access yet. Ask an organization admin for access.",
+    "createProject": "New project",
+    "loadMore": "Load more"
+  },
+  "projectHome": {
+    "loading": "Loading the project…",
+    "archived": "Archived",
+    "currentUnit": "Current unit:",
+    "unitsHeading": "Units",
+    "subunitsHeading": "Subunits",
+    "loadingUnits": "Loading units…",
+    "unitsEmptyTitle": "No units here",
+    "unitsEmptyDescription": "Units split the project into parts, such as sites or teams.",
+    "manageUnits": "Manage units",
+    "modulesHeading": "Modules",
+    "modulesEmptyTitle": "No modules available",
+    "modulesEmptyDescription": "You don't have access to modules in this project, or none is installed.",
+    "openModule": "Open module"
+  },
+  "modulePage": {
+    "loading": "Loading the page…"
+  },
+  "pageState": {
+    "goHome": "Go to home",
+    "goToOrganizations": "See organizations",
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "This address doesn't exist or you don't have access to it. Check the link or go back home.",
+    "forbiddenTitle": "You don't have access to this page",
+    "forbiddenDescription": "Ask an organization admin to grant you access."
+  },
+  "rightPanel": {
+    "label": "Side panel",
+    "toggle": "Assistant",
+    "chatUnavailable": "Open a project to chat with the assistant."
+  },
+  "configError": {
+    "title": "Configuration error",
+    "description": "This build of the app is missing valid settings for: {fields}. Install a correct build or contact support."
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "additionalProperties": false,
+  "description": "One item of an organization's eval dataset: the input an agent receives and the expected answer.",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "datasetId": "ds_01J8Z3K4M5",
+      "expectedOutput": "The refund policy and the terms of sale.",
+      "id": "item_01J8Z3K4M5",
+      "input": "Which documents mention the refund policy?"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the item was added (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "datasetId": {
+      "description": "Dataset of the item.",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "expectedOutput": {
+      "anyOf": [
+        {
+          "maxLength": 8000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Expected answer (ground truth) as text; null when the item has none.",
+      "x-pii": "personal"
+    },
+    "id": {
+      "description": "Item id.",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "input": {
+      "description": "What the agent receives, as text (JSON for a structured input).",
+      "maxLength": 8000,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "id",
+    "datasetId",
+    "input",
+    "expectedOutput",
+    "createdAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.eval.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

@@ -1,0 +1,121 @@
+{
+  "additionalProperties": false,
+  "description": "Projection of a principal's grants in one organization, read by Security Rules.",
+  "examples": [
+    {
+      "id": "Jd8sK2lPq0WnR5tYu3bV_uZ9y8X7w6V5u4T3s2R1q",
+      "isRevoked": false,
+      "orgWide": false,
+      "principalId": "uZ9y8X7w6V5u4T3s2R1q",
+      "principalType": "user",
+      "projectIds": [
+        "Pq4rS6tU8vW0xY2zA1bC"
+      ],
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "unitIds": [],
+      "updatedAt": "2026-09-29T15:00:00.000Z",
+      "version": 4,
+      "visibleProjectIds": [
+        "Pq4rS6tU8vW0xY2zA1bC"
+      ]
+    }
+  ],
+  "properties": {
+    "id": {
+      "description": "`<tenantId>_<principalId>` (document id).",
+      "minLength": 3,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "isRevoked": {
+      "description": "No grant left, or the organization was deleted.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "orgWide": {
+      "description": "Holds any organization-level grant.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "principalId": {
+      "description": "User uid or device id.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "principalType": {
+      "description": "`user` or `device`.",
+      "enum": [
+        "user",
+        "device"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "projectIds": {
+      "description": "Projects with a project-level grant.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization of the projection.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "unitIds": {
+      "description": "Units with a unit-level grant.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the projection was last rebuilt (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "version": {
+      "description": "Incremented on every rebuild.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "visibleProjectIds": {
+      "description": "Projects with any grant inside (project or unit level).",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "principalId",
+    "principalType",
+    "orgWide",
+    "projectIds",
+    "unitIds",
+    "visibleProjectIds",
+    "isRevoked",
+    "version",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

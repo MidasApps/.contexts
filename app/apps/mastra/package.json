@@ -1,0 +1,42 @@
+{
+  "name": "@core/mastra",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
+  "scripts": {
+    "dev": "node scripts/copy-agent-assets.ts && node --eval \"process.getBuiltinModule('node:fs').rmSync('.mastra', { recursive: true, force: true })\" && mastra dev --env ../../.env.local",
+    "build": "node scripts/copy-agent-assets.ts && mastra build && node scripts/check-mastra-output.ts",
+    "start": "node .mastra/output/index.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --project unit",
+    "db:init": "node scripts/db-init.ts",
+    "evals:seed": "node scripts/seed-eval-datasets.ts",
+    "test:emulators": "vitest run --project emulators --passWithNoTests"
+  },
+  "dependencies": {
+    "@core/agents": "workspace:*",
+    "@core/contracts": "workspace:*",
+    "@core/module-example": "workspace:*",
+    "@core/services": "workspace:*",
+    "@mastra/core": "catalog:",
+    "@mastra/loggers": "catalog:",
+    "@mastra/observability": "catalog:",
+    "@mastra/pg": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@core/config": "workspace:*",
+    "@mastra/deployer": "catalog:",
+    "@mastra/mcp": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "mastra": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "yaml": "catalog:"
+  }
+}

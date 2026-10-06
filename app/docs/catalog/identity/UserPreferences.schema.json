@@ -1,0 +1,77 @@
+{
+  "additionalProperties": false,
+  "description": "Preferences of the signed-in user: locale, time zone, currency, theme and notifications.",
+  "examples": [
+    {
+      "currency": "BRL",
+      "locale": "pt-BR",
+      "notifications": {
+        "productUpdates": true,
+        "securityAlerts": true
+      },
+      "theme": "dark",
+      "timeZone": "America/Sao_Paulo"
+    }
+  ],
+  "properties": {
+    "currency": {
+      "description": "Preferred ISO 4217 currency for display.",
+      "pattern": "^[A-Z]{3}$",
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "locale": {
+      "description": "Preferred BCP 47 locale; absent uses the organization default.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "notifications": {
+      "additionalProperties": false,
+      "description": "Notification opt-ins.",
+      "properties": {
+        "productUpdates": {
+          "description": "Receive product update notices.",
+          "type": "boolean",
+          "x-pii": "none"
+        },
+        "securityAlerts": {
+          "const": true,
+          "description": "Security alerts are always on.",
+          "type": "boolean",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "productUpdates",
+        "securityAlerts"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "theme": {
+      "description": "Color theme.",
+      "enum": [
+        "system",
+        "light",
+        "dark"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "timeZone": {
+      "description": "Preferred IANA time zone for display; absent uses the node's.",
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "theme",
+    "notifications"
+  ],
+  "type": "object",
+  "x-kind": "settings",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

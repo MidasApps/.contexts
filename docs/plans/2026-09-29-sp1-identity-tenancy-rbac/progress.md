@@ -1,0 +1,27 @@
+# SP1 progress
+
+- 2026-09-29 | Task 1 complete | commits: c41c68c | review: pending
+- 2026-09-29 | Task 2 complete | commits: 11a2f54 | review: pending
+- 2026-09-29 | Task 3 complete | commits: 2a3b2d8 | review: pending
+- 2026-09-29 | Review fixes Tasks 1-3 | commits: e42285c, 057f8c5, 40ae162 | review: pending
+- 2026-09-29 | Task 4 complete | commits: 1931a86 | review: pending
+- 2026-09-29 | Task 5 complete | commits: 5d35ef5, ee022d5 | review: pending
+- 2026-09-29 | Task 6 complete | commits: 2559088 | review: pending
+- 2026-09-30 | Review fixes Tasks 4-6 (fail-open gaps) | commits: 8f996ff, 554a9de | review: pending
+- 2026-09-30 | Task 7 complete | commits: 2e22fc5 (coverage-v8), b86f3e8 | review: pending
+- 2026-09-30 | Task 8 complete | commits: 91f2129 | review: pending
+- 2026-09-30 | Task 9 complete | commits: 0c600de | review: pending
+- 2026-09-30 | Task 10 complete | commits: 5ab6834 | review: pending
+- 2026-09-30 | Task 11 complete | commits: e081d3f | review: pending
+- 2026-09-30 | Task 12 complete | commits: 593ec6b | review: pending
+- 2026-09-30 | Review fixes Tasks 7-10 (decision 0030) + SP3 audit outcome/metadata | commits: 4b4a78b, 5272f18, 249785e, 18f9811, 11c2dff, 3d5270a, a365363, 4a3a282 | review: pending
+- 2026-09-30 | Task 13 complete | commits: a9c2d03 | review: pending
+- 2026-09-30 | Task 14 complete | commits: 0522bf2 | review: pending
+- 2026-09-30 | Task 15 complete | commits: 6522df8 | review: pending
+- 2026-09-30 | Controller requests (rate limiter test, upload/knowledge audit actions, UPSTREAM_UNAVAILABLE) | commits: a9343a6, 21cd27d, 77713ff | review: pending
+- 2026-09-30 | Review decisions 0030 A1 (device role reads its context) and A2 (redeem re-checks the creator) | commits: d92f38f, 3889f61, d18c071 | review: pending
+- 2026-09-30 | Task 16 complete | commits: 694237a | review: pending
+- 2026-09-30 | Task 17 complete | commits: 776b863 | review: pending
+- 2026-09-30 | Task 18 complete | commits: 49c450c | review: pending
+- 2026-09-30 | Task 19 complete (+ interrupted-approval pin, decision 0030 A3/A4) | commits: 3d0e78a, 4b6b0cc, fb326f2 | review: pending
+- 2026-09-30 | Task 20 complete (seed, docs, SP1 gate report reports/sp1-gate.md) | commits: b02a7f3 | review: pending

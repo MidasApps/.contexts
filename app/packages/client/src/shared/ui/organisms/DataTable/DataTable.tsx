@@ -1,0 +1,338 @@
+"use client";
+
+import { type RowData, useTable } from "@tanstack/react-table";
+import type { ReactNode } from "react";
+import { useTranslations } from "use-intl";
+import { isApiErrorStatus } from "#/shared/api/cursor-list.ts";
+import { cn } from "#/shared/lib/cn.ts";
+import { useElementWidth } from "#/shared/lib/media/use-element-width.ts";
+import { useIsMobile } from "#/shared/lib/media/use-media-query.ts";
+import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "#/shared/ui/atoms/Table/Table.tsx";
+import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
+import { NoAccessState } from "#/shared/ui/molecules/NoAccessState/NoAccessState.tsx";
+import { DataTablePagination, type DataTablePaginationProps } from "./DataTablePagination.tsx";
+import { type DataTableColumn, type DataTableFeatures, dataTableFeatures } from "./data-table-columns.ts";
+import type { DataTableStatus } from "./data-table-status.ts";
+
+export type { DataTableStatus } from "./data-table-status.ts";
+
+export type DataTableProps<TData extends RowData> = {
+  /** Required table name (rules/accessibility.md: every data table has a caption). */
+  caption: string;
+  /** Hide the caption visually when a heading above already says it. */
+  captionHidden?: boolean;
+  columns: ReadonlyArray<DataTableColumn<TData>>;
+  data: ReadonlyArray<TData>;
+  getRowId: (row: TData) => string;
+  status?: DataTableStatus;
+  /** Shown instead of the body when the page has no rows (usually an `EmptyState` with frame="plain"). */
+  empty: ReactNode;
+  /** Cursor paging driven by `meta.page` (omit when the list is not paged). */
+  pagination?: DataTablePaginationProps | undefined;
+  /**
+   * Card for one row: the table becomes a labelled list of cards when its own container is
+   * narrower than `minTableWidth` (a settings column, an open side panel, a phone), so rows and
+   * their actions stay reachable without horizontal scrolling. Before the container is measured
+   * the rule is the viewport below `md` (breakpoints.html). Omit to keep the scrolling table.
+   */
+  renderCard?: ((row: TData) => ReactNode) | undefined;
+  /** Width in px the table needs to show every column; defaults to {@link COLUMN_MIN_WIDTH} per column (at least {@link TABLE_MIN_WIDTH}). */
+  minTableWidth?: number | undefined;
+  /** Heading level of the error state: 2 when the table sits right under the page `h1`, 3 inside a section (default). */
+  stateHeadingLevel?: 2 | 3;
+  /** Skeleton rows while loading. */
+  loadingRows?: number;
+  className?: string;
+};
+
+type Instance<TData extends RowData> = ReturnType<typeof useTable<DataTableFeatures, TData>>;
+
+/** Room one column needs on average (a name, a pill, a date, a button): a 7-column list fits the
+ * settings column of a 1280 px screen (~680 px), a 9-column one fits the admin content there. */
+export const COLUMN_MIN_WIDTH = 88;
+/** Below this even a short table reads better as cards. */
+export const TABLE_MIN_WIDTH = 480;
+
+/** Cards when the container is measured narrower than the table needs; until then, on phones. */
+const useCardLayout = (hasCards: boolean, minWidth: number) => {
+  const mobile = useIsMobile();
+  const [observe, width] = useElementWidth<HTMLDivElement>();
+  const cards = hasCards && (width === undefined ? mobile : width < minWidth);
+  return [observe, cards] as const;
+};
+
+const SKELETON_WIDTHS = ["w-3/4", "w-1/2", "w-2/3", "w-5/6"] as const;
+
+function SkeletonRows({ rows, columnIds }: { rows: number; columnIds: string[] }) {
+  return Array.from({ length: rows }, (_, rowIndex) => (
+    <TableRow key={`skeleton-${rowIndex}`} className="hover:bg-transparent">
+      {columnIds.map((columnId, columnIndex) => (
+        <TableCell key={columnId}>
+          <Skeleton className={cn("h-4", SKELETON_WIDTHS[(rowIndex + columnIndex) % SKELETON_WIDTHS.length])} />
+        </TableCell>
+      ))}
+    </TableRow>
+  ));
+}
+
+function DataRows<TData extends RowData>({
+  table,
+  empty,
+  columnCount,
+}: {
+  table: Instance<TData>;
+  empty: ReactNode;
+  columnCount: number;
+}) {
+  const rows = table.getRowModel().rows;
+  if (rows.length === 0) {
+    return (
+      <TableRow className="hover:bg-transparent">
+        <TableCell colSpan={columnCount} className="p-0">
+          {empty}
+        </TableCell>
+      </TableRow>
+    );
+  }
+  return rows.map((row) => (
+    <TableRow key={row.id}>
+      {row.getAllCells().map((cell) => (
+        <TableCell
+          key={cell.id}
+          className={cn(cell.column.columnDef.meta?.numeric === true && "text-right font-mono tabular-nums")}
+        >
+          <table.FlexRender cell={cell} />
+        </TableCell>
+      ))}
+    </TableRow>
+  ));
+}
+
+function HeaderRows<TData extends RowData>({ table }: { table: Instance<TData> }) {
+  return table.getHeaderGroups().map((headerGroup) => (
+    <TableRow key={headerGroup.id} className="hover:bg-transparent">
+      {headerGroup.headers.map((header) => {
+        const meta = header.column.columnDef.meta;
+        return (
+          <TableHead key={header.id} colSpan={header.colSpan} className={cn(meta?.numeric === true && "text-right")}>
+            {header.isPlaceholder ? null : (
+              <span className={cn(meta?.headerHidden === true && "sr-only")}>
+                <table.FlexRender header={header} />
+              </span>
+            )}
+          </TableHead>
+        );
+      })}
+    </TableRow>
+  ));
+}
+
+/** A failed list: no-access for a 403 (retrying cannot help), else the copy of the error code with its reference and retry. */
+function TableError({
+  status,
+  headingLevel,
+}: {
+  status: Extract<DataTableStatus, { kind: "error" }>;
+  headingLevel: 2 | 3;
+}) {
+  if (isApiErrorStatus(status.error, 403)) return <NoAccessState frame="plain" headingLevel={headingLevel} />;
+  return (
+    <ApiErrorState
+      frame="plain"
+      headingLevel={headingLevel}
+      error={status.error}
+      onRetry={status.onRetry}
+      retrying={status.retrying ?? false}
+    />
+  );
+}
+
+type CardListProps<TData extends RowData> = {
+  caption: string;
+  captionHidden: boolean;
+  data: ReadonlyArray<TData>;
+  getRowId: (row: TData) => string;
+  renderCard: (row: TData) => ReactNode;
+  status: DataTableStatus;
+  empty: ReactNode;
+  loadingRows: number;
+  headingLevel: 2 | 3;
+};
+
+/** The mobile form of the table: caption as a heading-less label, one card per row. */
+function CardList<TData extends RowData>({
+  caption,
+  captionHidden,
+  data,
+  getRowId,
+  renderCard,
+  status,
+  empty,
+  loadingRows,
+  headingLevel,
+}: CardListProps<TData>) {
+  const t = useTranslations("common.states");
+  if (status.kind === "error") return <TableError status={status} headingLevel={headingLevel} />;
+  if (status.kind === "loading") {
+    return (
+      <div role="status" aria-busy="true" className="flex flex-col gap-2">
+        <span className="sr-only">{t("loading")}</span>
+        {Array.from({ length: Math.min(loadingRows, 3) }, (_, index) => (
+          <Skeleton key={index} className="h-20 rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <>
+      <p className={cn("text-sm font-medium", captionHidden && "sr-only")}>{caption}</p>
+      {data.length === 0 ? (
+        empty
+      ) : (
+        <ul aria-label={caption} className="flex flex-col gap-2">
+          {data.map((row) => (
+            <li key={getRowId(row)} className="rounded-lg border border-border bg-card p-3">
+              {renderCard(row)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+/** Pages of the list; hidden while the list failed (the error replaces it). */
+function ListPagination({
+  pagination,
+  status,
+}: {
+  pagination: DataTablePaginationProps | undefined;
+  status: DataTableStatus;
+}) {
+  return pagination === undefined || status.kind === "error" ? null : <DataTablePagination {...pagination} />;
+}
+
+/** The body rows: none on error, skeletons while loading, else the page (or its empty state). */
+function TableRows<TData extends RowData>({
+  table,
+  status,
+  loadingRows,
+  columnIds,
+  empty,
+}: {
+  table: Instance<TData>;
+  status: DataTableStatus;
+  loadingRows: number;
+  columnIds: string[];
+  empty: ReactNode;
+}) {
+  if (status.kind === "error") return null;
+  if (status.kind === "loading") return <SkeletonRows rows={loadingRows} columnIds={columnIds} />;
+  return <DataRows table={table} empty={empty} columnCount={columnIds.length} />;
+}
+
+/** What follows the table: the loading announcement, the error state and the pages. */
+function TableFooter({
+  status,
+  headingLevel,
+  pagination,
+}: {
+  status: DataTableStatus;
+  headingLevel: 2 | 3;
+  pagination: DataTablePaginationProps | undefined;
+}) {
+  const t = useTranslations("common.states");
+  return (
+    <>
+      {status.kind === "loading" ? (
+        <p role="status" className="sr-only">
+          {t("loading")}
+        </p>
+      ) : null}
+      {status.kind === "error" ? <TableError status={status} headingLevel={headingLevel} /> : null}
+      <ListPagination pagination={pagination} status={status} />
+    </>
+  );
+}
+
+/**
+ * List organism over TanStack Table v9 (server-driven: no client sorting/filtering). Caption and
+ * `scope="col"` headers always; loading keeps the header and shows skeleton rows (`aria-busy`
+ * with a status text); errors render the copy of their code with the request reference and a
+ * retry (no-access for a 403); empty pages render
+ * the caller's empty state; paging is previous/next over cursors. With `renderCard`, a container
+ * too narrow for the columns gets a card list instead of the table.
+ */
+export function DataTable<TData extends RowData>({
+  caption,
+  captionHidden = false,
+  columns,
+  data,
+  getRowId,
+  status = { kind: "ready" },
+  empty,
+  pagination,
+  renderCard,
+  stateHeadingLevel: headingLevel = 3,
+  loadingRows = 5,
+  minTableWidth,
+  className,
+}: DataTableProps<TData>) {
+  const [observeWidth, cards] = useCardLayout(
+    renderCard !== undefined,
+    minTableWidth ?? Math.max(TABLE_MIN_WIDTH, columns.length * COLUMN_MIN_WIDTH),
+  );
+  const table = useTable({
+    features: dataTableFeatures,
+    columns: [...columns],
+    data,
+    getRowId: (row) => getRowId(row),
+  });
+  const columnIds = table.getAllLeafColumns().map((column) => column.id);
+  if (cards && renderCard !== undefined) {
+    return (
+      <div
+        ref={observeWidth}
+        data-slot="data-table"
+        data-layout="cards"
+        className={cn("flex flex-col gap-3", className)}
+      >
+        <CardList
+          caption={caption}
+          captionHidden={captionHidden}
+          data={data}
+          getRowId={getRowId}
+          renderCard={renderCard}
+          status={status}
+          empty={empty}
+          loadingRows={loadingRows}
+          headingLevel={headingLevel}
+        />
+        <ListPagination pagination={pagination} status={status} />
+      </div>
+    );
+  }
+  return (
+    <div ref={observeWidth} data-slot="data-table" data-layout="table" className={cn("flex flex-col gap-3", className)}>
+      <Table scrollLabel={caption} aria-busy={status.kind === "loading" || undefined}>
+        <TableCaption className={cn(captionHidden && "sr-only")}>{caption}</TableCaption>
+        <TableHeader>
+          <HeaderRows table={table} />
+        </TableHeader>
+        <TableBody>
+          <TableRows table={table} status={status} loadingRows={loadingRows} columnIds={columnIds} empty={empty} />
+        </TableBody>
+      </Table>
+      <TableFooter status={status} headingLevel={headingLevel} pagination={pagination} />
+    </div>
+  );
+}

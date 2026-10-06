@@ -1,0 +1,1242 @@
+{
+  "surface": "Platform administration",
+  "sidebar": {
+    "title": "Administration",
+    "navLabel": "Administration areas",
+    "group": "Platform",
+    "backToApp": "Back to the app",
+    "loading": "Loading areas…",
+    "retry": "Try again"
+  },
+  "topbar": {
+    "badge": "Platform team"
+  },
+  "slot": {
+    "emptyTitle": "Not available yet",
+    "emptyDescription": "This administration area arrives in an upcoming release.",
+    "backToHome": "Back to the administration",
+    "loading": "Loading the area…"
+  },
+  "descriptions": {
+    "organizations": "Status, plan, cost and budget of each organization.",
+    "users": "User search and support access, read-only and audited.",
+    "agents": "Agents per organization and the platform prompts.",
+    "models": "The model of each agent role and the cost of each model.",
+    "connectors": "Connectors configured in each organization.",
+    "traces": "Agent and workflow runs, with tokens and cost.",
+    "costs": "Usage and costs per organization.",
+    "flags": "Feature flags per environment.",
+    "plans": "Limits each plan grants.",
+    "evals": "Datasets, experiments and the eval verdict.",
+    "logs": "Recent log lines of the local environment.",
+    "workflows": "Runs, pending approvals and schedules.",
+    "audit": "What staff did on the platform, filtered by action and organization.",
+    "team": "Who is on the platform team and with which role."
+  },
+  "states": {
+    "eyebrow": "Administration",
+    "loading": "Loading the area…",
+    "noAccessDescription": "Your role on the platform team does not give access to this area. Ask a platform administrator.",
+    "mfaTitle": "Confirm two-step verification",
+    "mfaDescription": "The administration only answers sessions confirmed with the second factor. Sign out and sign in again with the code.",
+    "mfaAction": "Open account security"
+  },
+  "organizationFilter": {
+    "label": "Organization",
+    "all": "All organizations",
+    "placeholder": "Choose an organization",
+    "loading": "Loading organizations…",
+    "search": "Search organizations",
+    "empty": "No organization found."
+  },
+  "overview": {
+    "title": "Platform administration",
+    "description": "Platform numbers and the areas your team role may open.",
+    "loading": "Loading the platform numbers…",
+    "sectionsTitle": "Areas",
+    "emptyTitle": "No areas available",
+    "emptyDescription": "Your team role does not give access to any administration area.",
+    "kpi": {
+      "title": "Platform numbers",
+      "generatedAt": "Updated {when}",
+      "organizations": "Active organizations",
+      "organizationsHint": "With active status",
+      "activeUsers": "Active users",
+      "last7Days": "Last 7 days",
+      "costMtd": "Cost this month",
+      "costMtdHint": "Models, all organizations",
+      "tripwireRate": "Guardrail stops",
+      "tripwireHint": "Runs stopped, last 7 days",
+      "tripwireUnmeasuredHint": "Guardrail stops are not recorded yet",
+      "notMeasured": "Not measured",
+      "approvalRate": "Approvals",
+      "approvalHint": "Requests approved, last 7 days",
+      "evalStatus": "Agent evaluation",
+      "evalHint": "Verdict of the latest experiment",
+      "eval": {
+        "passed": "Passed",
+        "failed": "Failed",
+        "unknown": "No result"
+      }
+    }
+  },
+  "organizations": {
+    "title": "Organizations",
+    "description": "Status, plan, cost this month and budget of each organization.",
+    "loading": "Loading organizations…",
+    "caption": "Organizations on the platform",
+    "pagination": "Organization pages",
+    "open": "Open",
+    "openNamed": "Open {name}",
+    "defaultPlan": "Platform default",
+    "cardCost": "{cost} of {cap} this month",
+    "noMatchTitle": "No organization matches these filters",
+    "noMatchDescription": "Check the search or clear the filters to see all of them.",
+    "clearFilters": "Clear filters",
+    "emptyTitle": "No organizations yet",
+    "emptyDescription": "Organizations appear here once someone creates one in the app.",
+    "columns": {
+      "organization": "Organization",
+      "status": "Status",
+      "plan": "Plan",
+      "costMtd": "Cost this month",
+      "cap": "Monthly cap",
+      "usage": "Cap used",
+      "actions": "Actions"
+    },
+    "filters": {
+      "label": "Filter organizations",
+      "search": "Search organizations",
+      "searchPlaceholder": "Words of the name or id",
+      "status": "Status",
+      "anyStatus": "Any status"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "budgetSource": {
+      "override": "Staff override",
+      "plan": "From the plan",
+      "default": "Platform default"
+    },
+    "usage": {
+      "noCap": "No cap",
+      "alert": "Attention: {percent}",
+      "over": "Over the cap: {percent}"
+    }
+  },
+  "plans": {
+    "title": "Plans",
+    "description": "Spend, token and connector limits each plan grants to organizations.",
+    "loading": "Loading plans…",
+    "caption": "Plan catalog",
+    "create": "New plan",
+    "edit": "Edit",
+    "editNamed": "Edit the plan {name}",
+    "noFeatures": "None",
+    "featuresOf": "Features of the plan {name}",
+    "cardLimits": "{budget} per month · {tokens} tokens · {connectors, plural, =0 {no connectors} one {# connector} other {# connectors}}",
+    "emptyTitle": "No plans yet",
+    "emptyDescription": "Without a plan, organizations use the platform default limits.",
+    "columns": {
+      "name": "Plan",
+      "monthlyBudget": "Monthly spend",
+      "monthlyTokens": "Tokens per month",
+      "maxConnectors": "Connectors",
+      "features": "Features",
+      "updatedAt": "Updated",
+      "actions": "Actions"
+    },
+    "form": {
+      "createTitle": "New plan",
+      "createDescription": "Set the limits the plan grants. You assign the plan on each organization's page.",
+      "editTitle": "Edit the plan {name}",
+      "editDescription": "Saving replaces the plan's limits and updates the budget of every organization on it.",
+      "createSubmit": "Create plan",
+      "editSubmit": "Save plan",
+      "savedStatus": "Plan saved.",
+      "created": "Plan {name} created.",
+      "updated": "Plan {name} updated.",
+      "name": "Name",
+      "monthlyBudget": "Monthly model spend",
+      "monthlyBudgetHint": "In US dollars (USD). Runs stop when the amount is reached.",
+      "monthlyTokens": "Tokens per month",
+      "monthlyTokensHint": "Applies when the model has no registered price.",
+      "maxConnectors": "Maximum connectors",
+      "maxCustomAgents": "Maximum custom agents",
+      "maxCustomAgentsHint": "Leave blank to use the platform default.",
+      "maxCustomSkills": "Maximum custom skills",
+      "maxCustomSkillsHint": "Leave blank to use the platform default.",
+      "maxCustomInstructionChars": "Maximum instruction length (characters)",
+      "maxCustomInstructionCharsHint": "Leave blank to use the platform default.",
+      "features": "Features",
+      "featuresHint": "Keys separated by commas, for example: web-tools, chat.voice"
+    },
+    "deleteAction": "Delete",
+    "deleteNamed": "Delete the {name} plan",
+    "delete": {
+      "title": "Delete the {name} plan?",
+      "description": "The plan leaves the catalog. Only a plan no organization is on can be deleted.",
+      "confirm": "Delete plan",
+      "done": "Plan {name} deleted."
+    }
+  },
+  "models": {
+    "title": "Models",
+    "description": "Choose the model of each role and the cost of each model.",
+    "loading": "Loading models…",
+    "updatedAt": "Updated {date}",
+    "fakeMode": "The runtime is in simulated mode: the roles use scripted models. What you save applies once real mode is turned on.",
+    "save": "Save",
+    "saved": "Models saved.",
+    "saveRefused": "Could not save: each role needs a priced model and a provider with a configured key.",
+    "roles": {
+      "title": "Model of each role",
+      "description": "Models of providers without a configured key cannot be chosen.",
+      "fixedNote": "Set in the runtime environment.",
+      "price": "{input} input · {output} output per 1M",
+      "option": "{model} — {price}",
+      "unavailableOption": "{model} — {price} (provider without a key)",
+      "noPrice": "This model has no price.",
+      "names": {
+        "chat": "Chat",
+        "fast": "Quick tasks",
+        "reasoning": "Reasoning",
+        "judge": "Judge",
+        "embedding": "Embeddings",
+        "transcription": "Transcription",
+        "speech": "Speech",
+        "realtime": "Realtime voice"
+      },
+      "hints": {
+        "chat": "Chat agents.",
+        "fast": "Titles, summaries and safety checks.",
+        "reasoning": "Action planning.",
+        "judge": "Eval scores in real mode.",
+        "embedding": "Knowledge base and memory.",
+        "transcription": "Audio to text.",
+        "speech": "Text to audio.",
+        "realtime": "Voice conversations."
+      }
+    },
+    "prices": {
+      "title": "Model costs",
+      "description": "Price per 1M tokens, in US dollars (USD). Restore brings back the code price; a model without a code price leaves the list when you save.",
+      "caption": "Model prices",
+      "columns": {
+        "model": "Model",
+        "input": "Input (US$ / 1M tokens)",
+        "output": "Output (US$ / 1M tokens)",
+        "origin": "Source",
+        "provider": "Provider",
+        "actions": "Actions"
+      },
+      "inputNamed": "Input price of {model}",
+      "outputNamed": "Output price of {model}",
+      "invalidPrice": "Enter an amount in dollars with up to six decimals.",
+      "requiredPrice": "Enter the price.",
+      "origin": {
+        "code": "Code",
+        "staff": "Staff",
+        "dropped": "Leaves on save"
+      },
+      "provider": {
+        "available": "Available",
+        "unavailable": "No key",
+        "unknown": "To be confirmed"
+      },
+      "restore": "Restore",
+      "restoreNamed": "Restore the price of {model}",
+      "remove": "Remove",
+      "removeNamed": "Remove {model}",
+      "keep": "Keep",
+      "keepNamed": "Keep the staff price of {model}",
+      "inUse": "In use: {roles}",
+      "emptyTitle": "No priced model",
+      "emptyDescription": "Add a model to choose it for a role."
+    },
+    "add": {
+      "title": "Add model",
+      "modelId": "Model",
+      "modelIdHint": "As provider/model, for example openai/gpt-6-luna.",
+      "input": "Input (US$ / 1M tokens)",
+      "output": "Output (US$ / 1M tokens)",
+      "submit": "Add model",
+      "refusals": {
+        "INVALID_ID": "Use provider/model, with the provider google, openai or anthropic.",
+        "DUPLICATE": "This model is already in the table.",
+        "TOO_MANY": "Staff can set up to 50 prices."
+      }
+    }
+  },
+  "flags": {
+    "title": "Flags",
+    "description": "Flags of the code registry, with owner, reason and expiry. The environment value applies to every organization.",
+    "loading": "Loading flags…",
+    "caption": "Feature flags",
+    "owner": "Owner: {owner}",
+    "expired": "Expired",
+    "on": "On",
+    "off": "Off",
+    "environmentSwitch": "Value of {key} in the environment",
+    "organizationLabel": "Override per organization",
+    "organizationHint": "Choose an organization to see and set its override for each flag.",
+    "overrideHint": "The override applies only to the chosen organization. Remove it to make the organization follow the environment value again.",
+    "overridesErrorTitle": "The organization's overrides could not be loaded.",
+    "reload": "Reload",
+    "emptyTitle": "No flags registered",
+    "emptyDescription": "Flags are declared in code. Once one exists, it shows up here.",
+    "expiredAlertTitle": "{count, plural, one {# expired flag} other {# expired flags}}",
+    "expiredAlertDescription": "Remove or renew in the code registry:",
+    "expiredMore": "and {count} more",
+    "expiredOnly": "Show only the expired ones",
+    "searchLabel": "Search flags",
+    "searchPlaceholder": "Key or name",
+    "noMatchTitle": "No flag matches the search",
+    "noMatchDescription": "Try another part of the key or name, or show every flag.",
+    "clearSearch": "Clear the search",
+    "kind": {
+      "kill-switch": "Kill switch",
+      "rollout": "Rollout",
+      "ops": "Operations"
+    },
+    "columns": {
+      "flag": "Flag",
+      "kind": "Kind",
+      "expiresAt": "Expires",
+      "environment": "Environment",
+      "override": "Organization override"
+    },
+    "override": {
+      "unknown": "Unavailable",
+      "none": "No override",
+      "on": "Override: on",
+      "off": "Override: off",
+      "effectiveOn": "Effective value: on",
+      "effectiveOff": "Effective value: off",
+      "setOn": "Turn on",
+      "setOff": "Turn off",
+      "setOnNamed": "Turn {key} on for {name}",
+      "setOffNamed": "Turn {key} off for {name}",
+      "clear": "Remove override",
+      "clearNamed": "Remove the override of {key} for {name}"
+    },
+    "confirm": {
+      "titleOn": "Turn {key} on?",
+      "titleOff": "Turn {key} off?",
+      "descriptionEnvironment": "Applies to the whole environment and is recorded in the audit log. {reason}",
+      "descriptionOrganization": "Applies only to {name} and is recorded in the audit log. {reason}",
+      "killSwitchEnvironment": "Turning this kill switch on stops what it describes in the whole environment, immediately. {reason}",
+      "killSwitchOrganization": "Turning this kill switch on stops what it describes for {name}, immediately. {reason}",
+      "confirmOn": "Turn on",
+      "confirmOff": "Turn off",
+      "doneOn": "{key} turned on.",
+      "doneOff": "{key} turned off."
+    },
+    "clear": {
+      "title": "Remove the override of {key}?",
+      "description": "{name} follows the environment value for this flag again. The removal is recorded in the audit log. {reason}",
+      "confirm": "Remove override",
+      "done": "Override of {key} removed."
+    }
+  },
+  "costs": {
+    "title": "Costs",
+    "description": "Model cost this month per organization, against each one's cap.",
+    "loading": "Loading costs…",
+    "organizationsTruncatedTitle": "The numbers below cover only part of the organizations",
+    "organizationsTruncatedDescription": "The list stopped at the first {count} organizations, the limit of this page. The counts, the attention list, the chart and the budgets may be incomplete; the total cost comes from the platform summary when it answers.",
+    "caption": "Budgets per organization",
+    "pagination": "Budget pages",
+    "adjust": "Adjust budget",
+    "adjustNamed": "Adjust the budget of {name}",
+    "budgetsTitle": "Budgets",
+    "noMatchTitle": "No organization at this level",
+    "noMatchDescription": "No organization is at this usage level right now.",
+    "clearFilter": "See all",
+    "emptyTitle": "No costs to show",
+    "emptyDescription": "Costs appear once there are organizations on the platform.",
+    "emptyAction": "See organizations",
+    "filters": {
+      "level": "Usage level",
+      "all": "All",
+      "alert": "At the alert or above",
+      "over": "Over the cap"
+    },
+    "kpi": {
+      "title": "This month",
+      "total": "Cost this month",
+      "totalHint": "Models, all organizations",
+      "alert": "At {threshold} or more",
+      "alertHint": "Organizations at the alert or above",
+      "over": "Over the cap",
+      "overHint": "Runs blocked by the budget"
+    },
+    "attention": {
+      "title": "Need attention",
+      "description": "The alert fires at {threshold} of the monthly cap; at 100% runs stop.",
+      "none": "No organization is near its cap.",
+      "costOfCap": "{cost} of {cap}",
+      "shown": "Showing {shown} of {count}",
+      "viewAll": "View all {count}"
+    },
+    "columns": {
+      "organization": "Organization",
+      "costMtd": "Cost this month",
+      "cap": "Monthly cap",
+      "tokensCap": "Token cap",
+      "source": "Cap source",
+      "usage": "Cap used",
+      "actions": "Actions"
+    },
+    "usage": {
+      "title": "Usage by day and by model",
+      "description": "Cost and calls of the range, straight from the usage ledger. Without dates, it is the current month to date. Days are in UTC, as in the ledger.",
+      "filtersLabel": "Filter the usage",
+      "from": "From",
+      "to": "To",
+      "loading": "Loading the usage…",
+      "totals": "From {from} to {to}: {cost} in {calls} calls and {tokens} tokens.",
+      "unpricedNote": "{count, plural, one {# call without a known price: its tokens count, its cost does not.} other {# calls without a known price: their tokens count, their cost does not.}}",
+      "truncatedTitle": "Not every organization is in the sum",
+      "truncatedDescription": "The answer read {count} organizations, the limit of one query. Filter by organization to see the others.",
+      "byDayTitle": "Cost by day",
+      "byDayDescription": "One value per day of the range; days without calls are zero.",
+      "byModelTitle": "Cost by model",
+      "byModelDescription": "Highest cost first.",
+      "byModelDescriptionTop": "The {shown} with the highest cost of {total} models; the table below lists all.",
+      "modelsCaption": "Usage by model",
+      "columns": {
+        "day": "Day",
+        "model": "Model",
+        "provider": "Provider",
+        "calls": "Calls",
+        "inputTokens": "Input tokens",
+        "outputTokens": "Output tokens",
+        "cost": "Cost",
+        "unpriced": "Unpriced"
+      },
+      "emptyTitle": "No usage in the range",
+      "emptyDescription": "No model call was recorded with these filters.",
+      "clear": "Back to the current month",
+      "rangeInvalid": "Choose a period of up to {days} days, with the start before the end.",
+      "clearRange": "Clear the period"
+    }
+  },
+  "organizationDetail": {
+    "title": "Organization",
+    "idLine": "Id {id}",
+    "loading": "Loading the organization…",
+    "readOnly": "Your team role can only view. A platform administrator changes the plan, budget and status.",
+    "summary": {
+      "title": "Summary",
+      "description": "Where the organization stands this month.",
+      "tokenCap": "Token cap this month",
+      "members": "Members",
+      "membersHint": "people with access"
+    },
+    "plan": {
+      "title": "Plan",
+      "description": "The budget follows the plan unless a staff override exists.",
+      "label": "Organization plan",
+      "default": "Platform default (no plan)",
+      "hint": "The change applies from now on and is recorded in the audit log.",
+      "save": "Save plan",
+      "saved": "Plan of {name} updated."
+    },
+    "budget": {
+      "title": "Budget override",
+      "descriptionNone": "No override: the plan's limits apply. Save values here to replace them for this organization only.",
+      "descriptionActive": "A staff override is in force instead of the plan's limits.",
+      "money": "Monthly model spend",
+      "tokens": "Tokens per month",
+      "moneyError": "Enter an amount in dollars, for example 100.00.",
+      "tokensError": "Enter a whole number of tokens, for example 20,000,000.",
+      "save": "Save override",
+      "saved": "Budget of {name} overridden.",
+      "clear": "Back to the plan",
+      "clearTitle": "Remove the override of {name}?",
+      "clearDescription": "The limits go back to the plan's. If the plan is below this month's spend, runs stop.",
+      "clearConfirm": "Remove override",
+      "cleared": "{name} is back on the plan's limits."
+    },
+    "status": {
+      "title": "Status",
+      "descriptionActive": "Suspending blocks every member until it is reactivated. No data is deleted.",
+      "descriptionSuspended": "The organization is suspended: its members cannot use it.",
+      "suspend": "Suspend organization",
+      "reactivate": "Reactivate organization",
+      "suspendTitle": "Suspend {name}?",
+      "suspendDescription": "Every member loses access until the organization is reactivated. The action is recorded in the audit log.",
+      "suspendConfirm": "Suspend",
+      "reactivateTitle": "Reactivate {name}?",
+      "reactivateDescription": "Members get access back at once.",
+      "reactivateConfirm": "Reactivate",
+      "suspended": "{name} was suspended.",
+      "reactivated": "{name} was reactivated."
+    },
+    "related": {
+      "title": "See this organization in",
+      "description": "Opens the area already filtered by this organization."
+    }
+  },
+  "users": {
+    "title": "Users",
+    "description": "User search and support access as a user, in one organization, read-only.",
+    "notice": {
+      "title": "Audited access",
+      "description": "Every session and every page opened as the user is recorded in the platform's and the organization's audit logs."
+    },
+    "session": {
+      "title": "Session open in this tab",
+      "description": "The session you started here, until it is ended or expires.",
+      "emptyTitle": "No open session",
+      "emptyDescription": "Search for a user, select them and start a session below to see the app as they do."
+    },
+    "start": {
+      "title": "Start access as a user",
+      "description": "You will see what the user sees in the chosen organization, without being able to change anything.",
+      "organization": "Organization"
+    },
+    "status": {
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "search": {
+      "title": "Find a user",
+      "description": "By the start of the name or of the email, or by the whole account id.",
+      "query": "Name, email or id",
+      "placeholder": "E.g. ana or ana@example.com",
+      "by": "Search by",
+      "byOptions": {
+        "auto": "Automatic",
+        "name": "Name",
+        "email": "Email",
+        "uid": "User id"
+      },
+      "submit": "Search",
+      "hint": "The search compares the start of the text and ignores case and accents. In automatic mode, text with @ is read as an email and a whole id returns only that user.",
+      "idleTitle": "Search for a user",
+      "idleDescription": "Type the start of the name or of the email, or the account id, and press Search.",
+      "loading": "Searching users…",
+      "caption": "Users found",
+      "pagination": "User pages",
+      "noMatchTitle": "No user found",
+      "noMatchDescription": "Check the spelling or try the whole email. The search only finds names and emails that start with the text.",
+      "columns": {
+        "user": "User",
+        "email": "Email",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "noName": "No name",
+      "noEmail": "No email",
+      "select": "Select",
+      "selected": "Selected",
+      "selectNamed": "Select {name} for support access"
+    },
+    "sessions": {
+      "title": "Support access sessions",
+      "description": "The sessions of the whole team: who acted as whom, in which organization and why.",
+      "scope": "Show",
+      "scopeOptions": {
+        "active": "Open now",
+        "all": "All, newest first"
+      },
+      "loading": "Loading support sessions…",
+      "caption": "Support sessions of the team",
+      "pagination": "Support session pages",
+      "columns": {
+        "staff": "Staff",
+        "user": "User",
+        "organization": "Organization",
+        "reason": "Reason",
+        "started": "Started",
+        "until": "End",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Open",
+        "ended": "Ended",
+        "expired": "Expired"
+      },
+      "expiresAt": "Expires {when}",
+      "endedAt": "Ended {when}",
+      "cardWho": "{staff} as {user}",
+      "end": "End",
+      "endNamed": "End the session of {staff} as {user}",
+      "seeAll": "See all sessions",
+      "emptyActiveTitle": "No support session in progress",
+      "emptyActiveDescription": "Nobody on the team is acting as a user right now.",
+      "emptyAllTitle": "No support session recorded",
+      "emptyAllDescription": "Sessions appear here as soon as someone on the team starts support access."
+    }
+  },
+  "impersonation": {
+    "form": {
+      "target": "User",
+      "targetEmpty": "No user selected. Use the search above and select the user.",
+      "targetChange": "Change",
+      "targetChangeNamed": "Change the selected user ({name})",
+      "reason": "Reason",
+      "reasonHint": "10 to 500 characters, for example the ticket number. It is kept in the audit log.",
+      "durationMinutes": "Duration in minutes",
+      "durationHint": "From 1 to {max} minutes.",
+      "submit": "Start session",
+      "started": "Support session started.",
+      "errors": {
+        "targetUid": "Select the user in the search.",
+        "organizationId": "Choose the organization.",
+        "reason": "Explain the reason in 10 to 500 characters.",
+        "durationMinutes": "Enter 1 to 60 minutes.",
+        "notFound": "This user does not exist or has no access to that organization.",
+        "forbidden": "You cannot start this session. You cannot access as yourself, and the action needs the support role."
+      }
+    },
+    "session": {
+      "user": "User",
+      "organization": "Organization",
+      "expires": "Expires",
+      "readOnly": "Read-only",
+      "openHint": "Opening switches this tab to the user's account, read-only, also after a reload. To return to the team account, use \"Leave support mode\" in the notice at the top: it ends the session.",
+      "open": "Open the app as this user",
+      "end": "End session",
+      "endTitle": "End the support session?",
+      "endDescription": "Access as the user stops working at once.",
+      "endConfirm": "End",
+      "ended": "Support session ended."
+    },
+    "banner": {
+      "message": "You are seeing the app as another user, read-only. Everything you open is recorded.",
+      "messageUntil": "You are seeing the app as another user, read-only, until {when}. Everything you open is recorded.",
+      "messageNamed": "You are seeing the app as {user}, read-only. Everything you open is recorded.",
+      "messageNamedUntil": "You are seeing the app as {user}, read-only, until {when}. Everything you open is recorded.",
+      "messageNamedIn": "You are seeing the app as {user} in {organization}, read-only, until {when}. Everything you open is recorded.",
+      "leave": "Leave support mode"
+    },
+    "endAny": {
+      "title": "End this support session?",
+      "description": "The access of {staff} as {user} stops working immediately. The end is recorded in the platform and organization audit logs.",
+      "confirm": "End session",
+      "done": "Session of {staff} ended."
+    },
+    "adminBlocked": {
+      "pageTitle": "Platform administration",
+      "title": "Administration does not open in support mode",
+      "description": "This tab is signed in as another user, read-only. Leave support mode to return to your staff account and use the administration."
+    }
+  },
+  "traces": {
+    "title": "Traces",
+    "description": "Agent and workflow runs of every organization, with tokens and cost.",
+    "loading": "Loading traces…",
+    "caption": "Execution traces",
+    "pagination": "Trace pages",
+    "platform": "Platform",
+    "open": "Open the trace {name}",
+    "agentTarget": "Agent {id}",
+    "workflowTarget": "Workflow {id}",
+    "noTarget": "No agent",
+    "tokensValue": "{input} / {output}",
+    "cardMeta": "{when} · {duration}",
+    "noMatchTitle": "No trace matches these filters",
+    "noMatchDescription": "Check the filters or clear them to see every trace.",
+    "clearFilters": "Clear filters",
+    "emptyTitle": "No traces yet",
+    "emptyDescription": "Traces appear here when an agent or workflow runs.",
+    "emptyAction": "See the logs",
+    "columns": {
+      "trace": "Trace",
+      "organization": "Organization",
+      "target": "Agent or workflow",
+      "status": "Status",
+      "startedAt": "Started",
+      "duration": "Duration",
+      "tokens": "Tokens (in / out)",
+      "cost": "Cost"
+    },
+    "filters": {
+      "label": "Filter traces",
+      "agent": "Agent",
+      "agentPlaceholder": "assistant",
+      "agentInvalid": "Use lowercase letters, numbers and hyphens, starting with a letter.",
+      "status": "Status",
+      "anyStatus": "Any status",
+      "apply": "Filter",
+      "from": "From",
+      "to": "To",
+      "dateHint": "Whole days, in this browser's time zone ({zone})."
+    },
+    "detail": {
+      "title": "Trace",
+      "back": "Traces",
+      "loading": "Loading the trace…",
+      "summary": "Trace summary",
+      "status": "Status",
+      "organization": "Organization",
+      "target": "Agent or workflow",
+      "startedAt": "Started",
+      "duration": "Duration",
+      "tokens": "Tokens (in / out)",
+      "cost": "Cost",
+      "traceId": "Trace id"
+    }
+  },
+  "evals": {
+    "title": "Evals",
+    "description": "Experiments with scores per scorer and the verdict, and the datasets they use.",
+    "tabs": {
+      "label": "Eval sections",
+      "experiments": "Experiments",
+      "datasets": "Datasets"
+    },
+    "experiments": {
+      "loading": "Loading experiments…",
+      "caption": "Eval experiments",
+      "pagination": "Experiment pages",
+      "promptEval": "Prompt eval",
+      "agent": "Agent {id}",
+      "scoresOf": "Scores of {id}",
+      "score": "{scorer}: {mean}",
+      "scoreWithBaseline": "{scorer}: {mean} (floor {baseline})",
+      "noScores": "No scores",
+      "running": "Running",
+      "select": "Compare",
+      "selectNamed": "Compare the experiment {id}",
+      "selected": "In the comparison",
+      "cardMeta": "{items, plural, one {# item} other {# items}} · {when}",
+      "emptyTitle": "No experiments yet",
+      "emptyDescription": "Experiments appear when CI publishes the evals or someone evaluates a prompt.",
+      "emptyAction": "See datasets",
+      "columns": {
+        "experiment": "Experiment",
+        "dataset": "Dataset",
+        "status": "Status",
+        "verdict": "Verdict",
+        "items": "Items",
+        "scores": "Scores per scorer",
+        "startedAt": "Started",
+        "finishedAt": "Finished",
+        "compare": "Comparison"
+      },
+      "status": {
+        "pending": "Queued",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "verdict": {
+        "passed": "Passed",
+        "failed": "Failed",
+        "pending": "Pending"
+      }
+    },
+    "datasets": {
+      "loading": "Loading datasets…",
+      "caption": "Eval datasets",
+      "platformScope": "Platform",
+      "organizationScope": "Organization {name}",
+      "noTargets": "None",
+      "targetsOf": "Agents evaluated by {name}",
+      "cardMeta": "Version {version} · {when}",
+      "emptyTitle": "No datasets yet",
+      "emptyDescription": "Datasets appear when the eval sets are loaded into the agent service (pnpm evals:seed) or when an organization saves rated answers.",
+      "emptyAction": "See experiments",
+      "columns": {
+        "name": "Dataset",
+        "scope": "Scope",
+        "version": "Version",
+        "targets": "Agents",
+        "createdAt": "Created"
+      }
+    },
+    "compare": {
+      "title": "Experiment comparison",
+      "hint": "Choose two experiments, from any page, to compare their scores per scorer.",
+      "hintOne": "Choose one more experiment to compare.",
+      "missing": "One of the chosen experiments was not found. Clear the comparison and choose again.",
+      "loading": "Loading the chosen experiments…",
+      "clear": "Clear comparison",
+      "chartTitle": "Mean score per scorer",
+      "chartDescription": "A is {a}; B is {b}.",
+      "seriesA": "A · {id}",
+      "seriesB": "B · {id}",
+      "baseline": "Floor",
+      "scorer": "Scorer",
+      "verdicts": "Result per scorer",
+      "outcome": {
+        "better": "{scorer}: B better than A ({delta})",
+        "worse": "{scorer}: B worse than A ({delta})",
+        "same": "{scorer}: no difference",
+        "onlyA": "{scorer}: only in A",
+        "onlyB": "{scorer}: only in B"
+      }
+    }
+  },
+  "agents": {
+    "title": "Agents and prompts",
+    "description": "The core agents, their platform prompts and what each organization has enabled.",
+    "openPrompts": "View prompts",
+    "openPromptsNamed": "View prompts of {agent}",
+    "names": {
+      "assistant": "Assistant",
+      "knowledge": "Knowledge",
+      "data": "Data",
+      "action": "Actions",
+      "web": "Web"
+    },
+    "roles": {
+      "assistant": "Supervisor: talks to the person and delegates to the other agents.",
+      "knowledge": "Answers from the knowledge base, citing its sources.",
+      "data": "Queries the data catalog.",
+      "action": "Runs commands, with confirmation and approval when required.",
+      "web": "Searches and reads web pages, when allowed."
+    },
+    "catalog": {
+      "title": "Registered agents",
+      "description": "What the runtime registered: each agent's role, subagents, tools, skills and permissions. Agents with a versioned prompt link to their versions.",
+      "loading": "Loading the registered agents…",
+      "role": {
+        "supervisor": "Supervisor",
+        "entry": "Entry",
+        "subagent": "Subagent"
+      },
+      "enablement": {
+        "always": "Always available",
+        "perOrganization": "Enabled per organization"
+      },
+      "subagents": "Subagents",
+      "tools": "Tools",
+      "toolsOfOrganization": "Plus the tools of the organization's connectors and options",
+      "skills": "Skills",
+      "permissions": "Permissions (ceiling)",
+      "none": "None",
+      "emptyTitle": "No agent registered",
+      "emptyDescription": "The runtime reported no agent. Check that it is running and reload.",
+      "reload": "Reload"
+    },
+    "organization": {
+      "title": "Agents per organization",
+      "description": "Choose an organization to see and change its agents, web tools and PII mode.",
+      "loading": "Loading the agent settings…",
+      "emptyTitle": "Choose an organization",
+      "emptyDescription": "Agent settings are per organization. The page address keeps your choice.",
+      "emptyAction": "Choose organization"
+    }
+  },
+  "agentSettings": {
+    "failed": "The change could not be saved",
+    "failedWithReference": "{message} Reference: {requestId}",
+    "offline": "No connection: changes are unavailable until it returns.",
+    "agentEnabled": "{agent} enabled in {organization}.",
+    "agentDisabled": "{agent} disabled in {organization}.",
+    "saved": "Agent settings of {organization} saved.",
+    "agents": {
+      "title": "Enabled agents",
+      "description": "Subagents the assistant may delegate to in this organization."
+    },
+    "webTools": {
+      "title": "Web tools",
+      "description": "They only apply while the platform flag ai.web-tools is on.",
+      "firecrawl": "Web search and page reading",
+      "firecrawlHint": "Web search and page extraction through Firecrawl.",
+      "browser": "Automated browser",
+      "browserHint": "Browser automation through a Playwright MCP connector."
+    },
+    "pii": {
+      "title": "Personal data in messages",
+      "warn": "Warn",
+      "warnHint": "The detector records the finding and lets the message through.",
+      "redact": "Redact",
+      "redactHint": "Personal data is masked before it reaches the model."
+    },
+    "confirm": {
+      "firecrawlTitle": "Turn on web search and page reading in {organization}?",
+      "browserTitle": "Turn on the automated browser in {organization}?",
+      "webDescription": "This organization's agents will reach the public web in every conversation. The change is recorded in the audit log.",
+      "webConfirm": "Turn on",
+      "piiTitle": "Let personal data reach the model in {organization}?",
+      "piiDescription": "With “Warn”, the detector only records what it finds: personal data goes on to the model in every conversation of the organization until someone masks it again.",
+      "piiConfirm": "Only warn"
+    }
+  },
+  "prompts": {
+    "title": "Prompts of {agent}",
+    "description": "Versions of the platform prompt. Nothing is edited in place: every change is a new version.",
+    "back": "Agents and prompts",
+    "create": "New version",
+    "loading": "Loading the prompt versions…",
+    "caption": "Prompt versions of {agent}",
+    "pagination": "Version pages",
+    "versionNumber": "v{version}",
+    "active": "Active",
+    "noNote": "No note",
+    "cardMeta": "{author} · {date}",
+    "emptyTitle": "No versions yet",
+    "emptyDescription": "The agent uses the prompt that ships in the code. Write the first version to change it from here.",
+    "activateBlocked": "Evaluate the version: only a passing eval unlocks activation.",
+    "columns": {
+      "version": "Version",
+      "note": "Note",
+      "author": "Author",
+      "createdAt": "Created",
+      "verdict": "Eval",
+      "actions": "Actions"
+    },
+    "actions": {
+      "evaluate": "Evaluate",
+      "evaluateNamed": "Evaluate version {version}",
+      "activate": "Activate",
+      "activateNamed": "Activate version {version}",
+      "rollback": "Roll back",
+      "rollbackNamed": "Roll back to version {version}",
+      "force": "Force activation",
+      "forceNamed": "Force the activation of version {version}",
+      "compare": "Compare",
+      "compareNamed": "Compare version {version}"
+    },
+    "verdict": {
+      "passed": "Passed",
+      "failed": "Failed",
+      "none": "Not evaluated"
+    },
+    "versions": {
+      "title": "Versions",
+      "description": "Version {version} is in production.",
+      "seedActive": "No version activated: the prompt from the code is in production."
+    },
+    "eval": {
+      "title": "Evaluation",
+      "description": "Runs the agent's eval set with the chosen version and records the verdict on it.",
+      "running": "Running the evaluation… this can take a few minutes.",
+      "idle": "Use Evaluate on a version to see the result per scorer.",
+      "failedTitle": "The evaluation of version {version} did not run",
+      "caption": "Result per scorer of version {version}",
+      "verdictOf": "Verdict of version {version}:",
+      "openExperiment": "See the experiment in evals",
+      "scorer": "Scorer",
+      "mean": "Mean",
+      "result": "Result",
+      "noScore": "No score",
+      "scorerPassed": "Met the floor",
+      "scorerFailed": "Below the floor"
+    },
+    "diff": {
+      "title": "Compare versions",
+      "description": "Line-by-line difference between two versions.",
+      "base": "From",
+      "compare": "To",
+      "pick": "Choose a version",
+      "pickBoth": "Choose both versions to compare.",
+      "identical": "Both versions have the same text.",
+      "summary": "{added, plural, =0 {no lines added} one {# line added} other {# lines added}}, {removed, plural, =0 {none removed} one {# removed} other {# removed}}",
+      "regionLabel": "Differences from version {base} to version {compare}",
+      "version": "Version {version}",
+      "versionActive": "Version {version} (active)",
+      "added": "Added:",
+      "removed": "Removed:"
+    },
+    "history": {
+      "title": "Activation history",
+      "description": "Every activation is a new record; a rollback activates an earlier version.",
+      "empty": "No activation recorded.",
+      "caption": "Prompt activations of {agent}",
+      "pagination": "Activation pages",
+      "version": "v{version}",
+      "unknownVersion": "Unknown version",
+      "forced": "Forced",
+      "gated": "With eval",
+      "noReason": "No reason",
+      "cardMeta": "{who} · {date}",
+      "columns": {
+        "version": "Version",
+        "when": "When",
+        "who": "Who",
+        "kind": "Kind",
+        "reason": "Reason"
+      }
+    },
+    "editor": {
+      "title": "New prompt version of {agent}",
+      "description": "The text starts from the active version. Saving creates a new version; nothing changes in production until it is evaluated and activated.",
+      "body": "Prompt text",
+      "bodyHint": "The agent's full instructions.",
+      "bodyRequired": "Write the prompt text.",
+      "bodyTooLong": "The text can have at most {maximum} characters.",
+      "bodyUnchanged": "The text is the same as the active version. Change something to create a new version.",
+      "note": "Note",
+      "noteHint": "Optional: why the prompt changes.",
+      "submit": "Create version",
+      "created": "Version {version} created.",
+      "descriptionSeed": "The text starts from the instructions the agent ships with in code, because there is no version yet. Saving creates the first version; nothing changes in production until it is evaluated and activated."
+    },
+    "activation": {
+      "title": "Activate version {version}?",
+      "description": "The version becomes the production prompt of {agent} for every organization. The action is audited.",
+      "confirm": "Activate version",
+      "done": "Version {version} of {agent} activated.",
+      "rollbackTitle": "Roll back to version {version}?",
+      "rollbackDescription": "Version {active} of {agent} leaves production and this earlier version applies again to every organization. The action is audited.",
+      "rollbackConfirm": "Roll back",
+      "rollbackDone": "{agent} rolled back to version {version}.",
+      "forceTitle": "Force the activation of version {version}?",
+      "forceDescription": "The version has no passing eval. Forcing skips that protection and puts the prompt of {agent} in production for every organization.",
+      "forceConfirm": "Force activation",
+      "forcedDone": "Version {version} of {agent} activated without a passing eval.",
+      "reason": "Reason",
+      "reasonHint": "Required. It stays in the history and the audit log.",
+      "reasonRequired": "Give the reason for the forced activation."
+    }
+  },
+  "workflows": {
+    "title": "Workflows",
+    "description": "Runs of every organization, the ones waiting for approval, and the platform and organization schedules.",
+    "platform": "Platform",
+    "tabs": {
+      "label": "Workflow sections",
+      "runs": "Runs",
+      "schedules": "Schedules"
+    },
+    "cancel": {
+      "title": "Cancel the run of {workflow}?",
+      "description": "The run stops now and cannot be resumed.",
+      "descriptionSuspended": "The run stops now and cannot be resumed. The approval request it was waiting for is cancelled with it.",
+      "confirm": "Cancel run",
+      "keep": "Keep run",
+      "done": "Run of {workflow} cancelled."
+    },
+    "runNow": {
+      "title": "Run {workflow} now?",
+      "descriptionTenant": "An extra run starts now, on behalf of whoever created the schedule and with that person's current permissions. The next cron fire does not change.",
+      "descriptionPlatform": "An extra run of this platform job starts now, for every organization. The next cron fire does not change.",
+      "confirm": "Run now",
+      "done": "Run of {workflow} requested."
+    },
+    "scheduleState": {
+      "pauseTitle": "Pause the schedule of {workflow}?",
+      "resumeTitle": "Resume the schedule of {workflow}?",
+      "pauseTenant": "The schedule stops firing for the organization until it is resumed. Runs in progress continue. The action is recorded in the audit log.",
+      "pausePlatform": "Warning: this is a platform job. While it is paused, it stops running for every organization (for example, approval expiry, data cleanup or the usage report). Pause it only during an incident and resume it right after. The action is recorded in the audit log.",
+      "resumeTenant": "The schedule fires again for the organization from the next cron time. Fires missed during the pause are not made up.",
+      "resumePlatform": "This platform job runs again for every organization from the next cron time. Fires missed during the pause are not made up.",
+      "confirmPause": "Pause schedule",
+      "confirmPausePlatform": "Pause platform job",
+      "confirmResume": "Resume schedule",
+      "paused": "Schedule of {workflow} paused.",
+      "resumed": "Schedule of {workflow} resumed."
+    },
+    "runs": {
+      "caption": "Workflow runs",
+      "pagination": "Run pages",
+      "loading": "Loading runs…",
+      "bySchedule": "Schedule: {schedule}",
+      "byAnySchedule": "Schedule",
+      "byUser": "User {user}",
+      "byPlatform": "Platform",
+      "waitsApproval": "Waiting for approval",
+      "details": "Details",
+      "detailsNamed": "Details of run {id} of {workflow}",
+      "cancel": "Cancel",
+      "cancelNamed": "Cancel run {id} of {workflow}",
+      "detailsTitle": "Run of {workflow}",
+      "detailsDescription": "{organization} · {id}",
+      "detailsMissingTitle": "Run not found in this list",
+      "detailsMissingDescription": "The link points to a run that is not among the loaded ones: it may be on another page or outside the filters. Close and look for it in the list.",
+      "timelineLabel": "Run timeline",
+      "noStepEvents": "Step-by-step events are not available in the administration; the timeline shows what the run records.",
+      "noMatchTitle": "No run matches these filters",
+      "noMatchDescription": "Check the filters or clear them to see all runs.",
+      "clearFilters": "Clear filters",
+      "emptyTitle": "No runs yet",
+      "emptyDescription": "Runs appear here once someone or a schedule starts a workflow.",
+      "emptyAction": "See schedules",
+      "columns": {
+        "run": "Workflow",
+        "organization": "Organization",
+        "status": "Status",
+        "origin": "Started by",
+        "createdAt": "Started",
+        "updatedAt": "Last change",
+        "actions": "Actions"
+      },
+      "filters": {
+        "label": "Filter runs",
+        "workflow": "Workflow",
+        "workflowPlaceholder": "usage-report",
+        "workflowInvalid": "Use the workflow id: lowercase letters, digits and hyphens.",
+        "apply": "Apply",
+        "status": "Status",
+        "anyStatus": "Any status",
+        "suspendedOnly": "Waiting for approval"
+      }
+    },
+    "schedules": {
+      "filtersLabel": "Filter schedules",
+      "loading": "Loading schedules…",
+      "caption": "Platform and organization schedules",
+      "emptyTitle": "No schedules",
+      "emptyDescription": "Platform schedules are created when the agent service starts.",
+      "reload": "Reload",
+      "noMatchTitle": "This organization has no schedules",
+      "noMatchDescription": "Platform schedules show when no organization is chosen.",
+      "seeAll": "See all"
+    }
+  },
+  "connectors": {
+    "title": "Connectors",
+    "description": "External systems each organization opened to its agents. Secrets never appear here.",
+    "filtersLabel": "Choose an organization",
+    "readOnlyNotice": "Read only: the platform team does not change or disable connectors. The organization's administrators do that in its settings.",
+    "chooseTitle": "Choose an organization",
+    "chooseDescription": "Connectors are listed per organization.",
+    "chooseAction": "See organizations",
+    "loading": "Loading connectors…",
+    "caption": "Connectors of the organization",
+    "pagination": "Connector pages",
+    "emptyTitle": "This organization has no connectors",
+    "emptyDescription": "Connectors are created in the organization's settings by its administrators.",
+    "moreReach": "{count, plural, one {and # more} other {and # more}}",
+    "tools": "{allowed, plural, =0 {no tools} one {# tool} other {# tools}}, {readOnly} without approval",
+    "noSecret": "No secret",
+    "hasSecret": "Secret configured",
+    "status": {
+      "active": "Active",
+      "disabled": "Disabled",
+      "error": "Error"
+    },
+    "types": {
+      "openapi": "API (OpenAPI)",
+      "mcp": "MCP server",
+      "postgres": "Postgres (read only)",
+      "browser": "Browser"
+    },
+    "columns": {
+      "name": "Connector",
+      "type": "Type",
+      "status": "Status",
+      "reach": "Reach",
+      "tools": "Tools",
+      "secret": "Secret",
+      "updatedAt": "Updated"
+    }
+  },
+  "logs": {
+    "title": "Logs",
+    "description": "Recent log lines of the web process in the local environment, newest first.",
+    "refresh": "Refresh",
+    "loading": "Loading logs…",
+    "listLabel": "Log lines",
+    "count": "{count, plural, one {# line} other {# lines}} (at most {limit})",
+    "openTrace": "Open the trace {id}",
+    "fields": "{count, plural, one {# field} other {# fields}}",
+    "fieldsOf": "Fields of line {position}: {message}",
+    "service": "{service} · {env}",
+    "requestId": "Request",
+    "traceId": "Trace",
+    "levels": {
+      "debug": "Debug",
+      "info": "Info",
+      "warn": "Warning",
+      "error": "Error"
+    },
+    "noMatchTitle": "No line matches these filters",
+    "noMatchDescription": "The buffer keeps only the last 500 lines. Clear the filters, or repeat the action and refresh.",
+    "clearFilters": "Clear filters",
+    "emptyTitle": "No log lines yet",
+    "emptyDescription": "Lines appear as the web process serves requests.",
+    "filters": {
+      "label": "Filter logs",
+      "level": "Minimum level",
+      "anyLevel": "Any level",
+      "levelOptions": {
+        "debug": "Debug and above",
+        "info": "Info and above",
+        "warn": "Warning and above",
+        "error": "Errors only"
+      },
+      "q": "Message text",
+      "traceId": "Trace",
+      "requestId": "Request",
+      "apply": "Apply"
+    },
+    "remote": {
+      "title": "Outside the local environment, logs live in Cloud Logging",
+      "description": "This page only reads the buffer of the local environment. Open Cloud Logging and choose this environment's project.",
+      "descriptionFiltered": "This page only reads the buffer of the local environment. The link opens Cloud Logging with the trace and request of the filter; choose this environment's project.",
+      "open": "Open Cloud Logging",
+      "newTab": "(opens in a new tab)"
+    }
+  },
+  "auditLog": {
+    "title": "Platform audit log",
+    "description": "What staff did on the platform: plans, budgets, flags, models, support access and refused attempts, newest first.",
+    "caption": "Platform audit log",
+    "platformWide": "Whole platform",
+    "organizationFilter": "Only the organization",
+    "clearOrganization": "See every organization"
+  },
+  "team": {
+    "title": "Platform team",
+    "description": "Who runs the platform and with which role. Everyone needs two-step verification to open the console.",
+    "loading": "Loading the team…",
+    "caption": "Platform team",
+    "emptyTitle": "Nobody on the team yet",
+    "you": "You",
+    "active": "Active",
+    "revoked": "Revoked",
+    "changeRole": "Change role",
+    "changeRoleNamed": "Change the role of {name}",
+    "restore": "Give access back",
+    "restoreNamed": "Give {name} access back",
+    "revokeAction": "Revoke",
+    "revokeNamed": "Revoke the access of {name}",
+    "columns": {
+      "person": "Person",
+      "role": "Role",
+      "status": "Status",
+      "updatedAt": "Changed",
+      "actions": "Actions"
+    },
+    "roles": {
+      "legend": "Team role",
+      "platform-admin": {
+        "name": "Platform admin",
+        "description": "Can do everything in the console: plans, organizations, models, flags and the team itself."
+      },
+      "platform-support": {
+        "name": "Platform support",
+        "description": "Reads organizations, users, traces, logs and costs, and does support access. Changes no settings."
+      }
+    },
+    "add": {
+      "action": "Add to the team",
+      "title": "Add to the team",
+      "description": "The person needs an account in the app already. They see the console once they turn on two-step verification.",
+      "email": "Account email",
+      "emailHint": "The exact email the person signs in with.",
+      "errors": {
+        "required": "Type the person's email.",
+        "invalid": "Type a valid email, for example name@company.com.",
+        "notFound": "No account uses this email. The person needs to create one first."
+      },
+      "cancel": "Cancel",
+      "submit": "Add",
+      "done": "{email} is now on the team."
+    },
+    "role": {
+      "title": "Role of {name}",
+      "description": "The change applies at once. A revoked person gets access back.",
+      "cancel": "Cancel",
+      "submit": "Save role",
+      "done": "Role of {name} updated."
+    },
+    "revoke": {
+      "title": "Revoke the access of {name}?",
+      "description": "The person loses the platform permissions at once, and the support sessions they opened end. Their app account stays.",
+      "confirm": "Revoke access",
+      "done": "Access of {name} revoked."
+    }
+  }
+}

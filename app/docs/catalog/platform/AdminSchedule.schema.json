@@ -1,0 +1,165 @@
+{
+  "additionalProperties": false,
+  "description": "A platform or tenant schedule as staff see it, with its state and next fire.",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": null,
+      "cron": "15 * * * *",
+      "id": "schedule_platform-usage-report",
+      "lastFireAt": null,
+      "nextFireAt": "2026-09-30T12:15:00.000Z",
+      "scope": "platform",
+      "status": "active",
+      "tenantId": null,
+      "timezone": "UTC",
+      "updatedAt": "2026-09-29T14:30:00.000Z",
+      "workflowId": "usage-report"
+    },
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "cron": "0 9 * * *",
+      "id": "schedule_3fa9c0e1b2d4a6f8-daily-usage",
+      "lastFireAt": "2026-09-29T12:00:00.000Z",
+      "nextFireAt": null,
+      "scope": "tenant",
+      "status": "paused",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "timezone": "America/Sao_Paulo",
+      "updatedAt": "2026-09-29T15:00:00.000Z",
+      "workflowId": "usage-report"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the schedule was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdBy": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Creator of a tenant schedule; null for platform ones.",
+      "x-pii": "personal"
+    },
+    "cron": {
+      "description": "5-field cron expression, evaluated in `timezone`.",
+      "maxLength": 120,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Schedule id.",
+      "pattern": "^schedule_[a-z0-9-]{1,120}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "lastFireAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Last fire (UTC); null before the first.",
+      "x-pii": "none"
+    },
+    "nextFireAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Next fire (UTC); null while paused.",
+      "x-pii": "none"
+    },
+    "scope": {
+      "description": "`platform` for the core crons, `tenant` for a schedule of an organization.",
+      "enum": [
+        "platform",
+        "tenant"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "status": {
+      "description": "`paused` schedules do not fire.",
+      "enum": [
+        "active",
+        "paused"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Organization that owns a tenant schedule; null for platform ones.",
+      "x-pii": "none"
+    },
+    "timezone": {
+      "description": "IANA time zone of the cron expression.",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the schedule last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "workflowId": {
+      "description": "Scheduled workflow.",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "scope",
+    "tenantId",
+    "workflowId",
+    "cron",
+    "timezone",
+    "status",
+    "nextFireAt",
+    "lastFireAt",
+    "createdBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "platform.workflow.manage",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

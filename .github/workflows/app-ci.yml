@@ -1,0 +1,373 @@
+# CI for the agentic app core in app/ (docs/plans/2026-09-29-sp0-app-foundation.md, Task 11).
+# Supply chain (.contexts/engineering/rules/security.md §9): third-party actions are
+# pinned by full commit SHA (tag in the trailing comment), permissions are read-only,
+# and installs use the committed lockfile.
+name: app-ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    working-directory: app
+
+env:
+  NODE_VERSION: 26.10.0
+  PNPM_VERSION: 12.6.0
+  # Turbo and Next telemetry off in CI; Mastra CLI telemetry too (LGPD default).
+  TURBO_TELEMETRY_DISABLED: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+  MASTRA_TELEMETRY_DISABLED: "1"
+
+jobs:
+  framework-guard:
+    name: framework is read-only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # .contexts/ and .claude/ are the DDC framework: app changes never touch them.
+      # Base: the PR base commit; on push, the previous tip of the branch (skipped
+      # when it is all zeros, i.e. a new branch); otherwise origin/main.
+      - name: Fail if .contexts or .claude changed
+        working-directory: .
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          case "$EVENT_NAME" in
+            pull_request) base="$PR_BASE_SHA" ;;
+            push) base="$PUSH_BEFORE_SHA" ;;
+            *) base="origin/main" ;;
+          esac
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            echo "No base commit to compare against; skipping the framework guard."
+            exit 0
+          fi
+          if ! git diff --quiet "$base" HEAD -- .contexts .claude; then
+            echo "::error::.contexts/ or .claude/ changed since $base; the framework is read-only."
+            git diff --stat "$base" HEAD -- .contexts .claude
+            exit 1
+          fi
+
+  checks:
+    name: lint, typecheck, test, contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # No corepack on Node 25+; same install as apps/mastra/Dockerfile.
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Audit dependencies (high and critical block)
+        run: pnpm audit --audit-level high
+      - name: Formatting (Biome, decision 0068)
+        run: pnpm format:check
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Contracts catalog is up to date
+        run: pnpm contracts:check
+      - name: Message catalogs are complete (i18n:check)
+        run: pnpm i18n:check
+
+  emulators:
+    name: emulator tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    # The SP3 gate suite (apps/mastra sp3-gate.emulator.test.ts) also needs Postgres:
+    # Mastra storage and memory, the knowledge base and the usage ledger.
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U app -d app"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      # CI-only credentials of the throwaway service container above.
+      DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # Firestore and Pub/Sub emulators are Java programs.
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Apply local init scripts and migrations
+        run: |
+          for file in infra/postgres/init/*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$file"
+          done
+          pnpm db:migrate
+        env:
+          APP_ENV: local
+      # Builds apps/functions, then runs every *.emulator.test.ts inside
+      # `firebase emulators:exec --only auth,firestore,functions,storage` (demo-core).
+      - name: Emulator tests
+        run: pnpm test:emulators
+
+  postgres:
+    name: postgres tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U app -d app"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      # CI-only credentials of the throwaway service container above.
+      DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # Service containers start before checkout, so the compose init scripts
+      # (docker-entrypoint-initdb.d) are applied here; they are idempotent.
+      - name: Apply local init scripts
+        run: |
+          for file in infra/postgres/init/*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$file"
+          done
+      # Versioned migrations (decision 0023); the CI database is the local kind.
+      - name: Apply migrations
+        run: pnpm db:migrate
+        env:
+          APP_ENV: local
+      - name: Postgres tests
+        run: pnpm test:postgres
+
+  # Follow-up #6 (decision 0017 §5): Rust compile check of apps/desktop/src-tauri on Linux.
+  # The native smoke test (`pnpm -F @core/desktop test:native`) stays local: it needs a display.
+  desktop-check:
+    name: desktop check (vite build + cargo check)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # WebKitGTK and friends: the system libraries tauri/wry link against on Linux (Tauri 2 prerequisites).
+      - name: Install Tauri system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev
+      # rustup is preinstalled on the runner; `rustup toolchain install` without a name installs
+      # the toolchain pinned by src-tauri/rust-toolchain.toml (no third-party toolchain action).
+      - name: Install the pinned Rust toolchain
+        working-directory: app/apps/desktop/src-tauri
+        run: |
+          rustup toolchain install
+          rustc --version
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            app/apps/desktop/src-tauri/target/
+          key: desktop-cargo-${{ runner.os }}-${{ hashFiles('app/apps/desktop/src-tauri/rust-toolchain.toml', 'app/apps/desktop/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            desktop-cargo-${{ runner.os }}-
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # tauri-build embeds `frontendDist` (../dist), so the bundle must exist before cargo runs.
+      # Public placeholders only (the env schema fails closed at build time): a remote https API
+      # and no emulator, as a release build would have.
+      - name: Build the desktop frontend
+        run: pnpm -F @core/desktop build
+        env:
+          VITE_API_URL: https://api.example.invalid
+          VITE_APP_ENV: staging
+          VITE_FIREBASE_API_KEY: ci-placeholder-api-key
+          VITE_FIREBASE_AUTH_DOMAIN: ci-placeholder.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: ci-placeholder
+          VITE_MFA_FACTORS: totp
+      # Run from src-tauri: rustup picks the toolchain from the current directory's
+      # rust-toolchain.toml, not from --manifest-path.
+      - name: cargo check
+        working-directory: app/apps/desktop/src-tauri
+        run: cargo check --locked
+
+  evals:
+    name: agent evals (fake models)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      # Deterministic fake models (decision 0028); real-model evals run with `pnpm evals:real`.
+      APP_ENV: local
+      AI_MODE: fake
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # Every eval set runs in memory (fake ports, eval knowledge corpus); the gate fails when a
+      # scorer mean drops below its baseline minimum - tolerance (packages/agents/evals/baselines).
+      - name: Eval gate
+        run: pnpm evals
+      - name: Upload eval reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: eval-reports
+          path: app/.evals/
+          retention-days: 30
+
+  e2e:
+    name: e2e (Playwright)
+    runs-on: ubuntu-24.04
+    # About 500 web journeys (two retries in CI) plus desktop-web: 40 minutes ran out before the end.
+    timeout-minutes: 75
+    # scripts/e2e.ts recreates the app_e2e database on this server (Mastra storage, knowledge).
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U app -d app"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # The Firestore emulator is a Java program.
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm -F @core/web exec playwright install --with-deps chromium firefox webkit
+      # Placeholders only; scripts/e2e.ts overrides every target (emulators of
+      # firebase.e2e.json, web on 3100, desktop preview on 1420, AI_MODE=fake).
+      - name: Local env file
+        run: |
+          cp .env.example .env.local
+          sed -i 's/^WEB_PORT=.*/WEB_PORT=3100/; s#^NEXT_PUBLIC_APP_URL=.*#NEXT_PUBLIC_APP_URL=http://localhost:3100#' .env.local
+      # Emulators (auth, firestore) + turbo build with the e2e public config +
+      # Playwright for web (chromium, firefox, webkit, mobile-chrome) and desktop-web.
+      # The /admin evals journey reads the reports of a fake-model eval run (app/.evals).
+      - name: Eval reports for the e2e
+        run: pnpm evals
+        env:
+          APP_ENV: local
+          AI_MODE: fake
+      - name: e2e
+        run: pnpm test:e2e
+      # Also on a timeout, which cancels the job, so the reports of the failed journeys are kept.
+      - name: Upload Playwright reports
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-reports
+          path: |
+            app/apps/web/playwright-report/
+            app/apps/desktop/playwright-report/
+          retention-days: 14
+
+  # Follow-up #2 (decision 0023 D3-20): the Mastra server build. `mastra build` installs the
+  # output's dependencies on its own; the build script then copies the workspace overrides
+  # into the output, fails when a shared package drifts from pnpm-lock.yaml, and runs
+  # `pnpm audit --prod --audit-level high` on the output.
+  mastra-build:
+    name: mastra build (output pins and audit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build the Mastra server
+        run: pnpm -F @core/mastra build

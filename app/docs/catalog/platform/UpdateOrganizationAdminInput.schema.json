@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "description": "Staff changes an organization's plan or status (audited with targetTenantId).",
+  "examples": [
+    {
+      "planId": "Pl1aB2cD3eF4gH5iJ6kL"
+    },
+    {
+      "status": "suspended"
+    }
+  ],
+  "properties": {
+    "planId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Plan to assign; null removes it (platform default caps).",
+      "x-pii": "none"
+    },
+    "status": {
+      "description": "`active` or `suspended`.",
+      "enum": [
+        "active",
+        "suspended"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "platform.organization.update",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

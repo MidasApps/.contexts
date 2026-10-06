@@ -1,0 +1,56 @@
+{
+  "module": { "name": "Ejemplo" },
+  "nav": { "home": "Ejemplo" },
+  "permissions": {
+    "item": {
+      "read": "Ver los elementos del módulo de ejemplo",
+      "write": "Crear y modificar elementos del módulo de ejemplo"
+    },
+    "note": {
+      "read": "Ver las notas del módulo de ejemplo",
+      "create": "Crear notas en el módulo de ejemplo",
+      "archive": "Archivar notas del módulo de ejemplo (requiere la aprobación de otra persona)"
+    }
+  },
+  "unitTypes": { "area": "Área" },
+  "workflows": {
+    "note-intake": { "name": "Ingreso de notas", "description": "Crea una nota en la organización de quien la pide." }
+  },
+  "note": { "title": "Título", "body": "Texto", "noteId": "Nota" },
+  "settings": {
+    "greeting": "Saludo",
+    "greetingHint": "Se muestra al inicio del módulo, a todos los miembros.",
+    "defaultBudget": "Presupuesto predeterminado",
+    "defaultBudgetHint": "Monto sugerido para elementos nuevos."
+  },
+  "home": {
+    "title": "Módulo de ejemplo",
+    "description": "Referencia del contrato de módulos: contexto, montos, zona horaria y permisos.",
+    "loading": "Cargando el módulo de ejemplo…",
+    "contextTitle": "Contexto actual",
+    "contextDescription": "Resuelto por el servidor para el nodo de la URL.",
+    "organization": "Organización",
+    "project": "Proyecto",
+    "unit": "Unidad",
+    "noUnit": "Ninguna unidad seleccionada",
+    "locale": "Idioma",
+    "timeZone": "Zona horaria de visualización",
+    "currency": "Moneda predeterminada",
+    "now": "Ahora",
+    "settingsTitle": "Configuración del módulo",
+    "settingsLoading": "Cargando la configuración del módulo…",
+    "greeting": "Saludo",
+    "defaultBudget": "Presupuesto predeterminado",
+    "emptyTitle": "El módulo aún no está configurado",
+    "emptyDescription": "Define el saludo y el presupuesto predeterminado en la configuración del módulo.",
+    "emptyDescriptionReadOnly": "Pide a un administrador de la organización que configure este módulo.",
+    "configure": "Configurar",
+    "notesTitle": "Notas",
+    "notesDescription": "Las crean agentes, flujos de trabajo o el chat. Esta lista solo las muestra.",
+    "notesLoading": "Cargando las notas…",
+    "notesEmptyTitle": "Todavía no hay notas",
+    "notesEmptyDescription": "Pide a un agente en el chat que cree una nota; aparecerá aquí.",
+    "notesArchived": "Archivada",
+    "notesLoadMore": "Cargar más"
+  }
+}

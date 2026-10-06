@@ -1,0 +1,29 @@
+{
+  "additionalProperties": false,
+  "description": "Grants a staff role to a user, or changes it; staff still need MFA to use it.",
+  "examples": [
+    {
+      "role": "platform-support"
+    }
+  ],
+  "properties": {
+    "role": {
+      "description": "`platform-admin` (every platform permission) or `platform-support` (reads).",
+      "enum": [
+        "platform-admin",
+        "platform-support"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "role"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "platform.staff.manage",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

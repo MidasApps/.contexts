@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="Inter, 'Segoe UI', Arial, sans-serif">
+<rect width="1280" height="800" fill="#fff"/>
+<rect x="0" y="0" width="260" height="800" rx="0" fill="#fafafa"/>
+<line x1="260" y1="0" x2="260" y2="800" stroke="#e5e5e5"/>
+<rect x="16" y="14" width="32" height="32" rx="8" fill="#ede9fe"/>
+<text x="32" y="35" font-size="12" fill="#6d28d9" font-weight="600" text-anchor="middle">CV</text>
+<text x="56" y="28" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Clínica Vet Exemplo</text>
+<text x="56" y="44" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Organização</text>
+<text x="40" y="92" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Atendimento</text>
+<text x="16" y="140" font-size="11" fill="#737373" font-weight="400" text-anchor="start">ORGANIZAÇÃO</text>
+<text x="40" y="172" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Projetos</text>
+<rect x="8" y="188" width="244" height="32" rx="6" fill="#f5f5f5"/>
+<text x="40" y="210" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Configurações</text>
+<circle cx="36" cy="766" r="16" fill="#fde68a"/>
+<text x="36" y="771" font-size="11" fill="#92400e" font-weight="600" text-anchor="middle">BC</text>
+<text x="60" y="762" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Bruno Costa</text>
+<text x="60" y="778" font-size="12" fill="#737373" font-weight="400" text-anchor="start">bruno@clinicavet.exemplo</text>
+<line x1="260" y1="56" x2="1280" y2="56" stroke="#e5e5e5"/>
+<text x="325" y="33" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Clínica Vet Exemplo</text>
+<text x="477.4" y="33" font-size="14" fill="#737373" font-weight="400" text-anchor="start">›</text>
+<text x="493.4" y="33" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Rastros</text>
+<text x="310" y="228" font-size="13" fill="#737373" font-weight="600" text-anchor="start">Organização</text>
+<text x="334" y="256" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Geral</text>
+<text x="334" y="286" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Membros</text>
+<text x="334" y="316" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Convites</text>
+<text x="334" y="346" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Papéis</text>
+<text x="334" y="376" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Unidades</text>
+<text x="310" y="420" font-size="13" fill="#737373" font-weight="600" text-anchor="start">Operação</text>
+<text x="334" y="448" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Fluxos e agendamentos</text>
+<text x="334" y="478" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Aprovações</text>
+<text x="334" y="508" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Uso e orçamento</text>
+<text x="334" y="538" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Rastros</text>
+<rect x="300" y="520" width="210" height="28" rx="6" fill="#f5f5f5"/>
+<text x="334" y="538" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Rastros</text>
+<text x="560" y="92" font-size="13" fill="#737373" font-weight="400" text-anchor="start">← Voltar aos rastros</text>
+<text x="560" y="128" font-size="24" fill="#171717" font-weight="600" text-anchor="start">Rastro</text>
+<text x="560" y="168" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Agente ou fluxo</text>
+<text x="560" y="190" font-size="15" fill="#171717" font-weight="600" text-anchor="start">Agente assistant</text>
+<text x="790" y="168" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Início</text>
+<text x="790" y="190" font-size="15" fill="#171717" font-weight="600" text-anchor="start">5 de out. de 2026, 10:41</text>
+<text x="1020" y="168" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Duração</text>
+<text x="1020" y="190" font-size="15" fill="#171717" font-weight="600" text-anchor="start">4,2 s</text>
+<text x="560" y="220" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Tokens (entrada / saída)</text>
+<text x="560" y="242" font-size="15" fill="#171717" font-weight="600" text-anchor="start">1.820 / 214</text>
+<text x="790" y="220" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Custo</text>
+<text x="790" y="242" font-size="15" fill="#171717" font-weight="600" text-anchor="start">—</text>
+<rect x="560" y="290" width="680" height="230" rx="12" fill="#fff" stroke="#e5e5e5"/>
+<text x="584" y="322" font-size="16" fill="#171717" font-weight="600" text-anchor="start">3 spans</text>
+<text x="584" y="362" font-size="14" fill="#171717" font-weight="600" text-anchor="start">▾ assistant</text>
+<text x="584" y="382" font-size="12" fill="#737373" font-weight="400" text-anchor="start">1.820 de entrada · 214 de saída</text>
+<rect x="1100" y="346" width="30" height="24" rx="12" fill="#dcfce7"/>
+<text x="1115.0" y="362" font-size="12" fill="#166534" font-weight="600" text-anchor="middle">OK</text>
+<text x="1220" y="362" font-size="13" fill="#737373" font-weight="400" text-anchor="end">4,2 s</text>
+<text x="608" y="412" font-size="14" fill="#171717" font-weight="600" text-anchor="start">chamada ao modelo openai/gpt-6-sol</text>
+<text x="608" y="432" font-size="12" fill="#737373" font-weight="400" text-anchor="start">1.640 de entrada · 198 de saída</text>
+<rect x="1100" y="396" width="30" height="24" rx="12" fill="#dcfce7"/>
+<text x="1115.0" y="412" font-size="12" fill="#166534" font-weight="600" text-anchor="middle">OK</text>
+<text x="1220" y="412" font-size="13" fill="#737373" font-weight="400" text-anchor="end">2,9 s</text>
+<text x="608" y="462" font-size="14" fill="#171717" font-weight="600" text-anchor="start">knowledge.searchKnowledge</text>
+<rect x="1100" y="446" width="30" height="24" rx="12" fill="#dcfce7"/>
+<text x="1115.0" y="462" font-size="12" fill="#166534" font-weight="600" text-anchor="middle">OK</text>
+<text x="1220" y="462" font-size="13" fill="#737373" font-weight="400" text-anchor="end">0,6 s</text>
+</svg>

@@ -1,0 +1,54 @@
+{
+  "additionalProperties": false,
+  "description": "Changes the name or regional defaults of an organization (`core.organization.update`).",
+  "examples": [
+    {
+      "name": "Northwind Brasil"
+    },
+    {
+      "defaults": {
+        "timeZone": "America/Recife"
+      }
+    }
+  ],
+  "properties": {
+    "defaults": {
+      "additionalProperties": false,
+      "description": "Regional defaults to change; absent keys keep their value.",
+      "properties": {
+        "currency": {
+          "description": "Default ISO 4217 currency for new amounts.",
+          "pattern": "^[A-Z]{3}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "locale": {
+          "description": "Default BCP 47 locale when the user has no preference.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "Default IANA time zone; projects and units may override it.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "type": "object",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "New display name.",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.organization.update",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

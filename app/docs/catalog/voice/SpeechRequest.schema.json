@@ -1,0 +1,37 @@
+{
+  "additionalProperties": false,
+  "description": "Text of an assistant message to read aloud as streamed audio.",
+  "examples": [
+    {
+      "text": "Here is the summary of the onboarding guide."
+    },
+    {
+      "text": "Done.",
+      "voice": "alloy"
+    }
+  ],
+  "properties": {
+    "text": {
+      "description": "Text to read aloud.",
+      "maxLength": 4000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "voice": {
+      "description": "Provider voice id; the default voice otherwise.",
+      "pattern": "^[A-Za-z0-9_-]{1,64}$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "text"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.voice.use",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

@@ -1,0 +1,51 @@
+{
+  "name": "@core/services",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./platform/health-route-handler": "./src/services/platform/adapters/driving/health-route-handler.ts",
+    "./composition": "./src/services/composition.ts"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --project unit",
+    "test:emulators": "vitest run --project emulators",
+    "test:postgres": "vitest run --project postgres",
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@core/contracts": "workspace:*",
+    "@core/i18n": "workspace:*",
+    "@google-cloud/bigquery": "catalog:",
+    "@google-cloud/secret-manager": "catalog:",
+    "@mastra/client-js": "catalog:",
+    "drizzle-orm": "catalog:",
+    "file-type": "catalog:",
+    "firebase-admin": "catalog:",
+    "google-auth-library": "catalog:",
+    "libpg-query": "catalog:",
+    "postgres": "catalog:",
+    "ulid": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@core/config": "workspace:*",
+    "@firebase/rules-unit-testing": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "drizzle-kit": "catalog:",
+    "eslint": "catalog:",
+    "firebase": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

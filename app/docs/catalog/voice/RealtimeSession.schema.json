@@ -1,0 +1,45 @@
+{
+  "additionalProperties": false,
+  "description": "A short-lived secret for an optional realtime voice session without tools.",
+  "examples": [
+    {
+      "clientSecret": "ek_example",
+      "expiresAt": "2026-09-29T14:31:00.000Z",
+      "model": "gpt-realtime-2.1"
+    }
+  ],
+  "properties": {
+    "clientSecret": {
+      "description": "Ephemeral client secret for the provider's WebRTC endpoint.",
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "sensitive"
+    },
+    "expiresAt": {
+      "description": "When the secret stops working (UTC, at most 60 s ahead).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "model": {
+      "description": "Realtime model id.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "clientSecret",
+    "expiresAt",
+    "model"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.voice.use",
+  "x-pii": "sensitive",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

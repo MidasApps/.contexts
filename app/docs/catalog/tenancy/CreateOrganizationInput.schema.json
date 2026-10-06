@@ -1,0 +1,62 @@
+{
+  "additionalProperties": false,
+  "description": "Creates an organization; the caller becomes its owner (self-serve flag, SP1 spec §6.1).",
+  "examples": [
+    {
+      "defaults": {
+        "currency": "BRL",
+        "locale": "pt-BR",
+        "timeZone": "America/Sao_Paulo"
+      },
+      "name": "Northwind"
+    }
+  ],
+  "properties": {
+    "defaults": {
+      "additionalProperties": false,
+      "description": "Regional defaults: locale, time zone and currency.",
+      "properties": {
+        "currency": {
+          "description": "Default ISO 4217 currency for new amounts.",
+          "pattern": "^[A-Z]{3}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "locale": {
+          "description": "Default BCP 47 locale when the user has no preference.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "Default IANA time zone; projects and units may override it.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "locale",
+        "timeZone",
+        "currency"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the new organization.",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "name",
+    "defaults"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

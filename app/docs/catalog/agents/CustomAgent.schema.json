@@ -1,0 +1,167 @@
+{
+  "additionalProperties": false,
+  "description": "An agent an organization configured: instructions, a model role, tools, skills and a knowledge scope.",
+  "examples": [
+    {
+      "connectorTools": false,
+      "coreSkills": [
+        "knowledge-citations"
+      ],
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "customSkills": [
+        "Sk7cX9zA1sD3fG5hJ7kL"
+      ],
+      "description": "Answers questions of new members from the organization's handbook.",
+      "enabled": true,
+      "id": "Ag4sK2lPq0WnR5tYu3bV",
+      "instructions": "Answer from the handbook. Keep answers short and link the page you used.",
+      "knowledgeScope": "organization",
+      "model": "chat",
+      "name": "Onboarding guide",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "tools": [],
+      "updatedAt": "2026-09-29T14:30:00.000Z"
+    }
+  ],
+  "properties": {
+    "connectorTools": {
+      "description": "Whether the agent also gets the read-only tools of the organization's connectors.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "coreSkills": {
+      "description": "Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.",
+      "items": {
+        "maxLength": 100,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 20,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "createdAt": {
+      "description": "When the agent was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdBy": {
+      "description": "Uid of the admin who created it.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "customSkills": {
+      "description": "Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored.",
+      "items": {
+        "pattern": "^[A-Za-z0-9]{20}$",
+        "type": "string"
+      },
+      "maxItems": 20,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "description": {
+      "description": "What the agent is for.",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "enabled": {
+      "description": "Whether members can chat with the agent.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Firestore automatic id; also the agent's chat id.",
+      "pattern": "^[A-Za-z0-9]{20}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "instructions": {
+      "description": "Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.",
+      "maxLength": 20000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "knowledgeScope": {
+      "description": "What the agent may search in the knowledge base.",
+      "enum": [
+        "none",
+        "organization",
+        "project",
+        "all"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "model": {
+      "description": "Model role the agent runs on, from the platform's allowlist.",
+      "enum": [
+        "chat",
+        "reasoning"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the agent.",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Owning organization.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tools": {
+      "description": "Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).",
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the agent last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "name",
+    "description",
+    "instructions",
+    "model",
+    "tools",
+    "connectorTools",
+    "coreSkills",
+    "customSkills",
+    "knowledgeScope",
+    "enabled",
+    "createdBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.agent-settings.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "description": "Answer of activation creation with the one-time code.",
+  "examples": [
+    {
+      "code": "7KQ2M9XA",
+      "expiresAt": "2026-09-29T14:40:00.000Z",
+      "id": "Da4tG6bY8hN0uJ2mI4kO"
+    }
+  ],
+  "properties": {
+    "code": {
+      "description": "One-time code to type on the device; shown once.",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{8}$",
+      "type": "string",
+      "x-pii": "sensitive"
+    },
+    "expiresAt": {
+      "description": "When the code expires (UTC), 10 minutes after creation.",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Activation id.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "code",
+    "expiresAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "sensitive",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

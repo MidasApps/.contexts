@@ -1,0 +1,1242 @@
+{
+  "surface": "Administración de la plataforma",
+  "sidebar": {
+    "title": "Administración",
+    "navLabel": "Áreas de la administración",
+    "group": "Plataforma",
+    "backToApp": "Volver a la app",
+    "loading": "Cargando áreas…",
+    "retry": "Intentar de nuevo"
+  },
+  "topbar": {
+    "badge": "Equipo de la plataforma"
+  },
+  "slot": {
+    "emptyTitle": "Todavía no disponible",
+    "emptyDescription": "Esta área de la administración llega en una próxima versión.",
+    "backToHome": "Volver a la administración",
+    "loading": "Cargando el área…"
+  },
+  "descriptions": {
+    "organizations": "Estado, plan, costo y presupuesto de cada organización.",
+    "users": "Búsqueda de usuarios y acceso de soporte, solo lectura y auditado.",
+    "agents": "Agentes por organización y los prompts de la plataforma.",
+    "models": "Modelo de cada función de los agentes y costo de cada modelo.",
+    "connectors": "Conectores configurados en cada organización.",
+    "traces": "Ejecuciones de agentes y workflows, con tokens y costo.",
+    "costs": "Uso y costos por organización.",
+    "flags": "Flags de funcionalidades por entorno.",
+    "plans": "Límites que concede cada plan.",
+    "evals": "Datasets, experimentos y el veredicto de las evaluaciones.",
+    "logs": "Líneas de log recientes del entorno local.",
+    "workflows": "Ejecuciones, aprobaciones pendientes y programaciones.",
+    "audit": "Lo que hizo el equipo en la plataforma, con filtros por acción y organización.",
+    "team": "Quién forma parte del equipo de la plataforma y con qué rol."
+  },
+  "states": {
+    "eyebrow": "Administración",
+    "loading": "Cargando el área…",
+    "noAccessDescription": "Tu rol en el equipo de la plataforma no da acceso a esta área. Pídelo a un administrador de la plataforma.",
+    "mfaTitle": "Confirma la verificación en dos pasos",
+    "mfaDescription": "La administración solo responde a sesiones confirmadas con el segundo factor. Cierra la sesión y vuelve a entrar con el código.",
+    "mfaAction": "Abrir seguridad de la cuenta"
+  },
+  "organizationFilter": {
+    "label": "Organización",
+    "all": "Todas las organizaciones",
+    "placeholder": "Elige una organización",
+    "loading": "Cargando organizaciones…",
+    "search": "Buscar organización",
+    "empty": "No se encontró ninguna organización."
+  },
+  "overview": {
+    "title": "Administración de la plataforma",
+    "description": "Números de la plataforma y las áreas que tu rol en el equipo puede abrir.",
+    "loading": "Cargando los números de la plataforma…",
+    "sectionsTitle": "Áreas",
+    "emptyTitle": "No hay áreas disponibles",
+    "emptyDescription": "Tu rol en el equipo no da acceso a ninguna área de la administración.",
+    "kpi": {
+      "title": "Números de la plataforma",
+      "generatedAt": "Actualizado el {when}",
+      "organizations": "Organizaciones activas",
+      "organizationsHint": "Con estado activo",
+      "activeUsers": "Usuarios activos",
+      "last7Days": "Últimos 7 días",
+      "costMtd": "Costo del mes",
+      "costMtdHint": "Modelos, todas las organizaciones",
+      "tripwireRate": "Paradas por guardrail",
+      "tripwireHint": "Ejecuciones interrumpidas, últimos 7 días",
+      "tripwireUnmeasuredHint": "Las paradas por guardrail aún no se registran",
+      "notMeasured": "Sin medir",
+      "approvalRate": "Aprobaciones",
+      "approvalHint": "Solicitudes aprobadas, últimos 7 días",
+      "evalStatus": "Evaluación de los agentes",
+      "evalHint": "Veredicto del experimento más reciente",
+      "eval": {
+        "passed": "Aprobada",
+        "failed": "Reprobada",
+        "unknown": "Sin resultado"
+      }
+    }
+  },
+  "organizations": {
+    "title": "Organizaciones",
+    "description": "Estado, plan, costo del mes y presupuesto de cada organización.",
+    "loading": "Cargando organizaciones…",
+    "caption": "Organizaciones de la plataforma",
+    "pagination": "Páginas de organizaciones",
+    "open": "Abrir",
+    "openNamed": "Abrir {name}",
+    "defaultPlan": "Predeterminado de la plataforma",
+    "cardCost": "{cost} de {cap} en el mes",
+    "noMatchTitle": "Ninguna organización con esos filtros",
+    "noMatchDescription": "Revisa la búsqueda o limpia los filtros para verlas todas.",
+    "clearFilters": "Limpiar filtros",
+    "emptyTitle": "Todavía no hay organizaciones",
+    "emptyDescription": "Las organizaciones aparecen aquí cuando alguien crea una en la app.",
+    "columns": {
+      "organization": "Organización",
+      "status": "Estado",
+      "plan": "Plan",
+      "costMtd": "Costo del mes",
+      "cap": "Límite mensual",
+      "usage": "Uso del límite",
+      "actions": "Acciones"
+    },
+    "filters": {
+      "label": "Filtrar organizaciones",
+      "search": "Buscar organización",
+      "searchPlaceholder": "Palabras del nombre o id",
+      "status": "Estado",
+      "anyStatus": "Todos los estados"
+    },
+    "status": {
+      "active": "Activa",
+      "suspended": "Suspendida"
+    },
+    "budgetSource": {
+      "override": "Ajuste del equipo",
+      "plan": "Del plan",
+      "default": "Predeterminado de la plataforma"
+    },
+    "usage": {
+      "noCap": "Sin límite",
+      "alert": "Atención: {percent}",
+      "over": "Sobre el límite: {percent}"
+    }
+  },
+  "plans": {
+    "title": "Planes",
+    "description": "Límites de gasto, tokens y conectores que cada plan concede a las organizaciones.",
+    "loading": "Cargando planes…",
+    "caption": "Catálogo de planes",
+    "create": "Nuevo plan",
+    "edit": "Editar",
+    "editNamed": "Editar el plan {name}",
+    "noFeatures": "Ninguna",
+    "featuresOf": "Funcionalidades del plan {name}",
+    "cardLimits": "{budget} por mes · {tokens} tokens · {connectors, plural, =0 {ningún conector} one {# conector} other {# conectores}}",
+    "emptyTitle": "No hay planes registrados",
+    "emptyDescription": "Sin plan, las organizaciones usan los límites predeterminados de la plataforma.",
+    "columns": {
+      "name": "Plan",
+      "monthlyBudget": "Gasto mensual",
+      "monthlyTokens": "Tokens por mes",
+      "maxConnectors": "Conectores",
+      "features": "Funcionalidades",
+      "updatedAt": "Actualizado el",
+      "actions": "Acciones"
+    },
+    "form": {
+      "createTitle": "Nuevo plan",
+      "createDescription": "Define los límites que concede el plan. El plan se asigna en la página de cada organización.",
+      "editTitle": "Editar el plan {name}",
+      "editDescription": "Guardar reemplaza los límites del plan y actualiza el presupuesto de todas las organizaciones que lo usan.",
+      "createSubmit": "Crear plan",
+      "editSubmit": "Guardar plan",
+      "savedStatus": "Plan guardado.",
+      "created": "Plan {name} creado.",
+      "updated": "Plan {name} actualizado.",
+      "name": "Nombre",
+      "monthlyBudget": "Gasto mensual en modelos",
+      "monthlyBudgetHint": "En dólares (USD). Las ejecuciones se detienen al alcanzar el valor.",
+      "monthlyTokens": "Tokens por mes",
+      "monthlyTokensHint": "Aplica cuando el modelo no tiene precio registrado.",
+      "maxConnectors": "Máximo de conectores",
+      "maxCustomAgents": "Máximo de agentes personalizados",
+      "maxCustomAgentsHint": "Déjelo en blanco para usar el valor predeterminado de la plataforma.",
+      "maxCustomSkills": "Máximo de habilidades personalizadas",
+      "maxCustomSkillsHint": "Déjelo en blanco para usar el valor predeterminado de la plataforma.",
+      "maxCustomInstructionChars": "Longitud máxima de las instrucciones (caracteres)",
+      "maxCustomInstructionCharsHint": "Déjelo en blanco para usar el valor predeterminado de la plataforma.",
+      "features": "Funcionalidades",
+      "featuresHint": "Claves separadas por comas, por ejemplo: web-tools, chat.voice"
+    },
+    "deleteAction": "Eliminar",
+    "deleteNamed": "Eliminar el plan {name}",
+    "delete": {
+      "title": "¿Eliminar el plan {name}?",
+      "description": "El plan sale del catálogo. Solo se puede eliminar un plan que ninguna organización usa.",
+      "confirm": "Eliminar plan",
+      "done": "Plan {name} eliminado."
+    }
+  },
+  "models": {
+    "title": "Modelos",
+    "description": "Elige el modelo de cada función y el costo de cada modelo.",
+    "loading": "Cargando modelos…",
+    "updatedAt": "Actualizado el {date}",
+    "fakeMode": "El runtime está en modo simulado: las funciones usan modelos guionados. Lo que guardes se aplica cuando se active el modo real.",
+    "save": "Guardar",
+    "saved": "Modelos guardados.",
+    "saveRefused": "No se pudo guardar: cada función necesita un modelo con precio y un proveedor con clave configurada.",
+    "roles": {
+      "title": "Modelo de cada función",
+      "description": "No se pueden elegir modelos de proveedores sin clave configurada.",
+      "fixedNote": "Definido en el entorno del runtime.",
+      "price": "{input} entrada · {output} salida por 1M",
+      "option": "{model} — {price}",
+      "unavailableOption": "{model} — {price} (proveedor sin clave)",
+      "noPrice": "Este modelo no tiene precio registrado.",
+      "names": {
+        "chat": "Conversación",
+        "fast": "Tareas rápidas",
+        "reasoning": "Razonamiento",
+        "judge": "Evaluador",
+        "embedding": "Embeddings",
+        "transcription": "Transcripción",
+        "speech": "Voz sintetizada",
+        "realtime": "Voz en tiempo real"
+      },
+      "hints": {
+        "chat": "Agentes de chat.",
+        "fast": "Títulos, resúmenes y verificaciones de seguridad.",
+        "reasoning": "Planificación de acciones.",
+        "judge": "Nota de los evals en modo real.",
+        "embedding": "Base de conocimiento y memoria.",
+        "transcription": "Audio convertido en texto.",
+        "speech": "Texto convertido en audio.",
+        "realtime": "Conversaciones por voz."
+      }
+    },
+    "prices": {
+      "title": "Costo de los modelos",
+      "description": "Precio por 1M de tokens, en dólares (USD). Restaurar devuelve el precio del código; un modelo sin precio en el código sale de la lista al guardar.",
+      "caption": "Precios de los modelos",
+      "columns": {
+        "model": "Modelo",
+        "input": "Entrada (US$ / 1M tokens)",
+        "output": "Salida (US$ / 1M tokens)",
+        "origin": "Origen",
+        "provider": "Proveedor",
+        "actions": "Acciones"
+      },
+      "inputNamed": "Precio de entrada de {model}",
+      "outputNamed": "Precio de salida de {model}",
+      "invalidPrice": "Ingresa un monto en dólares con hasta seis decimales.",
+      "requiredPrice": "Ingresa el precio.",
+      "origin": {
+        "code": "Código",
+        "staff": "Equipo",
+        "dropped": "Sale al guardar"
+      },
+      "provider": {
+        "available": "Disponible",
+        "unavailable": "Sin clave",
+        "unknown": "Por confirmar"
+      },
+      "restore": "Restaurar",
+      "restoreNamed": "Restaurar el precio de {model}",
+      "remove": "Quitar",
+      "removeNamed": "Quitar {model}",
+      "keep": "Mantener",
+      "keepNamed": "Mantener el precio del equipo de {model}",
+      "inUse": "En uso: {roles}",
+      "emptyTitle": "Ningún modelo con precio",
+      "emptyDescription": "Agrega un modelo para elegirlo en las funciones."
+    },
+    "add": {
+      "title": "Agregar modelo",
+      "modelId": "Modelo",
+      "modelIdHint": "En el formato proveedor/modelo, por ejemplo openai/gpt-6-luna.",
+      "input": "Entrada (US$ / 1M tokens)",
+      "output": "Salida (US$ / 1M tokens)",
+      "submit": "Agregar modelo",
+      "refusals": {
+        "INVALID_ID": "Usa proveedor/modelo, con el proveedor google, openai o anthropic.",
+        "DUPLICATE": "Este modelo ya está en la tabla.",
+        "TOO_MANY": "El equipo puede definir hasta 50 precios."
+      }
+    }
+  },
+  "flags": {
+    "title": "Flags",
+    "description": "Flags del registro de código, con responsable, motivo y vigencia. El valor del entorno aplica a todas las organizaciones.",
+    "loading": "Cargando flags…",
+    "caption": "Flags de funcionalidades",
+    "owner": "Responsable: {owner}",
+    "expired": "Vencida",
+    "on": "Activada",
+    "off": "Desactivada",
+    "environmentSwitch": "Valor de {key} en el entorno",
+    "organizationLabel": "Ajuste por organización",
+    "organizationHint": "Elige una organización para ver y definir su ajuste en cada flag.",
+    "overrideHint": "El ajuste aplica solo a la organización elegida. Quita el ajuste para que vuelva a seguir el valor del entorno.",
+    "overridesErrorTitle": "No se pudieron cargar los ajustes de la organización.",
+    "reload": "Recargar",
+    "emptyTitle": "No hay flags registradas",
+    "emptyDescription": "Las flags se declaran en el código. Cuando exista una, aparecerá aquí.",
+    "expiredAlertTitle": "{count, plural, one {# flag vencida} other {# flags vencidas}}",
+    "expiredAlertDescription": "Elimínalas o renuévalas en el registro de código:",
+    "expiredMore": "y {count} más",
+    "expiredOnly": "Mostrar solo las vencidas",
+    "searchLabel": "Buscar flag",
+    "searchPlaceholder": "Clave o nombre",
+    "noMatchTitle": "Ninguna flag coincide con la búsqueda",
+    "noMatchDescription": "Prueba otra parte de la clave o del nombre, o muestra todas las flags.",
+    "clearSearch": "Borrar la búsqueda",
+    "kind": {
+      "kill-switch": "Kill-switch",
+      "rollout": "Rollout",
+      "ops": "Operación"
+    },
+    "columns": {
+      "flag": "Flag",
+      "kind": "Tipo",
+      "expiresAt": "Vigencia",
+      "environment": "Entorno",
+      "override": "Ajuste de la organización"
+    },
+    "override": {
+      "unknown": "No disponible",
+      "none": "Sin ajuste",
+      "on": "Ajuste: activada",
+      "off": "Ajuste: desactivada",
+      "effectiveOn": "Valor efectivo: activada",
+      "effectiveOff": "Valor efectivo: desactivada",
+      "setOn": "Activar",
+      "setOff": "Desactivar",
+      "setOnNamed": "Activar {key} para {name}",
+      "setOffNamed": "Desactivar {key} para {name}",
+      "clear": "Quitar ajuste",
+      "clearNamed": "Quitar el ajuste de {key} para {name}"
+    },
+    "confirm": {
+      "titleOn": "¿Activar {key}?",
+      "titleOff": "¿Desactivar {key}?",
+      "descriptionEnvironment": "Aplica a todo el entorno y queda registrado en la auditoría. {reason}",
+      "descriptionOrganization": "Aplica solo a {name} y queda registrado en la auditoría. {reason}",
+      "killSwitchEnvironment": "Activar este kill-switch detiene lo que describe en todo el entorno, de inmediato. {reason}",
+      "killSwitchOrganization": "Activar este kill-switch detiene lo que describe para {name}, de inmediato. {reason}",
+      "confirmOn": "Activar",
+      "confirmOff": "Desactivar",
+      "doneOn": "{key} activada.",
+      "doneOff": "{key} desactivada."
+    },
+    "clear": {
+      "title": "¿Quitar el ajuste de {key}?",
+      "description": "{name} vuelve a seguir el valor del entorno para esta flag. La eliminación queda registrada en la auditoría. {reason}",
+      "confirm": "Quitar ajuste",
+      "done": "Ajuste de {key} quitado."
+    }
+  },
+  "costs": {
+    "title": "Costos",
+    "description": "Costo de modelos del mes por organización, comparado con el límite de cada una.",
+    "loading": "Cargando costos…",
+    "organizationsTruncatedTitle": "Las cifras de abajo cubren solo parte de las organizaciones",
+    "organizationsTruncatedDescription": "La lista se detuvo en las primeras {count} organizaciones, el límite de esta página. Los conteos, la lista de atención, el gráfico y los presupuestos pueden estar incompletos; el costo total viene del resumen de la plataforma cuando responde.",
+    "caption": "Presupuestos por organización",
+    "pagination": "Páginas de presupuestos",
+    "adjust": "Ajustar presupuesto",
+    "adjustNamed": "Ajustar el presupuesto de {name}",
+    "budgetsTitle": "Presupuestos",
+    "noMatchTitle": "Ninguna organización en ese nivel",
+    "noMatchDescription": "Ninguna organización está en ese nivel de uso ahora.",
+    "clearFilter": "Ver todas",
+    "emptyTitle": "No hay costos para mostrar",
+    "emptyDescription": "Los costos aparecen cuando haya organizaciones en la plataforma.",
+    "emptyAction": "Ver organizaciones",
+    "filters": {
+      "level": "Nivel de uso",
+      "all": "Todas",
+      "alert": "Desde la alerta",
+      "over": "Sobre el límite"
+    },
+    "kpi": {
+      "title": "Resumen del mes",
+      "total": "Costo del mes",
+      "totalHint": "Modelos, todas las organizaciones",
+      "alert": "En {threshold} o más",
+      "alertHint": "Organizaciones desde la alerta",
+      "over": "Sobre el límite",
+      "overHint": "Ejecuciones bloqueadas por el presupuesto"
+    },
+    "attention": {
+      "title": "Requieren atención",
+      "description": "La alerta se dispara en {threshold} del límite mensual; en 100% las ejecuciones se detienen.",
+      "none": "Ninguna organización cerca del límite.",
+      "costOfCap": "{cost} de {cap}",
+      "shown": "Mostrando {shown} de {count}",
+      "viewAll": "Ver las {count}"
+    },
+    "columns": {
+      "organization": "Organización",
+      "costMtd": "Costo del mes",
+      "cap": "Límite mensual",
+      "tokensCap": "Límite de tokens",
+      "source": "Origen del límite",
+      "usage": "Uso del límite",
+      "actions": "Acciones"
+    },
+    "usage": {
+      "title": "Uso por día y por modelo",
+      "description": "Costo y llamadas del período, directo del registro de uso. Sin fechas, es el mes actual hasta hoy. Los días están en UTC, como en el registro.",
+      "filtersLabel": "Filtrar el uso",
+      "from": "Desde",
+      "to": "Hasta",
+      "loading": "Cargando el uso…",
+      "totals": "Del {from} al {to}: {cost} en {calls} llamadas y {tokens} tokens.",
+      "unpricedNote": "{count, plural, one {# llamada sin precio conocido: sus tokens cuentan, el costo no.} other {# llamadas sin precio conocido: sus tokens cuentan, el costo no.}}",
+      "truncatedTitle": "No todas las organizaciones entraron en la suma",
+      "truncatedDescription": "La respuesta leyó {count} organizaciones, el límite de una consulta. Filtra por organización para ver las demás.",
+      "byDayTitle": "Costo por día",
+      "byDayDescription": "Un valor por día del período; los días sin llamadas quedan en cero.",
+      "byModelTitle": "Costo por modelo",
+      "byModelDescription": "De mayor a menor costo.",
+      "byModelDescriptionTop": "Los {shown} de mayor costo entre {total} modelos; la tabla de abajo los lista todos.",
+      "modelsCaption": "Uso por modelo",
+      "columns": {
+        "day": "Día",
+        "model": "Modelo",
+        "provider": "Proveedor",
+        "calls": "Llamadas",
+        "inputTokens": "Tokens de entrada",
+        "outputTokens": "Tokens de salida",
+        "cost": "Costo",
+        "unpriced": "Sin precio"
+      },
+      "emptyTitle": "Ningún uso en el período",
+      "emptyDescription": "No se registró ninguna llamada de modelo con estos filtros.",
+      "clear": "Volver al mes actual",
+      "rangeInvalid": "Elige un período de hasta {days} días, con el inicio antes del fin.",
+      "clearRange": "Borrar el período"
+    }
+  },
+  "organizationDetail": {
+    "title": "Organización",
+    "idLine": "Id {id}",
+    "loading": "Cargando la organización…",
+    "readOnly": "Tu rol en el equipo solo permite consultar. Un administrador de la plataforma cambia el plan, el presupuesto y el estado.",
+    "summary": {
+      "title": "Resumen",
+      "description": "Situación de la organización este mes.",
+      "tokenCap": "Límite de tokens del mes",
+      "members": "Miembros",
+      "membersHint": "personas con acceso"
+    },
+    "plan": {
+      "title": "Plan",
+      "description": "El presupuesto sigue al plan, salvo que exista un ajuste del equipo.",
+      "label": "Plan de la organización",
+      "default": "Predeterminado de la plataforma (sin plan)",
+      "hint": "El cambio aplica desde ahora y queda registrado en la auditoría.",
+      "save": "Guardar plan",
+      "saved": "Plan de {name} actualizado."
+    },
+    "budget": {
+      "title": "Ajuste de presupuesto",
+      "descriptionNone": "Sin ajuste: aplican los límites del plan. Guarda valores aquí para reemplazarlos solo en esta organización.",
+      "descriptionActive": "Hay un ajuste del equipo vigente en lugar de los límites del plan.",
+      "money": "Gasto mensual en modelos",
+      "tokens": "Tokens por mes",
+      "moneyError": "Ingresa un monto en dólares, por ejemplo 100,00.",
+      "tokensError": "Ingresa un número entero de tokens, por ejemplo 20,000,000.",
+      "save": "Guardar ajuste",
+      "saved": "Presupuesto de {name} ajustado.",
+      "clear": "Volver al plan",
+      "clearTitle": "¿Quitar el ajuste de {name}?",
+      "clearDescription": "Los límites vuelven a ser los del plan. Si el plan es menor que el gasto del mes, las ejecuciones se detienen.",
+      "clearConfirm": "Quitar ajuste",
+      "cleared": "{name} volvió a los límites del plan."
+    },
+    "status": {
+      "title": "Estado",
+      "descriptionActive": "Suspender bloquea el acceso de todos los miembros hasta la reactivación. No se borra ningún dato.",
+      "descriptionSuspended": "La organización está suspendida: sus miembros no pueden usarla.",
+      "suspend": "Suspender organización",
+      "reactivate": "Reactivar organización",
+      "suspendTitle": "¿Suspender {name}?",
+      "suspendDescription": "Todos los miembros pierden el acceso hasta que la organización se reactive. La acción queda registrada en la auditoría.",
+      "suspendConfirm": "Suspender",
+      "reactivateTitle": "¿Reactivar {name}?",
+      "reactivateDescription": "Los miembros recuperan el acceso de inmediato.",
+      "reactivateConfirm": "Reactivar",
+      "suspended": "{name} fue suspendida.",
+      "reactivated": "{name} fue reactivada."
+    },
+    "related": {
+      "title": "Ver esta organización en",
+      "description": "Abre el área ya filtrada por esta organización."
+    }
+  },
+  "users": {
+    "title": "Usuarios",
+    "description": "Búsqueda de usuarios y acceso de soporte como un usuario, en una organización, solo lectura.",
+    "notice": {
+      "title": "Acceso auditado",
+      "description": "Cada sesión y cada página abierta como el usuario quedan registradas en la auditoría de la plataforma y de la organización."
+    },
+    "session": {
+      "title": "Sesión abierta en esta pestaña",
+      "description": "La sesión que iniciaste aquí, hasta que se cierre o expire.",
+      "emptyTitle": "No hay sesión abierta",
+      "emptyDescription": "Busca un usuario, selecciónalo e inicia una sesión abajo para ver la app como él."
+    },
+    "start": {
+      "title": "Iniciar acceso como usuario",
+      "description": "Verás lo que ve el usuario en la organización elegida, sin poder cambiar nada.",
+      "organization": "Organización"
+    },
+    "status": {
+      "active": "Activo",
+      "disabled": "Desactivado"
+    },
+    "search": {
+      "title": "Buscar usuario",
+      "description": "Por el inicio del nombre o del correo, o por el id completo de la cuenta.",
+      "query": "Nombre, correo o id",
+      "placeholder": "Ej.: ana o ana@ejemplo.com",
+      "by": "Buscar por",
+      "byOptions": {
+        "auto": "Automático",
+        "name": "Nombre",
+        "email": "Correo",
+        "uid": "Id del usuario"
+      },
+      "submit": "Buscar",
+      "hint": "La búsqueda compara el inicio del texto, sin distinguir mayúsculas ni acentos. En el modo automático, un texto con @ se lee como correo y un id completo trae solo a ese usuario.",
+      "idleTitle": "Busca un usuario",
+      "idleDescription": "Escribe el inicio del nombre o del correo, o el id de la cuenta, y presiona Buscar.",
+      "loading": "Buscando usuarios…",
+      "caption": "Usuarios encontrados",
+      "pagination": "Páginas de usuarios",
+      "noMatchTitle": "No se encontró ningún usuario",
+      "noMatchDescription": "Revisa la escritura o prueba con el correo completo. La búsqueda solo encuentra nombres y correos que empiezan con el texto.",
+      "columns": {
+        "user": "Usuario",
+        "email": "Correo",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "noName": "Sin nombre",
+      "noEmail": "Sin correo",
+      "select": "Seleccionar",
+      "selected": "Seleccionado",
+      "selectNamed": "Seleccionar a {name} para el acceso de soporte"
+    },
+    "sessions": {
+      "title": "Sesiones de acceso de soporte",
+      "description": "Las sesiones de todo el equipo: quién accedió como quién, en qué organización y por qué.",
+      "scope": "Mostrar",
+      "scopeOptions": {
+        "active": "Abiertas ahora",
+        "all": "Todas, las más recientes primero"
+      },
+      "loading": "Cargando sesiones de soporte…",
+      "caption": "Sesiones de soporte del equipo",
+      "pagination": "Páginas de sesiones de soporte",
+      "columns": {
+        "staff": "Equipo",
+        "user": "Usuario",
+        "organization": "Organización",
+        "reason": "Motivo",
+        "started": "Inicio",
+        "until": "Fin",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "status": {
+        "active": "Abierta",
+        "ended": "Finalizada",
+        "expired": "Vencida"
+      },
+      "expiresAt": "Vence el {when}",
+      "endedAt": "Finalizada el {when}",
+      "cardWho": "{staff} como {user}",
+      "end": "Finalizar",
+      "endNamed": "Finalizar la sesión de {staff} como {user}",
+      "seeAll": "Ver todas las sesiones",
+      "emptyActiveTitle": "Ninguna sesión de soporte en curso",
+      "emptyActiveDescription": "Nadie del equipo está accediendo como un usuario ahora.",
+      "emptyAllTitle": "Ninguna sesión de soporte registrada",
+      "emptyAllDescription": "Las sesiones aparecen aquí en cuanto alguien del equipo inicie un acceso de soporte."
+    }
+  },
+  "impersonation": {
+    "form": {
+      "target": "Usuario",
+      "targetEmpty": "Ningún usuario seleccionado. Usa la búsqueda de arriba y selecciona al usuario.",
+      "targetChange": "Cambiar",
+      "targetChangeNamed": "Cambiar el usuario seleccionado ({name})",
+      "reason": "Motivo",
+      "reasonHint": "De 10 a 500 caracteres, por ejemplo el número del ticket. Queda en la auditoría.",
+      "durationMinutes": "Duración en minutos",
+      "durationHint": "De 1 a {max} minutos.",
+      "submit": "Iniciar sesión de soporte",
+      "started": "Sesión de soporte iniciada.",
+      "errors": {
+        "targetUid": "Selecciona al usuario en la búsqueda.",
+        "organizationId": "Elige la organización.",
+        "reason": "Explica el motivo con 10 a 500 caracteres.",
+        "durationMinutes": "Ingresa de 1 a 60 minutos.",
+        "notFound": "Este usuario no existe o no tiene acceso a esa organización.",
+        "forbidden": "No puedes iniciar esta sesión. No es posible acceder como tú mismo, y la acción exige el rol de soporte."
+      }
+    },
+    "session": {
+      "user": "Usuario",
+      "organization": "Organización",
+      "expires": "Expira el",
+      "readOnly": "Solo lectura",
+      "openHint": "Abrir cambia esta pestaña a la cuenta del usuario, solo lectura, también después de recargar la página. Para volver a la cuenta del equipo, usa \"Salir del modo soporte\" en el aviso de arriba: eso cierra la sesión.",
+      "open": "Abrir la app como este usuario",
+      "end": "Cerrar sesión de soporte",
+      "endTitle": "¿Cerrar la sesión de soporte?",
+      "endDescription": "El acceso como el usuario deja de funcionar de inmediato.",
+      "endConfirm": "Cerrar",
+      "ended": "Sesión de soporte cerrada."
+    },
+    "banner": {
+      "message": "Estás viendo la app como otro usuario, en modo solo lectura. Todo lo que abras queda registrado.",
+      "messageUntil": "Estás viendo la app como otro usuario, en modo solo lectura, hasta {when}. Todo lo que abras queda registrado.",
+      "messageNamed": "Estás viendo la app como {user}, en modo de solo lectura. Todo lo que abras queda registrado.",
+      "messageNamedUntil": "Estás viendo la app como {user}, en modo de solo lectura, hasta {when}. Todo lo que abras queda registrado.",
+      "messageNamedIn": "Estás viendo la app como {user} en {organization}, en modo de solo lectura, hasta {when}. Todo lo que abras queda registrado.",
+      "leave": "Salir del modo soporte"
+    },
+    "endAny": {
+      "title": "¿Finalizar esta sesión de soporte?",
+      "description": "El acceso de {staff} como {user} deja de funcionar de inmediato. El cierre queda registrado en la auditoría de la plataforma y de la organización.",
+      "confirm": "Finalizar sesión",
+      "done": "Sesión de {staff} finalizada."
+    },
+    "adminBlocked": {
+      "pageTitle": "Administración de la plataforma",
+      "title": "La administración no se abre en modo soporte",
+      "description": "Esta pestaña está conectada como otro usuario, en modo solo lectura. Sal del modo soporte para volver a tu cuenta del equipo y usar la administración."
+    }
+  },
+  "traces": {
+    "title": "Traces",
+    "description": "Ejecuciones de agentes y workflows de todas las organizaciones, con tokens y costo.",
+    "loading": "Cargando traces…",
+    "caption": "Traces de ejecución",
+    "pagination": "Páginas de traces",
+    "platform": "Plataforma",
+    "open": "Abrir el trace {name}",
+    "agentTarget": "Agente {id}",
+    "workflowTarget": "Workflow {id}",
+    "noTarget": "Sin agente",
+    "tokensValue": "{input} / {output}",
+    "cardMeta": "{when} · {duration}",
+    "noMatchTitle": "Ningún trace con esos filtros",
+    "noMatchDescription": "Revisa los filtros o límpialos para ver todos los traces.",
+    "clearFilters": "Limpiar filtros",
+    "emptyTitle": "Todavía no hay traces",
+    "emptyDescription": "Los traces aparecen aquí cuando se ejecuta un agente o un workflow.",
+    "emptyAction": "Ver los registros",
+    "columns": {
+      "trace": "Trace",
+      "organization": "Organización",
+      "target": "Agente o workflow",
+      "status": "Estado",
+      "startedAt": "Inicio",
+      "duration": "Duración",
+      "tokens": "Tokens (entrada / salida)",
+      "cost": "Costo"
+    },
+    "filters": {
+      "label": "Filtrar traces",
+      "agent": "Agente",
+      "agentPlaceholder": "assistant",
+      "agentInvalid": "Usa minúsculas, números y guiones, empezando por una letra.",
+      "status": "Estado",
+      "anyStatus": "Todos los estados",
+      "apply": "Filtrar",
+      "from": "Desde",
+      "to": "Hasta",
+      "dateHint": "Días completos, en la zona horaria de este navegador ({zone})."
+    },
+    "detail": {
+      "title": "Trace",
+      "back": "Traces",
+      "loading": "Cargando el trace…",
+      "summary": "Resumen del trace",
+      "status": "Estado",
+      "organization": "Organización",
+      "target": "Agente o workflow",
+      "startedAt": "Inicio",
+      "duration": "Duración",
+      "tokens": "Tokens (entrada / salida)",
+      "cost": "Costo",
+      "traceId": "Id del trace"
+    }
+  },
+  "evals": {
+    "title": "Evaluaciones",
+    "description": "Experimentos con las notas por evaluador y el veredicto, y los datasets que usan.",
+    "tabs": {
+      "label": "Secciones de evaluaciones",
+      "experiments": "Experimentos",
+      "datasets": "Datasets"
+    },
+    "experiments": {
+      "loading": "Cargando experimentos…",
+      "caption": "Experimentos de evaluación",
+      "pagination": "Páginas de experimentos",
+      "promptEval": "Evaluación de prompt",
+      "agent": "Agente {id}",
+      "scoresOf": "Notas de {id}",
+      "score": "{scorer}: {mean}",
+      "scoreWithBaseline": "{scorer}: {mean} (mínimo {baseline})",
+      "noScores": "Sin notas",
+      "running": "En curso",
+      "select": "Comparar",
+      "selectNamed": "Comparar el experimento {id}",
+      "selected": "En la comparación",
+      "cardMeta": "{items, plural, one {# ítem} other {# ítems}} · {when}",
+      "emptyTitle": "Todavía no hay experimentos",
+      "emptyDescription": "Los experimentos aparecen cuando el CI publica las evaluaciones o alguien evalúa un prompt.",
+      "emptyAction": "Ver datasets",
+      "columns": {
+        "experiment": "Experimento",
+        "dataset": "Dataset",
+        "status": "Estado",
+        "verdict": "Veredicto",
+        "items": "Ítems",
+        "scores": "Notas por evaluador",
+        "startedAt": "Inicio",
+        "finishedAt": "Fin",
+        "compare": "Comparación"
+      },
+      "status": {
+        "pending": "En cola",
+        "running": "En curso",
+        "completed": "Completado",
+        "failed": "Falló"
+      },
+      "verdict": {
+        "passed": "Aprobado",
+        "failed": "Reprobado",
+        "pending": "Pendiente"
+      }
+    },
+    "datasets": {
+      "loading": "Cargando datasets…",
+      "caption": "Datasets de evaluación",
+      "platformScope": "Plataforma",
+      "organizationScope": "Organización {name}",
+      "noTargets": "Ninguno",
+      "targetsOf": "Agentes evaluados por {name}",
+      "cardMeta": "Versión {version} · {when}",
+      "emptyTitle": "Todavía no hay datasets",
+      "emptyDescription": "Los datasets aparecen cuando los conjuntos de evaluación se cargan en el servicio de agentes (pnpm evals:seed) o cuando una organización guarda respuestas calificadas.",
+      "emptyAction": "Ver experimentos",
+      "columns": {
+        "name": "Dataset",
+        "scope": "Alcance",
+        "version": "Versión",
+        "targets": "Agentes",
+        "createdAt": "Creado el"
+      }
+    },
+    "compare": {
+      "title": "Comparación de experimentos",
+      "hint": "Elige dos experimentos, de cualquier página, para comparar las notas por evaluador.",
+      "hintOne": "Elige un experimento más para comparar.",
+      "missing": "Uno de los experimentos elegidos no se encontró. Limpia la comparación y elige de nuevo.",
+      "loading": "Cargando los experimentos elegidos…",
+      "clear": "Limpiar comparación",
+      "chartTitle": "Nota media por evaluador",
+      "chartDescription": "A es {a}; B es {b}.",
+      "seriesA": "A · {id}",
+      "seriesB": "B · {id}",
+      "baseline": "Mínimo",
+      "scorer": "Evaluador",
+      "verdicts": "Resultado por evaluador",
+      "outcome": {
+        "better": "{scorer}: B mejor que A ({delta})",
+        "worse": "{scorer}: B peor que A ({delta})",
+        "same": "{scorer}: sin diferencia",
+        "onlyA": "{scorer}: solo en A",
+        "onlyB": "{scorer}: solo en B"
+      }
+    }
+  },
+  "agents": {
+    "title": "Agentes y prompts",
+    "description": "Los agentes del núcleo, sus prompts de la plataforma y lo que cada organización tiene habilitado.",
+    "openPrompts": "Ver prompts",
+    "openPromptsNamed": "Ver prompts de {agent}",
+    "names": {
+      "assistant": "Asistente",
+      "knowledge": "Conocimiento",
+      "data": "Datos",
+      "action": "Acciones",
+      "web": "Web"
+    },
+    "roles": {
+      "assistant": "Supervisor: conversa con la persona y delega en los demás agentes.",
+      "knowledge": "Responde con la base de conocimiento, citando las fuentes.",
+      "data": "Consulta el catálogo de datos.",
+      "action": "Ejecuta comandos, con confirmación y aprobación cuando se exige.",
+      "web": "Busca y lee páginas web, cuando está permitido."
+    },
+    "catalog": {
+      "title": "Agentes registrados",
+      "description": "Lo que registró el runtime: el rol de cada agente, sus subagentes, herramientas, skills y permisos. Los agentes con prompt versionado tienen un acceso a sus versiones.",
+      "loading": "Cargando los agentes registrados…",
+      "role": {
+        "supervisor": "Supervisor",
+        "entry": "Entrada",
+        "subagent": "Subagente"
+      },
+      "enablement": {
+        "always": "Siempre disponible",
+        "perOrganization": "Habilitado por organización"
+      },
+      "subagents": "Subagentes",
+      "tools": "Herramientas",
+      "toolsOfOrganization": "Más las herramientas de los conectores y de las opciones de la organización",
+      "skills": "Skills",
+      "permissions": "Permisos (techo)",
+      "none": "Sin elementos",
+      "emptyTitle": "Ningún agente registrado",
+      "emptyDescription": "El runtime no informó ningún agente. Verifica que esté en ejecución y recarga.",
+      "reload": "Recargar"
+    },
+    "organization": {
+      "title": "Agentes por organización",
+      "description": "Elige una organización para ver y cambiar sus agentes, herramientas web y modo de PII.",
+      "loading": "Cargando la configuración de agentes…",
+      "emptyTitle": "Elige una organización",
+      "emptyDescription": "La configuración de agentes es por organización. La dirección de la página guarda la elección.",
+      "emptyAction": "Elegir organización"
+    }
+  },
+  "agentSettings": {
+    "failed": "No se pudo guardar el cambio",
+    "failedWithReference": "{message} Referencia: {requestId}",
+    "offline": "Sin conexión: los cambios no están disponibles hasta que vuelva.",
+    "agentEnabled": "{agent} habilitado en {organization}.",
+    "agentDisabled": "{agent} deshabilitado en {organization}.",
+    "saved": "Configuración de agentes de {organization} guardada.",
+    "agents": {
+      "title": "Agentes habilitados",
+      "description": "Subagentes en los que el asistente puede delegar en esta organización."
+    },
+    "webTools": {
+      "title": "Herramientas web",
+      "description": "Solo aplican mientras la flag ai.web-tools de la plataforma esté activa.",
+      "firecrawl": "Búsqueda y lectura de páginas",
+      "firecrawlHint": "Búsqueda web y extracción de páginas con Firecrawl.",
+      "browser": "Navegador automatizado",
+      "browserHint": "Automatización de navegador con un conector Playwright MCP."
+    },
+    "pii": {
+      "title": "Datos personales en los mensajes",
+      "warn": "Avisar",
+      "warnHint": "El detector registra el hallazgo y deja pasar el mensaje.",
+      "redact": "Enmascarar",
+      "redactHint": "Los datos personales se enmascaran antes de llegar al modelo."
+    },
+    "confirm": {
+      "firecrawlTitle": "¿Activar búsqueda y lectura de páginas en {organization}?",
+      "browserTitle": "¿Activar el navegador automatizado en {organization}?",
+      "webDescription": "Los agentes de esta organización accederán a la web pública en todas las conversaciones. El cambio queda registrado en la auditoría.",
+      "webConfirm": "Activar",
+      "piiTitle": "¿Dejar que los datos personales lleguen al modelo en {organization}?",
+      "piiDescription": "Con “Avisar”, el detector solo registra el hallazgo: los datos personales siguen hacia el modelo en todas las conversaciones de la organización hasta que alguien vuelva a enmascararlos.",
+      "piiConfirm": "Solo avisar"
+    }
+  },
+  "prompts": {
+    "title": "Prompts de {agent}",
+    "description": "Versiones del prompt de la plataforma. Nada se edita en el lugar: cada cambio es una versión nueva.",
+    "back": "Agentes y prompts",
+    "create": "Nueva versión",
+    "loading": "Cargando las versiones del prompt…",
+    "caption": "Versiones del prompt de {agent}",
+    "pagination": "Páginas de versiones",
+    "versionNumber": "v{version}",
+    "active": "Activa",
+    "noNote": "Sin nota",
+    "cardMeta": "{author} · {date}",
+    "emptyTitle": "Todavía no hay versiones",
+    "emptyDescription": "El agente usa el prompt que viene en el código. Escribe la primera versión para cambiarlo desde aquí.",
+    "activateBlocked": "Evalúa la versión: solo una evaluación aprobada habilita la activación.",
+    "columns": {
+      "version": "Versión",
+      "note": "Nota",
+      "author": "Autor",
+      "createdAt": "Creada el",
+      "verdict": "Evaluación",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "evaluate": "Evaluar",
+      "evaluateNamed": "Evaluar la versión {version}",
+      "activate": "Activar",
+      "activateNamed": "Activar la versión {version}",
+      "rollback": "Revertir",
+      "rollbackNamed": "Revertir a la versión {version}",
+      "force": "Forzar activación",
+      "forceNamed": "Forzar la activación de la versión {version}",
+      "compare": "Comparar",
+      "compareNamed": "Comparar la versión {version}"
+    },
+    "verdict": {
+      "passed": "Aprobada",
+      "failed": "Reprobada",
+      "none": "Sin evaluar"
+    },
+    "versions": {
+      "title": "Versiones",
+      "description": "La versión {version} está en producción.",
+      "seedActive": "Ninguna versión activada: el prompt del código está en producción."
+    },
+    "eval": {
+      "title": "Evaluación",
+      "description": "Ejecuta el conjunto de evaluación del agente con la versión elegida y registra el veredicto en ella.",
+      "running": "Ejecutando la evaluación… puede tardar unos minutos.",
+      "idle": "Usa Evaluar en una versión para ver el resultado por evaluador.",
+      "failedTitle": "La evaluación de la versión {version} no se ejecutó",
+      "caption": "Resultado por evaluador de la versión {version}",
+      "verdictOf": "Veredicto de la versión {version}:",
+      "openExperiment": "Ver el experimento en evaluaciones",
+      "scorer": "Evaluador",
+      "mean": "Promedio",
+      "result": "Resultado",
+      "noScore": "Sin nota",
+      "scorerPassed": "Alcanzó el mínimo",
+      "scorerFailed": "Bajo el mínimo"
+    },
+    "diff": {
+      "title": "Comparar versiones",
+      "description": "Diferencia línea por línea entre dos versiones.",
+      "base": "De",
+      "compare": "A",
+      "pick": "Elige una versión",
+      "pickBoth": "Elige las dos versiones para comparar.",
+      "identical": "Las dos versiones tienen el mismo texto.",
+      "summary": "{added, plural, =0 {ninguna línea agregada} one {# línea agregada} other {# líneas agregadas}}, {removed, plural, =0 {ninguna eliminada} one {# eliminada} other {# eliminadas}}",
+      "regionLabel": "Diferencias de la versión {base} a la versión {compare}",
+      "version": "Versión {version}",
+      "versionActive": "Versión {version} (activa)",
+      "added": "Agregada:",
+      "removed": "Eliminada:"
+    },
+    "history": {
+      "title": "Historial de activaciones",
+      "description": "Cada activación es un registro nuevo; revertir es activar una versión anterior.",
+      "empty": "No hay activaciones registradas.",
+      "caption": "Activaciones del prompt de {agent}",
+      "pagination": "Páginas de activaciones",
+      "version": "v{version}",
+      "unknownVersion": "Versión desconocida",
+      "forced": "Forzada",
+      "gated": "Con evaluación",
+      "noReason": "Sin motivo",
+      "cardMeta": "{who} · {date}",
+      "columns": {
+        "version": "Versión",
+        "when": "Cuándo",
+        "who": "Quién",
+        "kind": "Tipo",
+        "reason": "Motivo"
+      }
+    },
+    "editor": {
+      "title": "Nueva versión del prompt de {agent}",
+      "description": "El texto parte de la versión activa. Guardar crea una versión nueva; nada cambia en producción hasta que se evalúe y se active.",
+      "body": "Texto del prompt",
+      "bodyHint": "Instrucciones completas del agente.",
+      "bodyRequired": "Escribe el texto del prompt.",
+      "bodyTooLong": "El texto puede tener como máximo {maximum} caracteres.",
+      "bodyUnchanged": "El texto es igual al de la versión activa. Cambia algo para crear una versión nueva.",
+      "note": "Nota",
+      "noteHint": "Opcional: por qué cambia el prompt.",
+      "submit": "Crear versión",
+      "created": "Versión {version} creada.",
+      "descriptionSeed": "El texto parte de las instrucciones que el agente tiene en el código, porque aún no hay versión. Guardar crea la primera versión; nada cambia en producción hasta que se evalúe y active."
+    },
+    "activation": {
+      "title": "¿Activar la versión {version}?",
+      "description": "La versión pasa a ser el prompt de {agent} en producción para todas las organizaciones. La acción queda auditada.",
+      "confirm": "Activar versión",
+      "done": "Versión {version} de {agent} activada.",
+      "rollbackTitle": "¿Revertir a la versión {version}?",
+      "rollbackDescription": "La versión {active} de {agent} sale de producción y esta versión anterior vuelve a aplicar para todas las organizaciones. La acción queda auditada.",
+      "rollbackConfirm": "Revertir",
+      "rollbackDone": "{agent} revertido a la versión {version}.",
+      "forceTitle": "¿Forzar la activación de la versión {version}?",
+      "forceDescription": "La versión no tiene una evaluación aprobada. Forzar omite esa protección y pone el prompt de {agent} en producción para todas las organizaciones.",
+      "forceConfirm": "Forzar activación",
+      "forcedDone": "Versión {version} de {agent} activada sin evaluación aprobada.",
+      "reason": "Motivo",
+      "reasonHint": "Obligatorio. Queda en el historial y en la auditoría.",
+      "reasonRequired": "Indica el motivo de la activación forzada."
+    }
+  },
+  "workflows": {
+    "title": "Workflows",
+    "description": "Ejecuciones de todas las organizaciones, las que esperan aprobación y las programaciones de la plataforma y de las organizaciones.",
+    "platform": "Plataforma",
+    "tabs": {
+      "label": "Secciones de workflows",
+      "runs": "Ejecuciones",
+      "schedules": "Programaciones"
+    },
+    "cancel": {
+      "title": "¿Cancelar la ejecución de {workflow}?",
+      "description": "La ejecución se detiene ahora y no se puede reanudar.",
+      "descriptionSuspended": "La ejecución se detiene ahora y no se puede reanudar. La solicitud de aprobación que esperaba se cancela con ella.",
+      "confirm": "Cancelar ejecución",
+      "keep": "Mantener ejecución",
+      "done": "Ejecución de {workflow} cancelada."
+    },
+    "runNow": {
+      "title": "¿Ejecutar {workflow} ahora?",
+      "descriptionTenant": "Una ejecución extra empieza ahora, en nombre de quien creó la programación y con los permisos actuales de esa persona. El próximo disparo del cron no cambia.",
+      "descriptionPlatform": "Una ejecución extra de este job de la plataforma empieza ahora, para todas las organizaciones. El próximo disparo del cron no cambia.",
+      "confirm": "Ejecutar ahora",
+      "done": "Ejecución de {workflow} solicitada."
+    },
+    "scheduleState": {
+      "pauseTitle": "¿Pausar la programación de {workflow}?",
+      "resumeTitle": "¿Reanudar la programación de {workflow}?",
+      "pauseTenant": "La programación deja de dispararse para la organización hasta que se reanude. Las ejecuciones en curso continúan. La acción queda registrada en la auditoría.",
+      "pausePlatform": "Atención: este es un job de la plataforma. Mientras esté pausado, deja de ejecutarse para todas las organizaciones (por ejemplo, el vencimiento de aprobaciones, la limpieza de datos o el informe de uso). Páusalo solo durante un incidente y reanúdalo enseguida. La acción queda registrada en la auditoría.",
+      "resumeTenant": "La programación vuelve a dispararse para la organización desde el próximo horario del cron. Los disparos que no ocurrieron durante la pausa no se reponen.",
+      "resumePlatform": "Este job de la plataforma vuelve a ejecutarse para todas las organizaciones desde el próximo horario del cron. Los disparos que no ocurrieron durante la pausa no se reponen.",
+      "confirmPause": "Pausar programación",
+      "confirmPausePlatform": "Pausar job de la plataforma",
+      "confirmResume": "Reanudar programación",
+      "paused": "Programación de {workflow} pausada.",
+      "resumed": "Programación de {workflow} reanudada."
+    },
+    "runs": {
+      "caption": "Ejecuciones de workflows",
+      "pagination": "Páginas de ejecuciones",
+      "loading": "Cargando ejecuciones…",
+      "bySchedule": "Programación: {schedule}",
+      "byAnySchedule": "Programación",
+      "byUser": "Usuario {user}",
+      "byPlatform": "Plataforma",
+      "waitsApproval": "Espera aprobación",
+      "details": "Detalles",
+      "detailsNamed": "Detalles de la ejecución {id} de {workflow}",
+      "cancel": "Cancelar",
+      "cancelNamed": "Cancelar la ejecución {id} de {workflow}",
+      "detailsTitle": "Ejecución de {workflow}",
+      "detailsDescription": "{organization} · {id}",
+      "detailsMissingTitle": "Ejecución no encontrada en esta lista",
+      "detailsMissingDescription": "El enlace apunta a una ejecución que no está entre las cargadas: puede estar en otra página o fuera de los filtros. Cierra y búscala en la lista.",
+      "timelineLabel": "Línea de tiempo de la ejecución",
+      "noStepEvents": "Los eventos de cada paso no están disponibles en la administración; la línea de tiempo muestra lo que registra la ejecución.",
+      "noMatchTitle": "Ninguna ejecución con esos filtros",
+      "noMatchDescription": "Revisa los filtros o límpialos para verlas todas.",
+      "clearFilters": "Limpiar filtros",
+      "emptyTitle": "Todavía no hay ejecuciones",
+      "emptyDescription": "Las ejecuciones aparecen aquí cuando alguien o una programación inicia un workflow.",
+      "emptyAction": "Ver programaciones",
+      "columns": {
+        "run": "Workflow",
+        "organization": "Organización",
+        "status": "Estado",
+        "origin": "Iniciada por",
+        "createdAt": "Inicio",
+        "updatedAt": "Último cambio",
+        "actions": "Acciones"
+      },
+      "filters": {
+        "label": "Filtrar ejecuciones",
+        "workflow": "Workflow",
+        "workflowPlaceholder": "usage-report",
+        "workflowInvalid": "Usa el id del workflow: minúsculas, números y guiones.",
+        "apply": "Aplicar",
+        "status": "Estado",
+        "anyStatus": "Todos los estados",
+        "suspendedOnly": "Esperando aprobación"
+      }
+    },
+    "schedules": {
+      "filtersLabel": "Filtrar programaciones",
+      "loading": "Cargando programaciones…",
+      "caption": "Programaciones de la plataforma y de las organizaciones",
+      "emptyTitle": "No hay programaciones",
+      "emptyDescription": "Las programaciones de la plataforma se crean cuando inicia el servicio de agentes.",
+      "reload": "Recargar",
+      "noMatchTitle": "Esta organización no tiene programaciones",
+      "noMatchDescription": "Las programaciones de la plataforma aparecen cuando no hay una organización elegida.",
+      "seeAll": "Ver todas"
+    }
+  },
+  "connectors": {
+    "title": "Conectores",
+    "description": "Sistemas externos que cada organización habilitó para sus agentes. Los secretos nunca aparecen aquí.",
+    "filtersLabel": "Elegir organización",
+    "readOnlyNotice": "Solo lectura: el equipo de la plataforma no modifica ni desactiva conectores. Quienes administran la organización lo hacen en su configuración.",
+    "chooseTitle": "Elige una organización",
+    "chooseDescription": "Los conectores se listan por organización.",
+    "chooseAction": "Ver organizaciones",
+    "loading": "Cargando conectores…",
+    "caption": "Conectores de la organización",
+    "pagination": "Páginas de conectores",
+    "emptyTitle": "Esta organización no tiene conectores",
+    "emptyDescription": "Los conectores se crean en la configuración de la organización por quienes la administran.",
+    "moreReach": "{count, plural, one {y # más} other {y # más}}",
+    "tools": "{allowed, plural, =0 {ninguna herramienta} one {# herramienta} other {# herramientas}}, {readOnly} sin aprobación",
+    "noSecret": "Sin secreto",
+    "hasSecret": "Secreto configurado",
+    "status": {
+      "active": "Activo",
+      "disabled": "Desactivado",
+      "error": "Con error"
+    },
+    "types": {
+      "openapi": "API (OpenAPI)",
+      "mcp": "Servidor MCP",
+      "postgres": "Postgres (lectura)",
+      "browser": "Navegador"
+    },
+    "columns": {
+      "name": "Conector",
+      "type": "Tipo",
+      "status": "Estado",
+      "reach": "Alcance",
+      "tools": "Herramientas",
+      "secret": "Secreto",
+      "updatedAt": "Actualizado el"
+    }
+  },
+  "logs": {
+    "title": "Logs",
+    "description": "Líneas de log recientes del proceso web en el entorno local, de la más nueva a la más antigua.",
+    "refresh": "Actualizar",
+    "loading": "Cargando logs…",
+    "listLabel": "Líneas de log",
+    "count": "{count, plural, one {# línea} other {# líneas}} (como máximo {limit})",
+    "openTrace": "Abrir el trace {id}",
+    "fields": "{count, plural, one {# campo} other {# campos}}",
+    "fieldsOf": "Campos de la línea {position}: {message}",
+    "service": "{service} · {env}",
+    "requestId": "Solicitud",
+    "traceId": "Trace",
+    "levels": {
+      "debug": "Debug",
+      "info": "Info",
+      "warn": "Aviso",
+      "error": "Error"
+    },
+    "noMatchTitle": "Ninguna línea con esos filtros",
+    "noMatchDescription": "El buffer guarda solo las últimas 500 líneas. Limpia los filtros o repite la acción y actualiza.",
+    "clearFilters": "Limpiar filtros",
+    "emptyTitle": "Todavía no hay líneas de log",
+    "emptyDescription": "Las líneas aparecen a medida que el proceso web atiende solicitudes.",
+    "filters": {
+      "label": "Filtrar logs",
+      "level": "Nivel mínimo",
+      "anyLevel": "Todos los niveles",
+      "levelOptions": {
+        "debug": "Debug o superior",
+        "info": "Info o superior",
+        "warn": "Aviso o superior",
+        "error": "Solo errores"
+      },
+      "q": "Texto del mensaje",
+      "traceId": "Trace",
+      "requestId": "Solicitud",
+      "apply": "Aplicar"
+    },
+    "remote": {
+      "title": "Fuera del entorno local, los logs están en Cloud Logging",
+      "description": "Esta página solo lee el buffer del entorno local. Abre Cloud Logging y elige el proyecto de este entorno.",
+      "descriptionFiltered": "Esta página solo lee el buffer del entorno local. El enlace abre Cloud Logging con el trace y la solicitud del filtro; elige el proyecto de este entorno.",
+      "open": "Abrir Cloud Logging",
+      "newTab": "(se abre en una pestaña nueva)"
+    }
+  },
+  "auditLog": {
+    "title": "Auditoría de la plataforma",
+    "description": "Lo que hizo el equipo en la plataforma: planes, presupuestos, funciones, modelos, accesos de soporte e intentos rechazados, del más reciente al más antiguo.",
+    "caption": "Auditoría de la plataforma",
+    "platformWide": "Toda la plataforma",
+    "organizationFilter": "Solo de la organización",
+    "clearOrganization": "Ver todas las organizaciones"
+  },
+  "team": {
+    "title": "Equipo de la plataforma",
+    "description": "Quién opera la plataforma y con qué rol. Todos necesitan la verificación en dos pasos para abrir la administración.",
+    "loading": "Cargando el equipo…",
+    "caption": "Equipo de la plataforma",
+    "emptyTitle": "Aún no hay nadie en el equipo",
+    "you": "Tú",
+    "active": "Activo",
+    "revoked": "Revocado",
+    "changeRole": "Cambiar rol",
+    "changeRoleNamed": "Cambiar el rol de {name}",
+    "restore": "Devolver acceso",
+    "restoreNamed": "Devolver el acceso de {name}",
+    "revokeAction": "Revocar",
+    "revokeNamed": "Revocar el acceso de {name}",
+    "columns": {
+      "person": "Persona",
+      "role": "Rol",
+      "status": "Estado",
+      "updatedAt": "Modificado",
+      "actions": "Acciones"
+    },
+    "roles": {
+      "legend": "Rol en el equipo",
+      "platform-admin": {
+        "name": "Administrador de la plataforma",
+        "description": "Puede todo en la administración: planes, organizaciones, modelos, funciones y el propio equipo."
+      },
+      "platform-support": {
+        "name": "Soporte de la plataforma",
+        "description": "Consulta organizaciones, usuarios, trazas, logs y costos, y hace el acceso de soporte. No cambia configuraciones."
+      }
+    },
+    "add": {
+      "action": "Agregar al equipo",
+      "title": "Agregar al equipo",
+      "description": "La persona ya debe tener cuenta en la app. Verá la administración después de activar la verificación en dos pasos.",
+      "email": "Correo de la cuenta",
+      "emailHint": "El correo exacto con el que la persona entra a la app.",
+      "errors": {
+        "required": "Escribe el correo de la persona.",
+        "invalid": "Escribe un correo válido, por ejemplo nombre@empresa.com.",
+        "notFound": "Ninguna cuenta usa este correo. La persona debe crear la cuenta antes."
+      },
+      "cancel": "Cancelar",
+      "submit": "Agregar",
+      "done": "{email} ahora forma parte del equipo."
+    },
+    "role": {
+      "title": "Rol de {name}",
+      "description": "El cambio aplica de inmediato. Si la persona estaba revocada, recupera el acceso.",
+      "cancel": "Cancelar",
+      "submit": "Guardar rol",
+      "done": "Rol de {name} actualizado."
+    },
+    "revoke": {
+      "title": "¿Revocar el acceso de {name}?",
+      "description": "La persona pierde de inmediato los permisos de la plataforma, y los accesos de soporte que abrió se cierran. Su cuenta en la app sigue existiendo.",
+      "confirm": "Revocar acceso",
+      "done": "Acceso de {name} revocado."
+    }
+  }
+}

@@ -1,0 +1,1203 @@
+{
+  "id": "dfd6dd25-5445-4ec5-8d0c-ffc3dbf81d4b",
+  "prevId": "1ef2e046-fbff-4095-ac3a-04fb9e534c81",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "agents.prompt_activations": {
+      "name": "prompt_activations",
+      "schema": "agents",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "agent_id": {
+          "name": "agent_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_id": {
+          "name": "version_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "forced": {
+          "name": "forced",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activated_by": {
+          "name": "activated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "activated_at": {
+          "name": "activated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "prompt_activations_version_idx": {
+          "name": "prompt_activations_version_idx",
+          "columns": [
+            {
+              "expression": "version_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "prompt_activations_lookup_idx": {
+          "name": "prompt_activations_lookup_idx",
+          "columns": [
+            {
+              "expression": "agent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "scope",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "activated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "prompt_activations_version_fk": {
+          "name": "prompt_activations_version_fk",
+          "tableFrom": "prompt_activations",
+          "tableTo": "prompt_versions",
+          "schemaTo": "agents",
+          "columnsFrom": [
+            "version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "prompt_activations_tenant_or_platform_rows": {
+          "name": "prompt_activations_tenant_or_platform_rows",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id IS NULL OR tenant_id = current_setting('app.tenant_id', true)",
+          "withCheck": "tenant_id IS NULL OR tenant_id = current_setting('app.tenant_id', true)"
+        }
+      },
+      "checkConstraints": {
+        "prompt_activations_scope_check": {
+          "name": "prompt_activations_scope_check",
+          "value": "\"agents\".\"prompt_activations\".\"scope\" IN ('platform', 'tenant')"
+        },
+        "prompt_activations_scope_tenant_check": {
+          "name": "prompt_activations_scope_tenant_check",
+          "value": "(\"agents\".\"prompt_activations\".\"scope\" = 'tenant') = (\"agents\".\"prompt_activations\".\"tenant_id\" IS NOT NULL)"
+        },
+        "prompt_activations_forced_reason_check": {
+          "name": "prompt_activations_forced_reason_check",
+          "value": "NOT \"agents\".\"prompt_activations\".\"forced\" OR \"agents\".\"prompt_activations\".\"reason\" IS NOT NULL"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "agents.prompt_versions": {
+      "name": "prompt_versions",
+      "schema": "agents",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "agent_id": {
+          "name": "agent_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body_sha256": {
+          "name": "body_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "eval_experiment_id": {
+          "name": "eval_experiment_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "eval_verdict": {
+          "name": "eval_verdict",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "prompt_versions_agent_scope_tenant_version_key": {
+          "name": "prompt_versions_agent_scope_tenant_version_key",
+          "nullsNotDistinct": true,
+          "columns": [
+            "agent_id",
+            "scope",
+            "tenant_id",
+            "version"
+          ]
+        }
+      },
+      "policies": {
+        "prompt_versions_tenant_or_platform_rows": {
+          "name": "prompt_versions_tenant_or_platform_rows",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id IS NULL OR tenant_id = current_setting('app.tenant_id', true)",
+          "withCheck": "tenant_id IS NULL OR tenant_id = current_setting('app.tenant_id', true)"
+        }
+      },
+      "checkConstraints": {
+        "prompt_versions_scope_check": {
+          "name": "prompt_versions_scope_check",
+          "value": "\"agents\".\"prompt_versions\".\"scope\" IN ('platform', 'tenant')"
+        },
+        "prompt_versions_scope_tenant_check": {
+          "name": "prompt_versions_scope_tenant_check",
+          "value": "(\"agents\".\"prompt_versions\".\"scope\" = 'tenant') = (\"agents\".\"prompt_versions\".\"tenant_id\" IS NOT NULL)"
+        },
+        "prompt_versions_version_check": {
+          "name": "prompt_versions_version_check",
+          "value": "\"agents\".\"prompt_versions\".\"version\" >= 1"
+        },
+        "prompt_versions_sha_check": {
+          "name": "prompt_versions_sha_check",
+          "value": "\"agents\".\"prompt_versions\".\"body_sha256\" ~ '^[0-9a-f]{64}$'"
+        },
+        "prompt_versions_verdict_check": {
+          "name": "prompt_versions_verdict_check",
+          "value": "\"agents\".\"prompt_versions\".\"eval_verdict\" IS NULL OR \"agents\".\"prompt_versions\".\"eval_verdict\" IN ('passed', 'failed')"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "ai.chunks_v1": {
+      "name": "chunks_v1",
+      "schema": "ai",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "namespace": {
+          "name": "namespace",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chunk_index": {
+          "name": "chunk_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_count": {
+          "name": "token_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "embedding": {
+          "name": "embedding",
+          "type": "vector(1536)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "embedding_model": {
+          "name": "embedding_model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "embedding_version": {
+          "name": "embedding_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "chunks_v1_document_idx": {
+          "name": "chunks_v1_document_idx",
+          "columns": [
+            {
+              "expression": "document_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "chunks_v1_tenant_namespace_idx": {
+          "name": "chunks_v1_tenant_namespace_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "namespace",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "chunks_v1_embedding_hnsw": {
+          "name": "chunks_v1_embedding_hnsw",
+          "columns": [
+            {
+              "expression": "embedding",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "vector_cosine_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hnsw",
+          "with": {
+            "m": 16,
+            "ef_construction": 64
+          }
+        }
+      },
+      "foreignKeys": {
+        "chunks_v1_document_fk": {
+          "name": "chunks_v1_document_fk",
+          "tableFrom": "chunks_v1",
+          "tableTo": "documents",
+          "schemaTo": "ai",
+          "columnsFrom": [
+            "document_id",
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "tenant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "chunks_v1_document_chunk_key": {
+          "name": "chunks_v1_document_chunk_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "document_id",
+            "chunk_index"
+          ]
+        }
+      },
+      "policies": {
+        "chunks_v1_tenant_rows": {
+          "name": "chunks_v1_tenant_rows",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = current_setting('app.tenant_id', true)",
+          "withCheck": "tenant_id = current_setting('app.tenant_id', true)"
+        },
+        "chunks_v1_platform_read": {
+          "name": "chunks_v1_platform_read",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = '_platform'"
+        }
+      },
+      "checkConstraints": {
+        "chunks_v1_chunk_index_check": {
+          "name": "chunks_v1_chunk_index_check",
+          "value": "\"ai\".\"chunks_v1\".\"chunk_index\" >= 0"
+        },
+        "chunks_v1_token_count_check": {
+          "name": "chunks_v1_token_count_check",
+          "value": "\"ai\".\"chunks_v1\".\"token_count\" >= 0"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "ai.documents": {
+      "name": "documents",
+      "schema": "ai",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "namespace": {
+          "name": "namespace",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_ref": {
+          "name": "source_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_url": {
+          "name": "source_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "content_hash": {
+          "name": "content_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "documents_tenant_namespace_idx": {
+          "name": "documents_tenant_namespace_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "namespace",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "documents_tenant_source_ref_key": {
+          "name": "documents_tenant_source_ref_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tenant_id",
+            "source",
+            "source_ref"
+          ]
+        },
+        "documents_id_tenant_key": {
+          "name": "documents_id_tenant_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "tenant_id"
+          ]
+        }
+      },
+      "policies": {
+        "documents_tenant_rows": {
+          "name": "documents_tenant_rows",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = current_setting('app.tenant_id', true)",
+          "withCheck": "tenant_id = current_setting('app.tenant_id', true)"
+        },
+        "documents_platform_read": {
+          "name": "documents_platform_read",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = '_platform'"
+        }
+      },
+      "checkConstraints": {
+        "documents_source_check": {
+          "name": "documents_source_check",
+          "value": "\"ai\".\"documents\".\"source\" IN ('upload', 'url', 'catalog', 'module')"
+        },
+        "documents_status_check": {
+          "name": "documents_status_check",
+          "value": "\"ai\".\"documents\".\"status\" IN ('pending', 'ready', 'failed', 'deleted')"
+        },
+        "documents_content_hash_check": {
+          "name": "documents_content_hash_check",
+          "value": "\"ai\".\"documents\".\"content_hash\" ~ '^[a-f0-9]{64}$'"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "usage.budget_alerts": {
+      "name": "budget_alerts",
+      "schema": "usage",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "month": {
+          "name": "month",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "threshold_percent": {
+          "name": "threshold_percent",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "budget_alerts_tenant_month_threshold_key": {
+          "name": "budget_alerts_tenant_month_threshold_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tenant_id",
+            "month",
+            "threshold_percent"
+          ]
+        }
+      },
+      "policies": {
+        "budget_alerts_tenant_rows": {
+          "name": "budget_alerts_tenant_rows",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = current_setting('app.tenant_id', true)",
+          "withCheck": "tenant_id = current_setting('app.tenant_id', true)"
+        }
+      },
+      "checkConstraints": {
+        "budget_alerts_threshold_check": {
+          "name": "budget_alerts_threshold_check",
+          "value": "\"usage\".\"budget_alerts\".\"threshold_percent\" IN (80, 100)"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "usage.daily_rollups": {
+      "name": "daily_rollups",
+      "schema": "usage",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "day": {
+          "name": "day",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "agent_id": {
+          "name": "agent_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "calls": {
+          "name": "calls",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "input_tokens": {
+          "name": "input_tokens",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "output_tokens": {
+          "name": "output_tokens",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_micro_usd": {
+          "name": "cost_micro_usd",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "daily_rollups_tenant_day_model_agent_key": {
+          "name": "daily_rollups_tenant_day_model_agent_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tenant_id",
+            "day",
+            "model",
+            "agent_id"
+          ]
+        }
+      },
+      "policies": {
+        "daily_rollups_tenant_rows": {
+          "name": "daily_rollups_tenant_rows",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = current_setting('app.tenant_id', true)",
+          "withCheck": "tenant_id = current_setting('app.tenant_id', true)"
+        }
+      },
+      "checkConstraints": {
+        "daily_rollups_counts_check": {
+          "name": "daily_rollups_counts_check",
+          "value": "\"usage\".\"daily_rollups\".\"calls\" >= 0 AND \"usage\".\"daily_rollups\".\"input_tokens\" >= 0 AND \"usage\".\"daily_rollups\".\"output_tokens\" >= 0 AND \"usage\".\"daily_rollups\".\"cost_micro_usd\" >= 0"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "usage.export_cursors": {
+      "name": "export_cursors",
+      "schema": "usage",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "exported_until": {
+          "name": "exported_until",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "export_cursors_tenant_key": {
+          "name": "export_cursors_tenant_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tenant_id"
+          ]
+        }
+      },
+      "policies": {
+        "export_cursors_tenant_rows": {
+          "name": "export_cursors_tenant_rows",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = current_setting('app.tenant_id', true)",
+          "withCheck": "tenant_id = current_setting('app.tenant_id', true)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "usage.llm_calls": {
+      "name": "llm_calls",
+      "schema": "usage",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trace_id": {
+          "name": "trace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "agent_id": {
+          "name": "agent_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "input_tokens": {
+          "name": "input_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "output_tokens": {
+          "name": "output_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cached_tokens": {
+          "name": "cached_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cost_micro_usd": {
+          "name": "cost_micro_usd",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latency_ms": {
+          "name": "latency_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "finish_reason": {
+          "name": "finish_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "llm_calls_tenant_occurred_idx": {
+          "name": "llm_calls_tenant_occurred_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "llm_calls_tenant_rows": {
+          "name": "llm_calls_tenant_rows",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = current_setting('app.tenant_id', true)",
+          "withCheck": "tenant_id = current_setting('app.tenant_id', true)"
+        }
+      },
+      "checkConstraints": {
+        "llm_calls_tokens_check": {
+          "name": "llm_calls_tokens_check",
+          "value": "\"usage\".\"llm_calls\".\"input_tokens\" >= 0 AND \"usage\".\"llm_calls\".\"output_tokens\" >= 0 AND \"usage\".\"llm_calls\".\"cached_tokens\" >= 0"
+        },
+        "llm_calls_cost_check": {
+          "name": "llm_calls_cost_check",
+          "value": "\"usage\".\"llm_calls\".\"cost_micro_usd\" IS NULL OR \"usage\".\"llm_calls\".\"cost_micro_usd\" >= 0"
+        },
+        "llm_calls_latency_check": {
+          "name": "llm_calls_latency_check",
+          "value": "\"usage\".\"llm_calls\".\"latency_ms\" >= 0"
+        },
+        "llm_calls_trace_id_check": {
+          "name": "llm_calls_trace_id_check",
+          "value": "\"usage\".\"llm_calls\".\"trace_id\" IS NULL OR \"usage\".\"llm_calls\".\"trace_id\" ~ '^[0-9a-f]{32}$'"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "usage.tenant_budgets": {
+      "name": "tenant_budgets",
+      "schema": "usage",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monthly_micro_usd": {
+          "name": "monthly_micro_usd",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monthly_tokens": {
+          "name": "monthly_tokens",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "tenant_budgets_tenant_key": {
+          "name": "tenant_budgets_tenant_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tenant_id"
+          ]
+        }
+      },
+      "policies": {
+        "tenant_budgets_tenant_rows": {
+          "name": "tenant_budgets_tenant_rows",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = current_setting('app.tenant_id', true)",
+          "withCheck": "tenant_id = current_setting('app.tenant_id', true)"
+        }
+      },
+      "checkConstraints": {
+        "tenant_budgets_caps_check": {
+          "name": "tenant_budgets_caps_check",
+          "value": "\"usage\".\"tenant_budgets\".\"monthly_micro_usd\" >= 0 AND \"usage\".\"tenant_budgets\".\"monthly_tokens\" >= 0"
+        }
+      },
+      "isRLSEnabled": true
+    }
+  },
+  "enums": {},
+  "schemas": {
+    "agents": "agents",
+    "ai": "ai",
+    "usage": "usage"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

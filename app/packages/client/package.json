@@ -1,0 +1,88 @@
+{
+  "name": "@core/client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./app-shell": "./src/app-shell/index.ts",
+    "./views/*": "./src/views/*/index.ts",
+    "./widgets/*": "./src/widgets/*/index.ts",
+    "./entities/*": "./src/entities/*/index.ts",
+    "./shared/ui/*": "./src/shared/ui/*.tsx",
+    "./shared/ui/ai": "./src/shared/ui/ai/index.ts",
+    "./shared/ui/notify": "./src/shared/ui/molecules/Toaster/notify.ts",
+    "./shared/api": "./src/shared/api/index.ts",
+    "./shared/config": "./src/shared/config/index.ts",
+    "./shared/lib/*": "./src/shared/lib/*/index.ts",
+    "./shared/lib/cn": "./src/shared/lib/cn.ts",
+    "./styles.css": "./src/shared/ui/styles/globals.css",
+    "./testing": "./src/app-shell/testing/index.ts",
+    "./testing/setup": "./src/shared/testing/setup.ts"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-sdk/react": "catalog:",
+    "@core/contracts": "workspace:*",
+    "@core/i18n": "workspace:*",
+    "@tanstack/react-table": "catalog:",
+    "ai": "catalog:",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "cmdk": "catalog:",
+    "firebase": "catalog:",
+    "lucide-react": "catalog:",
+    "next-themes": "catalog:",
+    "radix-ui": "catalog:",
+    "react-hook-form": "catalog:",
+    "react-is": "catalog:",
+    "recharts": "catalog:",
+    "sonner": "catalog:",
+    "streamdown": "catalog:",
+    "tailwind-merge": "catalog:",
+    "tw-animate-css": "catalog:",
+    "ulid": "catalog:",
+    "uqr": "catalog:",
+    "use-stick-to-bottom": "catalog:",
+    "zod": "catalog:",
+    "zustand": "catalog:"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "use-intl": "catalog:"
+  },
+  "devDependencies": {
+    "@core/config": "workspace:*",
+    "@tailwindcss/node": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@testing-library/dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "axe-core": "catalog:",
+    "eslint": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "use-intl": "catalog:",
+    "vitest": "catalog:"
+  }
+}

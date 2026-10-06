@@ -1,0 +1,25 @@
+{
+  "additionalProperties": false,
+  "description": "Exchanges a desktop session secret for a custom token (no Bearer; rate limited per IP).",
+  "examples": [
+    {
+      "secret": "q1W2e3R4t5Y6u7I8o9P0a1S2d3F4g5H6j7K8l9Z0x1C"
+    }
+  ],
+  "properties": {
+    "secret": {
+      "description": "Current session secret; it is rotated by the exchange.",
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "type": "string",
+      "x-pii": "sensitive"
+    }
+  },
+  "required": [
+    "secret"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-pii": "sensitive",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

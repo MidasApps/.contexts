@@ -1,0 +1,57 @@
+import { createLogger } from "@core/services";
+import { write } from "firebase-functions/logger";
+import { setGlobalOptions } from "firebase-functions/v2";
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onRequest } from "firebase-functions/v2/https";
+import { onObjectFinalized } from "firebase-functions/v2/storage";
+import { makeOnApprovalRequestSettled } from "./approvals/on-approval-request-settled.ts";
+import { env, processEnvForFirebaseGuard } from "./env.ts";
+import { makeOnFileFinalized } from "./files/on-file-finalized.ts";
+import { DEFAULT_MAX_INSTANCES, FUNCTIONS_REGION } from "./functions-options.ts";
+import { makeHealthzHandler } from "./healthz-handler.ts";
+import { serveWebHandler } from "./http/express-web-bridge.ts";
+import { makeFirebaseLogSink } from "./observability/firebase-log-sink.ts";
+
+// Composition root of the Functions codebase (Gen 2 only). Spec D5: Functions
+// serve events, jobs and webhooks; the product API lives in the web app.
+// HTTPS functions are private by default (IAM invoker only); a public one opts in
+// explicitly, like healthz below. Non-HTTPS triggers ignore `invoker`.
+setGlobalOptions({ region: FUNCTIONS_REGION, maxInstances: DEFAULT_MAX_INSTANCES, invoker: "private" });
+
+const logger = createLogger({
+  context: { service: "functions", env: env.APP_ENV },
+  sink: makeFirebaseLogSink({ write }),
+});
+
+/** Public liveness probe (decision 0003); smallest footprint the platform allows. */
+export const healthz = onRequest(
+  { invoker: "public", memory: "256MiB", timeoutSeconds: 10, concurrency: 80 },
+  serveWebHandler({ operation: "healthz", logger }, makeHealthzHandler({ logger })),
+);
+
+/**
+ * Upload validation (SP3 Task 13, umbrella §16.2): magic bytes and size of every object
+ * under `tenants/{tenantId}/files/{fileId}` of the files bucket (`FILES_BUCKET`, else the
+ * default bucket). Retries are on: the handler is idempotent and throws only on
+ * infrastructure errors. The bucket must be in (or cover) `FUNCTIONS_REGION`.
+ */
+export const onFileFinalized = onObjectFinalized(
+  {
+    ...(env.FILES_BUCKET === undefined ? {} : { bucket: env.FILES_BUCKET }),
+    memory: "512MiB",
+    timeoutSeconds: 60,
+    retry: true,
+  },
+  makeOnFileFinalized({ env, processEnv: processEnvForFirebaseGuard, logger }),
+);
+
+/**
+ * Workflow HITL (decision 0036): a `workflow-resume` approval request that became rejected,
+ * expired or cancelled resumes its suspended run through the Mastra settle route. Retries are
+ * on: the handler is idempotent and throws only on infrastructure errors. Outside local the
+ * service account of the function needs `roles/run.invoker` on Mastra (`MASTRA_AUDIENCE`).
+ */
+export const onApprovalRequestSettled = onDocumentUpdated(
+  { document: "approval-requests/{id}", memory: "256MiB", timeoutSeconds: 120, retry: true },
+  makeOnApprovalRequestSettled({ env, logger }),
+);

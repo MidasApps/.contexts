@@ -1,0 +1,114 @@
+{
+  "additionalProperties": false,
+  "description": "Changes enabled agents, web opt-ins, the PII mode or the organization's own lower budget cap.",
+  "examples": [
+    {
+      "enabledAgents": [
+        "knowledge",
+        "data"
+      ]
+    },
+    {
+      "budget": {
+        "monthlyMicroUsd": 20000000,
+        "monthlyTokens": 10000000
+      },
+      "guardrails": {
+        "pii": "redact"
+      }
+    }
+  ],
+  "properties": {
+    "budget": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "monthlyMicroUsd": {
+              "description": "Monthly model spend cap in micro-USD.",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+              "x-pii": "none"
+            },
+            "monthlyTokens": {
+              "description": "Monthly model token cap.",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "monthlyMicroUsd",
+            "monthlyTokens"
+          ],
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The organization's own lower monthly cap; null removes it.",
+      "x-pii": "none"
+    },
+    "enabledAgents": {
+      "description": "Subagents the supervisor may delegate to.",
+      "items": {
+        "pattern": "^[a-z][a-z0-9-]*$",
+        "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "guardrails": {
+      "additionalProperties": false,
+      "description": "PII detector mode for user input.",
+      "properties": {
+        "pii": {
+          "description": "`warn` or `redact`.",
+          "enum": [
+            "warn",
+            "redact"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "pii"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "webTools": {
+      "additionalProperties": false,
+      "description": "Web tool opt-ins (the platform flag ai.web-tools must also be on).",
+      "properties": {
+        "browser": {
+          "description": "Browser automation through a Playwright MCP connector.",
+          "type": "boolean",
+          "x-pii": "none"
+        },
+        "firecrawl": {
+          "description": "Web search and scrape through Firecrawl.",
+          "type": "boolean",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "firecrawl",
+        "browser"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.agent-settings.update",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

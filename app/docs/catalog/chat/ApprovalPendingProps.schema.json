@@ -1,0 +1,35 @@
+{
+  "additionalProperties": false,
+  "description": "A card for an agent action waiting for another member's approval.",
+  "examples": [
+    {
+      "approvalId": "Ar9oP1lK3jH5gF7dS9aQ",
+      "summary": "Create project Launch"
+    }
+  ],
+  "properties": {
+    "approvalId": {
+      "description": "SP1 approval request id.",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "summary": {
+      "description": "What waits for approval.",
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "approvalId",
+    "summary"
+  ],
+  "type": "object",
+  "x-kind": "ui-component",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

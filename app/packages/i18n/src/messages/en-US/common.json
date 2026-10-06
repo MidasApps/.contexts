@@ -1,0 +1,380 @@
+{
+  "unitTypes": {
+    "unit": "Unit"
+  },
+  "actions": {
+    "save": "Save",
+    "signInAgain": "Sign in again",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "back": "Back",
+    "retry": "Try again",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create"
+  },
+  "states": {
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "saved": "Changes saved.",
+    "offline": "You are offline. Some actions are unavailable until the connection is back."
+  },
+  "errorWithReference": "Something went wrong. Reference: {requestId}",
+  "itemCount": "{count, plural, =0 {No items} one {# item} other {# items}}",
+  "presence": {
+    "online": "Online",
+    "away": "Away",
+    "busy": "Busy",
+    "offline": "Offline"
+  },
+  "copy": {
+    "copy": "Copy",
+    "copied": "Copied to clipboard.",
+    "failed": "Couldn't copy. Select the text and copy it manually.",
+    "reveal": "Show value",
+    "hide": "Hide value"
+  },
+  "search": {
+    "label": "Search",
+    "placeholder": "Search…",
+    "clear": "Clear search",
+    "noResults": "No results found.",
+    "results": "Results"
+  },
+  "navigation": {
+    "breadcrumb": "Breadcrumb",
+    "more": "More"
+  },
+  "pickers": {
+    "currency": {
+      "placeholder": "Select a currency",
+      "search": "Search currency",
+      "empty": "No currency found."
+    },
+    "timeZone": {
+      "placeholder": "Select a time zone",
+      "search": "Search time zone",
+      "empty": "No time zone found."
+    },
+    "locale": {
+      "placeholder": "Select a language"
+    }
+  },
+  "money": {
+    "invalid": "Enter a valid amount, for example {example}.",
+    "tooManyDigits": "Use at most {digits, plural, =0 {no decimal places} one {# decimal place} other {# decimal places}}."
+  },
+  "errorState": {
+    "title": "We couldn't load this",
+    "description": "Something went wrong on our side. Try again in a moment.",
+    "reference": "Reference: {requestId}",
+    "messageWithReference": "{message} Reference: {requestId}"
+  },
+  "noAccess": {
+    "title": "You don't have access to this page",
+    "description": "Ask an organization administrator to grant you access."
+  },
+  "notifications": {
+    "region": "Notifications",
+    "dismiss": "Dismiss notification"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "form": {
+    "required": "required",
+    "submitFailedTitle": "Could not save",
+    "savedTitle": "Changes saved",
+    "unavailableFields": "Some values that cannot be edited here are invalid. Reload the page and try again.",
+    "selectPlaceholder": "Select an option",
+    "timeZoneHint": "Date and time in the {timeZone} time zone.",
+    "errors": {
+      "required": "Fill in this field.",
+      "tooShort": "Use at least {minimum, plural, one {# character} other {# characters}}.",
+      "tooLong": "Use at most {maximum, plural, one {# character} other {# characters}}.",
+      "tooSmall": "Enter a value greater than or equal to {minimum}.",
+      "tooBig": "Enter a value less than or equal to {maximum}.",
+      "notInteger": "Enter a whole number.",
+      "invalidFormat": "The format of this field is invalid.",
+      "invalidOption": "Choose one of the available options.",
+      "invalid": "Check this field."
+    }
+  },
+  "password": {
+    "show": "Show password"
+  },
+  "oneTimeSecret": {
+    "confirmFirst": "Confirm you stored the secret to finish."
+  },
+  "dialogGuard": {
+    "unsaved": {
+      "title": "Discard changes?",
+      "description": "What you changed in this dialog will be lost.",
+      "confirm": "Discard",
+      "cancel": "Keep editing"
+    },
+    "oneTime": {
+      "title": "Close without storing it?",
+      "description": "This value will not be shown again. To get another one, you will have to create a new one.",
+      "confirm": "Close anyway",
+      "cancel": "Go back"
+    }
+  },
+  "pageTitles": {
+    "signIn": "Sign in",
+    "invite": "Invitation",
+    "signUp": "Create account",
+    "resetPassword": "Reset password",
+    "home": "Home",
+    "organizations": "Organizations",
+    "organization": "Organization",
+    "project": "Project",
+    "module": "Module",
+    "settings": "Settings",
+    "profile": "Profile",
+    "admin": "Administration",
+    "notFound": "Page not found",
+    "chat": "Assistant",
+    "docs": "Documentation"
+  },
+  "approvals": {
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "executed": "Executed",
+      "failed": "Failed"
+    },
+    "item": {
+      "expires": "Expires {when}",
+      "requestedBy": "Requested by {requester}",
+      "requester": "Requester",
+      "node": "Where:",
+      "when": "Deadline",
+      "updated": "Updated on {when}",
+      "reason": "Reason given: {reason}",
+      "failed": "The action was approved but did not run. Ask the requester to ask again.",
+      "failureReason": {
+        "EXECUTION_INTERRUPTED": "The run was interrupted before it finished. Check whether the action took effect before asking again.",
+        "UNKNOWN_APPROVAL_ACTION": "This app no longer recognizes this action.",
+        "other": "The action returned an error while running."
+      },
+      "failureReference": "Reference: {requestId} ({code})"
+    },
+    "preview": {
+      "before": "Before",
+      "after": "After",
+      "none": "No preview available.",
+      "viewRun": "View workflow progress"
+    },
+    "menu": {
+      "label": "Approvals",
+      "labelWithWaiting": "Approvals, {count, plural, one {# waiting for your decision} other {# waiting for your decision}}",
+      "triggerWithWaiting": "{name}, account menu, {count, plural, one {# approval waiting for your decision} other {# approvals waiting for your decision}}"
+    }
+  },
+  "traceViewer": {
+    "title": "{count, plural, =0 {No spans} one {# span} other {# spans}}",
+    "status": {
+      "ok": "OK",
+      "error": "Error"
+    },
+    "running": "Running",
+    "unknownCost": "Unknown price",
+    "model": "Model",
+    "duration": "Duration",
+    "tokens": "Tokens",
+    "tokensValue": "{input} in · {output} out",
+    "cost": "Cost",
+    "payload": "Input and output",
+    "payloadOf": "Input and output of {name}",
+    "inputOf": "Input of {name}",
+    "outputOf": "Output of {name}",
+    "collapse": "Collapse the spans of {name}",
+    "expand": "Expand the spans of {name}",
+    "childrenOf": "Spans of {name}",
+    "logs": "See the logs of this trace",
+    "emptyTitle": "No spans recorded",
+    "emptyDescription": "This trace has no spans to show."
+  },
+  "costCharts": {
+    "title": "Cost this month and cap",
+    "description": "From the highest cost down.",
+    "descriptionTop": "The {shown} highest costs of {total}.",
+    "cost": "Cost this month",
+    "cap": "Monthly cap",
+    "total": "Month total: <value>{total}</value>"
+  },
+  "runTimeline": {
+    "status": {
+      "pending": "Pending",
+      "running": "Running",
+      "waiting": "Waiting",
+      "suspended": "Suspended",
+      "paused": "Paused",
+      "success": "Completed",
+      "failed": "Failed",
+      "canceled": "Cancelled",
+      "tripwire": "Stopped by guardrail"
+    },
+    "started": "Started",
+    "startedBySchedule": "By a schedule: {schedule}",
+    "startedByAnySchedule": "By a schedule",
+    "startedByUser": "By the user {user}",
+    "startedByPlatform": "By the platform",
+    "waitingApproval": "Waits for approval",
+    "current": "Current state",
+    "updatedAt": "Since {when}",
+    "failure": {
+      "STEP_FAILED": "A step failed",
+      "TRIPWIRE": "A safeguard stopped the run",
+      "RUN_FAILED": "The run failed outside a step"
+    },
+    "failedStep": "Step:"
+  },
+  "scheduleTable": {
+    "noFire": "—",
+    "inZone": "{when} ({zone})",
+    "inYourZone": "{when} in your time zone ({zone})",
+    "scope": {
+      "platform": "Platform",
+      "tenant": "Organization"
+    },
+    "status": {
+      "active": "Active",
+      "paused": "Paused"
+    },
+    "pause": "Pause",
+    "pauseNamed": "Pause the schedule {id} of {name}",
+    "pauseOf": "Pause the schedule of {name}",
+    "resume": "Resume",
+    "resumeNamed": "Resume the schedule {id} of {name}",
+    "resumeOf": "Resume the schedule of {name}",
+    "runNow": "Run now",
+    "runNowNamed": "Run the schedule {id} of {name} now",
+    "runNowOf": "Run the schedule of {name} now",
+    "moreActionsNamed": "More actions for the schedule {id} of {name}",
+    "moreActionsOf": "More actions for the schedule of {name}",
+    "columns": {
+      "workflow": "Workflow",
+      "cron": "Cron and time zone",
+      "status": "Status",
+      "nextFire": "Next fire",
+      "lastFire": "Last fire",
+      "actions": "Actions"
+    }
+  },
+  "workflows": {
+    "knowledge-ingest": {
+      "name": "Knowledge ingestion",
+      "description": "Indexes an uploaded file or a public web page into the organization's knowledge base."
+    },
+    "catalog-reindex": {
+      "name": "Catalog reindex",
+      "description": "Rebuilds the platform catalog documents of the knowledge base."
+    },
+    "approval-demo": {
+      "name": "Approval demo",
+      "description": "Asks a second person to approve a note before it is created.",
+      "input": {
+        "title": "Title",
+        "body": "Text"
+      }
+    },
+    "usage-report": {
+      "name": "Usage report",
+      "description": "Rolls up model usage per organization and day, exports it and sends budget alerts."
+    },
+    "approval-expiry-sweep": {
+      "name": "Approval expiry sweep",
+      "description": "Expires overdue approval requests and fails interrupted executions."
+    },
+    "conversation-purge": {
+      "name": "Conversation purge",
+      "description": "Purges conversations deleted more than 30 days ago."
+    },
+    "eval-export": {
+      "name": "Eval export",
+      "description": "Exports eval experiment summaries to the warehouse."
+    }
+  },
+  "agents": {
+    "assistant": "Assistant",
+    "knowledge": "Knowledge",
+    "data": "Data",
+    "action": "Actions",
+    "web": "Web"
+  },
+  "flags": {
+    "ai": {
+      "kill-switch": {
+        "name": "AI kill switch",
+        "description": "Stops every agent, chat and voice run during an incident."
+      },
+      "web-tools": {
+        "name": "Web tools",
+        "description": "Platform switch over the organization's opt-in for tools that reach the public web."
+      },
+      "memory": {
+        "observational": {
+          "name": "Observational memory",
+          "description": "Agents' observational memory; takes effect the next time the runtime starts."
+        }
+      }
+    },
+    "chat": {
+      "voice": {
+        "name": "Chat voice",
+        "description": "Voice transcription and speech per environment and organization.",
+        "realtime": {
+          "name": "Realtime voice",
+          "description": "Realtime voice sessions; audio flows between browser and provider and is not metered yet."
+        }
+      }
+    },
+    "workflows": {
+      "schedules": {
+        "name": "Workflow schedules",
+        "description": "Scheduled workflow fires; off holds every fire (a missed fire runs once when back on)."
+      }
+    }
+  },
+  "cron": {
+    "hourly": "Every hour at minute {minute}",
+    "daily": "Every day at {time}",
+    "weekdays": "Weekdays at {time}",
+    "weekly": "Every week on {weekday} at {time}",
+    "monthly": "Monthly on day {day} at {time}",
+    "withZone": "{description} ({zone})"
+  },
+  "evalExperiment": {
+    "label": "{agent} · {dataset} · {when}"
+  },
+  "jsonInput": {
+    "legend": "Input",
+    "label": "Input (JSON)",
+    "editAsJson": "Edit as JSON",
+    "editAsForm": "Edit as form",
+    "invalid": "Write a valid JSON object.",
+    "switchBlocked": "Fix the JSON to go back to the form."
+  },
+  "docs": {
+    "nav": "Documentation pages",
+    "pages": "Pages",
+    "backToApp": "Go to the app",
+    "fallback": "This documentation is only available in Portuguese.",
+    "previous": "Previous",
+    "next": "Next",
+    "code": "Code",
+    "codeWithLanguage": "{language} code",
+    "newTab": "(opens in a new tab)",
+    "steps": "Previous and next page",
+    "table": "Table (scroll sideways to see all of it)"
+  }
+}

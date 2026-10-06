@@ -1,0 +1,270 @@
+{
+  "skipToContent": "Saltar al contenido principal",
+  "sidebar": {
+    "title": "Navegación",
+    "description": "Secciones, organización y proyecto actuales.",
+    "toggle": "Mostrar u ocultar la barra lateral",
+    "loading": "Cargando la navegación…",
+    "retry": "Recargar la navegación",
+    "projectGroup": "Proyecto",
+    "organizationGroup": "Organización"
+  },
+  "commandPalette": {
+    "open": "Abrir paleta de comandos",
+    "title": "Paleta de comandos",
+    "description": "Busca páginas y acciones, y presiona Enter para ejecutar una.",
+    "search": "Buscar comando o página",
+    "placeholder": "Escribe un comando o busca…",
+    "results": "Comandos",
+    "empty": "No se encontraron comandos.",
+    "loading": "Cargando…",
+    "groupFailed": "No se pudo cargar esta lista.",
+    "switchOrganization": "Cambiar a {name}",
+    "openProject": "Abrir proyecto {name}",
+    "slots": {
+      "project": "proyecto",
+      "organization": "organización",
+      "settings": "configuración",
+      "user-menu": "perfil"
+    },
+    "groups": {
+      "recent": "Recientes",
+      "navigation": "Navegación",
+      "organizations": "Organizaciones",
+      "projects": "Proyectos",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "createOrganization": "Crear organización",
+      "createProject": "Crear proyecto",
+      "toggleTheme": "Alternar tema claro/oscuro",
+      "changeLanguage": "Cambiar idioma",
+      "openProfile": "Abrir perfil",
+      "signOut": "Cerrar sesión"
+    }
+  },
+  "nav": {
+    "organizationHome": "Proyectos",
+    "organizationSettings": "Configuración",
+    "projectHome": "Resumen",
+    "settings": {
+      "general": "General",
+      "members": "Miembros",
+      "invitations": "Invitaciones",
+      "roles": "Roles",
+      "units": "Unidades",
+      "api-keys": "Claves de API",
+      "devices": "Dispositivos",
+      "agents": "Agentes",
+      "skills": "Habilidades",
+      "knowledge": "Base de conocimiento",
+      "connectors": "Conectores",
+      "workflows": "Flujos y programaciones",
+      "approvals": "Aprobaciones",
+      "usage": "Uso y presupuesto",
+      "traces": "Trazas",
+      "evals": "Evaluaciones",
+      "flags": "Funciones",
+      "audit-log": "Auditoría"
+    },
+    "profile": {
+      "account": "Cuenta",
+      "preferences": "Preferencias",
+      "security": "Seguridad",
+      "sessions": "Sesiones",
+      "notifications": "Notificaciones"
+    },
+    "admin": {
+      "organizations": "Organizaciones",
+      "users": "Usuarios",
+      "agents": "Agentes y prompts",
+      "models": "Modelos",
+      "connectors": "Conectores",
+      "traces": "Traces",
+      "costs": "Costos",
+      "flags": "Flags",
+      "plans": "Planes",
+      "evals": "Evaluaciones",
+      "logs": "Logs",
+      "workflows": "Workflows",
+      "audit": "Auditoría",
+      "team": "Equipo"
+    },
+    "chat": "Asistente",
+    "groups": {
+      "organization": "Organización",
+      "access": "Acceso",
+      "customers": "Clientes",
+      "ai": "IA",
+      "operations": "Operación",
+      "other": "Otras"
+    }
+  },
+  "routeAnnouncer": {
+    "fallback": "Nueva página cargada"
+  },
+  "serverError": {
+    "title": "No se pudo abrir esta página",
+    "description": "El servidor encontró un error al armar la página. Intenta de nuevo; si continúa, comparte la referencia con soporte."
+  },
+  "errorBoundary": {
+    "title": "Esta pantalla dejó de funcionar",
+    "description": "Un error inesperado interrumpió la pantalla. Intenta recargarla; si continúa, comparte la referencia con soporte."
+  },
+  "units": {
+    "hiddenUnit": "Unidad restringida",
+    "loading": "Cargando unidades…",
+    "emptyTitle": "No hay unidades en este proyecto",
+    "emptyDescription": "Quien administra el proyecto puede crear unidades en la configuración.",
+    "wholeProject": "Todo el proyecto",
+    "treeLabel": "Unidades de {project}",
+    "pickerTrigger": "Unidad: {unit}. Elegir unidad",
+    "pickerTitle": "Elige una unidad"
+  },
+  "organizations": {
+    "title": "Organizaciones",
+    "description": "Elige dónde trabajar o crea una organización nueva.",
+    "descriptionInviteOnly": "Elige dónde trabajar.",
+    "listLabel": "Tus organizaciones",
+    "lastUsed": "Usada por última vez",
+    "suspended": "Suspendida",
+    "loading": "Cargando organizaciones…",
+    "emptyTitle": "Todavía no formas parte de ninguna organización",
+    "emptyDescription": "Crea una organización junto a esta lista o pide una invitación a quien administra la tuya.",
+    "emptyDescriptionInviteOnly": "Pide una invitación a quien administra tu organización. El enlace llega por correo; ábrelo con la cuenta de esa dirección.",
+    "loadMore": "Cargar más",
+    "switchAccount": "Iniciar sesión con otra cuenta",
+    "create": {
+      "title": "Nueva organización",
+      "description": "Serás el propietario. Los valores regionales se aplican a los proyectos nuevos y se pueden cambiar después.",
+      "checking": "Verificando lo que puedes crear…",
+      "name": "Nombre de la organización",
+      "nameHint": "Lo ven todos los miembros.",
+      "regional": "Valores regionales",
+      "locale": "Idioma predeterminado",
+      "timeZone": "Zona horaria predeterminada",
+      "currency": "Moneda predeterminada",
+      "submit": "Crear organización",
+      "created": "Organización {name} creada.",
+      "createdStatus": "Organización creada."
+    }
+  },
+  "home": {
+    "title": "Inicio",
+    "loading": "Abriendo donde lo dejaste…"
+  },
+  "switcher": {
+    "organizationTrigger": "{name}, cambiar de organización",
+    "organizationLabel": "Organización",
+    "chooseOrganization": "Elegir organización",
+    "organizations": "Organizaciones",
+    "loadingOrganizations": "Cargando organizaciones…",
+    "organizationsFailed": "No se pudo cargar. Intentar de nuevo",
+    "allOrganizations": "Ver todas o crear una organización",
+    "projectTrigger": "{name}, cambiar de proyecto",
+    "chooseProject": "Elegir proyecto",
+    "projects": "Proyectos",
+    "loadingProjects": "Cargando proyectos…",
+    "projectsFailed": "No se pudo cargar. Intentar de nuevo",
+    "noProjects": "Todavía no hay proyectos",
+    "createProject": "Nuevo proyecto",
+    "allProjects": "Todos los proyectos",
+    "switchFailed": "No se pudo cambiar de organización",
+    "switching": "Cambiando de organización…"
+  },
+  "userMenu": {
+    "trigger": "{name}, menú de la cuenta",
+    "theme": "Tema",
+    "themes": {
+      "system": "Del sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "language": "Idioma y región",
+    "docs": "Documentación"
+  },
+  "projects": {
+    "create": {
+      "title": "Nuevo proyecto",
+      "description": "Los proyectos agrupan unidades, módulos y personas dentro de la organización.",
+      "name": "Nombre del proyecto",
+      "descriptionField": "Descripción",
+      "descriptionFieldHint": "Opcional. Ayuda a entender para qué sirve el proyecto.",
+      "submit": "Crear proyecto",
+      "created": "Proyecto {name} creado.",
+      "createdStatus": "Proyecto creado."
+    },
+    "edit": {
+      "title": "Editar proyecto",
+      "description": "El nombre y la descripción se muestran a todos los que acceden al proyecto.",
+      "name": "Nombre del proyecto",
+      "descriptionField": "Descripción",
+      "descriptionFieldHint": "Opcional. Déjala en blanco para quitar la descripción.",
+      "saved": "Proyecto {name} actualizado."
+    },
+    "actions": {
+      "menu": "Configurar proyecto",
+      "edit": "Editar nombre y descripción",
+      "archive": "Archivar proyecto",
+      "reactivate": "Reactivar proyecto",
+      "delete": "Eliminar proyecto",
+      "archiveTitle": "¿Archivar {name}?",
+      "archiveDescription": "El proyecto sigue accesible y con los mismos datos, pero queda marcado como archivado. Puedes reactivarlo cuando quieras.",
+      "archiveConfirm": "Archivar",
+      "archived": "Proyecto {name} archivado.",
+      "reactivated": "Proyecto {name} reactivado.",
+      "deleteTitle": "¿Eliminar {name}?",
+      "deleteDescription": "El proyecto y todas sus unidades dejan de existir para todos los miembros. No se puede deshacer desde la app.",
+      "deleteConfirm": "Eliminar proyecto",
+      "deleted": "Proyecto {name} eliminado."
+    }
+  },
+  "organizationHome": {
+    "description": "Proyectos de esta organización a los que tienes acceso.",
+    "archived": "Archivado",
+    "suspended": "Suspendida",
+    "loading": "Cargando la organización…",
+    "loadingProjects": "Cargando proyectos…",
+    "projectsHeading": "Proyectos",
+    "emptyTitle": "Todavía no hay proyectos",
+    "emptyDescription": "Crea el primer proyecto para organizar unidades, módulos y personas.",
+    "emptyDescriptionNoPermission": "Todavía no hay proyectos a los que tengas acceso. Pide acceso a quien administra la organización.",
+    "createProject": "Nuevo proyecto",
+    "loadMore": "Cargar más"
+  },
+  "projectHome": {
+    "loading": "Cargando el proyecto…",
+    "archived": "Archivado",
+    "currentUnit": "Unidad actual:",
+    "unitsHeading": "Unidades",
+    "subunitsHeading": "Subunidades",
+    "loadingUnits": "Cargando unidades…",
+    "unitsEmptyTitle": "No hay unidades aquí",
+    "unitsEmptyDescription": "Las unidades dividen el proyecto en partes, como sedes o equipos.",
+    "manageUnits": "Administrar unidades",
+    "modulesHeading": "Módulos",
+    "modulesEmptyTitle": "No hay módulos disponibles",
+    "modulesEmptyDescription": "No tienes acceso a módulos en este proyecto, o no hay ninguno instalado.",
+    "openModule": "Abrir módulo"
+  },
+  "modulePage": {
+    "loading": "Cargando la página…"
+  },
+  "pageState": {
+    "goHome": "Ir al inicio",
+    "goToOrganizations": "Ver organizaciones",
+    "notFoundTitle": "Página no encontrada",
+    "notFoundDescription": "Esta dirección no existe o no tienes acceso. Revisa el enlace o vuelve al inicio.",
+    "forbiddenTitle": "No tienes acceso a esta página",
+    "forbiddenDescription": "Pide a quien administra la organización que te dé acceso."
+  },
+  "rightPanel": {
+    "label": "Panel lateral",
+    "toggle": "Asistente",
+    "chatUnavailable": "Abre un proyecto para conversar con el asistente."
+  },
+  "configError": {
+    "title": "Error de configuración",
+    "description": "Esta versión de la aplicación no tiene ajustes válidos para: {fields}. Instala una versión correcta o comunícate con soporte."
+  }
+}

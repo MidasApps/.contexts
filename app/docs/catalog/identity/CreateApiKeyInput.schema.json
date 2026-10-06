@@ -1,0 +1,150 @@
+{
+  "additionalProperties": false,
+  "description": "Creates an API key; scopes must be within the caller's permissions at the node.",
+  "examples": [
+    {
+      "expiresAt": "2027-03-29T14:30:00.000Z",
+      "name": "Reporting export",
+      "node": {
+        "level": "organization",
+        "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+      },
+      "scopes": [
+        "core.project.read",
+        "core.unit.read"
+      ]
+    }
+  ],
+  "properties": {
+    "expiresAt": {
+      "description": "Required expiry (UTC), after now and at most 365 days ahead.",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Name of the key.",
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "node": {
+      "description": "Node the key is limited to.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "organization",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "project",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "unit",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "unitId": {
+              "description": "Unit of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId",
+            "unitId"
+          ],
+          "type": "object"
+        }
+      ],
+      "x-pii": "none"
+    },
+    "scopes": {
+      "description": "Permissions the key may use; always intersected with the owner's current grants.",
+      "items": {
+        "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+        "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "name",
+    "scopes",
+    "node",
+    "expiresAt"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.api-key.create",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

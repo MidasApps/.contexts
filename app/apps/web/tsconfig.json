@@ -1,0 +1,23 @@
+{
+  "extends": "@core/config/tsconfig/bundler.json",
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }],
+    "paths": { "@/*": ["./src/*"] },
+    "allowJs": true,
+    "checkJs": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tscache/tsbuildinfo"
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "scripts/**/*.ts",
+    "e2e/**/*.ts",
+    ".next/types/**/*.ts",
+    "*.ts",
+    "*.js",
+    "*.mjs"
+  ],
+  "exclude": ["node_modules"]
+}

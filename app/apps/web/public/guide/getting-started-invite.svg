@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="Inter, 'Segoe UI', Arial, sans-serif">
+<rect width="1280" height="800" fill="#fff"/>
+<rect x="0" y="0" width="1280" height="800" rx="0" fill="#fafafa"/>
+<rect x="604" y="150" width="32" height="32" rx="8" fill="#171717"/>
+<text x="620" y="172" font-size="16" fill="#fff" font-weight="600" text-anchor="middle">✦</text>
+<text x="646" y="172" font-size="16" fill="#171717" font-weight="600" text-anchor="start">Core</text>
+<rect x="440" y="200" width="400" height="440" rx="16" fill="#fff" stroke="#e5e5e5"/>
+<text x="472" y="248" font-size="20" fill="#171717" font-weight="600" text-anchor="start">Convite para organização</text>
+<text x="472" y="274" font-size="13" fill="#737373" font-weight="400" text-anchor="start">Marta Silva convidou você para participar de</text>
+<text x="472" y="294" font-size="13" fill="#737373" font-weight="400" text-anchor="start">Clínica Vet Exemplo.</text>
+<text x="560" y="676" font-size="12" fill="#737373" font-weight="400" text-anchor="start">文A  Idioma</text>
+<rect x="630" y="660" width="140" height="28" rx="6" fill="#fff" stroke="#e5e5e5"/>
+<text x="642" y="679" font-size="12" fill="#171717" font-weight="400" text-anchor="start">Português (Brasil)</text>
+<text x="790" y="679" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Documentação</text>
+<text x="472" y="344" font-size="13" fill="#737373" font-weight="400" text-anchor="start">E-mail convidado</text>
+<text x="472" y="366" font-size="14" fill="#171717" font-weight="600" text-anchor="start">ana@clinicavet.exemplo</text>
+<text x="472" y="404" font-size="13" fill="#737373" font-weight="400" text-anchor="start">Válido até</text>
+<text x="472" y="426" font-size="14" fill="#171717" font-weight="600" text-anchor="start">12 de out. de 2026</text>
+<rect x="472" y="470" width="336" height="36" rx="6" fill="#171717"/>
+<text x="640.0" y="493.0" font-size="14" fill="#fff" font-weight="600" text-anchor="middle">Aceitar convite</text>
+<rect x="472" y="518" width="336" height="36" rx="6" fill="#fff" stroke="#e5e5e5"/>
+<text x="640.0" y="541.0" font-size="14" fill="#171717" font-weight="600" text-anchor="middle">Agora não</text>
+<text x="640" y="590" font-size="13" fill="#171717" font-weight="600" text-anchor="middle">Entrar com outra conta</text>
+</svg>

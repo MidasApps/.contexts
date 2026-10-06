@@ -1,0 +1,26 @@
+{
+  "additionalProperties": false,
+  "description": "Switches the active organization (claims projection; the API never relies on it).",
+  "examples": [
+    {
+      "organizationId": "Jd8sK2lPq0WnR5tYu3bV"
+    }
+  ],
+  "properties": {
+    "organizationId": {
+      "description": "Organization to make active; the caller must be a member.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "organizationId"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.organization.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

@@ -1,0 +1,114 @@
+{
+  "additionalProperties": false,
+  "description": "Changes the signed-in user's display name, photo or preferences (PATCH /v1/me).",
+  "examples": [
+    {
+      "displayName": "Ana S."
+    },
+    {
+      "preferences": {
+        "theme": "dark",
+        "timeZone": "America/Recife"
+      }
+    },
+    {
+      "preferences": {
+        "locale": null
+      }
+    }
+  ],
+  "properties": {
+    "displayName": {
+      "description": "New display name.",
+      "maxLength": 120,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "photoUrl": {
+      "anyOf": [
+        {
+          "format": "uri",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "New profile photo URL; null removes it.",
+      "x-pii": "personal"
+    },
+    "preferences": {
+      "additionalProperties": false,
+      "description": "Preference changes; absent keys keep their value.",
+      "properties": {
+        "currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "New display currency; null removes it.",
+          "x-pii": "personal"
+        },
+        "locale": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "New locale; null falls back to the organization default.",
+          "x-pii": "personal"
+        },
+        "notifications": {
+          "additionalProperties": false,
+          "description": "Notification opt-ins; security alerts cannot be turned off.",
+          "properties": {
+            "productUpdates": {
+              "description": "Receive product update notices.",
+              "type": "boolean",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "productUpdates"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "theme": {
+          "description": "New color theme.",
+          "enum": [
+            "system",
+            "light",
+            "dark"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "New IANA time zone; null falls back to the node's.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-pii": "personal"
+        }
+      },
+      "type": "object",
+      "x-pii": "personal"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

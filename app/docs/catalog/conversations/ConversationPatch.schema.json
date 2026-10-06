@@ -1,0 +1,38 @@
+{
+  "additionalProperties": false,
+  "description": "Renames, pins or archives one of the member's conversations.",
+  "examples": [
+    {
+      "title": "Onboarding plan"
+    },
+    {
+      "archived": false,
+      "pinned": true
+    }
+  ],
+  "properties": {
+    "archived": {
+      "description": "Archive (true) or restore (false).",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "pinned": {
+      "description": "Pin or unpin.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "title": {
+      "description": "New title; sets titleSource to user.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.conversation.update",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

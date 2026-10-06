@@ -1,0 +1,66 @@
+{
+  "additionalProperties": false,
+  "description": "A single or multiple choice the member answers inside the chat.",
+  "examples": [
+    {
+      "multiple": false,
+      "options": [
+        {
+          "label": "North",
+          "value": "north"
+        },
+        {
+          "label": "South",
+          "value": "south"
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "multiple": {
+      "description": "Whether several options may be chosen.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "options": {
+      "description": "Choices.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "description": "Shown label.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "value": {
+            "description": "Value returned to the tool.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ],
+        "type": "object"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "options",
+    "multiple"
+  ],
+  "type": "object",
+  "x-kind": "ui-component",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

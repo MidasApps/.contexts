@@ -1,0 +1,78 @@
+{
+  "additionalProperties": false,
+  "description": "Creates a unit under a project or unit (`core.unit.create` at the parent; depth limit 6).",
+  "examples": [
+    {
+      "name": "North site",
+      "parentUnitId": null,
+      "type": "sample.site"
+    },
+    {
+      "name": "Room 101",
+      "parentUnitId": "Ua2bC4dE6fG8hJ0kL1mN",
+      "settings": {
+        "currency": "USD"
+      },
+      "type": "sample.room"
+    }
+  ],
+  "properties": {
+    "name": {
+      "description": "Display name of the new unit.",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "parentUnitId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Parent unit in the same project; null (default) creates it directly under the project.",
+      "x-pii": "none"
+    },
+    "settings": {
+      "additionalProperties": false,
+      "description": "Regional overrides; absent fields inherit from the parent node.",
+      "properties": {
+        "currency": {
+          "description": "ISO 4217 currency for new amounts here; absent inherits the parent's.",
+          "pattern": "^[A-Z]{3}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "IANA time zone of this node; absent inherits the parent's.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "type": "object",
+      "x-pii": "none"
+    },
+    "type": {
+      "description": "Registered unit type; it must allow the parent.",
+      "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "parentUnitId"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.unit.create",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "project"
+}

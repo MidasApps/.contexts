@@ -1,0 +1,185 @@
+{
+  "additionalProperties": false,
+  "description": "An agent available to an organization (code-defined or its own) with its enabled state, tools and skills.",
+  "examples": [
+    {
+      "description": "Answers from the organization's knowledge base with citations.",
+      "enabled": true,
+      "key": "knowledge",
+      "moduleId": null,
+      "name": "Knowledge",
+      "skills": [
+        {
+          "description": "How to cite knowledge base passages.",
+          "name": "knowledge-citations",
+          "source": "core"
+        }
+      ],
+      "source": "core",
+      "tools": [
+        {
+          "id": "knowledge.search",
+          "kind": "read",
+          "source": "core"
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "description": {
+      "description": "What the agent does.",
+      "maxLength": 1000,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "enabled": {
+      "description": "Whether the supervisor may delegate to it in this organization; for a custom agent, whether members can chat with it.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "key": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "type": "string"
+        },
+        {
+          "pattern": "^[A-Za-z0-9]{20}$",
+          "type": "string"
+        }
+      ],
+      "description": "Agent key used in agent-settings.enabledAgents; for a custom agent, its id.",
+      "x-pii": "none"
+    },
+    "moduleId": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Module that ships the agent; null for core agents.",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the agent.",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "skills": {
+      "description": "Skills attached to the agent in this organization.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "What the skill teaches the agent, from its SKILL.md.",
+            "maxLength": 1024,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Skill name (its SKILL.md directory, <module>-<skill>, or org-<name> for an organization's own skill).",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "source": {
+            "description": "Shipped with the core or an installed module, or written by the organization.",
+            "enum": [
+              "core",
+              "module",
+              "custom"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "source"
+        ],
+        "type": "object"
+      },
+      "maxItems": 100,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "source": {
+      "description": "Shipped with the core or an installed module, or configured by the organization.",
+      "enum": [
+        "core",
+        "module",
+        "custom"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tools": {
+      "description": "Tools the agent has in this organization, connector tools included.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Tool id, e.g. knowledge.search or command.tenancy.CreateProjectInput.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "kind": {
+            "description": "Whether the tool only reads or changes data (mutations are confirmed or approved).",
+            "enum": [
+              "read",
+              "mutation"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "source": {
+            "description": "Where the tool comes from: the core, an installed module or one of the organization's connectors.",
+            "enum": [
+              "core",
+              "module",
+              "connector"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "source"
+        ],
+        "type": "object"
+      },
+      "maxItems": 500,
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "description",
+    "source",
+    "moduleId",
+    "enabled",
+    "tools",
+    "skills"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.agent-settings.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

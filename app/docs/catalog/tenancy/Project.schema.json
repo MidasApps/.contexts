@@ -1,0 +1,108 @@
+{
+  "additionalProperties": false,
+  "description": "A project inside an organization; the parent of the optional unit tree.",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "description": "Rollout of the new catalog.",
+      "id": "Pq4rS6tU8vW0xY2zA1bC",
+      "name": "Launch",
+      "settings": {
+        "timeZone": "America/Manaus"
+      },
+      "status": "active",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "updatedAt": "2026-09-29T15:00:00.000Z"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the project was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "description": {
+      "description": "Free text about the project; may mention people.",
+      "maxLength": 2000,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "id": {
+      "description": "Automatic id of the project.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the project.",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "settings": {
+      "additionalProperties": false,
+      "description": "Regional overrides of the project.",
+      "properties": {
+        "currency": {
+          "description": "ISO 4217 currency for new amounts here; absent inherits the parent's.",
+          "pattern": "^[A-Z]{3}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "IANA time zone of this node; absent inherits the parent's.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "type": "object",
+      "x-pii": "none"
+    },
+    "status": {
+      "description": "`archived` keeps the project readable but out of default lists.",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization that owns the project.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the project last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "name",
+    "status",
+    "settings",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.project.read",
+  "x-pii": "personal",
+  "x-relations": [
+    {
+      "field": "tenantId",
+      "target": "tenancy.Organization",
+      "type": "belongs-to"
+    }
+  ],
+  "x-tenancyScope": "project"
+}

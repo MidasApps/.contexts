@@ -1,0 +1,128 @@
+{
+  "additionalProperties": false,
+  "description": "A plan with the spend, token and connector limits it grants to organizations.",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "id": "Pl1aB2cD3eF4gH5iJ6kL",
+      "limits": {
+        "features": [
+          "web-tools"
+        ],
+        "maxConnectors": 5,
+        "monthlyMicroUsd": 50000000,
+        "monthlyTokens": 20000000
+      },
+      "name": "Standard",
+      "updatedAt": "2026-09-29T14:30:00.000Z"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the plan was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Automatic id of the plan.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "limits": {
+      "additionalProperties": false,
+      "description": "Limits the plan grants.",
+      "properties": {
+        "features": {
+          "description": "Feature keys the plan includes.",
+          "items": {
+            "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)*$",
+            "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array",
+          "x-pii": "none"
+        },
+        "maxConnectors": {
+          "description": "Most connectors an organization may configure.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxCustomAgents": {
+          "description": "Most custom agents an organization may have; absent means the platform default.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxCustomInstructionChars": {
+          "description": "Longest instructions of a custom agent or skill, in characters; absent means the platform default.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxCustomSkills": {
+          "description": "Most custom skills an organization may have; absent means the platform default.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "monthlyMicroUsd": {
+          "description": "Monthly model spend cap in micro-USD.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "monthlyTokens": {
+          "description": "Monthly model token cap.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "monthlyMicroUsd",
+        "monthlyTokens",
+        "maxConnectors",
+        "features"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the plan.",
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the plan last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "limits",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "platform.plan.manage",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

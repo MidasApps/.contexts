@@ -1,0 +1,12 @@
+{"id": "invitation-approval", "input": "Who approves the invitation of a member joining the workspace?", "expectedTools": ["knowledge.searchKnowledge"], "expectCitations": true, "reference": "An owner approves the invitation."}
+{"id": "invitation-expiry", "input": "When do invitations to the workspace expire?", "expectedTools": ["knowledge.searchKnowledge"], "expectCitations": true, "reference": "After seven days."}
+{"id": "password-reset", "input": "How do members reset a forgotten password from the sign in page?", "expectedTools": ["knowledge.searchKnowledge"], "expectCitations": true, "reference": "From the sign in page; the link expires after one hour."}
+{"id": "data-export", "input": "How do owners export workspace data?", "expectedTools": ["knowledge.searchKnowledge"], "expectCitations": true, "reference": "As CSV files from the settings page."}
+{"id": "support-hours", "input": "When does the support team answer requests?", "expectedTools": ["knowledge.searchKnowledge"], "expectCitations": true, "reference": "Business days from nine to six, local time."}
+{"id": "file-retention", "input": "How long are uploaded files kept after the last access?", "expectedTools": ["knowledge.searchKnowledge"], "expectCitations": true, "reference": "Twelve months."}
+{"id": "two-step", "input": "Where do owners require two-step sign in?", "expectedTools": ["knowledge.searchKnowledge"], "expectCitations": true, "reference": "In the security settings."}
+{"id": "archive", "input": "Can members read archived projects?", "expectedTools": ["knowledge.searchKnowledge"], "expectCitations": true, "reference": "Yes, archived projects stay readable."}
+{"id": "roles", "input": "Which records do editors change and viewers only read?", "expectedTools": ["knowledge.searchKnowledge"], "expectCitations": true, "reference": "Editors change records."}
+{"id": "foreign-export-probe", "input": "Owners export workspace data as CSV files from the settings page", "expectedTools": ["knowledge.searchKnowledge"], "tags": ["isolation"]}
+{"id": "foreign-support-probe", "input": "The support team answers requests on business days", "expectedTools": ["knowledge.searchKnowledge"], "tags": ["isolation"]}
+{"id": "unrelated-topic", "input": "Explain quantum chromodynamics", "expectedTools": ["knowledge.searchKnowledge"], "tags": ["no-answer"]}

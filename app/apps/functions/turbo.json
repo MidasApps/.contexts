@@ -1,0 +1,12 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    // lib/ holds a node_modules link (build.ts) that a cache restore would not
+    // recreate, and esbuild takes under a second: always rebuild.
+    "build": {
+      "cache": false,
+      "outputs": []
+    }
+  }
+}

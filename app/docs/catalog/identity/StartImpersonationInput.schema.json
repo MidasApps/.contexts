@@ -1,0 +1,53 @@
+{
+  "additionalProperties": false,
+  "description": "Starts read-only impersonation (platform.user.impersonate with MFA).",
+  "examples": [
+    {
+      "durationMinutes": 30,
+      "organizationId": "Jd8sK2lPq0WnR5tYu3bV",
+      "reason": "Ticket 4821: user cannot see project Launch.",
+      "targetUid": "uA1b2C3d4E5f6G7h8I9j"
+    }
+  ],
+  "properties": {
+    "durationMinutes": {
+      "default": 60,
+      "description": "Session length in minutes, 1-60 (default 60).",
+      "maximum": 60,
+      "minimum": 1,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "organizationId": {
+      "description": "Organization of the user to read.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "reason": {
+      "description": "Why the access is needed (10-500 chars); audited.",
+      "maxLength": 500,
+      "minLength": 10,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "targetUid": {
+      "description": "User to act as.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "targetUid",
+    "organizationId",
+    "reason",
+    "durationMinutes"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "platform.user.impersonate",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

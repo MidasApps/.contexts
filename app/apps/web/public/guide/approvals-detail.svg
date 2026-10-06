@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="Inter, 'Segoe UI', Arial, sans-serif">
+<rect width="1280" height="800" fill="#fff"/>
+<rect x="0" y="0" width="260" height="800" rx="0" fill="#fafafa"/>
+<line x1="260" y1="0" x2="260" y2="800" stroke="#e5e5e5"/>
+<rect x="16" y="14" width="32" height="32" rx="8" fill="#ede9fe"/>
+<text x="32" y="35" font-size="12" fill="#6d28d9" font-weight="600" text-anchor="middle">CV</text>
+<text x="56" y="28" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Clínica Vet Exemplo</text>
+<text x="56" y="44" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Organização</text>
+<text x="40" y="92" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Atendimento</text>
+<text x="16" y="140" font-size="11" fill="#737373" font-weight="400" text-anchor="start">ORGANIZAÇÃO</text>
+<text x="40" y="172" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Projetos</text>
+<rect x="8" y="188" width="244" height="32" rx="6" fill="#f5f5f5"/>
+<text x="40" y="210" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Configurações</text>
+<circle cx="36" cy="766" r="16" fill="#fde68a"/>
+<text x="36" y="771" font-size="11" fill="#92400e" font-weight="600" text-anchor="middle">BC</text>
+<text x="60" y="762" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Bruno Costa</text>
+<text x="60" y="778" font-size="12" fill="#737373" font-weight="400" text-anchor="start">bruno@clinicavet.exemplo</text>
+<line x1="260" y1="56" x2="1280" y2="56" stroke="#e5e5e5"/>
+<text x="325" y="33" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Clínica Vet Exemplo</text>
+<text x="477.4" y="33" font-size="14" fill="#737373" font-weight="400" text-anchor="start">›</text>
+<text x="493.4" y="33" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Aprovações</text>
+<text x="310" y="228" font-size="13" fill="#737373" font-weight="600" text-anchor="start">Organização</text>
+<text x="334" y="256" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Geral</text>
+<text x="334" y="286" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Membros</text>
+<text x="334" y="316" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Convites</text>
+<text x="334" y="346" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Papéis</text>
+<text x="334" y="376" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Unidades</text>
+<text x="310" y="420" font-size="13" fill="#737373" font-weight="600" text-anchor="start">Operação</text>
+<text x="334" y="448" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Fluxos e agendamentos</text>
+<text x="334" y="478" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Aprovações</text>
+<text x="334" y="508" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Uso e orçamento</text>
+<text x="334" y="538" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Rastros</text>
+<rect x="300" y="460" width="210" height="28" rx="6" fill="#f5f5f5"/>
+<text x="334" y="478" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Aprovações</text>
+<text x="560" y="92" font-size="13" fill="#737373" font-weight="400" text-anchor="start">← Voltar para aprovações</text>
+<text x="560" y="128" font-size="24" fill="#171717" font-weight="600" text-anchor="start">Solicitação de aprovação</text>
+<text x="560" y="152" font-size="14" fill="#737373" font-weight="400" text-anchor="start">Confira o que foi pedido antes de decidir. A decisão fica registrada na auditoria.</text>
+<rect x="560" y="176" width="680" height="250" rx="12" fill="#fff" stroke="#e5e5e5"/>
+<text x="584" y="210" font-size="16" fill="#171717" font-weight="600" text-anchor="start">Criar a nota “Lembrete de vacinas de outubro”</text>
+<rect x="1140" y="194" width="72" height="24" rx="12" fill="#fef3c7"/>
+<text x="1176.0" y="210" font-size="12" fill="#92400e" font-weight="600" text-anchor="middle">Pendente</text>
+<text x="584" y="250" font-size="13" fill="#737373" font-weight="400" text-anchor="start">Solicitante</text>
+<text x="760" y="250" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Ana Souza</text>
+<text x="584" y="284" font-size="13" fill="#737373" font-weight="400" text-anchor="start">Pedida em</text>
+<text x="760" y="284" font-size="14" fill="#171717" font-weight="400" text-anchor="start">5 de out. de 2026, 09:12</text>
+<text x="584" y="318" font-size="13" fill="#737373" font-weight="400" text-anchor="start">Expira em</text>
+<text x="760" y="318" font-size="14" fill="#171717" font-weight="400" text-anchor="start">8 de out. de 2026, 09:12</text>
+<text x="584" y="352" font-size="13" fill="#737373" font-weight="400" text-anchor="start">Permissão da ação</text>
+<text x="760" y="352" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Aprovar a ação da demonstração de aprovação</text>
+<text x="584" y="386" font-size="13" fill="#737373" font-weight="400" text-anchor="start">Referência</text>
+<text x="760" y="386" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Execução 7Hq2…Kd9 de Demonstração de aprovação</text>
+<text x="560" y="466" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Motivo (opcional)</text>
+<rect x="560" y="476" width="680" height="80" rx="6" fill="#fff" stroke="#e5e5e5"/>
+<text x="576" y="502" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Texto conferido com a tabela de vacinas.</text>
+<text x="560" y="576" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Quem pediu vê o motivo, e ele fica na auditoria. Até 500 caracteres.</text>
+<rect x="560" y="600" width="110" height="36" rx="6" fill="#171717"/>
+<text x="615.0" y="623.0" font-size="14" fill="#fff" font-weight="600" text-anchor="middle">Aprovar</text>
+<rect x="680" y="600" width="110" height="36" rx="6" fill="#fff" stroke="#e5e5e5"/>
+<text x="735.0" y="623.0" font-size="14" fill="#171717" font-weight="600" text-anchor="middle">Recusar</text>
+</svg>

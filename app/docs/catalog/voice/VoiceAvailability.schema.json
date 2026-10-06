@@ -1,0 +1,36 @@
+{
+  "additionalProperties": false,
+  "description": "Whether voice and realtime voice are switched on for the caller's organization.",
+  "examples": [
+    {
+      "realtime": false,
+      "voice": true
+    },
+    {
+      "realtime": false,
+      "voice": false
+    }
+  ],
+  "properties": {
+    "realtime": {
+      "description": "Realtime sessions are on too (flag chat.voice.realtime); the session route still needs real mode and a provider key.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "voice": {
+      "description": "Push-to-talk and read aloud are on for the organization (flag chat.voice).",
+      "type": "boolean",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "voice",
+    "realtime"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.voice.use",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

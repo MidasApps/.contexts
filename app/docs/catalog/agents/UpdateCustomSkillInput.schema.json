@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "description": "Changes a skill's name, description, instructions or enabled state.",
+  "examples": [
+    {
+      "enabled": false
+    }
+  ],
+  "properties": {
+    "description": {
+      "description": "When an agent should use the skill; the model routes by it.",
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "enabled": {
+      "description": "Enable or disable the skill.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "instructions": {
+      "description": "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+      "maxLength": 20000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "name": {
+      "description": "Kebab-case name, unique in the organization.",
+      "maxLength": 60,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.agent-settings.update",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

@@ -1,0 +1,85 @@
+{
+  "additionalProperties": false,
+  "description": "An active web or desktop session of the signed-in user (GET /v1/me/sessions).",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "current": true,
+      "expiresAt": "2026-10-06T14:30:00.000Z",
+      "id": "Ss8yH0nU2jM4iK6oL8pZ",
+      "kind": "web",
+      "lastSeenAt": "2026-09-29T15:00:00.000Z",
+      "mfa": true,
+      "userAgent": "Firefox on Windows"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the session was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "current": {
+      "description": "True for the session whose exchange minted the calling token.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "expiresAt": {
+      "description": "When the session expires (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Session id.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "kind": {
+      "description": "`web` (session cookie) or `desktop` (session secret).",
+      "enum": [
+        "web",
+        "desktop"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "lastSeenAt": {
+      "description": "Last exchange or request seen for the session (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "mfa": {
+      "description": "Whether the sign-in that created the session used a second factor.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "userAgent": {
+      "description": "Browser and OS family only, e.g. `Firefox on Windows`.",
+      "maxLength": 120,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "mfa",
+    "userAgent",
+    "createdAt",
+    "lastSeenAt",
+    "expiresAt",
+    "current"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

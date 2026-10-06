@@ -1,0 +1,44 @@
+{
+  "additionalProperties": false,
+  "description": "Activates a prompt version (eval-gated; staff may force with a reason).",
+  "examples": [
+    {
+      "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+    },
+    {
+      "force": true,
+      "reason": "Eval dataset is being rebuilt.",
+      "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+    }
+  ],
+  "properties": {
+    "force": {
+      "description": "Staff only: activate without a passing eval.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "reason": {
+      "description": "Required with force; kept on the activation.",
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "versionId": {
+      "description": "Version to activate.",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "versionId"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.prompt.write",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

@@ -1,0 +1,162 @@
+{
+  "core": {
+    "organization": {
+      "read": "View the organization",
+      "update": "Change the organization name and defaults",
+      "delete": "Delete the organization"
+    },
+    "project": {
+      "read": "View projects",
+      "create": "Create projects",
+      "update": "Change projects",
+      "delete": "Delete projects"
+    },
+    "unit": {
+      "read": "View units",
+      "create": "Create units",
+      "update": "Rename and move units",
+      "delete": "Delete units"
+    },
+    "member": {
+      "read": "View members",
+      "invite": "Invite people",
+      "update": "Change member roles",
+      "remove": "Remove members"
+    },
+    "role": {
+      "read": "View roles",
+      "create": "Create roles",
+      "update": "Change roles",
+      "delete": "Delete roles"
+    },
+    "api-key": {
+      "read": "View API keys",
+      "create": "Create API keys",
+      "revoke": "Revoke API keys"
+    },
+    "device": {
+      "read": "View devices",
+      "create": "Activate devices",
+      "revoke": "Revoke devices"
+    },
+    "audit-log": {
+      "read": "View the audit log"
+    },
+    "approval": {
+      "read": "View approval requests",
+      "decide": "Approve or reject requests"
+    },
+    "chat": {
+      "use": "Use the chat"
+    },
+    "mcp": {
+      "use": "Use MCP tools"
+    },
+    "web-tools": {
+      "use": "Use web search tools"
+    },
+    "knowledge": {
+      "read": "Read the knowledge base",
+      "write": "Add to the knowledge base",
+      "delete": "Delete from the knowledge base"
+    },
+    "catalog": {
+      "read": "View the data catalog",
+      "query": "Query catalog data"
+    },
+    "connector": {
+      "read": "View connectors",
+      "write": "Configure connectors"
+    },
+    "agent-settings": {
+      "read": "View agent settings",
+      "update": "Change agent settings"
+    },
+    "usage": {
+      "read": "View usage"
+    },
+    "file": {
+      "upload": "Upload files"
+    },
+    "workflow-run": {
+      "read": "View workflow runs",
+      "start": "Start workflows",
+      "cancel": "Cancel workflow runs",
+      "approve-demo": "Approve the approval demo's action"
+    },
+    "schedule": {
+      "read": "View schedules",
+      "write": "Create and change schedules"
+    },
+    "trace": {
+      "read": "View agent traces"
+    },
+    "eval": {
+      "read": "View evals",
+      "write": "Start evals"
+    },
+    "prompt": {
+      "read": "View agent instructions",
+      "write": "Change agent instructions"
+    },
+    "flag": {
+      "read": "View the organization's features",
+      "write": "Switch the organization's features on and off"
+    },
+    "conversation": {
+      "send": "Send messages in conversations",
+      "read": "View own conversations",
+      "update": "Rename, pin and archive conversations",
+      "delete": "Delete conversations"
+    },
+    "voice": {
+      "use": "Use voice in chat"
+    }
+  },
+  "platform": {
+    "organization": {
+      "read": "View organizations (staff)",
+      "update": "Change organizations (staff)"
+    },
+    "user": {
+      "read": "View users (staff)",
+      "impersonate": "Impersonate users (staff)"
+    },
+    "audit-log": {
+      "read": "View the audit log (staff)"
+    },
+    "staff": {
+      "manage": "Manage platform staff"
+    },
+    "plan": {
+      "manage": "Manage plans"
+    },
+    "agent": {
+      "manage": "Manage organizations' agents"
+    },
+    "model": {
+      "manage": "Manage models and prices"
+    },
+    "prompt": {
+      "manage": "Manage agent instructions"
+    },
+    "connector": {
+      "read": "View organizations' connectors"
+    },
+    "eval": {
+      "manage": "Manage evals"
+    },
+    "trace": {
+      "read": "View traces (staff)"
+    },
+    "usage": {
+      "read": "View usage and costs (staff)"
+    },
+    "workflow": {
+      "manage": "Manage workflows and schedules"
+    },
+    "flag": {
+      "manage": "Manage feature flags"
+    }
+  }
+}

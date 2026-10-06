@@ -1,0 +1,137 @@
+{
+  "additionalProperties": false,
+  "description": "A file uploaded by a member, validated by content before agents or the knowledge base can read it.",
+  "examples": [
+    {
+      "contentType": "text/markdown",
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "fileName": "onboarding-guide.md",
+      "id": "Fz9sK2lPq0WnR5tYu3bV",
+      "purpose": "knowledge",
+      "rejectionReason": null,
+      "sizeBytes": 18432,
+      "status": "ready",
+      "storagePath": "tenants/Jd8sK2lPq0WnR5tYu3bV/files/Fz9sK2lPq0WnR5tYu3bV",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "updatedAt": "2026-09-29T14:30:05.000Z"
+    }
+  ],
+  "properties": {
+    "contentType": {
+      "description": "Media type detected from the bytes once ready; declared type before.",
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdAt": {
+      "description": "When the upload was requested (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdBy": {
+      "description": "Uid of the uploader.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "fileName": {
+      "description": "Original file name.",
+      "maxLength": 255,
+      "minLength": 1,
+      "pattern": "^(?!\\.{1,2}$)[^/\\\\\\u0000-\\u001f]+$",
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "id": {
+      "description": "Firestore automatic id of the file.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "purpose": {
+      "description": "What the file is for.",
+      "enum": [
+        "chat-attachment",
+        "knowledge"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "rejectionReason": {
+      "anyOf": [
+        {
+          "enum": [
+            "TYPE_NOT_ALLOWED",
+            "TOO_LARGE",
+            "CONTENT_MISMATCH"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Why validation rejected the upload; null otherwise.",
+      "x-pii": "none"
+    },
+    "sizeBytes": {
+      "description": "Size in bytes.",
+      "maximum": 209715200,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "status": {
+      "description": "pending until the upload is validated.",
+      "enum": [
+        "pending",
+        "ready",
+        "rejected"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "storagePath": {
+      "description": "Object path, tenants/{tenantId}/files/{fileId}.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Owning organization.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the file last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "purpose",
+    "fileName",
+    "contentType",
+    "sizeBytes",
+    "status",
+    "rejectionReason",
+    "storagePath",
+    "createdBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

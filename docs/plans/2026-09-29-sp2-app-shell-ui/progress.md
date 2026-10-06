@@ -1,0 +1,28 @@
+# SP2 progress
+
+- 2026-09-29 | Task 1 complete | commits: df1168f | review: pending
+- 2026-09-29 | Task 2 complete | commits: 7aa049f | review: pending
+- 2026-09-29 | Task 3 complete | commits: bc23f7a | review: pending
+- 2026-09-29 | Review fixes Tasks 1-3 (i18n separators, AA text tokens, peers) complete | commits: not created (git commit denied to the implementer; plan in reports/task-4-6.md) | review: pending
+- 2026-09-29 | Task 4 complete | commits: not created (see reports/task-4-6.md) | review: pending
+- 2026-09-29 | Task 5 complete | commits: not created (see reports/task-4-6.md) | review: pending
+- 2026-09-29 | Task 6 complete | commits: not created (see reports/task-4-6.md) | review: pending
+- 2026-09-30 | Task 7 complete | commits: not created (git commit needs user permission; plan in reports/task-7-8.md) | review: pending
+- 2026-09-30 | Task 8 complete | commits: not created (git commit needs user permission; plan in reports/task-7-8.md) | review: pending
+- 2026-09-30 | Task 9 complete | commits: not created (git commit needs user permission; plan in reports/task-9-10.md) | review: pending
+- 2026-09-30 | Task 10 complete | commits: not created (git commit needs user permission; plan in reports/task-9-10.md) | review: pending
+- 2026-09-30 | Task 11 complete | commits: not created (git commit needs user permission; plan in reports/task-11-13.md) | review: pending
+- 2026-09-30 | Task 12 complete | commits: not created (git commit needs user permission; plan in reports/task-11-13.md) | review: pending
+- 2026-09-30 | Task 13 complete | commits: not created (git commit needs user permission; plan in reports/task-11-13.md) | review: pending
+- 2026-09-30 | Task 14 complete | commits: not created (git commit needs user permission; plan in reports/task-14-16.md) | review: pending
+- 2026-09-30 | Task 15 complete | commits: not created (git commit needs user permission; plan in reports/task-14-16.md) | review: pending
+- 2026-09-30 | Task 16 complete | commits: not created (git commit needs user permission; plan in reports/task-14-16.md) | review: pending
+- 2026-09-30 | Task 17 complete | commits: not created (git commit needs user permission; plan in reports/task-17.md) | review: pending
+- 2026-09-30 | Task 20 complete | commits: not created (git commit needs user permission; plan in reports/task-20.md) | review: pending
+- 2026-09-30 | Task 21 complete (native restart proof pending, see report) | commits: not created (git commit needs user permission; plan in reports/task-21.md) | review: pending
+- 2026-09-30 | Task 18 complete | commits: not created (git commit needs user permission; plan in reports/task-18-19.md) | review: pending
+- 2026-09-30 | Task 19 complete | commits: not created (git commit needs user permission; plan in reports/task-18-19.md) | review: pending
+- 2026-09-30 | Task 22 complete | commits: not created (git commit needs user permission; plan in reports/task-22-23.md) | review: pending
+- 2026-09-30 | Task 23 complete | commits: not created (git commit needs user permission; plan in reports/task-22-23.md) | review: pending
+- 2026-09-30 | Task 24 UI fixes (phone sheet closes on navigation, localized invitation link, profile prefetch guard, project-only member lands on a project) complete | commits: not created (git commit needs user permission; plan in reports/task-24.md) | review: pending
+- 2026-09-30 | Task 24 complete (native smoke, desktop-check CI, README, SP2 gate) | commits: not created (git commit needs user permission; plan in reports/task-24.md and reports/sp2-gate.md) | review: pending

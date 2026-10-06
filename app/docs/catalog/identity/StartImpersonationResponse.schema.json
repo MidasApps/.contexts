@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "description": "Answer of POST /v1/platform/impersonation-sessions with the one-time custom token.",
+  "examples": [
+    {
+      "customToken": "eyJhbGciOiJSUzI1NiJ9.eyJpbXAiOiJJbTUifQ.c2ln",
+      "expiresAt": "2026-09-29T15:30:00.000Z",
+      "sessionId": "Im5rT7yU9iO1pA3sD5fG"
+    }
+  ],
+  "properties": {
+    "customToken": {
+      "description": "Custom token for the target user with claims `imp` and `impBy`.",
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "sensitive"
+    },
+    "expiresAt": {
+      "description": "Hard end of the session (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "sessionId": {
+      "description": "Id of the new impersonation session.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "sessionId",
+    "customToken",
+    "expiresAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "sensitive",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

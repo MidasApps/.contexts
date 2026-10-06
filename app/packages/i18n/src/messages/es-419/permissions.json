@@ -1,0 +1,162 @@
+{
+  "core": {
+    "organization": {
+      "read": "Ver la organización",
+      "update": "Cambiar el nombre y los valores predeterminados de la organización",
+      "delete": "Eliminar la organización"
+    },
+    "project": {
+      "read": "Ver proyectos",
+      "create": "Crear proyectos",
+      "update": "Cambiar proyectos",
+      "delete": "Eliminar proyectos"
+    },
+    "unit": {
+      "read": "Ver unidades",
+      "create": "Crear unidades",
+      "update": "Renombrar y mover unidades",
+      "delete": "Eliminar unidades"
+    },
+    "member": {
+      "read": "Ver miembros",
+      "invite": "Invitar a personas",
+      "update": "Cambiar los roles de los miembros",
+      "remove": "Quitar miembros"
+    },
+    "role": {
+      "read": "Ver roles",
+      "create": "Crear roles",
+      "update": "Cambiar roles",
+      "delete": "Eliminar roles"
+    },
+    "api-key": {
+      "read": "Ver claves de API",
+      "create": "Crear claves de API",
+      "revoke": "Revocar claves de API"
+    },
+    "device": {
+      "read": "Ver dispositivos",
+      "create": "Activar dispositivos",
+      "revoke": "Revocar dispositivos"
+    },
+    "audit-log": {
+      "read": "Ver el registro de auditoría"
+    },
+    "approval": {
+      "read": "Ver solicitudes de aprobación",
+      "decide": "Aprobar o rechazar solicitudes"
+    },
+    "chat": {
+      "use": "Usar el chat"
+    },
+    "mcp": {
+      "use": "Usar herramientas MCP"
+    },
+    "web-tools": {
+      "use": "Usar herramientas de búsqueda web"
+    },
+    "knowledge": {
+      "read": "Consultar la base de conocimiento",
+      "write": "Agregar a la base de conocimiento",
+      "delete": "Eliminar de la base de conocimiento"
+    },
+    "catalog": {
+      "read": "Ver el catálogo de datos",
+      "query": "Consultar datos del catálogo"
+    },
+    "connector": {
+      "read": "Ver conectores",
+      "write": "Configurar conectores"
+    },
+    "agent-settings": {
+      "read": "Ver la configuración de agentes",
+      "update": "Cambiar la configuración de agentes"
+    },
+    "usage": {
+      "read": "Ver el uso"
+    },
+    "file": {
+      "upload": "Subir archivos"
+    },
+    "workflow-run": {
+      "read": "Ver ejecuciones de workflows",
+      "start": "Iniciar workflows",
+      "cancel": "Cancelar ejecuciones de workflows",
+      "approve-demo": "Aprobar la acción de la demostración de aprobación"
+    },
+    "schedule": {
+      "read": "Ver programaciones",
+      "write": "Crear y cambiar programaciones"
+    },
+    "trace": {
+      "read": "Ver trazas de los agentes"
+    },
+    "eval": {
+      "read": "Ver evaluaciones",
+      "write": "Iniciar evaluaciones"
+    },
+    "prompt": {
+      "read": "Ver instrucciones de los agentes",
+      "write": "Cambiar instrucciones de los agentes"
+    },
+    "flag": {
+      "read": "Ver funcionalidades de la organización",
+      "write": "Activar y desactivar funcionalidades de la organización"
+    },
+    "conversation": {
+      "send": "Enviar mensajes en las conversaciones",
+      "read": "Ver las propias conversaciones",
+      "update": "Renombrar, fijar y archivar conversaciones",
+      "delete": "Eliminar conversaciones"
+    },
+    "voice": {
+      "use": "Usar la voz en el chat"
+    }
+  },
+  "platform": {
+    "organization": {
+      "read": "Ver organizaciones (equipo)",
+      "update": "Cambiar organizaciones (equipo)"
+    },
+    "user": {
+      "read": "Ver usuarios (equipo)",
+      "impersonate": "Acceder como otro usuario (equipo)"
+    },
+    "audit-log": {
+      "read": "Ver el registro de auditoría (equipo)"
+    },
+    "staff": {
+      "manage": "Gestionar el equipo de la plataforma"
+    },
+    "plan": {
+      "manage": "Gestionar planes"
+    },
+    "agent": {
+      "manage": "Gestionar los agentes de las organizaciones"
+    },
+    "model": {
+      "manage": "Gestionar modelos y precios"
+    },
+    "prompt": {
+      "manage": "Gestionar instrucciones de los agentes"
+    },
+    "connector": {
+      "read": "Ver conectores de las organizaciones"
+    },
+    "eval": {
+      "manage": "Gestionar evaluaciones"
+    },
+    "trace": {
+      "read": "Ver trazas (equipo)"
+    },
+    "usage": {
+      "read": "Ver el uso y los costos (equipo)"
+    },
+    "workflow": {
+      "manage": "Gestionar workflows y programaciones"
+    },
+    "flag": {
+      "manage": "Gestionar funcionalidades (flags)"
+    }
+  }
+}

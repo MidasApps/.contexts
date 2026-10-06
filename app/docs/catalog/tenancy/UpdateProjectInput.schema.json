@@ -1,0 +1,83 @@
+{
+  "additionalProperties": false,
+  "description": "Changes a project (`core.project.update` at the project).",
+  "examples": [
+    {
+      "name": "Launch 2"
+    },
+    {
+      "status": "archived"
+    },
+    {
+      "settings": {
+        "timeZone": null
+      }
+    }
+  ],
+  "properties": {
+    "description": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "New description; null removes it.",
+      "x-pii": "personal"
+    },
+    "name": {
+      "description": "New display name.",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "settings": {
+      "additionalProperties": false,
+      "description": "Regional override changes.",
+      "properties": {
+        "currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "New ISO 4217 currency; null inherits the parent's again.",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "New IANA time zone; null inherits the parent's again.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-pii": "none"
+        }
+      },
+      "type": "object",
+      "x-pii": "none"
+    },
+    "status": {
+      "description": "Archive or reactivate the project.",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.project.update",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "project"
+}

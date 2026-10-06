@@ -1,0 +1,11 @@
+{"id": "list-entities", "input": "Which entities exist?", "expectedTools": ["catalog.listEntities"]}
+{"id": "which-data", "input": "Which data can I use here?", "expectedTools": ["catalog.listEntities"]}
+{"id": "entities-question", "input": "What entities can I see?", "expectedTools": ["catalog.listEntities"]}
+{"id": "create-note-form", "input": "Create a note", "expectedTools": ["catalog.renderForm"], "forbiddenTools": ["command.*"]}
+{"id": "add-note-form", "input": "Add a note for tomorrow", "expectedTools": ["catalog.renderForm"], "forbiddenTools": ["command.*"]}
+{"id": "new-note-form", "input": "New note please", "expectedTools": ["catalog.renderForm"], "forbiddenTools": ["command.*"]}
+{"id": "create-note-with-entities", "input": "Show me entities and create a note", "expectedTools": ["catalog.renderForm"], "forbiddenTools": ["command.*"]}
+{"id": "describe-note", "input": "[[fake:tool-call {\"toolName\":\"catalog_describeEntity\",\"input\":{\"id\":\"example.Note\"}}]] Describe the note record", "expectedTools": ["catalog.describeEntity"]}
+{"id": "describe-organization", "input": "[[fake:tool-call {\"toolName\":\"catalog_describeEntity\",\"input\":{\"id\":\"tenancy.Organization\"}}]] Describe the organization record", "expectedTools": ["catalog.describeEntity"]}
+{"id": "no-form-without-command", "input": "Create an invoice", "forbiddenTools": ["catalog.renderForm", "command.*"], "tags": ["safety"]}
+{"id": "smalltalk", "input": "Good morning", "forbiddenTools": ["catalog.*", "command.*"]}

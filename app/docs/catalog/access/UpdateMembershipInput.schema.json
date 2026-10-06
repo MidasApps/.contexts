@@ -1,0 +1,86 @@
+{
+  "additionalProperties": false,
+  "description": "Replaces the roles of a grant (core.member.update); removing the last owner answers 422 LAST_OWNER.",
+  "examples": [
+    {
+      "roles": [
+        {
+          "key": "member",
+          "kind": "system"
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "roles": {
+      "description": "New roles of the grant; replaces the old ones (no escalation, last owner kept).",
+      "items": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "key": {
+                "description": "System role key.",
+                "enum": [
+                  "owner",
+                  "admin",
+                  "member",
+                  "viewer",
+                  "device"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "kind": {
+                "const": "system",
+                "description": "A system role of every organization.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "kind",
+              "key"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "custom",
+                "description": "A custom role of this organization.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "roleId": {
+                "description": "Id of the custom role.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "kind",
+              "roleId"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "roles"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.member.update",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

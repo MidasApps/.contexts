@@ -1,0 +1,279 @@
+"use client";
+
+import { useQueryClient } from "@tanstack/react-query";
+import { type FormEvent, useState } from "react";
+import { useFormatter, useTranslations } from "use-intl";
+import { knowledgeKeys } from "#/entities/knowledge/index.ts";
+import { useCallEndpoint } from "#/shared/api/api-context.tsx";
+import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
+import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
+import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
+import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#/shared/ui/molecules/Field/Field.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/molecules/Tabs/Tabs.tsx";
+import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
+import {
+  checkKnowledgeFile,
+  isHttpsUrl,
+  KNOWLEDGE_EXTENSIONS,
+  KNOWLEDGE_MAX_BYTES,
+  type KnowledgeFileProblem,
+} from "../model/knowledge-file-policy.ts";
+import { type StartedKnowledgeIngestion, startKnowledgeIngestion } from "../model/start-knowledge-ingestion.ts";
+import { KnowledgeUploadError, type SendBytes, UPLOAD_STEPS, type UploadStep } from "../model/upload-knowledge-file.ts";
+
+// Defined with the code that builds it; re-exported because it is part of the dialog's contract (`onAdded`).
+export type { StartedKnowledgeIngestion } from "../model/start-knowledge-ingestion.ts";
+
+/** Where the new document goes: the whole organization, or one project (`project:<id>`). */
+export type KnowledgeUploadTarget = { readonly projectId?: string | undefined; readonly label: string };
+
+export type AddKnowledgeDocumentDialogProps = {
+  organizationId: string;
+  target: KnowledgeUploadTarget;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAdded?: ((started: StartedKnowledgeIngestion) => void) | undefined;
+  /** The viewer may upload files (core.file.upload); without it only a web page can be added. */
+  fileAllowed?: boolean | undefined;
+  /** Sends the bytes to the signed URL (tests inject one; the default is `fetch`). */
+  sendBytes?: SendBytes | undefined;
+  /** Pause between validation polls (tests pass a no-op). */
+  wait?: ((milliseconds: number) => Promise<void>) | undefined;
+};
+
+type Kind = "file" | "url";
+type Problem = KnowledgeFileProblem | "FILE_REQUIRED" | "URL_INVALID";
+
+const MIB = 1024 * 1024;
+
+function Progress({ step, slow }: { step: UploadStep | null; slow: boolean }) {
+  const t = useTranslations("settings.knowledge.add.steps");
+  if (step === null) return null;
+  return (
+    <p role="status" className="text-sm text-muted-foreground">
+      {t("progress", { current: UPLOAD_STEPS.indexOf(step) + 1, total: UPLOAD_STEPS.length, step: t(step) })}
+      {/* Follow-up 79: a slow first validation is not a failure; say so and keep waiting. */}
+      {slow && step === "validating" ? <span className="block">{t("slow")}</span> : null}
+    </p>
+  );
+}
+
+function Failure({ error }: { error: unknown }) {
+  const t = useTranslations("settings.knowledge.add.failures");
+  if (error === null) return null;
+  if (!(error instanceof KnowledgeUploadError)) return <ApiErrorAlert error={error} />;
+  return (
+    <Alert variant="destructive">
+      <AlertDescription>{t(error.reason)}</AlertDescription>
+    </Alert>
+  );
+}
+
+/** File or page: the two sources as tabs, each with its field and its problem while it is the chosen one. */
+function SourceTabs({
+  kind,
+  onKindChange,
+  pending,
+  fileAllowed,
+  onFile,
+  url,
+  onUrl,
+  problem,
+}: {
+  kind: Kind;
+  onKindChange: (kind: Kind) => void;
+  pending: boolean;
+  fileAllowed: boolean;
+  onFile: (file: File | null) => void;
+  url: string;
+  onUrl: (url: string) => void;
+  problem: Problem | null;
+}) {
+  const t = useTranslations("settings.knowledge.add");
+  const format = useFormatter();
+  const message = problem === null ? undefined : t(`problems.${problem}`, { size: KNOWLEDGE_MAX_BYTES / MIB });
+  const hint = t("fileHint", {
+    types: format.list([...KNOWLEDGE_EXTENSIONS], { type: "conjunction" }),
+    size: KNOWLEDGE_MAX_BYTES / MIB,
+  });
+  return (
+    <Tabs value={kind} onValueChange={(value) => onKindChange(value === "url" ? "url" : "file")}>
+      <TabsList aria-label={t("sourceLabel")}>
+        <TabsTrigger value="file" disabled={pending || !fileAllowed}>
+          {t("fileTab")}
+        </TabsTrigger>
+        <TabsTrigger value="url" disabled={pending}>
+          {t("urlTab")}
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="file">
+        <FieldGroup>
+          <Field>
+            <FieldLabel>{t("file")}</FieldLabel>
+            <FieldControl>
+              <Input
+                type="file"
+                required
+                disabled={pending}
+                accept={KNOWLEDGE_EXTENSIONS.join(",")}
+                onChange={(event) => onFile(event.target.files?.[0] ?? null)}
+              />
+            </FieldControl>
+            <FieldDescription>{hint}</FieldDescription>
+            <FieldError errors={[kind === "file" ? message : undefined]} />
+          </Field>
+        </FieldGroup>
+      </TabsContent>
+      <TabsContent value="url">
+        <FieldGroup>
+          <Field>
+            <FieldLabel>{t("url")}</FieldLabel>
+            <FieldControl>
+              <Input
+                type="url"
+                required
+                disabled={pending}
+                inputMode="url"
+                maxLength={2048}
+                placeholder="https://"
+                value={url}
+                onChange={(event) => onUrl(event.target.value)}
+              />
+            </FieldControl>
+            <FieldDescription>{t("urlHint")}</FieldDescription>
+            <FieldError errors={[kind === "url" ? message : undefined]} />
+          </Field>
+        </FieldGroup>
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+function AddKnowledgeDocumentBody({
+  organizationId,
+  target,
+  onOpenChange,
+  onAdded,
+  sendBytes,
+  wait,
+  fileAllowed = true,
+}: AddKnowledgeDocumentDialogProps) {
+  const t = useTranslations("settings.knowledge.add");
+  const callEndpoint = useCallEndpoint();
+  const queryClient = useQueryClient();
+  const [kind, setKind] = useState<Kind>(fileAllowed ? "file" : "url");
+  const [file, setFile] = useState<File | null>(null);
+  const [url, setUrl] = useState("");
+  const [problem, setProblem] = useState<Problem | null>(null);
+  const [step, setStep] = useState<UploadStep | null>(null);
+  const [slow, setSlow] = useState(false);
+  const [failure, setFailure] = useState<unknown>(null);
+  const [pending, setPending] = useState(false);
+  // Steps 1–3 (ticket, bytes, validation) run while pending: closing then would orphan the upload.
+  useDialogDismissGuard(pending ? "block" : "allow");
+
+  const problemOf = (): Problem | null => {
+    if (kind === "url") return isHttpsUrl(url.trim()) ? null : "URL_INVALID";
+    return file === null ? "FILE_REQUIRED" : checkKnowledgeFile(file);
+  };
+
+  const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    if (pending) return;
+    const found = problemOf();
+    setProblem(found);
+    setFailure(null);
+    if (found !== null) return;
+    setPending(true);
+    try {
+      const started = await startKnowledgeIngestion({
+        callEndpoint,
+        organizationId,
+        projectId: target.projectId,
+        choice: kind === "file" && file !== null ? { kind: "file", file } : { kind: "url", url },
+        onStep: setStep,
+        onSlow: () => setSlow(true),
+        sendBytes,
+        wait,
+      });
+      await queryClient.invalidateQueries({ queryKey: knowledgeKeys.all(organizationId) });
+      notify.success(t("started", { name: started.label }));
+      onAdded?.(started);
+      onOpenChange(false);
+    } catch (error: unknown) {
+      setFailure(error);
+    } finally {
+      setPending(false);
+      setStep(null);
+      setSlow(false);
+    }
+  };
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>{t("title")}</DialogTitle>
+        <DialogDescription>{t("description", { collection: target.label })}</DialogDescription>
+      </DialogHeader>
+      <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
+        <Failure error={failure} />
+        <SourceTabs
+          kind={kind}
+          onKindChange={(next) => {
+            setKind(next);
+            setProblem(null);
+          }}
+          pending={pending}
+          fileAllowed={fileAllowed}
+          onFile={setFile}
+          url={url}
+          onUrl={setUrl}
+          problem={problem}
+        />
+        {fileAllowed ? null : <p className="text-sm text-muted-foreground">{t("fileNotAllowed")}</p>}
+        <Progress step={step} slow={slow} />
+        <DialogFooter>
+          <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
+            {t("cancel")}
+          </Button>
+          <Button type="submit" pending={pending}>
+            {t("submit")}
+          </Button>
+        </DialogFooter>
+      </form>
+    </>
+  );
+}
+
+/**
+ * Adds a document to the knowledge base (core.knowledge.write; a file also needs core.file.upload):
+ * a file goes through the signed upload and its server-side validation, a public https page is
+ * fetched by the runtime. Both end in the ingestion workflow, which indexes in the background.
+ * The body mounts on open, so a draft or a failure never outlives the dialog.
+ */
+export function AddKnowledgeDocumentDialog(props: AddKnowledgeDocumentDialogProps) {
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <AddKnowledgeDocumentBody {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}

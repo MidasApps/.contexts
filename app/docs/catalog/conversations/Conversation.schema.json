@@ -1,0 +1,244 @@
+{
+  "additionalProperties": false,
+  "description": "A chat conversation of a member: title, summary, pin and archive state; the messages live in agent memory.",
+  "examples": [
+    {
+      "activeRunId": null,
+      "activeStreamStartedAt": null,
+      "agentId": "assistant",
+      "archivedAt": null,
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "deletedAt": null,
+      "id": "Cv3xZ5aB7nM9qW1eR2tY",
+      "lastMessageAt": "2026-09-29T15:00:00.000Z",
+      "messageCount": 4,
+      "ownerId": "uA1b2C3d4E5f6G7h8I9j",
+      "pinned": false,
+      "projectId": null,
+      "searchTokens": [
+        "quarterly",
+        "onboarding",
+        "plan"
+      ],
+      "summary": null,
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "title": "Quarterly onboarding plan",
+      "titleSource": "auto",
+      "updatedAt": "2026-09-29T15:00:00.000Z"
+    }
+  ],
+  "properties": {
+    "activeRunId": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Agent run streaming now; null when idle.",
+      "x-pii": "none"
+    },
+    "activeStreamStartedAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "When the active run started; stale after 15 minutes.",
+      "x-pii": "none"
+    },
+    "agentId": {
+      "anyOf": [
+        {
+          "const": "assistant",
+          "type": "string"
+        },
+        {
+          "pattern": "^[A-Za-z0-9]{20}$",
+          "type": "string"
+        }
+      ],
+      "description": "Chat agent that answers.",
+      "x-pii": "none"
+    },
+    "archivedAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "When the owner archived it; null when active.",
+      "x-pii": "none"
+    },
+    "createdAt": {
+      "description": "When the conversation started (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "deletedAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Soft delete; purged 30 days later.",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Firestore automatic id; also the memory thread id.",
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "lastMessageAt": {
+      "description": "When the last turn ended (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "messageCount": {
+      "description": "Turns sent and answered (approximate).",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "ownerId": {
+      "description": "Uid of the member who owns the conversation.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "pinned": {
+      "description": "Pinned conversations are listed first.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "projectId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Project the conversation runs in; null at organization level.",
+      "x-pii": "none"
+    },
+    "searchTokens": {
+      "description": "Lower-case, accent-folded words of the title and summary, for search.",
+      "items": {
+        "maxLength": 64,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array",
+      "x-pii": "personal"
+    },
+    "summary": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Summary made on request; may mention people.",
+      "x-pii": "personal"
+    },
+    "tenantId": {
+      "description": "Owning organization.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Title; generated after the first turn or set by the owner.",
+      "x-pii": "personal"
+    },
+    "titleSource": {
+      "description": "auto until the owner renames it.",
+      "enum": [
+        "auto",
+        "user"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the metadata last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "projectId",
+    "ownerId",
+    "agentId",
+    "title",
+    "titleSource",
+    "summary",
+    "pinned",
+    "archivedAt",
+    "deletedAt",
+    "lastMessageAt",
+    "messageCount",
+    "activeRunId",
+    "activeStreamStartedAt",
+    "searchTokens",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.conversation.read",
+  "x-pii": "personal",
+  "x-relations": [
+    {
+      "field": "tenantId",
+      "target": "tenancy.Organization",
+      "type": "belongs-to"
+    }
+  ],
+  "x-tenancyScope": "user"
+}

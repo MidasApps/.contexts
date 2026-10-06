@@ -1,0 +1,52 @@
+{
+  "additionalProperties": false,
+  "description": "Rates an assistant message with thumbs up or down and an optional comment.",
+  "examples": [
+    {
+      "addToDataset": true,
+      "comment": "The answer cited the wrong document.",
+      "messageId": "msg_01J8Z3K4M5",
+      "rating": "down"
+    }
+  ],
+  "properties": {
+    "addToDataset": {
+      "description": "Also add the turn to the tenant dataset `feedback`.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "comment": {
+      "description": "Optional comment of the user.",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "messageId": {
+      "description": "Assistant message rated.",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "rating": {
+      "description": "Thumbs up or down.",
+      "enum": [
+        "up",
+        "down"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "messageId",
+    "rating"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.chat.use",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

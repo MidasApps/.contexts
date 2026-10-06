@@ -1,0 +1,100 @@
+{
+  "additionalProperties": false,
+  "description": "Metadata of a chat message: conversation, agent, answer confidence and attachments.",
+  "examples": [
+    {
+      "agentId": "assistant",
+      "attachments": [
+        {
+          "fileId": "Fz9sK2lPq0WnR5tYu3bV",
+          "mediaType": "image/png",
+          "name": "diagram.png",
+          "sizeBytes": 48213
+        }
+      ],
+      "confidence": "normal",
+      "conversationId": "Cv3xZ5aB7nM9qW1eR2tY"
+    }
+  ],
+  "properties": {
+    "agentId": {
+      "anyOf": [
+        {
+          "const": "assistant",
+          "type": "string"
+        },
+        {
+          "pattern": "^[A-Za-z0-9]{20}$",
+          "type": "string"
+        }
+      ],
+      "description": "Agent that answered.",
+      "x-pii": "none"
+    },
+    "attachments": {
+      "description": "Files attached to a user message.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "fileId": {
+            "description": "Uploaded file id.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "mediaType": {
+            "description": "Media type detected from the bytes.",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Original file name.",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "sizeBytes": {
+            "description": "Size in bytes.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "fileId",
+          "name",
+          "mediaType",
+          "sizeBytes"
+        ],
+        "type": "object"
+      },
+      "maxItems": 10,
+      "type": "array",
+      "x-pii": "personal"
+    },
+    "confidence": {
+      "description": "low when the answer is not grounded in its citations.",
+      "enum": [
+        "low",
+        "normal"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "conversationId": {
+      "description": "Conversation of the message.",
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

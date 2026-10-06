@@ -1,0 +1,57 @@
+{
+  "additionalProperties": false,
+  "description": "Text transcribed from a push-to-talk recording, put in the prompt for review.",
+  "examples": [
+    {
+      "durationInSeconds": 3.2,
+      "language": "en",
+      "text": "Summarize the onboarding guide."
+    }
+  ],
+  "properties": {
+    "durationInSeconds": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Audio length, when known.",
+      "x-pii": "none"
+    },
+    "language": {
+      "anyOf": [
+        {
+          "maxLength": 35,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Detected language (BCP 47), when the model reports it.",
+      "x-pii": "none"
+    },
+    "text": {
+      "description": "What the member said.",
+      "maxLength": 20000,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "text",
+    "language",
+    "durationInSeconds"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.voice.use",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

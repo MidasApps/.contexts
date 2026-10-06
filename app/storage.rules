@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// Deny all direct client access (umbrella §16.2). Uploads go through
+// `POST /v1/organizations/{organizationId}/files`, which answers a V4 signed PUT URL
+// (15 min, fixed Content-Type, x-goog-content-length-range) for a server-generated
+// path `tenants/{tenantId}/files/{fileId}`; signed URLs bypass these rules by design.
+// Reads are 5-minute signed URLs from `GET /v1/files/{fileId}/read-url`. onObjectFinalized
+// checks the magic bytes and deletes rejected objects.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

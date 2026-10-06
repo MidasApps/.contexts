@@ -1,0 +1,108 @@
+{
+  "additionalProperties": false,
+  "description": "An organization: the tenant that owns projects, units, roles and memberships.",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "defaults": {
+        "currency": "BRL",
+        "locale": "pt-BR",
+        "timeZone": "America/Sao_Paulo"
+      },
+      "id": "Jd8sK2lPq0WnR5tYu3bV",
+      "name": "Northwind",
+      "status": "active",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "updatedAt": "2026-09-29T15:00:00.000Z"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the organization was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "defaults": {
+      "additionalProperties": false,
+      "description": "Regional defaults: locale, time zone and currency.",
+      "properties": {
+        "currency": {
+          "description": "Default ISO 4217 currency for new amounts.",
+          "pattern": "^[A-Z]{3}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "locale": {
+          "description": "Default BCP 47 locale when the user has no preference.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "Default IANA time zone; projects and units may override it.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "locale",
+        "timeZone",
+        "currency"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Automatic id of the organization; equals tenantId.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the organization.",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "status": {
+      "description": "`suspended` denies every tenant permission until reactivated.",
+      "enum": [
+        "active",
+        "suspended"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Tenant id; an organization is its own tenant (decision 0006).",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the organization last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "name",
+    "status",
+    "defaults",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.organization.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

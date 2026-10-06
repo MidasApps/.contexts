@@ -1,0 +1,93 @@
+{
+  "additionalProperties": false,
+  "description": "Daily model usage and cost of an organization per model and agent.",
+  "examples": [
+    {
+      "agentId": "assistant",
+      "calls": 42,
+      "costMicroUsd": 61000,
+      "day": "2026-09-30",
+      "inputTokens": 50000,
+      "model": "gemini-3.5-flash",
+      "outputTokens": 12000,
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+    }
+  ],
+  "properties": {
+    "agentId": {
+      "description": "Agent that made the calls.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "calls": {
+      "description": "Model calls.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "costMicroUsd": {
+      "description": "Known cost in micro-USD.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "day": {
+      "description": "Calendar day in UTC, YYYY-MM-DD.",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "inputTokens": {
+      "description": "Prompt tokens.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "model": {
+      "description": "Provider model id.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "outputTokens": {
+      "description": "Completion tokens.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "tenantId",
+    "day",
+    "model",
+    "agentId",
+    "calls",
+    "inputTokens",
+    "outputTokens",
+    "costMicroUsd"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.usage.read",
+  "x-pii": "none",
+  "x-relations": [
+    {
+      "field": "tenantId",
+      "target": "tenancy.Organization",
+      "type": "belongs-to"
+    }
+  ],
+  "x-tenancyScope": "organization"
+}

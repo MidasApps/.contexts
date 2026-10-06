@@ -1,0 +1,47 @@
+{
+  "additionalProperties": false,
+  "description": "Locale, display time zone, node time zone and currency resolved for a user at a node.",
+  "examples": [
+    {
+      "currency": "BRL",
+      "displayTimeZone": "America/Sao_Paulo",
+      "locale": "pt-BR",
+      "nodeTimeZone": "America/Manaus"
+    }
+  ],
+  "properties": {
+    "currency": {
+      "description": "Default currency for new amounts at the node (unit, project, organization).",
+      "pattern": "^[A-Z]{3}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "displayTimeZone": {
+      "description": "Time zone to display dates in: user preference, else nodeTimeZone.",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "locale": {
+      "description": "User preference, else the organization default.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "nodeTimeZone": {
+      "description": "Time zone of the node (unit, project, organization) for calendar rules.",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "locale",
+    "displayTimeZone",
+    "nodeTimeZone",
+    "currency"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

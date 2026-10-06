@@ -1,0 +1,35 @@
+{
+  "additionalProperties": false,
+  "description": "Writes a new prompt version; nothing is ever updated in place.",
+  "examples": [
+    {
+      "body": "Always cite the knowledge base documents you used.",
+      "note": "Tenant policy on citations."
+    }
+  ],
+  "properties": {
+    "body": {
+      "description": "Prompt text of the new version.",
+      "maxLength": 50000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "note": {
+      "description": "Why the prompt changes.",
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "body"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.prompt.write",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

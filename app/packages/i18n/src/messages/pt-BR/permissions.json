@@ -1,0 +1,162 @@
+{
+  "core": {
+    "organization": {
+      "read": "Ver a organização",
+      "update": "Alterar nome e padrões da organização",
+      "delete": "Excluir a organização"
+    },
+    "project": {
+      "read": "Ver projetos",
+      "create": "Criar projetos",
+      "update": "Alterar projetos",
+      "delete": "Excluir projetos"
+    },
+    "unit": {
+      "read": "Ver unidades",
+      "create": "Criar unidades",
+      "update": "Renomear e mover unidades",
+      "delete": "Excluir unidades"
+    },
+    "member": {
+      "read": "Ver membros",
+      "invite": "Convidar pessoas",
+      "update": "Alterar papéis de membros",
+      "remove": "Remover membros"
+    },
+    "role": {
+      "read": "Ver papéis",
+      "create": "Criar papéis",
+      "update": "Alterar papéis",
+      "delete": "Excluir papéis"
+    },
+    "api-key": {
+      "read": "Ver chaves de API",
+      "create": "Criar chaves de API",
+      "revoke": "Revogar chaves de API"
+    },
+    "device": {
+      "read": "Ver dispositivos",
+      "create": "Ativar dispositivos",
+      "revoke": "Revogar dispositivos"
+    },
+    "audit-log": {
+      "read": "Ver o registro de auditoria"
+    },
+    "approval": {
+      "read": "Ver pedidos de aprovação",
+      "decide": "Aprovar ou recusar pedidos"
+    },
+    "chat": {
+      "use": "Usar o chat"
+    },
+    "mcp": {
+      "use": "Usar ferramentas MCP"
+    },
+    "web-tools": {
+      "use": "Usar ferramentas de busca na web"
+    },
+    "knowledge": {
+      "read": "Consultar a base de conhecimento",
+      "write": "Adicionar à base de conhecimento",
+      "delete": "Excluir da base de conhecimento"
+    },
+    "catalog": {
+      "read": "Ver o catálogo de dados",
+      "query": "Consultar dados do catálogo"
+    },
+    "connector": {
+      "read": "Ver conectores",
+      "write": "Configurar conectores"
+    },
+    "agent-settings": {
+      "read": "Ver configurações de agentes",
+      "update": "Alterar configurações de agentes"
+    },
+    "usage": {
+      "read": "Ver o uso"
+    },
+    "file": {
+      "upload": "Enviar arquivos"
+    },
+    "workflow-run": {
+      "read": "Ver execuções de workflows",
+      "start": "Iniciar workflows",
+      "cancel": "Cancelar execuções de workflows",
+      "approve-demo": "Aprovar a ação da demonstração de aprovação"
+    },
+    "schedule": {
+      "read": "Ver agendamentos",
+      "write": "Criar e alterar agendamentos"
+    },
+    "trace": {
+      "read": "Ver traces dos agentes"
+    },
+    "eval": {
+      "read": "Ver avaliações",
+      "write": "Iniciar avaliações"
+    },
+    "prompt": {
+      "read": "Ver instruções dos agentes",
+      "write": "Alterar instruções dos agentes"
+    },
+    "flag": {
+      "read": "Ver funcionalidades da organização",
+      "write": "Ligar e desligar funcionalidades da organização"
+    },
+    "conversation": {
+      "send": "Enviar mensagens nas conversas",
+      "read": "Ver as próprias conversas",
+      "update": "Renomear, fixar e arquivar conversas",
+      "delete": "Excluir conversas"
+    },
+    "voice": {
+      "use": "Usar a voz no chat"
+    }
+  },
+  "platform": {
+    "organization": {
+      "read": "Ver organizações (equipe)",
+      "update": "Alterar organizações (equipe)"
+    },
+    "user": {
+      "read": "Ver usuários (equipe)",
+      "impersonate": "Acessar como outro usuário (equipe)"
+    },
+    "audit-log": {
+      "read": "Ver o registro de auditoria (equipe)"
+    },
+    "staff": {
+      "manage": "Gerenciar a equipe da plataforma"
+    },
+    "plan": {
+      "manage": "Gerenciar planos"
+    },
+    "agent": {
+      "manage": "Gerenciar agentes das organizações"
+    },
+    "model": {
+      "manage": "Gerenciar modelos e preços"
+    },
+    "prompt": {
+      "manage": "Gerenciar instruções dos agentes"
+    },
+    "connector": {
+      "read": "Ver conectores das organizações"
+    },
+    "eval": {
+      "manage": "Gerenciar avaliações"
+    },
+    "trace": {
+      "read": "Ver traces (equipe)"
+    },
+    "usage": {
+      "read": "Ver o uso e os custos (equipe)"
+    },
+    "workflow": {
+      "manage": "Gerenciar workflows e agendamentos"
+    },
+    "flag": {
+      "manage": "Gerenciar funcionalidades (flags)"
+    }
+  }
+}

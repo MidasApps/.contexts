@@ -1,0 +1,100 @@
+// Emulator test harness for `/v1` route tests: the real core server over the Firestore and
+// Auth emulators, with a fake token verifier (`Bearer token-<uid>` → that user).
+import type { Firestore } from "firebase-admin/firestore";
+import { type CoreServer, type CoreServerModule, createCoreServer } from "../../composition.ts";
+import { createFakeTokenVerifier } from "../../identity/adapters/driven/fake-token-verifier.ts";
+import type { Clock } from "../clock/clock.ts";
+import { createFirebaseAdmin, type FirebaseAdmin } from "../firebase/firebase-admin.ts";
+import { CORE_COLLECTIONS } from "../firestore/collections.ts";
+import { createLogger, type LogRecord } from "../observability/logger.ts";
+
+/** Firebase Admin bound to the emulators exported by `firebase emulators:exec`. */
+export const emulatorFirebase = (): FirebaseAdmin =>
+  createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: process.env });
+
+/** Deletes every core collection the route tests touch (one emulator per run, files run serially). */
+export const clearCoreCollections = async (firestore: Firestore): Promise<void> => {
+  const names = [
+    ...Object.values(CORE_COLLECTIONS),
+    "audit-logs",
+    "platform-audit-logs",
+    "rate-limit-buckets",
+    "idempotency-records",
+  ];
+  await Promise.all(names.map((name) => firestore.recursiveDelete(firestore.collection(name))));
+};
+
+/** Seeds an active `users/{uid}` doc with the fields access reads. */
+export const seedActiveUser = async (firestore: Firestore, uid: string): Promise<void> => {
+  await firestore
+    .collection(CORE_COLLECTIONS.users)
+    .doc(uid)
+    .set({ status: "active", accessVersion: 0, lastContext: {} });
+};
+
+/**
+ * Makes sure an Auth Emulator account with an email exists (createOrganization reads its
+ * profile); `email` and `emailVerified` default to `<uid>@example.com`, unverified.
+ */
+export const ensureAuthUser = async (
+  auth: FirebaseAdmin["auth"],
+  uid: string,
+  account: { email?: string; emailVerified?: boolean } = {},
+): Promise<void> => {
+  const email = account.email ?? `${uid}@example.com`;
+  try {
+    await auth.getUser(uid);
+    await auth.updateUser(uid, { email, emailVerified: account.emailVerified ?? false });
+  } catch {
+    // auth/user-not-found: create it; any other failure resurfaces in createUser.
+    await auth.createUser({ uid, email, emailVerified: account.emailVerified ?? false, displayName: uid });
+  }
+};
+
+/** Base URL of invitation links built by the emulator server. */
+export const EMULATOR_APP_URL = "https://app.example.com";
+
+type CallArgs = { readonly method: string; readonly path: string; readonly as?: string; readonly body?: unknown };
+
+/**
+ * Builds the core server with a fake verifier that accepts `token-<uid>` for every uid in
+ * `uids`, and `call(endpointId, { method, path, as, body })` to drive a route.
+ */
+export const buildEmulatorServer = (args: {
+  firebase: FirebaseAdmin;
+  uids: readonly string[];
+  modules?: readonly CoreServerModule[];
+  selfServe?: boolean;
+  clock?: Clock;
+}): { server: CoreServer; call: (endpointId: string, request: CallArgs) => Promise<Response>; logs: LogRecord[] } => {
+  const logs: LogRecord[] = [];
+  const tokens = Object.fromEntries(
+    args.uids.map((uid) => [`token-${uid}`, { uid, claims: {}, signInProvider: "password", secondFactor: null }]),
+  );
+  const base = {
+    env: {
+      API_KEY_PREFIX: "core",
+      ORGANIZATION_SELF_SERVE: args.selfServe ?? true,
+      NEXT_PUBLIC_APP_URL: EMULATOR_APP_URL,
+    },
+    ...(args.clock === undefined ? {} : { clock: args.clock }),
+    firebase: args.firebase,
+    logger: createLogger({ context: { service: "test", env: "local" }, sink: (record) => logs.push(record) }),
+    ...(args.modules === undefined ? {} : { modules: args.modules }),
+    adapters: { tokenVerifier: createFakeTokenVerifier({ tokens }) },
+  };
+  const server = createCoreServer(base);
+  const call = async (endpointId: string, request: CallArgs): Promise<Response> => {
+    const handler = server.routes[endpointId];
+    if (handler === undefined) throw new Error(`no handler for ${endpointId}`);
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    if (request.as !== undefined) headers["authorization"] = `Bearer token-${request.as}`;
+    const init: RequestInit = {
+      method: request.method,
+      headers,
+      ...(request.body === undefined ? {} : { body: JSON.stringify(request.body) }),
+    };
+    return handler(new Request(`http://localhost${request.path}`, init));
+  };
+  return { server, call, logs };
+};

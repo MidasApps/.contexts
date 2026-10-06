@@ -1,0 +1,104 @@
+{
+  "additionalProperties": false,
+  "description": "A progress event of a workflow run, streamed as server-sent events.",
+  "examples": [
+    {
+      "index": 0,
+      "occurredAt": "2026-09-30T12:00:00.000Z",
+      "status": "running",
+      "stepId": null,
+      "type": "workflow-start"
+    },
+    {
+      "index": 3,
+      "occurredAt": "2026-09-30T12:00:01.000Z",
+      "status": "suspended",
+      "stepId": "request-human-approval",
+      "type": "workflow-step-suspended"
+    }
+  ],
+  "properties": {
+    "index": {
+      "description": "Position in the run's stream; the SSE `id`, used by `Last-Event-Id`.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "occurredAt": {
+      "description": "When the event was emitted (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "output": {
+      "description": "Step output, redacted by the workflow schema's pii meta.",
+      "x-pii": "personal"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "pending",
+            "running",
+            "waiting",
+            "suspended",
+            "paused",
+            "success",
+            "failed",
+            "canceled",
+            "tripwire"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Step or run status carried by the event.",
+      "x-pii": "none"
+    },
+    "stepId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Step the event is about; null for run-level events.",
+      "x-pii": "none"
+    },
+    "type": {
+      "description": "Mastra event type.",
+      "enum": [
+        "workflow-start",
+        "workflow-step-start",
+        "workflow-step-output",
+        "workflow-step-progress",
+        "workflow-step-result",
+        "workflow-step-suspended",
+        "workflow-finish",
+        "workflow-canceled"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "index",
+    "type",
+    "stepId",
+    "status",
+    "occurredAt"
+  ],
+  "type": "object",
+  "x-kind": "event",
+  "x-permission": "core.workflow-run.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

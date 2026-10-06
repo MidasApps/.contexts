@@ -1,0 +1,202 @@
+{
+  "additionalProperties": false,
+  "description": "Profile, preferences, staff flags, capabilities and access version of the signed-in user.",
+  "examples": [
+    {
+      "accessVersion": 3,
+      "capabilities": {
+        "createOrganization": true
+      },
+      "displayName": "Ana Souza",
+      "email": "ana@example.com",
+      "isPlatformStaff": false,
+      "lastContext": {
+        "organizationId": "Jd8sK2lPq0WnR5tYu3bV",
+        "projectId": "Pq4rS6tU8vW0xY2zA1bC"
+      },
+      "mfaEnrolled": true,
+      "preferences": {
+        "locale": "pt-BR",
+        "notifications": {
+          "productUpdates": false,
+          "securityAlerts": true
+        },
+        "theme": "system"
+      },
+      "uid": "uA1b2C3d4E5f6G7h8I9j"
+    }
+  ],
+  "properties": {
+    "accessVersion": {
+      "description": "Bumped on every grant change; a newer value than the token's means stale claims.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "capabilities": {
+      "additionalProperties": false,
+      "description": "Actions the UI may offer the caller; it hides the ones the server would refuse.",
+      "properties": {
+        "createOrganization": {
+          "description": "Whether POST /v1/organizations would let the caller in (self-serve on, or MFA platform staff; never under impersonation).",
+          "type": "boolean",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "createOrganization"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "displayName": {
+      "description": "Name shown to other members; may be empty.",
+      "maxLength": 120,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "email": {
+      "description": "Email address of the Firebase Auth account.",
+      "format": "email",
+      "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "isPlatformStaff": {
+      "description": "Whether an active platform-staff doc exists for the user.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "lastContext": {
+      "additionalProperties": false,
+      "description": "Last organization, project and unit used.",
+      "properties": {
+        "organizationId": {
+          "description": "Active organization.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "projectId": {
+          "description": "Last project.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "unitId": {
+          "description": "Last unit.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "type": "object",
+      "x-pii": "none"
+    },
+    "mfaEnrolled": {
+      "description": "Whether the account has at least one second factor enrolled.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "photoUrl": {
+      "description": "Profile photo URL.",
+      "format": "uri",
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "platformRole": {
+      "description": "Staff role; present only for active staff.",
+      "enum": [
+        "platform-admin",
+        "platform-support"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "preferences": {
+      "additionalProperties": false,
+      "description": "Locale, time zone, currency, theme, notifications.",
+      "properties": {
+        "currency": {
+          "description": "Preferred ISO 4217 currency for display.",
+          "pattern": "^[A-Z]{3}$",
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "locale": {
+          "description": "Preferred BCP 47 locale; absent uses the organization default.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "notifications": {
+          "additionalProperties": false,
+          "description": "Notification opt-ins.",
+          "properties": {
+            "productUpdates": {
+              "description": "Receive product update notices.",
+              "type": "boolean",
+              "x-pii": "none"
+            },
+            "securityAlerts": {
+              "const": true,
+              "description": "Security alerts are always on.",
+              "type": "boolean",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "productUpdates",
+            "securityAlerts"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "theme": {
+          "description": "Color theme.",
+          "enum": [
+            "system",
+            "light",
+            "dark"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "Preferred IANA time zone for display; absent uses the node's.",
+          "type": "string",
+          "x-pii": "personal"
+        }
+      },
+      "required": [
+        "theme",
+        "notifications"
+      ],
+      "type": "object",
+      "x-pii": "personal"
+    },
+    "uid": {
+      "description": "Firebase Auth uid.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "uid",
+    "email",
+    "displayName",
+    "preferences",
+    "lastContext",
+    "accessVersion",
+    "isPlatformStaff",
+    "mfaEnrolled",
+    "capabilities"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

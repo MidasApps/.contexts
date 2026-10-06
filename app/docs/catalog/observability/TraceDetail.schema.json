@@ -1,0 +1,341 @@
+{
+  "additionalProperties": false,
+  "description": "A trace with its span tree, tokens, cost and redacted inputs and outputs.",
+  "examples": [
+    {
+      "spans": [
+        {
+          "costMicroUsd": 900,
+          "durationMs": 2400,
+          "input": null,
+          "inputTokens": 1800,
+          "model": null,
+          "name": "agent run: assistant",
+          "output": null,
+          "outputTokens": 350,
+          "parentSpanId": null,
+          "spanId": "00f067aa0ba902b7",
+          "startedAt": "2026-09-30T12:00:00.000Z",
+          "status": "ok",
+          "type": "agent_run"
+        }
+      ],
+      "summary": {
+        "agentId": "assistant",
+        "costMicroUsd": 900,
+        "durationMs": 2400,
+        "inputTokens": 1800,
+        "name": "agent run: assistant",
+        "outputTokens": 350,
+        "spanCount": 7,
+        "startedAt": "2026-09-30T12:00:00.000Z",
+        "status": "ok",
+        "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+        "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+        "workflowId": null
+      }
+    }
+  ],
+  "properties": {
+    "spans": {
+      "description": "Spans, parents before children.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "costMicroUsd": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Cost in micro-USD; null when a model price is unknown.",
+            "x-pii": "none"
+          },
+          "durationMs": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Duration in milliseconds; null while running.",
+            "x-pii": "none"
+          },
+          "input": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Redacted span input.",
+            "x-pii": "personal"
+          },
+          "inputTokens": {
+            "description": "Prompt tokens.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Model of a generation span.",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Span name (operation).",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "output": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Redacted span output.",
+            "x-pii": "personal"
+          },
+          "outputTokens": {
+            "description": "Completion tokens.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "parentSpanId": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{16}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Parent span; null for the root.",
+            "x-pii": "none"
+          },
+          "spanId": {
+            "description": "Span id.",
+            "pattern": "^[0-9a-f]{16}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "startedAt": {
+            "description": "Start (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "Span status.",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "type": {
+            "description": "Mastra span type (agent_run, model_generation, tool_call, workflow_step, ...).",
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "spanId",
+          "parentSpanId",
+          "name",
+          "type",
+          "status",
+          "model",
+          "input",
+          "output",
+          "startedAt",
+          "durationMs",
+          "inputTokens",
+          "outputTokens",
+          "costMicroUsd"
+        ],
+        "type": "object"
+      },
+      "maxItems": 2000,
+      "type": "array",
+      "x-pii": "personal"
+    },
+    "summary": {
+      "additionalProperties": false,
+      "description": "The trace as listed.",
+      "properties": {
+        "agentId": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Agent of the root span, if any.",
+          "x-pii": "none"
+        },
+        "costMicroUsd": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Cost in micro-USD; null when a model price is unknown.",
+          "x-pii": "none"
+        },
+        "durationMs": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Duration in milliseconds; null while running.",
+          "x-pii": "none"
+        },
+        "inputTokens": {
+          "description": "Prompt tokens.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "name": {
+          "description": "Root span name (agent or workflow run).",
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "outputTokens": {
+          "description": "Completion tokens.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "spanCount": {
+          "description": "Number of spans.",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "startedAt": {
+          "description": "Start (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "status": {
+          "description": "`error` when any span failed.",
+          "enum": [
+            "ok",
+            "error"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "tenantId": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Organization of the trace; null for platform jobs.",
+          "x-pii": "none"
+        },
+        "traceId": {
+          "description": "Trace id.",
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "workflowId": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Workflow of the root span, if any.",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "traceId",
+        "tenantId",
+        "name",
+        "agentId",
+        "workflowId",
+        "status",
+        "spanCount",
+        "startedAt",
+        "durationMs",
+        "inputTokens",
+        "outputTokens",
+        "costMicroUsd"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "summary",
+    "spans"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.trace.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

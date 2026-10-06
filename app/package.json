@@ -1,0 +1,41 @@
+{
+  "name": "@core/workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.ts",
+    "dev:desktop": "pnpm -F @core/desktop tauri:dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test --concurrency=2",
+    "test:e2e": "node scripts/e2e.ts",
+    "test:emulators": "node scripts/test-emulators.ts",
+    "test:postgres": "turbo run test:postgres",
+    "evals": "turbo run evals",
+    "evals:real": "turbo run evals:real",
+    "evals:seed": "pnpm -F @core/mastra evals:seed",
+    "evals:publish": "node scripts/evals-publish.ts",
+    "contracts:catalog": "turbo run contracts:catalog",
+    "contracts:check": "turbo run contracts:check",
+    "i18n:check": "turbo run i18n:check",
+    "seed:local": "node scripts/seed-local.ts",
+    "platform:grant-staff": "node scripts/grant-platform-staff.ts",
+    "users:backfill-search-names": "node scripts/backfill-user-search-names.ts",
+    "db:generate": "pnpm -F @core/services db:generate",
+    "db:migrate": "node scripts/db-migrate.ts",
+    "format": "biome format --write .",
+    "format:check": "biome format ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@core/module-example": "workspace:*",
+    "firebase-tools": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
+  }
+}

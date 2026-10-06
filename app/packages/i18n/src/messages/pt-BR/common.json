@@ -1,0 +1,380 @@
+{
+  "unitTypes": {
+    "unit": "Unidade"
+  },
+  "actions": {
+    "save": "Salvar",
+    "signInAgain": "Entrar novamente",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "continue": "Continuar",
+    "back": "Voltar",
+    "retry": "Tentar novamente",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "create": "Criar"
+  },
+  "states": {
+    "loading": "Carregando…",
+    "saving": "Salvando…",
+    "saved": "Alterações salvas.",
+    "offline": "Você está sem conexão. Algumas ações ficam indisponíveis até a conexão voltar."
+  },
+  "errorWithReference": "Algo deu errado. Referência: {requestId}",
+  "itemCount": "{count, plural, =0 {Nenhum item} one {# item} other {# itens}}",
+  "presence": {
+    "online": "Online",
+    "away": "Ausente",
+    "busy": "Ocupado",
+    "offline": "Offline"
+  },
+  "copy": {
+    "copy": "Copiar",
+    "copied": "Copiado para a área de transferência.",
+    "failed": "Não foi possível copiar. Selecione o texto e copie manualmente.",
+    "reveal": "Mostrar valor",
+    "hide": "Ocultar valor"
+  },
+  "search": {
+    "label": "Buscar",
+    "placeholder": "Buscar…",
+    "clear": "Limpar busca",
+    "noResults": "Nenhum resultado encontrado.",
+    "results": "Resultados"
+  },
+  "navigation": {
+    "breadcrumb": "Trilha de navegação",
+    "more": "Mais"
+  },
+  "pickers": {
+    "currency": {
+      "placeholder": "Selecione uma moeda",
+      "search": "Buscar moeda",
+      "empty": "Nenhuma moeda encontrada."
+    },
+    "timeZone": {
+      "placeholder": "Selecione um fuso horário",
+      "search": "Buscar fuso horário",
+      "empty": "Nenhum fuso horário encontrado."
+    },
+    "locale": {
+      "placeholder": "Selecione um idioma"
+    }
+  },
+  "money": {
+    "invalid": "Digite um valor válido, por exemplo {example}.",
+    "tooManyDigits": "Use no máximo {digits, plural, =0 {nenhuma casa decimal} one {# casa decimal} other {# casas decimais}}."
+  },
+  "errorState": {
+    "title": "Não foi possível carregar",
+    "description": "Algo deu errado do nosso lado. Tente novamente em instantes.",
+    "reference": "Referência: {requestId}",
+    "messageWithReference": "{message} Referência: {requestId}"
+  },
+  "noAccess": {
+    "title": "Você não tem acesso a esta página",
+    "description": "Peça a um administrador da organização para liberar o acesso."
+  },
+  "notifications": {
+    "region": "Notificações",
+    "dismiss": "Dispensar notificação"
+  },
+  "pagination": {
+    "label": "Paginação",
+    "previous": "Anterior",
+    "next": "Próxima"
+  },
+  "form": {
+    "required": "obrigatório",
+    "submitFailedTitle": "Não foi possível salvar",
+    "savedTitle": "Alterações salvas",
+    "unavailableFields": "Alguns dados que não podem ser editados aqui estão inválidos. Recarregue a página e tente novamente.",
+    "selectPlaceholder": "Selecione uma opção",
+    "timeZoneHint": "Data e hora no fuso {timeZone}.",
+    "errors": {
+      "required": "Preencha este campo.",
+      "tooShort": "Use pelo menos {minimum, plural, one {# caractere} other {# caracteres}}.",
+      "tooLong": "Use no máximo {maximum, plural, one {# caractere} other {# caracteres}}.",
+      "tooSmall": "Informe um valor maior ou igual a {minimum}.",
+      "tooBig": "Informe um valor menor ou igual a {maximum}.",
+      "notInteger": "Informe um número inteiro.",
+      "invalidFormat": "O formato deste campo é inválido.",
+      "invalidOption": "Escolha uma das opções disponíveis.",
+      "invalid": "Revise este campo."
+    }
+  },
+  "password": {
+    "show": "Mostrar senha"
+  },
+  "oneTimeSecret": {
+    "confirmFirst": "Confirme que guardou o segredo para concluir."
+  },
+  "dialogGuard": {
+    "unsaved": {
+      "title": "Descartar alterações?",
+      "description": "O que você alterou neste diálogo será perdido.",
+      "confirm": "Descartar",
+      "cancel": "Continuar editando"
+    },
+    "oneTime": {
+      "title": "Fechar sem guardar?",
+      "description": "Este valor não será mostrado de novo. Para obter outro, será preciso gerar um novo.",
+      "confirm": "Fechar mesmo assim",
+      "cancel": "Voltar"
+    }
+  },
+  "pageTitles": {
+    "signIn": "Entrar",
+    "invite": "Convite",
+    "signUp": "Criar conta",
+    "resetPassword": "Redefinir senha",
+    "home": "Início",
+    "organizations": "Organizações",
+    "organization": "Organização",
+    "project": "Projeto",
+    "module": "Módulo",
+    "settings": "Configurações",
+    "profile": "Perfil",
+    "admin": "Administração",
+    "notFound": "Página não encontrada",
+    "chat": "Assistente",
+    "docs": "Documentação"
+  },
+  "approvals": {
+    "status": {
+      "pending": "Pendente",
+      "approved": "Aprovada",
+      "rejected": "Recusada",
+      "cancelled": "Cancelada",
+      "expired": "Expirada",
+      "executed": "Executada",
+      "failed": "Falhou"
+    },
+    "item": {
+      "expires": "Expira em {when}",
+      "requestedBy": "Pedida por {requester}",
+      "requester": "Solicitante",
+      "node": "Onde:",
+      "when": "Prazo",
+      "updated": "Atualizada em {when}",
+      "reason": "Motivo informado: {reason}",
+      "failed": "A ação foi aprovada, mas não foi executada. Peça a quem a solicitou para pedir de novo.",
+      "failureReason": {
+        "EXECUTION_INTERRUPTED": "A execução foi interrompida antes de terminar. Confira se a ação teve efeito antes de pedir de novo.",
+        "UNKNOWN_APPROVAL_ACTION": "Este app não reconhece mais esta ação.",
+        "other": "A ação deu erro ao executar."
+      },
+      "failureReference": "Referência: {requestId} ({code})"
+    },
+    "preview": {
+      "before": "Antes",
+      "after": "Depois",
+      "none": "Sem prévia disponível.",
+      "viewRun": "Ver o progresso do fluxo"
+    },
+    "menu": {
+      "label": "Aprovações",
+      "labelWithWaiting": "Aprovações, {count, plural, one {# aguardando sua decisão} other {# aguardando sua decisão}}",
+      "triggerWithWaiting": "{name}, menu da conta, {count, plural, one {# aprovação aguardando sua decisão} other {# aprovações aguardando sua decisão}}"
+    }
+  },
+  "traceViewer": {
+    "title": "{count, plural, =0 {Nenhum span} one {# span} other {# spans}}",
+    "status": {
+      "ok": "OK",
+      "error": "Erro"
+    },
+    "running": "Em execução",
+    "unknownCost": "Preço desconhecido",
+    "model": "Modelo",
+    "duration": "Duração",
+    "tokens": "Tokens",
+    "tokensValue": "{input} de entrada · {output} de saída",
+    "cost": "Custo",
+    "payload": "Entrada e saída",
+    "payloadOf": "Entrada e saída de {name}",
+    "inputOf": "Entrada de {name}",
+    "outputOf": "Saída de {name}",
+    "collapse": "Recolher os spans de {name}",
+    "expand": "Expandir os spans de {name}",
+    "childrenOf": "Spans de {name}",
+    "logs": "Ver logs deste trace",
+    "emptyTitle": "Nenhum span registrado",
+    "emptyDescription": "Este trace não tem spans para mostrar."
+  },
+  "costCharts": {
+    "title": "Custo no mês e limite",
+    "description": "Do maior custo para o menor.",
+    "descriptionTop": "Os {shown} maiores custos de {total}.",
+    "cost": "Custo no mês",
+    "cap": "Limite mensal",
+    "total": "Total do mês: <value>{total}</value>"
+  },
+  "runTimeline": {
+    "status": {
+      "pending": "Pendente",
+      "running": "Em execução",
+      "waiting": "Em espera",
+      "suspended": "Suspensa",
+      "paused": "Pausada",
+      "success": "Concluída",
+      "failed": "Falhou",
+      "canceled": "Cancelada",
+      "tripwire": "Parada por guardrail"
+    },
+    "started": "Iniciada",
+    "startedBySchedule": "Por um agendamento: {schedule}",
+    "startedByAnySchedule": "Por um agendamento",
+    "startedByUser": "Pelo usuário {user}",
+    "startedByPlatform": "Pela plataforma",
+    "waitingApproval": "Aguarda aprovação",
+    "current": "Estado atual",
+    "updatedAt": "Desde {when}",
+    "failure": {
+      "STEP_FAILED": "Uma etapa falhou",
+      "TRIPWIRE": "Uma proteção interrompeu a execução",
+      "RUN_FAILED": "A execução falhou fora de uma etapa"
+    },
+    "failedStep": "Etapa:"
+  },
+  "scheduleTable": {
+    "noFire": "—",
+    "inZone": "{when} ({zone})",
+    "inYourZone": "{when} no seu fuso ({zone})",
+    "scope": {
+      "platform": "Plataforma",
+      "tenant": "Organização"
+    },
+    "status": {
+      "active": "Ativo",
+      "paused": "Pausado"
+    },
+    "pause": "Pausar",
+    "pauseNamed": "Pausar o agendamento {id} de {name}",
+    "pauseOf": "Pausar o agendamento de {name}",
+    "resume": "Retomar",
+    "resumeNamed": "Retomar o agendamento {id} de {name}",
+    "resumeOf": "Retomar o agendamento de {name}",
+    "runNow": "Executar agora",
+    "runNowNamed": "Executar agora o agendamento {id} de {name}",
+    "runNowOf": "Executar agora o agendamento de {name}",
+    "moreActionsNamed": "Mais ações do agendamento {id} de {name}",
+    "moreActionsOf": "Mais ações do agendamento de {name}",
+    "columns": {
+      "workflow": "Workflow",
+      "cron": "Cron e fuso",
+      "status": "Status",
+      "nextFire": "Próximo disparo",
+      "lastFire": "Último disparo",
+      "actions": "Ações"
+    }
+  },
+  "workflows": {
+    "knowledge-ingest": {
+      "name": "Ingestão de conhecimento",
+      "description": "Indexa um arquivo enviado ou uma página pública na base de conhecimento da organização."
+    },
+    "catalog-reindex": {
+      "name": "Reindexação do catálogo",
+      "description": "Reconstrói os documentos do catálogo da plataforma na base de conhecimento."
+    },
+    "approval-demo": {
+      "name": "Demonstração de aprovação",
+      "description": "Pede a outra pessoa que aprove uma nota antes de criá-la.",
+      "input": {
+        "title": "Título",
+        "body": "Texto"
+      }
+    },
+    "usage-report": {
+      "name": "Relatório de uso",
+      "description": "Consolida o uso de modelos por organização e dia, exporta e envia alertas de orçamento."
+    },
+    "approval-expiry-sweep": {
+      "name": "Expiração de aprovações",
+      "description": "Expira pedidos de aprovação vencidos e encerra execuções interrompidas."
+    },
+    "conversation-purge": {
+      "name": "Limpeza de conversas",
+      "description": "Apaga de vez as conversas excluídas há mais de 30 dias."
+    },
+    "eval-export": {
+      "name": "Exportação de avaliações",
+      "description": "Exporta os resumos dos experimentos de avaliação para o data warehouse."
+    }
+  },
+  "agents": {
+    "assistant": "Assistente",
+    "knowledge": "Conhecimento",
+    "data": "Dados",
+    "action": "Ações",
+    "web": "Web"
+  },
+  "flags": {
+    "ai": {
+      "kill-switch": {
+        "name": "Interruptor de emergência da IA",
+        "description": "Para todos os agentes, conversas e voz durante um incidente."
+      },
+      "web-tools": {
+        "name": "Ferramentas de web",
+        "description": "Chave da plataforma acima da opção da organização para ferramentas que acessam a web pública."
+      },
+      "memory": {
+        "observational": {
+          "name": "Memória observacional",
+          "description": "Memória observacional dos agentes; vale a partir do próximo início do runtime."
+        }
+      }
+    },
+    "chat": {
+      "voice": {
+        "name": "Voz no chat",
+        "description": "Transcrição e fala por ambiente e organização.",
+        "realtime": {
+          "name": "Voz em tempo real",
+          "description": "Sessões de voz em tempo real; o áudio vai direto entre o navegador e o provedor e ainda não é medido."
+        }
+      }
+    },
+    "workflows": {
+      "schedules": {
+        "name": "Agendamentos de workflows",
+        "description": "Disparos agendados de workflows; desligado, segura todos os disparos (um disparo perdido roda uma vez ao religar)."
+      }
+    }
+  },
+  "cron": {
+    "hourly": "De hora em hora, aos {minute} min",
+    "daily": "Todos os dias às {time}",
+    "weekdays": "Dias úteis às {time}",
+    "weekly": "Toda semana, {weekday}, às {time}",
+    "monthly": "Todo dia {day} do mês às {time}",
+    "withZone": "{description} ({zone})"
+  },
+  "evalExperiment": {
+    "label": "{agent} · {dataset} · {when}"
+  },
+  "jsonInput": {
+    "legend": "Dados de entrada",
+    "label": "Dados de entrada (JSON)",
+    "editAsJson": "Editar como JSON",
+    "editAsForm": "Editar como formulário",
+    "invalid": "Escreva um objeto JSON válido.",
+    "switchBlocked": "Corrija o JSON para voltar ao formulário."
+  },
+  "docs": {
+    "nav": "Páginas da documentação",
+    "pages": "Páginas",
+    "backToApp": "Ir para o app",
+    "fallback": "Esta documentação está disponível apenas em português.",
+    "previous": "Anterior",
+    "next": "Próxima",
+    "code": "Código",
+    "codeWithLanguage": "Código {language}",
+    "newTab": "(abre em nova aba)",
+    "steps": "Página anterior e próxima",
+    "table": "Tabela (role para o lado para ver tudo)"
+  }
+}

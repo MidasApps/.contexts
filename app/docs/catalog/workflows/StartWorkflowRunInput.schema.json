@@ -1,0 +1,32 @@
+{
+  "additionalProperties": false,
+  "description": "Starts a run of a startable workflow in the active organization.",
+  "examples": [
+    {
+      "inputData": {
+        "body": "Call about the invoice.",
+        "title": "Supplier follow-up"
+      }
+    }
+  ],
+  "properties": {
+    "inputData": {
+      "additionalProperties": {},
+      "description": "Workflow input; validated by the workflow's own schema on the server.",
+      "propertyNames": {
+        "type": "string"
+      },
+      "type": "object",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "inputData"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.workflow-run.start",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

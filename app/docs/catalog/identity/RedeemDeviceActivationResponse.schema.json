@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "description": "Answer of a successful redeem: the device signs in with the custom token.",
+  "examples": [
+    {
+      "customToken": "eyJhbGciOiJSUzI1NiJ9.eyJkZXYiOjF9.c2ln",
+      "deviceId": "Dv1qA3zW5sX7eD9cR2fV",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+    }
+  ],
+  "properties": {
+    "customToken": {
+      "description": "Custom token with `principalType: device` and `tenantId`.",
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "sensitive"
+    },
+    "deviceId": {
+      "description": "Id of the new device.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization of the device.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "deviceId",
+    "tenantId",
+    "customToken"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "sensitive",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

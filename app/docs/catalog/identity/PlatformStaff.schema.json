@@ -1,0 +1,61 @@
+{
+  "additionalProperties": false,
+  "description": "A platform staff member; access also requires MFA (SP1 spec §3.4).",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "isActive": true,
+      "role": "platform-support",
+      "uid": "uZ9y8X7w6V5u4T3s2R1q",
+      "updatedAt": "2026-09-29T15:00:00.000Z"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the staff record was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "isActive": {
+      "description": "Inactive staff hold no platform permission.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "role": {
+      "description": "Staff role.",
+      "enum": [
+        "platform-admin",
+        "platform-support"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "uid": {
+      "description": "Firebase Auth uid of the staff member (document id).",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "updatedAt": {
+      "description": "When the staff record last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "uid",
+    "role",
+    "isActive",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

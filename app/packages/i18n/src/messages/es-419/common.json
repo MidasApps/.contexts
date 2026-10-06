@@ -1,0 +1,380 @@
+{
+  "unitTypes": {
+    "unit": "Unidad"
+  },
+  "actions": {
+    "save": "Guardar",
+    "signInAgain": "Iniciar sesión de nuevo",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "continue": "Continuar",
+    "back": "Volver",
+    "retry": "Reintentar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "create": "Crear"
+  },
+  "states": {
+    "loading": "Cargando…",
+    "saving": "Guardando…",
+    "saved": "Cambios guardados.",
+    "offline": "No tienes conexión. Algunas acciones no están disponibles hasta que vuelva la conexión."
+  },
+  "errorWithReference": "Algo salió mal. Referencia: {requestId}",
+  "itemCount": "{count, plural, =0 {Ningún elemento} one {# elemento} other {# elementos}}",
+  "presence": {
+    "online": "En línea",
+    "away": "Ausente",
+    "busy": "Ocupado",
+    "offline": "Desconectado"
+  },
+  "copy": {
+    "copy": "Copiar",
+    "copied": "Copiado al portapapeles.",
+    "failed": "No se pudo copiar. Selecciona el texto y cópialo manualmente.",
+    "reveal": "Mostrar valor",
+    "hide": "Ocultar valor"
+  },
+  "search": {
+    "label": "Buscar",
+    "placeholder": "Buscar…",
+    "clear": "Borrar búsqueda",
+    "noResults": "No se encontraron resultados.",
+    "results": "Resultados"
+  },
+  "navigation": {
+    "breadcrumb": "Ruta de navegación",
+    "more": "Más"
+  },
+  "pickers": {
+    "currency": {
+      "placeholder": "Selecciona una moneda",
+      "search": "Buscar moneda",
+      "empty": "No se encontró ninguna moneda."
+    },
+    "timeZone": {
+      "placeholder": "Selecciona una zona horaria",
+      "search": "Buscar zona horaria",
+      "empty": "No se encontró ninguna zona horaria."
+    },
+    "locale": {
+      "placeholder": "Selecciona un idioma"
+    }
+  },
+  "money": {
+    "invalid": "Ingresa un monto válido, por ejemplo {example}.",
+    "tooManyDigits": "Usa como máximo {digits, plural, =0 {ningún decimal} one {# decimal} other {# decimales}}."
+  },
+  "errorState": {
+    "title": "No pudimos cargar esto",
+    "description": "Algo salió mal de nuestro lado. Inténtalo de nuevo en un momento.",
+    "reference": "Referencia: {requestId}",
+    "messageWithReference": "{message} Referencia: {requestId}"
+  },
+  "noAccess": {
+    "title": "No tienes acceso a esta página",
+    "description": "Pide a un administrador de la organización que te dé acceso."
+  },
+  "notifications": {
+    "region": "Notificaciones",
+    "dismiss": "Descartar notificación"
+  },
+  "pagination": {
+    "label": "Paginación",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "form": {
+    "required": "obligatorio",
+    "submitFailedTitle": "No se pudo guardar",
+    "savedTitle": "Cambios guardados",
+    "unavailableFields": "Algunos datos que no se pueden editar aquí no son válidos. Recarga la página e inténtalo de nuevo.",
+    "selectPlaceholder": "Selecciona una opción",
+    "timeZoneHint": "Fecha y hora en la zona horaria {timeZone}.",
+    "errors": {
+      "required": "Completa este campo.",
+      "tooShort": "Usa al menos {minimum, plural, one {# carácter} other {# caracteres}}.",
+      "tooLong": "Usa como máximo {maximum, plural, one {# carácter} other {# caracteres}}.",
+      "tooSmall": "Ingresa un valor mayor o igual a {minimum}.",
+      "tooBig": "Ingresa un valor menor o igual a {maximum}.",
+      "notInteger": "Ingresa un número entero.",
+      "invalidFormat": "El formato de este campo no es válido.",
+      "invalidOption": "Elige una de las opciones disponibles.",
+      "invalid": "Revisa este campo."
+    }
+  },
+  "password": {
+    "show": "Mostrar contraseña"
+  },
+  "oneTimeSecret": {
+    "confirmFirst": "Confirma que guardaste el secreto para terminar."
+  },
+  "dialogGuard": {
+    "unsaved": {
+      "title": "¿Descartar los cambios?",
+      "description": "Lo que cambiaste en este diálogo se perderá.",
+      "confirm": "Descartar",
+      "cancel": "Seguir editando"
+    },
+    "oneTime": {
+      "title": "¿Cerrar sin guardarlo?",
+      "description": "Este valor no se volverá a mostrar. Para obtener otro, tendrás que generar uno nuevo.",
+      "confirm": "Cerrar de todos modos",
+      "cancel": "Volver"
+    }
+  },
+  "pageTitles": {
+    "signIn": "Iniciar sesión",
+    "invite": "Invitación",
+    "signUp": "Crear cuenta",
+    "resetPassword": "Restablecer contraseña",
+    "home": "Inicio",
+    "organizations": "Organizaciones",
+    "organization": "Organización",
+    "project": "Proyecto",
+    "module": "Módulo",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "admin": "Administración",
+    "notFound": "Página no encontrada",
+    "chat": "Asistente",
+    "docs": "Documentación"
+  },
+  "approvals": {
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobada",
+      "rejected": "Rechazada",
+      "cancelled": "Cancelada",
+      "expired": "Vencida",
+      "executed": "Ejecutada",
+      "failed": "Falló"
+    },
+    "item": {
+      "expires": "Vence {when}",
+      "requestedBy": "Pedida por {requester}",
+      "requester": "Solicitante",
+      "node": "Dónde:",
+      "when": "Plazo",
+      "updated": "Actualizada el {when}",
+      "reason": "Motivo informado: {reason}",
+      "failed": "La acción fue aprobada, pero no se ejecutó. Pide a quien la solicitó que la pida de nuevo.",
+      "failureReason": {
+        "EXECUTION_INTERRUPTED": "La ejecución se interrumpió antes de terminar. Revisa si la acción tuvo efecto antes de pedirla de nuevo.",
+        "UNKNOWN_APPROVAL_ACTION": "Esta app ya no reconoce esta acción.",
+        "other": "La acción dio un error al ejecutarse."
+      },
+      "failureReference": "Referencia: {requestId} ({code})"
+    },
+    "preview": {
+      "before": "Antes",
+      "after": "Después",
+      "none": "No hay vista previa disponible.",
+      "viewRun": "Ver el progreso del flujo"
+    },
+    "menu": {
+      "label": "Aprobaciones",
+      "labelWithWaiting": "Aprobaciones, {count, plural, one {# esperando tu decisión} other {# esperando tu decisión}}",
+      "triggerWithWaiting": "{name}, menú de la cuenta, {count, plural, one {# aprobación esperando tu decisión} other {# aprobaciones esperando tu decisión}}"
+    }
+  },
+  "traceViewer": {
+    "title": "{count, plural, =0 {Ningún span} one {# span} other {# spans}}",
+    "status": {
+      "ok": "OK",
+      "error": "Error"
+    },
+    "running": "En ejecución",
+    "unknownCost": "Precio desconocido",
+    "model": "Modelo",
+    "duration": "Duración",
+    "tokens": "Tokens",
+    "tokensValue": "{input} de entrada · {output} de salida",
+    "cost": "Costo",
+    "payload": "Entrada y salida",
+    "payloadOf": "Entrada y salida de {name}",
+    "inputOf": "Entrada de {name}",
+    "outputOf": "Salida de {name}",
+    "collapse": "Contraer los spans de {name}",
+    "expand": "Expandir los spans de {name}",
+    "childrenOf": "Spans de {name}",
+    "logs": "Ver los logs de este trace",
+    "emptyTitle": "No hay spans registrados",
+    "emptyDescription": "Este trace no tiene spans para mostrar."
+  },
+  "costCharts": {
+    "title": "Costo del mes y límite",
+    "description": "Del mayor costo al menor.",
+    "descriptionTop": "Los {shown} mayores costos de {total}.",
+    "cost": "Costo del mes",
+    "cap": "Límite mensual",
+    "total": "Total del mes: <value>{total}</value>"
+  },
+  "runTimeline": {
+    "status": {
+      "pending": "Pendiente",
+      "running": "En ejecución",
+      "waiting": "En espera",
+      "suspended": "Suspendida",
+      "paused": "Pausada",
+      "success": "Completada",
+      "failed": "Falló",
+      "canceled": "Cancelada",
+      "tripwire": "Detenida por guardrail"
+    },
+    "started": "Iniciada",
+    "startedBySchedule": "Por una programación: {schedule}",
+    "startedByAnySchedule": "Por una programación",
+    "startedByUser": "Por el usuario {user}",
+    "startedByPlatform": "Por la plataforma",
+    "waitingApproval": "Espera aprobación",
+    "current": "Estado actual",
+    "updatedAt": "Desde {when}",
+    "failure": {
+      "STEP_FAILED": "Un paso falló",
+      "TRIPWIRE": "Una protección detuvo la ejecución",
+      "RUN_FAILED": "La ejecución falló fuera de un paso"
+    },
+    "failedStep": "Paso:"
+  },
+  "scheduleTable": {
+    "noFire": "—",
+    "inZone": "{when} ({zone})",
+    "inYourZone": "{when} en tu zona horaria ({zone})",
+    "scope": {
+      "platform": "Plataforma",
+      "tenant": "Organización"
+    },
+    "status": {
+      "active": "Activa",
+      "paused": "Pausada"
+    },
+    "pause": "Pausar",
+    "pauseNamed": "Pausar la programación {id} de {name}",
+    "pauseOf": "Pausar la programación de {name}",
+    "resume": "Reanudar",
+    "resumeNamed": "Reanudar la programación {id} de {name}",
+    "resumeOf": "Reanudar la programación de {name}",
+    "runNow": "Ejecutar ahora",
+    "runNowNamed": "Ejecutar ahora la programación {id} de {name}",
+    "runNowOf": "Ejecutar ahora la programación de {name}",
+    "moreActionsNamed": "Más acciones de la programación {id} de {name}",
+    "moreActionsOf": "Más acciones de la programación de {name}",
+    "columns": {
+      "workflow": "Workflow",
+      "cron": "Cron y zona horaria",
+      "status": "Estado",
+      "nextFire": "Próximo disparo",
+      "lastFire": "Último disparo",
+      "actions": "Acciones"
+    }
+  },
+  "workflows": {
+    "knowledge-ingest": {
+      "name": "Ingesta de conocimiento",
+      "description": "Indexa un archivo subido o una página web pública en la base de conocimiento de la organización."
+    },
+    "catalog-reindex": {
+      "name": "Reindexación del catálogo",
+      "description": "Reconstruye los documentos del catálogo de la plataforma en la base de conocimiento."
+    },
+    "approval-demo": {
+      "name": "Demostración de aprobación",
+      "description": "Pide a otra persona que apruebe una nota antes de crearla.",
+      "input": {
+        "title": "Título",
+        "body": "Texto"
+      }
+    },
+    "usage-report": {
+      "name": "Informe de uso",
+      "description": "Consolida el uso de modelos por organización y día, lo exporta y envía alertas de presupuesto."
+    },
+    "approval-expiry-sweep": {
+      "name": "Vencimiento de aprobaciones",
+      "description": "Vence las solicitudes de aprobación atrasadas y cierra las ejecuciones interrumpidas."
+    },
+    "conversation-purge": {
+      "name": "Depuración de conversaciones",
+      "description": "Elimina definitivamente las conversaciones borradas hace más de 30 días."
+    },
+    "eval-export": {
+      "name": "Exportación de evaluaciones",
+      "description": "Exporta los resúmenes de los experimentos de evaluación al data warehouse."
+    }
+  },
+  "agents": {
+    "assistant": "Asistente",
+    "knowledge": "Conocimiento",
+    "data": "Datos",
+    "action": "Acciones",
+    "web": "Web"
+  },
+  "flags": {
+    "ai": {
+      "kill-switch": {
+        "name": "Interruptor de emergencia de la IA",
+        "description": "Detiene todos los agentes, chats y voz durante un incidente."
+      },
+      "web-tools": {
+        "name": "Herramientas web",
+        "description": "Interruptor de la plataforma sobre la opción de la organización para herramientas que acceden a la web pública."
+      },
+      "memory": {
+        "observational": {
+          "name": "Memoria observacional",
+          "description": "Memoria observacional de los agentes; se aplica en el próximo inicio del runtime."
+        }
+      }
+    },
+    "chat": {
+      "voice": {
+        "name": "Voz en el chat",
+        "description": "Transcripción y voz por entorno y organización.",
+        "realtime": {
+          "name": "Voz en tiempo real",
+          "description": "Sesiones de voz en tiempo real; el audio va directo entre el navegador y el proveedor y aún no se mide."
+        }
+      }
+    },
+    "workflows": {
+      "schedules": {
+        "name": "Programaciones de workflows",
+        "description": "Disparos programados de workflows; apagado, retiene todos los disparos (uno perdido se ejecuta una vez al reactivarlo)."
+      }
+    }
+  },
+  "cron": {
+    "hourly": "Cada hora, en el minuto {minute}",
+    "daily": "Todos los días a las {time}",
+    "weekdays": "Días hábiles a las {time}",
+    "weekly": "Cada semana, el {weekday}, a las {time}",
+    "monthly": "El día {day} de cada mes a las {time}",
+    "withZone": "{description} ({zone})"
+  },
+  "evalExperiment": {
+    "label": "{agent} · {dataset} · {when}"
+  },
+  "jsonInput": {
+    "legend": "Datos de entrada",
+    "label": "Datos de entrada (JSON)",
+    "editAsJson": "Editar como JSON",
+    "editAsForm": "Editar como formulario",
+    "invalid": "Escribe un objeto JSON válido.",
+    "switchBlocked": "Corrige el JSON para volver al formulario."
+  },
+  "docs": {
+    "nav": "Páginas de la documentación",
+    "pages": "Páginas",
+    "backToApp": "Ir a la app",
+    "fallback": "Esta documentación solo está disponible en portugués.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "code": "Código",
+    "codeWithLanguage": "Código {language}",
+    "newTab": "(se abre en una pestaña nueva)",
+    "steps": "Página anterior y siguiente",
+    "table": "Tabla (desplázate hacia el lado para ver todo)"
+  }
+}

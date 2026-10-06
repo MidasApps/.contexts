@@ -1,0 +1,50 @@
+{
+  "additionalProperties": false,
+  "description": "Creates a note in the organization (`example.note.create`).",
+  "examples": [
+    {
+      "body": "Call Ana about the invoice on Monday.",
+      "title": "Supplier follow-up"
+    }
+  ],
+  "properties": {
+    "body": {
+      "description": "Free text of the note; may mention people.",
+      "examples": [
+        "Call Ana about the invoice on Monday."
+      ],
+      "maxLength": 10000,
+      "type": "string",
+      "x-pii": "personal",
+      "x-ui": {
+        "labelKey": "example.note.body",
+        "order": 2,
+        "widget": "textarea"
+      }
+    },
+    "title": {
+      "description": "Short title shown in lists.",
+      "examples": [
+        "Supplier follow-up"
+      ],
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none",
+      "x-ui": {
+        "labelKey": "example.note.title",
+        "order": 1,
+        "widget": "text"
+      }
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "example.note.create",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

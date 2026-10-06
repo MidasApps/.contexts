@@ -1,0 +1,6 @@
+# `next dev` (16.3.x) writes these when it detects an AI agent
+# (next/dist/server/lib/generate-agent-files.js) and has no opt-out. Agent
+# guidance for this repository lives in the DDC root CLAUDE.md and ../.contexts;
+# a nested copy would compete with it, so the generated files stay untracked.
+/AGENTS.md
+/CLAUDE.md

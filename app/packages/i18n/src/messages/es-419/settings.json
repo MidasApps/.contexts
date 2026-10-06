@@ -1,0 +1,1863 @@
+{
+  "navLabel": "Secciones de la configuración",
+  "navLoading": "Cargando las secciones…",
+  "navPicker": "Sección",
+  "indexLoading": "Abriendo la configuración…",
+  "noAccessDescription": "Pide a un administrador de la organización que te dé acceso a esta sección.",
+  "nodes": {
+    "organizationGroup": "Organización",
+    "projectGroup": "Proyectos",
+    "wholeOrganization": "Toda la organización ({name})",
+    "organizationLevel": "Toda la organización",
+    "projectLevel": "Proyecto:",
+    "unitLevel": "Unidad:",
+    "hiddenProject": "Proyecto oculto",
+    "hiddenUnit": "Unidad oculta",
+    "placeholder": "Elige dónde aplica",
+    "search": "Buscar proyecto",
+    "loading": "Cargando proyectos…",
+    "empty": "No se encontraron proyectos.",
+    "wholeProject": "Todo el proyecto",
+    "unitGroup": "Unidades",
+    "searchUnit": "Buscar unidad",
+    "loadingUnits": "Cargando unidades…",
+    "emptyUnits": "No se encontraron unidades."
+  },
+  "general": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "General",
+    "description": "Nombre y valores regionales predeterminados de la organización.",
+    "loading": "Cargando la organización…",
+    "suspended": "Suspendida",
+    "detailsTitle": "Organización",
+    "detailsDescription": "El idioma, la zona horaria y la moneda predeterminados aplican a quien no eligió los suyos y a los montos nuevos.",
+    "readOnlyDescription": "Solo los administradores pueden cambiar estos datos.",
+    "createdAt": "Creada el {date}.",
+    "form": {
+      "name": "Nombre",
+      "regional": "Valores regionales predeterminados",
+      "locale": "Idioma predeterminado",
+      "timeZone": "Zona horaria predeterminada",
+      "currency": "Moneda predeterminada"
+    },
+    "delete": {
+      "sectionTitle": "Eliminar organización",
+      "sectionDescription": "Quita la organización y el acceso de todos los miembros, dispositivos y claves de API a ella. Úsalo solo cuando la organización ya no se use.",
+      "action": "Eliminar organización",
+      "title": "¿Eliminar {name}?",
+      "dialogDescription": "Todos los miembros pierden el acceso de inmediato, y los proyectos, unidades y configuraciones dejan de aparecer en la app. No se puede deshacer desde la app.",
+      "confirmLabel": "Escribe {name} para confirmar",
+      "confirmHint": "El nombre debe ser igual al de la organización, con mayúsculas y acentos.",
+      "mismatch": "El nombre escrito no es igual al de la organización.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar para siempre",
+      "done": "Organización {name} eliminada."
+    }
+  },
+  "members": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Miembros",
+    "description": "Quién tiene acceso a la organización y con qué roles.",
+    "loading": "Cargando miembros…",
+    "caption": "Miembros de {organization}",
+    "pagination": "Páginas de miembros",
+    "invite": "Invitar",
+    "you": "Tú",
+    "columns": {
+      "member": "Miembro",
+      "access": "Acceso",
+      "actions": "Acciones"
+    },
+    "editRolesOf": "Editar roles de {name}",
+    "removeAction": "Quitar",
+    "emptyTitle": "Aún no hay miembros",
+    "emptyDescription": "Invita a personas a trabajar contigo en esta organización.",
+    "emptyDescriptionNoPermission": "Pide a un administrador que invite a personas.",
+    "editRoles": {
+      "title": "Roles de {name}",
+      "description": "Los roles aplican en:",
+      "rolesLegend": "Roles",
+      "rolesRequired": "Elige al menos un rol.",
+      "cancel": "Cancelar",
+      "submit": "Guardar roles",
+      "saved": "Roles de {name} actualizados."
+    },
+    "remove": {
+      "title": "¿Quitar a {name} de la organización?",
+      "description": "Se revocarán todos los accesos de esta persona en la organización y sus claves de API.",
+      "confirm": "Quitar miembro",
+      "done": "{name} fue quitado de la organización."
+    },
+    "removeNamed": "Quitar a {name}",
+    "grantAction": "Dar acceso",
+    "grantNamed": "Dar acceso a {name} en otro lugar",
+    "revokeGrantOf": "Revocar este acceso de {name}",
+    "grant": {
+      "title": "Dar acceso a {name}",
+      "description": "La persona recibe estos roles también en el lugar elegido, además de los accesos que ya tiene.",
+      "node": "Dónde aplica",
+      "nodeHint": "El acceso aplica en el nivel elegido y en todo lo que está debajo.",
+      "unit": "Unidad",
+      "unitHint": "Elige una unidad para limitar el acceso a ella y a sus subunidades.",
+      "roles": "Roles",
+      "rolesRequired": "Elige al menos un rol.",
+      "exists": "Esta persona ya tiene acceso en este lugar. Para cambiar los roles, usa el lápiz junto a ese acceso.",
+      "cancel": "Cancelar",
+      "submit": "Dar acceso",
+      "done": "Acceso de {name} agregado."
+    },
+    "revokeGrant": {
+      "title": "¿Revocar este acceso de {name}?",
+      "description": "La persona pierde los roles de este acceso y conserva los demás. El acceso revocado aplicaba en:",
+      "confirm": "Revocar acceso",
+      "done": "Acceso de {name} revocado."
+    }
+  },
+  "invitations": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Invitaciones",
+    "description": "Invita a personas por correo y sigue las invitaciones enviadas.",
+    "loading": "Cargando invitaciones…",
+    "invite": "Invitar",
+    "filterLabel": "Filtrar invitaciones",
+    "filters": {
+      "pending": "Pendientes",
+      "all": "Todas"
+    },
+    "captionPending": "Invitaciones pendientes",
+    "captionAll": "Todas las invitaciones",
+    "pagination": "Páginas de invitaciones",
+    "columns": {
+      "email": "Correo",
+      "node": "Dónde aplica",
+      "roles": "Roles",
+      "status": "Estado",
+      "expires": "Vence",
+      "actions": "Acciones"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "accepted": "Aceptada",
+      "revoked": "Revocada",
+      "expired": "Vencida"
+    },
+    "expiresOn": "Vence el {date}",
+    "expiresNotApplicable": "No aplica",
+    "revokeAction": "Revocar",
+    "revokeNamed": "Revocar invitación de {email}",
+    "emptyPendingTitle": "No hay invitaciones pendientes",
+    "emptyTitle": "No se enviaron invitaciones",
+    "emptyDescription": "Las invitaciones aparecen aquí hasta que se aceptan o vencen.",
+    "inviteDialog": {
+      "title": "Invitar a una persona",
+      "description": "La persona obtiene acceso a {organization} al aceptar la invitación con este correo.",
+      "email": "Correo electrónico",
+      "node": "Dónde aplica",
+      "nodeHint": "El acceso aplica en el nivel elegido y en todo lo que está debajo.",
+      "roles": "Roles",
+      "errors": {
+        "required": "Escribe el correo de la persona.",
+        "invalid": "Escribe un correo válido, por ejemplo nombre@empresa.com.",
+        "roles": "Elige al menos un rol."
+      },
+      "cancel": "Cancelar",
+      "submit": "Enviar invitación",
+      "createdTitle": "Invitación creada para {email}",
+      "createdDescription": "Envía el enlace de abajo a la persona. Por seguridad, no se volverá a mostrar.",
+      "link": "Enlace de la invitación",
+      "linkHint": "Vale por 7 días y solo se puede usar una vez, con el correo invitado.",
+      "another": "Invitar a otra persona",
+      "done": "Listo",
+      "unit": "Unidad"
+    },
+    "revoke": {
+      "title": "¿Revocar esta invitación?",
+      "description": "El enlace enviado a {email} deja de funcionar de inmediato.",
+      "confirm": "Revocar invitación",
+      "done": "Invitación de {email} revocada."
+    }
+  },
+  "roles": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Roles",
+    "description": "Qué permite hacer cada rol en la organización.",
+    "loading": "Cargando roles…",
+    "create": "Nuevo rol",
+    "edit": "Editar",
+    "editNamed": "Editar rol {name}",
+    "deleteAction": "Eliminar",
+    "deleteNamed": "Eliminar rol {name}",
+    "customTitle": "Roles personalizados",
+    "customDescription": "Combina permisos para crear roles a medida.",
+    "customCaption": "Roles personalizados de la organización",
+    "systemTitle": "Roles del sistema",
+    "systemDescription": "Existen en toda organización y no se pueden cambiar.",
+    "columns": {
+      "name": "Rol",
+      "permissions": "Permisos",
+      "actions": "Acciones"
+    },
+    "permissionCount": "{count, plural, one {# permiso} other {# permisos}}",
+    "emptyTitle": "No hay roles personalizados",
+    "emptyDescription": "Crea un rol cuando los roles del sistema no alcancen.",
+    "emptyDescriptionNoPermission": "Los roles del sistema de abajo están disponibles.",
+    "unknownRole": "Rol eliminado",
+    "checklistHint": "Elige hasta {max} roles.",
+    "system": {
+      "owner": {
+        "name": "Propietario",
+        "description": "Acceso total, incluso eliminar la organización."
+      },
+      "admin": {
+        "name": "Administrador",
+        "description": "Gestiona miembros, roles, proyectos y configuración."
+      },
+      "member": {
+        "name": "Miembro",
+        "description": "Trabaja en los proyectos y unidades a los que tiene acceso."
+      },
+      "viewer": {
+        "name": "Lector",
+        "description": "Ve, pero no cambia."
+      },
+      "device": {
+        "name": "Dispositivo",
+        "description": "Acceso de un dispositivo activado, sin permisos de persona."
+      }
+    },
+    "picker": {
+      "coreModule": "Plataforma",
+      "selectedCount": "({count} de {total})",
+      "loading": "Cargando permisos…",
+      "loadError": "No se pudieron cargar los permisos",
+      "grantsError": "No se pudo verificar qué puedes conceder",
+      "empty": "No hay permisos disponibles para conceder."
+    },
+    "editor": {
+      "createTitle": "Nuevo rol",
+      "editTitle": "Editar {name}",
+      "description": "Solo puedes otorgar permisos que tú mismo tienes.",
+      "name": "Nombre",
+      "descriptionField": "Descripción",
+      "permissions": "Permisos",
+      "errors": {
+        "required": "Ponle un nombre al rol.",
+        "tooLong": "Usa como máximo 80 caracteres.",
+        "permissions": "Elige al menos un permiso."
+      },
+      "cancel": "Cancelar",
+      "create": "Crear rol",
+      "save": "Guardar rol",
+      "created": "Rol {name} creado.",
+      "updated": "Rol {name} actualizado."
+    },
+    "delete": {
+      "title": "¿Eliminar el rol {name}?",
+      "description": "Solo se pueden eliminar roles que nadie tiene. Esta acción no se puede deshacer.",
+      "confirm": "Eliminar rol",
+      "done": "Rol {name} eliminado."
+    }
+  },
+  "units": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Unidades",
+    "description": "La estructura de cada proyecto: unidades dentro de unidades.",
+    "loading": "Cargando…",
+    "loadingProjects": "Cargando proyectos…",
+    "loadingTree": "Cargando unidades…",
+    "project": "Proyecto",
+    "treeTitle": "Unidades de {project}",
+    "treeDescription": "Selecciona una unidad para crear subunidades, renombrarla, moverla o eliminarla.",
+    "treeLabel": "Unidades de {project}",
+    "noSelection": "Ninguna unidad seleccionada",
+    "createRoot": "Nueva unidad",
+    "createChild": "Nueva subunidad",
+    "noChildTypes": "Este tipo de unidad no admite subunidades.",
+    "noRootTypes": "Ningún tipo de unidad puede ir directo en el proyecto.",
+    "rename": "Renombrar",
+    "moveAction": "Mover a…",
+    "deleteAction": "Eliminar",
+    "emptyTitle": "Aún no hay unidades",
+    "emptyDescription": "Crea la primera unidad de {project}.",
+    "emptyDescriptionNoPermission": "Pide a un administrador que cree unidades.",
+    "truncated": "Se muestran las primeras {max} unidades.",
+    "noProjectsTitle": "Aún no hay proyectos",
+    "noProjectsDescription": "Las unidades están dentro de proyectos. Crea un proyecto primero.",
+    "goToProjects": "Ver proyectos",
+    "projectRoot": "Directamente en {project}",
+    "createTitle": "Nueva unidad",
+    "createUnderProject": "La unidad queda directamente en {project}.",
+    "createUnder": "La unidad queda dentro de {parent}.",
+    "createSubmit": "Crear unidad",
+    "created": "Unidad {name} creada.",
+    "renameTitle": "Renombrar unidad",
+    "renameDescription": "El nuevo nombre aparece en todos los lugares donde se usa la unidad.",
+    "renameSubmit": "Guardar nombre",
+    "renamed": "Unidad renombrada a {name}.",
+    "moved": "{name} se movió.",
+    "deleteTitle": "¿Eliminar {name}?",
+    "deleteDescription": "{count, plural, =0 {Se eliminará la unidad.} one {Se eliminarán la unidad y # subunidad.} other {Se eliminarán la unidad y # subunidades.}} Los accesos otorgados allí dejan de aplicar.",
+    "deleteConfirm": "Eliminar unidad",
+    "deleted": "Unidad {name} eliminada.",
+    "form": {
+      "name": "Nombre",
+      "type": "Tipo",
+      "typePlaceholder": "Elige un tipo",
+      "noTypes": "Ningún tipo de unidad puede ir aquí.",
+      "nameRequired": "Ponle un nombre a la unidad.",
+      "nameTooLong": "Usa como máximo {max} caracteres.",
+      "typeRequired": "Elige el tipo de la unidad.",
+      "cancel": "Cancelar"
+    },
+    "move": {
+      "title": "Mover {name}",
+      "description": "Elige a dónde va la unidad. Sus subunidades van con ella.",
+      "destination": "Destino",
+      "placeholder": "Elige el destino",
+      "search": "Buscar unidad",
+      "empty": "No se encontró ningún destino.",
+      "noTargets": "No hay otro lugar al que pueda ir esta unidad.",
+      "required": "Elige el destino.",
+      "cancel": "Cancelar",
+      "submit": "Mover"
+    }
+  },
+  "apiKeys": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Claves de API",
+    "description": "Las integraciones acceden a la API con claves limitadas a un nivel y a permisos.",
+    "loading": "Cargando claves…",
+    "create": "Nueva clave",
+    "caption": "Claves de API de {organization}",
+    "pagination": "Páginas de claves",
+    "columns": {
+      "name": "Clave",
+      "node": "Dónde aplica",
+      "scopes": "Permisos",
+      "lastUsed": "Último uso",
+      "expires": "Vence",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "status": {
+      "active": "Activa",
+      "revoked": "Revocada",
+      "expired": "Vencida",
+      "ownerRemoved": "Revocada (dueño quitado)"
+    },
+    "scopeCount": "{count, plural, one {# permiso} other {# permisos}}",
+    "neverUsed": "Nunca usada",
+    "cardMeta": "{scopes, plural, one {# permiso} other {# permisos}} · vence el {date}",
+    "revokeAction": "Revocar",
+    "revokeNamed": "Revocar clave {name}",
+    "emptyTitle": "No hay claves de API",
+    "emptyDescription": "Crea una clave para conectar una integración a la API.",
+    "emptyDescriptionNoPermission": "Pide a un administrador que cree claves.",
+    "createDialog": {
+      "title": "Nueva clave de API",
+      "description": "La clave actúa en tu nombre, solo con los permisos elegidos y solo donde aplica.",
+      "name": "Nombre",
+      "nameHint": "Para reconocer la clave después, por ejemplo \"Exportación de reportes\".",
+      "node": "Dónde aplica",
+      "nodeHint": "La clave solo funciona en el nivel elegido y debajo de él.",
+      "expiry": "Vigencia",
+      "expiryOption": "{days} días",
+      "expiresOn": "Vence el {date}.",
+      "scopes": "Permisos",
+      "errors": {
+        "required": "Ponle un nombre a la clave.",
+        "tooLong": "Usa como máximo 80 caracteres.",
+        "scopes": "Elige al menos un permiso."
+      },
+      "cancel": "Cancelar",
+      "submit": "Crear clave",
+      "createdTitle": "Clave {name} creada",
+      "createdDescription": "Copia la clave ahora y guárdala en un gestor de secretos.",
+      "secretTitle": "Es la única vez que se muestra la clave",
+      "secretWarning": "Solo guardamos un resumen. Si la pierdes, revócala y crea otra.",
+      "secretLabel": "Clave de API",
+      "secretHint": "Envíala en el encabezado Authorization: Bearer de la integración.",
+      "stored": "Copié la clave y la guardé en un lugar seguro",
+      "done": "Listo"
+    },
+    "revoke": {
+      "title": "¿Revocar la clave {name}?",
+      "description": "Las integraciones que usan esta clave dejan de funcionar de inmediato.",
+      "confirm": "Revocar clave",
+      "done": "Clave {name} revocada."
+    }
+  },
+  "devices": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Dispositivos",
+    "description": "Dispositivos compartidos que inician sesión con un código de activación.",
+    "loading": "Cargando dispositivos…",
+    "create": "Activar dispositivo",
+    "caption": "Dispositivos de {organization}",
+    "pagination": "Páginas de dispositivos",
+    "columns": {
+      "label": "Dispositivo",
+      "node": "Dónde aplica",
+      "lastSeen": "Última actividad",
+      "activated": "Activado el",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "status": {
+      "active": "Activo",
+      "revoked": "Revocado"
+    },
+    "neverSeen": "Sin actividad",
+    "lastSeenOn": "Última actividad el {date}",
+    "revokeAction": "Revocar",
+    "revokeNamed": "Revocar dispositivo {name}",
+    "emptyTitle": "No hay dispositivos activados",
+    "emptyDescription": "Genera un código de activación y escríbelo en el dispositivo.",
+    "emptyDescriptionNoPermission": "Pide a un administrador que active dispositivos.",
+    "createDialog": {
+      "title": "Activar dispositivo",
+      "description": "Genera un código de un solo uso para escribir en el dispositivo.",
+      "label": "Nombre del dispositivo",
+      "labelHint": "Por ejemplo \"Tablet de recepción\".",
+      "node": "Dónde aplica",
+      "nodeHint": "El dispositivo solo accede al nivel elegido y a lo que está debajo.",
+      "roles": "Roles del dispositivo",
+      "errors": {
+        "labelRequired": "Ponle un nombre al dispositivo.",
+        "labelTooLong": "Usa como máximo {max} caracteres.",
+        "roles": "Elige al menos un rol."
+      },
+      "cancel": "Cancelar",
+      "submit": "Generar código",
+      "codeTitle": "Código para {label}",
+      "codeDescription": "El código se muestra solo ahora y vale por 10 minutos."
+    },
+    "activation": {
+      "instructions": "En {label}, abre la pantalla de activación y escribe el código:",
+      "codeLabel": "Código de activación",
+      "codeHint": "De un solo uso. Mayúsculas o minúsculas, con o sin guion.",
+      "countdown": "Vence en {clock}",
+      "expiresIn": "{minutes, plural, one {El código vence en # minuto.} other {El código vence en # minutos.}}",
+      "done": "Listo",
+      "expiredTitle": "El código venció",
+      "expiredDescription": "Genera un código nuevo para activar el dispositivo.",
+      "another": "Generar código nuevo",
+      "close": "Cerrar"
+    },
+    "revoke": {
+      "title": "¿Revocar el dispositivo {name}?",
+      "description": "El dispositivo pierde el acceso de inmediato y no puede volver a iniciar sesión.",
+      "confirm": "Revocar dispositivo",
+      "done": "Dispositivo {name} revocado."
+    }
+  },
+  "module": {
+    "eyebrow": "Configuración de {organization}",
+    "description": "Configuración de {module} en esta organización.",
+    "loading": "Cargando la configuración…",
+    "formTitle": "Configuración",
+    "neverSaved": "Aún no se guardó; los valores de abajo son los predeterminados.",
+    "readOnly": "Puedes ver esta configuración, pero no cambiarla."
+  },
+  "agents": {
+    "eyebrow": "{organization}",
+    "title": "Agentes",
+    "description": "Cree los agentes de la organización, active los agentes de la plataforma que el asistente puede usar y vea las herramientas y habilidades de cada uno.",
+    "loading": "Cargando los agentes",
+    "connectorsLink": "Abrir conectores",
+    "skillsLink": "Ver habilidades",
+    "saveFailed": "No se pudo guardar",
+    "catalog": {
+      "title": "Agentes de la plataforma",
+      "emptyTitle": "Ningún agente disponible",
+      "emptyDescription": "La plataforma no ofrece agentes para esta organización en este momento.",
+      "sourceCore": "Plataforma",
+      "sourceModule": "Módulo {module}",
+      "enabled": "Activado",
+      "disabled": "Desactivado",
+      "enable": "Activar {agent}",
+      "enabledToast": "{agent} activado.",
+      "disabledToast": "{agent} desactivado.",
+      "toolsTitle": "Herramientas",
+      "toolsEmpty": "Este agente no tiene herramientas en esta organización.",
+      "toolSource": {
+        "core": "De la plataforma",
+        "module": "De módulos",
+        "connector": "De conectores"
+      },
+      "toolMutation": "modifica datos",
+      "toolRead": "solo lectura",
+      "skillsTitle": "Habilidades",
+      "skillsEmpty": "Este agente no tiene habilidades.",
+      "description": "Definidos por la plataforma y los módulos instalados. El asistente les delega cuando están activados.",
+      "sourceCustom": "Organización",
+      "counts": "{tools, plural, =0 {ninguna herramienta} one {# herramienta} other {# herramientas}} · {skills, plural, =0 {ninguna habilidad} one {# habilidad} other {# habilidades}}",
+      "showDetails": "Ver detalles",
+      "hideDetails": "Ocultar detalles",
+      "showDetailsNamed": "Ver detalles de {name}",
+      "hideDetailsNamed": "Ocultar detalles de {name}"
+    },
+    "modules": {
+      "title": "Módulos",
+      "description": "Módulos instalados en esta aplicación. Activar un módulo pone sus comandos, habilidades y agentes a disposición de la organización.",
+      "emptyTitle": "Ningún módulo instalado",
+      "emptyDescription": "Esta aplicación no tiene módulos instalados.",
+      "enabled": "Activado",
+      "disabled": "Desactivado",
+      "enable": "Activar el módulo {module}",
+      "enabledToast": "Módulo {module} activado.",
+      "disabledToast": "Módulo {module} desactivado.",
+      "viaAgents": "Un agente activado de este módulo ya habilita sus comandos y habilidades."
+    },
+    "assistant": {
+      "name": "Asistente",
+      "description": "Conversa con las personas, planifica el trabajo y delega en los agentes activados. Siempre está activo."
+    },
+    "organization": {
+      "title": "Reglas de la organización",
+      "description": "Se aplican a todos los agentes de esta organización.",
+      "saved": "Configuración guardada.",
+      "webTools": {
+        "title": "Herramientas web",
+        "description": "Permiten que los agentes accedan a internet pública. La plataforma también debe habilitar esta función.",
+        "firecrawl": "Búsqueda y lectura de páginas",
+        "firecrawlHint": "El agente web busca y lee páginas públicas.",
+        "browser": "Navegador automatizado",
+        "browserHint": "El agente web usa un navegador mediante un conector."
+      },
+      "pii": {
+        "title": "Datos personales en los mensajes",
+        "warn": "Avisar",
+        "warnHint": "El mensaje se envía como fue escrito y se registra el uso de datos personales.",
+        "redact": "Ocultar",
+        "redactHint": "Los datos personales se eliminan del mensaje antes de llegar al modelo."
+      }
+    },
+    "instructions": {
+      "title": "Instrucciones de la organización",
+      "description": "Se agregan a las instrucciones de la plataforma y nunca las reemplazan. Cada cambio crea una versión; una versión solo se aplica después de evaluarla y activarla.",
+      "loading": "Cargando las instrucciones",
+      "unsupported": "Este agente todavía no acepta instrucciones de la organización.",
+      "none": "No hay instrucciones de la organización activas. El agente usa solo las instrucciones de la plataforma.",
+      "activeLabel": "Versión {version} activa",
+      "write": "Escribir instrucciones",
+      "writeFor": "Escribir instrucciones para {agent}",
+      "versionsTitle": "Versiones",
+      "versionsCaption": "Versiones de las instrucciones de {agent}",
+      "columns": {
+        "version": "Versión",
+        "note": "Nota",
+        "created": "Creada el",
+        "verdict": "Evaluación",
+        "actions": "Acciones"
+      },
+      "versionLabel": "Versión {version}",
+      "noNote": "Sin nota",
+      "active": "Activa",
+      "verdict": {
+        "passed": "Aprobada",
+        "failed": "Reprobada",
+        "none": "Sin evaluar"
+      },
+      "evaluate": "Evaluar",
+      "evaluateVersion": "Evaluar la versión {version} de {agent}",
+      "evaluating": "La evaluación puede tardar unos minutos.",
+      "evalPassed": "La versión {version} aprobó la evaluación.",
+      "evalFailed": "La versión {version} no aprobó la evaluación y no se puede activar.",
+      "activate": "Activar",
+      "activateVersion": "Activar la versión {version} de {agent}",
+      "rollbackVersion": "Volver a la versión {version} de {agent}",
+      "rollback": "Volver a esta",
+      "activated": "La versión {version} está activa.",
+      "needsEval": "Evalúa la versión antes de activarla.",
+      "failed": "No se pudo completar",
+      "dialog": {
+        "title": "Instrucciones para {agent}",
+        "description": "El texto se guarda como una versión nueva. Solo se aplica después de evaluarlo y activarlo.",
+        "body": "Instrucciones",
+        "bodyHint": "Describe cómo debe actuar el agente en esta organización: tono, prioridades y límites. No incluyas contraseñas ni datos personales.",
+        "note": "Nota",
+        "noteHint": "Opcional. Qué cambió y por qué.",
+        "submit": "Guardar versión",
+        "bodyRequired": "Escribe las instrucciones.",
+        "bodyTooLong": "Usa como máximo {maximum} caracteres.",
+        "bodyUnchanged": "El texto es igual al de la versión activa.",
+        "created": "Versión {version} guardada. Evalúala para poder activarla."
+      },
+      "confirmActivate": {
+        "title": "¿Activar la versión {version} de {agent}?",
+        "rollbackTitle": "¿Volver {agent} a la versión {version}?",
+        "description": "Estas instrucciones pasan a regir en todas las conversaciones de la organización con {agent}. El cambio queda en el historial de activaciones."
+      }
+    },
+    "intro": "La organización crea sus propios agentes y también activa, limita e instruye a los agentes de la plataforma y de los módulos instalados. Un agente de la organización se elige directamente al iniciar una conversación; el asistente no le delega tareas.",
+    "custom": {
+      "title": "Agentes de la organización",
+      "description": "Agentes configurados por la organización: instrucciones, modelo, herramientas, habilidades y base de conocimiento. Se eligen directamente al iniciar una conversación; el asistente no les delega.",
+      "loading": "Cargando los agentes de la organización",
+      "create": "Nuevo agente",
+      "usage": "{used} de {maximum} agentes del plan en uso.",
+      "capReached": "Se alcanzó el límite del plan: elimine un agente para crear otro.",
+      "readOnly": "Puede ver los agentes, pero no puede cambiarlos.",
+      "emptyTitle": "Ningún agente de la organización",
+      "emptyDescription": "Cree un agente para dar a las personas un asistente con instrucciones y herramientas propias.",
+      "emptyDescriptionNoPermission": "La organización aún no ha creado agentes.",
+      "enabled": "Activado",
+      "disabled": "Desactivado",
+      "actions": {
+        "edit": "Editar",
+        "editNamed": "Editar {name}",
+        "enable": "Activar",
+        "enableNamed": "Activar {name}",
+        "disable": "Desactivar",
+        "disableNamed": "Desactivar {name}",
+        "delete": "Eliminar",
+        "deleteNamed": "Eliminar {name}"
+      },
+      "editor": {
+        "createTitle": "Nuevo agente",
+        "editTitle": "Editar {name}",
+        "description": "El agente es solo configuración: sigue las reglas de seguridad de la plataforma y cada herramienta sigue exigiendo el permiso de quien conversa.",
+        "loading": "Cargando el agente",
+        "retry": "Intentar de nuevo",
+        "cancel": "Cancelar",
+        "submitCreate": "Crear agente",
+        "submitSave": "Guardar",
+        "created": "Agente {name} creado.",
+        "saved": "Agente {name} guardado.",
+        "counter": "{count} de {maximum} caracteres.",
+        "toolRead": "solo lectura",
+        "toolMutation": "modifica datos",
+        "skillDisabled": "Habilidad desactivada: el agente no la recibe.",
+        "unavailable": "Ya no está disponible; desmarque para quitarla.",
+        "fields": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "instructions": "Instrucciones",
+          "model": "Modelo",
+          "tools": "Herramientas",
+          "connectorTools": "Herramientas de lectura de los conectores",
+          "coreSkills": "Habilidades de la plataforma",
+          "customSkills": "Habilidades de la organización",
+          "knowledgeScope": "Base de conocimiento",
+          "enabled": "Disponible para conversaciones"
+        },
+        "hints": {
+          "description": "Para qué sirve el agente. Las personas ven este texto al elegir el agente.",
+          "instructions": "Cómo debe actuar el agente. Las instrucciones van después de las reglas de la plataforma y nunca las reemplazan. No incluya contraseñas ni datos personales.",
+          "model": "La plataforma define qué modelo usa cada opción.",
+          "tools": "El agente solo usa las herramientas marcadas. Las que modifican datos piden confirmación o aprobación.",
+          "connectorTools": "Incluye las herramientas que los conectores de la organización marcan como de solo lectura.",
+          "coreSkills": "Instrucciones listas de la plataforma que el agente consulta cuando las necesita.",
+          "customSkills": "Habilidades escritas por la organización.",
+          "enabled": "Mientras esté desactivado, nadie inicia ni continúa conversaciones con el agente."
+        },
+        "empty": {
+          "tools": "No hay herramientas para seleccionar.",
+          "coreSkills": "No hay habilidades de la plataforma para seleccionar.",
+          "customSkills": "La organización aún no ha creado habilidades."
+        },
+        "models": {
+          "chat": "Estándar",
+          "reasoning": "Razonamiento (más potente)"
+        },
+        "knowledgeScopes": {
+          "none": "No busca",
+          "organization": "Documentos de la organización",
+          "project": "Organización y proyecto activo",
+          "all": "Todo lo que la persona puede buscar"
+        },
+        "knowledgeHints": {
+          "none": "El agente no busca en la base de conocimiento.",
+          "organization": "El agente busca solo en los documentos de la organización.",
+          "project": "El agente busca en los documentos de la organización y en los del proyecto donde ocurre la conversación.",
+          "all": "El agente busca en todo lo que quien conversa puede buscar, incluido el catálogo de datos."
+        },
+        "errors": {
+          "name": "Indique un nombre de hasta 100 caracteres.",
+          "description": "Indique una descripción de hasta 1000 caracteres.",
+          "instructions": "Escriba las instrucciones.",
+          "instructionsTooLong": "Use como máximo {maximum} caracteres.",
+          "model": "Elija un modelo de la lista.",
+          "tools": "Revise las herramientas seleccionadas.",
+          "coreSkills": "Revise las habilidades de la plataforma seleccionadas.",
+          "customSkills": "Revise las habilidades de la organización seleccionadas.",
+          "knowledgeScope": "Elija una opción de la lista."
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar {name}?",
+        "description": "El agente deja de existir y nadie más conversa con él. Las conversaciones ya hechas siguen disponibles para lectura.",
+        "confirm": "Eliminar agente",
+        "done": "Agente {name} eliminado."
+      },
+      "toggle": {
+        "disableTitle": "¿Desactivar {name}?",
+        "disableDescription": "Nadie inicia ni continúa conversaciones con el agente hasta que se active de nuevo. Puede tardar hasta un minuto en aplicarse.",
+        "disableConfirm": "Desactivar",
+        "doneDisabled": "Agente {name} desactivado.",
+        "enableTitle": "¿Activar {name}?",
+        "enableDescription": "Las personas de la organización podrán elegir el agente al iniciar una conversación.",
+        "enableConfirm": "Activar",
+        "doneEnabled": "Agente {name} activado."
+      }
+    }
+  },
+  "skills": {
+    "eyebrow": "{organization}",
+    "title": "Habilidades",
+    "description": "Instrucciones especializadas que los agentes consultan para ejecutar un tipo de tarea. La organización puede escribir las suyas.",
+    "loading": "Cargando las habilidades",
+    "agentsLink": "Abrir agentes",
+    "emptyTitle": "Ninguna habilidad disponible",
+    "emptyDescription": "Los agentes de esta organización no tienen habilidades en este momento.",
+    "caption": "Habilidades disponibles para {organization}",
+    "columns": {
+      "name": "Habilidad",
+      "source": "Origen",
+      "agents": "Agentes",
+      "status": "Estado"
+    },
+    "sourceCore": "Plataforma",
+    "sourceModule": "Módulo",
+    "active": "En uso",
+    "inactive": "Sin agente activado",
+    "agentOff": "{agent} (desactivado)",
+    "sourceCustom": "Organización",
+    "inUse": {
+      "title": "Habilidades en uso por los agentes",
+      "description": "Las habilidades de la plataforma, de los módulos y de la organización que los agentes cargan. La habilidad de un módulo queda disponible cuando se activa su agente."
+    },
+    "custom": {
+      "title": "Habilidades de la organización",
+      "description": "Habilidades escritas por la organización. Un agente de la organización usa una habilidad cuando se selecciona en él.",
+      "loading": "Cargando las habilidades de la organización",
+      "create": "Nueva habilidad",
+      "usage": "{used} de {maximum} habilidades del plan en uso.",
+      "capReached": "Se alcanzó el límite del plan: elimine una habilidad para crear otra.",
+      "readOnly": "Puede ver las habilidades, pero no puede cambiarlas.",
+      "emptyTitle": "Ninguna habilidad de la organización",
+      "emptyDescription": "Cree una habilidad para enseñar a los agentes cómo la organización ejecuta una tarea.",
+      "emptyDescriptionNoPermission": "La organización aún no ha creado habilidades.",
+      "caption": "Habilidades creadas por {organization}",
+      "columns": {
+        "name": "Habilidad",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "enabled": "Activada",
+      "disabled": "Desactivada",
+      "actions": {
+        "edit": "Editar",
+        "editNamed": "Editar {name}",
+        "enable": "Activar",
+        "enableNamed": "Activar {name}",
+        "disable": "Desactivar",
+        "disableNamed": "Desactivar {name}",
+        "delete": "Eliminar",
+        "deleteNamed": "Eliminar {name}"
+      },
+      "editor": {
+        "createTitle": "Nueva habilidad",
+        "editTitle": "Editar {name}",
+        "description": "Una habilidad es un texto de instrucciones. No ejecuta código ni da nuevas herramientas al agente.",
+        "cancel": "Cancelar",
+        "submitCreate": "Crear habilidad",
+        "submitSave": "Guardar",
+        "created": "Habilidad {name} creada.",
+        "saved": "Habilidad {name} guardada.",
+        "counter": "{count} de {maximum} caracteres.",
+        "fields": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "instructions": "Instrucciones",
+          "enabled": "Activada"
+        },
+        "hints": {
+          "name": "Letras minúsculas, números y guiones, por ejemplo informe-semanal. Único en la organización.",
+          "description": "Cuándo debe usar el agente la habilidad. El agente decide por este texto.",
+          "instructions": "Texto en Markdown con el paso a paso. No incluya contraseñas ni datos personales."
+        },
+        "errors": {
+          "name": {
+            "invalid": "Use letras minúsculas, números y guiones, empezando por una letra (hasta 60 caracteres).",
+            "tooLong": "Use letras minúsculas, números y guiones, empezando por una letra (hasta 60 caracteres).",
+            "taken": "Ya existe una habilidad con este nombre en la organización."
+          },
+          "description": {
+            "invalid": "Indique una descripción de hasta 1024 caracteres.",
+            "tooLong": "Indique una descripción de hasta 1024 caracteres.",
+            "taken": "Indique una descripción de hasta 1024 caracteres."
+          },
+          "instructions": {
+            "invalid": "Escriba las instrucciones.",
+            "tooLong": "Use como máximo {maximum} caracteres.",
+            "taken": "Escriba las instrucciones."
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar {name}?",
+        "description": "La habilidad deja de existir. Los agentes que la seleccionaron siguen funcionando sin ella.",
+        "confirm": "Eliminar habilidad",
+        "done": "Habilidad {name} eliminada."
+      },
+      "toggle": {
+        "disableTitle": "¿Desactivar {name}?",
+        "disableDescription": "Los agentes que seleccionaron la habilidad dejan de recibirla hasta que se active de nuevo. Puede tardar hasta un minuto en aplicarse.",
+        "disableConfirm": "Desactivar",
+        "doneDisabled": "Habilidad {name} desactivada.",
+        "enableTitle": "¿Activar {name}?",
+        "enableDescription": "Los agentes que seleccionaron la habilidad vuelven a recibirla.",
+        "enableConfirm": "Activar",
+        "doneEnabled": "Habilidad {name} activada."
+      }
+    }
+  },
+  "evals": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Evaluaciones",
+    "description": "Mide la calidad de los agentes de esta organización: ejecuta un agente sobre un conjunto de datos y compara las notas.",
+    "loading": "Cargando evaluaciones…",
+    "tabs": {
+      "label": "Secciones de evaluaciones",
+      "experiments": "Experimentos",
+      "datasets": "Conjuntos de datos"
+    },
+    "experiments": {
+      "loading": "Cargando experimentos…",
+      "caption": "Experimentos de {organization}",
+      "pagination": "Páginas de experimentos",
+      "agent": "Agente {id}",
+      "scoresOf": "Notas de {id}",
+      "score": "{scorer}: {mean}",
+      "scoreWithBaseline": "{scorer}: {mean} (mínimo {baseline})",
+      "noScores": "Sin notas",
+      "running": "En curso",
+      "select": "Comparar",
+      "selectNamed": "Comparar el experimento {id}",
+      "selected": "En la comparación",
+      "cardMeta": "{items, plural, one {# elemento} other {# elementos}} · {when}",
+      "emptyTitle": "Aún no hay experimentos",
+      "emptyDescription": "Inicia un experimento para evaluar un agente sobre un conjunto de datos de esta organización.",
+      "emptyDescriptionReadOnly": "Los experimentos aparecen aquí cuando alguien con permiso inicia uno.",
+      "columns": {
+        "experiment": "Experimento",
+        "dataset": "Conjunto de datos",
+        "status": "Estado",
+        "verdict": "Veredicto",
+        "items": "Elementos",
+        "scores": "Notas por evaluador",
+        "startedAt": "Inicio",
+        "finishedAt": "Fin",
+        "compare": "Comparación"
+      },
+      "status": {
+        "pending": "En cola",
+        "running": "En curso",
+        "completed": "Completado",
+        "failed": "Falló"
+      },
+      "verdict": {
+        "passed": "Aprobado",
+        "failed": "Reprobado",
+        "pending": "Pendiente"
+      }
+    },
+    "datasets": {
+      "loading": "Cargando conjuntos de datos…",
+      "caption": "Conjuntos de datos de {organization}",
+      "noTargets": "Ninguno",
+      "targetsOf": "Agentes evaluados por {name}",
+      "cardMeta": "Versión {version} · {when}",
+      "emptyTitle": "Aún no hay conjuntos de datos",
+      "emptyDescription": "Crea un conjunto y agrega ítems, o califica negativamente una respuesta en el chat para crear el conjunto feedback.",
+      "emptyAction": "Ver experimentos",
+      "columns": {
+        "name": "Conjunto de datos",
+        "version": "Versión",
+        "targets": "Agentes",
+        "createdAt": "Creado",
+        "items": "Ítems"
+      },
+      "emptyDescriptionReadOnly": "Los conjuntos aparecen aquí cuando alguien con permiso crea uno o califica negativamente una respuesta en el chat.",
+      "openItems": "Ver ítems",
+      "openItemsNamed": "Ver los ítems de {name}",
+      "create": {
+        "action": "Nuevo conjunto de datos",
+        "title": "Nuevo conjunto de datos",
+        "description": "Un conjunto vacío de esta organización, evaluado con el asistente. Luego agrega sus ítems.",
+        "name": "Nombre",
+        "nameRequired": "Ingresa un nombre.",
+        "nameTaken": "Esta organización ya tiene un conjunto con ese nombre.",
+        "submit": "Crear",
+        "cancel": "Cancelar",
+        "done": "Conjunto {name} creado."
+      },
+      "renameNamed": "Renombrar el conjunto {name}",
+      "deleteNamed": "Eliminar el conjunto {name}",
+      "rename": {
+        "action": "Renombrar",
+        "title": "Renombrar {name}",
+        "description": "Las evaluaciones que ya se ejecutaron siguen vinculadas a este conjunto.",
+        "submit": "Guardar nombre",
+        "done": "Conjunto renombrado a {name}."
+      },
+      "delete": {
+        "action": "Eliminar",
+        "title": "¿Eliminar el conjunto {name}?",
+        "description": "El conjunto y todos sus elementos se borran. Solo se puede eliminar un conjunto en el que no se ejecutó ninguna evaluación.",
+        "confirm": "Eliminar conjunto",
+        "done": "Conjunto {name} eliminado."
+      }
+    },
+    "compare": {
+      "title": "Comparación de experimentos",
+      "hint": "Elige dos experimentos, de cualquier página, para comparar las notas por evaluador.",
+      "hintOne": "Elige un experimento más para comparar.",
+      "missing": "Uno de los experimentos elegidos no se encontró. Limpia la comparación y elige de nuevo.",
+      "loading": "Cargando los experimentos elegidos…",
+      "clear": "Limpiar comparación"
+    },
+    "start": {
+      "action": "Iniciar experimento",
+      "title": "Iniciar experimento",
+      "description": "El agente responde a cada elemento del conjunto de datos y los evaluadores ponen las notas. La ejecución usa el presupuesto de la organización.",
+      "dataset": "Conjunto de datos",
+      "datasetRequired": "Elige un conjunto de datos.",
+      "noDatasets": "Esta organización aún no tiene conjuntos de datos, así que no hay nada que evaluar.",
+      "agent": "Agente",
+      "agentRequired": "Elige un agente.",
+      "agentHint": "Solo el asistente y los agentes habilitados para la organización pueden evaluarse.",
+      "agentNotEnabled": "Este agente no está habilitado para la organización. Habilítalo en Agentes o elige otro.",
+      "datasetNotFound": "Este conjunto de datos ya no existe en esta organización. Elige otro.",
+      "loading": "Cargando conjuntos y agentes…",
+      "submit": "Iniciar",
+      "cancel": "Cancelar",
+      "done": "Experimento {id} iniciado."
+    },
+    "items": {
+      "back": "Conjuntos de datos",
+      "title": "Ítems de {name}",
+      "caption": "Ítems de {name}",
+      "loading": "Cargando ítems…",
+      "pagination": "Páginas de ítems",
+      "noExpectedOutput": "Sin respuesta esperada",
+      "deleteAction": "Eliminar",
+      "deleteNamed": "Eliminar el ítem {input}",
+      "emptyTitle": "Aún no hay ítems",
+      "emptyDescription": "Agrega un ítem con el mensaje que recibe el agente y la respuesta esperada.",
+      "emptyDescriptionReadOnly": "Los ítems aparecen aquí cuando alguien con permiso los agrega.",
+      "columns": {
+        "input": "Entrada",
+        "expectedOutput": "Respuesta esperada",
+        "createdAt": "Agregado",
+        "actions": "Acciones"
+      },
+      "add": {
+        "action": "Agregar ítem",
+        "title": "Agregar ítem",
+        "description": "Un ítem manual de {name}. Los experimentos nuevos usan la versión actual del conjunto.",
+        "input": "Entrada",
+        "inputHint": "El mensaje que recibe el agente.",
+        "inputRequired": "Ingresa la entrada.",
+        "expectedOutput": "Respuesta esperada (opcional)",
+        "expectedOutputHint": "La respuesta que los evaluadores comparan con la del agente.",
+        "submit": "Agregar",
+        "cancel": "Cancelar",
+        "done": "Ítem agregado."
+      },
+      "delete": {
+        "title": "¿Eliminar este ítem?",
+        "description": "El ítem sale del conjunto. Los experimentos ya hechos conservan sus resultados.",
+        "confirm": "Eliminar ítem",
+        "done": "Ítem eliminado."
+      }
+    }
+  },
+  "traces": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Trazas",
+    "description": "Ejecuciones de agentes y flujos de esta organización, con tokens y costo por paso.",
+    "loading": "Cargando trazas…",
+    "caption": "Trazas de {organization}",
+    "pagination": "Páginas de trazas",
+    "open": "Abrir la traza {name}",
+    "agentTarget": "Agente {id}",
+    "workflowTarget": "Flujo {id}",
+    "noTarget": "Sin agente",
+    "tokensValue": "{input} / {output}",
+    "noMatchTitle": "Ninguna traza con esos filtros",
+    "noMatchDescription": "Revisa los filtros o límpialos para ver todas las trazas.",
+    "clearFilters": "Limpiar filtros",
+    "emptyTitle": "Aún no hay trazas",
+    "emptyDescription": "Las trazas aparecen aquí cuando se ejecuta un agente o flujo de esta organización.",
+    "columns": {
+      "trace": "Traza",
+      "target": "Agente o flujo",
+      "status": "Estado",
+      "startedAt": "Inicio",
+      "duration": "Duración",
+      "tokens": "Tokens (entrada / salida)",
+      "cost": "Costo"
+    },
+    "filters": {
+      "label": "Filtrar trazas",
+      "agent": "Agente",
+      "anyAgent": "Cualquier agente",
+      "agentsLoading": "Cargando agentes…",
+      "agentPlaceholder": "assistant",
+      "agentInvalid": "Usa letras minúsculas, números y guiones, empezando por una letra.",
+      "status": "Estado",
+      "anyStatus": "Todos los estados",
+      "apply": "Filtrar"
+    },
+    "detail": {
+      "title": "Traza",
+      "back": "Volver a las trazas",
+      "loading": "Cargando la traza…",
+      "summary": "Resumen de la traza",
+      "target": "Agente o flujo",
+      "startedAt": "Inicio",
+      "duration": "Duración",
+      "tokens": "Tokens (entrada / salida)",
+      "cost": "Costo",
+      "traceId": "Id de la traza",
+      "notFoundTitle": "Traza no encontrada",
+      "notFoundDescription": "Esta traza no existe o no pertenece a esta organización."
+    }
+  },
+  "approvals": {
+    "eyebrow": "{organization}",
+    "title": "Aprobaciones",
+    "description": "Acciones que necesitan la decisión de una segunda persona antes de ejecutarse. Quien pide nunca aprueba su propia solicitud.",
+    "loading": "Cargando aprobaciones",
+    "historyPagination": "Páginas del historial",
+    "truncatedTitle": "No se cargaron todas las solicitudes pendientes",
+    "truncatedDescription": "Se muestran las primeras {count}, el límite de esta lista. Decide estas para ver las demás.",
+    "tabs": {
+      "label": "Listas de aprobaciones",
+      "waiting": "Esperando mi decisión",
+      "mine": "Solicitadas por mí",
+      "history": "Historial",
+      "waitingCount": "Esperando mi decisión ({count})",
+      "mineCount": "Solicitadas por mí ({count})",
+      "historyCount": "Historial ({count})"
+    },
+    "empty": {
+      "waitingTitle": "Nada espera tu decisión",
+      "waitingDescription": "Cuando alguien pida una acción que requiere aprobación, aparecerá aquí.",
+      "mineTitle": "No has solicitado ninguna aprobación",
+      "mineDescription": "Tus solicitudes, del chat o de un flujo, aparecen aquí mientras esperan una decisión; las decididas pasan al Historial.",
+      "historyTitle": "Ninguna aprobación concluida",
+      "historyDescription": "Las aprobaciones ejecutadas, rechazadas, canceladas o vencidas quedan registradas aquí."
+    },
+    "requester": {
+      "you": "ti"
+    },
+    "detail": {
+      "title": "Solicitud de aprobación",
+      "description": "Revisa lo que se pidió antes de decidir. La decisión queda registrada en la auditoría.",
+      "loading": "Cargando la solicitud",
+      "back": "Volver a aprobaciones",
+      "notFoundTitle": "Solicitud no encontrada",
+      "notFoundDescription": "No existe en esta organización o no tienes acceso a ella.",
+      "factsLabel": "Detalles de la solicitud",
+      "created": "Solicitada el",
+      "expires": "Vence el",
+      "permission": "Permiso de la acción",
+      "decidedBy": "Decidida por",
+      "reference": "Referencia"
+    },
+    "decision": {
+      "checking": "Verificando tu acceso…",
+      "reasonLabel": "Motivo (opcional)",
+      "reasonHint": "Quien solicitó ve el motivo, y queda en la auditoría. Hasta 500 caracteres.",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "rejectTitle": "¿Rechazar esta solicitud?",
+      "rejectDescription": "“{summary}” no se ejecutará. Quien la solicitó puede pedirla de nuevo.",
+      "rejectConfirm": "Rechazar solicitud",
+      "blocked": {
+        "own-request": "Tú pediste esta aprobación. Otra persona con permiso debe decidir.",
+        "not-covered": "Tu acceso no cubre el lugar de esta solicitud, así que no puedes decidirla.",
+        "no-permission": "No tienes permiso para decidir esta solicitud. Necesitas poder decidir aprobaciones y tener el permiso de la acción misma."
+      },
+      "done": {
+        "approved": "Solicitud aprobada.",
+        "executed": "Solicitud aprobada y acción ejecutada.",
+        "failed": "La solicitud fue aprobada, pero la acción falló al ejecutarse.",
+        "rejected": "Solicitud rechazada."
+      },
+      "errors": {
+        "SELF_APPROVAL_FORBIDDEN": "No puedes decidir una solicitud que tú mismo hiciste. Otra persona debe decidir.",
+        "FORBIDDEN": "No tienes permiso para decidir esta solicitud en este lugar.",
+        "CONFLICT": "Esta solicitud ya no está pendiente: fue decidida, cancelada con su flujo o venció. La lista se actualizó.",
+        "NOT_FOUND": "Esta solicitud ya no existe o perdiste el acceso a ella."
+      }
+    }
+  },
+  "connectors": {
+    "loading": "Cargando conectores",
+    "eyebrow": "Configuración de {organization}",
+    "title": "Conectores",
+    "description": "Sistemas externos que los agentes de la organización pueden usar: API descritas en OpenAPI, servidores MCP, bases Postgres de solo lectura y navegador.",
+    "create": "Nuevo conector",
+    "caption": "Conectores de {organization}",
+    "pagination": "Páginas de conectores",
+    "limitNotice": "En esta página no hay prueba de conexión ni listado de las herramientas del sistema externo. Escribe los nombres de las herramientas a mano, tal como los expone el sistema, y verifica el resultado en una conversación con el agente.",
+    "emptyTitle": "Ningún conector",
+    "emptyDescription": "Crea un conector para que los agentes consulten o accionen un sistema externo.",
+    "emptyDescriptionNoPermission": "No se ha creado ningún conector. No tienes permiso para crear conectores.",
+    "hasSecret": "Definido",
+    "noSecret": "Sin definir",
+    "tools": "{allowed, plural, =0 {Ninguna herramienta} one {# herramienta} other {# herramientas}} · {readOnly} sin aprobación",
+    "types": {
+      "openapi": "API OpenAPI",
+      "mcp": "Servidor MCP",
+      "postgres": "Postgres (solo lectura)",
+      "browser": "Navegador"
+    },
+    "status": {
+      "active": "Activo",
+      "disabled": "Desactivado",
+      "error": "Con error"
+    },
+    "columns": {
+      "name": "Conector",
+      "status": "Estado",
+      "secret": "Secreto",
+      "tools": "Herramientas",
+      "updatedAt": "Actualizado",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "edit": "Editar",
+      "editNamed": "Editar {name}",
+      "setSecret": "Definir secreto",
+      "setSecretNamed": "Definir el secreto de {name}",
+      "replaceSecret": "Reemplazar secreto",
+      "replaceSecretNamed": "Reemplazar el secreto de {name}",
+      "disable": "Desactivar",
+      "disableNamed": "Desactivar {name}",
+      "enable": "Activar",
+      "enableNamed": "Activar {name}",
+      "delete": "Eliminar",
+      "deleteNamed": "Eliminar {name}"
+    },
+    "editor": {
+      "createTitle": "Nuevo conector",
+      "editTitle": "Editar {name}",
+      "createDescription": "El secreto (token, clave o DSN) se define después, en una acción separada, y nunca se muestra.",
+      "editDescription": "El tipo no se puede cambiar. El secreto se define en una acción separada.",
+      "cancel": "Cancelar",
+      "submitCreate": "Crear conector",
+      "submitSave": "Guardar cambios",
+      "created": "Conector {name} creado.",
+      "saved": "Conector {name} actualizado.",
+      "toolsLimit": "Los nombres no se verifican con el sistema externo: una herramienta con un nombre incorrecto simplemente no queda disponible para los agentes.",
+      "fields": {
+        "name": "Nombre",
+        "type": "Tipo",
+        "specUrl": "URL del documento OpenAPI",
+        "url": "URL del servidor",
+        "allowedHosts": "Hosts permitidos",
+        "allowedRelations": "Tablas y vistas permitidas",
+        "auth": "Autenticación",
+        "apiKeyHeader": "Encabezado de la clave de API",
+        "allow": "Herramientas permitidas",
+        "readOnly": "Herramientas que se ejecutan sin aprobación"
+      },
+      "hints": {
+        "name": "Hasta 100 caracteres. También es el prefijo de los nombres de las herramientas.",
+        "specUrl": "Dirección https del documento OpenAPI 3.0 o 3.1.",
+        "url": "Dirección https del servidor.",
+        "allowedHosts": "Un host por línea, en minúsculas, sin https:// y sin puerto (por ejemplo, api.ejemplo.com). Solo se alcanzan esos hosts, incluso en redirecciones.",
+        "allowedRelations": "Una por línea, con el formato esquema.tabla (por ejemplo, public.pedidos). Solo ellas se pueden leer.",
+        "auth": "Cómo se envía el secreto. El secreto en sí queda en el almacén de secretos.",
+        "apiKeyHeader": "Nombre del encabezado que lleva la clave (por ejemplo, X-Api-Key).",
+        "allow": "Un nombre por línea, tal como lo expone el sistema externo (operationId o nombre de la herramienta MCP). Lo que no esté aquí queda oculto para los agentes.",
+        "readOnly": "Las demás herramientas permitidas piden confirmación al usuario antes de ejecutarse.",
+        "typeLocked": "El tipo de un conector existente no cambia."
+      },
+      "typeHints": {
+        "openapi": "Los agentes llaman a las operaciones de una API HTTP descrita en OpenAPI.",
+        "mcp": "Los agentes usan las herramientas de un servidor MCP remoto.",
+        "postgres": "Los agentes consultan, solo para lectura, las tablas permitidas de una base Postgres. El DSN es el secreto.",
+        "browser": "Los agentes navegan páginas mediante un servidor Playwright MCP."
+      },
+      "auth": {
+        "none": "Sin autenticación",
+        "bearer": "Token Bearer",
+        "api-key": "Clave de API en encabezado",
+        "oauth": "OAuth"
+      },
+      "errors": {
+        "name": "Escribe un nombre de hasta 100 caracteres.",
+        "specUrl": "Escribe una URL https válida.",
+        "url": "Escribe una URL https válida.",
+        "allowedHosts": "Escribe de 1 a 20 hosts válidos, en minúsculas, sin esquema, puerto ni dirección IP.",
+        "allowedRelations": "Escribe de 1 a 200 relaciones con el formato esquema.tabla, en minúsculas.",
+        "auth": "Elige un modo de autenticación que este tipo acepte.",
+        "apiKeyHeader": "Escribe el nombre del encabezado (letras, números y guion).",
+        "allow": "Usa nombres de herramienta válidos: empiezan con una letra y solo tienen letras, números, punto, guion y guion bajo.",
+        "readOnly": "Solo las herramientas permitidas pueden ejecutarse sin aprobación."
+      }
+    },
+    "secret": {
+      "setTitle": "Definir el secreto de {name}",
+      "replaceTitle": "Reemplazar el secreto de {name}",
+      "setDescription": "El valor va directo al almacén de secretos. Una vez guardado, no se puede leer ni mostrar de nuevo.",
+      "replaceDescription": "El valor actual no se puede mostrar. El nuevo valor lo reemplaza en el almacén de secretos.",
+      "label": {
+        "openapi": "Token o clave de API",
+        "mcp": "Token de acceso",
+        "postgres": "DSN de conexión",
+        "browser": "Token de acceso"
+      },
+      "hint": "Solo escritura: el campo empieza vacío y se borra al guardar.",
+      "required": "Escribe el valor del secreto.",
+      "cancel": "Cancelar",
+      "submitSet": "Guardar secreto",
+      "submitReplace": "Reemplazar secreto",
+      "done": "Secreto de {name} guardado."
+    },
+    "delete": {
+      "title": "¿Eliminar {name}?",
+      "description": "Se eliminan el conector y el secreto guardado. Los agentes dejan de tener sus herramientas. Esta acción no se puede deshacer.",
+      "confirm": "Eliminar conector",
+      "done": "Conector {name} eliminado."
+    },
+    "toggle": {
+      "disableTitle": "¿Desactivar {name}?",
+      "enableTitle": "¿Activar {name}?",
+      "disableDescription": "Los agentes dejan de usar las herramientas de este conector hasta que se active de nuevo. La configuración y el secreto se conservan.",
+      "enableDescription": "Los agentes vuelven a usar las herramientas permitidas de este conector.",
+      "disableConfirm": "Desactivar",
+      "enableConfirm": "Activar",
+      "doneDisabled": "Conector {name} desactivado.",
+      "doneEnabled": "Conector {name} activado."
+    },
+    "lastErrorAt": "(último intento: {when})",
+    "loadErrors": {
+      "SECRET_MISSING": "Falta el secreto: defínelo para que los agentes usen este conector.",
+      "SPEC_UNAVAILABLE": "No se pudo descargar el documento OpenAPI.",
+      "SPEC_INVALID": "El documento OpenAPI no es válido.",
+      "SPEC_TOO_LARGE": "El documento OpenAPI supera el tamaño máximo (2 MB).",
+      "SERVER_NOT_ALLOWED": "El servidor del documento no está entre los hosts permitidos.",
+      "CONNECT_FAILED": "El servidor rechazó la conexión; revisa la URL y el secreto.",
+      "LOAD_FAILED": "No se pudo cargar el conector."
+    }
+  },
+  "flags": {
+    "loading": "Cargando funciones",
+    "eyebrow": "Configuración de {organization}",
+    "title": "Funciones",
+    "description": "Funciones de la plataforma que la organización puede desactivar para sí misma.",
+    "caption": "Funciones que {organization} puede desactivar",
+    "onlyOffNotice": "La organización solo puede desactivar una función para sí misma, o volver a usarla. No puede activar una función que la plataforma desactivó.",
+    "platformUnknown": "No se informa mientras la organización cambia la función",
+    "emptyTitle": "Ninguna función ajustable",
+    "emptyDescription": "Por ahora la plataforma no ofrece funciones que la organización pueda desactivar.",
+    "value": {
+      "on": "Activada",
+      "off": "Desactivada"
+    },
+    "override": {
+      "none": "Sin cambios",
+      "on": "Activada por la organización",
+      "off": "Desactivada por la organización"
+    },
+    "columns": {
+      "flag": "Función",
+      "platform": "Valor de la plataforma",
+      "override": "Cambio de la organización",
+      "effective": "Valor en uso",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "turnOff": "Desactivar para la organización",
+      "turnOffNamed": "Desactivar {key} para la organización",
+      "turnOn": "Volver a usar",
+      "turnOnNamed": "Volver a usar {key}",
+      "platformOff": "Desactivada por la plataforma",
+      "follow": "Seguir a la plataforma",
+      "followNamed": "Seguir a la plataforma en {key}"
+    },
+    "confirm": {
+      "titleOff": "¿Desactivar {key} para la organización?",
+      "titleOn": "¿Volver a usar {key}?",
+      "descriptionOff": "La función deja de estar disponible para todos los miembros de esta organización. Descripción de la función: {reason}",
+      "descriptionOn": "La organización vuelve a usar la función, si la plataforma la mantiene activada. Descripción de la función: {reason}",
+      "confirmOff": "Desactivar",
+      "confirmOn": "Volver a usar",
+      "doneOff": "{key} desactivada para la organización.",
+      "doneOn": "La organización volvió a usar {key}."
+    },
+    "clear": {
+      "title": "¿Seguir a la plataforma en {key}?",
+      "description": "Se quita el cambio de la organización y la función toma el valor de la plataforma, activada o desactivada. Descripción de la función: {reason}",
+      "confirm": "Seguir a la plataforma",
+      "done": "{key} sigue a la plataforma."
+    }
+  },
+  "knowledge": {
+    "loading": "Cargando la base de conocimiento…",
+    "eyebrow": "Configuración de {organization}",
+    "title": "Base de conocimiento",
+    "description": "Documentos que los agentes consultan y citan al responder.",
+    "addAction": "Agregar documento",
+    "collectionLabel": "Colección",
+    "collections": {
+      "all": "Todos los documentos",
+      "organization": "Toda la organización",
+      "project": "Proyecto {name}",
+      "catalog": "Contenido de la plataforma",
+      "module": "Módulo {name}",
+      "projectRemoved": "Proyecto eliminado",
+      "projectUnknown": "Otro proyecto de la organización"
+    },
+    "collectionsNote": {
+      "title": "Cómo funcionan las colecciones",
+      "description": "Cada colección corresponde a toda la organización o a uno de sus proyectos. Los documentos de la organización valen en todos los proyectos; los de un proyecto valen solo en él. No es posible crear colecciones con nombre propio."
+    },
+    "caption": "Documentos de la base de conocimiento de {organization}",
+    "pagination": "Páginas de documentos",
+    "columns": {
+      "title": "Documento",
+      "source": "Origen",
+      "collection": "Colección",
+      "status": "Indexación",
+      "added": "Agregado el",
+      "actions": "Acciones"
+    },
+    "sources": {
+      "upload": "Archivo subido",
+      "url": "Página web",
+      "catalog": "Catálogo de la plataforma",
+      "module": "Módulo"
+    },
+    "status": {
+      "pending": "Indexando",
+      "ready": "Listo",
+      "failed": "Falló",
+      "deleted": "Eliminado"
+    },
+    "deleteAction": "Eliminar",
+    "deleteNamed": "Eliminar {name}",
+    "cardMeta": "{source} · {date}",
+    "emptyTitle": "No hay documentos en esta colección",
+    "emptyDescription": "Agrega un archivo o una página web para que los agentes la consulten.",
+    "emptyDescriptionNoPermission": "Quienes administran la organización pueden agregar documentos.",
+    "indexing": {
+      "label": "Indexaciones en curso",
+      "running": "Indexando {name}. El documento aparece en la lista cuando se lee su contenido.",
+      "dismiss": "Descartar",
+      "dismissNamed": "Descartar el aviso de {name}",
+      "failedTitle": "No se pudo indexar {name}",
+      "failedDescription": "La lectura del contenido falló antes de que el documento llegara a la lista. Inténtalo de nuevo o revisa la dirección o el archivo.",
+      "reference": "Referencia: {runId}",
+      "retry": "Intentar de nuevo",
+      "retryNamed": "Intentar indexar {name} de nuevo",
+      "noDocumentTitle": "{name} no generó un documento",
+      "noDocumentDescription": "La indexación terminó, pero ningún documento nuevo apareció en la lista. El contenido puede estar vacío o no se pudo leer. Intenta de nuevo o envía otro archivo."
+    },
+    "add": {
+      "title": "Agregar documento",
+      "description": "El documento entra en la colección \"{collection}\" y se indexa en segundo plano.",
+      "sourceLabel": "Origen del documento",
+      "fileTab": "Archivo",
+      "urlTab": "Página web",
+      "file": "Archivo",
+      "fileHint": "Formatos aceptados: {types}. Tamaño máximo: {size} MB. El servidor verifica el tipo y el contenido después de la carga.",
+      "url": "Dirección de la página",
+      "urlHint": "Solo páginas públicas con dirección https.",
+      "fileNotAllowed": "No tienes permiso para subir archivos; solo se pueden agregar páginas web.",
+      "cancel": "Cancelar",
+      "submit": "Agregar",
+      "started": "Se inició la indexación de {name}.",
+      "steps": {
+        "progress": "Paso {current} de {total}: {step}",
+        "requesting": "preparando la carga",
+        "uploading": "subiendo el archivo",
+        "validating": "verificando el archivo",
+        "starting": "iniciando la indexación",
+        "slow": "Todavía procesando el archivo. La primera verificación puede tardar unos minutos; puedes esperar con esta ventana abierta."
+      },
+      "failures": {
+        "UPLOAD_FAILED": "No se pudo subir el archivo. Revisa la conexión e inténtalo de nuevo.",
+        "VALIDATION_TIMEOUT": "La verificación del archivo está tardando más de lo esperado. Inténtalo de nuevo en unos minutos.",
+        "TYPE_NOT_ALLOWED": "Este tipo de archivo no se acepta en la base de conocimiento.",
+        "TOO_LARGE": "El archivo supera el tamaño permitido.",
+        "CONTENT_MISMATCH": "El contenido del archivo no corresponde al tipo indicado."
+      },
+      "problems": {
+        "FILE_REQUIRED": "Elige un archivo.",
+        "EMPTY": "El archivo está vacío.",
+        "TYPE_NOT_ALLOWED": "Este tipo de archivo no se acepta.",
+        "TOO_LARGE": "El archivo supera {size} MB.",
+        "URL_INVALID": "Ingresa una dirección completa que empiece con https://."
+      }
+    },
+    "delete": {
+      "title": "¿Eliminar {name}?",
+      "description": "Se eliminarán el documento y su contenido indexado. Los agentes dejan de citarlo. Esta acción no se puede deshacer.",
+      "confirm": "Eliminar documento",
+      "done": "Se eliminó {name}."
+    }
+  },
+  "usage": {
+    "loading": "Cargando el uso…",
+    "eyebrow": "Configuración de {organization}",
+    "title": "Uso y presupuesto",
+    "description": "Costo y tokens de los modelos en el mes, comparados con los límites de la organización.",
+    "month": "Mes",
+    "currentMonth": "{month} (mes actual)",
+    "totals": {
+      "title": "Totales del mes",
+      "cost": "Costo",
+      "costHint": "Las llamadas sin precio conocido no entran en el costo.",
+      "tokens": "Tokens",
+      "tokensHint": "{input} de entrada y {output} de salida",
+      "calls": "Llamadas a modelos",
+      "callsHint": "Incluye todos los agentes y flujos.",
+      "unpriced": "Llamadas sin precio",
+      "unpricedHint": "Cuentan solo para el límite de tokens."
+    },
+    "budget": {
+      "title": "Presupuesto",
+      "description": "Límites mensuales vigentes hoy. La alerta se activa al {threshold}% de un límite; al alcanzar el límite, se rechazan nuevas ejecuciones.",
+      "spend": "Gasto del mes",
+      "tokens": "Tokens del mes",
+      "level": {
+        "ok": "Dentro del límite",
+        "alert": "Cerca del límite",
+        "over": "Límite alcanzado"
+      },
+      "useOfCap": "{used} de {cap}",
+      "useOfCapWithPercent": "{used} de {cap} ({percent})",
+      "alert": {
+        "alert": {
+          "title": "El uso está cerca del límite",
+          "description": "El uso superó el {threshold}% de un límite mensual. Al alcanzar el límite, los agentes dejan de responder hasta el próximo mes."
+        },
+        "over": {
+          "title": "Se alcanzó el límite mensual",
+          "description": "Las nuevas ejecuciones de agentes se rechazan hasta el próximo mes o hasta que se amplíe el límite en el plan de la organización."
+        }
+      }
+    },
+    "models": {
+      "title": "Uso por modelo",
+      "caption": "Uso por modelo en el mes",
+      "columns": {
+        "model": "Modelo",
+        "provider": "Proveedor",
+        "calls": "Llamadas",
+        "inputTokens": "Tokens de entrada",
+        "outputTokens": "Tokens de salida",
+        "cost": "Costo"
+      },
+      "cardMeta": "{calls, plural, one {# llamada} other {# llamadas}} · {cost}",
+      "emptyTitle": "Sin uso en este mes",
+      "emptyDescription": "Cuando los agentes respondan, el uso por modelo aparece aquí."
+    },
+    "breakdowns": {
+      "columns": {
+        "calls": "Llamadas",
+        "tokens": "Tokens",
+        "cost": "Costo"
+      },
+      "cardMeta": "{calls, plural, one {# llamada} other {# llamadas}} · {cost}",
+      "byDay": {
+        "title": "Costo por día",
+        "description": "Costo conocido de cada día del mes con llamadas (días en UTC).",
+        "day": "Día"
+      },
+      "byAgent": {
+        "title": "Uso por agente",
+        "caption": "Uso por agente en el mes",
+        "name": "Agente"
+      },
+      "byUser": {
+        "title": "Uso por usuario",
+        "caption": "Uso por usuario en el mes",
+        "name": "Usuario"
+      },
+      "platformJobs": "Procesos de la plataforma"
+    },
+    "ownCap": {
+      "source": {
+        "plan": "Sin límite propio: se aplican los límites del plan.",
+        "own": "Límite propio vigente: {spend} y {tokens} tokens por mes.",
+        "mixed": "Límite propio definido: {spend} y {tokens} tokens por mes; donde el límite del plan es menor, se aplica el del plan."
+      },
+      "title": "Límite propio de la organización",
+      "description": "La organización puede definir un límite mensual menor que el del plan. No es posible superar el límite del plan.",
+      "loading": "Cargando los límites…",
+      "spend": "Límite de gasto mensual",
+      "spendHint": "En dólares estadounidenses. El valor inicial es el límite vigente hoy.",
+      "tokens": "Límite mensual de tokens",
+      "tokensHint": "Número entero de tokens por mes.",
+      "save": "Guardar límite",
+      "remove": "Quitar límite propio",
+      "saved": "Límite propio guardado.",
+      "removed": "Límite propio quitado. Vuelven a regir los límites del plan.",
+      "abovePlan": "El límite indicado es mayor que el del plan. Ingresa valores iguales o menores que los límites vigentes.",
+      "failureWithReference": "{message} Referencia: {requestId}",
+      "problems": {
+        "spend": "Ingresa el límite de gasto.",
+        "tokens": "Ingresa un número entero de tokens."
+      },
+      "removeTitle": "¿Quitar el límite propio de la organización?",
+      "removeDescription": "Vuelven a regir los límites del plan, que pueden ser mayores. El gasto deja de detenerse en el límite propio.",
+      "removeConfirm": "Quitar límite"
+    }
+  },
+  "workflows": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Flujos y programaciones",
+    "description": "Sigue las ejecuciones de los flujos de la organización y programa los que pueden ejecutarse solos.",
+    "loading": "Cargando flujos…",
+    "tabsLabel": "Secciones de flujos",
+    "tabs": {
+      "runs": "Ejecuciones",
+      "schedules": "Programaciones"
+    },
+    "catalogFailed": "No se pudo cargar la lista de flujos. Iniciar y programar no están disponibles hasta que cargue.",
+    "notFoundTitle": "Página no encontrada",
+    "notFoundDescription": "Esta dirección no existe en flujos y programaciones.",
+    "backToRuns": "Volver a las ejecuciones",
+    "runs": {
+      "loading": "Cargando ejecuciones…",
+      "caption": "Ejecuciones de flujos de {organization}",
+      "pagination": "Páginas de ejecuciones",
+      "start": "Iniciar flujo",
+      "filters": {
+        "label": "Filtros de ejecuciones",
+        "workflow": "Flujo",
+        "anyWorkflow": "Todos los flujos",
+        "status": "Estado",
+        "anyStatus": "Cualquier estado"
+      },
+      "columns": {
+        "run": "Ejecución",
+        "status": "Estado",
+        "origin": "Iniciada por",
+        "createdAt": "Inicio",
+        "updatedAt": "Último cambio",
+        "actions": "Acciones"
+      },
+      "open": "Abrir",
+      "openNamed": "Abrir la ejecución {id} de {workflow}",
+      "cancel": "Cancelar",
+      "cancelNamed": "Cancelar la ejecución {id} de {workflow}",
+      "waitsApproval": "Espera aprobación",
+      "emptyTitle": "Aún no hay ejecuciones",
+      "emptyDescription": "Las ejecuciones aparecen aquí cuando alguien inicia un flujo o una programación se dispara.",
+      "emptyDescriptionCanStart": "Inicia un flujo para ver su ejecución aquí.",
+      "noMatchTitle": "Ninguna ejecución con esos filtros",
+      "noMatchDescription": "Cambia o limpia los filtros para ver otras ejecuciones.",
+      "clearFilters": "Limpiar filtros"
+    },
+    "startDialog": {
+      "title": "Iniciar flujo",
+      "description": "La ejecución actúa en tu nombre, con tus permisos en esta organización.",
+      "workflow": "Flujo",
+      "workflowPlaceholder": "Elige un flujo",
+      "noneStartable": "Ningún flujo de esta organización puede iniciarse manualmente.",
+      "inputHint": "Un objeto JSON. El servidor valida los datos con el formato del flujo.",
+      "errors": {
+        "workflow": "Elige un flujo."
+      },
+      "cancel": "Cancelar",
+      "submit": "Iniciar",
+      "started": "Ejecución de {workflow} iniciada."
+    },
+    "cancelDialog": {
+      "title": "¿Cancelar la ejecución de {workflow}?",
+      "description": "La ejecución se detiene y no puede reanudarse. Lo que ya hizo no se deshace.",
+      "descriptionSuspended": "La ejecución se detiene y no puede reanudarse. La solicitud de aprobación que esperaba se cancela con ella.",
+      "confirm": "Cancelar ejecución",
+      "keep": "Mantener ejecución",
+      "done": "Ejecución de {workflow} cancelada."
+    },
+    "run": {
+      "title": "Ejecución de {workflow}",
+      "titleUnknown": "Ejecución",
+      "loading": "Cargando la ejecución…",
+      "notFoundTitle": "Ejecución no encontrada",
+      "notFoundDescription": "Esta ejecución ya no existe o pertenece a otra organización.",
+      "id": "Identificador",
+      "workflow": "Flujo",
+      "timelineTitle": "Línea de tiempo",
+      "timelineLabel": "Línea de tiempo de la ejecución {id}",
+      "live": "Esta página se actualiza sola mientras la ejecución está en curso.",
+      "settled": "La ejecución terminó. El estado ya no cambia.",
+      "cancel": "Cancelar ejecución",
+      "openApproval": "Abrir aprobaciones",
+      "approvalHint": "La ejecución continúa cuando otra persona apruebe o rechace la solicitud.",
+      "eventsTitle": "Pasos",
+      "eventsLabel": "Eventos de los pasos de la ejecución",
+      "eventsDescription": "Eventos recibidos del servidor mientras esta página está abierta.",
+      "runLevel": "Ejecución",
+      "eventTypes": {
+        "workflow-start": "Ejecución iniciada",
+        "workflow-step-start": "Paso iniciado",
+        "workflow-step-output": "El paso produjo una salida",
+        "workflow-step-progress": "Paso en curso",
+        "workflow-step-result": "Paso terminado",
+        "workflow-step-suspended": "Paso suspendido",
+        "workflow-finish": "Ejecución terminada",
+        "workflow-canceled": "Ejecución cancelada"
+      },
+      "runAgain": "Ejecutar de nuevo",
+      "failureHint": {
+        "STEP_FAILED": "Revisa los datos de entrada y ejecuta el flujo de nuevo. Si la falla continúa, comparte el identificador de la ejecución con soporte.",
+        "RUN_FAILED": "Revisa los datos de entrada y ejecuta el flujo de nuevo. Si la falla continúa, comparte el identificador de la ejecución con soporte.",
+        "TRIPWIRE": "Una protección de seguridad bloqueó el contenido de esta ejecución. Revisa los datos de entrada antes de ejecutarla de nuevo; si crees que fue un error, comparte el identificador de la ejecución con soporte."
+      }
+    },
+    "schedules": {
+      "loading": "Cargando programaciones…",
+      "caption": "Programaciones de {organization}",
+      "create": "Nueva programación",
+      "edit": "Editar",
+      "editNamed": "Editar la programación {id} de {name}",
+      "delete": "Eliminar",
+      "deleteNamed": "Eliminar la programación {id} de {name}",
+      "nextFireNote": "El servidor calcula el próximo disparo y lo muestra en la zona horaria de la programación y en la tuya.",
+      "emptyTitle": "Ninguna programación",
+      "emptyDescription": "Programa un flujo para que se ejecute solo en días y horarios fijos.",
+      "emptyDescriptionNoPermission": "Pide a un administrador que cree programaciones.",
+      "noneSchedulable": "Ningún flujo de esta organización puede programarse."
+    },
+    "editor": {
+      "createTitle": "Nueva programación",
+      "editTitle": "Editar programación de {workflow}",
+      "description": "Cada ejecución actúa en nombre de quien creó la programación, con los permisos que esa persona tenga en ese momento.",
+      "workflow": "Flujo",
+      "workflowPlaceholder": "Elige un flujo",
+      "slug": "Nombre corto",
+      "slugHint": "Letras minúsculas, números y guiones, por ejemplo informe-diario. No se puede cambiar después.",
+      "frequency": "Frecuencia",
+      "kinds": {
+        "hourly": "Cada hora",
+        "daily": "Todos los días",
+        "weekdays": "De lunes a viernes",
+        "weekly": "Cada semana",
+        "monthly": "Cada mes",
+        "custom": "Expresión cron"
+      },
+      "minute": "Minuto de la hora",
+      "time": "Horario",
+      "weekday": "Día de la semana",
+      "weekdays": {
+        "0": "Domingo",
+        "1": "Lunes",
+        "2": "Martes",
+        "3": "Miércoles",
+        "4": "Jueves",
+        "5": "Viernes",
+        "6": "Sábado"
+      },
+      "monthDay": "Día del mes",
+      "monthDayHint": "De 1 a 28, para que exista en todos los meses.",
+      "custom": "Expresión cron",
+      "customHint": "Cinco campos: minuto, hora, día del mes, mes y día de la semana. Ejemplo: 0 9 * * 1-5.",
+      "cronPreview": "Expresión: {cron}",
+      "timezone": "Zona horaria",
+      "timezoneHint": "Los horarios de arriba valen en esta zona horaria.",
+      "inputHint": "Un objeto JSON enviado al flujo en cada disparo. Déjalo vacío si el flujo no necesita datos.",
+      "nextFires": {
+        "title": "Próximos {count} disparos",
+        "loading": "Calculando los próximos disparos…",
+        "invalidCron": "Completa la frecuencia para ver los próximos disparos.",
+        "unavailable": "No se pudieron calcular los próximos disparos ahora. El servidor revisa la frecuencia al guardar."
+      },
+      "errors": {
+        "workflow": "Elige un flujo.",
+        "slug": "Usa letras minúsculas, números y guiones (hasta 60 caracteres).",
+        "cron": "Revisa la frecuencia: el horario, el día o la expresión no son válidos.",
+        "timezone": "Elige una zona horaria.",
+        "slugTaken": "Ya existe una programación con este nombre corto. Elige otro.",
+        "tooFrequent": "El intervalo entre disparos es demasiado corto. Usa al menos 15 minutos.",
+        "notSchedulable": "Este flujo no puede programarse."
+      },
+      "cancel": "Cancelar",
+      "createSubmit": "Crear programación",
+      "editSubmit": "Guardar programación",
+      "created": "Programación de {workflow} creada.",
+      "updated": "Programación de {workflow} actualizada."
+    },
+    "scheduleActions": {
+      "pauseTitle": "¿Pausar la programación de {workflow}?",
+      "pauseDescription": "El flujo deja de ejecutarse solo hasta que la programación se reanude. Los disparos perdidos no se reponen.",
+      "pauseConfirm": "Pausar programación",
+      "paused": "Programación de {workflow} pausada.",
+      "resumed": "Programación de {workflow} reanudada.",
+      "resumeFailed": "No se pudo reanudar la programación de {workflow}.",
+      "runTitle": "¿Ejecutar {workflow} ahora?",
+      "runDescription": "Una ejecución adicional comienza ahora, en nombre de quien creó la programación. El próximo disparo no cambia.",
+      "runConfirm": "Ejecutar ahora",
+      "runQueued": "Ejecución de {workflow} iniciada.",
+      "deleteTitle": "¿Eliminar la programación de {workflow}?",
+      "deleteDescription": "El flujo deja de ejecutarse solo. Las ejecuciones ya hechas siguen en la lista.",
+      "deleteConfirm": "Eliminar programación",
+      "deleted": "Programación de {workflow} eliminada."
+    }
+  },
+  "auditLog": {
+    "eyebrow": "Configuración de {organization}",
+    "title": "Auditoría",
+    "description": "Quién hizo qué en la organización, del más reciente al más antiguo. Los registros muestran qué campos cambiaron, nunca los valores.",
+    "loading": "Cargando auditoría…",
+    "caption": "Auditoría de {organization}",
+    "pagination": "Páginas de la auditoría",
+    "filterLabel": "Filtrar por acción",
+    "allActions": "Todas las acciones",
+    "actionGroup": "Acciones",
+    "searchAction": "Buscar acción",
+    "noActionFound": "No se encontraron acciones.",
+    "emptyTitle": "Aún no hay registros",
+    "emptyFilteredTitle": "No hay registros de esta acción",
+    "emptyDescription": "Los cambios en la organización aparecen aquí en cuanto ocurren.",
+    "changes": "Campos: {fields}",
+    "onBehalfOf": "por soporte ({name})",
+    "columns": {
+      "occurredAt": "Cuándo",
+      "action": "Acción",
+      "actor": "Quién",
+      "target": "Objetivo",
+      "outcome": "Resultado",
+      "organization": "Organización"
+    },
+    "outcomes": {
+      "success": "Hecho",
+      "denied": "Denegado",
+      "failed": "Falló",
+      "pending-approval": "Esperando aprobación"
+    },
+    "actorTypes": {
+      "user": "Persona",
+      "device": "Dispositivo",
+      "service": "Integración (clave de API)",
+      "system": "Sistema"
+    },
+    "actions": {
+      "ORGANIZATION_CREATED": "Organización creada",
+      "ORGANIZATION_UPDATED": "Organización modificada",
+      "ORGANIZATION_DELETED": "Organización eliminada",
+      "PROJECT_CREATED": "Proyecto creado",
+      "PROJECT_UPDATED": "Proyecto modificado",
+      "PROJECT_DELETED": "Proyecto eliminado",
+      "UNIT_CREATED": "Unidad creada",
+      "UNIT_UPDATED": "Unidad modificada",
+      "UNIT_MOVED": "Unidad movida",
+      "UNIT_DELETED": "Unidad eliminada",
+      "MODULE_SETTINGS_UPDATED": "Configuración de módulo modificada",
+      "MODULE_RECORD_CREATED": "Registro de módulo creado",
+      "MODULE_RECORD_UPDATED": "Registro de módulo modificado",
+      "ROLE_CREATED": "Rol creado",
+      "ROLE_UPDATED": "Rol modificado",
+      "ROLE_DELETED": "Rol eliminado",
+      "MEMBERSHIP_GRANTED": "Acceso concedido",
+      "MEMBERSHIP_UPDATED": "Roles de un acceso modificados",
+      "MEMBERSHIP_REVOKED": "Acceso revocado",
+      "MEMBER_REMOVED": "Miembro quitado",
+      "INVITATION_CREATED": "Invitación enviada",
+      "INVITATION_ACCEPTED": "Invitación aceptada",
+      "INVITATION_REVOKED": "Invitación revocada",
+      "API_KEY_CREATED": "Clave de API creada",
+      "API_KEY_REVOKED": "Clave de API revocada",
+      "DEVICE_ACTIVATION_CREATED": "Código de activación de dispositivo generado",
+      "DEVICE_ACTIVATED": "Dispositivo activado",
+      "DEVICE_REVOKED": "Dispositivo revocado",
+      "ACTIVE_ORGANIZATION_CHANGED": "Organización activa cambiada",
+      "SESSION_REVOKED": "Sesión cerrada",
+      "ALL_SESSIONS_REVOKED": "Todas las sesiones cerradas",
+      "DESKTOP_SESSION_REUSE_DETECTED": "Reutilización de sesión de escritorio detectada",
+      "IMPERSONATION_STARTED": "Soporte entró como usuario",
+      "IMPERSONATION_ENDED": "Soporte salió del usuario",
+      "IMPERSONATION_EXPIRED": "Acceso de soporte expirado",
+      "IMPERSONATED_REQUEST_SERVED": "Solicitud atendida como usuario por soporte",
+      "IMPERSONATED_WRITE_DENIED": "Cambio de soporte bloqueado",
+      "APPROVAL_REQUESTED": "Aprobación solicitada",
+      "APPROVAL_APPROVED": "Aprobación concedida",
+      "APPROVAL_REJECTED": "Aprobación rechazada",
+      "APPROVAL_EXECUTED": "Acción aprobada ejecutada",
+      "APPROVAL_FAILED": "Acción aprobada falló",
+      "APPROVAL_EXPIRED": "Aprobación expirada",
+      "APPROVAL_CANCELLED": "Aprobación cancelada",
+      "PLATFORM_STAFF_GRANTED": "Acceso de equipo de plataforma concedido",
+      "PLATFORM_ACCESS_DENIED": "Acceso a la plataforma denegado",
+      "AGENT_TOOL_EXECUTED": "Herramienta de agente ejecutada",
+      "SEMANTIC_QUERY_EXECUTED": "Consulta de datos ejecutada",
+      "KNOWLEDGE_DOCUMENT_INDEXED": "Documento indexado",
+      "KNOWLEDGE_DOCUMENT_INGESTED": "Documento agregado a la base",
+      "KNOWLEDGE_DOCUMENT_DELETED": "Documento eliminado de la base",
+      "FILE_UPLOADED": "Archivo subido",
+      "FILE_REJECTED": "Archivo rechazado",
+      "CONNECTOR_CREATED": "Conector creado",
+      "CONNECTOR_UPDATED": "Conector modificado",
+      "CONNECTOR_DELETED": "Conector eliminado",
+      "CONNECTOR_SECRET_SET": "Secreto de conector definido",
+      "AGENT_TOOL_CALL_APPROVED": "Uso de herramienta aprobado en el chat",
+      "AGENT_TOOL_CALL_DECLINED": "Uso de herramienta rechazado en el chat",
+      "CONVERSATION_DELETED": "Conversación eliminada",
+      "VOICE_TRANSCRIBED": "Audio transcrito",
+      "VOICE_SYNTHESIZED": "Respuesta leída en voz",
+      "BUDGET_THRESHOLD_REACHED": "Umbral de presupuesto alcanzado",
+      "FEATURE_FLAG_UPDATED": "Función activada o desactivada",
+      "PLAN_CREATED": "Plan creado",
+      "PLAN_UPDATED": "Plan modificado",
+      "MODEL_SETTINGS_UPDATED": "Modelos de IA modificados",
+      "TENANT_BUDGET_UPDATED": "Presupuesto de la organización modificado",
+      "AGENT_SETTINGS_UPDATED": "Configuración de agente modificada",
+      "PROMPT_VERSION_CREATED": "Versión de prompt creada",
+      "PROMPT_EVALUATED": "Versión de prompt evaluada",
+      "PROMPT_ACTIVATED": "Versión de prompt activada",
+      "PROMPT_ACTIVATION_FORCED": "Versión de prompt activada sin evaluación",
+      "WORKFLOW_RUN_CANCELED": "Ejecución de flujo cancelada",
+      "SCHEDULE_PAUSED": "Programación pausada",
+      "SCHEDULE_RESUMED": "Programación reanudada",
+      "SCHEDULE_RUN_REQUESTED": "Programación ejecutada ahora",
+      "CUSTOM_AGENT_CREATED": "Agente creado",
+      "CUSTOM_AGENT_UPDATED": "Agente modificado",
+      "CUSTOM_AGENT_DELETED": "Agente eliminado",
+      "CUSTOM_SKILL_CREATED": "Habilidad creada",
+      "CUSTOM_SKILL_UPDATED": "Habilidad modificada",
+      "CUSTOM_SKILL_DELETED": "Habilidad eliminada",
+      "PLAN_DELETED": "Plan eliminado",
+      "PLATFORM_STAFF_REVOKED": "Acceso de equipo de plataforma revocado"
+    },
+    "targetTypes": {
+      "organization": "Organización",
+      "project": "Proyecto",
+      "unit": "Unidad",
+      "role": "Rol",
+      "membership": "Acceso",
+      "user": "Persona",
+      "invitation": "Invitación",
+      "api-key": "Clave de API",
+      "device": "Dispositivo",
+      "device-activation": "Activación de dispositivo",
+      "session": "Sesión",
+      "connector": "Conector",
+      "conversation": "Conversación",
+      "custom-agent": "Agente",
+      "custom-skill": "Habilidad",
+      "schedule": "Programación",
+      "workflow-run": "Ejecución de flujo",
+      "approval-request": "Solicitud de aprobación",
+      "feature-flag": "Función",
+      "agent-settings": "Configuración de agente",
+      "module-settings": "Configuración de módulo",
+      "model-settings": "Modelos de IA",
+      "prompt-version": "Versión de prompt",
+      "plan": "Plan",
+      "file": "Archivo",
+      "impersonation-session": "Acceso de soporte"
+    }
+  }
+}

@@ -1,0 +1,404 @@
+{
+  "markdown": {
+    "newTab": "(se abre en una pestaña nueva)",
+    "image": "[imagen: {alt}]",
+    "imageOmitted": "[imagen omitida]",
+    "code": "Código",
+    "codeWithLanguage": "Código {language}"
+  },
+  "elements": {
+    "scrollToBottom": "Ir al final",
+    "send": "Enviar mensaje",
+    "stop": "Detener respuesta",
+    "copyCode": "Copiar",
+    "copied": "Copiado",
+    "reasoning": {
+      "thinking": "Razonando…",
+      "done": "Razonamiento"
+    },
+    "tool": {
+      "input": "Entrada",
+      "output": "Resultado",
+      "error": "Error",
+      "state": {
+        "input-streaming": "Preparando",
+        "input-available": "Ejecutando",
+        "approval-requested": "Esperando aprobación",
+        "approval-responded": "Decisión enviada",
+        "output-available": "Completado",
+        "output-error": "Falló",
+        "output-denied": "Rechazado"
+      }
+    },
+    "sources": {
+      "count": "{count, plural, one {# fuente} other {# fuentes}}"
+    },
+    "citation": {
+      "label": "Fuente {index}: {title}",
+      "fallback": "Fuente {index}"
+    },
+    "context": {
+      "label": "Contexto usado: {percent}",
+      "title": "Uso del contexto",
+      "input": "Entrada",
+      "output": "Salida",
+      "reasoning": "Razonamiento",
+      "window": "Ventana del modelo"
+    }
+  },
+  "panel": {
+    "title": "Asistente",
+    "loadingTitle": "Cargando el título de la conversación…",
+    "logLabel": "Conversación con el asistente",
+    "newConversation": "Nueva conversación",
+    "close": "Cerrar el asistente",
+    "openInChat": "Abrir en la página del asistente",
+    "loadEarlier": "Cargar mensajes anteriores",
+    "loadEarlierFailed": "No se pudieron cargar los mensajes anteriores. Inténtalo de nuevo.",
+    "loadingHistory": "Cargando conversación…",
+    "notFound": {
+      "title": "Conversación no encontrada",
+      "description": "Fue eliminada o pertenece a otra cuenta."
+    },
+    "empty": {
+      "title": "¿En qué puedo ayudar?",
+      "description": "Pregunta sobre los datos y documentos de la organización o pide una acción.",
+      "suggestionsLabel": "Sugerencias"
+    },
+    "suggestions": {
+      "capabilities": {
+        "title": "¿Qué puedes hacer?",
+        "description": "Agentes y acciones disponibles en este contexto.",
+        "prompt": "¿Qué puedes hacer por mí aquí?"
+      },
+      "knowledge": {
+        "title": "Consultar la base de conocimiento",
+        "description": "Respuestas con fuente, a partir de los documentos de la organización.",
+        "prompt": "¿Cuáles son los temas principales de la base de conocimiento?"
+      },
+      "data": {
+        "title": "Consultar datos",
+        "description": "Entidades y registros que puedes ver.",
+        "prompt": "¿Qué datos puedo consultar?"
+      },
+      "create": {
+        "title": "Crear un registro",
+        "description": "Formulario para revisar antes de guardar.",
+        "prompt": "Quiero crear un registro. ¿Qué tipos existen?"
+      }
+    }
+  },
+  "input": {
+    "label": "Mensaje",
+    "placeholder": "Pregunta o pide algo…",
+    "hint": "Enter envía · Shift+Enter agrega una línea · Esc detiene",
+    "counter": "{count} de {max} caracteres",
+    "tooLong": "Límite de {max} caracteres. Quita {over, plural, one {# carácter} other {# caracteres}}.",
+    "offline": "Sin conexión. El envío no está disponible hasta que vuelva la conexión.",
+    "uploading": "Espera a que termine la carga de los adjuntos.",
+    "attachmentProblem": "Quita o reenvía los adjuntos con error antes de enviar.",
+    "awaitingApproval": "Aprueba o rechaza la acción de arriba antes de continuar."
+  },
+  "status": {
+    "connecting": "Conectando…",
+    "responding": "Respondiendo…",
+    "resuming": "Retomando respuesta…",
+    "finished": "Respuesta completa.",
+    "stopped": "Respuesta detenida.",
+    "lost": "Conexión perdida. La respuesta se detuvo antes del final.",
+    "offline": "Sin conexión.",
+    "awaitingApproval": "Esperando tu aprobación.",
+    "failed": "La respuesta falló."
+  },
+  "message": {
+    "you": "Tú",
+    "assistant": "Asistente",
+    "lowConfidence": "Sin certeza",
+    "lowConfidenceHint": "Respuesta sin fuente en la base de conocimiento. Revísala antes de usarla.",
+    "stopped": "Detenido",
+    "stoppedHint": "Se conservó la respuesta parcial.",
+    "regenerate": "Generar de nuevo",
+    "copy": "Copiar respuesta",
+    "copied": "Respuesta copiada.",
+    "attachments": "Adjuntos",
+    "formSubmitted": "Formulario enviado: {command}",
+    "choiceSubmitted": "Elección enviada: {choice}",
+    "incomplete": "Incompleta",
+    "incompleteHint": "La respuesta se detuvo por un error; el texto de arriba puede estar incompleto.",
+    "openAttachment": "Abrir {name}",
+    "openAttachmentFailed": "No se pudo abrir {name}."
+  },
+  "error": {
+    "title": "No se pudo responder",
+    "stream": "La respuesta falló antes de terminar. Intenta de nuevo.",
+    "retry": "Intentar de nuevo",
+    "history": "No se pudo cargar la conversación."
+  },
+  "tripwire": {
+    "title": "Respuesta bloqueada",
+    "default": "Una regla de seguridad detuvo esta respuesta.",
+    "tenant-budget-guard": "Se agotó el presupuesto de IA de la organización. Habla con un administrador.",
+    "tenant-pii-detector": "El mensaje tenía datos personales que no pueden enviarse al modelo.",
+    "prompt-injection-detector": "El pedido parecía intentar eludir las instrucciones del asistente.",
+    "moderation": "El contenido incumple las reglas de uso.",
+    "system-prompt-scrubber-result": "La respuesta se bloqueó para no exponer instrucciones internas."
+  },
+  "delegation": {
+    "label": "Delegado a {agent}",
+    "agents": {
+      "knowledge": "Agente de conocimiento",
+      "data": "Agente de datos",
+      "action": "Agente de acciones",
+      "web": "Agente de búsqueda web",
+      "unknown": "Agente {id}"
+    },
+    "request": "Pedido",
+    "steps": "{count, plural, one {# paso} other {# pasos}}",
+    "stepFailed": "falló",
+    "result": "Resultado",
+    "stepsTitle": "Pasos"
+  },
+  "tool": {
+    "title": "Herramienta: {name}"
+  },
+  "approval": {
+    "label": "Aprobación: {summary}",
+    "title": "Aprobación necesaria",
+    "fallbackSummary": "Ejecutar: {tool}",
+    "permission": "Permiso",
+    "details": "Datos enviados",
+    "diffCaption": "Cambios propuestos",
+    "field": "Campo",
+    "before": "Antes",
+    "after": "Después",
+    "none": "—",
+    "noPreview": "Sin vista previa de los cambios.",
+    "approve": "Aprobar",
+    "decline": "Rechazar",
+    "reasonLabel": "Motivo del rechazo (opcional)",
+    "reasonHint": "Queda registrado en la auditoría.",
+    "confirmDecline": "Confirmar rechazo",
+    "cancelDecline": "Volver",
+    "approving": "Aprobando…",
+    "declining": "Rechazando…",
+    "approved": "Aprobado. Ejecutando…",
+    "executed": "Aprobado y ejecutado.",
+    "declined": "Rechazado.",
+    "declinedReason": "Rechazado: {reason}",
+    "failed": "Aprobado, pero la ejecución falló.",
+    "expired": "Esta aprobación ya no está activa. La acción no se ejecutó."
+  },
+  "ui": {
+    "form": {
+      "label": "Formulario: {command}",
+      "submit": "Enviar",
+      "submitted": "Formulario enviado. El asistente pide confirmación antes de guardar.",
+      "answered": "Formulario enviado.",
+      "inactive": "Este formulario ya no está activo."
+    },
+    "table": {
+      "caption": "Resultado",
+      "truncated": "Mostrando las primeras {count, plural, one {# fila} other {# filas}}. Hay más resultados.",
+      "empty": "Ninguna fila.",
+      "yes": "Sí",
+      "no": "No"
+    },
+    "chart": {
+      "label": "Gráfico de {kind}: {series}",
+      "kinds": {
+        "bar": "barras",
+        "line": "líneas",
+        "area": "área",
+        "pie": "torta"
+      },
+      "data": "Datos del gráfico"
+    },
+    "picker": {
+      "legend": "Elige una opción",
+      "legendMultiple": "Elige una o más opciones",
+      "submit": "Confirmar elección",
+      "required": "Elige al menos una opción.",
+      "submitted": "Elección enviada.",
+      "inactive": "Esta elección ya no está activa."
+    },
+    "approvalPending": {
+      "title": "Esperando la aprobación de otra persona",
+      "open": "Abrir aprobaciones"
+    }
+  },
+  "upload": {
+    "menu": "Adjuntar",
+    "attachFile": "Adjuntar archivo",
+    "addToKnowledge": "Agregar a la base de conocimiento",
+    "fileInput": "Archivos para adjuntar",
+    "knowledgeInput": "Archivos para la base de conocimiento",
+    "listLabel": "Adjuntos del mensaje",
+    "remove": "Quitar {name}",
+    "cancel": "Cancelar la carga de {name}",
+    "retry": "Intentar de nuevo: {name}",
+    "status": {
+      "pending": "En cola",
+      "uploading": "Cargando {percent}",
+      "validating": "Verificando…",
+      "ready": "Listo",
+      "indexing": "Enviado a la base de conocimiento. La indexación continúa en segundo plano.",
+      "failed": "Falló la carga",
+      "timeout": "La verificación tardó demasiado",
+      "rejected": {
+        "TYPE_NOT_ALLOWED": "Tipo de archivo no aceptado",
+        "TOO_LARGE": "Archivo demasiado grande",
+        "CONTENT_MISMATCH": "El contenido no corresponde al tipo del archivo",
+        "TOO_MANY": "Límite de {max} adjuntos por mensaje"
+      },
+      "processing": "Procesando… la verificación puede tardar unos minutos"
+    },
+    "announce": {
+      "ready": "{name}: listo.",
+      "indexing": "{name}: enviado a la base de conocimiento; la indexación continúa en segundo plano.",
+      "problem": "{name}: {reason}."
+    }
+  },
+  "history": {
+    "title": "Conversaciones",
+    "listLabel": "Historial de conversaciones",
+    "new": "Nueva conversación",
+    "close": "Cerrar el historial",
+    "untitled": "Conversación sin título",
+    "pinned": "Fijada",
+    "answering": "Respondiendo",
+    "searchLabel": "Buscar conversaciones",
+    "searchPlaceholder": "Buscar por título o resumen",
+    "showArchived": "Archivadas",
+    "loading": "Cargando conversaciones…",
+    "loadMore": "Cargar más conversaciones",
+    "count": "{count, plural, =0 {Ninguna conversación} one {# conversación} other {# conversaciones}}",
+    "empty": {
+      "title": "Aún no hay conversaciones",
+      "description": "Las conversaciones con el asistente aparecen aquí."
+    },
+    "emptySearch": {
+      "title": "Nada encontrado",
+      "description": "Ninguna conversación coincide con “{q}”."
+    },
+    "emptyArchived": {
+      "title": "No hay conversaciones archivadas",
+      "description": "Las conversaciones archivadas salen de la lista principal y quedan aquí."
+    },
+    "noAccess": "No tienes permiso para ver el historial de conversaciones.",
+    "error": "No se pudieron cargar las conversaciones.",
+    "actions": {
+      "menu": "Acciones de {title}",
+      "rename": "Renombrar",
+      "pin": "Fijar",
+      "unpin": "Desfijar",
+      "archive": "Archivar",
+      "restore": "Restaurar",
+      "summarize": "Resumir",
+      "delete": "Eliminar"
+    },
+    "rename": {
+      "label": "Nuevo título de {title}",
+      "save": "Guardar título",
+      "cancel": "Cancelar",
+      "hint": "Enter guarda · Esc cancela",
+      "required": "Ingresa un título.",
+      "done": "Conversación renombrada."
+    },
+    "pinnedDone": "Conversación fijada.",
+    "unpinnedDone": "Conversación desfijada.",
+    "archivedDone": "Conversación archivada.",
+    "restoredDone": "Conversación restaurada.",
+    "summary": {
+      "title": "Resumen de {title}",
+      "description": "Hecho a partir de los últimos mensajes y usado en la búsqueda.",
+      "loading": "Resumiendo la conversación…",
+      "empty": "Todavía no hay mensajes para resumir.",
+      "close": "Cerrar"
+    },
+    "delete": {
+      "title": "¿Eliminar “{title}”?",
+      "description": "La conversación y todos sus mensajes se eliminarán. Esta acción no se puede deshacer.",
+      "confirm": "Eliminar conversación",
+      "done": "Conversación eliminada."
+    },
+    "countLoaded": "Mostrando {count, plural, one {# conversación} other {# conversaciones}}"
+  },
+  "view": {
+    "title": "Asistente",
+    "loading": "Cargando el asistente…",
+    "openHistory": "Conversaciones",
+    "historyPanel": "Historial de conversaciones"
+  },
+  "agents": {
+    "label": "Agente",
+    "assistant": "Asistente",
+    "loading": "Cargando agentes…",
+    "error": "No se pudieron cargar los agentes.",
+    "retry": "Intentar de nuevo",
+    "onlyAssistant": "No hay agentes de la organización disponibles.",
+    "unknown": "Agente de la organización",
+    "current": "Agente: {name}"
+  },
+  "voice": {
+    "talk": "Hablar: mantén presionado para grabar",
+    "stopRecording": "Detener la grabación y transcribir",
+    "requesting": "Esperando el micrófono…",
+    "recording": "Grabando… suelta para transcribir",
+    "transcribing": "Transcribiendo…",
+    "inserted": "Transcripción agregada al mensaje.",
+    "problem": {
+      "denied": "Micrófono bloqueado. Permite el acceso al micrófono en la configuración del navegador.",
+      "unsupported": "Este dispositivo no tiene un micrófono disponible para grabar.",
+      "too-large": "La grabación fue demasiado larga. Graba hasta 60 segundos.",
+      "empty": "No se pudo entender la grabación. Intenta de nuevo.",
+      "unavailable": "La voz está desactivada para esta organización.",
+      "failed": "La transcripción falló. Intenta de nuevo."
+    },
+    "options": "Opciones de voz",
+    "autoSend": "Enviar después de transcribir",
+    "autoRead": "Leer las respuestas en voz alta",
+    "realtime": {
+      "start": "Iniciar conversación por voz (experimental)",
+      "stop": "Terminar la conversación por voz",
+      "connecting": "Conectando la conversación por voz…",
+      "live": "Conversación por voz activa.",
+      "error": "La conversación por voz falló."
+    },
+    "readAloud": "Escuchar la respuesta",
+    "stopReading": "Detener la lectura",
+    "loadingAudio": "Preparando el audio…",
+    "player": "Respuesta en audio",
+    "readFailed": "No se pudo leer la respuesta en voz alta.",
+    "readUnavailable": "La lectura en voz alta está desactivada para esta organización.",
+    "endsSoon": "La grabación se detiene sola en {seconds} segundos."
+  },
+  "tools": {
+    "catalog": {
+      "describeEntity": "Describir un dato del catálogo",
+      "listEntities": "Listar los datos del catálogo",
+      "renderForm": "Abrir un formulario"
+    },
+    "knowledge": {
+      "searchKnowledge": "Buscar en la base de conocimiento"
+    },
+    "sql": {
+      "querySemanticSql": "Consultar datos"
+    },
+    "web": {
+      "search": "Buscar en la web",
+      "scrape": "Leer una página web"
+    }
+  },
+  "feedback": {
+    "up": "Buena respuesta",
+    "down": "Mala respuesta",
+    "thanks": "Gracias por la evaluación.",
+    "downTitle": "¿Qué no estuvo bien?",
+    "downDescription": "Tu evaluación ayuda a mejorar el asistente. El comentario es opcional.",
+    "comment": "Comentario",
+    "commentHint": "Por ejemplo: citó el documento equivocado o la respuesta quedó incompleta.",
+    "addToDataset": "Usar esta respuesta en las evaluaciones de la organización",
+    "cancel": "Cancelar",
+    "submit": "Enviar evaluación"
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "additionalProperties": false,
+  "description": "One chat turn: the member's message (or approval responses) sent to the assistant, answered as a UI message stream.",
+  "examples": [
+    {
+      "message": {
+        "id": "msg-1",
+        "parts": [
+          {
+            "text": "Summarize the onboarding guide.",
+            "type": "text"
+          }
+        ],
+        "role": "user"
+      },
+      "organizationId": "Jd8sK2lPq0WnR5tYu3bV"
+    },
+    {
+      "conversationId": "Cv3xZ5aB7nM9qW1eR2tY",
+      "message": {
+        "id": "msg-2",
+        "parts": [
+          {
+            "approval": {
+              "approved": true,
+              "id": "run-1::call-1"
+            },
+            "state": "approval-responded",
+            "toolCallId": "call-1",
+            "type": "tool-command_tenancy_CreateProjectInput"
+          }
+        ],
+        "role": "assistant"
+      }
+    }
+  ],
+  "properties": {
+    "agentId": {
+      "anyOf": [
+        {
+          "const": "assistant",
+          "type": "string"
+        },
+        {
+          "pattern": "^[A-Za-z0-9]{20}$",
+          "type": "string"
+        }
+      ],
+      "description": "Chat agent of a new conversation (default assistant).",
+      "x-pii": "none"
+    },
+    "attachments": {
+      "description": "Ready chat-attachment files of the caller to add to a user turn.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 10,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "conversationId": {
+      "description": "Existing conversation; a new one is created when absent.",
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "message": {
+      "description": "The last message of the chat.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "description": "Client message id.",
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "parts": {
+              "description": "Text parts of the turn.",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "text": {
+                    "description": "What the member wrote.",
+                    "maxLength": 16000,
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "personal"
+                  },
+                  "type": {
+                    "const": "text",
+                    "description": "Part type.",
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "type",
+                  "text"
+                ],
+                "type": "object"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "x-pii": "personal"
+            },
+            "role": {
+              "const": "user",
+              "description": "A member turn.",
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "id",
+            "role",
+            "parts"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "description": "Id of the assistant message that asked for approval.",
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "parts": {
+              "description": "Approval responses only.",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "approval": {
+                    "additionalProperties": false,
+                    "description": "The member's decision.",
+                    "properties": {
+                      "approved": {
+                        "description": "Whether the member approved the call.",
+                        "type": "boolean",
+                        "x-pii": "none"
+                      },
+                      "id": {
+                        "description": "Approval id, <runId>::<toolCallId>.",
+                        "maxLength": 400,
+                        "minLength": 1,
+                        "type": "string",
+                        "x-pii": "none"
+                      },
+                      "reason": {
+                        "description": "Why the member declined or approved.",
+                        "maxLength": 500,
+                        "minLength": 1,
+                        "type": "string",
+                        "x-pii": "personal"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "approved"
+                    ],
+                    "type": "object",
+                    "x-pii": "personal"
+                  },
+                  "state": {
+                    "const": "approval-responded",
+                    "description": "Only answered approvals are accepted.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "toolCallId": {
+                    "description": "Tool call the decision answers.",
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "toolName": {
+                    "description": "Tool name of a dynamic-tool part.",
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "type": {
+                    "description": "Tool part type, tool-<sanitized tool name>.",
+                    "pattern": "^(?:tool-[A-Za-z0-9_-]{1,128}|dynamic-tool)$",
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "type",
+                  "toolCallId",
+                  "state",
+                  "approval"
+                ],
+                "type": "object"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "x-pii": "personal"
+            },
+            "role": {
+              "const": "assistant",
+              "description": "The assistant message carrying the member's approval responses.",
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "id",
+            "role",
+            "parts"
+          ],
+          "type": "object"
+        }
+      ],
+      "x-pii": "personal"
+    },
+    "organizationId": {
+      "description": "Organization of a new conversation.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "projectId": {
+      "description": "Project of a new conversation; organization level when absent.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "trigger": {
+      "description": "useChat trigger.",
+      "enum": [
+        "submit-message",
+        "regenerate-message"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "message"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.conversation.send",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

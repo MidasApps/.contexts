@@ -1,0 +1,184 @@
+{
+  "navLabel": "Secciones del perfil",
+  "impersonationReadOnly": "Modo soporte: este perfil es de solo lectura. Ves lo que ve el usuario, pero no puedes cambiar nada aquí.",
+  "account": {
+    "title": "Cuenta",
+    "description": "Tus datos de acceso y cómo te ven los demás miembros.",
+    "loading": "Cargando tu cuenta…",
+    "identityTitle": "Acceso",
+    "identityDescription": "La cuenta con la que inicias sesión.",
+    "emailLabel": "Correo electrónico",
+    "mfaLabel": "Verificación en dos pasos",
+    "mfaOn": "Verificación en dos pasos activa",
+    "mfaOff": "Verificación en dos pasos desactivada",
+    "emailHint": "El correo viene de tu cuenta de acceso y no se puede cambiar aquí.",
+    "profileTitle": "Perfil",
+    "profileDescription": "Los miembros de tus organizaciones ven este nombre.",
+    "form": {
+      "displayName": "Nombre visible"
+    }
+  },
+  "preferences": {
+    "title": "Preferencias",
+    "description": "Idioma, zona horaria, moneda y tema de la interfaz.",
+    "loading": "Cargando tus preferencias…",
+    "regional": {
+      "title": "Idioma y región",
+      "description": "Las fechas se muestran en tu zona horaria; los montos nuevos usan la moneda elegida.",
+      "locale": "Idioma",
+      "timeZone": "Zona horaria",
+      "currency": "Moneda"
+    },
+    "theme": {
+      "title": "Apariencia",
+      "legend": "Tema",
+      "description": "Se aplica al instante y se guarda en tu perfil.",
+      "options": {
+        "system": "Automático (sistema)",
+        "light": "Claro",
+        "dark": "Oscuro"
+      },
+      "saveFailed": "El tema se aplicó aquí, pero no se guardó en tu perfil.",
+      "retry": "Reintentar"
+    }
+  },
+  "security": {
+    "title": "Seguridad",
+    "description": "Verificación en dos pasos y contraseña.",
+    "mfa": {
+      "title": "Verificación en dos pasos",
+      "description": "Además de la contraseña, pide un código cada vez que inicies sesión.",
+      "statusOn": "Activa",
+      "statusOff": "Desactivada",
+      "emptyTitle": "Aún no hay un segundo factor",
+      "emptyDescription": "Agrega una app de autenticación o un teléfono para proteger tu cuenta.",
+      "unavailable": "La verificación en dos pasos no está disponible en este entorno.",
+      "listLabel": "Factores registrados",
+      "kindTotp": "App de autenticación",
+      "kindSms": "SMS",
+      "enrolledAt": "registrado el {date}",
+      "addTotp": "Agregar app de autenticación",
+      "addSms": "Agregar teléfono",
+      "remove": "Quitar",
+      "removeNamed": "Quitar {name}",
+      "removeTitle": "¿Quitar este factor?",
+      "removeDescription": "Ya no podrás usarlo para iniciar sesión.",
+      "removeLastDescription": "Es tu único factor: al quitarlo, el inicio de sesión vuelve a pedir solo la contraseña.",
+      "removed": "Factor quitado.",
+      "enrolled": "Verificación en dos pasos actualizada.",
+      "totpTitle": "Agregar app de autenticación",
+      "totpDescription": "Usa una app como Google Authenticator, 1Password o Authy.",
+      "preparing": "Preparando el registro…",
+      "retry": "Reintentar",
+      "totpStepScan": "Escanea el código QR con la app de autenticación del celular. Si la app está en este dispositivo, abre el enlace; sin cámara, escribe la clave de configuración.",
+      "totpQrLabel": "Código QR para configurar la app de autenticación",
+      "totpStepCode": "Escribe el código de 6 dígitos que muestra la app.",
+      "openAuthenticator": "Abrir en la app de autenticación",
+      "setupKey": "Clave de configuración",
+      "setupKeyHint": "Solo se muestra durante el registro. No la compartas.",
+      "totpCodeHint": "El código cambia cada 30 segundos.",
+      "totpDefaultName": "App de autenticación",
+      "smsTitle": "Agregar teléfono",
+      "smsDescription": "Te enviaremos un código por SMS cada vez que inicies sesión.",
+      "smsDefaultName": "Teléfono",
+      "phone": "Número de teléfono",
+      "phoneHint": "Formato internacional, con + y el código del país. Ej.: +52 55 1234 5678.",
+      "phoneInvalid": "Escribe el número en formato internacional, empezando con +.",
+      "sendCode": "Enviar código",
+      "codeSent": "Código enviado a {phone}.",
+      "changePhone": "Cambiar número",
+      "smsCodeHint": "El SMS llega en unos segundos.",
+      "code": "Código de verificación",
+      "codeRequired": "Escribe el código de verificación.",
+      "codeInvalid": "El código tiene 6 dígitos.",
+      "codeWrong": "Código incorrecto o vencido. Inténtalo de nuevo.",
+      "factorName": "Nombre del factor",
+      "factorNameHint": "Te ayuda a reconocer este factor después.",
+      "cancel": "Cancelar",
+      "verify": "Confirmar"
+    },
+    "password": {
+      "title": "Contraseña",
+      "description": "Por seguridad, confirma tu contraseña actual antes de cambiarla.",
+      "fields": {
+        "current": "Contraseña actual",
+        "next": "Nueva contraseña",
+        "confirmation": "Confirma la nueva contraseña"
+      },
+      "hint": "Usa al menos {min} caracteres.",
+      "errors": {
+        "required": "Completa este campo.",
+        "tooShort": "Usa al menos {min} caracteres.",
+        "sameAsCurrent": "La nueva contraseña debe ser distinta de la actual.",
+        "mismatch": "Las contraseñas no coinciden.",
+        "wrongPassword": "La contraseña actual es incorrecta.",
+        "weak": "Esta contraseña es demasiado débil. Usa más caracteres y combina letras, números y símbolos."
+      },
+      "submit": "Cambiar contraseña",
+      "changed": "Contraseña cambiada.",
+      "mfaTitle": "Confirma que eres tú",
+      "mfaDescription": "Escribe el código de tu segundo factor para cambiar la contraseña.",
+      "cancelMfa": "Cancelar"
+    }
+  },
+  "sessions": {
+    "title": "Sesiones",
+    "description": "Dónde está conectada tu cuenta ahora.",
+    "listTitle": "Sesiones activas",
+    "listDescription": "Revoca las sesiones que no reconozcas. Para terminar la de este dispositivo, cierra sesión.",
+    "caption": "Sesiones de tu cuenta",
+    "pagination": "Páginas de sesiones",
+    "unknownDevice": "Dispositivo desconocido",
+    "kinds": {
+      "web": "Navegador",
+      "desktop": "App de escritorio"
+    },
+    "mfa": "Con 2 pasos",
+    "current": "Este dispositivo",
+    "columns": {
+      "device": "Dispositivo",
+      "lastSeen": "Última actividad",
+      "created": "Inicio",
+      "expires": "Vence",
+      "actions": "Acciones"
+    },
+    "revokeAction": "Revocar",
+    "revokeNamed": "Revocar sesión de {name}",
+    "signOutCurrent": "Cerrar sesión en este dispositivo",
+    "emptyTitle": "No hay sesiones activas",
+    "emptyDescription": "Las sesiones aparecen aquí cuando inicias sesión en un navegador o en la app.",
+    "revoke": {
+      "title": "¿Revocar esta sesión?",
+      "description": "{name} se desconectará en su próxima actividad.",
+      "confirm": "Revocar sesión",
+      "done": "Sesión de {name} revocada."
+    },
+    "revokeAll": {
+      "title": "Cerrar sesión en todos los dispositivos",
+      "sectionDescription": "Cierra todas las sesiones, incluida esta. Úsalo si perdiste un dispositivo o sospechas de un acceso indebido.",
+      "button": "Cerrar sesión en todos los dispositivos",
+      "description": "Se cerrarán todas las sesiones, incluida esta, y volverás a la pantalla de inicio de sesión.",
+      "confirm": "Cerrar todas",
+      "done": "Cerraste sesión en todos los dispositivos."
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "description": "Elige qué quieres recibir.",
+    "loading": "Cargando tus notificaciones…",
+    "emailTitle": "Avisos por correo",
+    "emailDescription": "Se envían al correo de tu cuenta.",
+    "productUpdates": {
+      "label": "Novedades del producto",
+      "description": "Funciones nuevas y mejoras, como máximo una vez por semana.",
+      "enabled": "Recibirás las novedades del producto.",
+      "disabled": "Ya no recibirás las novedades del producto."
+    },
+    "securityAlerts": {
+      "label": "Alertas de seguridad",
+      "description": "Siempre activas: avisan sobre nuevos inicios de sesión y cambios en tu cuenta."
+    },
+    "saveFailed": "No se pudo guardar la preferencia.",
+    "reference": "Referencia: {requestId}"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "additionalProperties": false,
+  "description": "Creates a skill of the organization.",
+  "examples": [
+    {
+      "description": "How to write the weekly status report of a project.",
+      "instructions": "# Weekly report\n\nStart with a three-line summary, then list risks and next steps.",
+      "name": "weekly-report"
+    }
+  ],
+  "properties": {
+    "description": {
+      "description": "When an agent should use the skill; the model routes by it.",
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "enabled": {
+      "description": "Defaults to true.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "instructions": {
+      "description": "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+      "maxLength": 20000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "name": {
+      "description": "Kebab-case name, unique in the organization.",
+      "maxLength": 60,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "instructions"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.agent-settings.update",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

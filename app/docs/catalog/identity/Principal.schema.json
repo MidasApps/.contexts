@@ -1,0 +1,150 @@
+{
+  "description": "The authenticated caller of a /v1 request: a user, a device or an API key (service).",
+  "examples": [
+    {
+      "mfa": true,
+      "type": "user",
+      "uid": "uA1b2C3d4E5f6G7h8I9j"
+    },
+    {
+      "deviceId": "Dv1qA3zW5sX7eD9cR2fV",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "type": "device"
+    },
+    {
+      "apiKeyId": "Ak2wS4xE6dC8rF0vT1gB",
+      "ownerUid": "uA1b2C3d4E5f6G7h8I9j",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "type": "service"
+    }
+  ],
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "impersonation": {
+          "additionalProperties": false,
+          "description": "Present when platform staff acts as this user (SP1 spec §6.6).",
+          "properties": {
+            "sessionId": {
+              "description": "Active impersonation session (read-only, time-boxed).",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "staffUid": {
+              "description": "Uid of the platform staff member acting as the user.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "personal"
+            }
+          },
+          "required": [
+            "sessionId",
+            "staffUid"
+          ],
+          "type": "object",
+          "x-pii": "personal"
+        },
+        "mfa": {
+          "description": "Whether the verified token proves a second factor (SP1 spec §3.4).",
+          "type": "boolean",
+          "x-pii": "none"
+        },
+        "sessionId": {
+          "description": "Web or desktop session whose exchange minted the token (developer claim `sessionId` of a custom-token sign-in).",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "type": {
+          "const": "user",
+          "description": "A person signed in with Firebase Auth.",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "uid": {
+          "description": "Firebase Auth uid of the user.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        }
+      },
+      "required": [
+        "type",
+        "uid",
+        "mfa"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "deviceId": {
+          "description": "Device id; also its Firebase Auth uid.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "tenantId": {
+          "description": "The only organization this principal can act in.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "type": {
+          "const": "device",
+          "description": "A device activated with a code; signs in with a custom token.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "type",
+        "deviceId",
+        "tenantId"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "apiKeyId": {
+          "description": "API key id.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "ownerUid": {
+          "description": "User who owns the key; the key never exceeds their permissions.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "tenantId": {
+          "description": "The only organization this principal can act in.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "type": {
+          "const": "service",
+          "description": "An API key; acts with its scopes intersected with its owner's grants.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "type",
+        "apiKeyId",
+        "tenantId",
+        "ownerUid"
+      ],
+      "type": "object"
+    }
+  ],
+  "x-kind": "view",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

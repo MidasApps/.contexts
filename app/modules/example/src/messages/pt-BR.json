@@ -1,0 +1,53 @@
+{
+  "module": { "name": "Exemplo" },
+  "nav": { "home": "Exemplo" },
+  "permissions": {
+    "item": { "read": "Ver os itens do módulo de exemplo", "write": "Criar e alterar itens do módulo de exemplo" },
+    "note": {
+      "read": "Ver as notas do módulo de exemplo",
+      "create": "Criar notas no módulo de exemplo",
+      "archive": "Arquivar notas do módulo de exemplo (exige a aprovação de outra pessoa)"
+    }
+  },
+  "unitTypes": { "area": "Área" },
+  "workflows": {
+    "note-intake": { "name": "Entrada de notas", "description": "Cria uma nota na organização de quem pediu." }
+  },
+  "note": { "title": "Título", "body": "Texto", "noteId": "Nota" },
+  "settings": {
+    "greeting": "Saudação",
+    "greetingHint": "Mostrada no início do módulo, para todos os membros.",
+    "defaultBudget": "Orçamento padrão",
+    "defaultBudgetHint": "Valor sugerido para novos itens."
+  },
+  "home": {
+    "title": "Módulo de exemplo",
+    "description": "Referência do contrato de módulos: contexto, valores, fuso horário e permissões.",
+    "loading": "Carregando o módulo de exemplo…",
+    "contextTitle": "Contexto atual",
+    "contextDescription": "Resolvido pelo servidor para o nó da URL.",
+    "organization": "Organização",
+    "project": "Projeto",
+    "unit": "Unidade",
+    "noUnit": "Nenhuma unidade selecionada",
+    "locale": "Idioma",
+    "timeZone": "Fuso horário de exibição",
+    "currency": "Moeda padrão",
+    "now": "Agora",
+    "settingsTitle": "Configurações do módulo",
+    "settingsLoading": "Carregando as configurações do módulo…",
+    "greeting": "Saudação",
+    "defaultBudget": "Orçamento padrão",
+    "emptyTitle": "Módulo ainda não configurado",
+    "emptyDescription": "Defina a saudação e o orçamento padrão nas configurações do módulo.",
+    "emptyDescriptionReadOnly": "Peça a um administrador da organização para configurar este módulo.",
+    "configure": "Configurar",
+    "notesTitle": "Notas",
+    "notesDescription": "Criadas por agentes, fluxos de trabalho ou pelo chat. Esta lista só mostra as notas.",
+    "notesLoading": "Carregando as notas…",
+    "notesEmptyTitle": "Nenhuma nota ainda",
+    "notesEmptyDescription": "Peça a um agente no chat para criar uma nota; ela aparece aqui.",
+    "notesArchived": "Arquivada",
+    "notesLoadMore": "Carregar mais"
+  }
+}

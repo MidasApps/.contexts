@@ -1,0 +1,102 @@
+{
+  "additionalProperties": false,
+  "description": "Creates or replaces a plan (staff).",
+  "examples": [
+    {
+      "limits": {
+        "features": [
+          "web-tools"
+        ],
+        "maxConnectors": 5,
+        "monthlyMicroUsd": 50000000,
+        "monthlyTokens": 20000000
+      },
+      "name": "Standard"
+    }
+  ],
+  "properties": {
+    "limits": {
+      "additionalProperties": false,
+      "description": "Limits the plan grants.",
+      "properties": {
+        "features": {
+          "description": "Feature keys the plan includes.",
+          "items": {
+            "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)*$",
+            "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array",
+          "x-pii": "none"
+        },
+        "maxConnectors": {
+          "description": "Most connectors an organization may configure.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxCustomAgents": {
+          "description": "Most custom agents an organization may have; absent means the platform default.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxCustomInstructionChars": {
+          "description": "Longest instructions of a custom agent or skill, in characters; absent means the platform default.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxCustomSkills": {
+          "description": "Most custom skills an organization may have; absent means the platform default.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "monthlyMicroUsd": {
+          "description": "Monthly model spend cap in micro-USD.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "monthlyTokens": {
+          "description": "Monthly model token cap.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "monthlyMicroUsd",
+        "monthlyTokens",
+        "maxConnectors",
+        "features"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the plan.",
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "name",
+    "limits"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "platform.plan.manage",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

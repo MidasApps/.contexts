@@ -1,0 +1,168 @@
+{
+  "additionalProperties": false,
+  "description": "An eval experiment of an agent on a dataset, with scores per scorer and the gate verdict.",
+  "examples": [
+    {
+      "agentId": "assistant",
+      "datasetId": "assistant.v1",
+      "experimentId": "exp_01J8Z3K4M5",
+      "finishedAt": "2026-09-30T12:03:00.000Z",
+      "itemCount": 18,
+      "promptVersionId": null,
+      "scores": [
+        {
+          "baseline": 0.9,
+          "mean": 0.94,
+          "scorer": "tool-routing"
+        }
+      ],
+      "startedAt": "2026-09-30T12:00:00.000Z",
+      "status": "completed",
+      "verdict": "passed"
+    }
+  ],
+  "properties": {
+    "agentId": {
+      "description": "Agent under test.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "datasetId": {
+      "description": "Dataset the experiment ran on.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "experimentId": {
+      "description": "Experiment id.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "finishedAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "End (UTC); null while running.",
+      "x-pii": "none"
+    },
+    "itemCount": {
+      "description": "Dataset items evaluated.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "promptVersionId": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Candidate prompt version, when the experiment gates an activation.",
+      "x-pii": "none"
+    },
+    "scores": {
+      "description": "Mean score per scorer against the baseline floor.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "baseline": {
+            "anyOf": [
+              {
+                "description": "Baseline floor.",
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number",
+                "x-pii": "none"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mean": {
+            "description": "Mean score.",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number",
+            "x-pii": "none"
+          },
+          "scorer": {
+            "description": "Scorer id.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "scorer",
+          "mean",
+          "baseline"
+        ],
+        "type": "object"
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "startedAt": {
+      "description": "Start (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "status": {
+      "description": "Experiment status.",
+      "enum": [
+        "pending",
+        "running",
+        "completed",
+        "failed"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "verdict": {
+      "description": "Gate verdict: every scorer at or above its baseline.",
+      "enum": [
+        "passed",
+        "failed",
+        "pending"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "experimentId",
+    "datasetId",
+    "agentId",
+    "promptVersionId",
+    "status",
+    "itemCount",
+    "scores",
+    "verdict",
+    "startedAt",
+    "finishedAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.eval.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

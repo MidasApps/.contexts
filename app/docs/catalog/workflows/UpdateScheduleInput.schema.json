@@ -1,0 +1,38 @@
+{
+  "additionalProperties": false,
+  "description": "Changes the cron expression, time zone or input of a tenant schedule.",
+  "examples": [
+    {
+      "cron": "30 8 * * 1-5",
+      "timezone": "America/New_York"
+    }
+  ],
+  "properties": {
+    "cron": {
+      "description": "New cron expression.",
+      "maxLength": 120,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "inputData": {
+      "additionalProperties": {},
+      "description": "Workflow input; validated by the workflow's own schema on the server.",
+      "propertyNames": {
+        "type": "string"
+      },
+      "type": "object",
+      "x-pii": "personal"
+    },
+    "timezone": {
+      "description": "New IANA time zone.",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.schedule.write",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

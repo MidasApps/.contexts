@@ -1,0 +1,49 @@
+{
+  "additionalProperties": false,
+  "description": "Allowlist of connector tools agents may call and which of them skip approval.",
+  "examples": [
+    {
+      "allow": [
+        "listIssues",
+        "getIssue",
+        "createIssue"
+      ],
+      "readOnly": [
+        "listIssues",
+        "getIssue"
+      ]
+    }
+  ],
+  "properties": {
+    "allow": {
+      "description": "Tools agents may call; anything else is hidden.",
+      "items": {
+        "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+        "type": "string"
+      },
+      "maxItems": 500,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "readOnly": {
+      "description": "Subset of allow that runs without approval.",
+      "items": {
+        "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+        "type": "string"
+      },
+      "maxItems": 500,
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "allow",
+    "readOnly"
+  ],
+  "type": "object",
+  "x-kind": "settings",
+  "x-permission": "core.connector.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

@@ -1,0 +1,67 @@
+{
+  "additionalProperties": false,
+  "description": "A member's approve or decline of an agent tool call in the chat, audited before the run resumes.",
+  "examples": [
+    {
+      "approved": false,
+      "conversationId": "Cv3xZ5aB7nM9qW1eR2tY",
+      "reason": "Wrong project name.",
+      "runId": "run-1",
+      "toolCallId": "call-1",
+      "toolName": "command_tenancy_CreateProjectInput"
+    }
+  ],
+  "properties": {
+    "approved": {
+      "description": "Approved (true) or declined (false).",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "conversationId": {
+      "description": "Conversation of the run.",
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "reason": {
+      "description": "Reason given by the member.",
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "runId": {
+      "description": "Agent run that waits for the decision.",
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "toolCallId": {
+      "description": "Tool call decided.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "toolName": {
+      "description": "Sanitized tool name the stream carried.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "conversationId",
+    "runId",
+    "toolCallId",
+    "toolName",
+    "approved"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.conversation.send",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

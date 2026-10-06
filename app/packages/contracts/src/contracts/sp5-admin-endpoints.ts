@@ -1,0 +1,25 @@
+import { PROMPT_ENDPOINTS } from "./agents/prompt-endpoints.ts";
+import type { EndpointDefinition } from "./http/endpoint.ts";
+import { OBSERVABILITY_ENDPOINTS } from "./observability/endpoints.ts";
+import { ADMIN_AGENT_ENDPOINTS } from "./platform/admin-agent-endpoints.ts";
+import { ADMIN_PLATFORM_ENDPOINTS } from "./platform/admin-endpoints.ts";
+import { ADMIN_IMPERSONATION_ENDPOINTS } from "./platform/admin-impersonation-endpoints.ts";
+import { ADMIN_MODEL_ENDPOINTS } from "./platform/admin-model-endpoints.ts";
+import { ADMIN_OPERATIONS_ENDPOINTS } from "./platform/admin-operations-endpoints.ts";
+import { ADMIN_STAFF_ENDPOINTS } from "./platform/admin-staff-endpoints.ts";
+import { ADMIN_USER_ENDPOINTS } from "./platform/admin-user-endpoints.ts";
+import { FLAG_ENDPOINTS } from "./platform/flag-endpoints.ts";
+
+/** `/v1` endpoints of the SP5 console APIs (flags, prompts, admin, traces, evals), registered by `composition.ts`. */
+export const SP5_ADMIN_ENDPOINTS: readonly EndpointDefinition[] = [
+  ...FLAG_ENDPOINTS,
+  ...ADMIN_PLATFORM_ENDPOINTS,
+  ...PROMPT_ENDPOINTS,
+  ...OBSERVABILITY_ENDPOINTS,
+  ...ADMIN_OPERATIONS_ENDPOINTS,
+  ...ADMIN_USER_ENDPOINTS,
+  ...ADMIN_IMPERSONATION_ENDPOINTS,
+  ...ADMIN_AGENT_ENDPOINTS,
+  ...ADMIN_MODEL_ENDPOINTS,
+  ...ADMIN_STAFF_ENDPOINTS,
+];

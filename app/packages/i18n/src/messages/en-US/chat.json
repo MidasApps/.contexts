@@ -1,0 +1,404 @@
+{
+  "markdown": {
+    "newTab": "(opens in a new tab)",
+    "image": "[image: {alt}]",
+    "imageOmitted": "[image omitted]",
+    "code": "Code",
+    "codeWithLanguage": "{language} code"
+  },
+  "elements": {
+    "scrollToBottom": "Jump to latest",
+    "send": "Send message",
+    "stop": "Stop answer",
+    "copyCode": "Copy",
+    "copied": "Copied",
+    "reasoning": {
+      "thinking": "Thinking…",
+      "done": "Reasoning"
+    },
+    "tool": {
+      "input": "Input",
+      "output": "Result",
+      "error": "Error",
+      "state": {
+        "input-streaming": "Preparing",
+        "input-available": "Running",
+        "approval-requested": "Awaiting approval",
+        "approval-responded": "Decision sent",
+        "output-available": "Done",
+        "output-error": "Failed",
+        "output-denied": "Declined"
+      }
+    },
+    "sources": {
+      "count": "{count, plural, one {# source} other {# sources}}"
+    },
+    "citation": {
+      "label": "Source {index}: {title}",
+      "fallback": "Source {index}"
+    },
+    "context": {
+      "label": "Context used: {percent}",
+      "title": "Context usage",
+      "input": "Input",
+      "output": "Output",
+      "reasoning": "Reasoning",
+      "window": "Model window"
+    }
+  },
+  "panel": {
+    "title": "Assistant",
+    "loadingTitle": "Loading the conversation title…",
+    "logLabel": "Conversation with the assistant",
+    "newConversation": "New conversation",
+    "close": "Close the assistant",
+    "openInChat": "Open on the assistant page",
+    "loadEarlier": "Load earlier messages",
+    "loadEarlierFailed": "Earlier messages could not be loaded. Try again.",
+    "loadingHistory": "Loading conversation…",
+    "notFound": {
+      "title": "Conversation not found",
+      "description": "It was deleted or belongs to another account."
+    },
+    "empty": {
+      "title": "How can I help?",
+      "description": "Ask about the organization's data and documents, or request an action.",
+      "suggestionsLabel": "Suggestions"
+    },
+    "suggestions": {
+      "capabilities": {
+        "title": "What can you do?",
+        "description": "Agents and actions available in this context.",
+        "prompt": "What can you do for me here?"
+      },
+      "knowledge": {
+        "title": "Search the knowledge base",
+        "description": "Answers with sources, from the organization's documents.",
+        "prompt": "What are the main topics in the knowledge base?"
+      },
+      "data": {
+        "title": "Query data",
+        "description": "Entities and records you can see.",
+        "prompt": "Which data can I query?"
+      },
+      "create": {
+        "title": "Create a record",
+        "description": "A form to review before saving.",
+        "prompt": "I want to create a record. Which types exist?"
+      }
+    }
+  },
+  "input": {
+    "label": "Message",
+    "placeholder": "Ask or request something…",
+    "hint": "Enter sends · Shift+Enter adds a line · Esc stops",
+    "counter": "{count} of {max} characters",
+    "tooLong": "Limit of {max} characters. Remove {over, plural, one {# character} other {# characters}}.",
+    "offline": "Offline. Sending is unavailable until the connection is back.",
+    "uploading": "Wait for the attachments to finish uploading.",
+    "attachmentProblem": "Remove or retry the attachments with errors before sending.",
+    "awaitingApproval": "Approve or decline the action above before you continue."
+  },
+  "status": {
+    "connecting": "Connecting…",
+    "responding": "Answering…",
+    "resuming": "Resuming answer…",
+    "finished": "Answer complete.",
+    "stopped": "Answer stopped.",
+    "lost": "Connection lost. The answer stopped before the end.",
+    "offline": "Offline.",
+    "awaitingApproval": "Waiting for your approval.",
+    "failed": "The answer failed."
+  },
+  "message": {
+    "you": "You",
+    "assistant": "Assistant",
+    "lowConfidence": "Not sure",
+    "lowConfidenceHint": "Answer without a source in the knowledge base. Check it before use.",
+    "stopped": "Stopped",
+    "stoppedHint": "The partial answer was kept.",
+    "regenerate": "Generate again",
+    "copy": "Copy answer",
+    "copied": "Answer copied.",
+    "attachments": "Attachments",
+    "formSubmitted": "Form submitted: {command}",
+    "choiceSubmitted": "Choice sent: {choice}",
+    "incomplete": "Incomplete",
+    "incompleteHint": "The answer stopped on an error; the text above may be incomplete.",
+    "openAttachment": "Open {name}",
+    "openAttachmentFailed": "Could not open {name}."
+  },
+  "error": {
+    "title": "Could not answer",
+    "stream": "The answer failed before finishing. Try again.",
+    "retry": "Try again",
+    "history": "Could not load the conversation."
+  },
+  "tripwire": {
+    "title": "Answer blocked",
+    "default": "A safety rule stopped this answer.",
+    "tenant-budget-guard": "The organization's AI budget ran out. Contact an administrator.",
+    "tenant-pii-detector": "The message had personal data that cannot be sent to the model.",
+    "prompt-injection-detector": "The request looked like an attempt to bypass the assistant's instructions.",
+    "moderation": "The content breaks the usage rules.",
+    "system-prompt-scrubber-result": "The answer was blocked to avoid exposing internal instructions."
+  },
+  "delegation": {
+    "label": "Delegated to {agent}",
+    "agents": {
+      "knowledge": "Knowledge agent",
+      "data": "Data agent",
+      "action": "Action agent",
+      "web": "Web research agent",
+      "unknown": "Agent {id}"
+    },
+    "request": "Request",
+    "steps": "{count, plural, one {# step} other {# steps}}",
+    "stepFailed": "failed",
+    "result": "Result",
+    "stepsTitle": "Steps"
+  },
+  "tool": {
+    "title": "Tool: {name}"
+  },
+  "approval": {
+    "label": "Approval: {summary}",
+    "title": "Approval required",
+    "fallbackSummary": "Run: {tool}",
+    "permission": "Permission",
+    "details": "Data sent",
+    "diffCaption": "Proposed changes",
+    "field": "Field",
+    "before": "Before",
+    "after": "After",
+    "none": "—",
+    "noPreview": "No preview of the changes.",
+    "approve": "Approve",
+    "decline": "Decline",
+    "reasonLabel": "Reason for declining (optional)",
+    "reasonHint": "It is recorded in the audit log.",
+    "confirmDecline": "Confirm decline",
+    "cancelDecline": "Back",
+    "approving": "Approving…",
+    "declining": "Declining…",
+    "approved": "Approved. Running…",
+    "executed": "Approved and executed.",
+    "declined": "Declined.",
+    "declinedReason": "Declined: {reason}",
+    "failed": "Approved, but the execution failed.",
+    "expired": "This approval is no longer active. The action did not run."
+  },
+  "ui": {
+    "form": {
+      "label": "Form: {command}",
+      "submit": "Submit",
+      "submitted": "Form submitted. The assistant asks for confirmation before saving.",
+      "answered": "Form sent.",
+      "inactive": "This form is no longer active."
+    },
+    "table": {
+      "caption": "Result",
+      "truncated": "Showing the first {count, plural, one {# row} other {# rows}}. There are more results.",
+      "empty": "No rows.",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "chart": {
+      "label": "{kind} chart: {series}",
+      "kinds": {
+        "bar": "Bar",
+        "line": "Line",
+        "area": "Area",
+        "pie": "Pie"
+      },
+      "data": "Chart data"
+    },
+    "picker": {
+      "legend": "Choose an option",
+      "legendMultiple": "Choose one or more options",
+      "submit": "Confirm choice",
+      "required": "Choose at least one option.",
+      "submitted": "Choice sent.",
+      "inactive": "This choice is no longer active."
+    },
+    "approvalPending": {
+      "title": "Waiting for another person's approval",
+      "open": "Open approvals"
+    }
+  },
+  "upload": {
+    "menu": "Attach",
+    "attachFile": "Attach file",
+    "addToKnowledge": "Add to knowledge base",
+    "fileInput": "Files to attach",
+    "knowledgeInput": "Files for the knowledge base",
+    "listLabel": "Message attachments",
+    "remove": "Remove {name}",
+    "cancel": "Cancel upload of {name}",
+    "retry": "Try again: {name}",
+    "status": {
+      "pending": "Queued",
+      "uploading": "Uploading {percent}",
+      "validating": "Checking…",
+      "ready": "Ready",
+      "indexing": "Sent to the knowledge base. Indexing continues in the background.",
+      "failed": "Upload failed",
+      "timeout": "The check took too long",
+      "rejected": {
+        "TYPE_NOT_ALLOWED": "File type not accepted",
+        "TOO_LARGE": "File too large",
+        "CONTENT_MISMATCH": "The content does not match the file type",
+        "TOO_MANY": "Limit of {max} attachments per message"
+      },
+      "processing": "Processing… the check can take a few minutes"
+    },
+    "announce": {
+      "ready": "{name}: ready.",
+      "indexing": "{name}: sent to the knowledge base; indexing continues in the background.",
+      "problem": "{name}: {reason}."
+    }
+  },
+  "history": {
+    "title": "Conversations",
+    "listLabel": "Conversation history",
+    "new": "New conversation",
+    "close": "Close the history",
+    "untitled": "Untitled conversation",
+    "pinned": "Pinned",
+    "answering": "Answering",
+    "searchLabel": "Search conversations",
+    "searchPlaceholder": "Search by title or summary",
+    "showArchived": "Archived",
+    "loading": "Loading conversations…",
+    "loadMore": "Load more conversations",
+    "count": "{count, plural, =0 {No conversations} one {# conversation} other {# conversations}}",
+    "empty": {
+      "title": "No conversations yet",
+      "description": "Conversations with the assistant show up here."
+    },
+    "emptySearch": {
+      "title": "Nothing found",
+      "description": "No conversation matches “{q}”."
+    },
+    "emptyArchived": {
+      "title": "No archived conversations",
+      "description": "Archived conversations leave the main list and stay here."
+    },
+    "noAccess": "You do not have permission to see the conversation history.",
+    "error": "The conversations could not be loaded.",
+    "actions": {
+      "menu": "Actions for {title}",
+      "rename": "Rename",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "archive": "Archive",
+      "restore": "Restore",
+      "summarize": "Summarize",
+      "delete": "Delete"
+    },
+    "rename": {
+      "label": "New title for {title}",
+      "save": "Save title",
+      "cancel": "Cancel",
+      "hint": "Enter saves · Esc cancels",
+      "required": "Enter a title.",
+      "done": "Conversation renamed."
+    },
+    "pinnedDone": "Conversation pinned.",
+    "unpinnedDone": "Conversation unpinned.",
+    "archivedDone": "Conversation archived.",
+    "restoredDone": "Conversation restored.",
+    "summary": {
+      "title": "Summary of {title}",
+      "description": "Made from the latest messages and used by search.",
+      "loading": "Summarizing the conversation…",
+      "empty": "There are no messages to summarize yet.",
+      "close": "Close"
+    },
+    "delete": {
+      "title": "Delete “{title}”?",
+      "description": "The conversation and all its messages will be deleted. This cannot be undone.",
+      "confirm": "Delete conversation",
+      "done": "Conversation deleted."
+    },
+    "countLoaded": "Showing {count, plural, one {# conversation} other {# conversations}}"
+  },
+  "view": {
+    "title": "Assistant",
+    "loading": "Loading the assistant…",
+    "openHistory": "Conversations",
+    "historyPanel": "Conversation history"
+  },
+  "agents": {
+    "label": "Agent",
+    "assistant": "Assistant",
+    "loading": "Loading agents…",
+    "error": "Could not load the agents.",
+    "retry": "Try again",
+    "onlyAssistant": "No organization agent available.",
+    "unknown": "Organization agent",
+    "current": "Agent: {name}"
+  },
+  "voice": {
+    "talk": "Talk: hold to record",
+    "stopRecording": "Stop recording and transcribe",
+    "requesting": "Waiting for the microphone…",
+    "recording": "Recording… release to transcribe",
+    "transcribing": "Transcribing…",
+    "inserted": "Transcript added to the message.",
+    "problem": {
+      "denied": "Microphone blocked. Allow microphone access in the browser settings.",
+      "unsupported": "This device has no microphone available to record.",
+      "too-large": "The recording was too long. Record up to 60 seconds.",
+      "empty": "The recording could not be understood. Try again.",
+      "unavailable": "Voice is turned off for this organization.",
+      "failed": "The transcription failed. Try again."
+    },
+    "options": "Voice options",
+    "autoSend": "Send after transcribing",
+    "autoRead": "Read answers aloud",
+    "realtime": {
+      "start": "Start voice conversation (experimental)",
+      "stop": "End voice conversation",
+      "connecting": "Connecting the voice conversation…",
+      "live": "Voice conversation on.",
+      "error": "The voice conversation failed."
+    },
+    "readAloud": "Listen to the answer",
+    "stopReading": "Stop reading",
+    "loadingAudio": "Preparing the audio…",
+    "player": "Answer as audio",
+    "readFailed": "The answer could not be read aloud.",
+    "readUnavailable": "Read aloud is turned off for this organization.",
+    "endsSoon": "The recording stops by itself in {seconds} seconds."
+  },
+  "tools": {
+    "catalog": {
+      "describeEntity": "Describe a catalog entity",
+      "listEntities": "List catalog entities",
+      "renderForm": "Open a form"
+    },
+    "knowledge": {
+      "searchKnowledge": "Search the knowledge base"
+    },
+    "sql": {
+      "querySemanticSql": "Query data"
+    },
+    "web": {
+      "search": "Search the web",
+      "scrape": "Read a web page"
+    }
+  },
+  "feedback": {
+    "up": "Good answer",
+    "down": "Bad answer",
+    "thanks": "Thanks for the rating.",
+    "downTitle": "What was wrong?",
+    "downDescription": "Your rating helps improve the assistant. The comment is optional.",
+    "comment": "Comment",
+    "commentHint": "For example: it cited the wrong document, or the answer was incomplete.",
+    "addToDataset": "Use this answer in the organization's evaluations",
+    "cancel": "Cancel",
+    "submit": "Send rating"
+  }
+}

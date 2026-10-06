@@ -1,0 +1,113 @@
+{
+  "additionalProperties": false,
+  "description": "Replaces the model of each text role and the prices staff set (staff).",
+  "examples": [
+    {
+      "models": [
+        {
+          "inputMicroUsdPerMTok": 100000,
+          "modelId": "openai/gpt-6-luna",
+          "outputMicroUsdPerMTok": 500000
+        }
+      ],
+      "roles": {
+        "chat": "openai/gpt-6-sol",
+        "fast": "openai/gpt-6-luna",
+        "judge": "openai/gpt-6-luna",
+        "reasoning": "openai/gpt-6-sol"
+      }
+    }
+  ],
+  "properties": {
+    "models": {
+      "description": "Prices set by staff: new models, or other prices for models the code already prices.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "inputMicroUsdPerMTok": {
+            "description": "Price of 1M input tokens, in micro-USD.",
+            "maximum": 1000000000000,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "modelId": {
+            "description": "Model id as <provider>/<model>.",
+            "maxLength": 120,
+            "pattern": "^(google|openai|anthropic)\\/[\\w.:-]+$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "outputMicroUsdPerMTok": {
+            "description": "Price of 1M output tokens, in micro-USD.",
+            "maximum": 1000000000000,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "modelId",
+          "inputMicroUsdPerMTok",
+          "outputMicroUsdPerMTok"
+        ],
+        "type": "object"
+      },
+      "maxItems": 50,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "roles": {
+      "additionalProperties": false,
+      "description": "The model of each text role.",
+      "properties": {
+        "chat": {
+          "description": "Model of the chat agents.",
+          "maxLength": 120,
+          "pattern": "^(google|openai|anthropic)\\/[\\w.:-]+$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "fast": {
+          "description": "Model of short tasks: titles, summaries and guardrails.",
+          "maxLength": 120,
+          "pattern": "^(google|openai|anthropic)\\/[\\w.:-]+$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "judge": {
+          "description": "Model that scores real-mode evals.",
+          "maxLength": 120,
+          "pattern": "^(google|openai|anthropic)\\/[\\w.:-]+$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "reasoning": {
+          "description": "Model that plans actions.",
+          "maxLength": 120,
+          "pattern": "^(google|openai|anthropic)\\/[\\w.:-]+$",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "chat",
+        "fast",
+        "reasoning",
+        "judge"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "roles",
+    "models"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "platform.model.manage",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

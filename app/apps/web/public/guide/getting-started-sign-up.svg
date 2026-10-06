@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="Inter, 'Segoe UI', Arial, sans-serif">
+<rect width="1280" height="800" fill="#fff"/>
+<rect x="0" y="0" width="1280" height="800" rx="0" fill="#fafafa"/>
+<rect x="604" y="150" width="32" height="32" rx="8" fill="#171717"/>
+<text x="620" y="172" font-size="16" fill="#fff" font-weight="600" text-anchor="middle">✦</text>
+<text x="646" y="172" font-size="16" fill="#171717" font-weight="600" text-anchor="start">Core</text>
+<rect x="440" y="200" width="400" height="440" rx="16" fill="#fff" stroke="#e5e5e5"/>
+<text x="472" y="248" font-size="20" fill="#171717" font-weight="600" text-anchor="start">Criar conta</text>
+<text x="472" y="274" font-size="13" fill="#737373" font-weight="400" text-anchor="start">Depois de criar a conta, você cria uma organização</text>
+<text x="472" y="294" font-size="13" fill="#737373" font-weight="400" text-anchor="start">ou aceita um convite.</text>
+<text x="560" y="676" font-size="12" fill="#737373" font-weight="400" text-anchor="start">文A  Idioma</text>
+<rect x="630" y="660" width="140" height="28" rx="6" fill="#fff" stroke="#e5e5e5"/>
+<text x="642" y="679" font-size="12" fill="#171717" font-weight="400" text-anchor="start">Português (Brasil)</text>
+<text x="790" y="679" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Documentação</text>
+<text x="472" y="330" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Seu nome</text>
+<rect x="472" y="340" width="336" height="38" rx="6" fill="#fff" stroke="#e5e5e5"/>
+<text x="484" y="364" font-size="14" fill="#171717" font-weight="400" text-anchor="start">Ana Souza</text>
+<text x="472" y="398" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Aparece para os outros membros.</text>
+<text x="472" y="420" font-size="14" fill="#171717" font-weight="600" text-anchor="start">E-mail</text>
+<rect x="472" y="430" width="336" height="38" rx="6" fill="#fff" stroke="#e5e5e5"/>
+<text x="484" y="454" font-size="14" fill="#171717" font-weight="400" text-anchor="start">ana@clinicavet.exemplo</text>
+<text x="472" y="490" font-size="14" fill="#171717" font-weight="600" text-anchor="start">Senha</text>
+<rect x="472" y="500" width="336" height="38" rx="6" fill="#fff" stroke="#e5e5e5"/>
+<text x="484" y="524" font-size="14" fill="#171717" font-weight="400" text-anchor="start">••••••••••</text>
+<text x="472" y="558" font-size="12" fill="#737373" font-weight="400" text-anchor="start">Pelo menos 8 caracteres.</text>
+<rect x="472" y="576" width="336" height="36" rx="6" fill="#171717"/>
+<text x="640.0" y="599.0" font-size="14" fill="#fff" font-weight="600" text-anchor="middle">Criar conta</text>
+<text x="640" y="628" font-size="13" fill="#737373" font-weight="400" text-anchor="middle">Já tem conta? Entrar</text>
+</svg>
