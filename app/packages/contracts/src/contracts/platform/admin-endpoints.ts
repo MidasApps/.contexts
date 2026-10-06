@@ -164,7 +164,7 @@ export const getAdminUsageEndpoint = defineEndpoint({
   method: "GET",
   path: "/v1/admin/usage",
   auth: "user",
-  query: z.object({
+  query: z.strictObject({
     from: UsageDaySchema.optional().meta(
       none("First UTC day (`2026-09-01`); default: the first day of the month of `to`."),
     ),

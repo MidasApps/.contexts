@@ -83,7 +83,13 @@ export const buildSchedulesRoutes = (deps: SchedulesRouteDeps): Record<string, R
     }),
     [createScheduleEndpoint.id]: withApiRoute(createScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.write);
-      return scope instanceof Response ? scope : answer(await create(scope, ctx.input.body), ctx.requestId, 201);
+      if (scope instanceof Response) return scope;
+      const created = await create(scope, ctx.input.body);
+      if (!created.ok) return answer(created, ctx.requestId);
+      const { organizationId } = ctx.input.query;
+      const query = organizationId === undefined ? "" : `?organizationId=${organizationId}`;
+      const location = `/v1/schedules/${encodeURIComponent(created.data.id)}${query}`;
+      return dataResponse({ data: created.data }, { status: 201, location });
     }),
     [updateScheduleEndpoint.id]: withApiRoute(updateScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.write);

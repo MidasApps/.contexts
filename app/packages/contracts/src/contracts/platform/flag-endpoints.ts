@@ -57,7 +57,7 @@ export const adminListFlagsEndpoint = defineEndpoint({
   method: "GET",
   path: "/v1/admin/flags",
   auth: "user",
-  query: z.object({
+  query: z.strictObject({
     organizationId: OrganizationIdSchema.optional().meta(none("Show this organization's overrides.")),
   }),
   responses: { 200: dataEnvelope(z.array(FeatureFlagSchema)) },

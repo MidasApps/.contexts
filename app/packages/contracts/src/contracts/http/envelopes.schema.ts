@@ -57,7 +57,7 @@ export const PageMetaSchema = z.object({
 export type PageMeta = z.infer<typeof PageMetaSchema>;
 
 /** Query of every list endpoint: `?cursor=…&limit=20` (max 100). Extend it with filters. */
-export const PageQuerySchema = z.object({
+export const PageQuerySchema = z.strictObject({
   cursor: z.string().min(1).optional().meta(none("Cursor returned by the previous page.")),
   // Query strings are text: coerce, then enforce an integer in range.
   limit: z.coerce.number().int().min(1).max(100).default(20).meta(none("Page size, 1-100 (default 20).")),

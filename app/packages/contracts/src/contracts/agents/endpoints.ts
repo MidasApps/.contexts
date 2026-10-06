@@ -26,7 +26,7 @@ export const callMcpEndpoint = defineEndpoint({
   method: "POST",
   path: "/v1/mcp",
   auth: "principal",
-  query: z.object({
+  query: z.strictObject({
     organizationId: OrganizationIdSchema.optional().meta(
       none("Organization to act in; required for users, and when given it must be an API key's own organization."),
     ),

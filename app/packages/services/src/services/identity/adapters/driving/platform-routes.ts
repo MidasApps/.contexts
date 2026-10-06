@@ -28,10 +28,8 @@ export const buildPlatformRoutes = (deps: {
           requestId,
         });
         if (!result.ok) return accessErrorResponse(result.error, requestId);
-        return dataResponse(
-          { data: result.data },
-          { status: 201, location: `/v1/platform/impersonation-sessions/${result.data.sessionId}` },
-        );
+        // No `Location`: a support session is only ended (`…/{sessionId}/end`), never read back.
+        return dataResponse({ data: result.data }, { status: 201 });
       },
     ),
     [endImpersonationEndpoint.id]: withApiRoute(

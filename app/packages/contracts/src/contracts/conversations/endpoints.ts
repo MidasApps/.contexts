@@ -38,7 +38,7 @@ const booleanQuery = (description: string) =>
     .optional()
     .meta(none(description));
 
-export const ListConversationsQuerySchema = z.object({
+export const ListConversationsQuerySchema = z.strictObject({
   organizationId: OrganizationIdSchema.meta(none("Organization whose conversations to list.")),
   cursor: z.string().min(1).max(500).optional().meta(none("Cursor returned by the previous page.")),
   limit: z.coerce
@@ -138,7 +138,7 @@ export const listConversationMessagesEndpoint = defineEndpoint({
   path: "/v1/conversations/{conversationId}/messages",
   auth: "user",
   params: conversationParams,
-  query: z.object({
+  query: z.strictObject({
     cursor: z
       .string()
       .regex(/^\d{1,6}$/)

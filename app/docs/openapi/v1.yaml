@@ -489,6 +489,14 @@ paths:
             pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
             type: string
             x-pii: none
+        - description: ULID; a retry with the same key and body replays the first response (24 h).
+          in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            format: ulid
+            pattern: ^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$
+            type: string
       responses:
         "200":
           content:
@@ -535,6 +543,14 @@ paths:
           description: NOT_FOUND
           x-error-codes:
             - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: IDEMPOTENCY_KEY_REUSED
+          x-error-codes:
+            - IDEMPOTENCY_KEY_REUSED
         "422":
           content:
             application/json:
@@ -2714,6 +2730,14 @@ paths:
             pattern: ^schedule_[a-z0-9-]{1,120}$
             type: string
             x-pii: none
+        - description: ULID; a retry with the same key and body replays the first response (24 h).
+          in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            format: ulid
+            pattern: ^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$
+            type: string
       responses:
         "202":
           content:
@@ -2769,6 +2793,14 @@ paths:
           description: NOT_FOUND
           x-error-codes:
             - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: IDEMPOTENCY_KEY_REUSED
+          x-error-codes:
+            - IDEMPOTENCY_KEY_REUSED
         "500":
           content:
             application/json:
@@ -4625,6 +4657,14 @@ paths:
             minLength: 1
             type: string
             x-pii: none
+        - description: ULID; a retry with the same key and body replays the first response (24 h).
+          in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            format: ulid
+            pattern: ^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$
+            type: string
       responses:
         "200":
           content:
@@ -4670,6 +4710,14 @@ paths:
           description: NOT_FOUND
           x-error-codes:
             - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: IDEMPOTENCY_KEY_REUSED
+          x-error-codes:
+            - IDEMPOTENCY_KEY_REUSED
         "422":
           content:
             application/json:
@@ -6917,6 +6965,14 @@ paths:
             minLength: 1
             type: string
             x-pii: none
+        - description: ULID; a retry with the same key and body replays the first response (24 h).
+          in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            format: ulid
+            pattern: ^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$
+            type: string
       requestBody:
         content:
           application/json:
@@ -6977,6 +7033,14 @@ paths:
           description: NOT_FOUND
           x-error-codes:
             - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: IDEMPOTENCY_KEY_REUSED
+          x-error-codes:
+            - IDEMPOTENCY_KEY_REUSED
         "500":
           content:
             application/json:
@@ -13794,6 +13858,14 @@ paths:
             minLength: 1
             type: string
             x-pii: none
+        - description: ULID; a retry with the same key and body replays the first response (24 h).
+          in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            format: ulid
+            pattern: ^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$
+            type: string
       responses:
         "202":
           content:
@@ -13848,6 +13920,14 @@ paths:
           description: NOT_FOUND
           x-error-codes:
             - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: IDEMPOTENCY_KEY_REUSED
+          x-error-codes:
+            - IDEMPOTENCY_KEY_REUSED
         "500":
           content:
             application/json:

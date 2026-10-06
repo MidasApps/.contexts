@@ -14,7 +14,7 @@ import {
   VoiceAvailabilitySchema,
 } from "./voice.schema.ts";
 
-const organizationQuery = z.object({
+const organizationQuery = z.strictObject({
   organizationId: OrganizationIdSchema.meta(none("Organization the call is billed to.")),
 });
 

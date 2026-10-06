@@ -50,6 +50,7 @@ export const adminEvaluatePromptVersionEndpoint = defineEndpoint({
   params: versionParams,
   responses: { 200: dataEnvelope(PromptEvalResultSchema) },
   errors: { ...STAFF, ...EVAL_ERRORS },
+  idempotency: "optional",
   summary: "Runs the agent's eval set with the version and records the verdict.",
 });
 
@@ -112,6 +113,7 @@ export const evaluateAddendumVersionEndpoint = defineEndpoint({
   query: OrganizationQuerySchema,
   responses: { 200: dataEnvelope(PromptEvalResultSchema) },
   errors: { 403: ["FORBIDDEN"], ...EVAL_ERRORS },
+  idempotency: "optional",
   summary: "Runs the agent's eval set with the platform prompt plus this addendum (core.prompt.write).",
 });
 

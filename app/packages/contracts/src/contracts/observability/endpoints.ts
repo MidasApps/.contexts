@@ -20,7 +20,7 @@ import { TraceIdSchema, TraceStatusSchema, TraceSummarySchema } from "./trace-su
 const STAFF = { 403: ["FORBIDDEN", "MFA_REQUIRED"] } as const;
 
 /** Page of a console list: Mastra storage pages by number (`page` from 0), not by cursor. */
-const PageNumberQuerySchema = z.object({
+const PageNumberQuerySchema = z.strictObject({
   page: z.coerce.number().int().min(0).max(1000).default(0).meta(none("Page number, from 0.")),
   perPage: z.coerce.number().int().min(1).max(100).default(20).meta(none("Page size, 1-100 (default 20).")),
 });
@@ -245,6 +245,7 @@ export const startEvalExperimentEndpoint = defineEndpoint({
     202: dataEnvelope(z.strictObject({ experimentId: z.string().min(1).meta(none("Started experiment.")) })),
   },
   errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"], 404: ["NOT_FOUND"], 503: ["UPSTREAM_UNAVAILABLE"] },
+  idempotency: "optional",
   summary: "Runs an agent the organization enabled on one of its datasets, as the caller (core.eval.write).",
 });
 

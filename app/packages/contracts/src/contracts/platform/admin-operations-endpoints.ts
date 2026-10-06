@@ -60,7 +60,7 @@ export const adminListSchedulesEndpoint = defineEndpoint({
   method: "GET",
   path: "/v1/admin/schedules",
   auth: "user",
-  query: z.object({
+  query: z.strictObject({
     organizationId: OrganizationIdSchema.optional().meta(
       none("Only the schedules of this organization; without it, platform schedules are listed too."),
     ),
@@ -103,6 +103,7 @@ export const adminRunScheduleNowEndpoint = defineEndpoint({
     ),
   },
   errors: { ...STAFF, 404: ["NOT_FOUND"], ...UPSTREAM },
+  idempotency: "optional",
   summary:
     "Starts a run of any schedule now; a tenant schedule still re-authorizes its creator (staff, platform.workflow.manage; audited).",
 });
@@ -127,7 +128,7 @@ export const adminListLogsEndpoint = defineEndpoint({
   method: "GET",
   path: "/v1/admin/logs",
   auth: "user",
-  query: z.object({
+  query: z.strictObject({
     level: LogLevelSchema.optional().meta(none("Minimum level.")),
     q: z.string().min(1).max(200).optional().meta(none("Text the message contains.")),
     traceId: z.string().min(1).max(128).optional().meta(none("Only lines of this trace.")),

@@ -12,7 +12,7 @@ import { UnitFieldsSchema } from "../tenancy/unit.schema.ts";
 
 /** `GET /v1/me/context?organizationId&projectId&unitId`: the node to resolve. */
 export const AccessContextQuerySchema = z
-  .object({
+  .strictObject({
     organizationId: OrganizationIdSchema.meta(none("Organization of the node.")),
     projectId: ProjectIdSchema.optional().meta(none("Project of the node; absent for the organization itself.")),
     unitId: UnitIdSchema.optional().meta(none("Unit of the node; requires projectId.")),
