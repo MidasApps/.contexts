@@ -40,7 +40,7 @@ const bucket = filesBucketOf(firebase.app, BUCKET);
 const files = createFirestoreFileRepository({ firestore: firebase.firestore });
 const events = createRecordingFileEvents();
 const logger = createLogger({ context: { service: "test", env: "local" }, sink: () => undefined });
-const handle = makeObjectFinalizedHandler({
+const handler = makeObjectFinalizedHandler({
   finalizeUpload: makeFinalizeUpload({
     files,
     objects: createGcsObjectStore(bucket),
@@ -51,6 +51,7 @@ const handle = makeObjectFinalizedHandler({
   }),
   logger,
 });
+const handle = (data: Parameters<typeof handler>[0]) => handler(data, { eventId: "delivery-1" });
 
 const pending = (id: string, overrides: Partial<StoredFile> = {}): StoredFile =>
   StoredFileSchema.parse({

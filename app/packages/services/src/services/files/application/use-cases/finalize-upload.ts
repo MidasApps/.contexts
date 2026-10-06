@@ -1,5 +1,4 @@
 import type { StoredFile } from "@core/contracts";
-import { ulid } from "ulid";
 import type { Clock } from "#/services/shared/clock/clock.ts";
 import type { Logger } from "#/services/shared/observability/logger.ts";
 import {
@@ -65,7 +64,6 @@ const judge = async (deps: Deps, file: StoredFile, object: FinalizedObject): Pro
 const publishUploaded = async (deps: Deps, file: StoredFile): Promise<void> => {
   await deps.events.publish({
     eventName: "FILE_UPLOADED",
-    eventId: ulid(),
     occurredAt: file.updatedAt,
     schemaVersion: 1,
     tenantId: file.tenantId,
@@ -96,13 +94,8 @@ export const makeFinalizeUpload =
     const settlement = await judge(deps, file, object);
     if (settlement.status === "rejected") await deps.objects.delete(file.storagePath);
     const settled = await deps.files.settle({ fileId: file.id, settlement, updatedAt: deps.clock.now().toISOString() });
-    const logFields = { fileId: file.id, tenantId: file.tenantId, purpose: file.purpose, sizeBytes: object.size };
-    if (settlement.status === "rejected") {
-      deps.logger.info("file_rejected", { ...logFields, reason: settlement.reason });
-      return { kind: "rejected", file: settled, reason: settlement.reason };
-    }
+    if (settlement.status === "rejected") return { kind: "rejected", file: settled, reason: settlement.reason };
     if (settled === null) return { kind: "ignored", reason: "ALREADY_SETTLED" };
     await publishUploaded(deps, settled);
-    deps.logger.info("file_ready", { ...logFields, contentType: settled.contentType });
     return { kind: "ready", file: settled };
   };
