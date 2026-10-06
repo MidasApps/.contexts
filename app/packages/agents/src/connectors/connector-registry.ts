@@ -1,4 +1,5 @@
 import type { Connector } from "@core/contracts";
+import type { Logger } from "@core/services";
 import { type RequestContextReader, readAgentContext } from "../context/agent-request-context.ts";
 import type { ConnectorsPort, SecretStore } from "../runtime/runtime-ports.ts";
 import type { CoreToolDefinition, CoreToolDeps } from "../tools/define-core-tool.ts";
@@ -101,6 +102,7 @@ export const createConnectorToolResolver = (args: {
   readonly loaders: ConnectorLoaders;
   readonly ttlMs?: number;
   readonly now?: () => number;
+  readonly logger?: Pick<Logger, "warn">;
 }): ConnectorToolsResolver => {
   const ttl = args.ttlMs ?? CONNECTOR_CACHE_TTL_MS;
   const now = args.now ?? Date.now;
@@ -139,6 +141,7 @@ export const createConnectorToolResolver = (args: {
       tenantId,
       outcomes: settled,
       at: new Date(now()).toISOString(),
+      ...(args.logger === undefined ? {} : { logger: args.logger }),
     });
     return settled.flatMap((outcome) => (outcome.loaded === null ? [] : [outcome.loaded]));
   };

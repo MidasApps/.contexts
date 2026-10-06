@@ -677,9 +677,9 @@ export {
   type FirebaseAdminSdk,
   FirebaseProjectMismatchError,
 } from "./services/shared/firebase/firebase-admin.ts";
+export { SYSTEM_ACTOR } from "./services/audit/domain/audit-actor.ts";
 export {
   type CreateAuditFields,
-  SYSTEM_ACTOR,
   type UpdateAuditFields,
   withCreateAudit,
   withUpdateAudit,

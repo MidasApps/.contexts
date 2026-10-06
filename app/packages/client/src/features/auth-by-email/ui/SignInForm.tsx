@@ -55,7 +55,7 @@ function PasswordField({
             required
             value={value}
             onChange={(event) => onChange(event.target.value)}
-            className="pr-11"
+            className="pe-11"
           />
         </FieldControl>
         <Button
@@ -63,7 +63,7 @@ function PasswordField({
           variant="ghost"
           size="icon-sm"
           aria-pressed={visible}
-          className="absolute top-1/2 right-1 -translate-y-1/2"
+          className="absolute top-1/2 end-1 -translate-y-1/2"
           onClick={() => setVisible((current) => !current)}
         >
           <Icon name={visible ? "eye-off" : "eye"} />

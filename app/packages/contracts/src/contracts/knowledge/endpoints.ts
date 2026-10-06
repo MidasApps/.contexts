@@ -66,7 +66,7 @@ export const addKnowledgeSourceEndpoint = defineEndpoint({
   path: "/v1/organizations/{organizationId}/knowledge/sources",
   auth: "principal",
   params: organizationParams,
-  query: z.object({
+  query: z.strictObject({
     projectId: ProjectIdSchema.optional().meta(
       none(
         "Project of the organization to index the source for (namespace project:<id>); the whole organization when absent.",

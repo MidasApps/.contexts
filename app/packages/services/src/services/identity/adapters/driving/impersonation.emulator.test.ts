@@ -105,7 +105,7 @@ describe("impersonation (Auth Emulator, SMS MFA)", () => {
     });
     expect(started.status).toBe(201);
     const { data } = (await started.json()) as { data: { sessionId: string; customToken: string; expiresAt: string } };
-    expect(started.headers.get("location")).toBe(`/v1/platform/impersonation-sessions/${data.sessionId}`);
+    expect(started.headers.get("location")).toBeNull();
     expect(data.expiresAt).toBe("2026-09-30T12:30:00.000Z");
     const { idToken } = await signInWithCustomToken(data.customToken);
     expect(await auth.verifyIdToken(idToken)).toMatchObject({ uid: OWNER, imp: data.sessionId, impBy: STAFF.uid });

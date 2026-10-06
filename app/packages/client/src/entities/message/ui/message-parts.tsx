@@ -95,7 +95,7 @@ function DelegationCard({ tool, delegation }: { tool: ToolPartView; delegation: 
                 {delegation.steps.map((step) => (
                   <TaskItem key={step.toolCallId}>
                     <TaskItemFile>{toolLabel(step.toolName)}</TaskItemFile>
-                    {step.isError ? <span className="ml-1.5 text-destructive-text">{t("stepFailed")}</span> : null}
+                    {step.isError ? <span className="ms-1.5 text-destructive-text">{t("stepFailed")}</span> : null}
                   </TaskItem>
                 ))}
               </TaskContent>
@@ -145,6 +145,7 @@ function TripwireAlert({ tripwire }: { tripwire: TripwireView }) {
 /** A form or picker answer the member sent (`ui-submission.ts`), shown as a chip instead of its JSON. */
 function UserText({ text }: { text: string }) {
   const t = useTranslations("chat.message");
+  const format = useFormatter();
   const commandLabel = useCommandLabel();
   const submission = parseUiSubmission(text);
   if (submission === null) return <p className="whitespace-pre-wrap">{text}</p>;
@@ -152,7 +153,7 @@ function UserText({ text }: { text: string }) {
     <p data-slot="ui-submission" className="flex items-center gap-2">
       <ClipboardCheckIcon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
       {submission.kind === "picker"
-        ? t("choiceSubmitted", { choice: submission.labels.join(", ") })
+        ? t("choiceSubmitted", { choice: format.list(submission.labels) })
         : t("formSubmitted", { command: commandLabel(submission.commandId) })}
     </p>
   );

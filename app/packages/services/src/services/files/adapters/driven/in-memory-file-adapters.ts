@@ -84,7 +84,7 @@ export const createRecordingFileEvents = (): FileEventPublisher & { readonly eve
   return {
     events,
     publish: (event) => {
-      events.push(event);
+      events.push({ ...event, eventId: `event-${events.length + 1}` });
       return Promise.resolve();
     },
   };

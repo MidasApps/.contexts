@@ -69,12 +69,12 @@ export function Context({ usage, maxTokens, className, ...props }: ContextProps)
           {rows.map(([label, value]) => (
             <div key={label} className="contents">
               <dt className="text-muted-foreground">{label}</dt>
-              <dd className="text-right font-mono tabular-nums">{format.number(value)}</dd>
+              <dd className="text-end font-mono tabular-nums">{format.number(value)}</dd>
             </div>
           ))}
           <div className="contents">
             <dt className="text-muted-foreground">{t("window")}</dt>
-            <dd className="text-right font-mono tabular-nums">{format.number(maxTokens)}</dd>
+            <dd className="text-end font-mono tabular-nums">{format.number(maxTokens)}</dd>
           </div>
         </dl>
       </PopoverContent>

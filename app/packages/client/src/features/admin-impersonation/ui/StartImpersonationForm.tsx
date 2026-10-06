@@ -184,7 +184,7 @@ export function StartImpersonationForm({
           type="number"
           min={1}
           max={MAX_IMPERSONATION_MINUTES}
-          className="w-28 text-right font-mono tabular-nums"
+          className="w-28 text-end font-mono tabular-nums"
           value={form.minutes}
           onChange={(event) => form.changeMinutes(event.target.value)}
           aria-invalid={errors.durationMinutes !== undefined}

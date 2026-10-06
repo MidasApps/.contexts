@@ -3,6 +3,7 @@ import type { Logger } from "@core/services";
 import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
 import { z } from "zod";
 import type { ModelSettingsService } from "../models/model-settings.ts";
+import { withRequestId } from "./console-errors.ts";
 
 const MODELS_ROUTE = "/console/models";
 
@@ -28,11 +29,12 @@ export const createModelConsoleRoutes = (deps: {
 }): ApiRoute[] => {
   // Infrastructure errors answer 500 with no detail; the log keeps the cause.
   const guarded = (event: string, run: (c: HonoLike) => Promise<Response>) => async (c: HonoLike) => {
+    const requestId = c.req.header("x-request-id");
     try {
-      return await run(c);
+      return await withRequestId(await run(c), requestId);
     } catch (error: unknown) {
-      deps.logger.error(event, { err: error });
-      return fail(500, "INTERNAL_ERROR");
+      deps.logger.error(event, { ...(requestId === undefined ? {} : { requestId }), err: error });
+      return withRequestId(fail(500, "INTERNAL_ERROR"), requestId);
     }
   };
   return [

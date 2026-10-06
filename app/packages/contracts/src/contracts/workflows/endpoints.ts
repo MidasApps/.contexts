@@ -17,7 +17,7 @@ import { StartWorkflowRunInputSchema, WorkflowRunSchema, WorkflowRunStatusSchema
 const RunIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,128}$/);
 
 /** The organization of the call: required for users, an API key's own one otherwise (like `/v1/mcp`). */
-export const OrganizationQuerySchema = z.object({
+export const OrganizationQuerySchema = z.strictObject({
   organizationId: OrganizationIdSchema.optional().meta(
     none("Organization to act in; required for users, and when given it must be an API key's own organization."),
   ),
@@ -221,6 +221,7 @@ export const runScheduleNowEndpoint = defineEndpoint({
   query: OrganizationQuerySchema,
   responses: { 202: dataEnvelope(ScheduleRunQueuedSchema) },
   errors: scheduleErrors,
+  idempotency: "optional",
   summary: "Starts a run of the schedule now, with the creator re-authorized (core.schedule.write).",
 });
 

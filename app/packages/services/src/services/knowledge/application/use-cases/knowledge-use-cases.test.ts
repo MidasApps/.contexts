@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CHUNKS_V1_DIMENSIONS } from "../../adapters/driven/drizzle-schema.ts";
+import { CHUNKS_V1_DIMENSIONS } from "../../domain/chunk-dimensions.ts";
 import type { ChunkMatch, KnowledgeRepository } from "../ports/knowledge-repository.ts";
 import { makeDeleteDocument } from "./delete-document.ts";
 import { makeGetDocument } from "./get-document.ts";

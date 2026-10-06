@@ -108,7 +108,7 @@ function EnrollTotpDialogBody({ onOpenChange, onEnrolled }: Props) {
         )
       ) : (
         <form noValidate onSubmit={(event) => void verify(event)} className="flex flex-col gap-5">
-          <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm text-muted-foreground">
+          <ol className="flex list-decimal flex-col gap-2 ps-5 text-sm text-muted-foreground">
             <li>{t("totpStepScan")}</li>
             <li>{t("totpStepCode")}</li>
           </ol>

@@ -99,7 +99,7 @@ export function Avatar({
       {showPresence ? (
         <span
           data-slot="avatar-presence"
-          className={cn("absolute right-0 bottom-0 size-2.5 rounded-full ring-2 ring-card", PRESENCE_CLASSES[presence])}
+          className={cn("absolute end-0 bottom-0 size-2.5 rounded-full ring-2 ring-card", PRESENCE_CLASSES[presence])}
         >
           <span className="sr-only">{t(presence)}</span>
         </span>

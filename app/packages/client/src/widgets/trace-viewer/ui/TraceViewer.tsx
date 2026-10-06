@@ -54,7 +54,7 @@ function SpanPayload({ span }: { span: TraceSpan }) {
         <Button
           variant="ghost"
           size="sm"
-          className="group -ml-2 h-7 px-2 text-xs"
+          className="group -ms-2 h-7 px-2 text-xs"
           aria-label={t("payloadOf", { name: span.name })}
         >
           <Icon name="chevron-right" className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
@@ -120,7 +120,7 @@ function SpanItem({ node }: { node: SpanNode }) {
             <Button
               variant="ghost"
               size="icon-xs"
-              className="-ml-1"
+              className="-ms-1"
               aria-expanded={open}
               aria-label={open ? t("collapse", { name: span.name }) : t("expand", { name: span.name })}
               onClick={() => setOpen(!open)}
@@ -138,7 +138,7 @@ function SpanItem({ node }: { node: SpanNode }) {
       {children.length > 0 && open ? (
         <ul
           aria-label={t("childrenOf", { name: span.name })}
-          className="ml-3 flex flex-col gap-1 border-l border-border pl-3 sm:ml-5 sm:pl-4"
+          className="ms-3 flex flex-col gap-1 border-s border-border ps-3 sm:ms-5 sm:ps-4"
         >
           {children.map((child) => (
             <SpanItem key={child.span.spanId} node={child} />

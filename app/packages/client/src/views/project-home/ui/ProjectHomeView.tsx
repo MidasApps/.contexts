@@ -66,7 +66,7 @@ function UnitsSection({ context, node }: { context: ProjectContext; node: NodePa
           >
             <Icon name="network" className="size-4 text-muted-foreground" />
             <span className="truncate font-medium">{unit.name}</span>
-            <Icon name="chevron-right" className="ml-auto size-4 text-muted-foreground" />
+            <Icon name="chevron-right" className="ms-auto size-4 text-muted-foreground" />
           </RouteLink>
         </li>
       ))}

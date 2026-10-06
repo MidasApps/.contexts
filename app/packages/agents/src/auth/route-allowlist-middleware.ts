@@ -1,3 +1,5 @@
+import { FORWARDED_HEADERS } from "@core/contracts";
+import { resolveRequestId } from "@core/services";
 import { type AgentMiddleware, apiPathPattern, normalizeApiPrefix } from "./agent-middleware.ts";
 
 type RouteRule = { readonly methods: ReadonlySet<string> | "any"; readonly pattern: RegExp };
@@ -50,11 +52,18 @@ export const isAllowedRoute = (method: string, path: string, hiddenAgentIds: rea
   return ALLOWED_ROUTES.some((rule) => (rule.methods === "any" || rule.methods.has(upper)) && rule.pattern.test(path));
 };
 
-const notFound = (): Response =>
-  new Response(JSON.stringify({ error: "Not Found" }), {
-    status: 404,
-    headers: { "content-type": "application/json" },
-  });
+// The api.md §6 envelope, with the forwarded request id.
+const notFound = (request: Request): Response =>
+  Response.json(
+    {
+      error: {
+        code: "NOT_FOUND",
+        message: "Not found.",
+        requestId: resolveRequestId(request.headers.get(FORWARDED_HEADERS.requestId)),
+      },
+    },
+    { status: 404 },
+  );
 
 /**
  * 404 for every built-in route outside `ALLOWED_ROUTES` (spec §4.3). Custom API
@@ -73,7 +82,7 @@ export const createRouteAllowlistMiddleware = (options: {
       const { pathname } = new URL(context.req.raw.url);
       const relative = pathname.startsWith(`${prefix}/`) ? pathname.slice(prefix.length) : undefined;
       if (relative === undefined || !isAllowedRoute(context.req.raw.method, relative, options.hiddenAgentIds))
-        return notFound();
+        return notFound(context.req.raw);
       await next();
       return undefined;
     },

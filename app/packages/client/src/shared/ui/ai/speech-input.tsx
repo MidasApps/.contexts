@@ -45,7 +45,7 @@ export function SpeechInput({
       {recording ? (
         <span
           aria-hidden="true"
-          className="absolute top-1 right-1 size-1.5 animate-pulse rounded-full bg-destructive motion-reduce:animate-none"
+          className="absolute top-1 end-1 size-1.5 animate-pulse rounded-full bg-destructive motion-reduce:animate-none"
         />
       ) : null}
     </Button>

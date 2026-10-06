@@ -65,7 +65,7 @@ export function IntegerInput({
       }}
       aria-invalid={parseFailed || ariaInvalid === true || ariaInvalid === "true" || undefined}
       {...props}
-      className={cn(textControlClasses, "h-9 px-3 py-2 text-right font-mono tabular-nums", className)}
+      className={cn(textControlClasses, "h-9 px-3 py-2 text-end font-mono tabular-nums", className)}
     />
   );
 }

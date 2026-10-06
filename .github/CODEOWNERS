@@ -1,0 +1,14 @@
+# Owners of the critical areas (.contexts/engineering/rules/governance.md, "Code ownership"):
+# database schemas and migrations, authentication and access, AI prompts and model config,
+# infrastructure and CI. Governance asks for two owners per area: add the second reviewer of
+# each line as soon as the team has one, and review this file every quarter.
+/app/infra/                                        @giullianosoares
+/app/firestore.rules                               @giullianosoares
+/app/firestore.indexes.json                        @giullianosoares
+/app/storage.rules                                 @giullianosoares
+/app/packages/services/src/services/identity/      @giullianosoares
+/app/packages/services/src/services/access/        @giullianosoares
+/app/packages/agents/                              @giullianosoares
+/app/apps/mastra/                                  @giullianosoares
+/.github/                                          @giullianosoares
+/.gitleaks.toml                                    @giullianosoares

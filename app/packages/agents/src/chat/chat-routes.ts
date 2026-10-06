@@ -183,7 +183,12 @@ export const createChatRoutes = (deps: ChatRouteDeps): ApiRoute[] => [
     requiresAuth: true,
     handler: (context) =>
       handleSummary(
-        { ...inputsOf(context), agentId: context.req.param("agentId"), url: new URL(context.req.url) },
+        {
+          ...inputsOf(context),
+          agentId: context.req.param("agentId"),
+          url: new URL(context.req.url),
+          signal: context.req.raw.signal,
+        },
         deps,
       ),
   }),

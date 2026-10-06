@@ -1,4 +1,5 @@
 import { type Connector, type ConnectorLoadErrorCode, connectorNeedsSecret } from "@core/contracts";
+import type { Logger } from "@core/services";
 import type { ConnectorsPort } from "../runtime/runtime-ports.ts";
 import { McpConnectorError } from "./mcp/mcp-connector.ts";
 import { OpenApiConnectorError } from "./openapi/openapi-document.ts";
@@ -28,13 +29,15 @@ const codeOf = (outcome: ConnectorLoadOutcome): ConnectorLoadErrorCode | null =>
  * Writes each connector's load result where the settings page shows it (`Connector.lastError`,
  * UX review U-59): a new code, or `null` when a connector that had failed loads again. Nothing is
  * written when nothing changed, so a healthy tenant costs no write per cache refresh. Fire and
- * forget: a failed write must not fail the agent's run.
+ * forget: a failed write must not fail the agent's run, so it is only logged (the status
+ * shows the old value until the next load writes it).
  */
 export const recordConnectorLoads = (args: {
   readonly connectors: ConnectorsPort;
   readonly tenantId: string;
   readonly outcomes: readonly ConnectorLoadOutcome[];
   readonly at: string;
+  readonly logger?: Pick<Logger, "warn">;
 }): void => {
   const { recordLoad } = args.connectors;
   if (recordLoad === undefined) return;
@@ -43,6 +46,9 @@ export const recordConnectorLoads = (args: {
     const previous = outcome.connector.lastError?.code ?? null;
     if (code === previous) continue;
     const lastError = code === null ? null : { code, at: args.at };
-    void recordLoad({ tenantId: args.tenantId, connectorId: outcome.connector.id, lastError }).catch(() => undefined);
+    const connectorId = outcome.connector.id;
+    void recordLoad({ tenantId: args.tenantId, connectorId, lastError }).catch((error: unknown) =>
+      args.logger?.warn("connector_load_record_failed", { tenantId: args.tenantId, connectorId, err: error }),
+    );
   }
 };

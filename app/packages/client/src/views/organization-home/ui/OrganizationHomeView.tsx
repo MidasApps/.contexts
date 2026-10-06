@@ -29,7 +29,7 @@ function ProjectCard({ organizationId, project }: { organizationId: string; proj
         <Icon name="folder" className="size-4 text-muted-foreground" />
         <span className="truncate text-title font-semibold">{project.name}</span>
         {project.status === "archived" ? (
-          <StatusPill tone="neutral" className="ml-auto">
+          <StatusPill tone="neutral" className="ms-auto">
             {t("archived")}
           </StatusPill>
         ) : null}

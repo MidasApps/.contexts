@@ -25,7 +25,7 @@ export class MissingProjectIdError extends Error {
   }
 }
 
-type FinalizedEvent = { readonly data: ObjectFinalizedData & { readonly bucket: string } };
+type FinalizedEvent = { readonly id: string; readonly data: ObjectFinalizedData & { readonly bucket: string } };
 
 /**
  * Handler of the `onFileFinalized` trigger (SP3 Task 13, umbrella §16.2): checks the
@@ -66,5 +66,5 @@ export const makeOnFileFinalized = (deps: {
     handlers.set(bucketName, handler);
     return handler;
   };
-  return (event) => handlerFor(event.data.bucket)(event.data);
+  return (event) => handlerFor(event.data.bucket)(event.data, { eventId: event.id });
 };

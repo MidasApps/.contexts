@@ -184,7 +184,7 @@ describe("createContextMiddleware", () => {
         "x-conversation-id": "../other/thread",
       });
       expect(response?.status).toBe(400);
-      expect(await response?.json()).toEqual({ error: "Invalid conversation id" });
+      expect(await response?.json()).toMatchObject({ error: { code: "VALIDATION_FAILED" } });
       expect(nextCalled).toBe(false);
     });
 
@@ -291,7 +291,7 @@ describe("createContextMiddleware", () => {
         { "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" },
       );
       expect(response?.status).toBe(403);
-      expect(await response?.json()).toEqual({ error: "Forbidden" });
+      expect(await response?.json()).toMatchObject({ error: { code: "FORBIDDEN" } });
       expect(nextCalled).toBe(false);
     });
 

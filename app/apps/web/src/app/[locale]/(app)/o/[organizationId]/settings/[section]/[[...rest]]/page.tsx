@@ -1,4 +1,4 @@
-import { SettingsSectionPage } from "@/client/section-pages";
+import { SettingsSectionPage } from "@/client/settings-section-pages";
 import { pageMetadata } from "@/server/page-metadata";
 
 export const generateMetadata = pageMetadata("settings");

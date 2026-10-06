@@ -69,10 +69,10 @@ export function MoneyInput({
         }}
         aria-describedby={[describedBy, suffixId].filter(Boolean).join(" ")}
         aria-invalid={parseFailed || ariaInvalid === true || ariaInvalid === "true" || undefined}
-        className={cn(textControlClasses, "h-9 py-2 pr-14 pl-3 text-right font-mono tabular-nums")}
+        className={cn(textControlClasses, "h-9 py-2 pe-14 ps-3 text-end font-mono tabular-nums")}
         {...props}
       />
-      <span id={suffixId} className="pointer-events-none absolute right-3 font-mono text-xs text-muted-foreground">
+      <span id={suffixId} className="pointer-events-none absolute end-3 font-mono text-xs text-muted-foreground">
         {currency}
       </span>
     </div>

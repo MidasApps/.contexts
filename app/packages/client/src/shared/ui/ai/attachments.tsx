@@ -55,7 +55,7 @@ export function Attachment({
       data-slot="attachment"
       data-tone={tone}
       className={cn(
-        "flex max-w-full items-center gap-2 rounded-sm border bg-card py-1.5 pr-1.5 pl-2 text-body-sm",
+        "flex max-w-full items-center gap-2 rounded-sm border bg-card py-1.5 pe-1.5 ps-2 text-body-sm",
         tone === "error" ? "border-destructive/40" : "border-border",
         className,
       )}

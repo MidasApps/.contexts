@@ -28,4 +28,8 @@ The script is idempotent (`IF NOT EXISTS`). Changes are additive only: add a `NU
 | `daily_rollups` | tenant × UTC day × model × agent | `usage-report` (hourly, yesterday and today) | latest `exported_at` per key |
 | `eval_runs` | experiment × scorer | `eval-export` (daily) | `insertId` = experiment:scorer:finish |
 
+Naming exception (contracts/bigquery.md §3.3 asks for singular fact tables): `daily_rollups` and
+`eval_runs` keep their plural names. Tables are never renamed in place (§12), and `llm_calls` is the
+canonical plural name §14 itself uses.
+
 No raw personal data: user ids are SHA-256 hashed before export (bigquery.md §15).

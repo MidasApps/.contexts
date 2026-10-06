@@ -106,7 +106,7 @@ export function OrganizationSwitcher() {
                 ) : (
                   <OrganizationAvatar name={current.name} size="md" decorative className="size-8" />
                 )}
-                <span className="grid min-w-0 flex-1 text-left leading-tight">
+                <span className="grid min-w-0 flex-1 text-start leading-tight">
                   {loadingName ? (
                     <Skeleton className="h-4 w-24" />
                   ) : (
@@ -115,9 +115,9 @@ export function OrganizationSwitcher() {
                   <span className="truncate text-caption text-muted-foreground">{t("organizationLabel")}</span>
                 </span>
                 {switching ? (
-                  <Spinner decorative className="ml-auto" />
+                  <Spinner decorative className="ms-auto" />
                 ) : (
-                  <Icon name="chevron-down" className="ml-auto size-4" />
+                  <Icon name="chevron-down" className="ms-auto size-4" />
                 )}
               </SidebarMenuButton>
             </DropdownMenuTrigger>

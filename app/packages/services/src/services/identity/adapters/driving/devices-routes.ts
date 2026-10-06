@@ -62,11 +62,9 @@ export const buildDevicesRoutes = (deps: {
           requestId,
         });
         if (!result.ok) return accessErrorResponse(result.error, requestId);
-        // The code is in this response only; the activation expires by itself (TTL).
-        return dataResponse(
-          { data: result.data },
-          { status: 201, location: `/v1/device-activations/${result.data.id}` },
-        );
+        // The code is in this response only; the activation expires by itself (TTL). No
+        // `Location`: an activation has no URL to read it back (contracts/api.md §7).
+        return dataResponse({ data: result.data }, { status: 201 });
       },
     ),
     [redeemDeviceActivationEndpoint.id]: withApiRoute(

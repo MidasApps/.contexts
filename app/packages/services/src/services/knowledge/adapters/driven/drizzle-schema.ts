@@ -13,6 +13,7 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 import { aiSchema } from "#/services/shared/postgres/drizzle-schemas.ts";
+import { CHUNKS_V1_DIMENSIONS } from "../../domain/chunk-dimensions.ts";
 
 /**
  * Knowledge base tables (SP3 spec §11, decisions 0022 and 0023): source of the
@@ -20,9 +21,6 @@ import { aiSchema } from "#/services/shared/postgres/drizzle-schemas.ts";
  * `postgres-knowledge-repository.ts`. `FORCE ROW LEVEL SECURITY` and the
  * runtime role grants are in the custom migration that follows the generated one.
  */
-
-/** Embedding dimension of `chunks_v1` (decision 0022, D3-06). A new model or dimension means `chunks_v2`. */
-export const CHUNKS_V1_DIMENSIONS = 1536;
 
 const currentTenant = sql`current_setting('app.tenant_id', true)`;
 

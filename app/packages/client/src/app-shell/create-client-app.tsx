@@ -5,6 +5,7 @@ import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 import type { IntlError } from "use-intl";
 import type { StateStorage } from "zustand/middleware";
+import { useImpersonationStore } from "#/features/admin-impersonation/index.ts";
 import { ProfileThemeSync } from "#/features/update-preferences/index.ts";
 import { ApiProvider } from "#/shared/api/api-context.tsx";
 import { type CallEndpoint, createEndpointCaller } from "#/shared/api/call-endpoint.ts";
@@ -110,7 +111,12 @@ export const createClientApp = (args: CreateClientAppArgs): CreatedClientApp => 
 
   function ClientApp({ locale, children }: ClientAppProps) {
     const messages = useMemo(() => loadMessages(locale, modules.messages()), [locale]);
-    const resetShellUi = useCallback(() => shellUi.getState().reset(), []);
+    // Sign-out clears every per-person client store (rules/state-management.md §15), including
+    // the support session this tab opened, so the next person never sees the last one's target.
+    const resetSignedOutState = useCallback(() => {
+      shellUi.getState().reset();
+      useImpersonationStore.getState().reset();
+    }, []);
     useEffect(() => {
       Promise.resolve(shellUi.persist.rehydrate()).catch((error: unknown) =>
         reportError(error, { operation: "shell_ui_rehydrate" }),
@@ -128,7 +134,7 @@ export const createClientApp = (args: CreateClientAppArgs): CreatedClientApp => 
                       <SessionProvider
                         sessionBridge={adapters.sessionBridge}
                         reportError={reportError}
-                        onSignedOut={resetShellUi}
+                        onSignedOut={resetSignedOutState}
                       >
                         <ShellIntlProvider
                           locale={locale}

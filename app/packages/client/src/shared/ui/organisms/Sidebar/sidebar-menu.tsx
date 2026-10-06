@@ -21,12 +21,12 @@ export function SidebarMenuItem({ className, ...props }: ComponentProps<"li">) {
 // scroll container never clips it.
 const sidebarMenuButtonVariants = cva(
   [
-    "peer/menu-button flex w-full cursor-pointer items-center gap-2 overflow-hidden rounded-xs p-2 text-left text-body text-sidebar-foreground",
+    "peer/menu-button flex w-full cursor-pointer items-center gap-2 overflow-hidden rounded-xs p-2 text-start text-body text-sidebar-foreground",
     "transition-[width,height,padding,background-color] focus-visible:-outline-offset-2",
     "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
     "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
     "data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground",
-    "group-has-data-[slot=sidebar-menu-action]/menu-item:pr-8",
+    "group-has-data-[slot=sidebar-menu-action]/menu-item:pe-8",
     "group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:p-3!",
     "[&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-muted-foreground data-[active=true]:[&>svg]:text-sidebar-accent-foreground",
   ],
@@ -99,7 +99,7 @@ export function SidebarMenuAction({
     <Component
       data-slot="sidebar-menu-action"
       className={cn(
-        "absolute top-1 right-1 flex size-6 cursor-pointer items-center justify-center rounded-2xs text-muted-foreground",
+        "absolute top-1 end-1 flex size-6 cursor-pointer items-center justify-center rounded-2xs text-muted-foreground",
         "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
@@ -120,7 +120,7 @@ export function SidebarMenuBadge({ className, ...props }: ComponentProps<"span">
     <span
       data-slot="sidebar-menu-badge"
       className={cn(
-        "pointer-events-none absolute top-1.5 right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-primary px-1.5",
+        "pointer-events-none absolute top-1.5 end-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-primary px-1.5",
         "font-mono text-tiny text-sidebar-primary-foreground tabular-nums select-none group-data-[collapsible=icon]:hidden",
         className,
       )}
@@ -150,7 +150,7 @@ export function SidebarMenuSub({ className, ...props }: ComponentProps<"ul">) {
     <ul
       data-slot="sidebar-menu-sub"
       className={cn(
-        "mx-3.5 flex min-w-0 translate-x-px flex-col gap-0.5 border-l border-sidebar-border px-2.5 py-0.5 group-data-[collapsible=icon]:hidden",
+        "mx-3.5 flex min-w-0 translate-x-px flex-col gap-0.5 border-s border-sidebar-border px-2.5 py-0.5 group-data-[collapsible=icon]:hidden",
         className,
       )}
       {...props}

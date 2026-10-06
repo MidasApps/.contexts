@@ -1,6 +1,7 @@
 // Composition root of the files context (SP3 Task 13): Firestore records, Cloud Storage
 // bytes, V4 signed URLs (emulator URLs in local) and the onObjectFinalized validation.
 
+import { ulid } from "ulid";
 import { type Clock, systemClock } from "../shared/clock/clock.ts";
 import type { FirebaseAdmin } from "../shared/firebase/firebase-admin.ts";
 import type { Logger } from "../shared/observability/logger.ts";
@@ -78,7 +79,7 @@ export type FilesEnv = {
 export const createLogFileEventPublisher = (logger: Logger): FileEventPublisher => ({
   publish: (event) => {
     logger.info("file_uploaded_event", {
-      eventId: event.eventId,
+      eventId: ulid(),
       eventName: event.eventName,
       tenantId: event.tenantId,
       fileId: event.data.fileId,

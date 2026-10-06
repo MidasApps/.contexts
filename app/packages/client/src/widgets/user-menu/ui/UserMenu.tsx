@@ -76,7 +76,7 @@ function ApprovalsMenuItem({ organizationId, count }: { organizationId: string; 
         <Icon name="inbox" />
         {t("label")}
         {count > 0 ? (
-          <Badge className="ml-auto" aria-hidden="true">
+          <Badge className="ms-auto" aria-hidden="true">
             {count}
           </Badge>
         ) : null}
@@ -141,11 +141,11 @@ export function UserMenu() {
                   <span
                     aria-hidden="true"
                     data-slot="approvals-dot"
-                    className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-sidebar bg-amber"
+                    className="absolute -top-0.5 -end-0.5 size-2.5 rounded-full border-2 border-sidebar bg-amber"
                   />
                 ) : null}
               </span>
-              <span className="grid min-w-0 flex-1 text-left leading-tight">
+              <span className="grid min-w-0 flex-1 text-start leading-tight">
                 {me.data === undefined ? (
                   <Skeleton className="h-4 w-28" />
                 ) : (
@@ -155,7 +155,7 @@ export function UserMenu() {
                   </>
                 )}
               </span>
-              <Icon name="chevron-down" className="ml-auto" />
+              <Icon name="chevron-down" className="ms-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent side={isMobile ? "top" : "right"} align="end" sideOffset={4} className="min-w-60">

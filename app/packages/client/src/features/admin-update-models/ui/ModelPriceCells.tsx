@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, use } from "react";
-import { useTranslations } from "use-intl";
+import { useFormatter, useTranslations } from "use-intl";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import {
@@ -74,6 +74,7 @@ export function ProviderPill({ row }: { row: ModelRow }) {
 
 function RemoveButton({ row }: { row: ModelRow }) {
   const t = useTranslations("admin.models");
+  const format = useFormatter();
   const context = usePriceRowContext();
   const usedBy = rolesUsing(context.form, row.modelId);
   return (
@@ -89,7 +90,7 @@ function RemoveButton({ row }: { row: ModelRow }) {
       </Button>
       {usedBy.length === 0 ? null : (
         <span className="text-caption text-muted-foreground">
-          {t("prices.inUse", { roles: usedBy.map((role) => t(`roles.names.${role}`)).join(", ") })}
+          {t("prices.inUse", { roles: format.list(usedBy.map((role) => t(`roles.names.${role}`))) })}
         </span>
       )}
     </span>

@@ -23,10 +23,10 @@ function AdminTopbar() {
   const t = useTranslations("admin");
   return (
     <>
-      <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mr-1 data-[orientation=vertical]:h-4" />
+      <SidebarTrigger className="-ms-1" />
+      <Separator orientation="vertical" className="me-1 data-[orientation=vertical]:h-4" />
       <p className="truncate text-sm font-medium">{t("surface")}</p>
-      <div className="ml-auto">
+      <div className="ms-auto">
         <StatusPill tone="violet" icon="shield">
           {t("topbar.badge")}
         </StatusPill>

@@ -94,7 +94,7 @@ export function ProjectSwitcher() {
               ) : (
                 <span className="truncate">{name}</span>
               )}
-              <Icon name="chevron-down" className="ml-auto" />
+              <Icon name="chevron-down" className="ms-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent side={isMobile ? "bottom" : "right"} align="start" sideOffset={4} className="min-w-56">

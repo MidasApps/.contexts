@@ -108,7 +108,7 @@ function DataRows<TData extends RowData>({
       {row.getAllCells().map((cell) => (
         <TableCell
           key={cell.id}
-          className={cn(cell.column.columnDef.meta?.numeric === true && "text-right font-mono tabular-nums")}
+          className={cn(cell.column.columnDef.meta?.numeric === true && "text-end font-mono tabular-nums")}
         >
           <table.FlexRender cell={cell} />
         </TableCell>
@@ -123,7 +123,7 @@ function HeaderRows<TData extends RowData>({ table }: { table: Instance<TData> }
       {headerGroup.headers.map((header) => {
         const meta = header.column.columnDef.meta;
         return (
-          <TableHead key={header.id} colSpan={header.colSpan} className={cn(meta?.numeric === true && "text-right")}>
+          <TableHead key={header.id} colSpan={header.colSpan} className={cn(meta?.numeric === true && "text-end")}>
             {header.isPlaceholder ? null : (
               <span className={cn(meta?.headerHidden === true && "sr-only")}>
                 <table.FlexRender header={header} />

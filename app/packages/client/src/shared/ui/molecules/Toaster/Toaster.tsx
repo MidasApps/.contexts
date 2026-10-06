@@ -26,10 +26,10 @@ const CLASS_NAMES = {
   description: "text-body-sm leading-snug text-muted-foreground",
   icon: "shrink-0",
   actionButton:
-    "ml-auto shrink-0 cursor-pointer self-center rounded-xs bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90",
+    "ms-auto shrink-0 cursor-pointer self-center rounded-xs bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90",
   cancelButton: "shrink-0 cursor-pointer self-center rounded-xs px-2.5 py-1 text-xs font-medium hover:bg-muted",
   closeButton:
-    "absolute top-2 right-2 grid size-6 cursor-pointer place-items-center rounded-2xs text-muted-foreground hover:bg-muted hover:text-foreground",
+    "absolute top-2 end-2 grid size-6 cursor-pointer place-items-center rounded-2xs text-muted-foreground hover:bg-muted hover:text-foreground",
 };
 
 export type ToasterProps = {

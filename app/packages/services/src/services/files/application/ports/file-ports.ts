@@ -80,4 +80,7 @@ export type FileUploadedEvent = {
   };
 };
 
-export type FileEventPublisher = { readonly publish: (event: FileUploadedEvent) => Promise<void> };
+/** An event before publishing: the publisher (transport) assigns its `eventId`. */
+export type FileUploadedEventDraft = Omit<FileUploadedEvent, "eventId">;
+
+export type FileEventPublisher = { readonly publish: (event: FileUploadedEventDraft) => Promise<void> };

@@ -32,8 +32,8 @@ export type RunTimelineProps = {
 
 function Step({ title, when, children }: { title: string; when?: string | undefined; children?: ReactNode }) {
   return (
-    <li className="relative flex flex-col gap-0.5 border-l border-border pb-4 pl-4 last:pb-0">
-      <span aria-hidden="true" className="absolute top-1.5 -left-[4.5px] size-2 rounded-full bg-muted-foreground" />
+    <li className="relative flex flex-col gap-0.5 border-s border-border pb-4 ps-4 last:pb-0">
+      <span aria-hidden="true" className="absolute top-1.5 -start-[4.5px] size-2 rounded-full bg-muted-foreground" />
       <span className="text-sm font-medium">{title}</span>
       {when === undefined ? null : (
         <span className="font-mono text-caption text-muted-foreground tabular-nums">{when}</span>

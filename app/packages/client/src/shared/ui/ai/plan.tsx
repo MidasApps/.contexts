@@ -28,7 +28,7 @@ export function PlanHeader({ title, description, streaming = false, className, .
   return (
     <CollapsibleTrigger
       data-slot="plan-header"
-      className={cn("flex w-full items-start justify-between gap-3 rounded-md px-3 py-2.5 text-left", className)}
+      className={cn("flex w-full items-start justify-between gap-3 rounded-md px-3 py-2.5 text-start", className)}
       {...props}
     >
       <span className="min-w-0 space-y-0.5">

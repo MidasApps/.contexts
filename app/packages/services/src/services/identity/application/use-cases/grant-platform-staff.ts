@@ -1,5 +1,5 @@
 import type { PlatformRole, PlatformStaff, UserId } from "@core/contracts";
-import { SYSTEM_ACTOR } from "#/services/shared/firestore/audit-fields.ts";
+import { SYSTEM_ACTOR } from "#/services/audit/domain/audit-actor.ts";
 import type { PlatformDeps } from "../platform-deps.ts";
 
 export type GrantPlatformStaff = (command: {
