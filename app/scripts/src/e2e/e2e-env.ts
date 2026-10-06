@@ -20,6 +20,8 @@ const DEFAULT_WEB_PORT = 3100;
 const DEFAULT_DESKTOP_PORT = 1420;
 // Apart from `mastra dev` (4111), so both stacks can run at the same time.
 const DEFAULT_MASTRA_PORT = 4191;
+// The compose Postgres of .env.example; another local stack on the machine moves it (E2E_POSTGRES_PORT).
+const DEFAULT_POSTGRES_PORT = 5432;
 // Never started by the e2e run (nothing in the journeys publishes; its java process also outlives
 // `emulators:exec` on Windows): a service that would use it fails loudly instead of reaching the
 // dev emulator of `pnpm dev` (processes/environments.md: no cross-environment traffic).
@@ -52,6 +54,7 @@ const OverridesSchema = z.object({
   E2E_WEB_PORT: PortSchema.default(DEFAULT_WEB_PORT),
   E2E_DESKTOP_PORT: PortSchema.default(DEFAULT_DESKTOP_PORT),
   E2E_MASTRA_PORT: PortSchema.default(DEFAULT_MASTRA_PORT),
+  E2E_POSTGRES_PORT: PortSchema.default(DEFAULT_POSTGRES_PORT),
 });
 
 /** Thrown when a port override is invalid; names the variable, never other env values. */
@@ -71,7 +74,7 @@ const hostPort = (entry: z.infer<typeof EmulatorEntrySchema>): string => `${entr
  * Every variable the e2e run exports to the web build/start, the desktop build/preview and the
  * Playwright processes. Values the shell already set for these names are replaced on purpose:
  * the e2e stack must never inherit the developer's `.env.local` targets.
- * @throws {InvalidE2eEnvError} for an invalid `E2E_WEB_PORT` / `E2E_DESKTOP_PORT`.
+ * @throws {InvalidE2eEnvError} for an invalid `E2E_WEB_PORT`, `E2E_DESKTOP_PORT`, `E2E_MASTRA_PORT` or `E2E_POSTGRES_PORT`.
  */
 export const buildE2eEnv = (args: {
   firebaseConfig: unknown;
@@ -81,7 +84,12 @@ export const buildE2eEnv = (args: {
   const parsed = OverridesSchema.safeParse(args.overrides);
   if (!parsed.success)
     throw new InvalidE2eEnvError([...new Set(parsed.error.issues.map((issue) => String(issue.path[0])))]);
-  const { E2E_WEB_PORT: webPort, E2E_DESKTOP_PORT: desktopPort, E2E_MASTRA_PORT: mastraPort } = parsed.data;
+  const {
+    E2E_WEB_PORT: webPort,
+    E2E_DESKTOP_PORT: desktopPort,
+    E2E_MASTRA_PORT: mastraPort,
+    E2E_POSTGRES_PORT: postgresPort,
+  } = parsed.data;
   const mastraOrigin = `http://localhost:${String(mastraPort)}`;
   const webOrigin = `http://localhost:${String(webPort)}`;
   const desktopOrigin = `http://localhost:${String(desktopPort)}`;
@@ -101,7 +109,7 @@ export const buildE2eEnv = (args: {
     AI_MODE: "fake",
     // The compose Postgres of .env.example (local-only credentials), in the e2e run's own
     // database (scripts/src/e2e/e2e-database.ts creates and migrates it).
-    DATABASE_URL: `postgresql://app:app@127.0.0.1:5432/${E2E_DATABASE_NAME}`,
+    DATABASE_URL: `postgresql://app:app@127.0.0.1:${String(postgresPort)}/${E2E_DATABASE_NAME}`,
     // The agent runtime of the chat journeys (apps/mastra with fake models), started by Playwright.
     MASTRA_URL: mastraOrigin,
     MASTRA_HOST: "localhost",
