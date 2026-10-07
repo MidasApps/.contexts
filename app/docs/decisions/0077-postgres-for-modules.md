@@ -31,9 +31,12 @@ silently skip whichever migration is older.
    the core already uses (`web`, `knowledge`, `prompts`), is refused.
 4. **The convention is checked after each module's migrations.** Every table of the module's schema
    has row level security enabled and forced and a policy on `current_setting('app.tenant_id',
-   true)`; the runtime role exists, is `NOLOGIN` and `NOBYPASSRLS`, and may not create objects in
-   the schema. `pnpm db:migrate` fails and names each violation. The check runs on every run, so CI
-   catches a table added without `FORCE`.
+   true)`. No permissive policy has a `USING` or `WITH CHECK` expression without that setting. The
+   runtime role reads no materialized view and no view that is not `security_invoker`. The runtime
+   role exists, is `NOLOGIN` and `NOBYPASSRLS`, and may not create objects in the schema.
+   `pnpm db:migrate` fails and names each violation. The check runs on every run, so CI catches a
+   table added without `FORCE`. It reads the catalog, not the meaning of an expression: it is a
+   floor, and the isolation suite of each table (`*.postgres.test.ts`) is the proof.
 5. **The module's server side receives the SQL client.** `ModuleServerDeps` (`apps/mastra`) and the
    web app's module dependencies carry `sql`, the app's pool, next to `firestore`, `access` and
    `audit`. A module reads and writes only inside `withTenantTransaction`, after
@@ -70,4 +73,4 @@ silently skip whichever migration is older.
   hold their role as a constant; the check in `pnpm db:migrate` already ties the name to the module
   id.
 - **The convention as documentation only.** A table without `FORCE` looks right in review and is
-  open to a superuser login; the check costs three queries per module.
+  open to a superuser login; the check costs five queries per module.
