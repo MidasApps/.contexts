@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { useProjects } from "#/entities/project/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { CreateProjectDialog } from "#/features/create-project/index.ts";
+import { useDefaultProject } from "#/features/default-project/index.ts";
 import { isApiErrorStatus } from "#/shared/api/cursor-list.ts";
 import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -111,9 +112,18 @@ function ProjectsSection({
 
 function OrganizationHome({ context }: { context: AccessContext }) {
   const t = useTranslations("shell.organizationHome");
+  const router = useRouter();
   const [creating, setCreating] = useState(false);
   const { organization } = context;
+  const mode = useDefaultProject(organization.id);
+  const onlyProjectId = mode.project?.id;
+  useEffect(() => {
+    if (onlyProjectId !== undefined)
+      router.navigate({ id: "project", organizationId: organization.id, projectId: onlyProjectId }, { replace: true });
+  }, [onlyProjectId, organization.id, router]);
   const canCreate = context.permissions.includes("core.project.create");
+  // Default project mode: there is nothing to choose while the only project is loading or opening.
+  if (mode.pending || onlyProjectId !== undefined) return <LoadingState label={t("loading")} rows={5} />;
   return (
     <>
       <PageHeader
@@ -121,7 +131,7 @@ function OrganizationHome({ context }: { context: AccessContext }) {
         description={t("description")}
         meta={organization.status === "suspended" ? <StatusPill tone="amber">{t("suspended")}</StatusPill> : undefined}
         actions={
-          canCreate ? (
+          canCreate && !mode.enabled ? (
             <Button onClick={() => setCreating(true)}>
               <Icon name="plus" />
               {t("createProject")}
@@ -166,7 +176,8 @@ function EntryProjectRedirect({ organizationId }: { organizationId: string }) {
  * `/o/:organizationId` (SP2 spec §4, `core.organization.read`): the organization's projects as
  * cards, "New project" when `core.project.create` is held. A hidden organization renders
  * not-found, unless the member sees a project in it (then they land there); loading, empty and
- * error states come with the list.
+ * error states come with the list. With the default project on (decision 0078), a single visible
+ * project is opened directly and "New project" stays only in the empty state.
  */
 export function OrganizationHomeView() {
   const t = useTranslations("shell.organizationHome");
