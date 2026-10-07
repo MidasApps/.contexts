@@ -13,7 +13,17 @@ const sql = createPostgresClient({ DATABASE_URL: process.env.DATABASE_URL ?? LOC
 const work = mkdtempSync(path.join(tmpdir(), "module-migrations-"));
 
 type Names = ReturnType<typeof moduleSqlNames>;
-const MODULE_IDS = ["zz-migrate-ok", "zz-migrate-unforced", "zz-migrate-ddl"] as const;
+const MODULE_IDS = [
+  "zz-migrate-ok",
+  "zz-migrate-unforced",
+  "zz-migrate-ddl",
+  "zz-migrate-nopolicy",
+  "zz-migrate-loose",
+  "zz-migrate-check",
+  "zz-migrate-views",
+  "zz-migrate-login",
+  "zz-migrate-empty",
+] as const;
 
 const createRole = (role: string): string => `DO $$
 BEGIN
@@ -106,6 +116,75 @@ describe("applyModuleMigrations", () => {
     await expect(applyModuleMigrations(sql, module)).rejects.toBeInstanceOf(ModuleSchemaConventionError);
     await expect(applyModuleMigrations(sql, module)).rejects.toMatchObject({
       violations: [`role ${module.runtimeRole} may create objects in schema ${module.schema}`],
+    });
+  });
+
+  it("refuses a table without a policy on app.tenant_id, naming it", async () => {
+    const module = fixture("zz-migrate-nopolicy", (names) =>
+      compliant(names).filter((statement) => !statement.startsWith("CREATE POLICY")),
+    );
+    await expect(applyModuleMigrations(sql, module)).rejects.toMatchObject({
+      violations: [`table ${module.schema}.items has no policy on app.tenant_id`],
+    });
+  });
+
+  it("refuses a second permissive policy that reads every tenant's rows", async () => {
+    const module = fixture("zz-migrate-loose", (names) => [
+      ...compliant(names),
+      `CREATE POLICY items_read_all ON ${names.schema}.items FOR SELECT USING (true);`,
+    ]);
+    await expect(applyModuleMigrations(sql, module)).rejects.toMatchObject({
+      violations: [`policy items_read_all on ${module.schema}.items has an expression without app.tenant_id`],
+    });
+  });
+
+  it("refuses a tenant policy whose WITH CHECK lets a row be written to another tenant", async () => {
+    const module = fixture("zz-migrate-check", (names) => [
+      ...compliant(names).filter((statement) => !statement.startsWith("CREATE POLICY")),
+      `CREATE POLICY items_tenant_isolation ON ${names.schema}.items
+         USING (tenant_id = current_setting('app.tenant_id', true))
+         WITH CHECK (true);`,
+    ]);
+    await expect(applyModuleMigrations(sql, module)).rejects.toMatchObject({
+      violations: [`policy items_tenant_isolation on ${module.schema}.items has an expression without app.tenant_id`],
+    });
+  });
+
+  it("refuses views the runtime role reads past row level security, and accepts a security_invoker view", async () => {
+    const module = fixture("zz-migrate-views", (names) => [
+      ...compliant(names),
+      ...["items_as_invoker WITH (security_invoker = true)", "items_as_owner"].map(
+        (view) => `CREATE VIEW ${names.schema}.${view} AS SELECT id FROM ${names.schema}.items;`,
+      ),
+      `CREATE MATERIALIZED VIEW ${names.schema}.items_copy AS SELECT id FROM ${names.schema}.items;`,
+      ...["items_as_invoker", "items_as_owner", "items_copy"].map(
+        (relation) => `GRANT SELECT ON ${names.schema}.${relation} TO ${names.runtimeRole};`,
+      ),
+    ]);
+    await expect(applyModuleMigrations(sql, module)).rejects.toMatchObject({
+      violations: [
+        `view ${module.schema}.items_as_owner is readable by ${module.runtimeRole} without security_invoker`,
+        `materialized view ${module.schema}.items_copy is readable by ${module.runtimeRole}`,
+      ],
+    });
+  });
+
+  it("refuses a runtime role that can log in", async () => {
+    const module = fixture("zz-migrate-login", (names) => [
+      `CREATE ROLE ${names.runtimeRole} LOGIN NOBYPASSRLS;`,
+      ...compliant(names),
+    ]);
+    await expect(applyModuleMigrations(sql, module)).rejects.toMatchObject({
+      violations: [
+        `role ${module.runtimeRole} must be NOLOGIN and NOBYPASSRLS, without SUPERUSER, CREATEDB or CREATEROLE`,
+      ],
+    });
+  });
+
+  it("refuses a module whose migrations create neither its schema nor its role", async () => {
+    const module = fixture("zz-migrate-empty", () => ["SELECT 1;"]);
+    await expect(applyModuleMigrations(sql, module)).rejects.toMatchObject({
+      violations: [`schema ${module.schema} does not exist`, `role ${module.runtimeRole} does not exist`],
     });
   });
 });
