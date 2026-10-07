@@ -7,6 +7,7 @@ import {
   fixedClock,
   inMemoryUnitOfWork,
   makeRecordAudit,
+  type PostgresClient,
 } from "@core/services";
 import type { Firestore } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
@@ -46,8 +47,11 @@ const setup = () => {
   const notes = createInMemoryNoteRepository();
   // The in-memory repository and unit of work replace Firestore; the handle is never used.
   const firestore = {} as Firestore;
+  // The notes under test never reach Postgres; the pool is never queried.
+  const sql = {} as PostgresClient;
   const [create, archive] = createExampleCommands({
     firestore,
+    sql,
     access,
     audit: makeRecordAudit({ writer, clock }),
     clock,

@@ -7,6 +7,7 @@ import {
   createInMemoryAccessStore,
   decodeCursor,
   makeRecordAudit,
+  type PostgresClient,
   systemClock,
 } from "@core/services";
 import { Timestamp } from "firebase-admin/firestore";
@@ -45,7 +46,9 @@ const audit = makeRecordAudit({
   writer: createFirestoreAuditLogWriter({ firestore: firebase.firestore }),
   clock: systemClock,
 });
-const notes = createExampleNotes({ firestore: firebase.firestore, access, audit });
+// The notes under test live in Firestore; the pool is never queried.
+const sql = {} as PostgresClient;
+const notes = createExampleNotes({ firestore: firebase.firestore, access, audit, sql });
 const command = (actor = MEMBER) =>
   ({ actor, tenantId: TENANT, node: { level: "organization", tenantId: TENANT }, requestId: `req-${RUN}` }) as const;
 const auditOf = async (action: string) =>
@@ -119,6 +122,7 @@ describe("example notes (Firestore emulator)", () => {
       firestore: firebase.firestore,
       access,
       audit,
+      sql,
       clock: { now: () => new Date(Date.UTC(2030, 0, 1, 0, 0, (seconds += 1))) },
     });
     for (const title of ["List one", "List two", "List three"]) {
