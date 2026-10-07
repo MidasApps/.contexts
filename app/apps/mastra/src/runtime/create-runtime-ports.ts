@@ -41,7 +41,7 @@ import {
   systemClock,
 } from "@core/services";
 import { type CoreServer, createCoreServer } from "@core/services/composition";
-import type { AppModule } from "../modules.ts";
+import type { AppModule, ModuleServerDeps } from "../modules.ts";
 import { bindAccessPort } from "./access-port-binding.ts";
 import { bindApprovalsPort } from "./approvals-port-binding.ts";
 import { bindAuditPort } from "./audit-port-binding.ts";
@@ -186,11 +186,17 @@ const createConnectorPorts = (args: {
 const createCommandPorts = (args: {
   firebase: FirebaseAdmin;
   core: CoreServer;
+  sql: RuntimeSql;
   modules?: RuntimeModules | undefined;
   extraExecutors?: readonly AgentCommandExecutor[] | undefined;
 }): Pick<AgentRuntimePorts, "commands" | "commandRegistry" | "workflowApprovals" | "workflowCommands"> => {
   const { core } = args;
-  const moduleDeps = { firestore: args.firebase.firestore, access: core.access, audit: core.audit };
+  const moduleDeps: ModuleServerDeps = {
+    firestore: args.firebase.firestore,
+    access: core.access,
+    audit: core.audit,
+    sql: args.sql,
+  };
   const commandRegistry = [
     ...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
     ...(args.modules ?? []).flatMap((module) => module.createCommands(moduleDeps)),
