@@ -778,8 +778,10 @@ export {
   buildPostgresConnection,
   createPostgresClient,
   InvalidDatabaseUrlError,
+  type PostgresClient,
   type PostgresConnection,
   type PostgresPoolOptions,
+  type PostgresTransaction,
 } from "./services/shared/postgres/postgres-client.ts";
 export {
   InvalidNodeIdError,

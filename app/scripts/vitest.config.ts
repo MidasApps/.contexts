@@ -6,8 +6,10 @@ import { defineConfig } from "vitest/config";
  * - `*.test.ts` (unit): no external service; `pnpm test`.
  * - `*.emulator.test.ts`: needs the Auth Emulator; run inside
  *   `firebase emulators:exec` via the root `pnpm test:emulators`.
+ * - `*.postgres.test.ts`: needs the local Postgres container; `pnpm test:postgres`.
  */
 const EMULATOR_TESTS = "src/**/*.emulator.test.ts";
+const POSTGRES_TESTS = "src/**/*.postgres.test.ts";
 
 // Projects copy the preset instead of `extends: true`: mergeConfig concatenates
 // arrays, so the preset's `include` would leak unit tests into every project.
@@ -33,8 +35,9 @@ export default defineConfig({
   test: {
     ...(coverage ? { coverage } : {}),
     projects: [
-      defineProject({ name: "unit", include, exclude: [EMULATOR_TESTS] }),
+      defineProject({ name: "unit", include, exclude: [EMULATOR_TESTS, POSTGRES_TESTS] }),
       defineProject({ name: "emulators", include: [EMULATOR_TESTS], overrides: EMULATOR_PROJECT_DEFAULTS }),
+      defineProject({ name: "postgres", include: [POSTGRES_TESTS] }),
     ],
   },
 });

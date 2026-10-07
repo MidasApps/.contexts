@@ -1,4 +1,4 @@
-import postgres, { type Options, type Sql } from "postgres";
+import postgres, { type Options, type Sql, type TransactionSql } from "postgres";
 import { parseDatabaseUrl, type SocketDatabaseTarget } from "./database-url.ts";
 
 type PostgresOptions = Options<Record<string, postgres.PostgresType>>;
@@ -7,6 +7,12 @@ type PostgresOptions = Options<Record<string, postgres.PostgresType>>;
 export type PostgresPoolOptions = { max?: number; connectTimeoutSeconds?: number };
 
 export type PostgresConnection = { url: string | undefined; options: PostgresOptions };
+
+/** The app's Postgres pool, as apps and modules name it without depending on the driver. */
+export type PostgresClient = Sql;
+
+/** A transaction of `PostgresClient`, as `withTenantTransaction` hands it to its callback. */
+export type PostgresTransaction = TransactionSql;
 
 const DEFAULT_POOL_MAX = 10;
 const DEFAULT_CONNECT_TIMEOUT_SECONDS = 10;
