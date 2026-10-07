@@ -136,6 +136,8 @@ type CoreServerArgs = {
   env: {
     readonly API_KEY_PREFIX: string;
     readonly ORGANIZATION_SELF_SERVE?: boolean;
+    /** `ORGANIZATION_DEFAULT_PROJECT` defaults to false (decision 0078). */
+    readonly ORGANIZATION_DEFAULT_PROJECT?: boolean;
     readonly NEXT_PUBLIC_APP_URL?: string;
     /** Per-IP rate limits read the client IP behind this many trusted proxies (default 1). */
     readonly TRUSTED_PROXY_HOPS?: number;
@@ -212,6 +214,7 @@ const buildTenancy = (
     unitOfWork: createFirestoreUnitOfWork({ firestore }),
     clock,
     selfServe: args.env.ORGANIZATION_SELF_SERVE ?? true,
+    defaultProject: args.env.ORGANIZATION_DEFAULT_PROJECT ?? false,
   });
 };
 
@@ -238,6 +241,7 @@ const buildIdentity = (deps: {
     organizations: deps.tenancyAdapters.organizations,
     loadNode: tenancy.loadNode,
     mayCreateOrganization: tenancy.mayCreateOrganization,
+    organizationDefaultProject: deps.args.env.ORGANIZATION_DEFAULT_PROJECT ?? false,
     audit: deps.audit,
     unitOfWork: createFirestoreUnitOfWork({ firestore }),
     clock: deps.clock,

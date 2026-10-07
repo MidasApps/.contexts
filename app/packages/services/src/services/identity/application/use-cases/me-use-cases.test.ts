@@ -69,6 +69,22 @@ describe("getMe", () => {
     expect(updated).toMatchObject({ ok: true, data: { capabilities: { createOrganization: true } } });
   });
 
+  it("tells whether organizations are created with their one project", async () => {
+    const off = makeMeWorld();
+    off.account("ana");
+    const on = makeMeWorld({ defaultProject: true });
+    on.account("ana");
+
+    expect(await off.identity.getMe({ actor: userOf("ana") })).toMatchObject({
+      ok: true,
+      data: { organizationDefaultProject: false },
+    });
+    expect(await on.identity.getMe({ actor: userOf("ana") })).toMatchObject({
+      ok: true,
+      data: { organizationDefaultProject: true },
+    });
+  });
+
   it("answers the last context while the caller is still a member, and an empty one once it is gone", async () => {
     const world = makeMeWorld();
     const organization = await world.organizationOf("owner");

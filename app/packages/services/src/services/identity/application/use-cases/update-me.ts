@@ -53,7 +53,15 @@ export const makeUpdateMe =
   (
     deps: Pick<
       MeDeps,
-      "users" | "accounts" | "staff" | "clock" | "unitOfWork" | "access" | "mayCreateOrganization" | "membership"
+      | "users"
+      | "accounts"
+      | "staff"
+      | "clock"
+      | "unitOfWork"
+      | "access"
+      | "mayCreateOrganization"
+      | "organizationDefaultProject"
+      | "membership"
     >,
   ): UpdateMe =>
   async ({ actor, input }) => {

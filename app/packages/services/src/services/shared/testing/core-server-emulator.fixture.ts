@@ -65,6 +65,7 @@ export const buildEmulatorServer = (args: {
   uids: readonly string[];
   modules?: readonly CoreServerModule[];
   selfServe?: boolean;
+  defaultProject?: boolean;
   clock?: Clock;
 }): { server: CoreServer; call: (endpointId: string, request: CallArgs) => Promise<Response>; logs: LogRecord[] } => {
   const logs: LogRecord[] = [];
@@ -75,6 +76,7 @@ export const buildEmulatorServer = (args: {
     env: {
       API_KEY_PREFIX: "core",
       ORGANIZATION_SELF_SERVE: args.selfServe ?? true,
+      ORGANIZATION_DEFAULT_PROJECT: args.defaultProject ?? false,
       NEXT_PUBLIC_APP_URL: EMULATOR_APP_URL,
     },
     ...(args.clock === undefined ? {} : { clock: args.clock }),
