@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project unit",
-    "test:emulators": "vitest run --project emulators"
+    "test:emulators": "vitest run --project emulators",
+    "test:postgres": "vitest run --project postgres"
   },
   "dependencies": {
     "@core/agents": "workspace:*",
