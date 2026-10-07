@@ -31,8 +31,8 @@ export const ids = {
   unit: (value: string) => UnitIdSchema.parse(value),
 };
 
-/** A fresh world; `selfServe` defaults to true. Accounts exist for every uid. */
-export const makeTenancyWorld = (options: { selfServe?: boolean; clock?: Clock } = {}) => {
+/** A fresh world; `selfServe` defaults to true and `defaultProject` to false. Accounts exist for every uid. */
+export const makeTenancyWorld = (options: { selfServe?: boolean; defaultProject?: boolean; clock?: Clock } = {}) => {
   const world = makeAccessWriteWorld();
   const tenancyStore = createInMemoryTenancyStore(world.store);
   const tenancy = createTenancyServices({
@@ -47,6 +47,7 @@ export const makeTenancyWorld = (options: { selfServe?: boolean; clock?: Clock }
     unitOfWork: world.deps.unitOfWork,
     clock: options.clock ?? world.deps.clock,
     selfServe: options.selfServe ?? true,
+    defaultProject: options.defaultProject ?? false,
   });
   const command = (uid: string) => ({ actor: userOf(uid), access: world.access(), requestId: REQUEST_ID });
   /** Creates an organization owned by `uid` and marks the owner active for `authorize()`. */

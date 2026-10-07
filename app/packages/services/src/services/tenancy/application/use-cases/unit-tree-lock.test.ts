@@ -57,6 +57,7 @@ const crashingTenancy = (world: World) =>
     unitOfWork: world.deps.unitOfWork,
     clock: world.clock,
     selfServe: true,
+    defaultProject: false,
   });
 
 describe("unit tree lock", () => {
