@@ -2,6 +2,7 @@ import { coreVitestConfig, EMULATOR_PROJECT_DEFAULTS } from "@core/config/vitest
 import { defineConfig } from "vitest/config";
 
 const EMULATOR_TESTS = "src/**/*.emulator.test.ts";
+const POSTGRES_TESTS = "src/**/*.postgres.test.ts";
 
 // Projects copy the preset instead of `extends: true`: mergeConfig concatenates arrays, so the
 // preset's `include` would leak unit tests into the emulator project.
@@ -23,7 +24,7 @@ export default defineConfig({
           ...presetDefaults,
           name: "unit",
           include,
-          exclude: [...exclude, EMULATOR_TESTS],
+          exclude: [...exclude, EMULATOR_TESTS, POSTGRES_TESTS],
           environment: "jsdom",
           setupFiles: ["./src/testing/setup.ts"],
           testTimeout: 15_000,
@@ -36,6 +37,16 @@ export default defineConfig({
           ...EMULATOR_PROJECT_DEFAULTS,
           name: "emulators",
           include: [EMULATOR_TESTS],
+          exclude,
+        },
+      },
+      // `*.postgres.test.ts` needs the compose Postgres with `pnpm db:migrate` applied (the module's
+      // own migrations); root `pnpm test:postgres`.
+      {
+        test: {
+          ...presetDefaults,
+          name: "postgres",
+          include: [POSTGRES_TESTS],
           exclude,
         },
       },
