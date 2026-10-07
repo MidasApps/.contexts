@@ -8,6 +8,14 @@ export {
 } from "./example-commands.ts";
 export { createExampleRoutes } from "./example-routes.ts";
 export {
+  createExampleLabels,
+  createPostgresLabelRepository,
+  EXAMPLE_RUNTIME_ROLE,
+  type Label,
+  LabelNotReturnedError,
+  type LabelRepository,
+} from "./label-repository.ts";
+export {
   createFirestoreNoteRepository,
   createInMemoryNoteRepository,
   type InMemoryNoteRepository,
