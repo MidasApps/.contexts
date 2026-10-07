@@ -22,10 +22,10 @@ const problemsOf = (value: unknown, hasJournal: (folder: string) => boolean = wi
 
 describe("moduleSqlNames", () => {
   it("maps a kebab-case id to its schema, runtime role and journal table", () => {
-    expect(moduleSqlNames("field-service")).toEqual({
-      schema: "field_service",
-      runtimeRole: "field_service_runtime",
-      journalTable: "module_field_service",
+    expect(moduleSqlNames("two-words")).toEqual({
+      schema: "two_words",
+      runtimeRole: "two_words_runtime",
+      journalTable: "module_two_words",
     });
   });
 });
