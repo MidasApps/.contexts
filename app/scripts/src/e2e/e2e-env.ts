@@ -117,6 +117,8 @@ export const buildE2eEnv = (args: {
     FILES_BUCKET: `${E2E_PROJECT_ID}.appspot.com`,
     MFA_FACTORS: "phone",
     ORGANIZATION_SELF_SERVE: "true",
+    // The journeys assert the project list of single-project organizations (decision 0078).
+    ORGANIZATION_DEFAULT_PROJECT: "false",
     WEB_PORT: String(webPort),
     NEXT_PUBLIC_APP_URL: webOrigin,
     // The desktop preview (desktop-web) and the native Tauri webview (`pnpm -F @core/desktop

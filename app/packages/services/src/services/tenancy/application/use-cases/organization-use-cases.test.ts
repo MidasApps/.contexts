@@ -1,3 +1,4 @@
+import { ProjectIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { DEFAULTS, makeTenancyWorld } from "./tenancy.fixture.ts";
 
@@ -28,6 +29,26 @@ describe("createOrganization", () => {
     expect(world.writes.claims.claimsOf("u1")).toEqual({ accessVersion: 1, tenantId: organization.id });
     const read = await world.tenancy.getOrganization({ ...world.command("u1"), organizationId: organization.id });
     expect(read).toMatchObject({ ok: true, data: { id: organization.id } });
+  });
+
+  it("creates the organization's one project in the same transaction when the default project is on", async () => {
+    const world = makeTenancyWorld({ defaultProject: true });
+    const organization = await world.organizationOf("u1");
+
+    const entries = world.auditLog.entries("tenant");
+    expect(entries.map((entry) => entry.action)).toEqual([
+      "MEMBERSHIP_GRANTED",
+      "ORGANIZATION_CREATED",
+      "PROJECT_CREATED",
+    ]);
+    const created = entries[2];
+    expect(created).toMatchObject({ tenantId: organization.id, target: { type: "project" } });
+    const projectId = ProjectIdSchema.parse(created?.target.id);
+    expect(await world.tenancyStore.projects.get(undefined, projectId)).toMatchObject({
+      tenantId: organization.id,
+      name: "Northwind",
+      status: "active",
+    });
   });
 
   it("keeps the active organization of a user who already has one", async () => {

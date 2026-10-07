@@ -28,6 +28,8 @@ export type TenancyDeps = {
   readonly clock: Clock;
   /** `ORGANIZATION_SELF_SERVE`: any user may create organizations (SP1 spec §6.1). */
   readonly selfServe: boolean;
+  /** `ORGANIZATION_DEFAULT_PROJECT`: a new organization gets its one project in the same transaction (decision 0078). */
+  readonly defaultProject: boolean;
 };
 
 /** What every tenancy command carries: the caller, its request scope and the request id. */
