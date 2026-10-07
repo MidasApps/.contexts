@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { MEMBER_PERMISSIONS, shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, page } from "#/shared/testing/fake-api.ts";
-import { buildProject, IDS } from "#/shared/testing/fixtures.ts";
+import { apiError, ok, page } from "#/shared/testing/fake-api.ts";
+import { buildMe, buildProject, IDS } from "#/shared/testing/fixtures.ts";
 import { OrganizationHomeView } from "./OrganizationHomeView.tsx";
 
 const PATH = `/o/${IDS.organization}`;
@@ -15,6 +15,11 @@ const renderView = (routes = shellRoutes(MEMBER_PERMISSIONS)) =>
     </main>,
     { path: PATH, routes },
   );
+const defaultProjectRoutes = (projects: readonly unknown[]) =>
+  shellRoutes(MEMBER_PERMISSIONS, {
+    "GET /v1/me": ok(buildMe({ lastContext: { organizationId: IDS.organization }, organizationDefaultProject: true })),
+    "GET /v1/organizations/:organizationId/projects": page(projects),
+  });
 
 describe("OrganizationHomeView", () => {
   it("lists the projects as links and offers New project with core.project.create", async () => {
@@ -82,5 +87,29 @@ describe("OrganizationHomeView", () => {
     expect(alert.textContent).toContain("Referência:");
     await waitFor(() => expect(within(alert).getByRole("button", { name: "Tentar novamente" })).toBeDefined());
     await expectNoAxeViolations(failing.container);
+  });
+
+  it("opens the only visible project directly when the default project is on", async () => {
+    const { router } = renderView(defaultProjectRoutes([buildProject({ id: IDS.otherProject, name: "Beta" })]));
+    await waitFor(() => expect(router.current()).toBe(`/o/${IDS.organization}/p/${IDS.otherProject}`));
+    expect(router.history()).toEqual([`/o/${IDS.organization}/p/${IDS.otherProject}`]);
+  });
+
+  it("lists several projects without New project when the default project is on", async () => {
+    const { container } = renderView(
+      defaultProjectRoutes([buildProject(), buildProject({ id: IDS.otherProject, name: "Beta" })]),
+    );
+    // The header action is there until `GET /v1/me` answers; wait for the settled page.
+    await waitFor(() => {
+      expect(within(screen.getByRole("list", { name: "Projetos" })).getAllByRole("link")).toHaveLength(2);
+      expect(screen.queryByRole("button", { name: "Novo projeto" })).toBeNull();
+    });
+    await expectNoAxeViolations(container);
+  });
+
+  it("keeps the create action of the empty state when the default project is on", async () => {
+    renderView(defaultProjectRoutes([]));
+    expect(await screen.findByRole("heading", { name: "Nenhum projeto ainda" })).toBeDefined();
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Novo projeto" })).toHaveLength(1));
   });
 });
