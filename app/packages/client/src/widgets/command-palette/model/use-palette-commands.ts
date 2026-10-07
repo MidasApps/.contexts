@@ -4,7 +4,7 @@ import type { NavSlot } from "@core/contracts";
 import { useTranslations } from "use-intl";
 import { usePermissions } from "#/entities/permission/index.ts";
 import { useProjects } from "#/entities/project/index.ts";
-import { useCurrentNode, useMyOrganizations } from "#/entities/session/index.ts";
+import { useCurrentNode, useMe, useMyOrganizations } from "#/entities/session/index.ts";
 import { useSignOut } from "#/features/sign-out/index.ts";
 import { useIsSwitchingOrganization, useSwitchOrganization } from "#/features/switch-organization/index.ts";
 import { useSaveThemePreference } from "#/features/update-preferences/index.ts";
@@ -109,6 +109,7 @@ const useActionCommands = (node: NodeParams | null, onCreateProject: () => void)
   const canCreateProject = usePermissions(node === null ? null : { organizationId: node.organizationId }).can(
     "core.project.create",
   );
+  const defaultProject = useMe().data?.organizationDefaultProject === true;
   const action = (name: string, icon: IconName, run: () => void): PaletteCommand => ({
     id: `action:${name}`,
     group: "actions",
@@ -119,7 +120,7 @@ const useActionCommands = (node: NodeParams | null, onCreateProject: () => void)
   });
   return [
     action("createOrganization", "plus", () => router.navigate({ id: "organizations" })),
-    ...(node !== null && canCreateProject ? [action("createProject", "plus", onCreateProject)] : []),
+    ...(node !== null && canCreateProject && !defaultProject ? [action("createProject", "plus", onCreateProject)] : []),
     action("toggleTheme", theme.resolved === "dark" ? "sun" : "moon", () =>
       saveTheme(theme.resolved === "dark" ? "light" : "dark"),
     ),
