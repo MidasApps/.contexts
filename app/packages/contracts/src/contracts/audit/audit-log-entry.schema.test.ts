@@ -53,6 +53,12 @@ describe("AuditLogEntrySchema", () => {
     expect(AuditLogEntrySchema.safeParse({ ...entry, action: "ORGANIZATION_CREATE" }).success).toBe(false);
   });
 
+  it("accepts the three actions a module records for its own records", () => {
+    for (const action of ["MODULE_RECORD_CREATED", "MODULE_RECORD_UPDATED", "MODULE_RECORD_DELETED"]) {
+      expect(AuditLogEntrySchema.safeParse({ ...entry, action }).success, action).toBe(true);
+    }
+  });
+
   it("accepts the agent runtime actions SP3 audits (tool runs, semantic queries, indexed documents)", () => {
     for (const action of ["AGENT_TOOL_EXECUTED", "SEMANTIC_QUERY_EXECUTED", "KNOWLEDGE_DOCUMENT_INDEXED"]) {
       expect(AuditLogEntrySchema.safeParse({ ...entry, action }).success).toBe(true);

@@ -1758,6 +1758,7 @@
       "MODULE_SETTINGS_UPDATED": "Configuración de módulo modificada",
       "MODULE_RECORD_CREATED": "Registro de módulo creado",
       "MODULE_RECORD_UPDATED": "Registro de módulo modificado",
+      "MODULE_RECORD_DELETED": "Registro de módulo eliminado",
       "ROLE_CREATED": "Rol creado",
       "ROLE_UPDATED": "Rol modificado",
       "ROLE_DELETED": "Rol eliminado",

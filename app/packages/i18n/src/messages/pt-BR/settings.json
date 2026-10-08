@@ -1758,6 +1758,7 @@
       "MODULE_SETTINGS_UPDATED": "Configurações de módulo alteradas",
       "MODULE_RECORD_CREATED": "Registro de módulo criado",
       "MODULE_RECORD_UPDATED": "Registro de módulo alterado",
+      "MODULE_RECORD_DELETED": "Registro de módulo excluído",
       "ROLE_CREATED": "Papel criado",
       "ROLE_UPDATED": "Papel alterado",
       "ROLE_DELETED": "Papel excluído",

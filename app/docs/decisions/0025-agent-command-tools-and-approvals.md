@@ -100,3 +100,9 @@ The action agent executes module commands (mutations). A mutation triggered by a
     `example.ArchiveNoteCommand` (`example.note.archive`, `requiresApproval`) over Firestore
     `notes` (`tenantId`, automatic ids). An archive requested through the agent becomes an SP1
     approval request and runs in `/v1`, as the requester, after a different member approves.
+- **2026-10-06 — delete action for module records.** A module's use cases audit a deletion as
+  `MODULE_RECORD_DELETED`, next to `MODULE_RECORD_CREATED` and `MODULE_RECORD_UPDATED`: in the same
+  transaction as the delete and without `changes`, as `ROLE_DELETED` and `CUSTOM_AGENT_DELETED` are
+  written. `target.type` still names the record kind. Archiving stays an update
+  (`changes: ["archivedAt"]`), so the example module, which deletes nothing, does not use the new
+  action. Its label is in the three catalogs (decision 0074).

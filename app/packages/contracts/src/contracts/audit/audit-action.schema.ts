@@ -21,6 +21,7 @@ export const AUDIT_ACTIONS = [
   // module audits its own use cases without adding action names to the core.
   "MODULE_RECORD_CREATED",
   "MODULE_RECORD_UPDATED",
+  "MODULE_RECORD_DELETED",
   "ROLE_CREATED",
   "ROLE_UPDATED",
   "ROLE_DELETED",
