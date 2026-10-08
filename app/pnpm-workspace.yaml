@@ -37,7 +37,7 @@ catalog:
   "@mastra/pg": 1.27.1
   "@opentelemetry/exporter-trace-otlp-proto": 0.218.0 # http/protobuf OTLP; @mastra/otel-exporter 1.4.2 peers ^0.218.0 (0.222.0 is outside it)
   "@playwright/test": 1.63.0 # e2e runner (web + desktop-web projects); no component testing (E5)
-  "@next/eslint-plugin-next": 16.3.7
+  "@next/eslint-plugin-next": 16.3.8
   "@tailwindcss/node": 4.3.3 # compiles globals.css in the client token test
   "@tailwindcss/postcss": 4.3.3 # web (Next) Tailwind plugin, postcss.config.mjs
   "@tailwindcss/vite": 4.3.3 # desktop (Vite) Tailwind plugin
@@ -89,7 +89,7 @@ catalog:
   libpg-query: 18.1.5 # PG 18 parser (WASM) for the semantic SQL guard (decision 0024)
   lucide-react: 1.49.0
   mastra: 1.31.3 # CLI; same release train as @mastra/core
-  next: 16.3.7
+  next: 16.3.8
   next-intl: 4.14.8 # web locale routing, request config and navigation (decision 0013); wraps use-intl
   next-themes: 0.4.6 # theme provider for both apps (attribute data-theme, decision 0014)
   postgres: 3.4.9
@@ -200,6 +200,10 @@ overrides:
   "@firebase/firestore>@grpc/grpc-js": 1.14.5
   "get-uri>basic-ftp": 6.2.1
   "mocha>serialize-javascript": 7.0.3
+  # GHSA-cjq9-62q9-8jv4 (high, Next.js image optimization SSRF, patched in 16.3.8): inngest takes
+  # next as a peer and the lockfile kept 16.3.7 for it. Drop once the lockfile resolves it to the
+  # catalog's next on its own.
+  "inngest>next": 16.3.8
   # GHSA-68fv-2mgg-jv7q (2026-10-06): about 100 paths (postcss, css-tree, ...), so not scoped
   # to one parent. Drop once postcss and css-tree depend on >= 1.2.2.
   source-map-js: 1.2.2
