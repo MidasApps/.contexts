@@ -3,7 +3,8 @@ import { useState } from "react";
 import { describe, expect, it } from "vitest";
 import { renderWidget } from "#/app-shell/testing/render-widget.tsx";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { IDS } from "#/shared/testing/fixtures.ts";
+import { ok } from "#/shared/testing/fake-api.ts";
+import { buildMe, IDS } from "#/shared/testing/fixtures.ts";
 import { CommandPalette } from "./CommandPalette.tsx";
 
 function Harness() {
@@ -44,5 +45,23 @@ describe("CommandPalette", () => {
     await user.click(within(create).getByRole("button", { name: "Fechar" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     await waitFor(() => expect(document.activeElement).toBe(opener));
+  });
+
+  it("does not offer project creation when the default project is on", async () => {
+    const { user } = renderWidget(<Harness />, {
+      path: `/o/${IDS.organization}`,
+      routes: {
+        "GET /v1/me": ok(
+          buildMe({ lastContext: { organizationId: IDS.organization }, organizationDefaultProject: true }),
+        ),
+      },
+    });
+    await user.click(screen.getByRole("button", { name: "abrir" }));
+    const dialog = await screen.findByRole("dialog", { name: "Paleta de comandos" });
+    // The action is listed until `GET /v1/me` answers; wait for the settled list.
+    await waitFor(() => {
+      expect(within(dialog).getByRole("option", { name: "Geral" })).toBeDefined();
+      expect(within(dialog).queryByRole("option", { name: "Criar projeto" })).toBeNull();
+    });
   });
 });

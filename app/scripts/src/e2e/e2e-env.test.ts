@@ -42,6 +42,7 @@ describe("buildE2eEnv", () => {
       CORS_ALLOWED_ORIGINS: "http://localhost:1420,http://tauri.localhost,tauri://localhost",
       AI_MODE: "fake",
       APP_ENV: "local",
+      ORGANIZATION_DEFAULT_PROJECT: "false",
     });
   });
 

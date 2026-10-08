@@ -1,5 +1,8 @@
+import { ProjectIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { DEFAULTS, makeTenancyWorld } from "./tenancy.fixture.ts";
+import { ok } from "#/services/shared/result/result.ts";
+import { createTenancyServices } from "../../composition.ts";
+import { DEFAULTS, makeTenancyWorld, UNIT_TYPES } from "./tenancy.fixture.ts";
 
 describe("createOrganization", () => {
   it("creates the organization, the owner grant, the projection, the user doc and audits, then syncs claims", async () => {
@@ -28,6 +31,73 @@ describe("createOrganization", () => {
     expect(world.writes.claims.claimsOf("u1")).toEqual({ accessVersion: 1, tenantId: organization.id });
     const read = await world.tenancy.getOrganization({ ...world.command("u1"), organizationId: organization.id });
     expect(read).toMatchObject({ ok: true, data: { id: organization.id } });
+  });
+
+  it("creates the organization's one project and its audit entry when the default project is on", async () => {
+    const world = makeTenancyWorld({ defaultProject: true });
+    const organization = await world.organizationOf("u1");
+
+    const entries = world.auditLog.entries("tenant");
+    expect(entries.map((entry) => entry.action)).toEqual([
+      "MEMBERSHIP_GRANTED",
+      "ORGANIZATION_CREATED",
+      "PROJECT_CREATED",
+    ]);
+    const created = entries[2];
+    expect(created).toMatchObject({ tenantId: organization.id, target: { type: "project" } });
+    const projectId = ProjectIdSchema.parse(created?.target.id);
+    expect(await world.tenancyStore.projects.get(undefined, projectId)).toMatchObject({
+      tenantId: organization.id,
+      name: "Northwind",
+      status: "active",
+    });
+  });
+
+  it("writes the same default project when the transaction function runs again", async () => {
+    const world = makeTenancyWorld({ defaultProject: true });
+    const written: string[] = [];
+    let plan: Awaited<ReturnType<typeof world.services.prepareGrant>> | undefined;
+    const tenancy = createTenancyServices({
+      unitTypes: UNIT_TYPES,
+      ...world.tenancyStore,
+      projects: {
+        ...world.tenancyStore.projects,
+        create: (tx, args) => {
+          written.push(args.project.id);
+          world.tenancyStore.projects.create(tx, args);
+        },
+      },
+      access: {
+        ...world.services,
+        // The second attempt reads what the first one read; the grant itself is written once.
+        prepareGrant: async (tx, args) => {
+          if (plan === undefined) return (plan = await world.services.prepareGrant(tx, args));
+          return plan.ok ? ok({ ...plan.data, commit: () => Promise.resolve() }) : plan;
+        },
+      },
+      accounts: { getProfile: (uid) => Promise.resolve({ email: `${uid}@example.com`, displayName: uid }) },
+      audit: world.deps.audit,
+      // Firestore runs the function again on contention (`UnitOfWork`).
+      unitOfWork: {
+        run: async (fn) => {
+          await world.deps.unitOfWork.run(fn);
+          return world.deps.unitOfWork.run(fn);
+        },
+      },
+      clock: world.deps.clock,
+      selfServe: true,
+      defaultProject: true,
+    });
+    world.store.putUser("u1");
+
+    const created = await tenancy.createOrganization({
+      ...world.command("u1"),
+      input: { name: "Northwind", defaults: DEFAULTS },
+    });
+
+    expect(created.ok).toBe(true);
+    expect(written).toHaveLength(2);
+    expect(written[1]).toBe(written[0]);
   });
 
   it("keeps the active organization of a user who already has one", async () => {

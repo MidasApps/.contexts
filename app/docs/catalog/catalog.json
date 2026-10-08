@@ -16262,6 +16262,7 @@
             "projectId": "Pq4rS6tU8vW0xY2zA1bC"
           },
           "mfaEnrolled": true,
+          "organizationDefaultProject": false,
           "preferences": {
             "locale": "pt-BR",
             "notifications": {
@@ -16317,6 +16318,12 @@
           "required": true
         },
         {
+          "description": "Whether the server creates every organization with its one project (ORGANIZATION_DEFAULT_PROJECT). The shell then offers no project creation while the organization has a project, opens a single visible project directly and hides the project switcher.",
+          "name": "organizationDefaultProject",
+          "pii": "none",
+          "required": true
+        },
+        {
           "description": "Profile photo URL.",
           "name": "photoUrl",
           "pii": "personal",
@@ -16359,6 +16366,7 @@
               "projectId": "Pq4rS6tU8vW0xY2zA1bC"
             },
             "mfaEnrolled": true,
+            "organizationDefaultProject": false,
             "preferences": {
               "locale": "pt-BR",
               "notifications": {
@@ -16440,6 +16448,11 @@
           },
           "mfaEnrolled": {
             "description": "Whether the account has at least one second factor enrolled.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "organizationDefaultProject": {
+            "description": "Whether the server creates every organization with its one project (ORGANIZATION_DEFAULT_PROJECT). The shell then offers no project creation while the organization has a project, opens a single visible project directly and hides the project switcher.",
             "type": "boolean",
             "x-pii": "none"
           },
@@ -16536,7 +16549,8 @@
           "accessVersion",
           "isPlatformStaff",
           "mfaEnrolled",
-          "capabilities"
+          "capabilities",
+          "organizationDefaultProject"
         ],
         "type": "object",
         "x-kind": "view",
