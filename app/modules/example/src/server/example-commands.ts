@@ -6,6 +6,7 @@ import {
   type ContractCommand,
   createFirestoreUnitOfWork,
   defineContractCommand,
+  type PostgresClient,
   systemClock,
   type UnitOfWork,
 } from "@core/services";
@@ -23,11 +24,13 @@ import {
   type NotesDeps,
 } from "./note-use-cases.ts";
 
-/** What the apps hand to the module's server side: the core server's access, audit and Firestore. */
+/** What the apps hand to the module's server side: the core server's access, audit, Firestore and Postgres pool. */
 export type ExampleServerDeps = {
   readonly firestore: Firestore;
   readonly access: Pick<AccessCore, "forRequest">;
   readonly audit: AuditWriter;
+  /** The app's Postgres pool (decision 0077); the module's labels use it (`createExampleLabels`). */
+  readonly sql: PostgresClient;
   readonly clock?: Clock;
   /** Test seams (in-memory repository and unit of work). */
   readonly notes?: NoteRepository;

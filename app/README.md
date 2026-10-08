@@ -286,6 +286,12 @@ three files, use it through `useTranslations("<namespace>")`, then run
 4. **Server** (`src/server/`, optional): the use cases, their repositories, the
    agent commands (`createExampleCommands`) and the `/v1` handlers
    (`createExampleRoutes`, each wrapped in `withApiRoute` from `@core/services`).
+   A module that keeps data in Postgres (decision 0077) adds a `migrations/` folder
+   (`meta/_journal.json` plus `.sql` files): a schema named after the module id, every
+   table with forced row level security on `app.tenant_id`, and a `<id>_runtime` role
+   without DDL. Its repositories take `deps.sql`, run inside `withTenantTransaction`
+   after `SET LOCAL ROLE`, and each table has an isolation suite in `*.postgres.test.ts`
+   (`modules/example/src/server/label-repository.*`).
 5. **Client** (`src/client.ts`): `defineClientModule({ manifest, pages })`; `pages`
    maps the path after `/m/<id>/` to a lazily loaded page component (module pages
    need no route files in the apps). Pages read the module's endpoints through
@@ -295,6 +301,7 @@ three files, use it through `useTranslations("<namespace>")`, then run
    `apps/web/src/modules.ts` (server manifests), `apps/web/src/client/modules.ts`
    and `apps/desktop/src/modules.ts` (client modules), `catalog.modules.ts`
    (contracts in the generated catalog, `endpoints` in the OpenAPI),
+   `migrations.modules.ts` when it has Postgres migrations,
    `transpilePackages` in `apps/web/next.config.ts`, and the workspace dependency
    in each app's `package.json`. Tailwind already scans `modules/*/src`. A module
    with `/v1` endpoints also goes in `apps/web/src/server/modules.ts`
@@ -303,7 +310,8 @@ three files, use it through `useTranslations("<namespace>")`, then run
    its Firestore queries add their composite indexes to `firestore.indexes.json`.
 8. **Verify:** `pnpm -F @core/module-<id> test`, `pnpm contracts:catalog` (commit the
    regenerated `docs/catalog` and `docs/openapi`), `pnpm lint && pnpm typecheck &&
-   pnpm i18n:check`, and an e2e journey through its page when it has one.
+   pnpm i18n:check`, `pnpm db:migrate && pnpm -F @core/module-<id> test:postgres` when
+   it has migrations, and an e2e journey through its page when it has one.
 
 ## Starting a new app from this core
 

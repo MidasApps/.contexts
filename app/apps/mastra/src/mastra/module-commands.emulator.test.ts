@@ -7,6 +7,7 @@ import {
   createFirebaseAdmin,
   createInMemoryAccessStore,
   type FirebaseAdmin,
+  type PostgresClient,
   processLogger,
   registerAgentCommandApprovals,
 } from "@core/services";
@@ -82,7 +83,9 @@ beforeAll(() => {
     modules: manifests,
     adapters: { accessReaders: readers },
   });
-  const moduleDeps = { firestore: firebase.firestore, access: web.access, audit: web.audit };
+  // The notes under test live in Firestore; the pool is never queried.
+  const sql = {} as PostgresClient;
+  const moduleDeps = { firestore: firebase.firestore, access: web.access, audit: web.audit, sql };
   registerAgentCommandApprovals({
     approvals: web.approvals,
     executors: [
