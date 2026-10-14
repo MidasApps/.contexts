@@ -171,8 +171,9 @@ and tests pass their timeouts.
 can run at once), builds web and desktop with the e2e public config and runs:
 
 - `apps/web/e2e/*.spec.ts` on chromium, firefox, webkit and a phone (Pixel 7):
-  sign-in, organization/project switching, profile, settings, `/admin` (staff with
-  SMS MFA from the emulator) and axe (WCAG 2.2 AA) on every page, light and dark;
+  sign-in, organization/project switching, the administration (settings, profile,
+  platform console for staff with SMS MFA from the emulator) and axe (WCAG 2.2 AA) on
+  every page, light and dark;
 - `apps/desktop/e2e/` (`desktop-web`): the desktop frontend served by `vite preview`.
 
 The setup project seeds its own world (`packages/e2e/src/seed-users.ts`, same
@@ -245,12 +246,15 @@ package imports a module (apps list the installed modules).
   ports (`router`, `session-bridge`, `secure-store`, `platform`) and pass them to
   `createClientApp`; views never import `next/*` or `@tanstack/*` (decision 0012).
   Every component has a colocated `*.test.tsx` that also runs axe.
-- **Routes** (one map, `shared/lib/router/route-paths.ts`): `/sign-in`, `/invite`,
-  `/organizations`, `/o/:organizationId[/p/:projectId[/m/:moduleId/*]]`,
-  `/o/:organizationId/settings/:section`, `/profile/:section`; the web prefixes
-  `/{locale}` and adds `/admin` (platform staff with MFA). A member whose only grant
-  is on a project lands on that project when they open the organization
-  (decision 0030 A5).
+- **Routes** (one map, `shared/lib/router/route-paths.ts`), two surfaces (decision
+  0077). The application, for using the product: `/sign-in`, `/invite`,
+  `/organizations`, `/o/:organizationId[/p/:projectId[/chat|/m/:moduleId/*]]`,
+  `/o/:organizationId/approvals[/:approvalRequestId]`. The administration, for
+  configuring it, open to every signed-in user with each section authorized on its
+  own: `/admin`, `/admin/o/:organizationId[/:section|/m/:moduleId]`,
+  `/admin/profile/:section`, and on web `/admin/platform/*` (platform staff with
+  MFA). The web prefixes `/{locale}`. A member whose only grant is on a project lands
+  on that project when they open the organization (decision 0030 A5).
 - **Desktop session** (decision 0017): the Firebase ID token stays in memory; a
   desktop session secret lives in the OS keychain (Windows Credential Manager, macOS
   Keychain, Secret Service) through the Tauri commands `secure_store_get|set|delete`,

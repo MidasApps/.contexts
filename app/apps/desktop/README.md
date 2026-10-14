@@ -1,9 +1,11 @@
 # @core/desktop
 
 Tauri 2 desktop shell with Vite, React 19 and TanStack Router. It renders the
-same user area as the web app from the shared FSD client (`@core/client`): the
-routes in `src/routes/` mirror the shared route map without a locale segment and
-without `/admin` (web only), and every route file renders a shared view. It
+same application and administration as the web app from the shared FSD client
+(`@core/client`, decision 0077): the routes in `src/routes/` mirror the shared
+route map without a locale segment and without the platform console and the guide
+(web only), every route file renders a shared view, and the root picks
+`AdminLayout` for the administration's routes and `AppLayout` for the rest. It
 calls the web `/v1` API on its own origin.
 
 ## When to use
