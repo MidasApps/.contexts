@@ -20,7 +20,7 @@ describe("AdminOverviewView", () => {
       routes: { "GET /v1/admin/overview": ok(buildAdminOverview()) },
     });
     expect(await screen.findByRole("heading", { level: 2, name: "Números da plataforma" })).toBeDefined();
-    expect(screen.getByRole("heading", { level: 1, name: "Administração da plataforma" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 1, name: "Console da plataforma" })).toBeDefined();
     expect(within(kpi("Organizações ativas")).getByText("12")).toBeDefined();
     expect(within(kpi("Usuários ativos")).getByText("87")).toBeDefined();
     const cost = kpi("Custo no mês").querySelector("dd");
@@ -55,13 +55,13 @@ describe("AdminOverviewView", () => {
     await screen.findByRole("heading", { level: 2, name: "Números da plataforma" });
     expect(
       within(kpi("Organizações ativas")).getByRole("link", { name: "Organizações ativas" }).getAttribute("href"),
-    ).toBe("/admin/organizations");
+    ).toBe("/admin/platform/organizations");
     expect(within(kpi("Custo no mês")).getByRole("link", { name: "Custo no mês" }).getAttribute("href")).toBe(
-      "/admin/costs",
+      "/admin/platform/costs",
     );
     expect(
       within(kpi("Avaliação dos agentes")).getByRole("link", { name: "Avaliação dos agentes" }).getAttribute("href"),
-    ).toBe("/admin/evals");
+    ).toBe("/admin/platform/evals");
     expect(within(kpi("Aprovações")).queryByRole("link")).toBeNull();
     expect(screen.queryByText("Equipe da plataforma")).toBeNull();
     await expectNoAxeViolations(container);
@@ -98,13 +98,13 @@ describe("AdminOverviewView", () => {
         .getAllByRole("link")
         .map((link) => link.getAttribute("href")),
     ).toEqual([
-      "/admin/organizations",
-      "/admin/users",
-      "/admin/traces",
-      "/admin/logs",
-      "/admin/costs",
-      "/admin/connectors",
-      "/admin/audit",
+      "/admin/platform/organizations",
+      "/admin/platform/users",
+      "/admin/platform/traces",
+      "/admin/platform/logs",
+      "/admin/platform/costs",
+      "/admin/platform/connectors",
+      "/admin/platform/audit",
     ]);
     expect(within(areas).getByRole("link", { name: /Custos.*Uso e custos por organização/u })).toBeDefined();
   });

@@ -41,7 +41,7 @@ describe("ApiErrorState", () => {
     const onRetry = vi.fn();
     const error = new ApiError({ status: 401, code: "UNAUTHORIZED", message: "x", requestId: "01K6REQ" });
     const { user, router, container } = renderWithClient(<ApiErrorState error={error} onRetry={onRetry} />, {
-      path: "/o/org-1/settings/members?tab=all",
+      path: "/admin/o/org-1/members?tab=all",
       session,
     });
     expect(screen.getByRole("alert").textContent).toContain("Sua sessão expirou. Entre novamente para continuar.");
@@ -51,7 +51,7 @@ describe("ApiErrorState", () => {
     await user.click(screen.getByRole("button", { name: "Entrar novamente" }));
 
     expect(session.actions).toEqual(["signOut"]);
-    expect(router.current()).toBe(`/sign-in?next=${encodeURIComponent("/o/org-1/settings/members?tab=all")}`);
+    expect(router.current()).toBe(`/sign-in?next=${encodeURIComponent("/admin/o/org-1/members?tab=all")}`);
     expect(onRetry).not.toHaveBeenCalled();
   });
 });

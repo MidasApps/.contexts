@@ -51,7 +51,7 @@ const routes = (experiments: readonly unknown[] = [BASE, CANDIDATE, RUNNING], ha
 });
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminEvalsView />, { path: "/admin/evals", routes: routes(), ...options });
+  renderAdmin(<AdminEvalsView />, { path: "/admin/platform/evals", routes: routes(), ...options });
 
 describe("AdminEvalsView", () => {
   it("lists experiments with status, verdict and scores against the baseline", async () => {
@@ -87,10 +87,10 @@ describe("AdminEvalsView", () => {
   it("compares two experiments chosen on the page, in the URL, with a verdict per scorer, above the list", async () => {
     const { user, router, container, api } = render();
     await user.click(await screen.findByRole("button", { name: "Comparar o experimento exp_01J8Z3K4M5" }));
-    expect(router.current()).toBe("/admin/evals?a=exp_01J8Z3K4M5");
+    expect(router.current()).toBe("/admin/platform/evals?a=exp_01J8Z3K4M5");
     expect(await screen.findByText("Escolha mais um experimento para comparar.")).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Comparar o experimento exp_candidate" }));
-    expect(router.current()).toBe("/admin/evals?a=exp_01J8Z3K4M5&b=exp_candidate");
+    expect(router.current()).toBe("/admin/platform/evals?a=exp_01J8Z3K4M5&b=exp_candidate");
     const chart = await screen.findByRole("table", { name: "Nota média por avaliador" });
     expect(
       within(chart)
@@ -126,22 +126,22 @@ describe("AdminEvalsView", () => {
     expect(api.calls.filter((call) => call.path.startsWith("/v1/admin/experiments/"))).toHaveLength(0);
     await expectNoAxeViolations(container);
     await user.click(screen.getByRole("button", { name: "Limpar comparação" }));
-    expect(router.current()).toBe("/admin/evals");
+    expect(router.current()).toBe("/admin/platform/evals");
   });
 
   it("restores a comparison from the URL and says when a chosen experiment no longer exists", async () => {
-    const restored = render({ path: "/admin/evals?a=exp_candidate&b=exp_01J8Z3K4M5" });
+    const restored = render({ path: "/admin/platform/evals?a=exp_candidate&b=exp_01J8Z3K4M5" });
     const verdicts = await screen.findByRole("list", { name: "Resultado por avaliador" });
     expect(plain(within(verdicts).getAllByRole("listitem")[0]?.textContent ?? null)).toBe(
       "tool-routing: B melhor que A (+9%)",
     );
     restored.unmount();
-    render({ path: "/admin/evals?a=exp_gone&b=exp_candidate" });
+    render({ path: "/admin/platform/evals?a=exp_gone&b=exp_candidate" });
     expect(await screen.findByText(/não foi encontrado/u)).toBeDefined();
   });
 
   it("compares with an experiment of another page, read by id", async () => {
-    const { api, container } = render({ path: "/admin/evals?a=exp_old_baseline&b=exp_candidate" });
+    const { api, container } = render({ path: "/admin/platform/evals?a=exp_old_baseline&b=exp_candidate" });
     const verdicts = await screen.findByRole("list", { name: "Resultado por avaliador" });
     expect(plain(within(verdicts).getAllByRole("listitem")[0]?.textContent ?? null)).toBe(
       "tool-routing: B melhor que A (+5%)",
@@ -154,7 +154,7 @@ describe("AdminEvalsView", () => {
 
   it("shows a failed read of a chosen experiment with its reference and a retry", async () => {
     const { user, api } = render({
-      path: "/admin/evals?a=exp_old_baseline&b=exp_candidate",
+      path: "/admin/platform/evals?a=exp_old_baseline&b=exp_candidate",
       routes: { ...routes(), "GET /v1/admin/experiments/:experimentId": apiError(409, "CONFLICT") },
     });
     const comparison = await screen.findByRole("region", { name: /Comparação de experimentos/u });
@@ -166,12 +166,12 @@ describe("AdminEvalsView", () => {
 
   it("pages experiments by number and keeps the comparison across pages", async () => {
     const { user, router, api } = render({
-      path: "/admin/evals?a=exp_candidate",
+      path: "/admin/platform/evals?a=exp_candidate",
       routes: routes([BASE, CANDIDATE], true),
     });
     const pages = await screen.findByRole("navigation", { name: "Páginas de experimentos" });
     await user.click(within(pages).getByRole("button", { name: "Próxima" }));
-    expect(router.current()).toBe("/admin/evals?a=exp_candidate&page=2");
+    expect(router.current()).toBe("/admin/platform/evals?a=exp_candidate&page=2");
     await waitFor(() =>
       expect(api.calls.filter((call) => call.path === "/v1/admin/experiments").at(-1)?.query).toBe(
         "?page=1&perPage=20",
@@ -183,7 +183,7 @@ describe("AdminEvalsView", () => {
     const { user, router, container } = render();
     await screen.findByRole("table", { name: "Experimentos de avaliação" });
     await user.click(screen.getByRole("tab", { name: "Datasets" }));
-    expect(router.current()).toBe("/admin/evals?tab=datasets");
+    expect(router.current()).toBe("/admin/platform/evals?tab=datasets");
     const table = await screen.findByRole("table", { name: "Datasets de avaliação" });
     const platform = within(table).getByRole("row", { name: /assistant\.v1/u });
     expect(within(platform).getByText("Plataforma")).toBeDefined();
@@ -202,10 +202,10 @@ describe("AdminEvalsView", () => {
     expect(screen.queryByRole("heading", { name: "Comparação de experimentos" })).toBeNull();
     await expectNoAxeViolations(container);
     await user.click(screen.getByRole("button", { name: "Ver datasets" }));
-    expect(router.current()).toBe("/admin/evals?tab=datasets");
+    expect(router.current()).toBe("/admin/platform/evals?tab=datasets");
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhum dataset ainda" })).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Ver experimentos" }));
-    expect(router.current()).toBe("/admin/evals");
+    expect(router.current()).toBe("/admin/platform/evals");
   });
 
   it("shows an error with the request reference and a retry", async () => {

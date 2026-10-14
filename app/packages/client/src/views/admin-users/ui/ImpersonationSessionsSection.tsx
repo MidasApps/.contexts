@@ -240,7 +240,7 @@ function SessionsTable({
 }
 
 /**
- * Support access sessions of every staff member on `/admin/users` (decision 0044,
+ * Support access sessions of every staff member on `/admin/platform/users` (decision 0044,
  * platform.user.read): the ones open now, or all of them newest first, with who acted as whom,
  * where and why. Staff with `platform.user.impersonate` end an open session after a confirmation.
  */

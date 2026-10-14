@@ -14,7 +14,7 @@ import { IDS } from "#/shared/testing/fixtures.ts";
 import { AdminAgentPromptsView } from "./AdminAgentPromptsView.tsx";
 
 const BASE = "/v1/admin/agents/:agentId";
-const PATH = "/admin/agents/assistant/prompts";
+const PATH = "/admin/platform/agents/assistant/prompts";
 
 // v3 not evaluated (newest), v2 active with a passing eval, v1 older with a passing eval.
 const V3 = buildPromptVersion({
@@ -69,7 +69,7 @@ describe("AdminAgentPromptsView", () => {
     const { container } = render();
     const table = await versionsTable();
     expect(screen.getByRole("heading", { level: 1, name: "Prompts de Assistente" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Agentes e prompts" }).getAttribute("href")).toBe("/admin/agents");
+    expect(screen.getByRole("link", { name: "Agentes e prompts" }).getAttribute("href")).toBe("/admin/platform/agents");
     expect(
       within(table)
         .getAllByRole("row")
@@ -168,7 +168,9 @@ describe("AdminAgentPromptsView", () => {
     expect(within(scorer).getByText("Atingiu o mínimo")).toBeDefined();
     // The experiment is a link to its page in the evals console, not a bare id.
     const experimentLink = screen.getByRole("link", { name: "Ver o experimento nas avaliações" });
-    expect(experimentLink.getAttribute("href")).toBe(`/admin/evals?a=${String(buildPromptEvalResult().experimentId)}`);
+    expect(experimentLink.getAttribute("href")).toBe(
+      `/admin/platform/evals?a=${String(buildPromptEvalResult().experimentId)}`,
+    );
     expect(api.calls.find((call) => call.method === "POST")?.path).toBe(
       `/v1/admin/agents/assistant/prompt-versions/${PROMPT_IDS.v3}/eval`,
     );
@@ -465,10 +467,10 @@ describe("AdminAgentPromptsView", () => {
   });
 
   it("is not found for an agent without a versioned prompt or another path", async () => {
-    const unknown = render({ path: "/admin/agents/example-notes/prompts" });
+    const unknown = render({ path: "/admin/platform/agents/example-notes/prompts" });
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
     unknown.unmount();
-    render({ path: "/admin/agents/assistant/prompts/extra" });
+    render({ path: "/admin/platform/agents/assistant/prompts/extra" });
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
   });
 

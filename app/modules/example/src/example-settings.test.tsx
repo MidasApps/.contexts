@@ -38,7 +38,7 @@ describe("example module settings", () => {
         <SettingsModuleView />
       </main>,
       {
-        path: `/o/${IDS.organization}/settings/m/example`,
+        path: `/admin/o/${IDS.organization}/m/example`,
         modules: [exampleClientModule],
         routes: shellRoutes(EDITOR, {
           "GET /v1/me/context": contextInUsd(),

@@ -99,7 +99,8 @@ describe("core navigation", () => {
     ]);
     expect(registry.visibleItems("organization", all).map((entry) => entry.id)).toEqual([
       "core.organization.home",
-      "core.organization.settings",
+      "core.organization.approvals",
+      "core.organization.administration",
     ]);
     expect(registry.visibleItems("project", all).map((entry) => entry.id)).toEqual([
       "core.project.home",

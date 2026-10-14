@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
@@ -11,11 +11,11 @@ const renderView = (routes = {}) =>
     <main>
       <ProfileAccountView />
     </main>,
-    { path: "/profile/account", routes },
+    { path: "/admin/profile/account", routes },
   );
 
 describe("ProfileAccountView", () => {
-  it("shows the account, marks the current section and saves a new display name", async () => {
+  it("shows the account and saves a new display name", async () => {
     const patches: unknown[] = [];
     const { user, container } = renderView({
       "PATCH /v1/me": (request: FakeRequest) => {
@@ -25,8 +25,6 @@ describe("ProfileAccountView", () => {
     });
     expect(await screen.findByRole("heading", { level: 1, name: "Conta" })).toBeDefined();
     expect(await screen.findByText("ana@example.com")).toBeDefined();
-    const nav = screen.getByRole("navigation", { name: "Seções do perfil" });
-    expect(within(nav).getByRole("link", { name: "Conta" }).getAttribute("aria-current")).toBe("page");
     await expectNoAxeViolations(container);
 
     const name = screen.getByRole("textbox", { name: /Nome de exibição/u });

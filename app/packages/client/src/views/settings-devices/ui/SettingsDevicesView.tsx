@@ -21,7 +21,7 @@ import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-st
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 const column = dataTableColumnHelper<Device>();
 
@@ -161,7 +161,6 @@ function SettingsDevices({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={context.permissions.includes("core.device.read")}
       header={
         <PageHeader
@@ -194,7 +193,7 @@ function SettingsDevices({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/devices` (SP2 spec §8, core.device.read): activated devices with
+ * `/admin/o/:organizationId/devices` (SP2 spec §8, core.device.read): activated devices with
  * node, last activity and status; create a one-time activation code and revoke devices.
  */
 export function SettingsDevicesView() {

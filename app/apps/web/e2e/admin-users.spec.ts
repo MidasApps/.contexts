@@ -3,7 +3,7 @@ import { completeSmsChallenge, showSidebar, submitSignIn } from "@core/e2e/sign-
 import type { Page } from "@playwright/test";
 import { expect, openAs, test, toast } from "./sp5-test.ts";
 
-// SP5 Task 16: `/admin/users`: search by name, e-mail and id, support access (impersonation)
+// SP5 Task 16: `/admin/platform/users`: search by name, e-mail and id, support access (impersonation)
 // started for a seeded user and ended from the team's session list. What happens to the tab after
 // "open the app as this user" survives a reload and "leave" returns to the staff account (decision
 // 0047); that journey signs staff in on its own session so the shared staff session is untouched.
@@ -28,7 +28,7 @@ const startSession = async (page: Page, organizationName: string, reason: string
 
 test.describe("user search", () => {
   test("finds a user by e-mail, by name prefix and shows the empty result", async ({ staffPage }) => {
-    await staffPage.goto("admin/users");
+    await staffPage.goto("admin/platform/users");
     const search = staffPage.getByRole("region", { name: "Buscar usuário" });
     await expect(search.getByRole("heading", { name: "Busque um usuário" })).toBeVisible();
     const box = search.getByRole("searchbox", { name: "Nome, e-mail ou id" });
@@ -50,7 +50,7 @@ test.describe("user search", () => {
 
 test.describe("support access", () => {
   test("starts a session as a user, lists it for the team and ends it from the list", async ({ staffPage, world }) => {
-    await staffPage.goto("admin/users");
+    await staffPage.goto("admin/platform/users");
     const search = staffPage.getByRole("region", { name: "Buscar usuário" });
     await search.getByRole("searchbox", { name: "Nome, e-mail ou id" }).fill(viewer.email);
     await search.getByRole("button", { name: "Buscar" }).click();
@@ -92,7 +92,7 @@ test.describe("support access", () => {
   });
 
   test("refuses a reason that is too short", async ({ staffPage }) => {
-    await staffPage.goto("admin/users");
+    await staffPage.goto("admin/platform/users");
     const search = staffPage.getByRole("region", { name: "Buscar usuário" });
     await search.getByRole("searchbox", { name: "Nome, e-mail ou id" }).fill(viewer.email);
     await search.getByRole("button", { name: "Buscar" }).click();
@@ -143,7 +143,7 @@ test.describe("support access in the tab", () => {
 
     // Leaving ends the session and returns to staff without a new sign-in.
     await page.getByRole("button", { name: "Sair do modo suporte" }).click();
-    await expect(page).toHaveURL(/\/pt-BR\/admin\/users$/);
+    await expect(page).toHaveURL(/\/pt-BR\/admin\/platform\/users$/);
     await expect(page.getByRole("heading", { level: 1, name: "Usuários" })).toBeVisible();
     await expect(banner).toHaveCount(0);
     const sessions = page.getByRole("region", { name: "Sessões de acesso de suporte" });

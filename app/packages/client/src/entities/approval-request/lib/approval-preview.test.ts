@@ -13,12 +13,12 @@ describe("approvalPreviewOf", () => {
       runRoute: { id: "settings", organizationId: "OrgAaaaaaaaaaaaaaaaaa", section: "workflows", rest: "runs/run-1" },
     });
     expect(preview.kind === "workflow-resume" ? routeHref(preview.runRoute) : "").toBe(
-      "/o/OrgAaaaaaaaaaaaaaaaaa/settings/workflows/runs/run-1",
+      "/admin/o/OrgAaaaaaaaaaaaaaaaaa/workflows/runs/run-1",
     );
   });
 
-  it("addresses one request under its organization's settings", () => {
-    expect(routeHref(approvalRequestRoute("org 1", "Ap1"))).toBe("/o/org%201/settings/approvals/Ap1");
+  it("addresses one request in its organization's approvals inbox", () => {
+    expect(routeHref(approvalRequestRoute("org 1", "Ap1"))).toBe("/o/org%201/approvals/Ap1");
   });
 
   it("shows the before/after of an agent-command request", () => {

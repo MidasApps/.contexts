@@ -17,8 +17,10 @@ describe("UserMenu", () => {
     const { user } = renderWidget(<UserMenu />, { path: `/o/${IDS.organization}` });
     await user.click(await screen.findByRole("button", { name: "Ana Souza, menu da conta" }));
     expect(await screen.findByRole("menuitem", { name: "Conta" })).toBeDefined();
-    expect(screen.getByRole("menuitem", { name: "Sessões" }).getAttribute("href")).toBe("/profile/sessions");
-    expect(screen.getByRole("menuitem", { name: "Idioma e região" }).getAttribute("href")).toBe("/profile/preferences");
+    expect(screen.getByRole("menuitem", { name: "Sessões" }).getAttribute("href")).toBe("/admin/profile/sessions");
+    expect(screen.getByRole("menuitem", { name: "Idioma e região" }).getAttribute("href")).toBe(
+      "/admin/profile/preferences",
+    );
     expect(screen.getByRole("menuitem", { name: "Tema" })).toBeDefined();
     expect(screen.getByRole("menuitem", { name: "Documentação" }).getAttribute("href")).toBe("/docs");
     await expectNoAxeViolations(document.body);
@@ -59,7 +61,7 @@ describe("UserMenu", () => {
       ),
     );
     const entry = await screen.findByRole("menuitem", { name: "Aprovações, 1 aguardando sua decisão" });
-    expect(entry.getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals`);
+    expect(entry.getAttribute("href")).toBe(`/o/${IDS.organization}/approvals`);
     expect(api.calls.find((call) => call.path.endsWith("/approval-requests"))?.query).toContain("status=pending");
     await expectNoAxeViolations(document.body);
   });

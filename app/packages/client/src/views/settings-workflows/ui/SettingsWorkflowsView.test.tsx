@@ -36,7 +36,7 @@ const CATALOG = [
   }),
 ];
 
-const SETTINGS_PATH = `/o/${IDS.organization}/settings/workflows`;
+const SETTINGS_PATH = `/admin/o/${IDS.organization}/workflows`;
 
 const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] = ADMIN, path = SETTINGS_PATH) =>
   renderApp(
@@ -584,7 +584,7 @@ describe("SettingsWorkflowsView: run page", () => {
     const timeline = screen.getByRole("list", { name: "Linha do tempo da execução run-1" });
     expect(within(timeline).getByText("Suspensa")).toBeDefined();
     expect(within(timeline).getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe(
-      `/o/${IDS.organization}/settings/approvals/Ap3rQ9vLr3TnB7pWc1aZ`,
+      `/o/${IDS.organization}/approvals/Ap3rQ9vLr3TnB7pWc1aZ`,
     );
     expect(screen.getByText("Esta página se atualiza sozinha enquanto a execução está em andamento.")).toBeDefined();
     expect(new URLSearchParams(lastCall(api, "GET", "/v1/workflows/runs/run-1")?.query).get("organizationId")).toBe(

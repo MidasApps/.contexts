@@ -33,7 +33,7 @@ const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
 });
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminWorkflowsView />, { path: "/admin/workflows", routes: routes(), ...options });
+  renderAdmin(<AdminWorkflowsView />, { path: "/admin/platform/workflows", routes: routes(), ...options });
 
 const setOnline = (online: boolean): void => {
   Object.defineProperty(globalThis.navigator, "onLine", { configurable: true, get: () => online });
@@ -65,7 +65,7 @@ describe("AdminWorkflowsView: runs", () => {
     const toggle = screen.getByRole("button", { name: "Aguardando aprovação" });
     expect(toggle.getAttribute("aria-pressed")).toBe("false");
     await user.click(toggle);
-    expect(router.current()).toBe("/admin/workflows?status=suspended");
+    expect(router.current()).toBe("/admin/platform/workflows?status=suspended");
     await waitFor(() =>
       expect(
         api.calls.some((call) => call.path === "/v1/admin/workflow-runs" && call.query.includes("status=suspended")),
@@ -81,10 +81,10 @@ describe("AdminWorkflowsView: runs", () => {
     await user.type(field, "Usage Report");
     expect(screen.getByText("Use o id do workflow: minúsculas, números e hifens.")).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Aplicar" }));
-    expect(router.current()).toBe("/admin/workflows");
+    expect(router.current()).toBe("/admin/platform/workflows");
     await user.clear(field);
     await user.type(field, "usage-report{Enter}");
-    expect(router.current()).toBe("/admin/workflows?workflowId=usage-report");
+    expect(router.current()).toBe("/admin/platform/workflows?workflowId=usage-report");
   });
 
   it("cancels a suspended run after a destructive confirmation and reloads the list", async () => {
@@ -146,23 +146,23 @@ describe("AdminWorkflowsView: runs", () => {
       within(table).getByRole("button", { name: /^Detalhes da execução .* de Demonstração de aprovação/u }),
     );
     await screen.findByRole("dialog", { name: "Execução de Demonstração de aprovação" });
-    expect(router.current()).toBe(`/admin/workflows?run=${OPS_IDS.run}`);
+    expect(router.current()).toBe(`/admin/platform/workflows?run=${OPS_IDS.run}`);
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-    expect(router.current()).toBe("/admin/workflows");
+    expect(router.current()).toBe("/admin/platform/workflows");
   });
 
   it("opens the run of a shared link, and says so when it is not in the list", async () => {
-    const shared = render({ path: `/admin/workflows?run=${OPS_IDS.otherRun}` });
+    const shared = render({ path: `/admin/platform/workflows?run=${OPS_IDS.otherRun}` });
     expect(await screen.findByRole("dialog", { name: "Execução de Relatório de uso" })).toBeDefined();
     shared.unmount();
 
-    const { user, router, container } = render({ path: "/admin/workflows?run=01J8Z3K4M5N6P7Q8R9S0T1V2ZZ" });
+    const { user, router, container } = render({ path: "/admin/platform/workflows?run=01J8Z3K4M5N6P7Q8R9S0T1V2ZZ" });
     const dialog = await screen.findByRole("dialog", { name: "Execução não encontrada nesta lista" });
     expect(within(dialog).getByText(/pode estar em outra página ou fora dos filtros/u)).toBeDefined();
     await expectNoAxeViolations(container.ownerDocument.body);
     await user.click(within(dialog).getByRole("button", { name: "Fechar" }));
-    await waitFor(() => expect(router.current()).toBe("/admin/workflows"));
+    await waitFor(() => expect(router.current()).toBe("/admin/platform/workflows"));
   });
 
   it("pages by cursor, passing the cursor back as given", async () => {
@@ -191,17 +191,17 @@ describe("AdminWorkflowsView: runs", () => {
     const empty = render({ routes: routes({ "GET /v1/admin/workflow-runs": page([]) }) });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhuma execução ainda" })).toBeDefined();
     await empty.user.click(screen.getByRole("button", { name: "Ver agendamentos" }));
-    expect(empty.router.current()).toBe("/admin/workflows?tab=schedules");
+    expect(empty.router.current()).toBe("/admin/platform/workflows?tab=schedules");
     empty.unmount();
 
     const filtered = render({
-      path: "/admin/workflows?status=failed",
+      path: "/admin/platform/workflows?status=failed",
       routes: routes({ "GET /v1/admin/workflow-runs": page([]) }),
     });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhuma execução com esses filtros" })).toBeDefined();
     await expectNoAxeViolations(filtered.container);
     await filtered.user.click(screen.getByRole("button", { name: "Limpar filtros" }));
-    expect(filtered.router.current()).toBe("/admin/workflows");
+    expect(filtered.router.current()).toBe("/admin/platform/workflows");
   });
 
   it("shows an error with the request reference and retries", async () => {
@@ -255,7 +255,7 @@ describe("AdminWorkflowsView: runs", () => {
 
 describe("AdminWorkflowsView: schedules", () => {
   const renderSchedules = (overrides: FakeRoutes = {}, options: Parameters<typeof renderAdmin>[1] = {}) =>
-    render({ path: "/admin/workflows?tab=schedules", routes: routes(overrides), ...options });
+    render({ path: "/admin/platform/workflows?tab=schedules", routes: routes(overrides), ...options });
 
   it("lists platform and organization schedules with the next fire in the schedule's zone", async () => {
     const { container, api } = renderSchedules();
@@ -372,7 +372,7 @@ describe("AdminWorkflowsView: schedules", () => {
         "GET /v1/admin/schedules": (request) =>
           ok(request.query.get("organizationId") === null ? [buildPlatformSchedule()] : []),
       },
-      { path: `/admin/workflows?tab=schedules&organizationId=${IDS.organization}` },
+      { path: `/admin/platform/workflows?tab=schedules&organizationId=${IDS.organization}` },
     );
     expect(
       await screen.findByRole("heading", { level: 2, name: "Esta organização não tem agendamentos" }),
@@ -381,7 +381,7 @@ describe("AdminWorkflowsView: schedules", () => {
       `?organizationId=${IDS.organization}`,
     );
     await user.click(screen.getByRole("button", { name: "Ver todos" }));
-    expect(router.current()).toBe("/admin/workflows?tab=schedules");
+    expect(router.current()).toBe("/admin/platform/workflows?tab=schedules");
     expect(await screen.findByRole("row", { name: /Plataforma/u })).toBeDefined();
   });
 

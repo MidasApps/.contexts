@@ -52,7 +52,7 @@ describe("createDesktopRouterAdapter", () => {
     const { port } = setup("/");
 
     expect(port.href({ id: "project", organizationId: "a b", projectId: "p", unit: "u" })).toBe("/o/a%20b/p/p?unit=u");
-    expect(port.href({ id: "profile", section: "security" })).toBe("/profile/security");
+    expect(port.href({ id: "profile", section: "security" })).toBe("/admin/profile/security");
   });
 
   it("exposes the route-map params, the path and raw search values of the current location", async () => {
@@ -93,10 +93,10 @@ describe("createDesktopRouterAdapter", () => {
     setup("/");
     const link = await screen.findByRole("link", { name: "members" });
 
-    expect(link.getAttribute("href")).toBe("/o/org-1/settings/members");
+    expect(link.getAttribute("href")).toBe("/admin/o/org-1/members");
     await userEvent.click(link);
 
-    await vi.waitFor(() => expect(screen.getByTestId("path").textContent).toBe("/o/org-1/settings/members"));
+    await vi.waitFor(() => expect(screen.getByTestId("path").textContent).toBe("/admin/o/org-1/members"));
   });
 
   it("delegates locale switches to the desktop intl store", () => {

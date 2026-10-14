@@ -42,7 +42,7 @@ const renderView = (permissions: readonly Permission[] = READ, routes: FakeRoute
       <SettingsSkillsView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/skills`,
+      path: `/admin/o/${IDS.organization}/skills`,
       routes: shellRoutes(permissions, {
         "GET /v1/agents": ok(CATALOG),
         "GET /v1/agent-options": ok(buildCustomAgentOptions()),
@@ -85,7 +85,7 @@ describe("SettingsSkillsView", { timeout: 30_000 }, () => {
     expect(within(row).getByText("Ativada")).toBeDefined();
     expect(screen.getByText(/1 de 10 habilidades do plano em uso\./u)).toBeDefined();
     expect(screen.getByRole("link", { name: "Abrir agentes" }).getAttribute("href")).toBe(
-      `/o/${IDS.organization}/settings/agents`,
+      `/admin/o/${IDS.organization}/agents`,
     );
     expect(screen.queryByText(/não pode criar/u)).toBeNull();
   });

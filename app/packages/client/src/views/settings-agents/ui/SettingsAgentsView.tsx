@@ -15,7 +15,7 @@ import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage, QuerySection } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 import { AgentCard } from "./AgentCard.tsx";
 import { InstalledModules } from "./InstalledModules.tsx";
 import { OrganizationAgents } from "./OrganizationAgents.tsx";
@@ -156,7 +156,6 @@ function SettingsAgents({ context }: { context: AccessContext }) {
   };
   return (
     <SettingsPageFrame
-      organizationId={organization.id}
       allowed={permissions.includes("core.agent-settings.read")}
       header={
         <PageHeader
@@ -172,7 +171,7 @@ function SettingsAgents({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/agents` (SP5 spec §7, core.agent-settings.read): the agents the
+ * `/admin/o/:organizationId/agents` (SP5 spec §7, core.agent-settings.read): the agents the
  * platform and the installed modules offer to the organization, each with its switch, tools,
  * skills and the organization's instructions; the organization's own agents, which an admin
  * creates, edits, enables and deletes (decision 0046); one switch per installed module (decision

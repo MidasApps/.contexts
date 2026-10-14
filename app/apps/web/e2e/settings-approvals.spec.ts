@@ -2,6 +2,7 @@ import { signInThroughUi } from "@core/e2e/sign-in";
 import type { Page } from "@playwright/test";
 import {
   addMember,
+  approvalsPath,
   expect,
   type FreshUser,
   openAs,
@@ -12,7 +13,7 @@ import {
   unique,
 } from "./sp5-test.ts";
 
-// SP5 Task 16, `/settings/approvals` with four eyes: the owner starts `approval-demo`, which
+// SP5 Task 16, the approvals inbox (`/o/{id}/approvals`, decision 0077) with four eyes: the owner starts `approval-demo`, which
 // suspends on an approval request; the owner (the requester) sees no decision buttons and why;
 // a second administrator approves one run and rejects another from the inbox.
 
@@ -65,7 +66,7 @@ test.describe("four-eyes approvals", () => {
     const toReject = await startRunAwaitingApproval(page, sp5Org, rejectTitle);
 
     // The requester: the request is under "requested by me", the detail explains why there are no buttons.
-    await page.goto(settingsPath(sp5Org.id, "approvals"));
+    await page.goto(approvalsPath(sp5Org.id));
     await expect(page.getByRole("heading", { level: 1, name: "Aprovações" })).toBeVisible();
     await page.getByRole("tab", { name: /^Pedidas por mim \(\d+\)$/ }).click();
     await expect(page.getByRole("tabpanel").getByText(approveTitle).first()).toBeVisible();
@@ -79,7 +80,7 @@ test.describe("four-eyes approvals", () => {
 
     const approver = await signInAdmin({ browser, ownerApi, createUser, org: sp5Org });
     const admin = approver.page;
-    await admin.goto(settingsPath(sp5Org.id, "approvals"));
+    await admin.goto(approvalsPath(sp5Org.id));
     // Exactly the two requests of this test wait for this admin (one organization per test; a
     // cancelled run cancels its request, follow-up 82).
     await expect(admin.getByRole("tab", { name: "Aguardando minha decisão (2)", exact: true })).toBeVisible();
@@ -99,7 +100,7 @@ test.describe("four-eyes approvals", () => {
       .click();
     await expect(toast(admin, "Solicitação recusada.")).toBeVisible();
 
-    await admin.goto(settingsPath(sp5Org.id, "approvals"));
+    await admin.goto(approvalsPath(sp5Org.id));
     await expect(admin.getByRole("tab", { name: /^Aguardando minha decisão/ })).toHaveAttribute(
       "aria-selected",
       "true",

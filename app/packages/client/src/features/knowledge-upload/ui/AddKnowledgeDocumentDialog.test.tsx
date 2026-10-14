@@ -74,7 +74,7 @@ const setup = (
       wait={options.wait ?? noWait}
     />,
     {
-      path: `/o/${IDS.organization}/settings/knowledge`,
+      path: `/admin/o/${IDS.organization}/knowledge`,
       routes: shellRoutes(
         ["core.organization.read", "core.knowledge.read", "core.knowledge.write", "core.file.upload"],
         routes,
@@ -147,7 +147,7 @@ describe("AddKnowledgeDocumentDialog", () => {
     const { user } = renderApp(
       <Harness sendBytes={sendBytes} projectId={undefined} fileAllowed={true} wait={noWait} />,
       {
-        path: `/o/${IDS.organization}/settings/knowledge`,
+        path: `/admin/o/${IDS.organization}/knowledge`,
         routes: shellRoutes(
           ["core.organization.read", "core.knowledge.read", "core.knowledge.write", "core.file.upload"],
           {

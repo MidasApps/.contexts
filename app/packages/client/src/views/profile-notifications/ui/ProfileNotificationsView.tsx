@@ -6,9 +6,9 @@ import { NotificationPreferencesForm } from "#/features/update-preferences/index
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-nav/index.ts";
+import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-frame/index.ts";
 
-/** `/profile/notifications` (SP2 spec §8): `preferences.notifications.*` toggles. */
+/** `/admin/profile/notifications` (SP2 spec §8): `preferences.notifications.*` toggles. */
 export function ProfileNotificationsView() {
   const t = useTranslations("profile.notifications");
   const me = useMe();

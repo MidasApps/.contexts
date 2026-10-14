@@ -14,7 +14,7 @@ import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/molecules/Tabs/Tabs.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 import { DatasetItemsPanel } from "./DatasetItemsPanel.tsx";
 import { DatasetsPanel } from "./DatasetsPanel.tsx";
 import { ExperimentsPanel } from "./ExperimentsPanel.tsx";
@@ -93,7 +93,6 @@ function SettingsEvals({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={allowed}
       header={
         <PageHeader
@@ -124,7 +123,7 @@ function SettingsEvals({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/evals` (SP5 spec §7, core.eval.read): the organization's
+ * `/admin/o/:organizationId/evals` (SP5 spec §7, core.eval.read): the organization's
  * experiments with scores, verdict and a two-experiment comparison, its datasets and their items,
  * and, with core.eval.write, starting an experiment, creating a dataset and adding or deleting
  * items (decision 0062).

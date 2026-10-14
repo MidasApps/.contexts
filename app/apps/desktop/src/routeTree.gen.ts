@@ -15,12 +15,14 @@ import { Route as OrganizationsRouteImport } from './routes/organizations'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as ProfileSectionRouteImport } from './routes/profile/$section'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminProfileSectionRouteImport } from './routes/admin/profile/$section'
 import { Route as OOrganizationIdIndexRouteImport } from './routes/o/$organizationId/index'
-import { Route as OOrganizationIdSettingsIndexRouteImport } from './routes/o/$organizationId/settings/index'
+import { Route as AdminOOrganizationIdIndexRouteImport } from './routes/admin/o/$organizationId/index'
+import { Route as OOrganizationIdApprovalsChar123ApprovalRequestIdChar125RouteImport } from './routes/o/$organizationId/approvals/{-$approvalRequestId}'
+import { Route as AdminOOrganizationIdSectionSplatRouteImport } from './routes/admin/o/$organizationId/$section/$'
+import { Route as AdminOOrganizationIdMModuleIdRouteImport } from './routes/admin/o/$organizationId/m/$moduleId'
 import { Route as OOrganizationIdPProjectIdIndexRouteImport } from './routes/o/$organizationId/p/$projectId/index'
-import { Route as OOrganizationIdSettingsSectionSplatRouteImport } from './routes/o/$organizationId/settings/$section/$'
-import { Route as OOrganizationIdSettingsMModuleIdRouteImport } from './routes/o/$organizationId/settings/m/$moduleId'
 import { Route as OOrganizationIdPProjectIdChatChar123ConversationIdChar125RouteImport } from './routes/o/$organizationId/p/$projectId/chat/{-$conversationId}'
 import { Route as OOrganizationIdPProjectIdMModuleIdSplatRouteImport } from './routes/o/$organizationId/p/$projectId/m/$moduleId/$'
 
@@ -54,9 +56,14 @@ const SignUpRoute = SignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileSectionRoute = ProfileSectionRouteImport.update({
-  id: '/profile/$section',
-  path: '/profile/$section',
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProfileSectionRoute = AdminProfileSectionRouteImport.update({
+  id: '/admin/profile/$section',
+  path: '/admin/profile/$section',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OOrganizationIdIndexRoute = OOrganizationIdIndexRouteImport.update({
@@ -64,28 +71,34 @@ const OOrganizationIdIndexRoute = OOrganizationIdIndexRouteImport.update({
   path: '/o/$organizationId/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OOrganizationIdSettingsIndexRoute =
-  OOrganizationIdSettingsIndexRouteImport.update({
-    id: '/o/$organizationId/settings/',
-    path: '/o/$organizationId/settings/',
+const AdminOOrganizationIdIndexRoute =
+  AdminOOrganizationIdIndexRouteImport.update({
+    id: '/admin/o/$organizationId/',
+    path: '/admin/o/$organizationId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OOrganizationIdApprovalsChar123ApprovalRequestIdChar125Route =
+  OOrganizationIdApprovalsChar123ApprovalRequestIdChar125RouteImport.update({
+    id: '/o/$organizationId/approvals/{-$approvalRequestId}',
+    path: '/o/$organizationId/approvals/{-$approvalRequestId}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminOOrganizationIdSectionSplatRoute =
+  AdminOOrganizationIdSectionSplatRouteImport.update({
+    id: '/admin/o/$organizationId/$section/$',
+    path: '/admin/o/$organizationId/$section/$',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminOOrganizationIdMModuleIdRoute =
+  AdminOOrganizationIdMModuleIdRouteImport.update({
+    id: '/admin/o/$organizationId/m/$moduleId',
+    path: '/admin/o/$organizationId/m/$moduleId',
     getParentRoute: () => rootRouteImport,
   } as any)
 const OOrganizationIdPProjectIdIndexRoute =
   OOrganizationIdPProjectIdIndexRouteImport.update({
     id: '/o/$organizationId/p/$projectId/',
     path: '/o/$organizationId/p/$projectId/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OOrganizationIdSettingsSectionSplatRoute =
-  OOrganizationIdSettingsSectionSplatRouteImport.update({
-    id: '/o/$organizationId/settings/$section/$',
-    path: '/o/$organizationId/settings/$section/$',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OOrganizationIdSettingsMModuleIdRoute =
-  OOrganizationIdSettingsMModuleIdRouteImport.update({
-    id: '/o/$organizationId/settings/m/$moduleId',
-    path: '/o/$organizationId/settings/m/$moduleId',
     getParentRoute: () => rootRouteImport,
   } as any)
 const OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route =
@@ -108,11 +121,13 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/profile/$section': typeof ProfileSectionRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/profile/$section': typeof AdminProfileSectionRoute
   '/o/$organizationId/': typeof OOrganizationIdIndexRoute
-  '/o/$organizationId/settings/': typeof OOrganizationIdSettingsIndexRoute
-  '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
-  '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
+  '/o/$organizationId/approvals/{-$approvalRequestId}': typeof OOrganizationIdApprovalsChar123ApprovalRequestIdChar125Route
+  '/admin/o/$organizationId/': typeof AdminOOrganizationIdIndexRoute
+  '/admin/o/$organizationId/$section/$': typeof AdminOOrganizationIdSectionSplatRoute
+  '/admin/o/$organizationId/m/$moduleId': typeof AdminOOrganizationIdMModuleIdRoute
   '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
   '/o/$organizationId/p/$projectId/chat/{-$conversationId}': typeof OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route
   '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
@@ -124,11 +139,13 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/profile/$section': typeof ProfileSectionRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/profile/$section': typeof AdminProfileSectionRoute
   '/o/$organizationId': typeof OOrganizationIdIndexRoute
-  '/o/$organizationId/settings': typeof OOrganizationIdSettingsIndexRoute
-  '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
-  '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
+  '/o/$organizationId/approvals/{-$approvalRequestId}': typeof OOrganizationIdApprovalsChar123ApprovalRequestIdChar125Route
+  '/admin/o/$organizationId': typeof AdminOOrganizationIdIndexRoute
+  '/admin/o/$organizationId/$section/$': typeof AdminOOrganizationIdSectionSplatRoute
+  '/admin/o/$organizationId/m/$moduleId': typeof AdminOOrganizationIdMModuleIdRoute
   '/o/$organizationId/p/$projectId': typeof OOrganizationIdPProjectIdIndexRoute
   '/o/$organizationId/p/$projectId/chat/{-$conversationId}': typeof OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route
   '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
@@ -141,11 +158,13 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/profile/$section': typeof ProfileSectionRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/profile/$section': typeof AdminProfileSectionRoute
   '/o/$organizationId/': typeof OOrganizationIdIndexRoute
-  '/o/$organizationId/settings/': typeof OOrganizationIdSettingsIndexRoute
-  '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
-  '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
+  '/o/$organizationId/approvals/{-$approvalRequestId}': typeof OOrganizationIdApprovalsChar123ApprovalRequestIdChar125Route
+  '/admin/o/$organizationId/': typeof AdminOOrganizationIdIndexRoute
+  '/admin/o/$organizationId/$section/$': typeof AdminOOrganizationIdSectionSplatRoute
+  '/admin/o/$organizationId/m/$moduleId': typeof AdminOOrganizationIdMModuleIdRoute
   '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
   '/o/$organizationId/p/$projectId/chat/{-$conversationId}': typeof OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route
   '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
@@ -159,11 +178,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
-    | '/profile/$section'
+    | '/admin/'
+    | '/admin/profile/$section'
     | '/o/$organizationId/'
-    | '/o/$organizationId/settings/'
-    | '/o/$organizationId/settings/$section/$'
-    | '/o/$organizationId/settings/m/$moduleId'
+    | '/o/$organizationId/approvals/{-$approvalRequestId}'
+    | '/admin/o/$organizationId/'
+    | '/admin/o/$organizationId/$section/$'
+    | '/admin/o/$organizationId/m/$moduleId'
     | '/o/$organizationId/p/$projectId/'
     | '/o/$organizationId/p/$projectId/chat/{-$conversationId}'
     | '/o/$organizationId/p/$projectId/m/$moduleId/$'
@@ -175,11 +196,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
-    | '/profile/$section'
+    | '/admin'
+    | '/admin/profile/$section'
     | '/o/$organizationId'
-    | '/o/$organizationId/settings'
-    | '/o/$organizationId/settings/$section/$'
-    | '/o/$organizationId/settings/m/$moduleId'
+    | '/o/$organizationId/approvals/{-$approvalRequestId}'
+    | '/admin/o/$organizationId'
+    | '/admin/o/$organizationId/$section/$'
+    | '/admin/o/$organizationId/m/$moduleId'
     | '/o/$organizationId/p/$projectId'
     | '/o/$organizationId/p/$projectId/chat/{-$conversationId}'
     | '/o/$organizationId/p/$projectId/m/$moduleId/$'
@@ -191,11 +214,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/sign-up'
-    | '/profile/$section'
+    | '/admin/'
+    | '/admin/profile/$section'
     | '/o/$organizationId/'
-    | '/o/$organizationId/settings/'
-    | '/o/$organizationId/settings/$section/$'
-    | '/o/$organizationId/settings/m/$moduleId'
+    | '/o/$organizationId/approvals/{-$approvalRequestId}'
+    | '/admin/o/$organizationId/'
+    | '/admin/o/$organizationId/$section/$'
+    | '/admin/o/$organizationId/m/$moduleId'
     | '/o/$organizationId/p/$projectId/'
     | '/o/$organizationId/p/$projectId/chat/{-$conversationId}'
     | '/o/$organizationId/p/$projectId/m/$moduleId/$'
@@ -208,11 +233,13 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
-  ProfileSectionRoute: typeof ProfileSectionRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminProfileSectionRoute: typeof AdminProfileSectionRoute
   OOrganizationIdIndexRoute: typeof OOrganizationIdIndexRoute
-  OOrganizationIdSettingsIndexRoute: typeof OOrganizationIdSettingsIndexRoute
-  OOrganizationIdSettingsSectionSplatRoute: typeof OOrganizationIdSettingsSectionSplatRoute
-  OOrganizationIdSettingsMModuleIdRoute: typeof OOrganizationIdSettingsMModuleIdRoute
+  OOrganizationIdApprovalsChar123ApprovalRequestIdChar125Route: typeof OOrganizationIdApprovalsChar123ApprovalRequestIdChar125Route
+  AdminOOrganizationIdIndexRoute: typeof AdminOOrganizationIdIndexRoute
+  AdminOOrganizationIdSectionSplatRoute: typeof AdminOOrganizationIdSectionSplatRoute
+  AdminOOrganizationIdMModuleIdRoute: typeof AdminOOrganizationIdMModuleIdRoute
   OOrganizationIdPProjectIdIndexRoute: typeof OOrganizationIdPProjectIdIndexRoute
   OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route: typeof OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route
   OOrganizationIdPProjectIdMModuleIdSplatRoute: typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
@@ -262,11 +289,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile/$section': {
-      id: '/profile/$section'
-      path: '/profile/$section'
-      fullPath: '/profile/$section'
-      preLoaderRoute: typeof ProfileSectionRouteImport
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/profile/$section': {
+      id: '/admin/profile/$section'
+      path: '/admin/profile/$section'
+      fullPath: '/admin/profile/$section'
+      preLoaderRoute: typeof AdminProfileSectionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/o/$organizationId/': {
@@ -276,11 +310,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrganizationIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/o/$organizationId/settings/': {
-      id: '/o/$organizationId/settings/'
-      path: '/o/$organizationId/settings'
-      fullPath: '/o/$organizationId/settings/'
-      preLoaderRoute: typeof OOrganizationIdSettingsIndexRouteImport
+    '/admin/o/$organizationId/': {
+      id: '/admin/o/$organizationId/'
+      path: '/admin/o/$organizationId'
+      fullPath: '/admin/o/$organizationId/'
+      preLoaderRoute: typeof AdminOOrganizationIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$organizationId/approvals/{-$approvalRequestId}': {
+      id: '/o/$organizationId/approvals/{-$approvalRequestId}'
+      path: '/o/$organizationId/approvals/{-$approvalRequestId}'
+      fullPath: '/o/$organizationId/approvals/{-$approvalRequestId}'
+      preLoaderRoute: typeof OOrganizationIdApprovalsChar123ApprovalRequestIdChar125RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/o/$organizationId/$section/$': {
+      id: '/admin/o/$organizationId/$section/$'
+      path: '/admin/o/$organizationId/$section/$'
+      fullPath: '/admin/o/$organizationId/$section/$'
+      preLoaderRoute: typeof AdminOOrganizationIdSectionSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/o/$organizationId/m/$moduleId': {
+      id: '/admin/o/$organizationId/m/$moduleId'
+      path: '/admin/o/$organizationId/m/$moduleId'
+      fullPath: '/admin/o/$organizationId/m/$moduleId'
+      preLoaderRoute: typeof AdminOOrganizationIdMModuleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/o/$organizationId/p/$projectId/': {
@@ -288,20 +343,6 @@ declare module '@tanstack/react-router' {
       path: '/o/$organizationId/p/$projectId'
       fullPath: '/o/$organizationId/p/$projectId/'
       preLoaderRoute: typeof OOrganizationIdPProjectIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/o/$organizationId/settings/$section/$': {
-      id: '/o/$organizationId/settings/$section/$'
-      path: '/o/$organizationId/settings/$section/$'
-      fullPath: '/o/$organizationId/settings/$section/$'
-      preLoaderRoute: typeof OOrganizationIdSettingsSectionSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/o/$organizationId/settings/m/$moduleId': {
-      id: '/o/$organizationId/settings/m/$moduleId'
-      path: '/o/$organizationId/settings/m/$moduleId'
-      fullPath: '/o/$organizationId/settings/m/$moduleId'
-      preLoaderRoute: typeof OOrganizationIdSettingsMModuleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/o/$organizationId/p/$projectId/chat/{-$conversationId}': {
@@ -328,12 +369,14 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
-  ProfileSectionRoute: ProfileSectionRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminProfileSectionRoute: AdminProfileSectionRoute,
   OOrganizationIdIndexRoute: OOrganizationIdIndexRoute,
-  OOrganizationIdSettingsIndexRoute: OOrganizationIdSettingsIndexRoute,
-  OOrganizationIdSettingsSectionSplatRoute:
-    OOrganizationIdSettingsSectionSplatRoute,
-  OOrganizationIdSettingsMModuleIdRoute: OOrganizationIdSettingsMModuleIdRoute,
+  OOrganizationIdApprovalsChar123ApprovalRequestIdChar125Route:
+    OOrganizationIdApprovalsChar123ApprovalRequestIdChar125Route,
+  AdminOOrganizationIdIndexRoute: AdminOOrganizationIdIndexRoute,
+  AdminOOrganizationIdSectionSplatRoute: AdminOOrganizationIdSectionSplatRoute,
+  AdminOOrganizationIdMModuleIdRoute: AdminOOrganizationIdMModuleIdRoute,
   OOrganizationIdPProjectIdIndexRoute: OOrganizationIdPProjectIdIndexRoute,
   OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route:
     OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route,

@@ -88,7 +88,7 @@ function StartSection({ target, onTargetClear, onStarted }: StartSectionProps) {
 }
 
 /**
- * `/admin/users` (SP5 spec §6, platform.user.read): staff find a user by name, email or id
+ * `/admin/platform/users` (SP5 spec §6, platform.user.read): staff find a user by name, email or id
  * (decision 0044) and, with `platform.user.impersonate`, pick one to start SP1's support access —
  * acting as the user in one organization, read-only, for at most an hour, audited in both logs.
  * The session started in this tab stays listed until it is ended or expires; below it, the

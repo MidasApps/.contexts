@@ -59,7 +59,7 @@ describe("session entity", () => {
   });
 
   it("has no node outside an organization", () => {
-    const { result } = renderClientHook(() => useCurrentNode(), { path: "/profile/account" });
+    const { result } = renderClientHook(() => useCurrentNode(), { path: "/admin/profile/account" });
     expect(result.current).toBeNull();
   });
 });

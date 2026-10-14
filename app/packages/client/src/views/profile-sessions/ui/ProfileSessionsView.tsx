@@ -17,7 +17,7 @@ import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
-import { ProfilePageFrame } from "#/widgets/profile-nav/index.ts";
+import { ProfilePageFrame } from "#/widgets/profile-frame/index.ts";
 
 const column = dataTableColumnHelper<SessionSummary>();
 
@@ -131,7 +131,7 @@ function SessionCard({ session, onRevoke }: { session: SessionSummary; onRevoke:
 }
 
 /**
- * `/profile/sessions` (SP2 spec §8): active web and desktop sessions (browser/OS family, second
+ * `/admin/profile/sessions` (SP2 spec §8): active web and desktop sessions (browser/OS family, second
  * factor, last seen, expiry in the display time zone), "this device" marked (SP1 `current`) with
  * a sign-out instead of a revoke, revoke another one (confirmed; the row leaves at once and returns
  * if the call fails) or sign out everywhere, this device included.

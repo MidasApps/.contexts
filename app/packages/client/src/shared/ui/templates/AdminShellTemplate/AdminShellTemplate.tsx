@@ -13,9 +13,9 @@ export type AdminShellTemplateProps = {
 };
 
 /**
- * `/admin` surface frame (web only): the app-shell layout without the right panel, marked with
- * `data-surface="admin"` so the admin topbar can show its surface badge. Guarding (staff + MFA)
- * happens on the server before this renders.
+ * Frame of the administration (`/admin`, decision 0077): the app-shell layout without the right
+ * panel (no chat while configuring), marked with `data-surface="admin"`. Guarding (a session for the
+ * surface, staff + MFA for the platform console) happens before this renders.
  */
 export function AdminShellTemplate({
   sidebar,

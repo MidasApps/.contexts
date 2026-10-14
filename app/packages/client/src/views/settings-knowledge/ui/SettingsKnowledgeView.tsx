@@ -17,7 +17,7 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 import { ALL_COLLECTIONS, useKnowledgeCollection } from "../model/use-knowledge-collection.ts";
 import { useStartedIngestions } from "../model/use-started-ingestions.ts";
 import { IngestionNotices } from "./IngestionNotices.tsx";
@@ -101,7 +101,6 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={allowed}
       header={
         <PageHeader
@@ -164,7 +163,7 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/knowledge` (SP5 spec §7, core.knowledge.read): the documents agents
+ * `/admin/o/:organizationId/knowledge` (SP5 spec §7, core.knowledge.read): the documents agents
  * cite, with their indexing status; add a file or a public page (core.knowledge.write) and delete
  * (core.knowledge.delete). A collection is the organization or one of its projects: the runtime
  * scopes retrieval by those namespaces and has no custom named collections, and the page says so.

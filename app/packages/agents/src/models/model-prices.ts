@@ -33,7 +33,7 @@ export const MODEL_PRICES: Readonly<Record<string, ModelPrice>> = {
 
 /**
  * FAKE PRICES — NOT REAL. Nominal prices for the `AI_MODE=fake` models (follow-up 83), so the
- * offline ledger, `/admin/costs` and `/settings/usage` show non-zero costs end to end. They are
+ * offline ledger, `/admin/platform/costs` and `/admin/o/{id}/usage` show non-zero costs end to end. They are
  * read only through `priceTableFor("fake")`; the real table never carries a `fake/` id.
  */
 // Deliberately high (US$ 10–100 per 1M tokens): one fake chat turn of a few thousand tokens must

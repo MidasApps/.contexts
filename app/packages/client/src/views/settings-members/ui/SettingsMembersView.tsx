@@ -25,7 +25,7 @@ import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-st
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 type Grant = Member["grants"][number];
 type Actions = {
@@ -248,7 +248,6 @@ function SettingsMembers({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={allowed}
       header={
         <PageHeader
@@ -273,7 +272,7 @@ function SettingsMembers({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/members` (SP2 spec §8, core.member.read): members with every grant
+ * `/admin/o/:organizationId/members` (SP2 spec §8, core.member.read): members with every grant
  * (node + roles), give access at one more organization, project or unit and change roles per grant
  * (core.member.update), revoke one grant or remove the member (core.member.remove) and invite
  * (core.member.invite). `LAST_OWNER`/`ESCALATION_FORBIDDEN` stay in their dialogs.

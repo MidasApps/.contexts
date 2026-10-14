@@ -23,7 +23,7 @@ export function WebAppLayout({ children, sidebarDefaultOpen }: WebLayoutProps) {
   );
 }
 
-/** The `/admin` surface shell (`AdminLayout`), same sidebar cookie. */
+/** The administration's shell (`AdminLayout`, decision 0077), same sidebar cookie. */
 export function WebAdminLayout({ children, sidebarDefaultOpen }: WebLayoutProps) {
   return (
     <AdminLayout sidebarDefaultOpen={sidebarDefaultOpen} persistSidebarState={persistSidebarState}>

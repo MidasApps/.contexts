@@ -22,7 +22,7 @@ import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage, QuerySection } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 import { OrganizationSkills } from "./OrganizationSkills.tsx";
 
 const SOURCE_KEYS = { core: "sourceCore", module: "sourceModule", custom: "sourceCustom" } as const;
@@ -79,7 +79,6 @@ function SettingsSkills({ context }: { context: AccessContext }) {
   const catalog = useAgentCatalog(organization.id, { enabled: allowed });
   return (
     <SettingsPageFrame
-      organizationId={organization.id}
       allowed={allowed}
       header={
         <PageHeader
@@ -130,7 +129,7 @@ function SettingsSkills({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/skills` (core.agent-settings.read): the organization's own skills,
+ * `/admin/o/:organizationId/skills` (core.agent-settings.read): the organization's own skills,
  * which an admin creates, edits, enables and deletes (decision 0046, core.agent-settings.update),
  * and the skills its agents carry (platform, modules and its own), with the agents that use them.
  */

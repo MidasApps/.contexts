@@ -38,7 +38,7 @@ const renderView = (
       <SettingsTracesView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/traces${options.rest === undefined ? "" : `/${options.rest}`}${options.search ?? ""}`,
+      path: `/admin/o/${IDS.organization}/traces${options.rest === undefined ? "" : `/${options.rest}`}${options.search ?? ""}`,
       routes: shellRoutes(options.permissions ?? READER, { "GET /v1/traces": numberedPage([OK, FAILED]), ...routes }),
     },
   );
@@ -62,7 +62,7 @@ describe("SettingsTracesView", () => {
       "Fluxo usage-report",
     );
     expect(within(row).getByRole("link", { name: "Abrir o rastro agent run: assistant" }).getAttribute("href")).toBe(
-      `/o/${IDS.organization}/settings/traces/${OBS_IDS.trace}`,
+      `/admin/o/${IDS.organization}/traces/${OBS_IDS.trace}`,
     );
     const query = listQueries(api).at(-1);
     expect(query?.get("organizationId")).toBe(IDS.organization);
@@ -152,7 +152,7 @@ describe("SettingsTracesView", () => {
     await user.click(
       within(screen.getByRole("navigation", { name: "Páginas de rastros" })).getByRole("button", { name: /Próxima/u }),
     );
-    await waitFor(() => expect(router.current()).toBe(`/o/${IDS.organization}/settings/traces?status=error&page=3`));
+    await waitFor(() => expect(router.current()).toBe(`/admin/o/${IDS.organization}/traces?status=error&page=3`));
   });
 
   it("shows an empty state without traces", async () => {
@@ -183,7 +183,7 @@ describe("SettingsTracesView", () => {
     );
     expect(await screen.findByRole("heading", { level: 1, name: "agent run: assistant" })).toBeDefined();
     expect(screen.getByRole("link", { name: "Voltar aos rastros" }).getAttribute("href")).toBe(
-      `/o/${IDS.organization}/settings/traces`,
+      `/admin/o/${IDS.organization}/traces`,
     );
     expect(await screen.findByText("tool: searchKnowledge")).toBeDefined();
     const call = api.calls.find((entry) => entry.path === `/v1/traces/${OBS_IDS.trace}`);
@@ -191,10 +191,9 @@ describe("SettingsTracesView", () => {
     await expectNoAxeViolations(container);
   });
 
-  it("says not found inside the settings frame for a trace the viewer cannot see or a malformed id", async () => {
+  it("says not found for a trace the viewer cannot see or a malformed id", async () => {
     const first = renderView({ "GET /v1/traces/:traceId": apiError(404, "NOT_FOUND") }, { rest: OBS_IDS.otherTrace });
     expect(await screen.findByRole("heading", { name: "Rastro não encontrado" })).toBeDefined();
-    expect(screen.getByRole("navigation", { name: "Seções das configurações" })).toBeDefined();
     first.unmount();
     const { api } = renderView({}, { rest: "not-a-trace" });
     expect(await screen.findByRole("heading", { name: "Rastro não encontrado" })).toBeDefined();

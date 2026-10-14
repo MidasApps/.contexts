@@ -48,7 +48,7 @@ function Filters() {
       <button
         type="button"
         onClick={() => {
-          // Two filters changed before the URL re-renders (e2e: "De" then "Até" of /admin/traces).
+          // Two filters changed before the URL re-renders (e2e: "De" then "Até" of /admin/platform/traces).
           search.set({ status: "error" });
           search.set({ organizationId: "o2" });
         }}
@@ -69,7 +69,7 @@ function Filters() {
 describe("AdminPageFrame and AdminQuerySection", () => {
   it("shows the page with its data and actions to a role that holds the permission", async () => {
     const { container } = renderAdmin(<Plans />, {
-      path: "/admin/plans",
+      path: "/admin/platform/plans",
       routes: { "GET /v1/admin/plans": ok([buildPlan()]) },
     });
     expect(screen.getByRole("heading", { level: 1, name: "Planos" })).toBeDefined();
@@ -86,13 +86,13 @@ describe("AdminPageFrame and AdminQuerySection", () => {
   });
 
   it("drops the reserved slot once the role is known to lack the permission", async () => {
-    const { container } = renderAdmin(<Plans />, { role: "platform-support", path: "/admin/plans" });
+    const { container } = renderAdmin(<Plans />, { role: "platform-support", path: "/admin/platform/plans" });
     await screen.findByRole("heading", { level: 2, name: "Você não tem acesso a esta página" });
     expect(container.querySelector('[data-slot="page-actions"]')).toBeNull();
   });
 
   it("shows no-access when the staff role lacks the permission", async () => {
-    const { container } = renderAdmin(<Plans />, { role: "platform-support", path: "/admin/plans" });
+    const { container } = renderAdmin(<Plans />, { role: "platform-support", path: "/admin/platform/plans" });
     expect(await screen.findByRole("heading", { level: 2, name: "Você não tem acesso a esta página" })).toBeDefined();
     expect(screen.getByText(/Seu papel na equipe da plataforma não dá acesso/u)).toBeDefined();
     expect(screen.queryByRole("button", { name: "Novo" })).toBeNull();
@@ -105,7 +105,7 @@ describe("AdminPageFrame and AdminQuerySection", () => {
       await screen.findByRole("heading", { level: 2, name: "Confirme a verificação em duas etapas" }),
     ).toBeDefined();
     expect(screen.getByRole("link", { name: "Abrir segurança da conta" }).getAttribute("href")).toBe(
-      "/profile/security",
+      "/admin/profile/security",
     );
     await expectNoAxeViolations(container);
   });
@@ -133,41 +133,44 @@ describe("useAdminSearch and AdminOrganizationFilter", () => {
   const state = (): unknown => JSON.parse(screen.getByTestId("state").textContent ?? "{}");
 
   it("reads filters and the page from the URL", async () => {
-    renderAdmin(<Filters />, { path: "/admin/traces?status=error&page=3", routes });
+    renderAdmin(<Filters />, { path: "/admin/platform/traces?status=error&page=3", routes });
     expect(await screen.findByTestId("state")).toBeDefined();
     expect(state()).toEqual({ status: "error", page: 3 });
   });
 
   it("writes filters to the URL, keeps the others and returns to the first page", async () => {
-    const { user, router } = renderAdmin(<Filters />, { path: "/admin/traces?organizationId=o1&page=2", routes });
+    const { user, router } = renderAdmin(<Filters />, {
+      path: "/admin/platform/traces?organizationId=o1&page=2",
+      routes,
+    });
     await user.click(await screen.findByRole("button", { name: "só erros" }));
-    expect(router.current()).toBe("/admin/traces?organizationId=o1&status=error");
+    expect(router.current()).toBe("/admin/platform/traces?organizationId=o1&status=error");
     await user.click(screen.getByRole("button", { name: "próxima" }));
-    expect(router.current()).toBe("/admin/traces?organizationId=o1&status=error&page=2");
+    expect(router.current()).toBe("/admin/platform/traces?organizationId=o1&status=error&page=2");
     await user.click(screen.getByRole("button", { name: "limpar" }));
-    expect(router.current()).toBe("/admin/traces?organizationId=o1");
+    expect(router.current()).toBe("/admin/platform/traces?organizationId=o1");
     expect(router.history()).toHaveLength(1);
   });
 
   it("keeps both filters when two are written before the URL updates", async () => {
-    const { user, router } = renderAdmin(<Filters />, { path: "/admin/traces?page=2", routes });
+    const { user, router } = renderAdmin(<Filters />, { path: "/admin/platform/traces?page=2", routes });
     await user.click(await screen.findByRole("button", { name: "dois filtros" }));
-    expect(router.current()).toBe("/admin/traces?status=error&organizationId=o2");
+    expect(router.current()).toBe("/admin/platform/traces?status=error&organizationId=o2");
     await user.click(screen.getByRole("button", { name: "limpar" }));
-    expect(router.current()).toBe("/admin/traces?organizationId=o2");
+    expect(router.current()).toBe("/admin/platform/traces?organizationId=o2");
   });
 
   it("picks an organization by name and clears it with the all option", async () => {
-    const { user, router, container } = renderAdmin(<Filters />, { path: "/admin/traces", routes });
+    const { user, router, container } = renderAdmin(<Filters />, { path: "/admin/platform/traces", routes });
     const trigger = await screen.findByRole("combobox", { name: "Organização" });
     await waitFor(() => expect(trigger.textContent).toContain("Todas as organizações"));
     await user.click(trigger);
     await user.click(await screen.findByRole("option", { name: "Contoso" }));
-    expect(router.current()).toBe(`/admin/traces?organizationId=${IDS.otherOrganization}`);
+    expect(router.current()).toBe(`/admin/platform/traces?organizationId=${IDS.otherOrganization}`);
     await waitFor(() => expect(screen.getByRole("combobox", { name: "Organização" }).textContent).toContain("Contoso"));
     await expectNoAxeViolations(container);
     await user.click(screen.getByRole("combobox", { name: "Organização" }));
     await user.click(await screen.findByRole("option", { name: "Todas as organizações" }));
-    expect(router.current()).toBe("/admin/traces");
+    expect(router.current()).toBe("/admin/platform/traces");
   });
 });

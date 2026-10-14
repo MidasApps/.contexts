@@ -17,7 +17,7 @@ import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/molecules/Tabs/Tabs.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-frame/index.ts";
 import { RunPage } from "./RunPage.tsx";
 import { RunsSection } from "./RunsSection.tsx";
 import { SchedulesSection } from "./SchedulesSection.tsx";
@@ -44,7 +44,6 @@ function WorkflowsHome({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={canRead}
       header={
         <PageHeader
@@ -113,7 +112,6 @@ function UnknownPage({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={context.permissions.includes("core.workflow-run.read")}
       header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} />}
     >
@@ -135,7 +133,7 @@ function UnknownPage({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/workflows` (SP5 spec §7; core.workflow-run.read): the
+ * `/admin/o/:organizationId/workflows` (SP5 spec §7; core.workflow-run.read): the
  * organization's workflow runs (start, follow, cancel) and, for holders of core.schedule.read,
  * its schedules. `…/workflows/runs/:runId` is the page of one run; any other tail is not found
  * inside the settings frame.

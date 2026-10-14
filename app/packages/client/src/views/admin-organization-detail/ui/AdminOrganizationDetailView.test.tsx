@@ -13,7 +13,7 @@ import { IDS } from "#/shared/testing/fixtures.ts";
 import { AdminOrganizationDetailView } from "./AdminOrganizationDetailView.tsx";
 
 const plain = (text: string | null): string => (text ?? "").replace(/\s/gu, " ");
-const PATH = `/admin/organizations/${IDS.organization}`;
+const PATH = `/admin/platform/organizations/${IDS.organization}`;
 const NORTHWIND = buildOrganizationDetail();
 const OVERRIDE = { monthlyMicroUsd: 80_000_000, monthlyTokens: 30_000_000 };
 const OVERRIDDEN = buildOrganizationDetail({ budget: { caps: OVERRIDE, source: "override", override: OVERRIDE } });
@@ -38,7 +38,9 @@ describe("AdminOrganizationDetailView", () => {
   it("shows the organization's status, plan, cost and budget, and links to its other areas", async () => {
     const { container } = render();
     expect(await screen.findByRole("heading", { level: 1, name: "Northwind" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Organizações" }).getAttribute("href")).toBe("/admin/organizations");
+    expect(screen.getByRole("link", { name: "Organizações" }).getAttribute("href")).toBe(
+      "/admin/platform/organizations",
+    );
     const summary = section("Resumo");
     await waitFor(() => expect(within(summary).getByText("Standard")).toBeDefined());
     expect(plain(summary.textContent)).toContain("US$ 1,25");
@@ -56,7 +58,7 @@ describe("AdminOrganizationDetailView", () => {
         .map((link) => link.getAttribute("href")),
     ).toEqual(
       ["agents", "connectors", "workflows", "traces", "flags", "costs"].map(
-        (area) => `/admin/${area}?organizationId=${IDS.organization}`,
+        (area) => `/admin/platform/${area}?organizationId=${IDS.organization}`,
       ),
     );
     await expectNoAxeViolations(container);
@@ -218,7 +220,7 @@ describe("AdminOrganizationDetailView", () => {
 
   it("is not found when the API answers 404", async () => {
     render({
-      path: "/admin/organizations/Unknown0000000000001",
+      path: "/admin/platform/organizations/Unknown0000000000001",
       routes: routes(NORTHWIND, { "GET /v1/admin/organizations/:organizationId": apiError(404, "NOT_FOUND") }),
     });
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();

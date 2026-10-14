@@ -25,7 +25,7 @@ import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-tabl
 import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 const column = dataTableColumnHelper<Connector>();
 const STATUS_TONES: Record<Connector["status"], StatusTone> = {
@@ -245,7 +245,6 @@ function SettingsConnectors({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={context.permissions.includes("core.connector.read")}
       header={
         <PageHeader
@@ -308,7 +307,7 @@ function SettingsConnectors({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/connectors` (SP5 spec §7, core.connector.read): the organization's
+ * `/admin/o/:organizationId/connectors` (SP5 spec §7, core.connector.read): the organization's
  * connectors (OpenAPI, MCP, Postgres read-only, browser) with status, whether a secret is stored
  * (never the secret or its reference) and how many tools agents may call; create, edit, set the
  * secret, enable or disable and delete need core.connector.write. There is no connection test and

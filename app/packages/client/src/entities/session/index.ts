@@ -7,3 +7,4 @@ export { useMe } from "./api/use-me.ts";
 export { myOrganizationsQuery, useMyOrganizations } from "./api/use-my-organizations.ts";
 export { mySessionsQuery, SESSIONS_PAGE_LIMIT, sessionKeys, useMySessions } from "./api/use-my-sessions.ts";
 export { useUpdateMe } from "./api/use-update-me.ts";
+export { useAdminOrganizationId } from "./model/use-admin-organization-id.ts";

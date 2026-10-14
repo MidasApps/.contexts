@@ -10,7 +10,7 @@ import { useImpersonationStore } from "../model/use-impersonation-store.ts";
 
 /**
  * "Leave support mode" (decision 0047): the server ends the impersonation (audited) and the tab
- * returns to the staff account on `/admin/users`, without a new sign-in. When the staff session
+ * returns to the staff account on `/admin/platform/users`, without a new sign-in. When the staff session
  * cannot be restored (it ended, or the platform has no `/admin`), it signs out completely: never
  * stay as the user.
  */

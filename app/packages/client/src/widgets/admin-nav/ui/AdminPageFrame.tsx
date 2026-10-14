@@ -20,7 +20,7 @@ export type AdminPageFrameProps = {
   /** The page's only `h1`. */
   title: string;
   description?: string | undefined;
-  /** Parent page of a detail page (`/admin/organizations` above one organization). */
+  /** Parent page of a detail page (`/admin/platform/organizations` above one organization). */
   back?: { rest: string; label: string } | undefined;
   /** Status next to the title. */
   meta?: ReactNode;

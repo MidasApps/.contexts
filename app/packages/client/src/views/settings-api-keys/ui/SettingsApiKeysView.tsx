@@ -20,7 +20,7 @@ import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-st
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 const column = dataTableColumnHelper<ApiKey>();
 type KeyState = "active" | "revoked" | "expired";
@@ -184,7 +184,6 @@ function SettingsApiKeys({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={context.permissions.includes("core.api-key.read")}
       header={
         <PageHeader
@@ -210,7 +209,7 @@ function SettingsApiKeys({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/api-keys` (SP2 spec §8, core.api-key.read): keys (never their
+ * `/admin/o/:organizationId/api-keys` (SP2 spec §8, core.api-key.read): keys (never their
  * secrets) with node, scopes, last use, expiry and status; create (secret shown once) and revoke.
  */
 export function SettingsApiKeysView() {

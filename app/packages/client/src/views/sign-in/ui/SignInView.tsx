@@ -7,6 +7,7 @@ import { MfaChallengeForm } from "#/features/mfa-challenge/index.ts";
 import { useClientConfig } from "#/shared/config/config-context.tsx";
 import { usePlatform } from "#/shared/lib/platform/platform-context.tsx";
 import { nextRoute } from "#/shared/lib/router/entry-routes.ts";
+import { ADMIN_SURFACE_ROUTE_IDS } from "#/shared/lib/router/route-paths.ts";
 import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { useSession } from "#/shared/lib/session/session-context.tsx";
 import type { SignedOutReason } from "#/shared/lib/session/session-state.ts";
@@ -69,7 +70,8 @@ function GuideLink() {
 
 /**
  * `/sign-in?next=` (SP2 spec §4): email + password, then the second factor when the account has
- * one. A signed-in session is sent to `next` (internal routes only) or home. Brand and language
+ * one. A signed-in session is sent to `next` (internal routes only) or home. Signing in on the way
+ * to the administration (`/admin`, decision 0077) says so in the heading. Brand and language
  * picker by default (SH-12); hosts may pass their own.
  */
 export function SignInView({ brand, footer }: { brand?: ReactNode; footer?: ReactNode }) {
@@ -78,6 +80,7 @@ export function SignInView({ brand, footer }: { brand?: ReactNode; footer?: Reac
   const router = useRouter();
   const next = router.useSearchParam("next");
   const target = useMemo(() => nextRoute(next), [next]);
+  const toAdministration = ADMIN_SURFACE_ROUTE_IDS.has(target.id);
   const signedIn = session.state.status === "signed-in";
 
   // Once: after navigating, `?next=` is gone and the target would fall back to home.
@@ -108,7 +111,10 @@ export function SignInView({ brand, footer }: { brand?: ReactNode; footer?: Reac
         </>
       ) : state.status === "signed-out" ? (
         <>
-          <Heading title={t("signIn.title")} description={t("signIn.description")} />
+          <Heading
+            title={toAdministration ? t("signIn.administrationTitle") : t("signIn.title")}
+            description={toAdministration ? t("signIn.administrationDescription") : t("signIn.description")}
+          />
           <SignedOutNotice reason={state.reason} />
           <SignInForm />
           <SignUpPrompt next={next} />

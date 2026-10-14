@@ -32,15 +32,21 @@ const SAMPLES: Record<RouteId, Route[]> = {
     { id: "chat", organizationId: "org", projectId: "p1", conversationId: undefined, unit: undefined },
     { id: "chat", organizationId: "org", projectId: "p 1", conversationId: "Cv3xZ5aB7nM9qW1eR2tY", unit: "u1" },
   ],
+  approvals: [
+    { id: "approvals", organizationId: "org", approvalRequestId: undefined },
+    { id: "approvals", organizationId: "org", approvalRequestId: "Ap3rQ9vLr3TnB7pWc1aZ" },
+    { id: "approvals", organizationId: "org", approvalRequestId: undefined, search: { tab: "history" } },
+  ],
   settings: [
     { id: "settings", organizationId: "org", section: "members" },
     { id: "settings", organizationId: "org", section: "api-keys" },
-    { id: "settings", organizationId: "org", section: "approvals", rest: "Ap3rQ9vLr3TnB7pWc1aZ" },
+    { id: "settings", organizationId: "org", section: "traces", rest: "Tr3rQ9vLr3TnB7pWc1aZ" },
     { id: "settings", organizationId: "org", section: "workflows", rest: "runs/run 1" },
   ],
   "settings-index": [{ id: "settings-index", organizationId: "org" }],
   "settings-module": [{ id: "settings-module", organizationId: "org", moduleId: "example" }],
   profile: [{ id: "profile", section: "preferences" }],
+  "admin-home": [{ id: "admin-home" }],
   admin: [
     { id: "admin", rest: "" },
     { id: "admin", rest: "organizations/org-1" },
@@ -62,18 +68,9 @@ describe("route paths", () => {
     expect(routeHref({ id: "module", organizationId: "a", projectId: "b", moduleId: "example", rest: "items/1" })).toBe(
       "/o/a/p/b/m/example/items/1",
     );
-    expect(routeHref({ id: "settings-module", organizationId: "a", moduleId: "example" })).toBe(
-      "/o/a/settings/m/example",
-    );
-    expect(routeHref({ id: "settings-index", organizationId: "a" })).toBe("/o/a/settings");
-    expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", rest: "ap1" })).toBe(
-      "/o/a/settings/approvals/ap1",
-    );
-    expect(routeHref({ id: "settings", organizationId: "a", section: "workflows", rest: "runs/r1" })).toBe(
-      "/o/a/settings/workflows/runs/r1",
-    );
-    expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", search: { tab: "history" } })).toBe(
-      "/o/a/settings/approvals?tab=history",
+    expect(routeHref({ id: "approvals", organizationId: "a", approvalRequestId: "ap1" })).toBe("/o/a/approvals/ap1");
+    expect(routeHref({ id: "approvals", organizationId: "a", search: { tab: "history" } })).toBe(
+      "/o/a/approvals?tab=history",
     );
     expect(routeHref({ id: "chat", organizationId: "a", projectId: "b" })).toBe("/o/a/p/b/chat");
     expect(routeHref({ id: "chat", organizationId: "a", projectId: "b", conversationId: "c1" })).toBe(
@@ -83,17 +80,39 @@ describe("route paths", () => {
     expect(routeHref({ id: "invite", token: "t1" })).toBe("/invite#token=t1");
     expect(routeHref({ id: "sign-up", next: "/organizations" })).toBe("/sign-up?next=%2Forganizations");
     expect(routeHref({ id: "reset-password" })).toBe("/reset-password");
-    expect(routeHref({ id: "admin", rest: "" })).toBe("/admin");
-    expect(routeHref({ id: "admin", rest: "traces", search: { status: "error" } })).toBe("/admin/traces?status=error");
-    expect(routeHref({ id: "admin", rest: "traces", search: {} })).toBe("/admin/traces");
+  });
+
+  it("puts the configuration under /admin (decision 0077)", () => {
+    expect(routeHref({ id: "admin-home" })).toBe("/admin");
+    expect(routeHref({ id: "settings-index", organizationId: "a" })).toBe("/admin/o/a");
+    expect(routeHref({ id: "settings", organizationId: "a", section: "members" })).toBe("/admin/o/a/members");
+    expect(routeHref({ id: "settings", organizationId: "a", section: "workflows", rest: "runs/r1" })).toBe(
+      "/admin/o/a/workflows/runs/r1",
+    );
+    expect(routeHref({ id: "settings", organizationId: "a", section: "traces", search: { status: "error" } })).toBe(
+      "/admin/o/a/traces?status=error",
+    );
+    expect(routeHref({ id: "settings-module", organizationId: "a", moduleId: "example" })).toBe("/admin/o/a/m/example");
+    expect(routeHref({ id: "profile", section: "security" })).toBe("/admin/profile/security");
+    expect(routeHref({ id: "admin", rest: "" })).toBe("/admin/platform");
+    expect(routeHref({ id: "admin", rest: "traces", search: { status: "error" } })).toBe(
+      "/admin/platform/traces?status=error",
+    );
+    expect(routeHref({ id: "admin", rest: "traces", search: {} })).toBe("/admin/platform/traces");
   });
 
   it("returns null for paths outside the map and unknown sections", () => {
     expect(parseRoute("/nope")).toBeNull();
     expect(parseRoute("/o")).toBeNull();
-    expect(parseRoute("/o/a/settings/billing")).toBeNull();
-    expect(parseRoute("/o/a/settings/members/extra")).toBeNull();
-    expect(parseRoute("/profile/unknown")).toBeNull();
+    expect(parseRoute("/admin/o/a/billing")).toBeNull();
+    expect(parseRoute("/admin/o/a/members/extra")).toBeNull();
+    expect(parseRoute("/admin/o")).toBeNull();
+    expect(parseRoute("/admin/profile/unknown")).toBeNull();
+    expect(parseRoute("/admin/organizations")).toBeNull();
+    expect(parseRoute("/o/a/approvals/ap1/extra")).toBeNull();
+    // The paths before decision 0077 are gone.
+    expect(parseRoute("/o/a/settings/members")).toBeNull();
+    expect(parseRoute("/profile/account")).toBeNull();
     expect(parseRoute("/o/a/p/b/x")).toBeNull();
     expect(parseRoute("/o/a/p/b/chat/c1/extra")).toBeNull();
     expect(parseRoute("/docs/chat/extra")).toBeNull();

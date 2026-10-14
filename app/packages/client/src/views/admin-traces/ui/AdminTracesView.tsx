@@ -181,7 +181,7 @@ function TraceTable({ page, labels, fetching, filtering, search, onClear }: Trac
 }
 
 /**
- * `/admin/traces` (SP5 spec §6, platform.trace.read): traces of every organization, newest first,
+ * `/admin/platform/traces` (SP5 spec §6, platform.trace.read): traces of every organization, newest first,
  * filtered by organization, agent, status and days and paged by number, all in the URL. The cost
  * of a trace is what the usage ledger recorded for it. Each row opens the trace with its span tree.
  */

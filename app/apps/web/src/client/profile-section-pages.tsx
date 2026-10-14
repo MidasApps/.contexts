@@ -11,7 +11,7 @@ import { ProfileSecurityView } from "@core/client/views/profile-security";
 import { ProfileSessionsView } from "@core/client/views/profile-sessions";
 import type { ComponentType } from "react";
 
-/** The shared view of each `/profile/:section` (SP2 spec §8). */
+/** The shared view of each `/admin/profile/:section` (SP2 spec §8; decision 0077). */
 export const PROFILE_SECTION_VIEWS: Readonly<Record<ProfileSection, ComponentType>> = {
   account: ProfileAccountView,
   preferences: ProfilePreferencesView,

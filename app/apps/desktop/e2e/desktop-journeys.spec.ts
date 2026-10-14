@@ -72,7 +72,11 @@ test("edits the profile: display name, time zone and language", async ({ page, w
   await page.getByRole("button", { name: "Salvar" }).click();
   await expect(accountMenu(page, `${user.displayName} Desk`)).toBeVisible();
 
-  await openFromPalette(page, "Preferências");
+  // The profile is in the administration (decision 0077): its sidebar lists the sections.
+  await page
+    .getByRole("navigation", { name: "Seções da administração" })
+    .getByRole("link", { name: "Preferências" })
+    .click();
   await page.getByRole("combobox", { name: /^Fuso horário/ }).click();
   const zones = page.getByRole("dialog", { name: "Buscar fuso horário" });
   await zones.getByRole("combobox", { name: "Buscar fuso horário" }).fill("Tokyo");
@@ -84,9 +88,13 @@ test("edits the profile: display name, time zone and language", async ({ page, w
   await expect(page.locator("html")).toHaveAttribute("lang", "en-US");
   await expectNoAxeViolations(page);
 
-  // Profile pages sit outside any organization: the switcher offers to choose one.
+  // The administration's switcher picks the organization; its sidebar leads back to the application.
   await page.getByRole("button", { name: /, switch organization$/ }).click();
   await page.getByRole("menuitemradio", { name: world.alpha.name }).click();
+  await page
+    .getByRole("navigation", { name: "Administration sections" })
+    .getByRole("link", { name: "Open the app" })
+    .click();
   await page.getByRole("main").getByRole("link", { name: world.alpha.projects.launch.name }).click();
   await page.getByRole("navigation", { name: "Navigation" }).getByRole("link", { name: "Example" }).click();
   await expect(page.getByText("Asia/Tokyo").first()).toBeVisible();

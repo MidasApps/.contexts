@@ -4,7 +4,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { expect, test } from "./sp5-test.ts";
 
-// SP5 Task 16: `/admin/evals` shows the experiments the CI publishes and the eval sets it loads.
+// SP5 Task 16: `/admin/platform/evals` shows the experiments the CI publishes and the eval sets it loads.
 // The journey loads the eval sets into the e2e runtime's storage (`pnpm -F @core/mastra
 // evals:seed`), publishes the reports of `AI_MODE=fake pnpm evals` (app/.evals) with
 // `pnpm evals:publish` (decision 0040), then reads both in the console.
@@ -33,7 +33,7 @@ test.describe("evals", () => {
     });
     expect(stdout).toMatch(/published [1-9]\d*/);
 
-    await staffPage.goto("admin/evals");
+    await staffPage.goto("admin/platform/evals");
     const experiments = staffPage.getByRole("table", { name: "Experimentos de avaliação" });
     const latest = experiments.getByRole("row").nth(1);
     await expect(latest).toContainText(/Aprovado|Reprovado/);

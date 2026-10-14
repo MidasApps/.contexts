@@ -1,5 +1,5 @@
 import { SEED_USERS } from "@core/e2e/seed-users";
-import { accountMenu, signInThroughUi } from "@core/e2e/sign-in";
+import { accountMenu, showSidebar, signInThroughUi } from "@core/e2e/sign-in";
 import type { Page } from "@playwright/test";
 import { authFile, expect, type FreshUser, test } from "./web-test.ts";
 
@@ -30,7 +30,7 @@ const pick = async (
 
 test("edits the display name", async ({ page, world, createUser }) => {
   const user = await signInFresh(page, createUser, world.alpha.id);
-  await page.goto("profile/account");
+  await page.goto("admin/profile/account");
   const field = page.getByRole("textbox", { name: /Nome de exibição/ });
   await expect(field).toHaveValue(user.displayName);
   await field.fill(`${user.displayName} Renamed`);
@@ -44,7 +44,7 @@ test("edits the display name", async ({ page, world, createUser }) => {
 
 test("changes the language: the URL locale and the copy switch", async ({ page, world, createUser }) => {
   await signInFresh(page, createUser, world.alpha.id);
-  await page.goto("profile/preferences");
+  await page.goto("admin/profile/preferences");
   await page.getByRole("combobox", { name: /^Idioma/ }).click();
   await page.getByRole("option", { name: "English (United States)" }).click();
   await page.getByRole("button", { name: "Salvar" }).click();
@@ -63,7 +63,7 @@ test("changes time zone and currency; the example page shows the new display zon
   await page.goto(modulePage);
   await expect(page.getByText("America/Sao_Paulo").first()).toBeVisible();
 
-  await page.goto("profile/preferences");
+  await page.goto("admin/profile/preferences");
   await pick(page, { field: /^Fuso horário/, search: "Buscar fuso horário", query: "Tokyo", option: /Asia\/Tokyo/ });
   await pick(page, { field: /^Moeda/, search: "Buscar moeda", query: "USD", option: /^USD/ });
   await page.getByRole("button", { name: "Salvar" }).click();
@@ -72,7 +72,7 @@ test("changes time zone and currency; the example page shows the new display zon
   await page.goto(modulePage);
   await expect(page.getByRole("heading", { level: 1, name: "Módulo de exemplo" })).toBeVisible();
   await expect(page.getByText("Asia/Tokyo").first()).toBeVisible();
-  await page.goto("profile/preferences");
+  await page.goto("admin/profile/preferences");
   await expect(page.getByRole("combobox", { name: /^Moeda/ })).toContainText("USD");
   await expect(page.getByRole("combobox", { name: /^Fuso horário/ })).toContainText("Asia/Tokyo");
 });
@@ -82,7 +82,7 @@ test.describe("theme", () => {
 
   test("applies the chosen theme at once and keeps it after a reload", async ({ page, world, createUser }) => {
     await signInFresh(page, createUser, world.alpha.id);
-    await page.goto("profile/preferences");
+    await page.goto("admin/profile/preferences");
     const html = page.locator("html");
     await expect(html).toHaveAttribute("data-theme", "light");
     const saved = page.waitForResponse(
@@ -106,7 +106,7 @@ test("revokes another session, which then has to sign in again", async ({ page, 
   const otherPage = await other.newPage();
   await signInThroughUi(otherPage, user);
 
-  await page.goto("profile/sessions");
+  await page.goto("admin/profile/sessions");
   const revoke = page.getByRole("button", { name: /^Revogar sessão de / });
   await expect(revoke).toHaveCount(1);
   await revoke.click();
@@ -145,15 +145,19 @@ test.describe("section navigation", () => {
     await page.goto(`o/${world.alpha.id}`);
     await (await accountMenu(page, SEED_USERS.owner.displayName)).click();
     await page.getByRole("menuitem", { name: "Conta" }).click();
-    await expect(page).toHaveURL(/\/profile\/account$/);
-    const sections = page.getByRole("navigation", { name: "Seções do perfil" });
+    await expect(page).toHaveURL(/\/admin\/profile\/account$/);
+    // The administration's sidebar lists the profile sections (decision 0077); on phones it is a sheet.
+    const sections = page
+      .getByRole("navigation", { name: "Seções da administração" })
+      .getByRole("list", { name: "Minha conta" });
     for (const [name, section] of PROFILE_SECTION_LINKS) {
+      await showSidebar(page);
       await sections.getByRole("link", { name, exact: true }).click();
-      await expect(page).toHaveURL(new RegExp(`/profile/${section}$`));
+      await expect(page).toHaveURL(new RegExp(`/admin/profile/${section}$`));
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     }
     for (const [, section] of PROFILE_SECTION_LINKS) {
-      await page.goto(`profile/${section}`);
+      await page.goto(`admin/profile/${section}`);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     }
     expect(rscRequests).toBeGreaterThan(0);

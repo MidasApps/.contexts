@@ -26,7 +26,7 @@ function ModelsContent({ settings }: { settings: ModelSettings }) {
 }
 
 /**
- * `/admin/models` (decision 0072, platform.model.manage): the model each runtime role runs on and
+ * `/admin/platform/models` (decision 0072, platform.model.manage): the model each runtime role runs on and
  * the price of each model, saved together. Roles the environment fixes are shown read only.
  */
 export function AdminModelsView() {

@@ -330,7 +330,7 @@ function FlagsContent({ flags, onReload }: { flags: readonly FeatureFlag[]; onRe
 }
 
 /**
- * `/admin/flags` (SP5 spec §5–§6, platform.flag.manage): every flag of the code registry with its
+ * `/admin/platform/flags` (SP5 spec §5–§6, platform.flag.manage): every flag of the code registry with its
  * owner, reason, kind and expiry, a warning for expired flags, the environment value behind a
  * confirmation and, for the organization in the URL, its override (set, or removed so the
  * environment value applies again). Writes wait for the connection.

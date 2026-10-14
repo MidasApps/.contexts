@@ -80,7 +80,7 @@ const MetadataSchema = z.looseObject({
   agentId: z.string().optional(),
 });
 
-/** One experiment as `/admin/evals` and `/settings/evals` list it; `null` when it does not fit the contract. */
+/** One experiment as `/admin/platform/evals` and `/admin/o/{id}/evals` list it; `null` when it does not fit the contract. */
 export const summarizeExperiment = (experiment: StoredExperiment): EvalExperimentSummary | null => {
   const metadata = MetadataSchema.safeParse(experiment.metadata ?? {});
   const meta = metadata.success ? metadata.data : {};

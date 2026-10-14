@@ -28,7 +28,7 @@ const routes = (traces: readonly unknown[] = [OK, FAILED], hasMore = false) => (
 });
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminTracesView />, { path: "/admin/traces", routes: routes(), ...options });
+  renderAdmin(<AdminTracesView />, { path: "/admin/platform/traces", routes: routes(), ...options });
 const traceCalls = (api: { calls: { path: string; query: string }[] }): string[] =>
   api.calls.filter((call) => call.path === "/v1/admin/traces").map((call) => call.query);
 
@@ -47,7 +47,7 @@ describe("AdminTracesView", () => {
     expect(plain(ok.textContent)).toContain("1.800 / 350");
     expect(plain(ok.textContent)).toContain("US$ 0,0009");
     expect(within(ok).getByRole("link", { name: "Abrir o trace agent run: assistant" }).getAttribute("href")).toBe(
-      `/admin/traces/${OBS_IDS.trace}`,
+      `/admin/platform/traces/${OBS_IDS.trace}`,
     );
     const failed = within(table).getByRole("row", { name: /usage-report/u });
     expect(within(failed).getByText("Plataforma")).toBeDefined();
@@ -60,7 +60,7 @@ describe("AdminTracesView", () => {
 
   it("sends the filters and the page of the URL to the API (page from 0)", async () => {
     const { api } = render({
-      path: `/admin/traces?status=error&agentId=assistant&organizationId=${IDS.organization}&page=3`,
+      path: `/admin/platform/traces?status=error&agentId=assistant&organizationId=${IDS.organization}&page=3`,
     });
     await screen.findByRole("table", { name: "Traces de execução" });
     expect(traceCalls(api)).toEqual([
@@ -69,7 +69,7 @@ describe("AdminTracesView", () => {
   });
 
   it("sends the days of the URL as instants: from the start of the first to the end of the last, in the browser's zone", async () => {
-    const { api } = render({ path: "/admin/traces?from=2026-09-29&to=2026-09-30" });
+    const { api } = render({ path: "/admin/platform/traces?from=2026-09-29&to=2026-09-30" });
     await screen.findByRole("table", { name: "Traces de execução" });
     const sent = new URLSearchParams(traceCalls(api)[0]);
     expect(sent.get("startedAfter")).toBe(new Date(2026, 8, 29).toISOString());
@@ -91,16 +91,16 @@ describe("AdminTracesView", () => {
   });
 
   it("writes a picked day to the URL, back on the first page, and ignores a day that does not exist", async () => {
-    const { router, api } = render({ path: "/admin/traces?page=2&from=2026-02-31" });
+    const { router, api } = render({ path: "/admin/platform/traces?page=2&from=2026-02-31" });
     await screen.findByRole("table", { name: "Traces de execução" });
     expect(new URLSearchParams(traceCalls(api)[0]).has("startedAfter")).toBe(false);
     fireEvent.change(screen.getByLabelText("Até"), { target: { value: "2026-09-30" } });
-    await waitFor(() => expect(router.current()).toBe("/admin/traces?from=2026-02-31&to=2026-09-30"));
+    await waitFor(() => expect(router.current()).toBe("/admin/platform/traces?from=2026-02-31&to=2026-09-30"));
     await waitFor(() =>
       expect(new URLSearchParams(traceCalls(api).at(-1)).get("startedBefore")).toBe(new Date(2026, 9, 1).toISOString()),
     );
     fireEvent.change(screen.getByLabelText("Até"), { target: { value: "" } });
-    await waitFor(() => expect(router.current()).toBe("/admin/traces?from=2026-02-31"));
+    await waitFor(() => expect(router.current()).toBe("/admin/platform/traces?from=2026-02-31"));
   });
 
   it("applies a typed agent on submit, refuses an invalid key and writes the status to the URL", async () => {
@@ -111,18 +111,18 @@ describe("AdminTracesView", () => {
     await user.click(screen.getByRole("button", { name: "Filtrar" }));
     expect(await screen.findByRole("alert")).toBeDefined();
     expect(agent.getAttribute("aria-invalid")).toBe("true");
-    expect(router.current()).toBe("/admin/traces");
+    expect(router.current()).toBe("/admin/platform/traces");
     await user.clear(agent);
     await user.type(agent, "knowledge{Enter}");
-    expect(router.current()).toBe("/admin/traces?agentId=knowledge");
+    expect(router.current()).toBe("/admin/platform/traces?agentId=knowledge");
     await waitFor(() => expect(traceCalls(api).at(-1)).toBe("?page=0&perPage=20&agentId=knowledge"));
     await user.click(screen.getByRole("combobox", { name: "Status" }));
     await user.click(await screen.findByRole("option", { name: "Erro" }));
-    expect(router.current()).toBe("/admin/traces?agentId=knowledge&status=error");
+    expect(router.current()).toBe("/admin/platform/traces?agentId=knowledge&status=error");
   });
 
   it("ignores an invalid agent key in a hand-edited URL", async () => {
-    const { api } = render({ path: "/admin/traces?agentId=Bad%20Key&status=nope" });
+    const { api } = render({ path: "/admin/platform/traces?agentId=Bad%20Key&status=nope" });
     await screen.findByRole("table", { name: "Traces de execução" });
     expect(traceCalls(api)).toEqual(["?page=0&perPage=20"]);
   });
@@ -132,20 +132,20 @@ describe("AdminTracesView", () => {
     const pages = await screen.findByRole("navigation", { name: "Páginas de traces" });
     expect(within(pages).getByRole("button", { name: "Anterior" }).hasAttribute("disabled")).toBe(true);
     await user.click(within(pages).getByRole("button", { name: "Próxima" }));
-    expect(router.current()).toBe("/admin/traces?page=2");
+    expect(router.current()).toBe("/admin/platform/traces?page=2");
     await waitFor(() => expect(traceCalls(api).at(-1)).toBe("?page=1&perPage=20"));
   });
 
   it("tells an empty platform from filters that match nothing", async () => {
     const empty = render({ routes: routes([]) });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhum trace ainda" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Ver os logs" }).getAttribute("href")).toBe("/admin/logs");
+    expect(screen.getByRole("link", { name: "Ver os logs" }).getAttribute("href")).toBe("/admin/platform/logs");
     await expectNoAxeViolations(empty.container);
     empty.unmount();
-    const { user, router } = render({ path: "/admin/traces?status=error", routes: routes([]) });
+    const { user, router } = render({ path: "/admin/platform/traces?status=error", routes: routes([]) });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhum trace com esses filtros" })).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Limpar filtros" }));
-    expect(router.current()).toBe("/admin/traces");
+    expect(router.current()).toBe("/admin/platform/traces");
   });
 
   it("shows an error with the request reference and a retry", async () => {

@@ -47,11 +47,15 @@ const USER_PAGES: PageCase[] = [
   { name: "organizations", path: () => "organizations", heading: "Organizações" },
   ...SETTINGS.map(([section, heading]) => ({
     name: `settings ${section}`,
-    path: (world: World) => `${org(world)}/settings/${section}`,
+    path: (world: World) => `admin/${org(world)}/${section}`,
     heading,
   })),
-  { name: "module settings", path: (world) => `${org(world)}/settings/m/example`, heading: "Exemplo" },
-  ...PROFILE.map(([section, heading]) => ({ name: `profile ${section}`, path: () => `profile/${section}`, heading })),
+  { name: "module settings", path: (world) => `admin/${org(world)}/m/example`, heading: "Exemplo" },
+  ...PROFILE.map(([section, heading]) => ({
+    name: `profile ${section}`,
+    path: () => `admin/profile/${section}`,
+    heading,
+  })),
 ];
 
 // A cold page restores the session (cookie exchange + Firebase custom token) before its queries
@@ -134,7 +138,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     });
 
     test("confirmation dialog open", async ({ page, world }) => {
-      await page.goto(`${org(world)}/settings/members`);
+      await page.goto(`admin/${org(world)}/members`);
       await settle(page, "Membros");
       await page
         .getByRole("button", { name: /^Remover (?!Demo Owner)/ })
@@ -147,7 +151,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     });
 
     test("second-factor enrollment dialog open", async ({ page }) => {
-      await page.goto("profile/security");
+      await page.goto("admin/profile/security");
       await settle(page, "Segurança");
       // The emulator offers SMS only (it does not implement TOTP); both factors use the same dialog frame.
       await page.getByRole("button", { name: "Adicionar telefone" }).click();
@@ -161,7 +165,7 @@ for (const colorScheme of ["light", "dark"] as const) {
 
       test("admin home", async ({ page }) => {
         await page.goto("admin");
-        await settle(page, "Administração da plataforma");
+        await settle(page, "Console da plataforma");
         await expectNoAxeViolations(page);
       });
     });
@@ -171,8 +175,8 @@ for (const colorScheme of ["light", "dark"] as const) {
 test.describe("axe in en-US", () => {
   const EN_PAGES: PageCase[] = [
     { name: "organization home", path: org, heading: "Alpha Org" },
-    { name: "settings members", path: (world) => `${org(world)}/settings/members`, heading: "Members" },
-    { name: "profile preferences", path: () => "profile/preferences", heading: "Preferences" },
+    { name: "settings members", path: (world) => `admin/${org(world)}/members`, heading: "Members" },
+    { name: "profile preferences", path: () => "admin/profile/preferences", heading: "Preferences" },
   ];
 
   test("sign-in page", async ({ browser }) => {
@@ -197,8 +201,8 @@ test.describe("axe in en-US", () => {
 test.describe("axe in es-419", () => {
   const ES_PAGES: PageCase[] = [
     { name: "organizations", path: () => "organizations", heading: "Organizaciones" },
-    { name: "settings members", path: (world) => `${org(world)}/settings/members`, heading: "Miembros" },
-    { name: "profile security", path: () => "profile/security", heading: "Seguridad" },
+    { name: "settings members", path: (world) => `admin/${org(world)}/members`, heading: "Miembros" },
+    { name: "profile security", path: () => "admin/profile/security", heading: "Seguridad" },
   ];
 
   test("sign-in page", async ({ browser }) => {
@@ -261,7 +265,7 @@ test.describe("axe on the second-factor step and the support access banner", () 
     await expectNoAxeViolations(page);
 
     await page.getByRole("button", { name: "Sair do modo suporte" }).click();
-    await expect(page).toHaveURL(/\/pt-BR\/admin\/users$/, { timeout: SETTLE_TIMEOUT_MS });
+    await expect(page).toHaveURL(/\/pt-BR\/admin\/platform\/users$/, { timeout: SETTLE_TIMEOUT_MS });
     await staff.close();
   });
 });

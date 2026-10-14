@@ -22,15 +22,23 @@ const SAMPLES: Record<RouteId, readonly Route[]> = {
     { id: "chat", organizationId: "org-1", projectId: "p-1" },
     { id: "chat", organizationId: "org-1", projectId: "p-1", conversationId: "Cv3xZ5aB7nM9qW1eR2tY" },
   ],
+  approvals: [
+    { id: "approvals", organizationId: "org-1" },
+    { id: "approvals", organizationId: "org-1", approvalRequestId: "ap-1" },
+  ],
   settings: [
     { id: "settings", organizationId: "org-1", section: "members" },
-    { id: "settings", organizationId: "org-1", section: "approvals", rest: "ap-1" },
+    { id: "settings", organizationId: "org-1", section: "traces", rest: "tr-1" },
     { id: "settings", organizationId: "org-1", section: "workflows", rest: "runs/run-1" },
   ],
   "settings-index": [{ id: "settings-index", organizationId: "org-1" }],
   "settings-module": [{ id: "settings-module", organizationId: "org-1", moduleId: "example" }],
   profile: [{ id: "profile", section: "security" }],
-  admin: [{ id: "admin", rest: "" }],
+  "admin-home": [{ id: "admin-home" }],
+  admin: [
+    { id: "admin", rest: "" },
+    { id: "admin", rest: "organizations/org-1" },
+  ],
   docs: [{ id: "docs", page: "" }],
 };
 
@@ -46,10 +54,12 @@ const DESKTOP_ROUTE: Record<Exclude<RouteId, "admin" | "docs">, string> = {
   project: "/o/$organizationId/p/$projectId/",
   module: "/o/$organizationId/p/$projectId/m/$moduleId/$",
   chat: "/o/$organizationId/p/$projectId/chat/{-$conversationId}",
-  settings: "/o/$organizationId/settings/$section/$",
-  "settings-index": "/o/$organizationId/settings/",
-  "settings-module": "/o/$organizationId/settings/m/$moduleId",
-  profile: "/profile/$section",
+  approvals: "/o/$organizationId/approvals/{-$approvalRequestId}",
+  settings: "/admin/o/$organizationId/$section/$",
+  "settings-index": "/admin/o/$organizationId/",
+  "settings-module": "/admin/o/$organizationId/m/$moduleId",
+  profile: "/admin/profile/$section",
+  "admin-home": "/admin/",
 };
 
 // Matching only: no component renders, so the app in the context is never read.
@@ -74,7 +84,7 @@ describe("desktop route tree", () => {
     expect(match).toEqual({ routeId: DESKTOP_ROUTE[id as Exclude<RouteId, "admin" | "docs">], notFound: false });
   });
 
-  it("has no /admin surface: the web-only routes are not found on desktop", async () => {
+  it("has no platform console nor guide: the web-only routes are not found on desktop", async () => {
     for (const id of WEB_ONLY_ROUTE_IDS) {
       for (const route of SAMPLES[id]) expect((await matchHref(routeHref(route))).notFound).toBe(true);
     }

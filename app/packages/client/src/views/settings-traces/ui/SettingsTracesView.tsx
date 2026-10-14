@@ -11,7 +11,7 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage, QuerySection } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-frame/index.ts";
 import { TraceDetail } from "./TraceDetail.tsx";
 import { TraceList } from "./TraceList.tsx";
 
@@ -38,7 +38,6 @@ function TracesPage({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={context.permissions.includes(READ)}
       header={
         <PageHeader
@@ -64,7 +63,6 @@ function TraceDetailPage({ context, traceId }: { context: AccessContext; traceId
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={allowed}
       header={
         <PageHeader
@@ -93,7 +91,7 @@ function TraceDetailPage({ context, traceId }: { context: AccessContext; traceId
 }
 
 /**
- * `/o/:organizationId/settings/traces` and `…/traces/:traceId` (SP5 spec §7, core.trace.read):
+ * `/admin/o/:organizationId/traces` and `…/traces/:traceId` (SP5 spec §7, core.trace.read):
  * the organization's own agent and workflow runs, and one run's span tree. The API forces the
  * tenant; the page also sends the organization and keys its cache by it.
  */

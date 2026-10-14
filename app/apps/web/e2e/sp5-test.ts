@@ -5,7 +5,7 @@ import { joinOrganization, type RoleRef } from "@core/e2e/seed-users";
 import type { Browser, BrowserContext, Page } from "@playwright/test";
 import { authFile, test as base, expect, type FreshUser } from "./web-test.ts";
 
-// The `/admin` and `/settings` journeys of SP5 (Task 16). Each test gets its own organization (one
+// The platform console and organization administration journeys of SP5 (Task 16). Each test gets its own organization (one
 // per worker made empty states depend on file order), so the seeded "Alpha Org" and "Beta Org" stay as the SP2 specs expect them, and every journey
 // fails when the browser console shows an error or a warning it did not declare.
 
@@ -86,9 +86,13 @@ export const test = base.extend<Sp5Fixtures>({
   },
 });
 
-/** `/o/{id}/settings/{section}` relative to the pt-BR base URL. */
+/** `/admin/o/{id}/{section}` (an organization's administration) relative to the pt-BR base URL. */
 export const settingsPath = (organizationId: string, section: string, rest?: string): string =>
-  `o/${organizationId}/settings/${section}${rest === undefined ? "" : `/${rest}`}`;
+  `admin/o/${organizationId}/${section}${rest === undefined ? "" : `/${rest}`}`;
+
+/** `/o/{id}/approvals[/{requestId}]`: the approvals inbox lives in the application (decision 0077). */
+export const approvalsPath = (organizationId: string, approvalRequestId?: string): string =>
+  `o/${organizationId}/approvals${approvalRequestId === undefined ? "" : `/${approvalRequestId}`}`;
 
 /** A table row on wide screens, a card (list item) on phones. */
 export const entry = (page: Page, text: string | RegExp) =>

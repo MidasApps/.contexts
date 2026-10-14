@@ -45,7 +45,8 @@
   },
   "nav": {
     "organizationHome": "Projects",
-    "organizationSettings": "Settings",
+    "approvals": "Approvals",
+    "administration": "Administration",
     "projectHome": "Overview",
     "settings": {
       "general": "General",
@@ -60,7 +61,6 @@
       "knowledge": "Knowledge base",
       "connectors": "Connectors",
       "workflows": "Workflows and schedules",
-      "approvals": "Approvals",
       "usage": "Usage and budget",
       "traces": "Traces",
       "evals": "Evaluations",

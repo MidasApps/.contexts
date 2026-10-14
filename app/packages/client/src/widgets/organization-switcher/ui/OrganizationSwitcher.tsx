@@ -5,6 +5,7 @@ import { useTranslations } from "use-intl";
 import { OrganizationAvatar, orderByLastUsed } from "#/entities/organization/index.ts";
 import { useAccessContext, useCurrentNode, useMe, useMyOrganizations } from "#/entities/session/index.ts";
 import { useIsSwitchingOrganization, useSwitchOrganization } from "#/features/switch-organization/index.ts";
+import type { Route } from "#/shared/lib/router/route-paths.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
@@ -22,11 +23,13 @@ import {
 import { useSidebar } from "#/shared/ui/organisms/Sidebar/sidebar-context.tsx";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "#/shared/ui/organisms/Sidebar/sidebar-menu.tsx";
 
-function OrganizationItems({ currentId }: { currentId: string | undefined }) {
+type Destination = (organizationId: string) => Route;
+
+function OrganizationItems({ currentId, destination }: { currentId: string | undefined; destination: Destination }) {
   const t = useTranslations("shell.switcher");
   const me = useMe();
   const organizations = useMyOrganizations();
-  const switchOrganization = useSwitchOrganization();
+  const switchOrganization = useSwitchOrganization(destination);
   const switching = useIsSwitchingOrganization();
   if (organizations.isPending) {
     return (
@@ -68,15 +71,28 @@ function OrganizationItems({ currentId }: { currentId: string | undefined }) {
   );
 }
 
+export type OrganizationSwitcherProps = {
+  /** The organization shown as current; default the one in the URL. */
+  organizationId?: string | undefined;
+  /** Where picking an organization leads; default its home in the application. */
+  destination?: Destination | undefined;
+  /** The caption under the name ("Organization"; the administration says so). */
+  caption?: string | undefined;
+};
+
+const ORGANIZATION_HOME: Destination = (organizationId) => ({ id: "organization", organizationId });
+
 /**
  * Organization switcher at the top of the sidebar (shadcn block `sidebar-07` team switcher): the
  * current organization, the user's organizations (last used first) as a radio group, and links to
- * create one or see all. Picking another runs the switch flow (`useSwitchOrganization`).
+ * create one or see all. Picking another runs the switch flow (`useSwitchOrganization`)
+ * and lands on `destination`: the application and the administration share the switcher.
  */
-export function OrganizationSwitcher() {
+export function OrganizationSwitcher({ organizationId, destination, caption }: OrganizationSwitcherProps) {
   const t = useTranslations("shell.switcher");
   const { isMobile } = useSidebar();
-  const node = useCurrentNode();
+  const urlNode = useCurrentNode();
+  const node = organizationId === undefined ? urlNode : { organizationId };
   const context = useAccessContext(node);
   const current = context.data?.organization;
   const loadingName = node !== null && context.isPending;
@@ -112,7 +128,9 @@ export function OrganizationSwitcher() {
                   ) : (
                     <span className="truncate text-body font-medium">{name}</span>
                   )}
-                  <span className="truncate text-caption text-muted-foreground">{t("organizationLabel")}</span>
+                  <span className="truncate text-caption text-muted-foreground">
+                    {caption ?? t("organizationLabel")}
+                  </span>
                 </span>
                 {switching ? (
                   <Spinner decorative className="ms-auto" />
@@ -128,7 +146,7 @@ export function OrganizationSwitcher() {
               className="w-(--radix-dropdown-menu-trigger-width) min-w-60"
             >
               <DropdownMenuLabel>{t("organizations")}</DropdownMenuLabel>
-              <OrganizationItems currentId={node?.organizationId} />
+              <OrganizationItems currentId={node?.organizationId} destination={destination ?? ORGANIZATION_HOME} />
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <RouteLink to={{ id: "organizations" }}>

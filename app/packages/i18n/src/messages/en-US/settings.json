@@ -1,7 +1,4 @@
 {
-  "navLabel": "Settings sections",
-  "navLoading": "Loading sections…",
-  "navPicker": "Section",
   "indexLoading": "Opening settings…",
   "noAccessDescription": "Ask an organization administrator to give you access to this section.",
   "nodes": {
@@ -1032,6 +1029,7 @@
     "title": "Approvals",
     "description": "Actions that need the decision of a second person before they run. The person who asks never approves their own request.",
     "loading": "Loading approvals",
+    "noAccessDescription": "Ask an organization administrator to give you access to approvals.",
     "historyPagination": "History pages",
     "truncatedTitle": "Not every pending request was loaded",
     "truncatedDescription": "Showing the first {count}, the limit of this list. Decide these to see the rest.",

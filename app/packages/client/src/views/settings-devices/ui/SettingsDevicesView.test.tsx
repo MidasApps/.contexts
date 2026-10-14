@@ -25,7 +25,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsDevicesView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/devices`,
+      path: `/admin/o/${IDS.organization}/devices`,
       routes: shellRoutes(permissions, {
         "GET /v1/organizations/:organizationId/devices": page([buildDevice()]),
         "GET /v1/organizations/:organizationId/roles": page([]),

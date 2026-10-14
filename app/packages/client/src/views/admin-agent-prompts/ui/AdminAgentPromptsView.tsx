@@ -256,7 +256,7 @@ function AgentPrompts({ agentId }: { agentId: PromptAgentId }) {
 }
 
 /**
- * `/admin/agents/:agentId/prompts` (SP5 spec §6, platform.prompt.manage): the platform prompt of a
+ * `/admin/platform/agents/:agentId/prompts` (SP5 spec §6, platform.prompt.manage): the platform prompt of a
  * core agent — versions (append-only), eval runs, eval-gated activation, forced activation with a
  * reason, rollback (activating an older version), a line diff between two versions and the
  * activation history. An agent without a versioned prompt is not found.

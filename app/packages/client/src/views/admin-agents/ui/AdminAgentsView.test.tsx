@@ -9,7 +9,7 @@ import { IDS } from "#/shared/testing/fixtures.ts";
 import { AdminAgentsView } from "./AdminAgentsView.tsx";
 
 const SETTINGS_PATH = "/v1/admin/organizations/:organizationId/agent-settings";
-const WITH_ORGANIZATION = `/admin/agents?organizationId=${IDS.organization}`;
+const WITH_ORGANIZATION = `/admin/platform/agents?organizationId=${IDS.organization}`;
 
 const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
   "GET /v1/admin/organizations": page([
@@ -22,7 +22,7 @@ const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
 });
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminAgentsView />, { path: "/admin/agents", routes: routes(), ...options });
+  renderAdmin(<AdminAgentsView />, { path: "/admin/platform/agents", routes: routes(), ...options });
 
 const setOnline = (online: boolean): void => {
   Object.defineProperty(globalThis.navigator, "onLine", { configurable: true, get: () => online });
@@ -48,7 +48,7 @@ describe("AdminAgentsView", () => {
     expect(within(assistant).getByText("example-notes")).toBeDefined();
     expect(within(assistant).getByText("Mais as ferramentas dos conectores e das opções da organização")).toBeDefined();
     expect(within(assistant).getByRole("link", { name: "Ver prompts de Assistente" }).getAttribute("href")).toBe(
-      "/admin/agents/assistant/prompts",
+      "/admin/platform/agents/assistant/prompts",
     );
     expect(within(ping).getByText("Entrada")).toBeDefined();
     expect(within(ping).queryByRole("link")).toBeNull();
@@ -94,7 +94,7 @@ describe("AdminAgentsView", () => {
     await expectNoAxeViolations(container);
     await user.click(screen.getByRole("button", { name: "Escolher organização" }));
     await user.click(await screen.findByRole("option", { name: "Contoso" }));
-    expect(router.current()).toBe(`/admin/agents?organizationId=${IDS.otherOrganization}`);
+    expect(router.current()).toBe(`/admin/platform/agents?organizationId=${IDS.otherOrganization}`);
     const knowledge = await screen.findByRole("switch", { name: "Conhecimento" });
     // The hint is the agent's role in words, not its key.
     expect(knowledge.getAttribute("aria-describedby")).not.toBeNull();

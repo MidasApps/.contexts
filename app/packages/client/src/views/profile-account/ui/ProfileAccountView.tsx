@@ -9,7 +9,7 @@ import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-nav/index.ts";
+import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-frame/index.ts";
 
 function AccountSections({ me }: { me: Me }) {
   const t = useTranslations("profile.account");
@@ -44,7 +44,7 @@ function AccountSections({ me }: { me: Me }) {
   );
 }
 
-/** `/profile/account` (SP2 spec §8): who the user is (email, MFA state) and the display name. */
+/** `/admin/profile/account` (SP2 spec §8): who the user is (email, MFA state) and the display name. */
 export function ProfileAccountView() {
   const t = useTranslations("profile.account");
   const me = useMe();

@@ -103,7 +103,7 @@ const languageModelOf = (registry: ProviderRegistry, modelId: string): LanguageM
 
 /**
  * A model that picks its target on every call: agents, memory and guardrails keep one object for
- * the life of the process, and the role behind it may change in `/admin/models` (decision 0072).
+ * the life of the process, and the role behind it may change in `/admin/platform/models` (decision 0072).
  */
 const roleModel = (registry: ProviderRegistry, modelIdNow: () => string): LanguageModelV4 => {
   const built = new Map<string, LanguageModelV4>();

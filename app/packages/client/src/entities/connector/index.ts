@@ -5,7 +5,7 @@ export {
   connectorKeys,
   useAdminConnectors,
 } from "./api/connector-queries.ts";
-// SP5 Task 14: the organization's own connectors (`/settings/connectors`).
+// SP5 Task 14: the organization's own connectors (`/admin/o/{id}/connectors`).
 export {
   TENANT_CONNECTORS_PAGE_LIMIT,
   tenantConnectorKeys,

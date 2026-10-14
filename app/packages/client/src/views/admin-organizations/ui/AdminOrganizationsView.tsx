@@ -257,7 +257,7 @@ function OrganizationsList({ plans }: { plans: readonly Plan[] | undefined }) {
 }
 
 /**
- * `/admin/organizations` (SP5 spec §6, platform.organization.read): every organization with its
+ * `/admin/platform/organizations` (SP5 spec §6, platform.organization.read): every organization with its
  * status, plan, cost month to date and budget. The search (words of the name or id) and the status
  * filter are in the URL and run on the server, one cursor page at a time (decision 0044). Plan
  * names need `platform.plan.manage`; without it the plan id is shown.

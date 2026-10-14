@@ -16,7 +16,7 @@ import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-tabl
 import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 const column = dataTableColumnHelper<Role>();
 /** `waiting`: the permission registry is still loading, so editing (which needs the picker) waits too. */
@@ -177,7 +177,6 @@ function SettingsRoles({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={context.permissions.includes("core.role.read")}
       header={
         <PageHeader
@@ -221,7 +220,7 @@ function SettingsRoles({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/roles` (SP2 spec §8, core.role.read): custom roles (create, edit
+ * `/admin/o/:organizationId/roles` (SP2 spec §8, core.role.read): custom roles (create, edit
  * with the permission picker grouped by module, delete; `ROLE_IN_USE` explained) next to the
  * fixed system roles.
  */

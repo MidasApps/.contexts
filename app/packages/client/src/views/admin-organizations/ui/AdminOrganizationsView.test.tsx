@@ -29,7 +29,7 @@ const routes = (organizations: readonly unknown[] = [NORTHWIND, CONTOSO]) => ({
 });
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminOrganizationsView />, { path: "/admin/organizations", routes: routes(), ...options });
+  renderAdmin(<AdminOrganizationsView />, { path: "/admin/platform/organizations", routes: routes(), ...options });
 
 describe("AdminOrganizationsView", () => {
   it("lists organizations with status, plan, cost and budget use", async () => {
@@ -42,7 +42,7 @@ describe("AdminOrganizationsView", () => {
     expect(plain(northwind.textContent)).toContain("US$ 50,00");
     expect(within(northwind).getByText("Do plano")).toBeDefined();
     expect(within(northwind).getByRole("link", { name: "Abrir Northwind" }).getAttribute("href")).toBe(
-      `/admin/organizations/${IDS.organization}`,
+      `/admin/platform/organizations/${IDS.organization}`,
     );
     const contoso = within(table).getByRole("row", { name: /Contoso/u });
     expect(within(contoso).getByText("Suspensa")).toBeDefined();
@@ -54,7 +54,7 @@ describe("AdminOrganizationsView", () => {
 
   it("sends the search and the status of the URL to the server and writes changes back to the URL", async () => {
     const { user, router, api } = render({
-      path: "/admin/organizations?status=suspended",
+      path: "/admin/platform/organizations?status=suspended",
       routes: {
         ...routes(),
         "GET /v1/admin/organizations": (request) =>
@@ -71,12 +71,12 @@ describe("AdminOrganizationsView", () => {
     expect(within(table).queryByRole("row", { name: /Northwind/u })).toBeNull();
     expect(within(table).getByRole("row", { name: /Contoso/u })).toBeDefined();
     await user.type(screen.getByRole("searchbox", { name: "Buscar organização" }), "north");
-    expect(router.current()).toBe("/admin/organizations?status=suspended&q=north");
+    expect(router.current()).toBe("/admin/platform/organizations?status=suspended&q=north");
     expect(
       await screen.findByRole("heading", { level: 2, name: "Nenhuma organização com esses filtros" }),
     ).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Limpar filtros" }));
-    expect(router.current()).toBe("/admin/organizations");
+    expect(router.current()).toBe("/admin/platform/organizations");
     expect(await screen.findByRole("row", { name: /Northwind/u })).toBeDefined();
     const asked = api.calls.filter((call) => call.path === "/v1/admin/organizations").map((call) => call.query);
     expect(asked[0]).toBe("?limit=20&status=suspended");

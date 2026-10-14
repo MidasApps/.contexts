@@ -11,7 +11,7 @@ const renderView = (routes: FakeRoutes = {}) =>
     <main>
       <ProfileNotificationsView />
     </main>,
-    { path: "/profile/notifications", routes },
+    { path: "/admin/profile/notifications", routes },
   );
 
 describe("ProfileNotificationsView", () => {

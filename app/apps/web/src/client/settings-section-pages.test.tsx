@@ -8,14 +8,14 @@ import { SettingsSectionPage } from "./settings-section-pages";
 describe("SettingsSectionPage", () => {
   it("renders the section named by the address", async () => {
     renderApp(<SettingsSectionPage />, {
-      path: `/o/${IDS.organization}/settings/general`,
+      path: `/admin/o/${IDS.organization}/general`,
       routes: shellRoutes(MEMBER_PERMISSIONS),
     });
     expect(await screen.findByRole("heading", { level: 1, name: "Geral" })).toBeDefined();
   });
 
-  it.each(["billing", "members/whatever"])("renders not found for settings/%s", async (tail) => {
-    renderApp(<SettingsSectionPage />, { path: `/o/${IDS.organization}/settings/${tail}` });
+  it.each(["billing", "members/whatever"])("renders not found for an organization section %s", async (tail) => {
+    renderApp(<SettingsSectionPage />, { path: `/admin/o/${IDS.organization}/${tail}` });
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
   });
 });

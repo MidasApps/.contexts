@@ -22,7 +22,7 @@ export type SchedulesPanelProps = {
 };
 
 /**
- * Schedules tab of `/admin/workflows`: the platform crons and every organization's schedules (one
+ * Schedules tab of `/admin/platform/workflows`: the platform crons and every organization's schedules (one
  * organization when filtered), with pause, resume and run-now, each behind a confirmation. Pausing
  * a platform schedule stops a core job (expiry sweep, purge, usage report) for every organization:
  * the table says which rows are the platform's and the confirmation warns before it happens.

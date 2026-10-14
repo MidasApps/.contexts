@@ -16,7 +16,7 @@ test.describe("after a chat turn of the organization", () => {
   }) => {
     test.setTimeout(180_000);
     await chatTurn(ownerApi, sp5Org, "Olá! Pode me ajudar com uma dúvida?");
-    await staffPage.goto("admin/traces");
+    await staffPage.goto("admin/platform/traces");
     const filters = staffPage.getByRole("search", { name: "Filtrar traces" });
     await chooseOrganization(
       staffPage,
@@ -45,7 +45,7 @@ test.describe("after a chat turn of the organization", () => {
     }
 
     await turn.getByRole("link", { name: /^Abrir o trace / }).click();
-    await expect(staffPage).toHaveURL(/\/admin\/traces\/[0-9a-f]{32}/);
+    await expect(staffPage).toHaveURL(/\/admin\/platform\/traces\/[0-9a-f]{32}/);
     await expect(staffPage.getByRole("heading", { level: 1, name: "agent run: 'assistant-chat'" })).toBeVisible();
     const summary = staffPage.getByRole("region", { name: "Resumo do trace" });
     await expect(summary.getByRole("definition").filter({ hasText: sp5Org.name })).toBeVisible();
@@ -71,12 +71,12 @@ test.describe("after a chat turn of the organization", () => {
     }).toPass({ timeout: 60_000 });
     await expect(staffPage.getByRole("link", { name: "Ver logs deste trace" })).toHaveAttribute(
       "href",
-      /\/admin\/logs\?traceId=[0-9a-f]{32}$/,
+      /\/admin\/platform\/logs\?traceId=[0-9a-f]{32}$/,
     );
   });
 
   test("traces shows the empty state for a day without runs", async ({ staffPage, sp5Org }) => {
-    await staffPage.goto(`admin/traces?organizationId=${sp5Org.id}&from=2020-01-01&to=2020-01-02`);
+    await staffPage.goto(`admin/platform/traces?organizationId=${sp5Org.id}&from=2020-01-01&to=2020-01-02`);
     await expect(staffPage.getByRole("heading", { name: /^Nenhum trace/ })).toBeVisible();
   });
 
@@ -88,7 +88,7 @@ test.describe("after a chat turn of the organization", () => {
     test.setTimeout(120_000);
     // Its own turn, so the journey also runs alone; the ledger row is written when the turn ends.
     await chatTurn(ownerApi, sp5Org, "Quanto custa uma resposta?");
-    await staffPage.goto("admin/costs");
+    await staffPage.goto("admin/platform/costs");
     const usage = staffPage.getByRole("region", { name: "Uso por dia e por modelo" });
     await chooseOrganization(staffPage, usage.getByRole("combobox", { name: "Organização", exact: true }), sp5Org.name);
     await expect(staffPage).toHaveURL(new RegExp(`organizationId=${sp5Org.id}`));
@@ -124,7 +124,7 @@ test.describe("after a chat turn of the organization", () => {
   test("costs shows the error state with its reference and recovers", async ({ staffPage, staffConsole }) => {
     staffConsole.allow(FAILED_REQUEST);
     const heal = await failUntilHealed(staffPage, "**/v1/admin/usage**");
-    await staffPage.goto("admin/costs");
+    await staffPage.goto("admin/platform/costs");
     const usage = staffPage.getByRole("region", { name: "Uso por dia e por modelo" });
     await expect(usage.getByText(/Referência: e2e-request-1/)).toBeVisible({ timeout: 30_000 });
     heal();
@@ -135,7 +135,7 @@ test.describe("after a chat turn of the organization", () => {
 
 test.describe("logs", () => {
   test("filters the web process lines by text and level", async ({ staffPage }) => {
-    await staffPage.goto("admin/logs");
+    await staffPage.goto("admin/platform/logs");
     const lines = staffPage.getByRole("list", { name: "Linhas de log" });
     await expect(lines.getByRole("listitem").first()).toBeVisible();
     const filters = staffPage.getByRole("search", { name: "Filtrar logs" });

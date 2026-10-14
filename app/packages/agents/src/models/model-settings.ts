@@ -85,7 +85,7 @@ const refusalOf = (args: ModelSettingsServiceArgs, input: UpdateModelSettingsInp
 };
 
 /**
- * The model of each text role and the model prices, set by staff in `/admin/models` (decision 0072).
+ * The model of each text role and the model prices, set by staff in `/admin/platform/models` (decision 0072).
  * `modelIdOf` and `prices` answer from a copy in memory, read again in the background once it is
  * older than the TTL: a change reaches every runtime instance within that time, and a model call
  * never waits for the store.

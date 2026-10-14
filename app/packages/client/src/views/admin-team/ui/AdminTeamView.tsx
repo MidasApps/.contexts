@@ -130,7 +130,7 @@ function StaffTable({ staff, actions }: { staff: readonly PlatformStaff[]; actio
 }
 
 /**
- * `/admin/team` (platform.staff.manage, platform admins; decision 0075): who is platform staff,
+ * `/admin/platform/team` (platform.staff.manage, platform admins; decision 0075): who is platform staff,
  * with which of the two fixed roles; add a person by email, change a role, revoke or give access
  * back. One's own row has no actions (the API refuses it). Staff always need two-step verification.
  */

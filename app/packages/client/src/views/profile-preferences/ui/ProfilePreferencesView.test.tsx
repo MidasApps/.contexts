@@ -41,7 +41,7 @@ const renderView = (routes: Record<string, unknown>) =>
     <main>
       <ProfilePreferencesView />
     </main>,
-    { path: "/profile/preferences", routes: routes as never },
+    { path: "/admin/profile/preferences", routes: routes as never },
   );
 
 describe("ProfilePreferencesView", () => {

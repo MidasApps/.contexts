@@ -52,7 +52,7 @@ function RemoteLogs({ filters }: { filters: LogFilters }) {
 }
 
 /**
- * `/admin/logs` (SP5 spec §6, platform.trace.read): in the local environment, the latest
+ * `/admin/platform/logs` (SP5 spec §6, platform.trace.read): in the local environment, the latest
  * structured log lines of the web process, filtered by minimum level, message text, trace and
  * request (all in the URL; the trace viewer links here with `?traceId=`), refreshed on demand.
  * Anywhere else the page points to Cloud Logging with the same trace and request.

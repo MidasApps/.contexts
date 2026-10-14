@@ -28,7 +28,7 @@ const AgentCommandPreviewSchema = z.looseObject({
   preview: z.looseObject({ before: z.unknown(), after: z.unknown() }).nullable().optional(),
 });
 
-/** The run's progress page in the organization's settings: `/o/{organizationId}/settings/workflows/runs/{runId}`. */
+/** The run's progress page in the organization's administration: `/admin/o/{organizationId}/workflows/runs/{runId}`. */
 export const workflowRunRoute = (organizationId: string, runId: string): Route => ({
   id: "settings",
   organizationId,
@@ -36,12 +36,11 @@ export const workflowRunRoute = (organizationId: string, runId: string): Route =
   rest: `runs/${runId}`,
 });
 
-/** The stable page of one request: `/o/{organizationId}/settings/approvals/{approvalRequestId}` (the chat links here). */
+/** The stable page of one request: `/o/{organizationId}/approvals/{approvalRequestId}` (the chat links here). */
 export const approvalRequestRoute = (organizationId: string, approvalRequestId: string): Route => ({
-  id: "settings",
+  id: "approvals",
   organizationId,
-  section: "approvals",
-  rest: approvalRequestId,
+  approvalRequestId,
 });
 
 /**

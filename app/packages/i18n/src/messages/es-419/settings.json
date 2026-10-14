@@ -1,7 +1,4 @@
 {
-  "navLabel": "Secciones de la configuración",
-  "navLoading": "Cargando las secciones…",
-  "navPicker": "Sección",
   "indexLoading": "Abriendo la configuración…",
   "noAccessDescription": "Pide a un administrador de la organización que te dé acceso a esta sección.",
   "nodes": {
@@ -1032,6 +1029,7 @@
     "title": "Aprobaciones",
     "description": "Acciones que necesitan la decisión de una segunda persona antes de ejecutarse. Quien pide nunca aprueba su propia solicitud.",
     "loading": "Cargando aprobaciones",
+    "noAccessDescription": "Pide a un administrador de la organización que te dé acceso a las aprobaciones.",
     "historyPagination": "Páginas del historial",
     "truncatedTitle": "No se cargaron todas las solicitudes pendientes",
     "truncatedDescription": "Se muestran las primeras {count}, el límite de esta lista. Decide estas para ver las demás.",

@@ -6,18 +6,19 @@ import { signInThroughUi } from "@core/e2e/sign-in";
 import { expect, openAs, test } from "./sp5-test.ts";
 import { authFile } from "./web-test.ts";
 
-// SP5 Task 16: who is refused by `/admin`. Non-staff get the not-found page on every area and a
-// 403 from `/v1/admin/*`. Staff whose session has no second factor are refused the same way: the
-// admin layout requires staff + MFA on the session (SP1 spec §3.4) and the API answers MFA_REQUIRED.
+// SP5 Task 16: who is refused by the platform console (`/admin/platform`, decision 0077). Non-staff
+// get the not-found page on every area and a 403 from `/v1/admin/*`. Staff whose session has no
+// second factor are refused the same way: the console's layout requires staff + MFA on the session
+// (SP1 spec §3.4) and the API answers MFA_REQUIRED.
 
 const AREAS = [
-  "admin/organizations",
-  "admin/users",
-  "admin/traces",
-  "admin/costs",
-  "admin/workflows",
-  "admin/flags",
-  "admin/logs",
+  "admin/platform/organizations",
+  "admin/platform/users",
+  "admin/platform/traces",
+  "admin/platform/costs",
+  "admin/platform/workflows",
+  "admin/platform/flags",
+  "admin/platform/logs",
 ];
 const APP_ROOT = path.resolve(import.meta.dirname, "../../..");
 const run = promisify(execFile);
@@ -29,7 +30,8 @@ test.describe("a user who is not platform staff", () => {
       for (const area of AREAS) {
         await session.page.goto(area);
         await expect(session.page.getByRole("heading", { level: 1, name: "Página não encontrada" })).toBeVisible();
-        await expect(session.page.getByRole("navigation", { name: "Áreas da administração" })).toHaveCount(0);
+        // The administration opens (decision 0077), but none of the console's areas is offered.
+        await expect(session.page.getByRole("list", { name: "Clientes" })).toHaveCount(0);
       }
       await session.close();
     });
@@ -79,7 +81,7 @@ test.describe("platform staff without a second factor", () => {
       },
     );
     await signInThroughUi(page, user);
-    for (const area of ["admin", "admin/organizations"]) {
+    for (const area of ["admin/platform", "admin/platform/organizations"]) {
       await page.goto(area);
       await expect(page.getByRole("heading", { level: 1, name: "Página não encontrada" })).toBeVisible();
       await expect(page.getByRole("region", { name: "Números da plataforma" })).toHaveCount(0);

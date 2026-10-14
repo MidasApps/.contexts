@@ -14,7 +14,7 @@ const isTab = (value: string | undefined): value is Tab =>
   value !== undefined && (TABS as readonly string[]).includes(value);
 
 /**
- * `/admin/workflows` (SP5 spec §6, platform.workflow.manage): workflow runs of every organization
+ * `/admin/platform/workflows` (SP5 spec §6, platform.workflow.manage): workflow runs of every organization
  * (suspended ones wait for an approval; a live run can be cancelled) and the platform and tenant
  * schedules (pause, resume, run now). Tab and filters live in the URL; only the open tab loads.
  */

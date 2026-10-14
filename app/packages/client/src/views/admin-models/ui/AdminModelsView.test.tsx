@@ -21,7 +21,7 @@ const ROLES = {
 
 const render = (routes: FakeRoutes = {}) =>
   renderAdmin(<AdminModelsView />, {
-    path: "/admin/models",
+    path: "/admin/platform/models",
     routes: { "GET /v1/admin/models": ok(SETTINGS), "PUT /v1/admin/models": ok(SETTINGS), ...routes },
   });
 
@@ -176,7 +176,7 @@ describe("AdminModelsView", () => {
   });
 
   it("is closed to the support role", async () => {
-    const { api } = renderAdmin(<AdminModelsView />, { path: "/admin/models", role: "platform-support" });
+    const { api } = renderAdmin(<AdminModelsView />, { path: "/admin/platform/models", role: "platform-support" });
     expect(await screen.findByRole("heading", { level: 2, name: "Você não tem acesso a esta página" })).toBeDefined();
     expect(api.callLines()).not.toContain("GET /v1/admin/models");
   });

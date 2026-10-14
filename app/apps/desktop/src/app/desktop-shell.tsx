@@ -1,5 +1,5 @@
-import { AppLayout } from "@core/client/app-shell";
-import { ENTRY_ROUTE_IDS, parseRoute, useRouter } from "@core/client/shared/lib/router";
+import { AdminLayout, AppLayout } from "@core/client/app-shell";
+import { ADMIN_SURFACE_ROUTE_IDS, ENTRY_ROUTE_IDS, parseRoute, useRouter } from "@core/client/shared/lib/router";
 import { type SessionState, useSession } from "@core/client/shared/lib/session";
 import { AppShellSkeleton } from "@core/client/shared/ui/templates/AppShellSkeleton/AppShellSkeleton";
 import { useRouterState } from "@tanstack/react-router";
@@ -38,19 +38,22 @@ function UserAreaGate({ href, sidebarOpen, children }: { href: string; sidebarOp
 }
 
 /**
- * Chooses the frame of the current page: entry pages (sign-in, invite, sign-up, password reset) render alone and handle
- * their own session states; every other path — the user area and not-found — needs a signed-in
- * session and renders inside the shared `AppLayout` (same widgets as web, no `/admin`).
+ * Chooses the frame of the current page: entry pages (sign-in, invite, sign-up, password reset)
+ * render alone and handle their own session states; every other path needs a signed-in session
+ * and renders inside the shared `AdminLayout` for the administration (organization settings and
+ * profile; the platform console is web only) or the shared `AppLayout` for the application and
+ * not-found (same widgets as web, decision 0077).
  */
 export function DesktopShell({ sidebar, children }: { sidebar: DesktopApp["sidebar"]; children: ReactNode }) {
   const href = useRouterState({ select: (state) => state.location.href });
   const route = parseRoute(href);
   if (route !== null && ENTRY_ROUTE_IDS.has(route.id)) return children;
+  const Layout = route !== null && ADMIN_SURFACE_ROUTE_IDS.has(route.id) ? AdminLayout : AppLayout;
   return (
     <UserAreaGate href={href} sidebarOpen={sidebar.defaultOpen}>
-      <AppLayout sidebarDefaultOpen={sidebar.defaultOpen} persistSidebarState={sidebar.persist}>
+      <Layout sidebarDefaultOpen={sidebar.defaultOpen} persistSidebarState={sidebar.persist}>
         {children}
-      </AppLayout>
+      </Layout>
     </UserAreaGate>
   );
 }

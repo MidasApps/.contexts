@@ -158,7 +158,7 @@ function Results({ search, onSelect, selectedId }: UserSearchSectionProps & { se
 }
 
 /**
- * User search of `/admin/users` (decision 0044, platform.user.read): the start of a name or of an
+ * User search of `/admin/platform/users` (decision 0044, platform.user.read): the start of a name or of an
  * email, or a whole user id. The search runs when staff submit it, never per keystroke, and the
  * text stays out of the page URL: an email typed here is personal data.
  */

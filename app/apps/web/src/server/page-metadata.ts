@@ -13,6 +13,8 @@ export type PageTitleKey =
   | "project"
   | "module"
   | "chat"
+  | "approvals"
+  | "administration"
   | "settings"
   | "profile"
   | "admin"

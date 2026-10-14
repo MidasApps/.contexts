@@ -2,13 +2,13 @@ import type { Page } from "@playwright/test";
 import { chooseOrganization } from "./admin-helpers.ts";
 import { expect, FAILED_REQUEST, test, toast, unique } from "./sp5-test.ts";
 
-// SP5 Task 16: `/admin/agents`: the runtime's agent catalog, one organization's agent settings,
+// SP5 Task 16: `/admin/platform/agents`: the runtime's agent catalog, one organization's agent settings,
 // and a platform prompt version taken through evaluation to activation (decision 0038: activation
 // needs a passed verdict; staff may force it with an audited reason).
 
 test.describe("agent catalog", () => {
   test("lists the registered agents with role, tools, skills and permission ceiling", async ({ staffPage }) => {
-    await staffPage.goto("admin/agents");
+    await staffPage.goto("admin/platform/agents");
     const catalog = staffPage.getByRole("list", { name: "Agentes registrados" });
     const assistant = catalog.getByRole("listitem").filter({ hasText: "Assistente" }).first();
     await expect(assistant).toContainText("Supervisor");
@@ -23,7 +23,7 @@ test.describe("agent catalog", () => {
   });
 
   test("shows an organization's agents after choosing it", async ({ staffPage, sp5Org }) => {
-    await staffPage.goto("admin/agents");
+    await staffPage.goto("admin/platform/agents");
     const perOrganization = staffPage.getByRole("region", { name: "Agentes por organização" });
     await expect(perOrganization.getByRole("heading", { name: "Escolha uma organização" })).toBeVisible();
     await chooseOrganization(
@@ -40,7 +40,7 @@ test.describe("agent catalog", () => {
 
 /** Creates a platform prompt version of `agent` from the prompts page; returns its number. */
 const createVersion = async (page: Page, agent: { id: string; name: string }, note: string): Promise<string> => {
-  await page.goto(`admin/agents/${agent.id}/prompts`);
+  await page.goto(`admin/platform/agents/${agent.id}/prompts`);
   await expect(page.getByRole("heading", { level: 1, name: `Prompts de ${agent.name}` })).toBeVisible();
   await page.getByRole("button", { name: "Nova versão" }).first().click();
   const editor = page.getByRole("dialog", { name: `Nova versão do prompt de ${agent.name}` });

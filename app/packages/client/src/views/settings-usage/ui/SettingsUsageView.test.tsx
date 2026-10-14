@@ -25,7 +25,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsUsageView now={NOW} />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/usage`,
+      path: `/admin/o/${IDS.organization}/usage`,
       routes: shellRoutes(permissions, {
         "GET /v1/usage": ok(buildUsageSummary()),
         "GET /v1/agent-settings": ok(buildTenantAgentSettings()),

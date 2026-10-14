@@ -15,7 +15,7 @@ import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { timeZoneLabel } from "#/shared/ui/molecules/TimeZoneSelect/TimeZoneSelect.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 /** Read-only details for members without `core.organization.update`. */
 function OrganizationDetails({ organization }: { organization: Organization }) {
@@ -60,7 +60,6 @@ function SettingsGeneral({ context }: { context: AccessContext }) {
   const canUpdate = context.permissions.includes("core.organization.update");
   return (
     <SettingsPageFrame
-      organizationId={organization.id}
       allowed={context.permissions.includes("core.organization.read")}
       header={
         <PageHeader
@@ -96,7 +95,7 @@ function SettingsGeneral({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/general` (SP2 spec §8): name and regional defaults (locale, time
+ * `/admin/o/:organizationId/general` (SP2 spec §8): name and regional defaults (locale, time
  * zone, currency) — editable with core.organization.update, read-only otherwise — and, for
  * core.organization.delete, deleting the organization.
  */

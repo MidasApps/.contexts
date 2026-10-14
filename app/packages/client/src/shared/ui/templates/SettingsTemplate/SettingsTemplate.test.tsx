@@ -5,38 +5,23 @@ import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { SettingsTemplate } from "./SettingsTemplate.tsx";
 
 describe("SettingsTemplate", () => {
-  it("renders a labelled section navigation next to the content", async () => {
+  it("renders the header above the section content, with no navigation of its own", async () => {
     const { container } = renderWithProviders(
       <main>
-        <SettingsTemplate
-          header={<h1>Configurações</h1>}
-          navigationLabel="Seções das configurações"
-          navigation={
-            <ul>
-              <li>
-                <a href="/settings/general" aria-current="page">
-                  Geral
-                </a>
-              </li>
-              <li>
-                <a href="/settings/members">Membros</a>
-              </li>
-            </ul>
-          }
-        >
-          <h2>Geral</h2>
+        <SettingsTemplate header={<h1>Membros</h1>}>
+          <h2>Pessoas</h2>
         </SettingsTemplate>
       </main>,
     );
-    const nav = screen.getByRole("navigation", { name: "Seções das configurações" });
-    expect(nav.querySelector("[aria-current=page]")?.textContent).toBe("Geral");
-    expect(screen.getByRole("heading", { level: 2, name: "Geral" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 1, name: "Membros" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 2, name: "Pessoas" })).toBeDefined();
+    expect(screen.queryByRole("navigation")).toBeNull();
     await expectNoAxeViolations(container);
   });
 
   it("spaces the blocks of a section and caps it for reading by default", () => {
     renderWithProviders(
-      <SettingsTemplate header={<h1>Uso</h1>} navigationLabel="Seções" navigation={<ul />}>
+      <SettingsTemplate header={<h1>Uso</h1>}>
         <p>Mês</p>
         <p>Resumo</p>
       </SettingsTemplate>,
@@ -49,7 +34,7 @@ describe("SettingsTemplate", () => {
 
   it("lets list sections use the full width", () => {
     renderWithProviders(
-      <SettingsTemplate header={<h1>Traces</h1>} navigationLabel="Seções" navigation={<ul />} width="wide">
+      <SettingsTemplate header={<h1>Traces</h1>} width="wide">
         <p>Tabela</p>
       </SettingsTemplate>,
     );

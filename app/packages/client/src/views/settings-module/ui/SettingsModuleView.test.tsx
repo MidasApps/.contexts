@@ -80,7 +80,7 @@ const renderView = (permissions: string[], routes: FakeRoutes = {}, moduleId = "
       <SettingsModuleView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/m/${moduleId}`,
+      path: `/admin/o/${IDS.organization}/m/${moduleId}`,
       modules: [sampleModule],
       routes: shellRoutes(["core.organization.read", ...permissions] as never, {
         "GET /v1/organizations/:organizationId/module-settings/:moduleId": stored({ greeting: "Oi" }),

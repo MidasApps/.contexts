@@ -40,7 +40,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsEvalsView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/evals${search}`,
+      path: `/admin/o/${IDS.organization}/evals${search}`,
       routes: shellRoutes(permissions, {
         "GET /v1/evals/experiments": numberedPage([]),
         "GET /v1/evals/datasets": ok([REFUNDS]),

@@ -155,7 +155,7 @@ function ConnectorsTable({ organizationId }: { organizationId: string }) {
 }
 
 /**
- * `/admin/connectors` (SP5 spec §6, platform.connector.read): the connectors of one organization
+ * `/admin/platform/connectors` (SP5 spec §6, platform.connector.read): the connectors of one organization
  * — type, status, where they reach, how many tools agents may call and whether a secret is stored
  * (never the secret or its reference). Read only: staff hold no permission that changes a
  * connector, so the organization's own administrators disable or edit it in their settings.

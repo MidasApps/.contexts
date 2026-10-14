@@ -6,10 +6,10 @@ import { RegionalPreferencesForm, ThemePreferenceField } from "#/features/update
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-nav/index.ts";
+import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-frame/index.ts";
 
 /**
- * `/profile/preferences` (SP2 spec §8): language, time zone and currency (saved together; a new
+ * `/admin/profile/preferences` (SP2 spec §8): language, time zone and currency (saved together; a new
  * language switches the page in place), and the theme (applied as soon as it is picked).
  */
 export function ProfilePreferencesView() {

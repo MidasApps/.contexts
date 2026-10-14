@@ -1,4 +1,4 @@
-// Test data factories of `/admin/agents` and its prompt pages (rules/testing.md: data by factory).
+// Test data factories of `/admin/platform/agents` and its prompt pages (rules/testing.md: data by factory).
 // Shapes follow the `@core/contracts` examples so the fake API answers parse like real ones.
 import { IDS } from "./fixtures.ts";
 

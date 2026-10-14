@@ -27,8 +27,9 @@ describe("AppLayout", () => {
     const nav = await screen.findByRole("navigation", { name: "Navegação" });
     await waitFor(() => expect(within(nav).getByRole("link", { name: "Visão geral" })).toBeDefined());
     expect(within(nav).getByRole("link", { name: "Visão geral" }).getAttribute("aria-current")).toBe("page");
-    expect(within(nav).getByRole("link", { name: "Configurações" }).getAttribute("href")).toBe(
-      `/o/${IDS.organization}/settings/general`,
+    // Configuring is one link away, in the administration (decision 0077).
+    expect(within(nav).getByRole("link", { name: "Administração" }).getAttribute("href")).toBe(
+      `/admin/o/${IDS.organization}`,
     );
     const breadcrumb = screen.getByRole("navigation", { name: "Trilha de navegação" });
     await waitFor(() => expect(within(breadcrumb).getByRole("link", { name: "Launch" })).toBeDefined());
@@ -76,12 +77,12 @@ describe("AppLayout", () => {
     globalThis.sessionStorage.clear();
   });
 
-  it("leaving support mode ends the impersonation and returns to the staff account on /admin/users", async () => {
+  it("leaving support mode ends the impersonation and returns to the staff account on /admin/platform/users", async () => {
     const auth = createFakeAuth(TEST_USER);
     const { user, router, bridge } = renderLayout({ auth });
     auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
     await user.click(await screen.findByRole("button", { name: "Sair do modo suporte" }));
-    await waitFor(() => expect(router.current()).toBe("/admin/users"));
+    await waitFor(() => expect(router.current()).toBe("/admin/platform/users"));
     expect(bridge.left).toBe(1);
     expect(bridge.ended).toBe(0);
   });
@@ -173,7 +174,7 @@ describe("AppLayout", () => {
     await expectNoAxeViolations(container);
     await user.type(within(dialog).getByRole("combobox"), "perfil");
     await user.click(within(dialog).getByRole("option", { name: "Abrir perfil" }));
-    await waitFor(() => expect(router.current()).toBe("/profile/account"));
+    await waitFor(() => expect(router.current()).toBe("/admin/profile/account"));
     await user.keyboard("{Control>}k{/Control}");
     const reopened = await screen.findByRole("dialog", { name: "Paleta de comandos" });
     expect(within(reopened).getByRole("group", { name: "Recentes" }).textContent).toContain("Abrir perfil");

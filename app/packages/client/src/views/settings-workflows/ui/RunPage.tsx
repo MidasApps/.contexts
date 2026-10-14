@@ -19,7 +19,7 @@ import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
 import { RunTimeline } from "#/widgets/run-timeline/index.ts";
-import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-frame/index.ts";
 import { useRunActions } from "../model/use-run-actions.ts";
 import { useRunEvents } from "../model/use-run-events.ts";
 import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
@@ -97,7 +97,7 @@ function RunDetails({ run, organizationId, canSeeApprovals, starterLabel, schedu
               {canSeeApprovals ? (
                 <RouteLink
                   className="font-medium text-foreground underline underline-offset-4"
-                  to={{ id: "settings", organizationId, section: "approvals", rest: approvalRequestId }}
+                  to={{ id: "approvals", organizationId, approvalRequestId }}
                 >
                   {t("openApproval")}
                 </RouteLink>
@@ -170,7 +170,7 @@ function RunHeaderActions({
 }
 
 /**
- * `/o/:organizationId/settings/workflows/runs/:runId` (core.workflow-run.read): one run of the
+ * `/admin/o/:organizationId/workflows/runs/:runId` (core.workflow-run.read): one run of the
  * organization: status, how it started, what it waits for, why it failed (with what to do next
  * and "run again" when the workflow is startable), and its step events. Progress is
  * live two ways: the run is re-read every 2 s while it can still change, and the SSE progress
@@ -195,7 +195,6 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
   const { canCancel, canRunAgain, rerunWorkflowId, workflows } = useRunActions(context, current);
   return (
     <SettingsPageFrame
-      organizationId={organization.id}
       allowed={context.permissions.includes("core.workflow-run.read")}
       header={
         <PageHeader

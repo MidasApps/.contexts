@@ -61,7 +61,7 @@ function TraceSummaryCards({ detail, organizationName }: { detail: TraceDetail; 
 }
 
 /**
- * `/admin/traces/:traceId` (SP5 spec §6, platform.trace.read): the trace's numbers and its span
+ * `/admin/platform/traces/:traceId` (SP5 spec §6, platform.trace.read): the trace's numbers and its span
  * tree with tokens and cost per span and redacted input and output, plus a link to its logs. A
  * trace that does not exist (or an id that is not a trace id) is the not-found page.
  */

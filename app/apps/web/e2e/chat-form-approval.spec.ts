@@ -111,12 +111,9 @@ test("a command that needs a second member waits in the approvals inbox, linked 
   const pending = messageLog(page).getByRole("region", { name: "Aguardando aprovação de outra pessoa" });
   await expect(pending).toBeVisible();
   const link = pending.getByRole("link", { name: "Abrir aprovações" });
-  await expect(link).toHaveAttribute(
-    "href",
-    new RegExp(`^/pt-BR/o/${world.alpha.id}/settings/approvals/[A-Za-z0-9]{20}$`),
-  );
+  await expect(link).toHaveAttribute("href", new RegExp(`^/pt-BR/o/${world.alpha.id}/approvals/[A-Za-z0-9]{20}$`));
   await expectNoAxeViolations(page);
   await link.click();
-  await expect(page).toHaveURL(new RegExp(`/o/${world.alpha.id}/settings/approvals/[A-Za-z0-9]{20}$`));
+  await expect(page).toHaveURL(new RegExp(`/o/${world.alpha.id}/approvals/[A-Za-z0-9]{20}$`));
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });

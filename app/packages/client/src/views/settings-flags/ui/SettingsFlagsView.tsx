@@ -21,7 +21,7 @@ import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage, QuerySection } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 const column = dataTableColumnHelper<FeatureFlag>();
 
@@ -198,7 +198,6 @@ function SettingsFlags({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={allowed}
       header={
         <PageHeader
@@ -242,7 +241,7 @@ function SettingsFlags({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/flags` (SP5 spec §5, §7; core.flag.read): the flags an
+ * `/admin/o/:organizationId/flags` (SP5 spec §5, §7; core.flag.read): the flags an
  * organization may override, with the platform value, its own override and what it gets. An
  * organization can only switch a feature off for itself, use it again, or remove its own change
  * and follow the platform (core.flag.write, decision 0066); it can never enable what the platform

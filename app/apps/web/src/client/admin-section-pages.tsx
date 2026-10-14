@@ -25,7 +25,7 @@ import { AdminWorkflowsView } from "@core/client/views/admin-workflows";
 import { type ComponentType, createElement } from "react";
 
 /**
- * The shared view of an `/admin/<area>/…` path (SP5 spec §6): `segments` are the path parts after
+ * The shared view of an `/admin/platform/<area>/…` path (SP5 spec §6): `segments` are the path parts after
  * the area. `null` falls through to `AdminSlotView` (module areas, or not-found).
  */
 const only = (View: ComponentType) => (segments: readonly string[]) => (segments.length === 0 ? View : null);
@@ -54,14 +54,14 @@ const ADMIN_AREA_VIEWS: Readonly<Record<string, (segments: readonly string[]) =>
   team: only(AdminTeamView),
 };
 
-/** The view of an `/admin` path: the overview at the root, the area's view below it. */
+/** The view of a platform console path: the overview at its root, the area's view below it. */
 const adminViewOf = (rest: string): ComponentType => {
   if (rest === "") return AdminOverviewView;
   const [area = "", ...segments] = rest.split("/");
   return (Object.hasOwn(ADMIN_AREA_VIEWS, area) ? ADMIN_AREA_VIEWS[area]?.(segments) : null) ?? AdminSlotView;
 };
 
-/** `/admin/[[...section]]`. */
+/** `/admin/platform/[[...section]]`. */
 export function AdminPage() {
   const rest = useRouter().useRouteParams()["rest"] ?? "";
   return createElement(adminViewOf(rest));

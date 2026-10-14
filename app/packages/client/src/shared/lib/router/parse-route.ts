@@ -20,7 +20,7 @@ const split = (href: string): Parts => {
   return { segments, search: url.searchParams, hash: new URLSearchParams(url.hash.slice(1)) };
 };
 
-/** `/o/:organizationId/settings/…`: the index, a module's settings, a section or a section's detail page. */
+/** `/admin/o/:organizationId/…`: the index, a module's settings, a section or a section's detail page. */
 const parseSettingsRoute = (organizationId: string, segments: string[]): Route | null => {
   const [section, detail, extra] = segments;
   if (section === undefined) return { id: "settings-index", organizationId };
@@ -29,7 +29,7 @@ const parseSettingsRoute = (organizationId: string, segments: string[]): Route |
   }
   if (!isOneOf<SettingsSection>(SETTINGS_SECTIONS, section)) return null;
   if (detail === undefined) return { id: "settings", organizationId, section };
-  // Detail pages (an approval, a trace, a workflow run) live under their section.
+  // Detail pages (a trace, a workflow run) live under their section.
   return isOneOf(SETTINGS_DETAIL_SECTIONS, section)
     ? { id: "settings", organizationId, section, rest: segments.slice(1).join("/") }
     : null;
@@ -47,12 +47,41 @@ const parseProjectRoute = (organizationId: string, segments: string[], search: U
   return { id: "module", organizationId, projectId, moduleId: id, rest: more.join("/"), unit };
 };
 
+/** `/o/:organizationId/approvals[/:approvalRequestId]`, its tabs and filters in the query. */
+const parseApprovalsRoute = (organizationId: string, rest: string[], search: URLSearchParams): Route | null => {
+  const [approvalRequestId, extra] = rest;
+  if (extra !== undefined) return null;
+  return {
+    id: "approvals",
+    organizationId,
+    approvalRequestId,
+    ...(search.size === 0 ? {} : { search: Object.fromEntries(search) }),
+  };
+};
+
 const parseOrganizationRoute = ([organizationId, kind, ...rest]: string[], search: URLSearchParams): Route | null => {
   if (organizationId === undefined) return null;
   if (kind === undefined) return { id: "organization", organizationId };
-  if (kind === "settings") return parseSettingsRoute(organizationId, rest);
+  if (kind === "approvals") return parseApprovalsRoute(organizationId, rest, search);
   if (kind === "p") return parseProjectRoute(organizationId, rest, search);
   return null;
+};
+
+/**
+ * `/admin/…` (decision 0077): the administration home, an organization's settings, the profile and
+ * the platform console (`/admin/platform/<area>…`, its filters in the query).
+ */
+const parseAdminRoute = ([kind, id, ...rest]: string[], search: URLSearchParams): Route | null => {
+  if (kind === undefined) return { id: "admin-home" };
+  if (kind === "o") return id === undefined ? null : parseSettingsRoute(id, rest);
+  if (kind === "profile") {
+    return rest.length === 0 && isOneOf<ProfileSection>(PROFILE_SECTIONS, id) ? { id: "profile", section: id } : null;
+  }
+  if (kind !== "platform") return null;
+  const tail = [id, ...rest].filter((segment) => segment !== undefined).join("/");
+  return search.size === 0
+    ? { id: "admin", rest: tail }
+    : { id: "admin", rest: tail, search: Object.fromEntries(search) };
 };
 
 /** Pages addressed by one segment. A `Map`, so a segment like `constructor` finds nothing. */
@@ -74,18 +103,8 @@ export const parseRoute = (href: string): Route | null => {
   const [first, second, ...rest] = segments;
   if (first === undefined) return { id: "home" };
   if (first === "o") return parseOrganizationRoute(segments.slice(1), search);
-  if (first === "admin") {
-    const tail = segments.slice(1).join("/");
-    return search.size === 0
-      ? { id: "admin", rest: tail }
-      : { id: "admin", rest: tail, search: Object.fromEntries(search) };
-  }
+  if (first === "admin") return parseAdminRoute(segments.slice(1), search);
   if (first === "docs") return rest.length === 0 ? { id: "docs", page: second ?? "" } : null;
-  if (first === "profile") {
-    return rest.length === 0 && isOneOf<ProfileSection>(PROFILE_SECTIONS, second)
-      ? { id: "profile", section: second }
-      : null;
-  }
   if (second !== undefined) return null;
   return PAGE_ROUTES.get(first)?.(parts) ?? null;
 };

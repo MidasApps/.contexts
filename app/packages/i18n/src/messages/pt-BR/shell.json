@@ -45,7 +45,8 @@
   },
   "nav": {
     "organizationHome": "Projetos",
-    "organizationSettings": "Configurações",
+    "approvals": "Aprovações",
+    "administration": "Administração",
     "projectHome": "Visão geral",
     "settings": {
       "general": "Geral",
@@ -60,7 +61,6 @@
       "knowledge": "Base de conhecimento",
       "connectors": "Conectores",
       "workflows": "Fluxos e agendamentos",
-      "approvals": "Aprovações",
       "usage": "Uso e orçamento",
       "traces": "Rastros",
       "evals": "Avaliações",

@@ -14,7 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert
 /** Expired keys named in the alert; the rest are counted ("and N more") and one press lists them all. */
 const EXPIRED_SHOWN = 5;
 
-/** The flag filters of `/admin/flags`, as the URL holds them (`?q=` and `?expired=1`). */
+/** The flag filters of `/admin/platform/flags`, as the URL holds them (`?q=` and `?expired=1`). */
 export type FlagFilter = { readonly query: string; readonly expiredOnly: boolean };
 
 /** Flags whose key or translated name contains the query (any case), optionally only the expired ones. */

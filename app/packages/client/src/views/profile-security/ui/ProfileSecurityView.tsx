@@ -6,7 +6,7 @@ import { MfaChallengeForm } from "#/features/mfa-challenge/index.ts";
 import { MfaFactorsSection } from "#/features/mfa-enrollment/index.ts";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
-import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-nav/index.ts";
+import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-frame/index.ts";
 
 /** The sign-in MFA form reused to confirm a sensitive change. */
 function ReauthMfaStep({ challenge, onResolved, onCancel }: MfaStepProps) {
@@ -17,7 +17,7 @@ function ReauthMfaStep({ challenge, onResolved, onCancel }: MfaStepProps) {
 }
 
 /**
- * `/profile/security` (SP2 spec §8): second factors (enroll TOTP/SMS per the environment,
+ * `/admin/profile/security` (SP2 spec §8): second factors (enroll TOTP/SMS per the environment,
  * remove) and the password change, which re-authenticates — with the second factor when one is
  * enrolled (the sign-in MFA form, in a dialog).
  */

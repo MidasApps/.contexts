@@ -10,9 +10,10 @@ describe("SignInView", () => {
   it("renders the sign-in page, signs in through the bridge and goes to ?next=", async () => {
     const { user, router, bridge, container } = renderApp(<SignInView />, {
       signedIn: false,
-      path: "/sign-in?next=%2Fprofile%2Fsecurity",
+      path: "/sign-in?next=%2Fadmin%2Fprofile%2Fsecurity",
     });
-    expect(await screen.findByRole("heading", { level: 1, name: "Entrar" })).toBeDefined();
+    // On the way to the administration the heading says so (decision 0077).
+    expect(await screen.findByRole("heading", { level: 1, name: "Entrar na administração" })).toBeDefined();
     expect(screen.getByRole("main")).toBeDefined();
     expect(screen.getByText("Core")).toBeDefined();
     expect(screen.getByRole("combobox", { name: "Idioma" })).toBeDefined();
@@ -22,7 +23,7 @@ describe("SignInView", () => {
     await user.type(screen.getByLabelText("E-mail"), "ana@example.com");
     await user.type(screen.getByLabelText("Senha"), "s3cret-pass");
     await user.click(screen.getByRole("button", { name: "Entrar" }));
-    await waitFor(() => expect(router.current()).toBe("/profile/security"));
+    await waitFor(() => expect(router.current()).toBe("/admin/profile/security"));
     expect(bridge.established).toEqual([`token-${TEST_USER.uid}`]);
   });
 
@@ -34,6 +35,8 @@ describe("SignInView", () => {
     });
     const link = await screen.findByRole("link", { name: "Criar conta" });
     expect(link.getAttribute("href")).toBe("/sign-up?next=%2Forganizations");
+    // On the way to the application the heading is the plain one.
+    expect(screen.getByRole("heading", { level: 1, name: "Entrar" })).toBeDefined();
   });
 
   it("switches to the second factor when the account has one", async () => {

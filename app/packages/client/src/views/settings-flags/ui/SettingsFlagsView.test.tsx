@@ -28,7 +28,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsFlagsView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/flags`,
+      path: `/admin/o/${IDS.organization}/flags`,
       routes: shellRoutes(permissions, { "GET /v1/flags": ok([VOICE, REALTIME, PLATFORM_OFF]), ...routes }),
     },
   );
