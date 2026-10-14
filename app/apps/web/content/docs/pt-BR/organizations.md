@@ -1,6 +1,6 @@
 # Organizações e projetos
 
-Esta página explica como escolher e criar organizações, como os projetos organizam o trabalho dentro delas, como editar, arquivar e excluir um projeto e como ajustar ou excluir a organização em **Configurações → Geral**.
+Esta página explica como escolher e criar organizações, como os projetos organizam o trabalho dentro delas, como editar, arquivar e excluir um projeto e como ajustar ou excluir a organização em **Administração → Geral**.
 
 ## O que é
 
@@ -48,9 +48,10 @@ As permissões de projeto valem no projeto: quem recebeu um papel com `core.proj
 | Organizações | Seletor de organização no topo da barra lateral → **Ver todas ou criar organização** | `/organizations` |
 | Página da organização (lista de projetos) | Barra lateral → **Organização → Projetos** | `/o/{organização}` |
 | Visão geral do projeto | Barra lateral → **Projeto → Visão geral** | `/o/{organização}/p/{projeto}` |
-| Configurações gerais | Barra lateral → **Organização → Configurações → Geral** | `/o/{organização}/settings/general` |
+| Configurações da organização | Barra lateral → **Organização → Administração** | `/admin/o/{organização}` |
+| Configurações gerais | Na administração, barra lateral → **Organização → Geral** | `/admin/o/{organização}/general` |
 
-O endereço `/o/{organização}/settings`, sem seção, abre a primeira seção de configurações que você pode ver.
+As configurações da organização ficam na administração. O endereço `/admin/o/{organização}`, sem seção, abre a primeira seção que você pode ver. Na administração, o seletor de organização no topo da barra lateral troca de organização e abre as configurações da escolhida. Para voltar aos projetos, clique em **Abrir a aplicação**.
 
 ![Lista de organizações da conta](/guide/organizations-list.jpg)
 
@@ -66,7 +67,7 @@ O endereço `/o/{organização}/settings`, sem seção, abre a primeira seção 
 
 ![Configurações gerais da organização](/guide/organizations-general.jpg)
 
-*Na tela: **Configurações → Geral**: os dados da organização.*
+*Na tela: **Administração → Geral**: os dados da organização.*
 
 ## Passo a passo
 
@@ -102,7 +103,7 @@ Se o cartão não aparece, a sua conta não pode criar organizações. Peça um 
    - o nome, a descrição e a situação do projeto;
    - **Unidades** (ou **Subunidades**, quando você já está dentro de uma unidade), que você pode clicar para focar;
    - **Módulos** que você pode abrir no projeto, cada um com **Abrir módulo**.
-3. Se você pode criar unidades, aparece o botão **Gerenciar unidades**, que leva a **Configurações → Unidades**.
+3. Se você pode criar unidades, aparece o botão **Gerenciar unidades**, que leva a **Administração → Unidades**.
 
 ### Editar o nome e a descrição de um projeto
 
@@ -129,7 +130,7 @@ Se o projeto só não é mais usado, prefira arquivar.
 
 ### Alterar nome e padrões da organização
 
-1. Vá em **Configurações → Geral**.
+1. Vá em **Administração → Geral**.
 2. No cartão **Organização**, altere **Nome**, **Idioma padrão**, **Fuso horário padrão** ou **Moeda padrão**.
 3. Clique em **Salvar**.
 
@@ -139,7 +140,7 @@ Os padrões valem para quem não escolheu os seus e para valores novos. Cada pes
 
 Só o **Proprietário** vê esta opção.
 
-1. Vá em **Configurações → Geral** e desça até o cartão **Excluir organização**.
+1. Vá em **Administração → Geral** e desça até o cartão **Excluir organização**.
 2. Clique em **Excluir organização**.
 3. Digite o nome da organização exatamente como ele aparece, com maiúsculas e acentos, e clique em **Excluir para sempre**.
 4. Todos os membros, dispositivos e chaves de API perdem o acesso na hora. O app abre a página **Organizações** com a confirmação **Organização {nome} excluída.**

@@ -6,6 +6,13 @@ Este guia mostra como entrar no app pela primeira vez, aceitar um convite, prote
 
 O app organiza o trabalho em **organizações**, que contêm **projetos**, que por sua vez podem ser divididos em **unidades**. Você entra com e-mail e senha, escolhe onde trabalhar e usa os recursos que os seus papéis liberam: o assistente de IA, as configurações da organização, o seu perfil e assim por diante.
 
+O app tem duas partes:
+
+- **Aplicação**: para usar. Aqui ficam as organizações, os projetos, o **Assistente**, os módulos e as **Aprovações**.
+- **Administração** (`/admin`): para configurar. Aqui ficam as configurações da organização (organização, acesso, IA, operação e módulos) e **Minha conta**, com o seu perfil. A administração não tem assistente nem paleta de comandos.
+
+Qualquer pessoa conectada pode abrir a administração. Cada seção mostra só o que você pode ver. A equipe da plataforma também tem o **Console da plataforma**, dentro da administração.
+
 Uma conta, sozinha, não dá acesso a nada. O acesso vem de duas formas:
 
 - de um **convite** para uma organização, feito por quem a administra;
@@ -20,7 +27,7 @@ Uma conta, sozinha, não dá acesso a nada. O acesso vem de duas formas:
 
 ## Onde encontrar
 
-No navegador, todos os endereços começam pelo idioma, por exemplo `/pt-BR/sign-in`. Nas demais páginas desta documentação, os endereços aparecem sem esse prefixo, como `/o/{organização}/settings/members`.
+No navegador, todos os endereços começam pelo idioma, por exemplo `/pt-BR/sign-in`. Nas demais páginas desta documentação, os endereços aparecem sem esse prefixo, como `/admin/o/{organização}/members`.
 
 | Página | Endereço |
 |---|---|
@@ -32,7 +39,10 @@ No navegador, todos os endereços começam pelo idioma, por exemplo `/pt-BR/sign
 | Organizações | `/organizations` |
 | Organização | `/o/{organização}` |
 | Projeto | `/o/{organização}/p/{projeto}` |
-| Perfil | `/profile/account` |
+| Aprovações | `/o/{organização}/approvals` |
+| Administração | `/admin` |
+| Configurações da organização | `/admin/o/{organização}` |
+| Perfil (Minha conta) | `/admin/profile/account` |
 
 ![Página Entrar com os campos E-mail e Senha](/guide/sign-in.jpg)
 
@@ -57,6 +67,8 @@ No navegador, todos os endereços começam pelo idioma, por exemplo `/pt-BR/sign
 5. Depois de entrar, o app abre o último lugar que você usou (organização, projeto e unidade). Na primeira vez, abre a página **Organizações**.
 
 Se você chegou à página de entrada por um link interno do app, depois de entrar você volta para aquele endereço.
+
+Se você entra pela administração (`/admin`), a página se chama **Entrar na administração** e, depois de entrar, você volta para a administração. Quem é da equipe da plataforma cai no **Console da plataforma**; os demais, nas configurações da última organização usada. Se você ainda não participa de nenhuma organização, a administração mostra **Você ainda não participa de uma organização** e o botão **Ver organizações**.
 
 ### Criar conta (quando o cadastro está aberto)
 
@@ -122,11 +134,13 @@ O link vale por pouco tempo. Confira também a caixa de spam. Se você estava ac
 
 ## A estrutura da tela
 
+Esta seção descreve a tela da aplicação. A administração tem uma tela própria, descrita mais abaixo.
+
 **Barra lateral (à esquerda)**
 
 - No topo, o seletor de organização. Ele lista as suas organizações e tem a opção **Ver todas ou criar organização**.
 - Logo abaixo, o seletor de projeto (com **Novo projeto** e **Todos os projetos**) e, dentro de um projeto, o seletor de unidade.
-- O grupo **Organização** traz **Projetos** e **Configurações**.
+- O grupo **Organização** traz **Projetos**, **Aprovações** (só para quem pode ver aprovações) e **Administração**, por último.
 - O grupo **Projeto** traz **Visão geral**, **Assistente** e os módulos que você pode abrir.
 - No rodapé, o menu da conta, com seu nome e e-mail.
 
@@ -134,7 +148,7 @@ Use **Mostrar ou ocultar a barra lateral** para recolhê-la.
 
 **Menu da conta (rodapé da barra lateral)**
 
-- As seções do perfil: **Conta**, **Preferências**, **Segurança**, **Sessões** e **Notificações**.
+- As seções do perfil: **Conta**, **Preferências**, **Segurança**, **Sessões** e **Notificações**. Elas abrem na administração, em **Minha conta**.
 - **Aprovações**, com o número de pedidos aguardando a sua decisão (só para quem pode ver aprovações).
 - **Tema**: **Do sistema**, **Claro** ou **Escuro**.
 - **Idioma e região**: abre as preferências do perfil.
@@ -150,10 +164,30 @@ Use **Mostrar ou ocultar a barra lateral** para recolhê-la.
 
 O painel só funciona dentro de um projeto. Fora dele, aparece **Abra um projeto para conversar com o assistente.** Se você fechar o painel e reabrir enquanto continua no mesmo projeto, a conversa continua de onde parou. Ao recarregar a página, o painel recomeça, mas a conversa fica guardada no histórico da página do assistente. Veja [Assistente (chat)](/docs/chat).
 
+## A tela da administração
+
+**Barra lateral (à esquerda)**
+
+- No topo, o seletor de organização, com a legenda **Administração**. Ao escolher uma organização, abrem as configurações dela.
+- Logo abaixo, as seções da parte em que você está, em grupos:
+  - numa organização: **Organização** (Geral, Membros, Convites, Papéis, Unidades, Auditoria), **Acesso** (Chaves de API, Dispositivos), **IA** (Agentes, Habilidades, Base de conhecimento, Conectores), **Operação** (Fluxos e agendamentos, Uso e orçamento, Rastros, Avaliações, Recursos) e **Outras** (as configurações dos módulos);
+  - no perfil: **Minha conta** (Conta, Preferências, Segurança, Sessões, Notificações).
+- O grupo **Ir para**, com **Configurações da organização** (quando você não está nelas), **Console da plataforma** (só para a equipe da plataforma, no navegador) e **Abrir a aplicação**.
+- No rodapé, o menu da conta.
+
+Cada seção mostra só o que você pode ver. No celular, a barra lateral abre como uma gaveta pelo botão de menu.
+
+**Barra superior**
+
+- A trilha, por exemplo **Administração › Organização › Membros** ou **Administração › Minha conta › Segurança**.
+- O botão **Abrir a aplicação**, que volta para a aplicação.
+
+Ao sair pela administração, a página de entrada leva de volta para a administração.
+
 ## Idioma e tema
 
 - **Nas páginas de entrada** (Entrar, Criar conta, Convite, Redefinir senha), use o seletor **Idioma** no rodapé.
-- **Dentro do app**, abra o menu da conta e clique em **Idioma e região**, ou vá em **Perfil → Preferências**. Os idiomas disponíveis são português (Brasil), inglês (EUA) e espanhol (América Latina).
+- **Dentro do app**, abra o menu da conta e clique em **Idioma e região**, ou vá em **Minha conta → Preferências**. Os idiomas disponíveis são português (Brasil), inglês (EUA) e espanhol (América Latina).
 - **Tema:** menu da conta → **Tema**. A escolha vale na hora e fica salva no seu perfil.
 
 ## Exemplo
@@ -168,24 +202,24 @@ Exemplo: Marina é coordenadora em uma escola de idiomas e foi convidada pela di
 | Prévia | "Ana Souza convidou você para participar de Escola Horizonte." | Clica em **Aceitar convite** |
 | Organização | Lista de projetos | Abre o projeto "Unidade Centro" |
 
-> **Marina:** Entrei, mas não vejo o menu Membros nas configurações.
+> **Marina:** Entrei, mas não vejo Membros na administração.
 >
-> **Ana:** Você entrou como Leitor. Vou trocar seu papel para Membro em Configurações → Membros.
+> **Ana:** Você entrou como Leitor. Vou trocar seu papel para Membro em Administração → Membros.
 
 ## Roteiro de 10 minutos
 
 Exemplo: você é o responsável por começar a usar o app em uma clínica veterinária.
 
 1. **Minuto 1 — Entrar.** Se o cadastro estiver aberto, crie a conta em **Criar conta**. Caso contrário, peça um convite e crie a conta pelo link.
-2. **Minuto 2 — Proteger a conta.** Vá em **Perfil → Segurança** e clique em **Adicionar app autenticador** ou **Adicionar telefone** (se o ambiente oferecer).
-3. **Minuto 3 — Preferências.** Em **Perfil → Preferências**, confira **Idioma**, **Fuso horário** e **Moeda**, e escolha o tema.
+2. **Minuto 2 — Proteger a conta.** Abra o menu da conta e clique em **Segurança** (abre **Minha conta → Segurança**, na administração). Clique em **Adicionar app autenticador** ou **Adicionar telefone** (se o ambiente oferecer).
+3. **Minuto 3 — Preferências.** Em **Minha conta → Preferências**, confira **Idioma**, **Fuso horário** e **Moeda**, e escolha o tema.
 4. **Minuto 4 — Organização.** Se a página **Organizações** mostrar o cartão **Nova organização**, preencha **Nome da organização** ("Clínica Bom Pelo") e os padrões regionais e clique em **Criar organização**. Se não mostrar, aguarde o convite de quem administra.
 5. **Minuto 5 — Projeto.** Na organização, clique em **Novo projeto**, dê o nome "Atendimento" e clique em **Criar projeto**.
-6. **Minuto 6 — Unidades.** Em **Configurações → Unidades**, crie "Filial Norte" e "Filial Sul".
-7. **Minuto 7 — Equipe.** Em **Configurações → Membros**, clique em **Convidar**, informe o e-mail de uma colega, escolha **Onde vale** e o papel, e clique em **Enviar convite**. Copie o **Link do convite** e envie para ela.
-8. **Minuto 8 — Assistente.** Abra o projeto "Atendimento" e clique em **Assistente** na barra superior. Faça uma pergunta.
+6. **Minuto 6 — Unidades.** Clique em **Administração** na barra lateral e, em **Administração → Unidades**, crie "Filial Norte" e "Filial Sul".
+7. **Minuto 7 — Equipe.** Em **Administração → Membros**, clique em **Convidar**, informe o e-mail de uma colega, escolha **Onde vale** e o papel, e clique em **Enviar convite**. Copie o **Link do convite** e envie para ela.
+8. **Minuto 8 — Assistente.** Clique em **Abrir a aplicação**, abra o projeto "Atendimento" e clique em **Assistente** na barra superior. Faça uma pergunta.
 9. **Minuto 9 — Atalhos.** Pressione **Ctrl+K** e digite "perfil" para testar a paleta de comandos.
-10. **Minuto 10 — Sessões.** Em **Perfil → Sessões**, confira onde sua conta está conectada.
+10. **Minuto 10 — Sessões.** Em **Minha conta → Sessões**, confira onde sua conta está conectada.
 
 ## Dicas e boas práticas
 

@@ -1,6 +1,6 @@
-# Administração: clientes
+# Console: clientes
 
-Esta página cobre as áreas do grupo **Clientes** da administração da plataforma: **Organizações**, **Planos** e **Usuários**. Nelas a equipe acompanha o gasto de cada organização, define os limites dos planos, ajusta orçamentos, suspende organizações e faz o acesso de suporte. Para saber quem pode entrar na administração, veja [Administração da plataforma](/docs/admin).
+Esta página cobre as áreas do grupo **Clientes** do console da plataforma: **Organizações**, **Planos** e **Usuários**. Nelas a equipe acompanha o gasto de cada organização, define os limites dos planos, ajusta orçamentos, suspende organizações e faz o acesso de suporte. Para saber quem pode entrar no console, veja [Console da plataforma](/docs/admin).
 
 Os valores em dinheiro aparecem na tela em dólares (US$). Nos exemplos em JSON, que mostram os dados como a API os envia, o dinheiro vem em micro-dólares: `50000000` equivale a US$ 50,00.
 
@@ -8,13 +8,13 @@ Os valores em dinheiro aparecem na tela em dólares (US$). Nos exemplos em JSON,
 
 **Para que serve:** ver o status, o plano, o custo no mês e o orçamento de cada organização, e abrir uma delas para trocar o plano, ajustar o orçamento ou suspender o acesso.
 
-- **URL:** `/admin/organizations` (lista) e `/admin/organizations/<id da organização>` (detalhe)
+- **URL:** `/admin/platform/organizations` (lista) e `/admin/platform/organizations/<id da organização>` (detalhe)
 - **Permissão para ver:** `platform.organization.read`, dos papéis `platform-admin` e `platform-support`.
 - **Permissão para alterar:** `platform.organization.update`, só do `platform-admin`.
 
-![Lista de organizações na administração](/guide/admin-organizations.jpg)
+![Lista de organizações no console da plataforma](/guide/admin-organizations.jpg)
 
-*Na tela: `/admin/organizations`.*
+*Na tela: `/admin/platform/organizations`.*
 
 ### A lista
 
@@ -110,14 +110,14 @@ Exemplo: a Clínica Exemplo chegou a 82% do limite em meados do mês e pediu mai
 
 **Para que serve:** definir os limites de gasto, tokens e conectores que cada plano concede às organizações.
 
-- **URL:** `/admin/plans`
+- **URL:** `/admin/platform/plans`
 - **Permissão:** `platform.plan.manage`, só do `platform-admin`.
 
 A tabela tem as colunas **Plano**, **Gasto mensal**, **Tokens por mês**, **Conectores**, **Funcionalidades**, **Atualizado em** e **Ações**.
 
 ![Página Planos](/guide/admin-plans.jpg)
 
-*Na tela: `/admin/plans`.*
+*Na tela: `/admin/platform/plans`.*
 
 ### Criar um plano
 
@@ -175,14 +175,14 @@ Exemplo de plano, como a API o recebe:
 
 **Para que serve:** encontrar um usuário e fazer acesso de suporte como ele, em uma organização, em modo somente leitura e com auditoria.
 
-- **URL:** `/admin/users`
+- **URL:** `/admin/platform/users`
 - **Permissões:** `platform.user.read` (buscar e ver sessões) e `platform.user.impersonate` (iniciar e encerrar sessões). Os papéis `platform-admin` e `platform-support` têm as duas.
 
 O aviso **Acesso auditado** lembra que cada sessão e cada página aberta como o usuário ficam registradas na auditoria da plataforma e da organização.
 
 ![Página Usuários](/guide/admin-users.jpg)
 
-*Na tela: `/admin/users`.*
+*Na tela: `/admin/platform/users`.*
 
 ### Buscar um usuário
 
@@ -220,7 +220,7 @@ Se nada aparecer, você verá "Nenhum usuário encontrado". A busca só encontra
 3. Clique em **Iniciar sessão**.
 4. Em **Sessão aberta nesta aba**, clique em **Abrir o app como este usuário**.
 
-O passo a passo completo, como sair e o que fica registrado estão em [Administração da plataforma](/docs/admin).
+O passo a passo completo, como sair e o que fica registrado estão em [Console da plataforma](/docs/admin).
 
 ### Sessões da equipe
 
@@ -230,13 +230,13 @@ Em **Sessões de acesso de suporte**, escolha em **Mostrar** entre **Abertas ago
 
 - "Este usuário não existe ou não tem acesso a essa organização." Escolha uma organização da qual o usuário seja membro.
 - "Você não pode iniciar esta sessão. Não é possível acessar como você mesmo, e a ação exige o papel de suporte."
-- Enquanto a aba estiver no modo suporte, a administração não abre nela. Saia do modo suporte primeiro.
+- Enquanto a aba estiver no modo suporte, o console não abre nela. Saia do modo suporte primeiro.
 
 ## Veja também
 
-- [Administração da plataforma](/docs/admin)
-- [Administração: IA](/docs/admin-ai)
-- [Administração: operações](/docs/admin-operations)
+- [Console da plataforma](/docs/admin)
+- [Console: IA](/docs/admin-ai)
+- [Console: operações](/docs/admin-operations)
 - [Organizações](/docs/organizations)
 - [Uso e limites](/docs/usage)
 - [Membros](/docs/members)

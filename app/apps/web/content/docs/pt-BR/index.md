@@ -1,6 +1,6 @@
 # Documentação do app
 
-Bem-vindo. Esta documentação explica como usar cada parte do app: da primeira entrada até a administração da plataforma. Cada página segue a mesma estrutura: o que é, quem pode usar, onde encontrar, passo a passo, um exemplo com dados fictícios, dicas e erros comuns.
+Bem-vindo. Esta documentação explica como usar cada parte do app: da primeira entrada até o console da plataforma. Cada página segue a mesma estrutura: o que é, quem pode usar, onde encontrar, passo a passo, um exemplo com dados fictícios, dicas e erros comuns.
 
 > Os exemplos usam negócios genéricos, como uma clínica veterinária, uma rede de lojas ou uma escola de idiomas, e dados inventados. Eles servem para mostrar o uso de cada recurso; os nomes, valores e pessoas não são reais.
 
@@ -27,6 +27,15 @@ O app reúne, num só lugar, a sua equipe, os seus dados e assistentes de inteli
 
 Uma mesma pessoa pode participar de várias organizações, com papéis diferentes em cada uma.
 
+## Aplicação e Administração
+
+O app tem duas partes:
+
+- **Aplicação**: onde você usa o app no dia a dia. Tem as organizações, os projetos, o assistente, os módulos e as **Aprovações**.
+- **Administração** (`/admin`): onde você configura. Tem as configurações da organização (organização, acesso, IA, operação e módulos) e **Minha conta** (o seu perfil). Não tem assistente.
+
+Para ir da aplicação à administração, clique em **Administração** na barra lateral, no grupo **Organização**. Para voltar, clique em **Abrir a aplicação**. A equipe da plataforma também tem o **Console da plataforma**, dentro da administração.
+
 ## Por onde começar
 
 | Se você quer… | Leia |
@@ -43,7 +52,7 @@ Uma mesma pessoa pode participar de várias organizações, com papéis diferent
 | Integrar outro sistema | [Chaves de API e integração](/docs/api-keys) e [Conectores](/docs/connectors) |
 | Usar o app no computador da loja ou da recepção | [Dispositivos e app desktop](/docs/devices) |
 | Ajustar a sua conta, idioma e segurança | [Seu perfil](/docs/profile) |
-| Operar a plataforma (equipe interna) | [Administração da plataforma](/docs/admin) |
+| Operar a plataforma (equipe interna) | [Console da plataforma](/docs/admin) |
 
 ## Exemplo: um dia na Clínica Vet Exemplo
 
@@ -64,7 +73,7 @@ Este roteiro mostra como as partes do app se encaixam. Cada passo tem a página 
 
 ## Endereços das páginas
 
-No navegador, todo endereço começa pelo idioma, como `/pt-BR/o/{organização}/settings/members`. Nesta documentação, os endereços aparecem sem esse prefixo. Os trechos entre chaves, como `{organização}`, são substituídos pelo identificador real que aparece na barra de endereço.
+No navegador, todo endereço começa pelo idioma, como `/pt-BR/admin/o/{organização}/members`. Nesta documentação, os endereços aparecem sem esse prefixo. Os trechos entre chaves, como `{organização}`, são substituídos pelo identificador real que aparece na barra de endereço.
 
 ## Idioma desta documentação
 

@@ -28,12 +28,12 @@ O que o app para desktop tem:
 - escolha de organização, página da organização e dos projetos;
 - o chat com o assistente;
 - as páginas dos módulos instalados;
-- as **Configurações** da organização, inclusive as configurações de módulos;
-- o **Perfil** (conta, preferências, segurança, sessões e notificações).
+- as **Aprovações**;
+- a **Administração**, com as configurações da organização (inclusive as configurações de módulos) e **Minha conta** (conta, preferências, segurança, sessões e notificações).
 
 O que o app para desktop **não** tem:
 
-- a área de administração da plataforma (`/admin`), que só existe no app web;
+- o **Console da plataforma** (`/admin/platform`), que só existe no app web;
 - este guia de ajuda (`/docs`), que também só existe no app web.
 
 O app para desktop lembra o seu acesso entre uma abertura e outra. Para isso, ele guarda um segredo de sessão no cofre de senhas do sistema operacional (Gerenciador de Credenciais no Windows, Keychain no macOS, Secret Service no Linux). Esse segredo é trocado a cada uso. A sessão aparece no seu perfil como **App para desktop**.
@@ -58,8 +58,8 @@ Qualquer pessoa com conta pode usar o app para desktop. O que ela vê depende da
 
 ## Onde encontrar
 
-- **Dispositivos compartilhados:** **Configurações → Dispositivos**, no grupo **Acesso** do menu de configurações. Endereço: `/o/<id-da-organização>/settings/devices`.
-- **Sessões do app para desktop:** menu do usuário → **Sessões**. Endereço: `/profile/sessions`.
+- **Dispositivos compartilhados:** **Administração → Dispositivos**, no grupo **Acesso** da barra lateral da administração. Endereço: `/admin/o/<id-da-organização>/devices`.
+- **Sessões do app para desktop:** menu do usuário → **Sessões**. Endereço: `/admin/profile/sessions`.
 
 A lista de dispositivos mostra estas colunas:
 
@@ -73,7 +73,7 @@ A lista de dispositivos mostra estas colunas:
 
 ![Página Dispositivos](/guide/devices-list.jpg)
 
-*Na tela: **Configurações → Dispositivos**.*
+*Na tela: **Administração → Dispositivos**.*
 
 ## Passo a passo
 
@@ -83,7 +83,7 @@ A lista de dispositivos mostra estas colunas:
 
 ### Gerar um código de ativação
 
-1. Abra **Configurações → Dispositivos**.
+1. Abra **Administração → Dispositivos**.
 2. Clique em **Ativar dispositivo**. O botão fica desativado enquanto você estiver sem conexão.
 3. Em **Nome do dispositivo**, escreva um nome fácil de reconhecer, por exemplo "Tablet da recepção". Use no máximo 80 caracteres.
 4. Em **Onde vale**, escolha a organização, um projeto ou uma unidade.
@@ -99,7 +99,7 @@ O código aparece só nessa janela. Depois de fechá-la, não é possível vê-l
 
 ### Revogar um dispositivo
 
-1. Abra **Configurações → Dispositivos**.
+1. Abra **Administração → Dispositivos**.
 2. Na linha do dispositivo, clique em **Revogar**. O botão só aparece em dispositivos com situação **Ativo**.
 3. Confirme em **Revogar dispositivo**.
 
@@ -124,7 +124,7 @@ Nas próximas aberturas, o app entra direto, sem pedir a senha, enquanto a sess�
 Exemplo: uma clínica tem um computador na recepção para que qualquer atendente registre a chegada dos pacientes.
 
 1. A administradora cria um papel personalizado "Recepção" só com as permissões de que o equipamento precisa.
-2. Em **Configurações → Dispositivos**, ela clica em **Ativar dispositivo** e preenche:
+2. Em **Administração → Dispositivos**, ela clica em **Ativar dispositivo** e preenche:
    - **Nome do dispositivo:** Computador da recepção
    - **Onde vale:** o projeto "Unidade Jardim"
    - **Papéis do dispositivo:** Dispositivo e Recepção
@@ -149,7 +149,7 @@ Exemplo: um gerente de uma rede de lojas usa o app para desktop no notebook. O n
 - **Revogue equipamentos que saíram de uso** e confira a coluna **Última atividade** de tempos em tempos.
 - **Não use o app para desktop como terminal compartilhado.** Ele guarda a sessão de uma pessoa. Para uso comum, use um dispositivo ativado por código.
 - **No Linux,** o app para desktop precisa de um serviço de cofre de senhas (como GNOME Keyring ou KWallet) para lembrar o seu acesso. Sem ele, você consegue entrar, mas precisa entrar de novo a cada abertura.
-- **Precisa da administração da plataforma ou deste guia?** Use o app web.
+- **Precisa do console da plataforma ou deste guia?** Use o app web.
 
 ## Erros comuns
 
@@ -164,7 +164,7 @@ Exemplo: um gerente de uma rede de lojas usa o app para desktop no notebook. O n
 | `RATE_LIMITED` ("Muitas tentativas. Aguarde um pouco e tente novamente.") | Houve 5 tentativas erradas em 15 minutos a partir da mesma rede | Aguarde e tente de novo com um código correto |
 | O dispositivo não aparece na lista | O código ainda não foi usado no equipamento | Digite o código no dispositivo; a lista só mostra dispositivos já ativados |
 | O app para desktop pede a senha toda vez | O cofre de senhas do sistema não está disponível (comum no Linux sem Secret Service) | Instale ou ative um serviço de cofre de senhas |
-| Não encontro a administração no app para desktop | A área `/admin` existe só no app web | Use o app web no navegador |
+| Não encontro o console da plataforma no app para desktop | O console (`/admin/platform`) existe só no app web | Use o app web no navegador |
 
 ## Veja também
 
@@ -172,5 +172,5 @@ Exemplo: um gerente de uma rede de lojas usa o app para desktop no notebook. O n
 - [Unidades](/docs/units)
 - [Perfil](/docs/profile)
 - [Chaves de API e integração](/docs/api-keys)
-- [Administração da plataforma](/docs/admin)
+- [Console da plataforma](/docs/admin)
 - [Primeiros passos](/docs/getting-started)

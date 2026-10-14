@@ -37,7 +37,7 @@ Quem pode adicionar documentos mas não pode enviar arquivos vê o aviso "Você 
 
 ## Onde encontrar
 
-**Configurações** → grupo **IA** → **Base de conhecimento**. Endereço: `/o/{organização}/settings/knowledge`.
+**Administração** → grupo **IA** → **Base de conhecimento**. Endereço: `/admin/o/{organização}/knowledge`.
 
 A coleção escolhida no seletor **Coleção** fica no endereço (por exemplo, `?collection=tenant` para a organização inteira), então você pode compartilhar o link já filtrado.
 
@@ -45,7 +45,7 @@ Também dá para mandar um arquivo para a base pelo chat: no Assistente, clique 
 
 ![Página Base de conhecimento](/guide/knowledge-list.jpg)
 
-*Na tela: **Configurações → Base de conhecimento**.*
+*Na tela: **Administração → Base de conhecimento**.*
 
 ## Passo a passo
 

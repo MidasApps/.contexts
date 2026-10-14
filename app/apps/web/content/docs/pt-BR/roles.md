@@ -29,15 +29,15 @@ Quem não pode criar papéis vê a lista e os papéis do sistema, mas sem os bot
 
 ## Onde encontrar
 
-**Configurações → Papéis**, no grupo **Organização** do menu de configurações.
+**Administração → Papéis**, no grupo **Organização** da barra lateral da administração.
 
-Endereço: `/o/{organização}/settings/roles`
+Endereço: `/admin/o/{organização}/roles`
 
 A página tem dois cartões: **Papéis personalizados** (os criados pela organização) e **Papéis do sistema** (fixos).
 
 ![Lista de papéis do sistema e da organização](/guide/roles-list.jpg)
 
-*Na tela: **Configurações → Papéis**: os papéis do sistema e os criados pela organização.*
+*Na tela: **Administração → Papéis**: os papéis do sistema e os criados pela organização.*
 
 ## Papéis do sistema
 
@@ -77,7 +77,7 @@ A tabela traz as permissões da plataforma, com o texto que aparece no seletor d
 | `core.role.create` / `update` / `delete` | Criar, alterar e excluir papéis | P, A |
 | `core.api-key.read` / `create` / `revoke` | Ver, criar e revogar chaves de API | P, A |
 | `core.device.read` / `create` / `revoke` | Ver, ativar e revogar dispositivos | P, A |
-| `core.audit-log.read` | Ver a auditoria da organização (**Configurações → Auditoria**) | P, A |
+| `core.audit-log.read` | Ver a auditoria da organização (**Administração → Auditoria**) | P, A |
 | `core.approval.read` | Ver pedidos de aprovação | P, A, M |
 | `core.approval.decide` | Aprovar ou recusar pedidos | P, A |
 | `core.chat.use` | Usar o chat | P, A, M |
@@ -107,7 +107,7 @@ A tabela traz as permissões da plataforma, com o texto que aparece no seletor d
 | `core.eval.read` / `write` | Ver e iniciar avaliações | P, A |
 | `core.flag.read` / `write` | Ver, ligar e desligar funcionalidades da organização | P, A |
 
-As permissões que começam com `platform.` são da equipe da plataforma e não podem ser dadas por uma organização. Veja [Administração da plataforma](/docs/admin).
+As permissões que começam com `platform.` são da equipe da plataforma e não podem ser dadas por uma organização. Veja [Console da plataforma](/docs/admin).
 
 ## Passo a passo
 
@@ -117,7 +117,7 @@ As permissões que começam com `platform.` são da equipe da plataforma e não 
 
 ### Criar um papel personalizado
 
-1. Vá em **Configurações → Papéis** e clique em **Novo papel**.
+1. Vá em **Administração → Papéis** e clique em **Novo papel**.
 2. Preencha **Nome** (até 80 caracteres) e, se quiser, **Descrição**.
 3. Em **Permissões**, marque o que o papel libera. As permissões aparecem agrupadas por módulo; as da plataforma ficam no grupo **Plataforma**, que mostra quantas estão marcadas e quantas existem no grupo. As permissões que você não tem aparecem desativadas e não podem ser marcadas.
 4. Clique em **Criar papel**. Aparece **Papel {nome} criado.**
@@ -138,7 +138,7 @@ Um papel precisa ter pelo menos uma permissão e pode ter até 200.
 
 ### Atribuir um papel a alguém
 
-Papéis são atribuídos em **Configurações → Membros** (ícone de lápis ao lado do acesso) ou no convite (**Convidar → Papéis**). Cada acesso aceita até 10 papéis.
+Papéis são atribuídos em **Administração → Membros** (ícone de lápis ao lado do acesso) ou no convite (**Convidar → Papéis**). Cada acesso aceita até 10 papéis.
 
 ## Exemplo
 

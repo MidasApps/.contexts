@@ -30,8 +30,8 @@ Quem tem só a leitura vê tudo, mas a página avisa: "Você pode ver os agentes
 
 ## Onde encontrar
 
-- **Configurações** → grupo **IA** → **Agentes**. Endereço: `/o/{organização}/settings/agents`.
-- **Configurações** → grupo **IA** → **Habilidades**. Endereço: `/o/{organização}/settings/skills`.
+- **Administração** → grupo **IA** → **Agentes**. Endereço: `/admin/o/{organização}/agents`.
+- **Administração** → grupo **IA** → **Habilidades**. Endereço: `/admin/o/{organização}/skills`.
 
 No topo da página **Agentes**, há atalhos para **Abrir conectores** e **Ver habilidades**. A página **Habilidades** tem o atalho **Abrir agentes**.
 
@@ -44,11 +44,11 @@ A página **Agentes** tem, de cima para baixo:
 
 ![Página Agentes](/guide/agents-list.jpg)
 
-*Na tela: **Configurações → Agentes**.*
+*Na tela: **Administração → Agentes**.*
 
 ![Página Habilidades](/guide/agents-skills.jpg)
 
-*Na tela: **Configurações → Habilidades**.*
+*Na tela: **Administração → Habilidades**.*
 
 ## Passo a passo
 
@@ -122,7 +122,7 @@ Alguns agentes ainda não aceitam instruções da organização. Nesses casos, a
 
 ### Criar uma habilidade da organização
 
-1. Em **Configurações** → **Habilidades**, na seção **Habilidades da organização**, clique em **Nova habilidade**.
+1. Em **Administração** → **Habilidades**, na seção **Habilidades da organização**, clique em **Nova habilidade**.
 2. Em **Nome**, use letras minúsculas, números e hífens, começando por uma letra (até 60 caracteres), por exemplo `relatorio-semanal`. O nome é único na organização.
 3. Em **Descrição** (até 1.024 caracteres), diga **quando** o agente deve usar a habilidade. O agente decide por este texto.
 4. Em **Instruções**, escreva o passo a passo em Markdown.

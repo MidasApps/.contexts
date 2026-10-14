@@ -53,15 +53,17 @@ Quando você não pode decidir, a tela explica o motivo em vez de mostrar os bot
 
 ## Onde encontrar
 
-- Menu: **Configurações → Operação → Aprovações**.
-- Atalho: abra o menu da sua conta, no rodapé da barra lateral, e clique em **Aprovações**.
-- Endereço da caixa: `/o/{organização}/settings/approvals`.
+A caixa de aprovações fica na aplicação, não na administração.
+
+- Barra lateral: grupo **Organização** → **Aprovações**. O item só aparece para quem pode ver aprovações.
+- Atalho: abra o menu da sua conta, no rodapé da barra lateral, e clique em **Aprovações**. O item mostra quantos pedidos aguardam você.
+- Endereço da caixa: `/o/{organização}/approvals`.
 - Abas: `?tab=mine` (**Pedidas por mim**) e `?tab=history` (**Histórico**). Sem `tab`, abre **Aguardando minha decisão**.
-- Página de um pedido: `/o/{organização}/settings/approvals/{pedido}`.
+- Página de um pedido: `/o/{organização}/approvals/{pedido}`.
 
 ![Página Aprovações](/guide/approvals-inbox.jpg)
 
-*Na tela: **Configurações → Aprovações**.*
+*Na tela: **Aprovações**, na barra lateral da aplicação.*
 
 ### O aviso no menu da conta
 
@@ -76,7 +78,7 @@ O número conta só os pedidos pendentes feitos por **outras pessoas**. Os seus 
 
 ### Ver o que aguarda a sua decisão
 
-1. Abra **Configurações → Operação → Aprovações**.
+1. Na barra lateral da aplicação, no grupo **Organização**, clique em **Aprovações**.
 2. A aba **Aguardando minha decisão ({quantidade})** mostra os pedidos pendentes feitos por outras pessoas.
 3. A aba **Pedidas por mim ({quantidade})** mostra os seus pedidos que ainda aguardam decisão.
 4. A aba **Histórico** mostra os pedidos já concluídos: executados, recusados, cancelados ou expirados.
