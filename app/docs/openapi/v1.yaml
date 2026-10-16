@@ -20097,6 +20097,7 @@ components:
             - MODULE_SETTINGS_UPDATED
             - MODULE_RECORD_CREATED
             - MODULE_RECORD_UPDATED
+            - MODULE_RECORD_DELETED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
@@ -20432,6 +20433,7 @@ components:
             - MODULE_SETTINGS_UPDATED
             - MODULE_RECORD_CREATED
             - MODULE_RECORD_UPDATED
+            - MODULE_RECORD_DELETED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
@@ -20580,6 +20582,7 @@ components:
             - MODULE_SETTINGS_UPDATED
             - MODULE_RECORD_CREATED
             - MODULE_RECORD_UPDATED
+            - MODULE_RECORD_DELETED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
@@ -20910,6 +20913,7 @@ components:
             - MODULE_SETTINGS_UPDATED
             - MODULE_RECORD_CREATED
             - MODULE_RECORD_UPDATED
+            - MODULE_RECORD_DELETED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
