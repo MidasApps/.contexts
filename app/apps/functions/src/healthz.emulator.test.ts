@@ -1,8 +1,15 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { FUNCTIONS_REGION } from "./functions-options.ts";
 
-// Host and port of the Functions emulator in app/firebase.json; exec exports GCLOUD_PROJECT.
-const EMULATOR_HOST = "127.0.0.1:5001";
+// Host and port of the Functions emulator, read from app/firebase.json, the file the emulators
+// start from; exec exports GCLOUD_PROJECT.
+type FunctionsEmulatorConfig = { emulators: { functions: { host: string; port: number } } };
+const firebaseConfig = JSON.parse(
+  readFileSync(path.resolve(import.meta.dirname, "../../../firebase.json"), "utf8"),
+) as FunctionsEmulatorConfig;
+const EMULATOR_HOST = `${firebaseConfig.emulators.functions.host}:${String(firebaseConfig.emulators.functions.port)}`;
 const PROJECT_ID = process.env["GCLOUD_PROJECT"] ?? "demo-core";
 const HEALTHZ_URL = `http://${EMULATOR_HOST}/${PROJECT_ID}/${FUNCTIONS_REGION}/healthz`;
 

@@ -4,12 +4,15 @@ import {
   buildEmulatorEnv,
   buildEmulatorExportArgs,
   buildEmulatorStartArgs,
+  buildEmulatorUiUrl,
   buildFunctionsProbeUrl,
   buildKillTreeCommand,
   buildReadinessChecks,
   buildTurboDevArgs,
   describePortConflicts,
+  parseEmulatorPorts,
   readDevPorts,
+  readEmulatorPorts,
 } from "./dev-plan.ts";
 
 describe("buildComposeUpArgs", () => {
@@ -108,9 +111,60 @@ describe("buildReadinessChecks", () => {
 });
 
 describe("buildFunctionsProbeUrl", () => {
-  it("points at the healthz function of the demo project in the emulator", () => {
-    expect(buildFunctionsProbeUrl({ projectId: "demo-core", region: "southamerica-east1" })).toBe(
+  it("points at the healthz function of the demo project on the Functions emulator port", () => {
+    expect(buildFunctionsProbeUrl({ projectId: "demo-core", region: "southamerica-east1", port: 5001 })).toBe(
       "http://127.0.0.1:5001/demo-core/southamerica-east1/healthz",
+    );
+    expect(buildFunctionsProbeUrl({ projectId: "demo-core", region: "southamerica-east1", port: 15001 })).toBe(
+      "http://127.0.0.1:15001/demo-core/southamerica-east1/healthz",
+    );
+  });
+});
+
+describe("buildEmulatorUiUrl", () => {
+  it("points at the Emulator UI on its port", () => {
+    expect(buildEmulatorUiUrl(4000)).toBe("http://127.0.0.1:4000/");
+    expect(buildEmulatorUiUrl(14000)).toBe("http://127.0.0.1:14000/");
+  });
+});
+
+describe("readEmulatorPorts", () => {
+  it("reads the Emulator UI and Functions ports of firebase.json and ignores the other emulators", () => {
+    const config = {
+      emulators: {
+        auth: { host: "127.0.0.1", port: 9099 },
+        functions: { host: "127.0.0.1", port: 5001 },
+        ui: { enabled: true, host: "127.0.0.1", port: 4000 },
+      },
+    };
+    expect(readEmulatorPorts(config)).toEqual({ ui: 4000, functions: 5001 });
+  });
+
+  it("names firebase.json and the entry when a port is missing or is not a port", () => {
+    expect(() => readEmulatorPorts({ emulators: { ui: { port: 4000 } } })).toThrow(
+      /^invalid firebase\.json: .*emulators\.functions/,
+    );
+    expect(() => readEmulatorPorts({ emulators: { ui: { port: "4000" }, functions: { port: 5001 } } })).toThrow(
+      /^invalid firebase\.json: .*emulators\.ui\.port/,
+    );
+    expect(() => readEmulatorPorts({ emulators: { ui: { port: 0 }, functions: { port: 70_000 } } })).toThrow(
+      /emulators\.ui\.port, emulators\.functions\.port/,
+    );
+    expect(() => readEmulatorPorts({})).toThrow(/^invalid firebase\.json: .*emulators/);
+  });
+});
+
+describe("parseEmulatorPorts", () => {
+  it("reads the ports from the text of firebase.json", () => {
+    const text = JSON.stringify({ emulators: { functions: { port: 5001 }, ui: { enabled: true, port: 4000 } } });
+    expect(parseEmulatorPorts(text)).toEqual({ ui: 4000, functions: 5001 });
+  });
+
+  it("names firebase.json when the text is not JSON, and when a port is missing", () => {
+    expect(() => parseEmulatorPorts('{ "emulators": ')).toThrow(/^invalid firebase\.json: the file is not valid JSON/);
+    expect(() => parseEmulatorPorts("")).toThrow(/^invalid firebase\.json: the file is not valid JSON/);
+    expect(() => parseEmulatorPorts('{ "emulators": { "ui": { "port": 4000 } } }')).toThrow(
+      /^invalid firebase\.json: .*emulators\.functions/,
     );
   });
 });

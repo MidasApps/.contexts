@@ -28,15 +28,22 @@ const ports = (config: unknown): number[] => {
   );
 };
 
+/** `host:port` of an emulator in firebase.e2e.json, so the expectations follow the file. */
+const emulatorHost = (name: string): string => {
+  const entry = (firebaseConfig as { emulators: Record<string, { host?: string; port?: number }> }).emulators[name];
+  if (entry?.host === undefined || entry.port === undefined) throw new Error(`firebase.e2e.json has no ${name} host`);
+  return `${entry.host}:${String(entry.port)}`;
+};
+
 describe("buildE2eEnv", () => {
   it("targets the e2e emulators of firebase.e2e.json and the default web and desktop ports", () => {
     const env = buildE2eEnv({ firebaseConfig, overrides: {} });
     expect(env).toMatchObject({
       FIREBASE_PROJECT_ID: E2E_PROJECT_ID,
-      FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9391",
-      FIRESTORE_EMULATOR_HOST: "127.0.0.1:8391",
-      NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: "http://127.0.0.1:9391",
-      VITE_AUTH_EMULATOR_URL: "http://127.0.0.1:9391",
+      FIREBASE_AUTH_EMULATOR_HOST: emulatorHost("auth"),
+      FIRESTORE_EMULATOR_HOST: emulatorHost("firestore"),
+      NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: `http://${emulatorHost("auth")}`,
+      VITE_AUTH_EMULATOR_URL: `http://${emulatorHost("auth")}`,
       NEXT_PUBLIC_APP_URL: "http://localhost:3100",
       VITE_API_URL: "http://localhost:3100",
       CORS_ALLOWED_ORIGINS: "http://localhost:1420,http://tauri.localhost,tauri://localhost",
@@ -92,10 +99,17 @@ describe("the e2e command", () => {
     expect(url.pathname).toBe(`/${E2E_DATABASE_NAME}`);
   });
 
+  it("keeps Postgres on 5432 and moves it with E2E_POSTGRES_PORT, naming the variable when it is invalid", () => {
+    expect(new URL(buildE2eEnv({ firebaseConfig, overrides: {} })["DATABASE_URL"] ?? "").port).toBe("5432");
+    const env = buildE2eEnv({ firebaseConfig, overrides: { E2E_POSTGRES_PORT: "15432" } });
+    expect(env["DATABASE_URL"]).toBe(`postgresql://app:app@127.0.0.1:15432/${E2E_DATABASE_NAME}`);
+    expect(() => buildE2eEnv({ firebaseConfig, overrides: { E2E_POSTGRES_PORT: "abc" } })).toThrow(/E2E_POSTGRES_PORT/);
+  });
+
   it("starts the chat stack: storage and functions emulators, the agent runtime in fake mode and a long functions discovery", () => {
     const env = buildE2eEnv({ firebaseConfig, overrides: { E2E_MASTRA_PORT: "4192" } });
     expect(env).toMatchObject({
-      FIREBASE_STORAGE_EMULATOR_HOST: "127.0.0.1:9393",
+      FIREBASE_STORAGE_EMULATOR_HOST: emulatorHost("storage"),
       MASTRA_URL: "http://localhost:4192",
       E2E_MASTRA_ORIGIN: "http://localhost:4192",
       MASTRA_CORS_ORIGINS: "http://localhost:3100",
