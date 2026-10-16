@@ -207,6 +207,11 @@ overrides:
   "@mastra/mcp>@modelcontextprotocol/client": 2.2.0
   "@mastra/mcp>@modelcontextprotocol/core": 2.2.0
   "@mastra/mcp>@modelcontextprotocol/server": 2.2.0
+  # GHSA-8r5x-fm3f-whwj and GHSA-p8wg-vrv2-v86f (critical, JavaScript injection in compile,
+  # patched in 4.7.10): only the boundaries lint plugin brings handlebars in. Drop both once
+  # eslint-plugin-boundaries and @boundaries/elements depend on 4.7.10 or newer.
+  "eslint-plugin-boundaries>handlebars": 4.7.10
+  "@boundaries/elements>handlebars": 4.7.10
   # GHSA-68fv-2mgg-jv7q (2026-10-06): about 100 paths (postcss, css-tree, ...), so not scoped
   # to one parent. Drop once postcss and css-tree depend on >= 1.2.2.
   source-map-js: 1.2.2
