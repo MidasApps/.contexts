@@ -117,7 +117,7 @@ test.describe("support access in the tab", () => {
     // The Auth Emulator does not implement the reCAPTCHA Enterprise config the SDK asks for when it
     // sends the SMS (501); a real project answers it. Nothing else may reach the console.
     staff.guard.allow(/status of 501 \(Not Implemented\)/);
-    await submitSignIn(page, SEED_USERS.staff, "sign-in?next=%2Fadmin%2Fusers");
+    await submitSignIn(page, SEED_USERS.staff, "sign-in?next=%2Fadmin%2Fplatform%2Fusers");
     await completeSmsChallenge(page, emulator);
     await expect(page.getByRole("heading", { level: 1, name: "Usuários" })).toBeVisible();
     const reason = `${REASON_PATTERN} 5150: reload and leave.`;

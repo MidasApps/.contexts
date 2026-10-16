@@ -66,6 +66,9 @@ test.describe("platform staff", () => {
 
     test("opens an admin area and goes back to the app", async ({ page }) => {
       await page.goto("admin");
+      // /admin sends staff on to the console; opening the phone sheet before that redirect would
+      // let the navigation close it under the click.
+      await expect(page.getByRole("heading", { level: 1, name: "Console da plataforma" })).toBeVisible();
       await showSidebar(page);
       const areas = page.getByRole("navigation", { name: "Seções da administração" });
       await areas.getByRole("link", { name: "Usuários" }).click();

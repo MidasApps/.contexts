@@ -62,7 +62,7 @@ function AdminTopbar({ context }: { context: AdminContext }) {
       </p>
       <div className="ms-auto flex items-center gap-2">
         {context === "platform" ? (
-          <StatusPill tone="violet" icon="shield" className="max-sm:hidden">
+          <StatusPill tone="violet" icon="shield">
             {t("topbar.badge")}
           </StatusPill>
         ) : null}

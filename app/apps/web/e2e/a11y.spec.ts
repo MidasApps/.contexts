@@ -234,7 +234,7 @@ test.describe("axe on the second-factor step and the support access banner", () 
     // A Firefox performance advisory (a scroll listener moves an element), logged as a warning;
     // it is not an error of the page and the other browsers do not emit it.
     staff.guard.allow(/scroll-linked positioning effect/);
-    await submitSignIn(page, SEED_USERS.staff, "sign-in?next=%2Fadmin%2Fusers");
+    await submitSignIn(page, SEED_USERS.staff, "sign-in?next=%2Fadmin%2Fplatform%2Fusers");
     await expect(page.getByRole("heading", { name: "Verificação em duas etapas" })).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     });

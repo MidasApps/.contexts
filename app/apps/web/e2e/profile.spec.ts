@@ -48,7 +48,7 @@ test("changes the language: the URL locale and the copy switch", async ({ page, 
   await page.getByRole("combobox", { name: /^Idioma/ }).click();
   await page.getByRole("option", { name: "English (United States)" }).click();
   await page.getByRole("button", { name: "Salvar" }).click();
-  await expect(page).toHaveURL(/\/en-US\/profile\/preferences$/);
+  await expect(page).toHaveURL(/\/en-US\/admin\/profile\/preferences$/);
   await expect(page.getByRole("heading", { level: 1, name: "Preferences" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "en-US");
 });
