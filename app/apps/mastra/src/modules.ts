@@ -2,7 +2,7 @@ import type { AgentModule, AgentRuntimePorts } from "@core/agents";
 import { createExampleAgentModule } from "@core/module-example/agents";
 import { exampleManifest } from "@core/module-example/manifest";
 import { createExampleCommands } from "@core/module-example/server";
-import type { AccessCore, AuditWriter, ContractCommand, FirebaseAdmin } from "@core/services";
+import type { AccessCore, AuditWriter, ContractCommand, FirebaseAdmin, PostgresClient } from "@core/services";
 import type { CoreServerModule } from "@core/services/composition";
 
 /** What a module's server side receives from this app's core server. */
@@ -10,6 +10,8 @@ export type ModuleServerDeps = {
   readonly firestore: FirebaseAdmin["firestore"];
   readonly access: Pick<AccessCore, "forRequest">;
   readonly audit: AuditWriter;
+  /** The app's Postgres pool: a module queries its own schema inside `withTenantTransaction` (decision 0077). */
+  readonly sql: PostgresClient;
 };
 
 /**

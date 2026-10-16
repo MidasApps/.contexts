@@ -262,7 +262,10 @@ const buildAdminOperationsSliceRoutes = (ctx: RuntimeRouteContext): CoreRoutes =
 export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> => {
   const { env, processEnvForFirebaseGuard } = await import("@/env");
   const firebase = createFirebaseAdmin({ env, processEnv: processEnvForFirebaseGuard });
-  const moduleDeps = { firestore: firebase.firestore, access: core.access, audit: core.audit };
+  // postgres.js connects lazily; the web login role may SET ROLE knowledge_runtime (migration 0005).
+  const sql = createPostgresClient({ DATABASE_URL: env.DATABASE_URL });
+  // The installed modules' server side: the core server's access and audit, Firestore and the pool.
+  const moduleDeps = { firestore: firebase.firestore, access: core.access, audit: core.audit, sql };
   // The command registry: core commands plus the installed modules' (SP3 Task 19).
   registerAgentCommandApprovals({
     approvals: core.approvals,
@@ -282,8 +285,6 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     },
     logger: processLogger,
   });
-  // postgres.js connects lazily; the web login role may SET ROLE knowledge_runtime (migration 0005).
-  const sql = createPostgresClient({ DATABASE_URL: env.DATABASE_URL });
   const serverlessToken =
     env.APP_ENV === "local" || env.MASTRA_AUDIENCE === undefined
       ? null
