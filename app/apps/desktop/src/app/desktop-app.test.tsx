@@ -163,7 +163,7 @@ describe("desktop app", () => {
   });
 
   it("has no /admin surface: signed-in staff paths render not found", async () => {
-    renderDesktop({ path: "/admin", signedIn: true });
+    renderDesktop({ path: "/admin/platform", signedIn: true });
 
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
   });

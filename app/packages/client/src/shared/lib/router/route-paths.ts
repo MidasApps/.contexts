@@ -1,4 +1,7 @@
-/** Sections of `/o/:organizationId/settings/:section` (SP2 spec §8; SP5 spec §7 for the agent runtime ones). */
+/**
+ * Sections of an organization's administration, `/admin/o/:organizationId/:section` (SP2 spec §8; SP5
+ * spec §7 for the agent runtime ones; decision 0077 moved them under `/admin`).
+ */
 export const SETTINGS_SECTIONS = [
   "general",
   "members",
@@ -13,7 +16,6 @@ export const SETTINGS_SECTIONS = [
   "knowledge",
   "connectors",
   "workflows",
-  "approvals",
   "usage",
   "traces",
   "evals",
@@ -23,22 +25,21 @@ export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
 
 /**
  * Sections with pages below them, addressed by the `rest` tail of the settings route:
- * `approvals/{approvalRequestId}`, `traces/{traceId}`, `workflows/runs/{runId}`.
+ * `traces/{traceId}`, `workflows/runs/{runId}`.
  */
-export const SETTINGS_DETAIL_SECTIONS = [
-  "approvals",
-  "traces",
-  "workflows",
-] as const satisfies readonly SettingsSection[];
+export const SETTINGS_DETAIL_SECTIONS = ["traces", "workflows"] as const satisfies readonly SettingsSection[];
 
-/** Sections of `/profile/:section` (SP2 spec §8). */
+/** Sections of `/admin/profile/:section` (SP2 spec §8; under `/admin` since decision 0077). */
 export const PROFILE_SECTIONS = ["account", "preferences", "security", "sessions", "notifications"] as const;
 export type ProfileSection = (typeof PROFILE_SECTIONS)[number];
 
 /**
  * A place in the app (SP2 spec §4, decision 0012), without the web's `/{locale}` prefix, which
- * the web adapter adds. `rest` is the catch-all tail of module and admin routes ("" for the root),
- * and the detail tail of a settings section (absent for the section itself).
+ * the web adapter adds. Two surfaces (decision 0077): the application at the root (organizations,
+ * projects, chat, module pages, approvals) and the administration under `/admin` (organization
+ * settings, module settings, profile and the platform console). `rest` is the catch-all tail of
+ * module and admin routes ("" for the root), and the detail tail of a settings section (absent for
+ * the section itself).
  * Admin pages and settings sections keep their tabs, filters and page in `search` (SP5: filters
  * are shareable links); views read and write them with `useRouteSearch`.
  */
@@ -69,6 +70,16 @@ export type Route =
       conversationId?: string | undefined;
       unit?: string | undefined;
     }
+  /**
+   * The organization's approvals inbox (SP5 spec §3.4): deciding an agent's action is part of using
+   * the app, so it lives in the application; `approvalRequestId` opens one request.
+   */
+  | {
+      id: "approvals";
+      organizationId: string;
+      approvalRequestId?: string | undefined;
+      search?: Readonly<Record<string, string>> | undefined;
+    }
   | {
       id: "settings";
       organizationId: string;
@@ -76,10 +87,13 @@ export type Route =
       rest?: string | undefined;
       search?: Readonly<Record<string, string>> | undefined;
     }
-  /** `/o/:organizationId/settings` without a section: opens the first section the viewer can read. */
+  /** `/admin/o/:organizationId` without a section: opens the first section the viewer can read. */
   | { id: "settings-index"; organizationId: string }
   | { id: "settings-module"; organizationId: string; moduleId: string }
   | { id: "profile"; section: ProfileSection }
+  /** `/admin`: opens the administration of the last organization used (or the platform console for staff). */
+  | { id: "admin-home" }
+  /** The platform console (staff only): `/admin/platform/<area>…`. */
   | { id: "admin"; rest: string; search?: Readonly<Record<string, string>> | undefined }
   /** The user guide (decision 0073): `page` is the slug of one guide page, "" for its index. Readable signed out. */
   | { id: "docs"; page: string };
@@ -97,16 +111,31 @@ export const ROUTE_IDS = [
   "project",
   "module",
   "chat",
+  "approvals",
   "settings",
   "settings-index",
   "settings-module",
   "profile",
+  "admin-home",
   "admin",
   "docs",
 ] as const satisfies readonly RouteId[];
 
-/** Routes that exist only on web (the desktop has no `/admin`, decision 0012, nor the guide, decision 0073). */
+/**
+ * Routes that exist only on web: the platform console (decision 0012) and the guide (decision 0073).
+ * The desktop keeps the organization's administration and the profile (decision 0077).
+ */
 export const WEB_ONLY_ROUTE_IDS: readonly RouteId[] = ["admin", "docs"];
+
+/** Routes of the administration surface (`/admin`, decision 0077); every other signed-in route is the application. */
+export const ADMIN_SURFACE_ROUTE_IDS: ReadonlySet<RouteId> = new Set<RouteId>([
+  "settings",
+  "settings-index",
+  "settings-module",
+  "profile",
+  "admin-home",
+  "admin",
+]);
 
 const seg = (value: string): string => encodeURIComponent(value);
 
@@ -121,12 +150,14 @@ const withSearch = (path: string, search: Record<string, string | undefined>): s
 };
 
 const organizationPath = (organizationId: string): string => `/o/${seg(organizationId)}`;
+const organizationAdminPath = (organizationId: string): string => `/admin/o/${seg(organizationId)}`;
 
 type OrganizationRoute = Extract<Route, { organizationId: string }>;
 
-/** Routes inside an organization (`/o/:organizationId/…`). */
+/** Routes of one organization: the application's `/o/:organizationId/…`, the administration's `/admin/o/:organizationId/…`. */
 const organizationRouteHref = (route: OrganizationRoute): string => {
   const organization = organizationPath(route.organizationId);
+  const administration = organizationAdminPath(route.organizationId);
   switch (route.id) {
     case "organization":
       return organization;
@@ -140,12 +171,16 @@ const organizationRouteHref = (route: OrganizationRoute): string => {
       const conversation = route.conversationId === undefined ? "" : `/${seg(route.conversationId)}`;
       return withSearch(`${organization}/p/${seg(route.projectId)}/chat${conversation}`, { unit: route.unit });
     }
+    case "approvals": {
+      const request = route.approvalRequestId === undefined ? "" : `/${seg(route.approvalRequestId)}`;
+      return withSearch(`${organization}/approvals${request}`, route.search ?? {});
+    }
     case "settings":
-      return withSearch(`${organization}/settings/${route.section}${tail(route.rest ?? "")}`, route.search ?? {});
+      return withSearch(`${administration}/${route.section}${tail(route.rest ?? "")}`, route.search ?? {});
     case "settings-index":
-      return `${organization}/settings`;
+      return administration;
     case "settings-module":
-      return `${organization}/settings/m/${seg(route.moduleId)}`;
+      return `${administration}/m/${seg(route.moduleId)}`;
   }
 };
 
@@ -171,9 +206,11 @@ export const routeHref = (route: Route): string => {
     case "organizations":
       return "/organizations";
     case "profile":
-      return `/profile/${route.section}`;
+      return `/admin/profile/${route.section}`;
+    case "admin-home":
+      return "/admin";
     case "admin":
-      return withSearch(`/admin${tail(route.rest)}`, route.search ?? {});
+      return withSearch(`/admin/platform${tail(route.rest)}`, route.search ?? {});
     case "docs":
       return route.page === "" ? "/docs" : `/docs/${seg(route.page)}`;
   }

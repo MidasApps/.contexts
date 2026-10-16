@@ -25,7 +25,7 @@ const TEXT_FIELDS: readonly { key: TextKey; maxLength: number; mono: boolean }[]
 ];
 
 /**
- * Filters of `/admin/logs`. The level applies at once; the text filters apply together on submit
+ * Filters of `/admin/platform/logs`. The level applies at once; the text filters apply together on submit
  * (Enter or the button), so the URL does not change on every keystroke.
  */
 export function LogFiltersForm({

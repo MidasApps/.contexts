@@ -12,7 +12,7 @@ const renderView = (permissions: string[], routes: FakeRoutes = {}) =>
     <main>
       <SettingsGeneralView />
     </main>,
-    { path: `/o/${IDS.organization}/settings/general`, routes: shellRoutes(permissions, routes) },
+    { path: `/admin/o/${IDS.organization}/general`, routes: shellRoutes(permissions, routes) },
   );
 
 describe("SettingsGeneralView", () => {

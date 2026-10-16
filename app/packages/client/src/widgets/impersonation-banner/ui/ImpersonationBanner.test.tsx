@@ -65,7 +65,7 @@ describe("ImpersonationBanner", () => {
     ).toBeDefined();
   });
 
-  it("returns to the staff account on /admin/users when leaving, with the button pending meanwhile", async () => {
+  it("returns to the staff account on /admin/platform/users when leaving, with the button pending meanwhile", async () => {
     let finish: () => void = () => undefined;
     const { user, router, bridge, impersonate } = render({
       leaveImpersonation: () =>
@@ -78,7 +78,7 @@ describe("ImpersonationBanner", () => {
     await user.click(leave);
     await waitFor(() => expect(leave.getAttribute("aria-busy")).toBe("true"));
     finish();
-    await waitFor(() => expect(router.current()).toBe("/admin/users"));
+    await waitFor(() => expect(router.current()).toBe("/admin/platform/users"));
     expect(bridge.ended).toBe(0);
   });
 

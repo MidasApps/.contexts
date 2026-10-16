@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { fillSignInForm, signInThroughUi } from "@core/e2e/sign-in";
+import { closeSidebarSheet, fillSignInForm, showSidebar, signInThroughUi } from "@core/e2e/sign-in";
 import type { Page } from "@playwright/test";
 import { authFile, expect, test } from "./web-test.ts";
 
@@ -8,7 +8,7 @@ import { authFile, expect, test } from "./web-test.ts";
 
 const unique = (label: string): string => `${label} ${randomUUID().slice(0, 8)}`;
 
-const settings = (organizationId: string, section: string): string => `o/${organizationId}/settings/${section}`;
+const settings = (organizationId: string, section: string): string => `admin/o/${organizationId}/${section}`;
 
 /** A table row on wide screens, a card (list item) on phones: DataTable switches by viewport. */
 const entry = (page: Page, text: string | RegExp) =>
@@ -177,21 +177,17 @@ test.describe("empty lists", () => {
 test.describe("a viewer", () => {
   test.use({ storageState: authFile("viewer") });
 
-  test("sees only the sections the viewer role can read, read-only", async ({ page, world, isMobile }) => {
+  test("sees only the sections the viewer role can read, read-only", async ({ page, world }) => {
     await page.goto(settings(world.alpha.id, "general"));
     await expect(page.getByRole("heading", { level: 1, name: "Geral" })).toBeVisible();
     await expect(page.getByText("Somente administradores podem alterar estes dados.")).toBeVisible();
-    const nav = page.getByRole("navigation", { name: "Seções das configurações" });
-    // Grouped links on wide screens; on phones the same sections are a picker (decision 0055).
-    if (isMobile) {
-      await nav.getByRole("combobox", { name: "Seção" }).click();
-      await expect(page.getByRole("option", { name: "Unidades" })).toBeVisible();
-      await page.keyboard.press("Escape");
-    } else {
-      await expect(nav.getByRole("link", { name: "Unidades" })).toBeVisible();
-    }
+    // The administration's sidebar lists the sections the role can read (decision 0077).
+    await showSidebar(page);
+    const nav = page.getByRole("navigation", { name: "Seções da administração" });
+    await expect(nav.getByRole("link", { name: "Unidades" })).toBeVisible();
     await expect(nav.getByRole("link", { name: "Membros" })).toHaveCount(0);
     await expect(nav.getByRole("link", { name: "Chaves de API" })).toHaveCount(0);
+    await closeSidebarSheet(page);
 
     await page.goto(settings(world.alpha.id, "m/example"));
     await expect(page.getByText("Você pode ver estas configurações, mas não alterá-las.")).toBeVisible();

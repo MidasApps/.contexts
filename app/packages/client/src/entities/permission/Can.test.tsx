@@ -36,7 +36,7 @@ describe("Can", () => {
   });
 
   it("denies everything outside an organization and while the context failed", async () => {
-    const outside = renderClientHook(() => usePermissions(), { path: "/profile/account" });
+    const outside = renderClientHook(() => usePermissions(), { path: "/admin/profile/account" });
     expect(outside.result.current.status).toBe("success");
     expect(outside.result.current.can("core.organization.read")).toBe(false);
 

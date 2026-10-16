@@ -5,8 +5,8 @@ import { ProfileSectionPage, SettingsSectionPage } from "./section-views.tsx";
 
 describe("section pages", () => {
   it.each([
-    ["settings", <SettingsSectionPage key="s" />, "/o/org-1/settings/billing"],
-    ["profile", <ProfileSectionPage key="p" section="admin" />, "/profile/admin"],
+    ["settings", <SettingsSectionPage key="s" />, "/admin/o/org-1/billing"],
+    ["profile", <ProfileSectionPage key="p" section="admin" />, "/admin/profile/admin"],
   ])("renders not found for a %s section outside the route map", async (_kind, page, path) => {
     renderApp(page, { path });
 
@@ -14,14 +14,14 @@ describe("section pages", () => {
   });
 
   it("renders not found for a tail under a section without detail pages", async () => {
-    renderApp(<SettingsSectionPage />, { path: "/o/org-1/settings/members/whatever" });
+    renderApp(<SettingsSectionPage />, { path: "/admin/o/org-1/members/whatever" });
 
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
   });
 
   it("renders the section named by the address", async () => {
     renderApp(<SettingsSectionPage />, {
-      path: `/o/${IDS.organization}/settings/general`,
+      path: `/admin/o/${IDS.organization}/general`,
       routes: shellRoutes(MEMBER_PERMISSIONS),
     });
 

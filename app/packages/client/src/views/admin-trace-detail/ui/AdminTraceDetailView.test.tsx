@@ -14,7 +14,7 @@ const routes = {
   "GET /v1/admin/organizations": page([buildOrganizationSummary()]),
 };
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminTraceDetailView />, { path: `/admin/traces/${OBS_IDS.trace}`, routes, ...options });
+  renderAdmin(<AdminTraceDetailView />, { path: `/admin/platform/traces/${OBS_IDS.trace}`, routes, ...options });
 
 describe("AdminTraceDetailView", () => {
   it("shows the trace's numbers, its span tree and the way to its logs and back", async () => {
@@ -29,9 +29,9 @@ describe("AdminTraceDetailView", () => {
     expect(within(summary).getByText(OBS_IDS.trace)).toBeDefined();
     expect(screen.getByRole("heading", { level: 2, name: "3 spans" })).toBeDefined();
     expect(screen.getByRole("link", { name: "Ver logs deste trace" }).getAttribute("href")).toBe(
-      `/admin/logs?traceId=${OBS_IDS.trace}`,
+      `/admin/platform/logs?traceId=${OBS_IDS.trace}`,
     );
-    expect(screen.getByRole("link", { name: "Traces" }).getAttribute("href")).toBe("/admin/traces");
+    expect(screen.getByRole("link", { name: "Traces" }).getAttribute("href")).toBe("/admin/platform/traces");
     expect(api.callLines()).toContain(`GET /v1/admin/traces/${OBS_IDS.trace}`);
     await expectNoAxeViolations(container);
   });
@@ -40,7 +40,7 @@ describe("AdminTraceDetailView", () => {
     const unknown = render({ routes: { ...routes, "GET /v1/admin/traces/:traceId": apiError(404, "NOT_FOUND") } });
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
     unknown.unmount();
-    const { api } = render({ path: "/admin/traces/not-a-trace" });
+    const { api } = render({ path: "/admin/platform/traces/not-a-trace" });
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
     expect(api.calls.some((call) => call.path.startsWith("/v1/admin/traces"))).toBe(false);
   });

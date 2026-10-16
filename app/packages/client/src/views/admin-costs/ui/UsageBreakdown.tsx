@@ -187,7 +187,7 @@ function Charts({ usage, onClear }: { usage: AdminUsage; onClear: () => void }) 
 }
 
 /**
- * Usage by day and by model on `/admin/costs` (`GET /v1/admin/usage`, decision 0044): the month
+ * Usage by day and by model on `/admin/platform/costs` (`GET /v1/admin/usage`, decision 0044): the month
  * to date of every organization by default; an organization and a range of UTC days (the ledger's
  * days) narrow it, all in the URL. Its own loading, error and empty states: the budgets above do
  * not wait for it.

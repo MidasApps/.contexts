@@ -14,7 +14,7 @@ describe("ApprovalRequestItem", () => {
     expect(screen.getByText("Pendente")).toBeTruthy();
     expect(screen.getByText(/Pedida por Mia/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Ver o progresso do fluxo" }).getAttribute("href")).toBe(
-      "/o/OrgAaaaaaaaaaaaaaaaaa/settings/workflows/runs/run-1",
+      "/admin/o/OrgAaaaaaaaaaaaaaaaaa/workflows/runs/run-1",
     );
     expect(screen.getByText("Toda a organização")).toBeTruthy();
     await expectNoAxeViolations(container);

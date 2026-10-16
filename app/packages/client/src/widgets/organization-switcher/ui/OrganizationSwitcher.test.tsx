@@ -51,7 +51,7 @@ describe("OrganizationSwitcher", () => {
   it("asks to choose outside an organization and offers a retry when the list fails", async () => {
     let fail = true;
     const { user } = renderWidget(<OrganizationSwitcher />, {
-      path: "/profile/account",
+      path: "/admin/profile/account",
       routes: {
         "GET /v1/me/organizations": () => (fail ? apiError(500, "INTERNAL_ERROR") : page(SHELL_ORGANIZATIONS)),
       },

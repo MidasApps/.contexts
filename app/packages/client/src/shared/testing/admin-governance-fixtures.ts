@@ -15,7 +15,7 @@ export const buildFeatureFlag = (overrides: Json = {}): Json => ({
   ...overrides,
 });
 
-/** A rollout flag that is on and past its expiry (the `/admin/flags` warning). */
+/** A rollout flag that is on and past its expiry (the `/admin/platform/flags` warning). */
 export const buildExpiredFlag = (overrides: Json = {}): Json =>
   buildFeatureFlag({
     key: "chat.voice",

@@ -22,39 +22,41 @@ Exceção: quando alguém da equipe de suporte acessa o app como você (modo sup
 
 ## Onde encontrar
 
-Abra o menu da conta, no rodapé da barra lateral (seu nome e e-mail), e escolha a seção. Também é possível usar a paleta de comandos (**Ctrl+K** ou **⌘K**) → **Abrir perfil**.
+O perfil fica na administração, em **Minha conta**. Abra o menu da conta, no rodapé da barra lateral (seu nome e e-mail), e escolha a seção. Na aplicação, também é possível usar a paleta de comandos (**Ctrl+K** ou **⌘K**) → **Abrir perfil**.
+
+Dentro da administração, a barra lateral mostra o grupo **Minha conta** com as cinco seções. Para mudar de seção, clique nela na barra lateral. No celular, abra a barra lateral pelo botão de menu. A barra superior mostra **Administração › Minha conta › {seção}**. Para voltar ao trabalho, clique em **Abrir a aplicação**.
 
 | Seção | Endereço |
 |---|---|
-| Conta | `/profile/account` |
-| Preferências | `/profile/preferences` |
-| Segurança | `/profile/security` |
-| Sessões | `/profile/sessions` |
-| Notificações | `/profile/notifications` |
+| Conta | `/admin/profile/account` |
+| Preferências | `/admin/profile/preferences` |
+| Segurança | `/admin/profile/security` |
+| Sessões | `/admin/profile/sessions` |
+| Notificações | `/admin/profile/notifications` |
 
 O item **Idioma e região** do menu da conta leva direto para **Preferências**.
 
 ![Página Conta do perfil](/guide/profile-account.jpg)
 
-*Na tela: **Perfil → Conta**.*
+*Na tela: **Minha conta → Conta**.*
 
 ![Página Preferências do perfil](/guide/profile-preferences.jpg)
 
-*Na tela: **Perfil → Preferências**.*
+*Na tela: **Minha conta → Preferências**.*
 
 ![Página Segurança do perfil](/guide/profile-security.jpg)
 
-*Na tela: **Perfil → Segurança**.*
+*Na tela: **Minha conta → Segurança**.*
 
 ![Página Sessões do perfil](/guide/profile-sessions.jpg)
 
-*Na tela: **Perfil → Sessões**.*
+*Na tela: **Minha conta → Sessões**.*
 
 ## Passo a passo
 
 ### Conta: alterar o nome de exibição
 
-1. Vá em **Perfil → Conta**.
+1. Vá em **Minha conta → Conta**.
 2. O cartão **Acesso** mostra o seu e-mail e se a **Verificação em duas etapas** está ativa ou desativada. O e-mail vem da sua conta de acesso e não pode ser alterado aqui.
 3. No cartão **Perfil**, altere **Nome de exibição**. Esse nome aparece para os membros das suas organizações.
 4. Clique em **Salvar**.
@@ -63,7 +65,7 @@ Se o nome ficar vazio, o app mostra o seu e-mail no lugar.
 
 ### Preferências: idioma, fuso horário e moeda
 
-1. Vá em **Perfil → Preferências**.
+1. Vá em **Minha conta → Preferências**.
 2. No cartão **Idioma e região**, escolha **Idioma**, **Fuso horário** e **Moeda**. Os campos de fuso e moeda têm busca.
 3. Clique em **Salvar**. Os três campos são salvos juntos. Se você trocou o idioma, a página muda na hora.
 
@@ -71,14 +73,14 @@ As datas aparecem no fuso horário escolhido; valores novos usam a moeda escolhi
 
 ### Preferências: tema
 
-1. Ainda em **Perfil → Preferências**, no cartão **Aparência**, escolha o **Tema**: **Automático (sistema)**, **Claro** ou **Escuro**.
+1. Ainda em **Minha conta → Preferências**, no cartão **Aparência**, escolha o **Tema**: **Automático (sistema)**, **Claro** ou **Escuro**.
 2. O tema é aplicado na hora e salvo no seu perfil, sem botão de salvar.
 
 Atalho: no menu da conta, use **Tema** e escolha **Do sistema**, **Claro** ou **Escuro**.
 
 ### Segurança: ativar a verificação em duas etapas com app autenticador
 
-1. Vá em **Perfil → Segurança**.
+1. Vá em **Minha conta → Segurança**.
 2. No cartão **Verificação em duas etapas**, clique em **Adicionar app autenticador**.
 3. Escaneie o QR code com um app autenticador no celular. Se o app estiver no mesmo dispositivo, use **Abrir no app autenticador**; sem câmera, digite a **Chave de configuração** (mostrada só durante o cadastro; não compartilhe).
 4. Em **Código de verificação**, digite o código de 6 dígitos que o app mostrar. O código muda a cada 30 segundos.
@@ -87,7 +89,7 @@ Atalho: no menu da conta, use **Tema** e escolha **Do sistema**, **Claro** ou **
 
 ### Segurança: ativar a verificação por SMS
 
-1. Em **Perfil → Segurança**, clique em **Adicionar telefone**.
+1. Em **Minha conta → Segurança**, clique em **Adicionar telefone**.
 2. Em **Número de telefone**, use o formato internacional, com + e código do país. Exemplo: +55 11 91234-5678.
 3. Clique em **Enviar código**. Para corrigir o número, use **Trocar número**.
 4. Digite o código recebido por SMS em **Código de verificação**.
@@ -111,7 +113,7 @@ Se esqueceu a senha atual, saia e use **Esqueci minha senha** na página de entr
 
 ### Sessões: revisar e encerrar acessos
 
-1. Vá em **Perfil → Sessões**.
+1. Vá em **Minha conta → Sessões**.
 2. A tabela **Sessões ativas** mostra **Dispositivo** (navegador ou **App para desktop**), **Última atividade**, **Início** e **Expira em**. A sua sessão atual tem o selo **Este dispositivo**; sessões que passaram pela verificação em duas etapas têm o selo **Com 2 etapas**.
 3. Para encerrar uma sessão que você não reconhece, clique em **Revogar** e confirme em **Revogar sessão**. O dispositivo é desconectado na próxima atividade.
 4. Para encerrar a sessão atual, clique em **Sair deste dispositivo**.
@@ -121,7 +123,7 @@ Por padrão, uma sessão no navegador dura 5 dias a partir da entrada. Já a ses
 
 ### Notificações: escolher os avisos por e-mail
 
-1. Vá em **Perfil → Notificações**.
+1. Vá em **Minha conta → Notificações**.
 2. Ligue ou desligue **Novidades do produto** (novos recursos e melhorias, no máximo uma vez por semana). A escolha é salva na hora.
 3. **Alertas de segurança** ficam sempre ativos: avisam sobre novas entradas e mudanças na sua conta.
 
@@ -150,7 +152,7 @@ Depois de uma viagem, ele revisa as sessões:
 
 > **Rafael:** Esqueci de sair no computador do hotel. Preciso trocar a senha?
 >
-> **Colega:** Primeiro revogue aquela sessão em Perfil → Sessões. Se desconfiar de acesso indevido, troque a senha e use "Sair de todos os dispositivos".
+> **Colega:** Primeiro revogue aquela sessão em Minha conta → Sessões. Se desconfiar de acesso indevido, troque a senha e use "Sair de todos os dispositivos".
 
 ## Dicas e boas práticas
 
@@ -173,7 +175,7 @@ Depois de uma viagem, ele revisa as sessões:
 | Por segurança, entre novamente para continuar. | A ação exige uma entrada recente. | Saia, entre de novo e repita a ação. |
 | O tema foi aplicado aqui, mas não foi salvo no seu perfil. | O tema mudou só neste dispositivo. | Clique em **Tentar novamente**. |
 | Não foi possível salvar a preferência. | A notificação não foi salva. | Tente de novo; se continuar, informe a referência ao suporte. |
-| Você saiu neste dispositivo, mas não conseguimos encerrar a sessão no servidor. | A saída local funcionou, mas a sessão no servidor continua. | Se usa outros dispositivos, use **Sair de todos os dispositivos** em **Perfil → Sessões**. |
+| Você saiu neste dispositivo, mas não conseguimos encerrar a sessão no servidor. | A saída local funcionou, mas a sessão no servidor continua. | Se usa outros dispositivos, use **Sair de todos os dispositivos** em **Minha conta → Sessões**. |
 
 ## Veja também
 

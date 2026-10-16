@@ -11,7 +11,7 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
+import { SettingsSectionLink } from "#/widgets/settings-frame/index.ts";
 import { TraceFilters, type TraceFilterValues } from "./TraceFilters.tsx";
 import { useTargetLabel } from "./trace-target.ts";
 

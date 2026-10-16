@@ -17,7 +17,7 @@ export const CHAT_PERMISSION = "core.conversation.send";
 
 /**
  * Href of one approval request in the approvals inbox (SP5 settings route
- * `/o/{organizationId}/settings/approvals/{approvalRequestId}`), built by the router port so the
+ * `/o/{organizationId}/approvals/{approvalRequestId}`), built by the router port so the
  * web adds its locale prefix.
  */
 export const approvalRequestHref = (

@@ -13,7 +13,7 @@ const renderView = (mfaFactors: MfaFactor[] = ["phone", "totp"], authOptions: Fa
     <main>
       <ProfileSecurityView />
     </main>,
-    { path: "/profile/security", auth, config: { mfaFactors } },
+    { path: "/admin/profile/security", auth, config: { mfaFactors } },
   );
 };
 

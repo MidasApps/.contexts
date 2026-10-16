@@ -78,7 +78,7 @@ Cada resposta concluída tem os botões **Resposta boa** (polegar para cima) e *
 1. Clique em **Resposta boa** quando a resposta ajudou. A avaliação é enviada na hora e o botão fica marcado.
 2. Clique em **Resposta ruim** quando algo não ficou bom. Abre a janela **O que não ficou bom?**.
 3. Se quiser, escreva um **Comentário**, por exemplo "citou o documento errado".
-4. Quem pode alterar as avaliações da organização (`core.eval.write`) vê também **Usar esta resposta nas avaliações da organização**. Marcado, a resposta entra no conjunto **feedback** em **Configurações → Avaliações**. Veja [Avaliações](/docs/evals).
+4. Quem pode alterar as avaliações da organização (`core.eval.write`) vê também **Usar esta resposta nas avaliações da organização**. Marcado, a resposta entra no conjunto **feedback** em **Administração → Avaliações**. Veja [Avaliações](/docs/evals).
 5. Clique em **Enviar avaliação**.
 
 Cada pessoa tem uma avaliação por resposta. Avaliar de novo substitui a anterior.

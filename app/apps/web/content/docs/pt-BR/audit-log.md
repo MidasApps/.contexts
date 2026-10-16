@@ -25,20 +25,20 @@ Em **Quem**, aparece o nome do membro quando você pode ver a lista de membros. 
 | Ver a **Auditoria** | `core.audit-log.read` | Proprietário, Administrador |
 | Ver o nome de quem fez cada ação | `core.member.read` | Proprietário, Administrador, Membro |
 
-Sem `core.audit-log.read`, a seção não aparece no menu e o endereço mostra **Você não tem acesso a esta página**. Para dar essa permissão a outra pessoa sem torná-la administradora, crie um papel personalizado com ela. Veja [Papéis e permissões](/docs/roles).
+Sem `core.audit-log.read`, a seção não aparece na barra lateral da administração e o endereço mostra **Você não tem acesso a esta página**. Para dar essa permissão a outra pessoa sem torná-la administradora, crie um papel personalizado com ela. Veja [Papéis e permissões](/docs/roles).
 
 ## Onde encontrar
 
-- **Configurações → Auditoria**: `/o/{organização}/settings/audit-log`
-- Já filtrada por uma ação: `/o/{organização}/settings/audit-log?action=MEMBERSHIP_GRANTED`
+- **Administração → Auditoria**: `/admin/o/{organização}/audit-log`
+- Já filtrada por uma ação: `/admin/o/{organização}/audit-log?action=MEMBERSHIP_GRANTED`
 
-A seção fica no grupo **Organização** do menu de configurações.
+A seção fica no grupo **Organização** da barra lateral da administração.
 
 ## Passo a passo
 
 ### Ver o que aconteceu
 
-1. Vá em **Configurações → Auditoria**.
+1. Vá em **Administração → Auditoria**.
 2. A tabela mostra os registros do mais recente para o mais antigo, com as colunas **Quando**, **Ação**, **Quem**, **Alvo** e **Resultado**.
 3. Em **Alvo**, a primeira linha diz o tipo (por exemplo **Projeto** ou **Acesso**), a segunda traz o identificador e, quando houver, **Campos:** lista o que mudou.
 4. Use **Anterior** e **Próxima** para navegar entre as páginas.
@@ -56,7 +56,7 @@ O filtro fica no endereço da página. Você pode copiar o link e enviá-lo para
 
 Exemplo: na organização "Rede Construir", o gerente quer saber por que a vendedora Carla perdeu o acesso à Loja Centro.
 
-1. Ele abre **Configurações → Auditoria** e filtra por **Acesso revogado**.
+1. Ele abre **Administração → Auditoria** e filtra por **Acesso revogado**.
 2. A tabela mostra:
 
 | Quando | Ação | Quem | Alvo | Resultado |

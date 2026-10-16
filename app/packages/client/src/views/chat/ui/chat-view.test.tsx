@@ -8,7 +8,7 @@ import { defineClientModule } from "#/app-shell/modules/define-client-module.ts"
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { MEMBER_PERMISSIONS, shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { chatStream, ok, page, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { chatStream, type FakeRoutes, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildConversation } from "#/widgets/chat-history-sidebar/testing/conversations-api.fixture.ts";
 import { CHAT_SHELL_SLOTS, useChatEnvironment } from "#/widgets/chat-panel/index.ts";
@@ -215,7 +215,7 @@ describe("useChatEnvironment (SP0 follow-up #41)", () => {
     renderApp(<Probe />, { path: PATH, modules: [sampleModule], routes: shellRoutes(CHAT_PERMISSIONS, chatRoutes()) });
     await waitFor(() => expect(screen.getByTestId("can").textContent).toBe("true"), LOADED);
     expect(screen.getByTestId("contracts").textContent).toBe("samplenotes.CreateNoteCommand");
-    expect(screen.getByTestId("approval").textContent).toBe(`/o/${IDS.organization}/settings/approvals/Ap1`);
+    expect(screen.getByTestId("approval").textContent).toBe(`/o/${IDS.organization}/approvals/Ap1`);
     expect(screen.getByTestId("currency").textContent).toBe("BRL");
   });
 });

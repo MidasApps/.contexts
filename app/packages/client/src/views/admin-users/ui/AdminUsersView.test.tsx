@@ -24,7 +24,7 @@ const ORGANIZATIONS = {
 };
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminUsersView />, { path: "/admin/users", routes: ORGANIZATIONS, ...options });
+  renderAdmin(<AdminUsersView />, { path: "/admin/platform/users", routes: ORGANIZATIONS, ...options });
 
 const searchFor = async (user: ReturnType<typeof render>["user"], text: string): Promise<HTMLElement> => {
   const search = await screen.findByRole("region", { name: "Buscar usuário" });
@@ -86,7 +86,7 @@ describe("AdminUsersView user search", () => {
       { limit: "20", query: "an" },
     ]);
     // The text is personal data: it never goes to the page URL.
-    expect(router.current()).toBe("/admin/users");
+    expect(router.current()).toBe("/admin/platform/users");
     await expectNoAxeViolations(container);
   });
 
@@ -187,7 +187,7 @@ describe("AdminUsersView support access sessions", () => {
 
   it("keeps the sessions scope in the URL, like every other admin filter", async () => {
     const { api } = render({
-      path: "/admin/users?sessions=all",
+      path: "/admin/platform/users?sessions=all",
       routes: sessionsRoutes([buildAdminImpersonationSession()]),
     });
     const section = await screen.findByRole("region", { name: "Sessões de acesso de suporte" });

@@ -37,10 +37,12 @@ describe("AdminKpiCards", () => {
   it("links the stats to their area only for a role that may open it", async () => {
     const admin = renderAdmin(<AdminKpiCards overview={overview()} />);
     expect((await screen.findByRole("link", { name: "Organizações ativas" })).getAttribute("href")).toBe(
-      "/admin/organizations",
+      "/admin/platform/organizations",
     );
-    expect(screen.getByRole("link", { name: "Custo no mês" }).getAttribute("href")).toBe("/admin/costs");
-    expect(screen.getByRole("link", { name: "Avaliação dos agentes" }).getAttribute("href")).toBe("/admin/evals");
+    expect(screen.getByRole("link", { name: "Custo no mês" }).getAttribute("href")).toBe("/admin/platform/costs");
+    expect(screen.getByRole("link", { name: "Avaliação dos agentes" }).getAttribute("href")).toBe(
+      "/admin/platform/evals",
+    );
     expect(screen.queryByRole("link", { name: "Usuários ativos" })).toBeNull();
     admin.unmount();
     renderAdmin(<AdminKpiCards overview={overview({ evalStatus: "failed" })} />, { role: "platform-support" });

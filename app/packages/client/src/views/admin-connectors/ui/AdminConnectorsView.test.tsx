@@ -27,20 +27,22 @@ const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
   ...overrides,
 });
 
-const WITH_ORGANIZATION = `/admin/connectors?organizationId=${IDS.organization}`;
+const WITH_ORGANIZATION = `/admin/platform/connectors?organizationId=${IDS.organization}`;
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
   renderAdmin(<AdminConnectorsView />, { path: WITH_ORGANIZATION, routes: routes(), ...options });
 
 describe("AdminConnectorsView", () => {
   it("asks for an organization first and never calls the API without one", async () => {
-    const { user, router, api, container } = render({ path: "/admin/connectors" });
+    const { user, router, api, container } = render({ path: "/admin/platform/connectors" });
     expect(await screen.findByRole("heading", { level: 2, name: "Escolha uma organização" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Ver organizações" }).getAttribute("href")).toBe("/admin/organizations");
+    expect(screen.getByRole("link", { name: "Ver organizações" }).getAttribute("href")).toBe(
+      "/admin/platform/organizations",
+    );
     await expectNoAxeViolations(container);
     expect(api.callLines()).not.toContain("GET /v1/admin/connectors");
     await user.click(screen.getByRole("combobox", { name: "Organização" }));
     await user.click(await screen.findByRole("option", { name: "Contoso" }));
-    expect(router.current()).toBe(`/admin/connectors?organizationId=${IDS.otherOrganization}`);
+    expect(router.current()).toBe(`/admin/platform/connectors?organizationId=${IDS.otherOrganization}`);
     await waitFor(() =>
       expect(api.calls.find((call) => call.path === "/v1/admin/connectors")?.query).toBe(
         `?limit=20&organizationId=${IDS.otherOrganization}`,

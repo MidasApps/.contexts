@@ -8,7 +8,7 @@ import { apiError } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsIndexView } from "./SettingsIndexView.tsx";
 
-const INDEX_PATH = `/o/${IDS.organization}/settings`;
+const INDEX_PATH = `/admin/o/${IDS.organization}`;
 
 const renderIndex = (permissions: readonly Permission[], overrides = {}) =>
   renderApp(

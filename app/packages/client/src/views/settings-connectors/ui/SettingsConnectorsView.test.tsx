@@ -31,7 +31,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsConnectorsView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/connectors`,
+      path: `/admin/o/${IDS.organization}/connectors`,
       routes: shellRoutes(permissions, { [LIST]: page([buildConnector(), MCP]), ...routes }),
     },
   );

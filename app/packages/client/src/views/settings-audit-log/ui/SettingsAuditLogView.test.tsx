@@ -41,7 +41,7 @@ const renderView = (permissions: readonly Permission[], routes: FakeRoutes = {})
       <SettingsAuditLogView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/audit-log`,
+      path: `/admin/o/${IDS.organization}/audit-log`,
       routes: shellRoutes(permissions, {
         "GET /v1/organizations/:organizationId/members": page([BRUNO]),
         "GET /v1/organizations/:organizationId/audit-logs": page(ENTRIES),
@@ -60,8 +60,6 @@ describe("SettingsAuditLogView", () => {
     expect(within(table).getByText("Campos: name, status")).toBeDefined();
     expect(within(table).getByText("Integração (chave de API)")).toBeDefined();
     expect(within(table).getByText("Negado")).toBeDefined();
-    const nav = screen.getByRole("navigation", { name: "Seções das configurações" });
-    expect(within(nav).getByRole("link", { name: "Auditoria" }).getAttribute("aria-current")).toBe("page");
     await expectNoAxeViolations(container);
   });
 

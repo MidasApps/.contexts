@@ -173,7 +173,7 @@ function PlansTable({
 }
 
 /**
- * `/admin/plans` (SP5 spec §6, platform.plan.manage): the plan catalog with the spend, token and
+ * `/admin/platform/plans` (SP5 spec §6, platform.plan.manage): the plan catalog with the spend, token and
  * connector limits each plan grants, the create/edit dialog and deleting a plan no organization is on. Writes wait for the connection.
  */
 export function AdminPlansView() {

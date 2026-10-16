@@ -31,16 +31,16 @@ const renderSlot = (path: string) =>
 
 describe("AdminSlotView", () => {
   it("renders the area's empty state until its page exists, with a way back", async () => {
-    const { container } = renderSlot("/admin/costs");
+    const { container } = renderSlot("/admin/platform/costs");
     expect(await screen.findByRole("heading", { level: 1, name: "Custos" })).toBeDefined();
     expect(screen.getByText("Uso e custos por organização.")).toBeDefined();
     expect(screen.getByRole("heading", { level: 2, name: "Ainda não disponível" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Voltar à administração" }).getAttribute("href")).toBe("/admin");
+    expect(screen.getByRole("link", { name: "Voltar à administração" }).getAttribute("href")).toBe("/admin/platform");
     await expectNoAxeViolations(container);
   });
 
   it("keeps sub-pages of an area in that area", async () => {
-    renderSlot("/admin/users/u-42");
+    renderSlot("/admin/platform/users/u-42");
 
     expect(await screen.findByRole("heading", { level: 1, name: "Usuários" })).toBeDefined();
   });
@@ -50,7 +50,7 @@ describe("AdminSlotView", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
     unknown.unmount();
 
-    renderSlot("/admin/staff");
+    renderSlot("/admin/platform/staff");
     expect(await screen.findByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
   });
 });

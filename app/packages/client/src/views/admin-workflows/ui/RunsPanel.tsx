@@ -235,7 +235,7 @@ export type RunsPanelProps = {
 };
 
 /**
- * Runs tab of `/admin/workflows`: every organization's runs and the platform's, filtered by
+ * Runs tab of `/admin/platform/workflows`: every organization's runs and the platform's, filtered by
  * organization, workflow and status in the URL (one press shows the suspended ones, which wait
  * for an approval), paged by cursor, with the run's timeline and a cancel for runs still alive.
  */

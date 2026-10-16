@@ -34,13 +34,13 @@ Quem só pode ver unidades enxerga a árvore, mas sem os botões de ação. O se
 
 ## Onde encontrar
 
-- **Configurações → Unidades**, no grupo **Organização** do menu de configurações: `/o/{organização}/settings/units`. O projeto escolhido fica no endereço: `/o/{organização}/settings/units?project={projeto}`.
-- **Visão geral do projeto**, seção **Unidades**: `/o/{organização}/p/{projeto}`. Quem pode criar unidades vê o botão **Gerenciar unidades**, que leva às configurações.
+- **Administração → Unidades**, no grupo **Organização** da barra lateral da administração: `/admin/o/{organização}/units`. O projeto escolhido fica no endereço: `/admin/o/{organização}/units?project={projeto}`.
+- **Visão geral do projeto**, seção **Unidades**: `/o/{organização}/p/{projeto}`. Quem pode criar unidades vê o botão **Gerenciar unidades**, que leva a **Administração → Unidades**.
 - **Seletor de unidade** na barra lateral, logo abaixo do seletor de projeto. Ao escolher uma unidade, o endereço ganha `?unit={unidade}`, por exemplo `/o/{organização}/p/{projeto}?unit={unidade}`. Isso vale também nas páginas de módulos do projeto.
 
 ![Árvore de unidades do projeto](/guide/units-tree.jpg)
 
-*Na tela: **Configurações → Unidades**: escolha o projeto e veja a árvore de unidades.*
+*Na tela: **Administração → Unidades**: escolha o projeto e veja a árvore de unidades.*
 
 ## Passo a passo
 
@@ -50,7 +50,7 @@ Quem só pode ver unidades enxerga a árvore, mas sem os botões de ação. O se
 
 ### Escolher o projeto
 
-1. Vá em **Configurações → Unidades**.
+1. Vá em **Administração → Unidades**.
 2. Se a organização tem mais de um projeto, escolha-o no campo **Projeto**. Com um projeto só, ele já vem aberto.
 3. O cartão **Unidades de {projeto}** mostra a árvore.
 
@@ -154,7 +154,7 @@ Como o acesso desce na árvore:
 - A árvore mostra as primeiras 500 unidades de um projeto. Se o projeto crescer além disso, considere dividi-lo em mais projetos.
 - Mover uma unidade com muitas subunidades pode ser recusado. Nesse caso, mova partes menores.
 - Unidades a que você não tem acesso aparecem como **Unidade restrita** no caminho.
-- Para dar a alguém acesso só a uma unidade, escolha a unidade no campo **Unidade** do convite ou use **Dar acesso** em **Configurações → Membros**. Veja [Membros e convites](/docs/members).
+- Para dar a alguém acesso só a uma unidade, escolha a unidade no campo **Unidade** do convite ou use **Dar acesso** em **Administração → Membros**. Veja [Membros e convites](/docs/members).
 
 ## Erros comuns
 

@@ -77,7 +77,7 @@ function OrganizationSection() {
 }
 
 /**
- * `/admin/agents` (SP5 spec §6, platform.agent.manage): the agents the runtime registered, with
+ * `/admin/platform/agents` (SP5 spec §6, platform.agent.manage): the agents the runtime registered, with
  * their subagents, tools, skills and permissions (decision 0044) and a link to the prompt versions
  * of the ones that have a prompt; and one organization's agent settings (chosen in the URL:
  * `?organizationId=`), where every registered subagent can be switched on or off.

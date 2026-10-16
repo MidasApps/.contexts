@@ -163,7 +163,7 @@ describe("ExampleHomePage", () => {
     );
     if (!(empty instanceof HTMLElement)) throw new Error("empty state not found");
     const link = within(empty).getByRole("link", { name: "Configurar" });
-    expect(link.getAttribute("href")).toBe(`/o/${IDS.organization}/settings/m/example`);
+    expect(link.getAttribute("href")).toBe(`/admin/o/${IDS.organization}/m/example`);
     await expectNoAxeViolations(container);
   });
 

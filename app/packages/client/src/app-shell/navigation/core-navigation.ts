@@ -25,7 +25,6 @@ const SETTINGS: Record<SettingsSection, { icon: IconName; permission: Permission
   knowledge: { icon: "file-text", permission: "core.knowledge.read", group: "ai" },
   connectors: { icon: "plug", permission: "core.connector.read", group: "ai" },
   workflows: { icon: "workflow", permission: "core.workflow-run.read", group: "operations" },
-  approvals: { icon: "inbox", permission: "core.approval.read", group: "operations" },
   usage: { icon: "chart", permission: "core.usage.read", group: "operations" },
   traces: { icon: "scroll-text", permission: "core.trace.read", group: "operations" },
   evals: { icon: "activity", permission: "core.eval.read", group: "operations" },
@@ -71,14 +70,25 @@ const HOMES: ShellNavItem[] = [
     order: 0,
     target: { kind: "organization-home" },
   },
+  // Deciding an agent's pending action is using the app (decision 0077), so the inbox sits here.
   {
-    id: "core.organization.settings",
+    id: "core.organization.approvals",
     slot: "organization",
-    labelKey: "shell.nav.organizationSettings",
+    labelKey: "shell.nav.approvals",
+    icon: "inbox",
+    permission: "core.approval.read",
+    order: 900,
+    target: { kind: "approvals" },
+  },
+  // The way into the administration (`/admin`), last: configuring is not what the app is for.
+  {
+    id: "core.organization.administration",
+    slot: "organization",
+    labelKey: "shell.nav.administration",
     icon: "settings",
     permission: "core.organization.read",
     order: 1000,
-    target: { kind: "settings", section: "general" },
+    target: { kind: "administration" },
   },
   // Modules add theirs between 1 and 999, after the chat (SP4 Task 13).
   {
@@ -102,9 +112,10 @@ const HOMES: ShellNavItem[] = [
 ];
 
 /**
- * The core's own navigation (SP2 spec §7–§9): organization and project homes, every settings
- * section (the agent runtime ones of SP5 spec §7 included), every profile section in the user menu and the `/admin`
- * slots. Orders are spaced by 10 so contributions can sit in between.
+ * The core's own navigation (SP2 spec §7–§9): the application's organization and project items
+ * (homes, chat, approvals, the way into the administration), every settings section (the agent
+ * runtime ones of SP5 spec §7 included) and profile section of the administration, and the platform
+ * console's areas (decision 0077). Orders are spaced by 10 so contributions can sit in between.
  */
 export const CORE_NAVIGATION: readonly ShellNavItem[] = [
   ...HOMES,

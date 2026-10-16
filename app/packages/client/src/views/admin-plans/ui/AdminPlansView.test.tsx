@@ -10,7 +10,7 @@ const plain = (text: string | null): string => (text ?? "").replace(/\s/gu, " ")
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
   renderAdmin(<AdminPlansView />, {
-    path: "/admin/plans",
+    path: "/admin/platform/plans",
     routes: { "GET /v1/admin/plans": ok([buildPlan()]) },
     ...options,
   });

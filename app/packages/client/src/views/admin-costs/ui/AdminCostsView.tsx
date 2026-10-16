@@ -333,7 +333,7 @@ function CostsContent({ organizations, truncated, overviewTotal }: CostsContentP
 }
 
 /**
- * `/admin/costs` (SP5 spec §6, platform.usage.read): cost month to date of the platform and of
+ * `/admin/platform/costs` (SP5 spec §6, platform.usage.read): cost month to date of the platform and of
  * each organization against its cap, who is at or over the 80 % alert threshold, and the budgets
  * in force with their source, and the usage by day and by model of a range (decision 0044).
  * Budgets are edited on the organization's page.

@@ -38,20 +38,20 @@ Para avaliar um agente, ele precisa estar habilitado para a organização. O ass
 
 ## Onde encontrar
 
-- Menu: **Configurações → Operação → Avaliações**.
-- Endereço: `/o/{organização}/settings/evals`.
-- Aba de conjuntos de dados: `/o/{organização}/settings/evals?tab=datasets`.
-- Itens de um conjunto: `/o/{organização}/settings/evals?tab=datasets&dataset={conjunto}`.
+- Menu: **Administração → Operação → Avaliações**.
+- Endereço: `/admin/o/{organização}/evals`.
+- Aba de conjuntos de dados: `/admin/o/{organização}/evals?tab=datasets`.
+- Itens de um conjunto: `/admin/o/{organização}/evals?tab=datasets&dataset={conjunto}`.
 
 ![Página Avaliações](/guide/evals-list.jpg)
 
-*Na tela: **Configurações → Avaliações**.*
+*Na tela: **Administração → Avaliações**.*
 
 ## Passo a passo
 
 ### Criar um conjunto de dados
 
-1. Abra **Configurações → Operação → Avaliações**.
+1. Abra **Administração → Operação → Avaliações**.
 2. Clique na aba **Conjuntos de dados**.
 3. Clique em **Novo conjunto de dados**.
 4. Digite o **Nome** e clique em **Criar**.

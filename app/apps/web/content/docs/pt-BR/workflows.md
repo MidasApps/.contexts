@@ -40,22 +40,22 @@ Se você não tem `core.schedule.read`, a página mostra só as execuções, sem
 
 ## Onde encontrar
 
-- Menu: **Configurações → Operação → Fluxos e agendamentos**.
-- Endereço da lista: `/o/{organização}/settings/workflows`.
-- Aba de agendamentos: `/o/{organização}/settings/workflows?tab=schedules`.
-- Página de uma execução: `/o/{organização}/settings/workflows/runs/{execução}`.
+- Menu: **Administração → Operação → Fluxos e agendamentos**.
+- Endereço da lista: `/admin/o/{organização}/workflows`.
+- Aba de agendamentos: `/admin/o/{organização}/workflows?tab=schedules`.
+- Página de uma execução: `/admin/o/{organização}/workflows/runs/{execução}`.
 
 A aba escolhida, os filtros e a página da lista ficam no endereço. Se você recarregar, compartilhar o link ou voltar de uma execução, a tela continua igual.
 
 ![Página Fluxos e agendamentos](/guide/workflows-runs.jpg)
 
-*Na tela: **Configurações → Fluxos e agendamentos**.*
+*Na tela: **Administração → Fluxos e agendamentos**.*
 
 ## Passo a passo
 
 ### Iniciar um fluxo
 
-1. Abra **Configurações → Operação → Fluxos e agendamentos**.
+1. Abra **Administração → Operação → Fluxos e agendamentos**.
 2. Clique em **Iniciar fluxo**, no topo da página.
 3. Em **Fluxo**, escolha um fluxo da lista (**Escolha um fluxo**).
 4. Preencha os **Dados de entrada**. Você pode usar o formulário ou clicar em **Editar como JSON** para escrever um objeto JSON. Para voltar ao formulário, clique em **Editar como formulário**.

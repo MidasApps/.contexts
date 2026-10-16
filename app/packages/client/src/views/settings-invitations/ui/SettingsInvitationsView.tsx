@@ -23,7 +23,7 @@ import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-st
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 const column = dataTableColumnHelper<Invitation>();
 const TONES: Record<InvitationStatus, StatusTone> = {
@@ -226,7 +226,6 @@ function SettingsInvitations({ context }: { context: AccessContext }) {
   return (
     <SettingsPageFrame
       width="wide"
-      organizationId={organization.id}
       allowed={canInvite}
       header={
         <PageHeader
@@ -274,7 +273,7 @@ function SettingsInvitations({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/invitations` (SP2 spec §8, core.member.invite): pending (or all)
+ * `/admin/o/:organizationId/invitations` (SP2 spec §8, core.member.invite): pending (or all)
  * invitations with node, roles, status and expiry; invite (the link is shown once) and revoke.
  */
 export function SettingsInvitationsView() {

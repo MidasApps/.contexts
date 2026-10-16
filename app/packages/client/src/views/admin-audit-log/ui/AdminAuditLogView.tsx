@@ -23,7 +23,7 @@ function Organization({ entry }: { entry: AuditRow }) {
 }
 
 /**
- * `/admin/audit` (platform.audit-log.read, both staff roles): what staff did across the platform —
+ * `/admin/platform/audit` (platform.audit-log.read, both staff roles): what staff did across the platform —
  * plans, budgets, flags, models, support access, refused attempts — newest first, filtered by action
  * (`?action=`) and by organization (`?organizationId=`, set from an organization's link).
  */

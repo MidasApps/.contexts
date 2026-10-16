@@ -12,7 +12,7 @@ describe("AdminShellTemplate", () => {
         sidebar={
           <Sidebar>
             <nav aria-label="Administração">
-              <a href="/admin">Início</a>
+              <a href="/admin/platform">Início</a>
             </nav>
           </Sidebar>
         }

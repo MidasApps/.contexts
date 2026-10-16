@@ -20,10 +20,22 @@ const renderSidebar = (path: string, routes = shellRoutes(MEMBER_PERMISSIONS)) =
 
 describe("AppSidebar", () => {
   it("groups the project and organization slots and marks the current section", async () => {
-    const { container } = renderSidebar(`/o/${IDS.organization}/settings/members`);
+    const { container } = renderSidebar(
+      `/o/${IDS.organization}/approvals`,
+      shellRoutes([...MEMBER_PERMISSIONS, "core.approval.read"]),
+    );
     const nav = screen.getByRole("navigation", { name: "Navegação" });
     const organization = await within(nav).findByRole("list", { name: "Organização" });
-    expect(within(organization).getByRole("link", { name: "Configurações" }).getAttribute("aria-current")).toBe("page");
+    // Using the app first; the way into the administration last (decision 0077).
+    expect(
+      within(organization)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Projetos", "Aprovações", "Administração"]);
+    expect(within(organization).getByRole("link", { name: "Aprovações" }).getAttribute("aria-current")).toBe("page");
+    expect(within(organization).getByRole("link", { name: "Administração" }).getAttribute("href")).toBe(
+      `/admin/o/${IDS.organization}`,
+    );
     expect(within(organization).getByRole("link", { name: "Projetos" }).getAttribute("aria-current")).toBeNull();
     expect(within(nav).queryByRole("list", { name: "Projeto" })).toBeNull();
     expect(screen.getByText("contexto")).toBeDefined();
@@ -73,9 +85,7 @@ describe("AppSidebar", () => {
   });
 
   it("matches sections and module sub-pages as active", () => {
-    expect(isRouteActive({ id: "settings", organizationId: "o", section: "general" }, "/o/o/settings/roles")).toBe(
-      true,
-    );
+    expect(isRouteActive({ id: "settings", organizationId: "o", section: "general" }, "/admin/o/o/roles")).toBe(true);
     expect(
       isRouteActive(
         { id: "module", organizationId: "o", projectId: "p", moduleId: "m", rest: "" },

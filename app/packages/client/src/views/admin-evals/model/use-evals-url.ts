@@ -22,7 +22,7 @@ export type EvalsUrl = {
 const isTab = (value: string | null): value is EvalTab => (EVAL_TABS as readonly string[]).includes(value ?? "");
 
 /**
- * URL state of `/admin/evals` (decision 0042 §3): the tab, the experiments page and the two
+ * URL state of `/admin/platform/evals` (decision 0042 §3): the tab, the experiments page and the two
  * experiments under comparison, so a comparison is a link staff can share. Unlike a filter, the
  * comparison survives paging (its experiments are read by id) and goes with the tab, hence the
  * dedicated hook.

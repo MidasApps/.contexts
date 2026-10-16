@@ -23,7 +23,7 @@ const routes = (extra: FakeRoutes = {}): FakeRoutes => ({
 });
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminFlagsView />, { path: "/admin/flags", routes: routes(), ...options });
+  renderAdmin(<AdminFlagsView />, { path: "/admin/platform/flags", routes: routes(), ...options });
 
 const setOnline = (online: boolean): void => {
   Object.defineProperty(globalThis.navigator, "onLine", { configurable: true, get: () => online });
@@ -67,7 +67,7 @@ describe("AdminFlagsView", () => {
     const onlyExpired = within(alert).getByRole("button", { name: "Mostrar só as expiradas" });
     expect(onlyExpired.getAttribute("aria-pressed")).toBe("false");
     await user.click(onlyExpired);
-    await waitFor(() => expect(router.current()).toBe("/admin/flags?expired=1"));
+    await waitFor(() => expect(router.current()).toBe("/admin/platform/flags?expired=1"));
     const table = screen.getByRole("table", { name: "Flags de funcionalidades" });
     await waitFor(() => expect(within(table).queryByRole("row", { name: /ai\.kill-switch/u })).toBeNull());
     expect(within(table).getAllByRole("row", { name: /legacy\.flag-/u })).toHaveLength(7);
@@ -78,7 +78,7 @@ describe("AdminFlagsView", () => {
   });
 
   it("searches the flags by key or name, says when none match and clears the search", async () => {
-    const { user, router } = render({ path: "/admin/flags?q=kill" });
+    const { user, router } = render({ path: "/admin/platform/flags?q=kill" });
     const table = await screen.findByRole("table", { name: "Flags de funcionalidades" });
     expect(within(table).getByRole("row", { name: /ai\.kill-switch/u })).toBeDefined();
     expect(within(table).queryByRole("row", { name: /chat\.voice/u })).toBeNull();
@@ -86,10 +86,10 @@ describe("AdminFlagsView", () => {
     expect((field as HTMLInputElement).value).toBe("kill");
     await user.clear(field);
     await user.type(field, "nada");
-    await waitFor(() => expect(router.current()).toBe("/admin/flags?q=nada"));
+    await waitFor(() => expect(router.current()).toBe("/admin/platform/flags?q=nada"));
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhuma flag corresponde à busca" })).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Limpar a busca" }));
-    await waitFor(() => expect(router.current()).toBe("/admin/flags"));
+    await waitFor(() => expect(router.current()).toBe("/admin/platform/flags"));
     expect(await screen.findByRole("row", { name: /chat\.voice/u })).toBeDefined();
   });
 
@@ -133,7 +133,7 @@ describe("AdminFlagsView", () => {
 
   it("shows the override of the organization in the URL and sets it for that organization only", async () => {
     const { user, api, container } = render({
-      path: `/admin/flags?organizationId=${IDS.organization}`,
+      path: `/admin/platform/flags?organizationId=${IDS.organization}`,
       routes: routes({ "PUT /v1/admin/flags/:flagKey": ok(buildExpiredFlag({ value: true, tenantOverride: true })) }),
     });
     const voice = await screen.findByRole("row", { name: /chat\.voice/u });
@@ -154,7 +154,7 @@ describe("AdminFlagsView", () => {
 
   it("removes an organization's override after a confirmation, and offers it only where one exists", async () => {
     const { user, api } = render({
-      path: `/admin/flags?organizationId=${IDS.organization}`,
+      path: `/admin/platform/flags?organizationId=${IDS.organization}`,
       routes: routes({
         "DELETE /v1/admin/flags/:flagKey/overrides/:organizationId": ok(
           buildExpiredFlag({ value: true, tenantOverride: null }),
@@ -185,7 +185,7 @@ describe("AdminFlagsView", () => {
 
   it("keeps the override and shows the error with its reference when the removal fails", async () => {
     const { user } = render({
-      path: `/admin/flags?organizationId=${IDS.organization}`,
+      path: `/admin/platform/flags?organizationId=${IDS.organization}`,
       routes: routes({
         "DELETE /v1/admin/flags/:flagKey/overrides/:organizationId": apiError(502, "UPSTREAM_UNAVAILABLE"),
       }),
@@ -204,7 +204,7 @@ describe("AdminFlagsView", () => {
     const { user, router } = render();
     await user.click(await screen.findByRole("combobox", { name: "Ajuste por organização" }));
     await user.click(await screen.findByRole("option", { name: "Northwind" }));
-    expect(router.current()).toBe(`/admin/flags?organizationId=${IDS.organization}`);
+    expect(router.current()).toBe(`/admin/platform/flags?organizationId=${IDS.organization}`);
     expect(await screen.findByRole("columnheader", { name: "Ajuste da organização" })).toBeDefined();
   });
 

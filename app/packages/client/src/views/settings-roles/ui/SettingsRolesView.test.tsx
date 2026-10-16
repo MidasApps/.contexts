@@ -25,7 +25,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsRolesView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/roles`,
+      path: `/admin/o/${IDS.organization}/roles`,
       routes: shellRoutes(permissions, {
         "GET /v1/organizations/:organizationId/roles": page([buildRole()]),
         "GET /v1/permissions": page(PERMISSION_REGISTRY),

@@ -3,6 +3,7 @@ export { ENTRY_ROUTE_IDS, nextRoute } from "./entry-routes.ts";
 export { createMemoryRouter, type MemoryRouter } from "./memory-router.tsx";
 export { parseRoute } from "./parse-route.ts";
 export {
+  ADMIN_SURFACE_ROUTE_IDS,
   PROFILE_SECTIONS,
   type ProfileSection,
   ROUTE_IDS,

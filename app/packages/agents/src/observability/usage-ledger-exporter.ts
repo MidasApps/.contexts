@@ -49,7 +49,7 @@ export type UsageLedgerExporterOptions = {
   readonly logger?: LedgerLogger;
   /**
    * Price table (`priceTableFor(AI_MODE)`); the verified prices by default. A function is read for
-   * every span, so prices staff change in `/admin/models` apply without a restart (decision 0072).
+   * every span, so prices staff change in `/admin/platform/models` apply without a restart (decision 0072).
    */
   readonly prices?: Readonly<Record<string, ModelPrice>> | (() => Readonly<Record<string, ModelPrice>>);
   /** Row id seam for tests (uuidv7 by default). */

@@ -12,7 +12,7 @@ type StartedRun = { runId: string };
 
 test.describe("flags", () => {
   test("sets an organization override and removes it", async ({ staffPage, sp5Org }) => {
-    await staffPage.goto("admin/flags");
+    await staffPage.goto("admin/platform/flags");
     await chooseOrganization(
       staffPage,
       staffPage.getByRole("combobox", { name: "Ajuste por organização" }),
@@ -50,7 +50,7 @@ test.describe("workflow runs", () => {
     const { runId } = await ownerApi.post<StartedRun>(`/v1/workflows/approval-demo/runs?organizationId=${sp5Org.id}`, {
       inputData: { title: unique("Admin cancel") },
     });
-    await staffPage.goto("admin/workflows");
+    await staffPage.goto("admin/platform/workflows");
     const filters = staffPage.getByRole("search", { name: "Filtrar execuções" });
     await chooseOrganization(
       staffPage,
@@ -80,7 +80,7 @@ test.describe("workflow runs", () => {
   });
 
   test("shows the no-match state for a workflow id without runs", async ({ staffPage }) => {
-    await staffPage.goto("admin/workflows");
+    await staffPage.goto("admin/platform/workflows");
     const filters = staffPage.getByRole("search", { name: "Filtrar execuções" });
     await filters.getByRole("textbox", { name: "Workflow" }).fill("no-such-workflow");
     await filters.getByRole("button", { name: "Aplicar" }).click();
@@ -90,7 +90,7 @@ test.describe("workflow runs", () => {
 
 test.describe("schedules", () => {
   test("pauses a platform job after a warning, then resumes it", async ({ staffPage }) => {
-    await staffPage.goto("admin/workflows");
+    await staffPage.goto("admin/platform/workflows");
     await staffPage.getByRole("tab", { name: "Agendamentos" }).click();
     // A platform schedule has no slug: its workflow's label names it.
     const row = staffPage
@@ -124,7 +124,7 @@ test.describe("connectors", () => {
       toolPolicy: { allow: ["search"], readOnly: ["search"] },
       config: { url: "https://mcp.example.com/mcp", allowedHosts: ["mcp.example.com"], auth: "none" },
     });
-    await staffPage.goto("admin/connectors");
+    await staffPage.goto("admin/platform/connectors");
     await expect(staffPage.getByRole("heading", { name: "Escolha uma organização" })).toBeVisible();
     await chooseOrganization(
       staffPage,

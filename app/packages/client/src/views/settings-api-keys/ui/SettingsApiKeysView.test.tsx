@@ -25,7 +25,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsApiKeysView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/api-keys`,
+      path: `/admin/o/${IDS.organization}/api-keys`,
       routes: shellRoutes(permissions, {
         "GET /v1/organizations/:organizationId/api-keys": page([buildApiKey()]),
         "GET /v1/permissions": page(PERMISSION_REGISTRY),

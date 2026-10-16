@@ -19,7 +19,7 @@ const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
   ...overrides,
 });
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminLogsView />, { path: "/admin/logs", routes: routes(), ...options });
+  renderAdmin(<AdminLogsView />, { path: "/admin/platform/logs", routes: routes(), ...options });
 
 describe("AdminLogsView", () => {
   it("lists the lines newest first with level, message, references and collapsed fields", async () => {
@@ -39,7 +39,7 @@ describe("AdminLogsView", () => {
       within(info)
         .getByRole("link", { name: `Abrir o trace ${OPS_IDS.trace}` })
         .getAttribute("href"),
-    ).toBe(`/admin/traces/${OPS_IDS.trace}`);
+    ).toBe(`/admin/platform/traces/${OPS_IDS.trace}`);
     expect(info.querySelector("time")?.getAttribute("datetime")).toBe("2026-09-30T12:00:00.000Z");
     const toggle = within(info).getByRole("button", { name: "2 campos" });
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
@@ -51,7 +51,7 @@ describe("AdminLogsView", () => {
   });
 
   it("reads the filters from the URL (the trace viewer links here) and sends them", async () => {
-    const { api } = render({ path: `/admin/logs?traceId=${OPS_IDS.trace}&level=warn` });
+    const { api } = render({ path: `/admin/platform/logs?traceId=${OPS_IDS.trace}&level=warn` });
     await screen.findByRole("list", { name: "Linhas de log" });
     expect(screen.getByRole<HTMLInputElement>("textbox", { name: "Trace" }).value).toBe(OPS_IDS.trace);
     const query = new URLSearchParams(api.calls.find((call) => call.path === "/v1/admin/logs")?.query);
@@ -59,12 +59,12 @@ describe("AdminLogsView", () => {
   });
 
   it("applies the text filters together on submit and ignores an unknown level", async () => {
-    const { user, router, api } = render({ path: "/admin/logs?level=loud" });
+    const { user, router, api } = render({ path: "/admin/platform/logs?level=loud" });
     await screen.findByRole("list", { name: "Linhas de log" });
     expect(api.calls.find((call) => call.path === "/v1/admin/logs")?.query).toBe("?limit=200");
     await user.type(screen.getByRole("textbox", { name: "Texto da mensagem" }), "order");
     await user.type(screen.getByRole("textbox", { name: "Requisição" }), `${OPS_IDS.request}{Enter}`);
-    expect(router.current()).toBe(`/admin/logs?level=loud&q=order&requestId=${OPS_IDS.request}`);
+    expect(router.current()).toBe(`/admin/platform/logs?level=loud&q=order&requestId=${OPS_IDS.request}`);
   });
 
   it("refreshes on demand", async () => {
@@ -77,7 +77,7 @@ describe("AdminLogsView", () => {
 
   it("points to Cloud Logging outside the local environment, with the trace of the filter", async () => {
     const { container } = render({
-      path: `/admin/logs?traceId=${OPS_IDS.trace}`,
+      path: `/admin/platform/logs?traceId=${OPS_IDS.trace}`,
       routes: routes({ "GET /v1/admin/logs": apiError(404, "NOT_FOUND") }),
     });
     expect(
@@ -105,10 +105,13 @@ describe("AdminLogsView", () => {
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhuma linha de log ainda" })).toBeDefined();
     await expectNoAxeViolations(empty.container);
     empty.unmount();
-    const filtered = render({ path: "/admin/logs?q=nothing", routes: routes({ "GET /v1/admin/logs": ok([]) }) });
+    const filtered = render({
+      path: "/admin/platform/logs?q=nothing",
+      routes: routes({ "GET /v1/admin/logs": ok([]) }),
+    });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhuma linha com esses filtros" })).toBeDefined();
     await filtered.user.click(screen.getByRole("button", { name: "Limpar filtros" }));
-    expect(filtered.router.current()).toBe("/admin/logs");
+    expect(filtered.router.current()).toBe("/admin/platform/logs");
   });
 
   it("shows an error with the request reference and retries", async () => {

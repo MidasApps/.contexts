@@ -18,7 +18,7 @@ export type CostChartsProps = {
 };
 
 /**
- * Cost month to date against the cap, highest cost first (SP5 spec §6–§7; used by `/admin/costs`
+ * Cost month to date against the cap, highest cost first (SP5 spec §6–§7; used by `/admin/platform/costs`
  * and the tenant usage page). The numbers are exactly the ones passed in: the chart's table and
  * the total line carry no arithmetic of their own beyond ordering and the row limit.
  */

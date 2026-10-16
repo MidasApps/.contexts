@@ -33,7 +33,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsUnitsView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/units`,
+      path: `/admin/o/${IDS.organization}/units`,
       routes: shellRoutes(permissions, {
         "GET /v1/unit-types": page(UNIT_TYPES),
         "GET /v1/projects/:projectId/units": unitsRoute,

@@ -4,7 +4,7 @@ import { DesktopRoot } from "@/app/desktop-root.tsx";
 import type { RouterContext } from "@/router-context.ts";
 
 // Every desktop page renders inside the shared client providers; paths outside the route map
-// (including the web-only `/admin`) render the shared not-found view.
+// (including the web-only platform console and guide) render the shared not-found view.
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
   notFoundComponent: NotFoundView,

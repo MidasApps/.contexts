@@ -12,6 +12,10 @@ export type NavTarget =
   | { readonly kind: "organization-home" }
   | { readonly kind: "project-home" }
   | { readonly kind: "chat" }
+  /** The organization's approvals inbox (application, decision 0077). */
+  | { readonly kind: "approvals" }
+  /** The organization's administration (`/admin/o/:organizationId`, its first readable section). */
+  | { readonly kind: "administration" }
   | { readonly kind: "settings"; readonly section: SettingsSection }
   | { readonly kind: "profile"; readonly section: ProfileSection }
   | { readonly kind: "admin"; readonly rest: string }

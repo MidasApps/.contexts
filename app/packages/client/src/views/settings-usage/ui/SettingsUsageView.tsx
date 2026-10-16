@@ -15,7 +15,7 @@ import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage, QuerySection } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 import { UsageSummaryPanel } from "./UsageSummaryPanel.tsx";
 
 /** Months the picker offers: the current one and the eleven before it. */
@@ -94,7 +94,6 @@ function SettingsUsage({ context, now }: { context: AccessContext; now: () => Da
   });
   return (
     <SettingsPageFrame
-      organizationId={organization.id}
       allowed={allowed}
       header={
         <PageHeader
@@ -115,7 +114,7 @@ function SettingsUsage({ context, now }: { context: AccessContext; now: () => Da
 }
 
 /**
- * `/o/:organizationId/settings/usage` (SP5 spec §7, core.usage.read): a month of model cost and
+ * `/admin/o/:organizationId/usage` (SP5 spec §7, core.usage.read): a month of model cost and
  * tokens, the state of the budget caps and the breakdowns per model, day, agent and user; holders of
  * core.agent-settings.update may lower the organization's own cap (never above its plan).
  * @param now clock for the month list (tests inject a fixed one).

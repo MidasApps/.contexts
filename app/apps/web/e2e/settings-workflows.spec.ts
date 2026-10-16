@@ -57,7 +57,7 @@ test.describe("workflow runs", () => {
     ).toBeVisible({ timeout: 90_000 });
     await expect(page.getByRole("link", { name: "Abrir aprovações" })).toHaveAttribute(
       "href",
-      new RegExp(`/settings/approvals/[^/]+$`),
+      new RegExp(`/approvals/[^/]+$`),
     );
     const approvalPath = (
       (await page.getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")) ?? ""

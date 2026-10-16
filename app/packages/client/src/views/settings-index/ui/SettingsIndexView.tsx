@@ -37,7 +37,7 @@ function OpenFirstSection({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings` (no section): opens the first settings section the viewer can
+ * `/admin/o/:organizationId` (no section): opens the first settings section the viewer can
  * read, in navigation order (general first for most members). Not-found for an organization the
  * viewer cannot see, forbidden when no section is readable.
  */

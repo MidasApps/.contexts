@@ -57,9 +57,9 @@ export const DOCS_GROUPS: readonly DocsNavGroup[] = [
     pages: [{ slug: "profile", title: "Seu perfil" }],
   },
   {
-    title: "Administração da plataforma",
+    title: "Console da plataforma",
     pages: [
-      { slug: "admin", title: "Visão geral da administração" },
+      { slug: "admin", title: "Visão geral do console" },
       { slug: "admin-customers", title: "Clientes" },
       { slug: "admin-ai", title: "Inteligência artificial" },
       { slug: "admin-operations", title: "Operações" },

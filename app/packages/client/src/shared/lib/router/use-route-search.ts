@@ -75,7 +75,7 @@ const isSettingsSection = (value: string | undefined): value is SettingsSection 
   (SETTINGS_SECTIONS as readonly (string | undefined)[]).includes(value);
 
 /**
- * `useRouteSearch` for a settings section (`/o/:organizationId/settings/:section`): its tabs,
+ * `useRouteSearch` for a settings section (`/admin/o/:organizationId/:section`): its tabs,
  * filters and page survive a reload, a shared link and the browser's back from a detail page.
  * @example const search = useSettingsSearch(["tab"]); search.set({ tab: "history" });
  */

@@ -11,7 +11,7 @@ import { ExperimentsPanel } from "./ExperimentsPanel.tsx";
 const isTab = (value: string): value is EvalTab => (EVAL_TABS as readonly string[]).includes(value);
 
 /**
- * `/admin/evals` (SP5 spec §6, §8, platform.eval.manage): experiments (CI eval runs, prompt evals
+ * `/admin/platform/evals` (SP5 spec §6, §8, platform.eval.manage): experiments (CI eval runs, prompt evals
  * and tenant experiments) with scores per scorer, the gate verdict and a two-experiment
  * comparison, and the datasets they run on. Tab, page and comparison live in the URL. Only the
  * open tab loads its data, and only for a role that holds the permission.

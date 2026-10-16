@@ -52,7 +52,7 @@ Na conversa, quem usa as ferramentas do conector é qualquer pessoa que fala com
 
 ## Onde encontrar
 
-**Configurações** → grupo **IA** → **Conectores**. Endereço: `/o/{organização}/settings/connectors`.
+**Administração** → grupo **IA** → **Conectores**. Endereço: `/admin/o/{organização}/connectors`.
 
 A página **Agentes** também tem o atalho **Abrir conectores**.
 
@@ -62,7 +62,7 @@ Antes de começar, saiba que a página **não** tem teste de conexão nem lista 
 
 ![Página Conectores](/guide/connectors-list.jpg)
 
-*Na tela: **Configurações → Conectores**.*
+*Na tela: **Administração → Conectores**.*
 
 ## Passo a passo
 

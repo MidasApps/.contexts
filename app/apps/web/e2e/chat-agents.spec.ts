@@ -10,7 +10,7 @@ import { chatPanel, expect, expectAnswered, history, messageLog, openChat, send,
 const picker = (page: Page) => chatPanel(page).getByRole("combobox", { name: "Agente" });
 
 const createSkill = async (page: Page, organizationId: string, name: string): Promise<void> => {
-  await page.goto(`o/${organizationId}/settings/skills`);
+  await page.goto(`admin/o/${organizationId}/skills`);
   await page.getByRole("button", { name: "Nova habilidade" }).click();
   const dialog = page.getByRole("dialog", { name: "Nova habilidade" });
   await dialog.getByRole("textbox", { name: "Nome" }).fill(name);
@@ -27,7 +27,7 @@ const createAgent = async (
   organizationId: string,
   args: { name: string; skill: string },
 ): Promise<void> => {
-  await page.goto(`o/${organizationId}/settings/agents`);
+  await page.goto(`admin/o/${organizationId}/agents`);
   await page.getByRole("button", { name: "Novo agente" }).click();
   const dialog = page.getByRole("dialog", { name: "Novo agente" });
   await dialog.getByRole("textbox", { name: "Nome" }).fill(args.name);
@@ -68,7 +68,7 @@ test("an agent created in settings answers in the chat, and is no longer offered
     ).toBeVisible();
     await expectNoAxeViolations(page);
 
-    await page.goto(`o/${world.alpha.id}/settings/agents`);
+    await page.goto(`admin/o/${world.alpha.id}/agents`);
     await page.getByRole("button", { name: `Desativar ${agent}` }).click();
     await page
       .getByRole("alertdialog", { name: `Desativar ${agent}?` })

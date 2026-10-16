@@ -1,15 +1,32 @@
 {
-  "surface": "Platform administration",
+  "surface": "Administration",
   "sidebar": {
     "title": "Administration",
-    "navLabel": "Administration areas",
-    "group": "Platform",
-    "backToApp": "Back to the app",
-    "loading": "Loading areas…",
+    "navLabel": "Administration sections",
+    "group": "Platform console",
+    "organizationGroup": "Organization",
+    "accountGroup": "My account",
+    "chooseOrganization": "Choose an organization",
+    "organizationSettings": "Organization settings",
+    "platformConsole": "Platform console",
+    "openApp": "Open the app",
+    "goTo": "Go to",
+    "loading": "Loading sections…",
     "retry": "Try again"
   },
   "topbar": {
-    "badge": "Platform team"
+    "badge": "Platform staff",
+    "organization": "Organization",
+    "account": "My account",
+    "platform": "Platform console",
+    "openApp": "Open the app"
+  },
+  "home": {
+    "title": "Administration",
+    "loading": "Opening the administration…",
+    "noOrganizationTitle": "You don't belong to an organization yet",
+    "noOrganizationDescription": "The administration configures an organization: members, roles, agents, knowledge and modules. Create an organization or accept an invitation to start.",
+    "noOrganizationAction": "See organizations"
   },
   "slot": {
     "emptyTitle": "Not available yet",
@@ -38,7 +55,7 @@
     "loading": "Loading the area…",
     "noAccessDescription": "Your role on the platform team does not give access to this area. Ask a platform administrator.",
     "mfaTitle": "Confirm two-step verification",
-    "mfaDescription": "The administration only answers sessions confirmed with the second factor. Sign out and sign in again with the code.",
+    "mfaDescription": "The platform console only answers sessions confirmed with the second factor. Sign out and sign in again with the code.",
     "mfaAction": "Open account security"
   },
   "organizationFilter": {
@@ -50,12 +67,12 @@
     "empty": "No organization found."
   },
   "overview": {
-    "title": "Platform administration",
+    "title": "Platform console",
     "description": "Platform numbers and the areas your team role may open.",
     "loading": "Loading the platform numbers…",
     "sectionsTitle": "Areas",
     "emptyTitle": "No areas available",
-    "emptyDescription": "Your team role does not give access to any administration area.",
+    "emptyDescription": "Your team role does not give access to any area of the console.",
     "kpi": {
       "title": "Platform numbers",
       "generatedAt": "Updated {when}",
@@ -623,9 +640,9 @@
       "done": "Session of {staff} ended."
     },
     "adminBlocked": {
-      "pageTitle": "Platform administration",
-      "title": "Administration does not open in support mode",
-      "description": "This tab is signed in as another user, read-only. Leave support mode to return to your staff account and use the administration."
+      "pageTitle": "Platform console",
+      "title": "The platform console does not open in support mode",
+      "description": "This tab is signed in as another user, read-only. Leave support mode to return to your staff account and use the console."
     }
   },
   "traces": {

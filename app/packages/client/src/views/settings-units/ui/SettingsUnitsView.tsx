@@ -17,7 +17,7 @@ import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.ts
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 function ProjectPicker({
   projects,
@@ -96,7 +96,7 @@ function UnitsByProject({ context }: { context: AccessContext }) {
 }
 
 /**
- * `/o/:organizationId/settings/units` (SP2 spec §8, core.unit.read): the unit tree of each project
+ * `/admin/o/:organizationId/units` (SP2 spec §8, core.unit.read): the unit tree of each project
  * (pick the project), with create, rename, move and delete where the viewer may.
  */
 export function SettingsUnitsView() {
@@ -107,7 +107,6 @@ export function SettingsUnitsView() {
     <QueryPage query={context} loadingLabel={t("loading")}>
       {(data) => (
         <SettingsPageFrame
-          organizationId={data.organization.id}
           allowed={data.permissions.includes("core.unit.read")}
           header={
             <PageHeader

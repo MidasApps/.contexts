@@ -38,7 +38,7 @@ describe("TraceViewer", () => {
     expect(within(tool).getByText("Preço desconhecido")).toBeDefined();
     expect(plain(tool.textContent)).toContain("320 ms");
     expect(screen.getByRole("link", { name: "Ver logs deste trace" }).getAttribute("href")).toBe(
-      `/admin/logs?traceId=${OBS_IDS.trace}`,
+      `/admin/platform/logs?traceId=${OBS_IDS.trace}`,
     );
     await expectNoAxeViolations(container);
   });

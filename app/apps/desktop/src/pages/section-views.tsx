@@ -13,7 +13,6 @@ import { ProfileSecurityView } from "@core/client/views/profile-security";
 import { ProfileSessionsView } from "@core/client/views/profile-sessions";
 import { SettingsAgentsView } from "@core/client/views/settings-agents";
 import { SettingsApiKeysView } from "@core/client/views/settings-api-keys";
-import { SettingsApprovalsView } from "@core/client/views/settings-approvals";
 import { SettingsAuditLogView } from "@core/client/views/settings-audit-log";
 import { SettingsConnectorsView } from "@core/client/views/settings-connectors";
 import { SettingsDevicesView } from "@core/client/views/settings-devices";
@@ -49,7 +48,6 @@ const SETTINGS_SECTION_VIEWS: Record<SettingsSection, ComponentType> = {
   knowledge: SettingsKnowledgeView,
   connectors: SettingsConnectorsView,
   workflows: SettingsWorkflowsView,
-  approvals: SettingsApprovalsView,
   usage: SettingsUsageView,
   traces: SettingsTracesView,
   evals: SettingsEvalsView,
@@ -76,7 +74,7 @@ function KnownProfileSection({ section }: { section: ProfileSection }) {
   }
 }
 
-/** `/o/:organizationId/settings/:section` (SP2 spec §8); a section outside the route map is not found. */
+/** `/admin/o/:organizationId/:section` (SP2 spec §8, decision 0077); a section outside the route map is not found. */
 export function SettingsSectionPage() {
   // The shared route map decides (as on web): an unknown section, or a tail under a section
   // without detail pages (`members/whatever`), has no params and reads as not found.
@@ -88,7 +86,7 @@ export function SettingsSectionPage() {
   );
 }
 
-/** `/profile/:section` (SP2 spec §8); a section outside the route map is not found. */
+/** `/admin/profile/:section` (SP2 spec §8, decision 0077); a section outside the route map is not found. */
 export function ProfileSectionPage({ section }: { section: string }) {
   return isOneOf(PROFILE_SECTIONS, section) ? <KnownProfileSection section={section} /> : <NotFoundView />;
 }

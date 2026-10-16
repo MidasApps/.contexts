@@ -26,7 +26,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsInvitationsView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/invitations`,
+      path: `/admin/o/${IDS.organization}/invitations`,
       routes: shellRoutes(permissions, {
         "GET /v1/organizations/:organizationId/invitations": page([buildInvitation()]),
         "GET /v1/organizations/:organizationId/roles": page([]),

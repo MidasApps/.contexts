@@ -55,7 +55,7 @@ const renderView = (
       <SettingsAgentsView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/agents`,
+      path: `/admin/o/${IDS.organization}/agents`,
       modules: options.modules === false ? [] : [sampleModule],
       routes: shellRoutes(options.permissions ?? ADMIN, {
         "GET /v1/agents": ok([buildCatalogAgent()]),

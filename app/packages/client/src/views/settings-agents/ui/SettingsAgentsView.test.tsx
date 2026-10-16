@@ -92,7 +92,7 @@ const renderView = (permissions: readonly Permission[] = ADMIN, routes: FakeRout
       <SettingsAgentsView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/agents`,
+      path: `/admin/o/${IDS.organization}/agents`,
       routes: shellRoutes(permissions, {
         "GET /v1/agents": ok(CATALOG),
         "GET /v1/agent-settings": ok(settings()),

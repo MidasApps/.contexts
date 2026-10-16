@@ -32,7 +32,7 @@ vi.setConfig({ testTimeout: 20_000 });
 
 describe("AdminTeamView", () => {
   it("lists the team with roles and status, and no actions on one's own row", async () => {
-    const { container } = renderAdmin(<AdminTeamView />, { path: "/admin/team", routes: routes() });
+    const { container } = renderAdmin(<AdminTeamView />, { path: "/admin/platform/team", routes: routes() });
     const table = await screen.findByRole("table", { name: "Equipe da plataforma" });
     await within(table).findByText("Bruno Lima");
     expect(within(table).getByText("Você")).toBeDefined();
@@ -46,7 +46,7 @@ describe("AdminTeamView", () => {
   it("adds a person by the exact email of their account, with the chosen role", async () => {
     const puts: unknown[] = [];
     const { user } = renderAdmin(<AdminTeamView />, {
-      path: "/admin/team",
+      path: "/admin/platform/team",
       routes: routes({
         "PUT /v1/admin/staff/:userId": (request: FakeRequest) => {
           puts.push([request.params["userId"], request.body]);
@@ -69,7 +69,7 @@ describe("AdminTeamView", () => {
 
   it("revokes after confirming, and explains STAFF_SELF_CHANGE", async () => {
     const { user, api } = renderAdmin(<AdminTeamView />, {
-      path: "/admin/team",
+      path: "/admin/platform/team",
       routes: routes({ "DELETE /v1/admin/staff/:userId": apiError(422, "STAFF_SELF_CHANGE") }),
     });
     await user.click(await screen.findByRole("button", { name: "Revogar o acesso de Bruno Lima" }));
@@ -83,7 +83,11 @@ describe("AdminTeamView", () => {
   });
 
   it("is closed to the support role", async () => {
-    const { api } = renderAdmin(<AdminTeamView />, { path: "/admin/team", role: "platform-support", routes: routes() });
+    const { api } = renderAdmin(<AdminTeamView />, {
+      path: "/admin/platform/team",
+      role: "platform-support",
+      routes: routes(),
+    });
     expect(await screen.findByRole("heading", { level: 2, name: "Você não tem acesso a esta página" })).toBeDefined();
     expect(api.callLines()).not.toContain("GET /v1/admin/staff");
   });

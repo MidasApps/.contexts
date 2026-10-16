@@ -28,7 +28,7 @@ const renderView = (routes: FakeRoutes = {}) =>
     <main>
       <ProfileSessionsView />
     </main>,
-    { path: "/profile/sessions", routes: { "GET /v1/me/sessions": page(SESSIONS), ...routes } },
+    { path: "/admin/profile/sessions", routes: { "GET /v1/me/sessions": page(SESSIONS), ...routes } },
   );
 
 describe("ProfileSessionsView", () => {
@@ -63,7 +63,8 @@ describe("ProfileSessionsView", () => {
     await screen.findByText("Firefox on Windows");
     expect(screen.queryByRole("button", { name: "Revogar sessão de Firefox on Windows" })).toBeNull();
     await user.click(screen.getByRole("button", { name: "Sair deste dispositivo" }));
-    await waitFor(() => expect(router.current()).toBe("/sign-in"));
+    // Signing out from the administration comes back to it after the next sign-in (decision 0077).
+    await waitFor(() => expect(router.current()).toBe("/sign-in?next=%2Fadmin"));
     expect(bridge.ended).toBe(1);
   });
 

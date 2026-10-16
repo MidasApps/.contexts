@@ -36,7 +36,7 @@ const routes = (extra: FakeRoutes = {}): FakeRoutes => ({
 });
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) =>
-  renderAdmin(<AdminCostsView />, { path: "/admin/costs", routes: routes(), ...options });
+  renderAdmin(<AdminCostsView />, { path: "/admin/platform/costs", routes: routes(), ...options });
 const kpi = (label: string): string =>
   plain(
     screen.getByText(label, { selector: "dt" }).closest("[data-slot='kpi-card']")?.querySelector("dd")?.textContent,
@@ -71,7 +71,7 @@ describe("AdminCostsView", () => {
     expect(plain(row.textContent)).toContain("20.000.000");
     expect(within(row).getByText("Do plano")).toBeDefined();
     expect(within(row).getByRole("link", { name: "Ajustar o orçamento de Fabrikam" }).getAttribute("href")).toBe(
-      "/admin/organizations/Fab0000000000000000A",
+      "/admin/platform/organizations/Fab0000000000000000A",
     );
     expect(await screen.findByRole("region", { name: "Uso por dia e por modelo" })).toBeDefined();
     await expectNoAxeViolations(container);
@@ -117,7 +117,7 @@ describe("AdminCostsView", () => {
 
   it("sends the organization and the days of the URL, writes a picked day back and warns when truncated", async () => {
     const { api, router } = render({
-      path: `/admin/costs?organizationId=${IDS.organization}&from=2026-09-01&to=2026-09-30`,
+      path: `/admin/platform/costs?organizationId=${IDS.organization}&from=2026-09-01&to=2026-09-30`,
       routes: routes({ "GET /v1/admin/usage": ok(buildAdminUsage({ truncated: true, organizations: 2000 })) }),
     });
     const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
@@ -130,7 +130,9 @@ describe("AdminCostsView", () => {
     });
     fireEvent.change(within(usage).getByLabelText("Até"), { target: { value: "2026-09-15" } });
     await waitFor(() =>
-      expect(router.current()).toBe(`/admin/costs?organizationId=${IDS.organization}&from=2026-09-01&to=2026-09-15`),
+      expect(router.current()).toBe(
+        `/admin/platform/costs?organizationId=${IDS.organization}&from=2026-09-01&to=2026-09-15`,
+      ),
     );
     await waitFor(() =>
       expect(
@@ -142,7 +144,7 @@ describe("AdminCostsView", () => {
   it("asks for an end day instead of sending a range the API refuses (more than 92 days)", async () => {
     // Found by the e2e: picking an old start day before the end day sent from=2020-01-01 with the
     // default end (today) and the API answered 400 RANGE_TOO_LONG.
-    const { api } = render({ path: "/admin/costs?from=2020-01-01&to=2020-06-30" });
+    const { api } = render({ path: "/admin/platform/costs?from=2020-01-01&to=2020-06-30" });
     const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
     expect(
       await within(usage).findByText("Escolha um período de até 92 dias, com o início antes do fim."),
@@ -158,7 +160,7 @@ describe("AdminCostsView", () => {
 
   it("marks both days of an invalid range as a field error and offers to clear the period", async () => {
     const { router, container } = render({
-      path: `/admin/costs?organizationId=${IDS.organization}&from=2026-09-30&to=2026-09-01`,
+      path: `/admin/platform/costs?organizationId=${IDS.organization}&from=2026-09-30&to=2026-09-01`,
     });
     const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
     const message = await within(usage).findByText("Escolha um período de até 92 dias, com o início antes do fim.");
@@ -169,7 +171,7 @@ describe("AdminCostsView", () => {
       expect(input.getAttribute("aria-describedby")).toBe(message.id);
     }
     fireEvent.click(within(usage).getByRole("button", { name: "Limpar o período" }));
-    await waitFor(() => expect(router.current()).toBe(`/admin/costs?organizationId=${IDS.organization}`));
+    await waitFor(() => expect(router.current()).toBe(`/admin/platform/costs?organizationId=${IDS.organization}`));
     expect(within(usage).getByLabelText("De").getAttribute("aria-invalid")).toBeNull();
     await expectNoAxeViolations(container);
   });
@@ -177,12 +179,12 @@ describe("AdminCostsView", () => {
   it("explains a range without usage and an unreadable ledger, without hiding the budgets", async () => {
     const zero = { calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0, unpricedCalls: 0 };
     const empty = render({
-      path: "/admin/costs?from=2026-09-29",
+      path: "/admin/platform/costs?from=2026-09-29",
       routes: routes({ "GET /v1/admin/usage": ok(buildAdminUsage({ totals: zero, byDay: [], byModel: [] })) }),
     });
     expect(await screen.findByRole("heading", { level: 3, name: "Nenhum uso no período" })).toBeDefined();
     await empty.user.click(screen.getByRole("button", { name: "Voltar ao mês atual" }));
-    expect(empty.router.current()).toBe("/admin/costs");
+    expect(empty.router.current()).toBe("/admin/platform/costs");
     empty.unmount();
     const failing = render({ routes: routes({ "GET /v1/admin/usage": apiError(409, "CONFLICT") }) });
     const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
@@ -200,13 +202,13 @@ describe("AdminCostsView", () => {
   });
 
   it("filters the budgets by level from the URL and writes the filter back", async () => {
-    const { user, router } = render({ path: "/admin/costs?level=over" });
+    const { user, router } = render({ path: "/admin/platform/costs?level=over" });
     const budgets = await screen.findByRole("table", { name: "Orçamentos por organização" });
     expect(within(budgets).getAllByRole("row")).toHaveLength(2);
     expect(within(budgets).getByRole("row", { name: /Contoso/u })).toBeDefined();
     await user.click(screen.getByRole("combobox", { name: "Nível de uso" }));
     await user.click(await screen.findByRole("option", { name: "A partir do alerta" }));
-    expect(router.current()).toBe("/admin/costs?level=alert");
+    expect(router.current()).toBe("/admin/platform/costs?level=alert");
     await waitFor(() =>
       expect(
         within(screen.getByRole("table", { name: "Orçamentos por organização" })).getAllByRole("row"),
@@ -216,13 +218,13 @@ describe("AdminCostsView", () => {
 
   it("says when no organization is at the chosen level and clears the filter", async () => {
     const { user, router } = render({
-      path: "/admin/costs?level=over",
+      path: "/admin/platform/costs?level=over",
       routes: routes({ "GET /v1/admin/organizations": page([NORTHWIND]) }),
     });
     expect(await screen.findByRole("heading", { level: 3, name: "Nenhuma organização nesse nível" })).toBeDefined();
     expect(screen.getByText("Nenhuma organização perto do limite.")).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Ver todas" }));
-    expect(router.current()).toBe("/admin/costs");
+    expect(router.current()).toBe("/admin/platform/costs");
   });
 
   it("pages the budgets and keeps the page in the URL", async () => {
@@ -235,7 +237,7 @@ describe("AdminCostsView", () => {
     const { user, router } = render({ routes: routes({ "GET /v1/admin/organizations": page(many) }) });
     const pages = await screen.findByRole("navigation", { name: "Páginas de orçamentos" });
     await user.click(within(pages).getByRole("button", { name: "Próxima" }));
-    expect(router.current()).toBe("/admin/costs?page=2");
+    expect(router.current()).toBe("/admin/platform/costs?page=2");
     await waitFor(() =>
       expect(
         within(screen.getByRole("table", { name: "Orçamentos por organização" })).getAllByRole("row"),
@@ -290,13 +292,15 @@ describe("AdminCostsView", () => {
     expect(summary.compareDocumentPosition(attention) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(attention.compareDocumentPosition(chart) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     await user.click(within(attention).getByRole("button", { name: "Ver todas as 12" }));
-    expect(router.current()).toBe("/admin/costs?level=alert");
+    expect(router.current()).toBe("/admin/platform/costs?level=alert");
   });
 
   it("explains an empty platform and links to the organizations", async () => {
     const { container } = render({ routes: routes({ "GET /v1/admin/organizations": page([]) }) });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhum custo para mostrar" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Ver organizações" }).getAttribute("href")).toBe("/admin/organizations");
+    expect(screen.getByRole("link", { name: "Ver organizações" }).getAttribute("href")).toBe(
+      "/admin/platform/organizations",
+    );
     await expectNoAxeViolations(container);
   });
 

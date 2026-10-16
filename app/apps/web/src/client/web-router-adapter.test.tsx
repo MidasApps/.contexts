@@ -48,7 +48,7 @@ describe("createWebRouterAdapter", () => {
     expect(router.href({ id: "project", organizationId: "org 1", projectId: "p", unit: "u" })).toBe(
       "/en-US/o/org%201/p/p?unit=u",
     );
-    expect(router.href({ id: "admin", rest: "users" })).toBe("/en-US/admin/users");
+    expect(router.href({ id: "admin", rest: "users" })).toBe("/en-US/admin/platform/users");
   });
 
   it("navigates through next-intl's router with unprefixed hrefs once attached", () => {
@@ -60,7 +60,7 @@ describe("createWebRouterAdapter", () => {
     router.navigate({ id: "organization", organizationId: "a" });
     router.navigate({ id: "profile", section: "account" }, { replace: true });
 
-    expect(navigator.calls).toEqual(["push /o/a", "replace /profile/account"]);
+    expect(navigator.calls).toEqual(["push /o/a", "replace /admin/profile/account"]);
     expect(assign).not.toHaveBeenCalled();
   });
 
@@ -92,7 +92,7 @@ describe("createWebRouterAdapter", () => {
 
     router.navigate({ id: "admin", rest: "users" }, { replace: true, reload: true });
 
-    expect(assign).toHaveBeenCalledWith("/pt-BR/admin/users");
+    expect(assign).toHaveBeenCalledWith("/pt-BR/admin/platform/users");
     expect(navigator.calls).toEqual([]);
   });
 
@@ -134,7 +134,7 @@ describe("createWebRouterAdapter", () => {
       </router.Link>,
     );
 
-    expect(screen.getByText("Members")).toHaveProperty("dataset.href", "/o/a/settings/members");
+    expect(screen.getByText("Members")).toHaveProperty("dataset.href", "/admin/o/a/members");
     expect(screen.getByText("Members")).toHaveProperty("dataset.replace", "true");
   });
 

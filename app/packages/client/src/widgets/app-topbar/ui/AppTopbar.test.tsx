@@ -10,7 +10,7 @@ describe("AppTopbar", () => {
   it("shows organization › page on a settings page and opens the palette", async () => {
     const onOpen = vi.fn();
     const { user, container } = renderWidget(<AppTopbar onOpenCommandPalette={onOpen} />, {
-      path: `/o/${IDS.organization}/settings/members`,
+      path: `/admin/o/${IDS.organization}/members`,
     });
     const breadcrumb = screen.getByRole("navigation", { name: "Trilha de navegação" });
     expect(await within(breadcrumb).findByRole("link", { name: "Northwind" })).toBeDefined();

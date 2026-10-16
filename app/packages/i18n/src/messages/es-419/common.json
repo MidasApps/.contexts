@@ -136,9 +136,11 @@
     "module": "Módulo",
     "settings": "Configuración",
     "profile": "Perfil",
-    "admin": "Administración",
+    "admin": "Consola de la plataforma",
     "notFound": "Página no encontrada",
     "chat": "Asistente",
+    "approvals": "Aprobaciones",
+    "administration": "Administración",
     "docs": "Documentación"
   },
   "approvals": {

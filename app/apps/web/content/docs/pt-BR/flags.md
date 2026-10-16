@@ -35,12 +35,12 @@ Sem `core.flag.write`, você vê a tabela, mas sem botões. Os botões também s
 
 ## Onde encontrar
 
-- Menu: **Configurações → Operação → Recursos**.
-- Endereço: `/o/{organização}/settings/flags`.
+- Menu: **Administração → Operação → Recursos**.
+- Endereço: `/admin/o/{organização}/flags`.
 
 ![Página Recursos](/guide/flags-list.jpg)
 
-*Na tela: **Configurações → Recursos**.*
+*Na tela: **Administração → Recursos**.*
 
 ## Passo a passo
 
@@ -60,7 +60,7 @@ No celular, cada recurso aparece como um cartão com as mesmas informações.
 
 ### Desligar um recurso para a organização
 
-1. Abra **Configurações → Operação → Recursos**.
+1. Abra **Administração → Operação → Recursos**.
 2. Na linha do recurso, clique em **Desligar para a organização**.
 3. Leia a confirmação **Desligar {recurso} para a organização?**. Ela avisa: "O recurso deixa de funcionar para todos os membros desta organização."
 4. Clique em **Desligar**.
@@ -153,5 +153,5 @@ Quando a reforma termina, a gerente clica em **Seguir a plataforma**. A alteraç
 - [Organizações](/docs/organizations)
 - [Papéis e permissões](/docs/roles)
 - [Fluxos e agendamentos](/docs/workflows)
-- [Administração da plataforma](/docs/admin-operations)
+- [Console: operações](/docs/admin-operations)
 - [Glossário](/docs/glossary)

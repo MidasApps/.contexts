@@ -1,15 +1,32 @@
 {
-  "surface": "Administración de la plataforma",
+  "surface": "Administración",
   "sidebar": {
     "title": "Administración",
-    "navLabel": "Áreas de la administración",
-    "group": "Plataforma",
-    "backToApp": "Volver a la app",
-    "loading": "Cargando áreas…",
+    "navLabel": "Secciones de la administración",
+    "group": "Consola de la plataforma",
+    "organizationGroup": "Organización",
+    "accountGroup": "Mi cuenta",
+    "chooseOrganization": "Elegir una organización",
+    "organizationSettings": "Configuración de la organización",
+    "platformConsole": "Consola de la plataforma",
+    "openApp": "Abrir la aplicación",
+    "goTo": "Ir a",
+    "loading": "Cargando secciones…",
     "retry": "Intentar de nuevo"
   },
   "topbar": {
-    "badge": "Equipo de la plataforma"
+    "badge": "Equipo de la plataforma",
+    "organization": "Organización",
+    "account": "Mi cuenta",
+    "platform": "Consola de la plataforma",
+    "openApp": "Abrir la aplicación"
+  },
+  "home": {
+    "title": "Administración",
+    "loading": "Abriendo la administración…",
+    "noOrganizationTitle": "Todavía no participas en una organización",
+    "noOrganizationDescription": "La administración configura una organización: miembros, roles, agentes, conocimiento y módulos. Crea una organización o acepta una invitación para empezar.",
+    "noOrganizationAction": "Ver organizaciones"
   },
   "slot": {
     "emptyTitle": "Todavía no disponible",
@@ -38,7 +55,7 @@
     "loading": "Cargando el área…",
     "noAccessDescription": "Tu rol en el equipo de la plataforma no da acceso a esta área. Pídelo a un administrador de la plataforma.",
     "mfaTitle": "Confirma la verificación en dos pasos",
-    "mfaDescription": "La administración solo responde a sesiones confirmadas con el segundo factor. Cierra la sesión y vuelve a entrar con el código.",
+    "mfaDescription": "La consola de la plataforma solo responde a sesiones confirmadas con el segundo factor. Cierra la sesión y vuelve a entrar con el código.",
     "mfaAction": "Abrir seguridad de la cuenta"
   },
   "organizationFilter": {
@@ -50,12 +67,12 @@
     "empty": "No se encontró ninguna organización."
   },
   "overview": {
-    "title": "Administración de la plataforma",
+    "title": "Consola de la plataforma",
     "description": "Números de la plataforma y las áreas que tu rol en el equipo puede abrir.",
     "loading": "Cargando los números de la plataforma…",
     "sectionsTitle": "Áreas",
     "emptyTitle": "No hay áreas disponibles",
-    "emptyDescription": "Tu rol en el equipo no da acceso a ninguna área de la administración.",
+    "emptyDescription": "Tu rol en el equipo no da acceso a ninguna área de la consola.",
     "kpi": {
       "title": "Números de la plataforma",
       "generatedAt": "Actualizado el {when}",
@@ -623,9 +640,9 @@
       "done": "Sesión de {staff} finalizada."
     },
     "adminBlocked": {
-      "pageTitle": "Administración de la plataforma",
-      "title": "La administración no se abre en modo soporte",
-      "description": "Esta pestaña está conectada como otro usuario, en modo solo lectura. Sal del modo soporte para volver a tu cuenta del equipo y usar la administración."
+      "pageTitle": "Consola de la plataforma",
+      "title": "La consola de la plataforma no se abre en modo soporte",
+      "description": "Esta pestaña está conectada como otro usuario, en modo solo lectura. Sal del modo soporte para volver a tu cuenta del equipo y usar la consola."
     }
   },
   "traces": {

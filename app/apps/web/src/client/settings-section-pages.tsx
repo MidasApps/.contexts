@@ -6,7 +6,6 @@ import { SETTINGS_SECTIONS, type SettingsSection, useRouter } from "@core/client
 import { NotFoundView } from "@core/client/views/not-found";
 import { SettingsAgentsView } from "@core/client/views/settings-agents";
 import { SettingsApiKeysView } from "@core/client/views/settings-api-keys";
-import { SettingsApprovalsView } from "@core/client/views/settings-approvals";
 import { SettingsAuditLogView } from "@core/client/views/settings-audit-log";
 import { SettingsConnectorsView } from "@core/client/views/settings-connectors";
 import { SettingsDevicesView } from "@core/client/views/settings-devices";
@@ -24,7 +23,7 @@ import { SettingsUsageView } from "@core/client/views/settings-usage";
 import { SettingsWorkflowsView } from "@core/client/views/settings-workflows";
 import type { ComponentType } from "react";
 
-/** The shared view of each `/o/:organizationId/settings/:section` (SP2 spec §8). */
+/** The shared view of each `/admin/o/:organizationId/:section` (SP2 spec §8; decision 0077). */
 export const SETTINGS_SECTION_VIEWS: Readonly<Record<SettingsSection, ComponentType>> = {
   general: SettingsGeneralView,
   members: SettingsMembersView,
@@ -40,7 +39,6 @@ export const SETTINGS_SECTION_VIEWS: Readonly<Record<SettingsSection, ComponentT
   knowledge: SettingsKnowledgeView,
   connectors: SettingsConnectorsView,
   workflows: SettingsWorkflowsView,
-  approvals: SettingsApprovalsView,
   usage: SettingsUsageView,
   traces: SettingsTracesView,
   evals: SettingsEvalsView,

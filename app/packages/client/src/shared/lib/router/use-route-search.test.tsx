@@ -21,7 +21,7 @@ describe("useRouteSearch", () => {
   it("writes tabs and filters as another address of the page on screen, without building it again", async () => {
     // A navigation would wait for the server before the tab changes; a second tab clicked in that
     // window was dropped and the first one won (e2e settings-workflows, follow-up of the gate).
-    const router = createMemoryRouter("/o/org/settings/workflows");
+    const router = createMemoryRouter("/admin/o/org/workflows");
     const navigate = vi.spyOn(router, "navigate");
     const { user } = renderWithProviders(
       <RouterProvider router={router}>
@@ -34,6 +34,6 @@ describe("useRouteSearch", () => {
       { replace: true, samePage: true },
     );
     expect(screen.getByText("tab: schedules")).toBeDefined();
-    expect(router.history()).toEqual(["/o/org/settings/workflows?tab=schedules"]);
+    expect(router.history()).toEqual(["/admin/o/org/workflows?tab=schedules"]);
   });
 });

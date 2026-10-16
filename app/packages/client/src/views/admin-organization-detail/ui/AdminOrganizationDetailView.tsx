@@ -158,7 +158,7 @@ function Detail({
 }
 
 /**
- * `/admin/organizations/:organizationId` (SP5 spec §6, platform.organization.read): one
+ * `/admin/platform/organizations/:organizationId` (SP5 spec §6, platform.organization.read): one
  * organization's status, plan, cost and budget; staff with `platform.organization.update` assign
  * the plan, override the budget and suspend or reactivate it. The organization comes from
  * `GET /v1/admin/organizations/{id}` (decision 0044), with its member count; a 404 is not found.

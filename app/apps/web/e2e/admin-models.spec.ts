@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect, test, toast } from "./sp5-test.ts";
 
-// Decision 0072: staff choose the model of each runtime role in `/admin/models`. The e2e stack runs
+// Decision 0072: staff choose the model of each runtime role in `/admin/platform/models`. The e2e stack runs
 // fake models, so the page says so and every listed model is available. The journey puts the
 // original model back at the end, so the shared runtime keeps the settings it started with.
 
@@ -20,7 +20,7 @@ const saveModels = async (page: Page): Promise<void> => {
 };
 
 test("changes the model of quick tasks, keeps it after a reload and puts it back", async ({ staffPage }) => {
-  await staffPage.goto("admin/models");
+  await staffPage.goto("admin/platform/models");
   await expect(staffPage.getByRole("heading", { level: 1, name: "Modelos" })).toBeVisible();
   await expect(staffPage.getByText(/O runtime está em modo simulado/)).toBeVisible();
   const fast = staffPage.getByRole("combobox", { name: "Tarefas rápidas" });

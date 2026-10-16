@@ -1,6 +1,6 @@
 import { V1RequestError } from "@core/e2e/api";
 import { signInThroughUi } from "@core/e2e/sign-in";
-import { addMember, expect, openAs, settingsPath, test } from "./sp5-test.ts";
+import { addMember, approvalsPath, expect, openAs, settingsPath, test } from "./sp5-test.ts";
 
 // SP5 Task 16: a plain member of the organization opens the admin-only agent sections of
 // `/settings`. Each one shows the no-access state, the navigation does not offer them, and the
@@ -50,11 +50,11 @@ test.describe("a member without the admin permissions", () => {
       await expect(
         session.page.getByRole("heading", { level: 2, name: "Você não tem acesso a esta página" }),
       ).toBeVisible();
-      const nav = session.page.getByRole("navigation", { name: "Seções das configurações" });
+      const nav = session.page.getByRole("navigation", { name: "Seções da administração" });
       await expect(nav.getByRole("link", { name: label, exact: true })).toHaveCount(0);
     }
     // A member reads the approvals inbox (core.approval.read) but decides nothing.
-    await session.page.goto(settingsPath(sp5Org.id, "approvals"));
+    await session.page.goto(approvalsPath(sp5Org.id));
     await expect(session.page.getByRole("heading", { level: 1, name: "Aprovações" })).toBeVisible();
     await session.close();
   });

@@ -1,7 +1,4 @@
 {
-  "navLabel": "Seções das configurações",
-  "navLoading": "Carregando as seções…",
-  "navPicker": "Seção",
   "indexLoading": "Abrindo as configurações…",
   "noAccessDescription": "Peça a um administrador da organização para liberar esta seção.",
   "nodes": {
@@ -1032,6 +1029,7 @@
     "title": "Aprovações",
     "description": "Ações que precisam da decisão de uma segunda pessoa antes de serem executadas. Quem pede nunca aprova o próprio pedido.",
     "loading": "Carregando aprovações",
+    "noAccessDescription": "Peça a quem administra a organização para liberar as aprovações para você.",
     "historyPagination": "Páginas do histórico",
     "truncatedTitle": "Nem todas as solicitações pendentes foram carregadas",
     "truncatedDescription": "Mostrando as {count} primeiras, o limite desta lista. Decida estas para ver as demais.",

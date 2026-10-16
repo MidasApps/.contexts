@@ -28,18 +28,18 @@ O uso inclui todos os agentes e fluxos da organização. Os meses e os dias são
 
 ## Onde encontrar
 
-- Menu: **Configurações → Operação → Uso e orçamento**.
-- Endereço: `/o/{organização}/settings/usage`.
+- Menu: **Administração → Operação → Uso e orçamento**.
+- Endereço: `/admin/o/{organização}/usage`.
 
 ![Página Uso e orçamento](/guide/usage-overview.jpg)
 
-*Na tela: **Configurações → Uso e orçamento**.*
+*Na tela: **Administração → Uso e orçamento**.*
 
 ## Passo a passo
 
 ### Ver o uso de um mês
 
-1. Abra **Configurações → Operação → Uso e orçamento**.
+1. Abra **Administração → Operação → Uso e orçamento**.
 2. Em **Mês**, escolha o mês. A lista traz o mês atual, marcado como "(mês atual)", e os 11 meses anteriores.
 3. Leia os **Totais do mês**:
    - **Custo**: chamadas sem preço conhecido não entram no custo;

@@ -10,7 +10,7 @@ import { useModuleRegistry } from "#/shared/lib/shell/shell-registry-context.tsx
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { PageNotFound, QueryPage, QuerySection } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame } from "#/widgets/settings-frame/index.ts";
 
 type ModuleRef = { id: string; labelKey: string; settings: ModuleSettingsManifest };
 
@@ -40,7 +40,6 @@ function SettingsModule({ context, module }: { context: AccessContext; module: M
   const name = t.has(module.labelKey) ? t(module.labelKey) : module.id;
   return (
     <SettingsPageFrame
-      organizationId={context.organization.id}
       allowed={context.permissions.includes(module.settings.readPermission)}
       header={
         <PageHeader
@@ -56,7 +55,7 @@ function SettingsModule({ context, module }: { context: AccessContext; module: M
 }
 
 /**
- * `/o/:organizationId/settings/m/:moduleId` (SP2 spec §6, §8): an installed module's settings
+ * `/admin/o/:organizationId/m/:moduleId` (SP2 spec §6, §8): an installed module's settings
  * rendered from its contract. Unknown modules and modules without settings render not-found; the
  * manifest's read permission gates the page and its update permission the form.
  */

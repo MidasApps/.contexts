@@ -70,7 +70,7 @@ function ApprovalsMenuItem({ organizationId, count }: { organizationId: string; 
   return (
     <DropdownMenuItem asChild>
       <RouteLink
-        to={{ id: "settings", organizationId, section: "approvals" }}
+        to={{ id: "approvals", organizationId }}
         aria-label={count > 0 ? t("labelWithWaiting", { count }) : t("label")}
       >
         <Icon name="inbox" />

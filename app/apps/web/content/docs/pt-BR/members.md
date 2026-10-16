@@ -26,15 +26,15 @@ Você só pode conceder papéis com permissões que você mesmo tem. Por exemplo
 
 ## Onde encontrar
 
-- **Configurações → Membros**: `/o/{organização}/settings/members`
-- **Configurações → Convites**: `/o/{organização}/settings/invitations`
-- Para ver todos os convites, e não só os pendentes: `/o/{organização}/settings/invitations?filter=all`
+- **Administração → Membros**: `/admin/o/{organização}/members`
+- **Administração → Convites**: `/admin/o/{organização}/invitations`
+- Para ver todos os convites, e não só os pendentes: `/admin/o/{organização}/invitations?filter=all`
 
-As duas seções ficam no grupo **Organização** do menu de configurações.
+As duas seções ficam no grupo **Organização** da barra lateral da administração.
 
 ![Lista de membros da organização](/guide/members-list.jpg)
 
-*Na tela: **Configurações → Membros**: quem tem acesso e com quais papéis.*
+*Na tela: **Administração → Membros**: quem tem acesso e com quais papéis.*
 
 ## Passo a passo
 
@@ -44,13 +44,13 @@ As duas seções ficam no grupo **Organização** do menu de configurações.
 
 ### Ver os membros
 
-1. Vá em **Configurações → Membros**.
+1. Vá em **Administração → Membros**.
 2. A tabela mostra cada pessoa em **Membro** (nome e e-mail; você aparece com o selo **Você**) e, em **Acesso**, cada lugar onde ela tem acesso com os papéis daquele lugar.
 3. Use **Anterior** e **Próxima** para navegar entre as páginas da lista.
 
 ### Convidar uma pessoa
 
-1. Em **Configurações → Membros** ou **Configurações → Convites**, clique em **Convidar**.
+1. Em **Administração → Membros** ou **Administração → Convites**, clique em **Convidar**.
 2. Em **E-mail**, digite o e-mail da pessoa.
 3. Em **Onde vale**, escolha **Toda a organização** ou um projeto (use **Buscar projeto** para filtrar). Ao escolher um projeto, aparece o campo **Unidade**: deixe **Todo o projeto** ou escolha uma unidade (as sub-unidades aparecem como **Unidade › Sub-unidade**). O acesso vale no nível escolhido e em tudo abaixo dele.
 4. Em **Papéis**, marque um ou mais papéis (até 10). O papel **Membro** já vem marcado.
@@ -62,7 +62,7 @@ Se você tentar fechar a janela sem clicar em **Concluir**, o app pergunta **Fec
 
 ### Acompanhar os convites
 
-1. Vá em **Configurações → Convites**.
+1. Vá em **Administração → Convites**.
 2. Use as abas **Pendentes** (padrão) e **Todos**.
 3. A tabela mostra **E-mail**, **Onde vale**, **Papéis**, **Situação** e **Expira em**.
 
@@ -77,14 +77,14 @@ Convites aceitos ou revogados não mostram data de expiração.
 
 ### Revogar um convite
 
-1. Em **Configurações → Convites**, na linha do convite pendente, clique em **Revogar**.
+1. Em **Administração → Convites**, na linha do convite pendente, clique em **Revogar**.
 2. Confirme em **Revogar convite**. O link enviado deixa de funcionar imediatamente.
 
 Só convites pendentes podem ser revogados.
 
 ### Alterar os papéis de um membro
 
-1. Em **Configurações → Membros**, na coluna **Acesso**, clique no ícone de lápis ao lado do acesso que quer alterar (**Editar papéis de {nome}**).
+1. Em **Administração → Membros**, na coluna **Acesso**, clique no ícone de lápis ao lado do acesso que quer alterar (**Editar papéis de {nome}**).
 2. A janela **Papéis de {nome}** mostra onde aquele acesso vale (**Os papéis valem em:**).
 3. Marque ou desmarque os papéis. É preciso manter pelo menos um, e o máximo é 10.
 4. Clique em **Salvar papéis**.
@@ -99,7 +99,7 @@ Um convite também deixa de funcionar se quem convidou perder a permissão de co
 
 Use quando a pessoa já é membro e precisa de acesso em mais um projeto ou unidade, sem convite novo.
 
-1. Em **Configurações → Membros**, na coluna **Acesso** da pessoa, clique em **Dar acesso**.
+1. Em **Administração → Membros**, na coluna **Acesso** da pessoa, clique em **Dar acesso**.
 2. Em **Onde vale**, escolha **Toda a organização** ou um projeto.
 3. Se escolheu um projeto, em **Unidade** deixe **Todo o projeto** ou escolha uma unidade.
 4. Em **Papéis**, marque os papéis desse novo acesso.
@@ -119,7 +119,7 @@ Quando a pessoa tem um único acesso, use **Remover** (abaixo).
 
 ### Remover um membro
 
-1. Em **Configurações → Membros**, clique em **Remover** na linha da pessoa.
+1. Em **Administração → Membros**, clique em **Remover** na linha da pessoa.
 2. Leia o aviso: todos os acessos da pessoa na organização **e as chaves de API dela** serão revogados.
 3. Clique em **Remover membro**.
 

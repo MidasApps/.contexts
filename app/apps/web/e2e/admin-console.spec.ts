@@ -8,7 +8,7 @@ import { entry, expect, FAILED_REQUEST, test, toast, unique } from "./sp5-test.t
 test.describe("overview", () => {
   test("shows the platform numbers and the areas of the role", async ({ staffPage }) => {
     await staffPage.goto("admin");
-    await expect(staffPage.getByRole("heading", { level: 1, name: "Administração da plataforma" })).toBeVisible();
+    await expect(staffPage.getByRole("heading", { level: 1, name: "Console da plataforma" })).toBeVisible();
     const kpis = staffPage.getByRole("region", { name: "Números da plataforma" });
     for (const term of [
       "Organizações ativas",
@@ -54,7 +54,7 @@ test.describe("overview", () => {
 
 test.describe("organizations", () => {
   test("searches on the server, opens the detail with the member count", async ({ staffPage, sp5Org }) => {
-    await staffPage.goto("admin/organizations");
+    await staffPage.goto("admin/platform/organizations");
     const table = staffPage.getByRole("table", { name: "Organizações da plataforma" });
     await expect(table.getByRole("row").nth(1)).toBeVisible();
     await staffPage.getByRole("searchbox", { name: "Buscar organização" }).fill(sp5Org.name);
@@ -71,7 +71,7 @@ test.describe("organizations", () => {
 
     // `q` is the page's search key: with an unknown key the list was unfiltered, and once the run had
     // created more organizations than a page holds, this one was not on the first page.
-    await staffPage.goto(`admin/organizations?q=${encodeURIComponent(sp5Org.name)}`);
+    await staffPage.goto(`admin/platform/organizations?q=${encodeURIComponent(sp5Org.name)}`);
     await staffPage.getByRole("link", { name: `Abrir ${sp5Org.name}` }).click();
     await expect(staffPage.getByRole("heading", { level: 1, name: sp5Org.name })).toBeVisible();
     const summary = staffPage.getByRole("region", { name: "Resumo" });
@@ -89,7 +89,7 @@ test.describe("organizations", () => {
       await held;
       await route.fulfill({ status: 500, json: ERROR_ENVELOPE });
     });
-    await staffPage.goto("admin/organizations");
+    await staffPage.goto("admin/platform/organizations");
     await expect(staffPage.getByText("Carregando organizações…")).toBeVisible();
     release();
     await expect(staffPage.getByText(/Referência: e2e-request-1/)).toBeVisible({ timeout: 30_000 });
@@ -100,7 +100,7 @@ test.describe("organizations", () => {
 
   test("creates a plan, assigns it, then suspends and reactivates the organization", async ({ staffPage, sp5Org }) => {
     const plan = unique("Starter");
-    await staffPage.goto("admin/plans");
+    await staffPage.goto("admin/platform/plans");
     await staffPage.getByRole("button", { name: "Novo plano" }).first().click();
     const dialog = staffPage.getByRole("dialog", { name: "Novo plano" });
     await dialog.getByRole("textbox", { name: /^Nome/ }).fill(plan);
@@ -109,7 +109,7 @@ test.describe("organizations", () => {
     await dialog.getByRole("button", { name: "Criar plano" }).click();
     await expect(toast(staffPage, `Plano ${plan} criado.`)).toBeVisible();
 
-    await staffPage.goto(`admin/organizations/${sp5Org.id}`);
+    await staffPage.goto(`admin/platform/organizations/${sp5Org.id}`);
     await expect(staffPage.getByRole("heading", { level: 1, name: sp5Org.name })).toBeVisible();
     await staffPage.getByRole("combobox", { name: "Plano da organização" }).click();
     await staffPage.getByRole("option", { name: plan }).click();
@@ -146,7 +146,7 @@ test.describe("organizations", () => {
 test.describe("plans", () => {
   test("edits a plan's limits", async ({ staffPage }) => {
     const plan = unique("Growth");
-    await staffPage.goto("admin/plans");
+    await staffPage.goto("admin/platform/plans");
     await staffPage.getByRole("button", { name: "Novo plano" }).first().click();
     const create = staffPage.getByRole("dialog", { name: "Novo plano" });
     await create.getByRole("textbox", { name: /^Nome/ }).fill(plan);

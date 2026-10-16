@@ -1,6 +1,6 @@
-# Administração: IA
+# Console: IA
 
-Esta página cobre as áreas do grupo **IA** da administração da plataforma: **Agentes e prompts**, **Modelos**, **Avaliações**, **Traces**, **Logs** e **Custos**. Nelas a equipe decide quais agentes cada organização usa, qual modelo atende cada função, quanto cada modelo custa, quais versões de prompt vão para produção e acompanha execuções e gastos. Para saber quem pode entrar na administração, veja [Administração da plataforma](/docs/admin).
+Esta página cobre as áreas do grupo **IA** do console da plataforma: **Agentes e prompts**, **Modelos**, **Avaliações**, **Traces**, **Logs** e **Custos**. Nelas a equipe decide quais agentes cada organização usa, qual modelo atende cada função, quanto cada modelo custa, quais versões de prompt vão para produção e acompanha execuções e gastos. Para saber quem pode entrar no console, veja [Console da plataforma](/docs/admin).
 
 Os preços e custos aparecem na tela em dólares (US$). Nos exemplos em JSON, que mostram os dados como a API os envia, o dinheiro vem em micro-dólares: `2000000` equivale a US$ 2,00.
 
@@ -8,12 +8,12 @@ Os preços e custos aparecem na tela em dólares (US$). Nos exemplos em JSON, qu
 
 **Para que serve:** ver os agentes que o runtime registrou, ligar ou desligar subagentes, ferramentas web e o modo de dados pessoais de cada organização, e gerenciar as versões dos prompts da plataforma.
 
-- **URL:** `/admin/agents` e `/admin/agents/<id do agente>/prompts`
+- **URL:** `/admin/platform/agents` e `/admin/platform/agents/<id do agente>/prompts`
 - **Permissões:** `platform.agent.manage` para a página e as configurações por organização; `platform.prompt.manage` para os prompts. As duas são só do `platform-admin`.
 
 ![Página Agentes e prompts](/guide/admin-agents.jpg)
 
-*Na tela: `/admin/agents`.*
+*Na tela: `/admin/platform/agents`.*
 
 ### Agentes registrados
 
@@ -34,7 +34,7 @@ A seção **Agentes registrados** mostra cada agente com o papel (**Supervisor**
 3. Em **Ferramentas web**, ligue **Busca e leitura de páginas** ou **Navegador automatizado**. Ao ligar, confirme em **Ligar**. Os agentes da organização passam a acessar a web pública em todas as conversas.
 4. Em **Dados pessoais nas mensagens**, escolha **Mascarar** (os dados pessoais são mascarados antes de chegar ao modelo) ou **Avisar** (o detector só registra o achado). Trocar para **Avisar** pede confirmação em **Só avisar**.
 
-As ferramentas web só valem enquanto a flag `ai.web-tools` da plataforma estiver ligada (veja [Administração: operações](/docs/admin-operations)). Todas as mudanças ficam na auditoria.
+As ferramentas web só valem enquanto a flag `ai.web-tools` da plataforma estiver ligada (veja [Console: operações](/docs/admin-operations)). Todas as mudanças ficam na auditoria.
 
 Exemplo: a Clínica Exemplo pede que o agente Web pesquise artigos públicos. Você liga o subagente **Web** e a **Busca e leitura de páginas**, e mantém **Mascarar** nos dados pessoais.
 
@@ -98,12 +98,12 @@ O **Histórico de ativações** lista cada ativação com **Versão**, **Quando*
 
 **Para que serve:** escolher o modelo de cada função dos agentes e definir o custo de cada modelo, sem novo deploy.
 
-- **URL:** `/admin/models`
+- **URL:** `/admin/platform/models`
 - **Permissão:** `platform.model.manage`, só do `platform-admin`.
 
 ![Página Modelos com o modelo e o custo de cada função](/guide/admin-models.jpg)
 
-*Na tela: `/admin/models`: o modelo de cada função, com o custo ao lado, e as funções fixas do ambiente.*
+*Na tela: `/admin/platform/models`: o modelo de cada função, com o custo ao lado, e as funções fixas do ambiente.*
 
 ### Modelo de cada função
 
@@ -195,12 +195,12 @@ Outros avisos:
 
 **Para que serve:** ver os experimentos de avaliação, com as notas por avaliador e o veredito, comparar dois experimentos e consultar os datasets usados.
 
-- **URL:** `/admin/evals`
+- **URL:** `/admin/platform/evals`
 - **Permissão:** `platform.eval.manage`, só do `platform-admin`.
 
-![Página Avaliações da administração](/guide/admin-evals.jpg)
+![Página Avaliações do console](/guide/admin-evals.jpg)
 
-*Na tela: `/admin/evals`.*
+*Na tela: `/admin/platform/evals`.*
 
 ### Experimentos
 
@@ -228,12 +228,12 @@ A aba **Datasets** lista **Dataset**, **Escopo** (**Plataforma** ou **Organizaç
 
 **Para que serve:** ver as execuções de agentes e workflows de todas as organizações, com duração, tokens e custo.
 
-- **URL:** `/admin/traces` e `/admin/traces/<id do trace>`
+- **URL:** `/admin/platform/traces` e `/admin/platform/traces/<id do trace>`
 - **Permissão:** `platform.trace.read`, dos papéis `platform-admin` e `platform-support`.
 
 ![Página Traces](/guide/admin-traces.jpg)
 
-*Na tela: `/admin/traces`.*
+*Na tela: `/admin/platform/traces`.*
 
 ### Passo a passo
 
@@ -259,12 +259,12 @@ Exemplo:
 
 **Para que serve:** ler as linhas de log recentes do processo web no ambiente local, das mais novas para as mais antigas.
 
-- **URL:** `/admin/logs`
+- **URL:** `/admin/platform/logs`
 - **Permissão:** `platform.trace.read`, dos papéis `platform-admin` e `platform-support`.
 
 ![Página Logs](/guide/admin-logs.jpg)
 
-*Na tela: `/admin/logs`.*
+*Na tela: `/admin/platform/logs`.*
 
 ### Passo a passo
 
@@ -296,12 +296,12 @@ Cada linha mostra o nível, a mensagem, o serviço e o ambiente, e pode abrir o 
 
 **Para que serve:** acompanhar o custo de modelos no mês por organização, comparado ao limite de cada uma, e ver o uso por dia e por modelo.
 
-- **URL:** `/admin/costs`
+- **URL:** `/admin/platform/costs`
 - **Permissão:** `platform.usage.read`, dos papéis `platform-admin` e `platform-support`.
 
 ![Página Custos](/guide/admin-costs.jpg)
 
-*Na tela: `/admin/costs`.*
+*Na tela: `/admin/platform/costs`.*
 
 ### O que a página mostra
 
@@ -354,9 +354,9 @@ O uso de uma organização em dois dias, como a API o envia:
 
 ## Veja também
 
-- [Administração da plataforma](/docs/admin)
-- [Administração: clientes](/docs/admin-customers)
-- [Administração: operações](/docs/admin-operations)
+- [Console da plataforma](/docs/admin)
+- [Console: clientes](/docs/admin-customers)
+- [Console: operações](/docs/admin-operations)
 - [Agentes](/docs/agents)
 - [Avaliações](/docs/evals)
 - [Traces](/docs/traces)

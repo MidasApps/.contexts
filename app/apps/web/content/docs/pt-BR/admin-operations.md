@@ -1,19 +1,19 @@
-# Administração: operações
+# Console: operações
 
-Esta página cobre as áreas do grupo **Operação** da administração da plataforma: **Workflows**, **Flags**, **Conectores** e **Auditoria** (esta explicada em [Administração da plataforma](/docs/admin)). Nelas a equipe acompanha e cancela execuções de todas as organizações, pausa ou dispara agendamentos, liga e desliga funcionalidades por ambiente ou por organização e consulta os conectores que cada organização configurou. Para saber quem pode entrar na administração, veja [Administração da plataforma](/docs/admin).
+Esta página cobre as áreas do grupo **Operação** do console da plataforma: **Workflows**, **Flags**, **Conectores** e **Auditoria** (esta explicada em [Console da plataforma](/docs/admin)). Nelas a equipe acompanha e cancela execuções de todas as organizações, pausa ou dispara agendamentos, liga e desliga funcionalidades por ambiente ou por organização e consulta os conectores que cada organização configurou. Para saber quem pode entrar no console, veja [Console da plataforma](/docs/admin).
 
 ## Workflows
 
 **Para que serve:** ver as execuções de workflows de todas as organizações e da plataforma, encontrar as que aguardam aprovação, cancelar uma execução e controlar os agendamentos.
 
-- **URL:** `/admin/workflows`
+- **URL:** `/admin/platform/workflows`
 - **Permissão:** `platform.workflow.manage`, só do `platform-admin`.
 
 A página tem duas abas: **Execuções** e **Agendamentos**. O endereço guarda a aba, os filtros e a execução aberta, então você pode compartilhar o link.
 
-![Página Workflows da administração](/guide/admin-workflows.jpg)
+![Página Workflows do console](/guide/admin-workflows.jpg)
 
-*Na tela: `/admin/workflows`.*
+*Na tela: `/admin/platform/workflows`.*
 
 ### Execuções
 
@@ -93,13 +93,13 @@ Exemplo de agendamento da plataforma, como a API o envia:
 - Pausar um job da **Plataforma** para de rodar para **todas** as organizações: por exemplo, a expiração de aprovações, a limpeza de dados ou o relatório de uso. A confirmação, **Pausar job da plataforma**, avisa isso. Pause só durante um incidente e retome em seguida.
 - "Use o id do workflow: minúsculas, números e hifens." O filtro **Workflow** espera o id, não o nome.
 - Se o link aponta para uma execução que não está na lista carregada, você verá "Execução não encontrada nesta lista". Ela pode estar em outra página ou fora dos filtros.
-- Os eventos de cada etapa não aparecem na administração. A linha do tempo mostra o que a execução registra.
+- Os eventos de cada etapa não aparecem no console. A linha do tempo mostra o que a execução registra.
 
 ## Flags
 
 **Para que serve:** ligar e desligar funcionalidades no ambiente inteiro ou só para uma organização. As flags são declaradas no código, cada uma com responsável, motivo e validade.
 
-- **URL:** `/admin/flags`
+- **URL:** `/admin/platform/flags`
 - **Permissão:** `platform.flag.manage`, só do `platform-admin`.
 
 A tabela tem as colunas **Flag**, **Tipo** (**Kill-switch**, **Rollout** ou **Operação**), **Validade**, **Ambiente** e, quando uma organização está escolhida, **Ajuste da organização**.
@@ -134,7 +134,7 @@ Todas têm o responsável `platform-team`. Exemplo de uma flag como a API a envi
 
 ![Página Flags](/guide/admin-flags.jpg)
 
-*Na tela: `/admin/flags`.*
+*Na tela: `/admin/platform/flags`.*
 
 ### Mudar o valor no ambiente
 
@@ -166,14 +166,14 @@ Exemplo: a Clínica Exemplo vai testar a voz no chat antes das outras organizaç
 
 **Para que serve:** consultar os sistemas externos que cada organização liberou para os agentes dela. Os segredos nunca aparecem aqui.
 
-- **URL:** `/admin/connectors`
+- **URL:** `/admin/platform/connectors`
 - **Permissão:** `platform.connector.read`, dos papéis `platform-admin` e `platform-support`.
 
 A área é **somente leitura**: a equipe da plataforma não altera nem desativa conectores. Quem administra a organização faz isso nas configurações dela (veja [Conectores](/docs/connectors)).
 
-![Página Conectores da administração](/guide/admin-connectors.jpg)
+![Página Conectores do console](/guide/admin-connectors.jpg)
 
-*Na tela: `/admin/connectors`.*
+*Na tela: `/admin/platform/connectors`.*
 
 ### Passo a passo
 
@@ -200,9 +200,9 @@ Exemplo para a Clínica Exemplo:
 
 ## Veja também
 
-- [Administração da plataforma](/docs/admin)
-- [Administração: clientes](/docs/admin-customers)
-- [Administração: IA](/docs/admin-ai)
+- [Console da plataforma](/docs/admin)
+- [Console: clientes](/docs/admin-customers)
+- [Console: IA](/docs/admin-ai)
 - [Workflows](/docs/workflows)
 - [Aprovações](/docs/approvals)
 - [Flags](/docs/flags)

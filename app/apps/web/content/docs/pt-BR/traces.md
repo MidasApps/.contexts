@@ -24,23 +24,23 @@ Você só vê rastros da sua própria organização. Um rastro de outra organiza
 
 Para ver a página e os rastros, você precisa da permissão Ver traces dos agentes (`core.trace.read`).
 
-A equipe da plataforma tem uma área própria de rastros, com acesso a logs. Na área da organização não há página de logs.
+A equipe da plataforma tem uma área própria de rastros no console da plataforma, com acesso a logs. Na área da organização não há página de logs.
 
 ## Onde encontrar
 
-- Menu: **Configurações → Operação → Rastros**.
-- Endereço da lista: `/o/{organização}/settings/traces`.
-- Página de um rastro: `/o/{organização}/settings/traces/{id do rastro}`. O id do rastro tem 32 caracteres hexadecimais (números de 0 a 9 e letras de a a f).
+- Menu: **Administração → Operação → Rastros**.
+- Endereço da lista: `/admin/o/{organização}/traces`.
+- Página de um rastro: `/admin/o/{organização}/traces/{id do rastro}`. O id do rastro tem 32 caracteres hexadecimais (números de 0 a 9 e letras de a a f).
 
 ![Lista de rastros](/guide/traces-list.jpg)
 
-*Na tela: **Configurações → Rastros**.*
+*Na tela: **Administração → Rastros**.*
 
 ## Passo a passo
 
 ### Encontrar um rastro
 
-1. Abra **Configurações → Operação → Rastros**.
+1. Abra **Administração → Operação → Rastros**.
 2. A tabela mostra as colunas **Rastro**, **Agente ou fluxo**, **Status**, **Início**, **Duração**, **Tokens (entrada / saída)** e **Custo**.
 3. Use os filtros:
    - **Status**: **Todos os status**, **OK** ou **Erro**. O filtro vale na hora.

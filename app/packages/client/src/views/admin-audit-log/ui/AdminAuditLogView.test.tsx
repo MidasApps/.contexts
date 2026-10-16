@@ -31,7 +31,7 @@ const ENTRIES = [
 describe("AdminAuditLogView", () => {
   it("lists staff actions with the organization they touched, also to support staff", async () => {
     const { container } = renderAdmin(<AdminAuditLogView />, {
-      path: "/admin/audit",
+      path: "/admin/platform/audit",
       role: "platform-support",
       routes: { "GET /v1/admin/audit-logs": page(ENTRIES) },
     });
@@ -39,7 +39,7 @@ describe("AdminAuditLogView", () => {
     expect(await within(table).findByText("Orçamento da organização alterado")).toBeDefined();
     expect(within(table).getByText("Plano excluído")).toBeDefined();
     expect(within(table).getByRole("link", { name: IDS.organization }).getAttribute("href")).toContain(
-      `/admin/organizations/${IDS.organization}`,
+      `/admin/platform/organizations/${IDS.organization}`,
     );
     expect(within(table).getByText("Toda a plataforma")).toBeDefined();
     await expectNoAxeViolations(container);
@@ -48,7 +48,7 @@ describe("AdminAuditLogView", () => {
   it("filters by action and by organization through the API", async () => {
     const queries: string[] = [];
     const { user } = renderAdmin(<AdminAuditLogView />, {
-      path: `/admin/audit?organizationId=${IDS.organization}`,
+      path: `/admin/platform/audit?organizationId=${IDS.organization}`,
       routes: {
         "GET /v1/admin/audit-logs": (request: FakeRequest) => {
           queries.push(request.query.toString());

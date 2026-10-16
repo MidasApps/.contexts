@@ -38,7 +38,7 @@ const renderView = (permissions: readonly Permission[] = ADMIN, routes: FakeRout
       <SettingsMembersView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/members`,
+      path: `/admin/o/${IDS.organization}/members`,
       routes: shellRoutes(permissions, {
         "GET /v1/me": ok(buildMe()),
         "GET /v1/organizations/:organizationId/members": page([SELF, BRUNO]),
@@ -49,7 +49,7 @@ const renderView = (permissions: readonly Permission[] = ADMIN, routes: FakeRout
   );
 
 describe("SettingsMembersView", () => {
-  it("lists members with their grants in a captioned table and marks the current section", async () => {
+  it("lists members with their grants in a captioned table", async () => {
     const { container } = renderView();
     expect(await screen.findByRole("heading", { level: 1, name: "Membros" })).toBeDefined();
     await screen.findByText("bruno@example.com");
@@ -57,8 +57,6 @@ describe("SettingsMembersView", () => {
     expect(within(table).getByText("Você")).toBeDefined();
     expect(within(table).getByText("Proprietário")).toBeDefined();
     expect(within(table).getAllByText("Toda a organização").length).toBe(2);
-    const nav = screen.getByRole("navigation", { name: "Seções das configurações" });
-    expect(within(nav).getByRole("link", { name: "Membros" }).getAttribute("aria-current")).toBe("page");
     await expectNoAxeViolations(container);
   });
 

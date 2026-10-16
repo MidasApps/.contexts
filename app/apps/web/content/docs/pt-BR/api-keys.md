@@ -41,12 +41,12 @@ Para entender papéis e permissões, veja [Papéis](/docs/roles).
 
 ## Onde encontrar
 
-No app (web ou desktop), abra **Configurações → Chaves de API**. A seção fica no grupo **Acesso** do menu de configurações.
+No app (web ou desktop), abra **Administração → Chaves de API**. A seção fica no grupo **Acesso** da barra lateral da administração.
 
 O endereço segue o padrão:
 
 ```text
-/o/<id-da-organização>/settings/api-keys
+/admin/o/<id-da-organização>/api-keys
 ```
 
 A lista mostra estas colunas:
@@ -64,7 +64,7 @@ O **Último uso** é atualizado no máximo uma vez por minuto, então pode mostr
 
 ![Página Chaves de API](/guide/api-keys-list.jpg)
 
-*Na tela: **Configurações → Chaves de API**.*
+*Na tela: **Administração → Chaves de API**.*
 
 ## Passo a passo
 
@@ -74,7 +74,7 @@ O **Último uso** é atualizado no máximo uma vez por minuto, então pode mostr
 
 ### Criar uma chave
 
-1. Abra **Configurações → Chaves de API**.
+1. Abra **Administração → Chaves de API**.
 2. Clique em **Nova chave**. O botão fica desativado enquanto você estiver sem conexão.
 3. Em **Nome**, escreva algo que ajude a reconhecer a chave depois, por exemplo "Exportação de relatórios". Use no máximo 80 caracteres.
 4. Em **Onde vale**, escolha a organização, um projeto ou uma unidade. Se mudar esse campo, as permissões já marcadas são desmarcadas, porque o que você pode conceder depende do nível.
@@ -87,7 +87,7 @@ O **Último uso** é atualizado no máximo uma vez por minuto, então pode mostr
 
 ### Revogar uma chave
 
-1. Abra **Configurações → Chaves de API**.
+1. Abra **Administração → Chaves de API**.
 2. Na linha da chave, clique em **Revogar**. O botão só aparece em chaves com situação **Ativa**.
 3. Confirme em **Revogar chave**.
 
@@ -242,7 +242,7 @@ Toda resposta também traz o cabeçalho `X-Request-Id` com o mesmo identificador
 A chave de API funciona apenas nas rotas abertas a integrações, como projetos, unidades, conectores, base de conhecimento, fluxos e as rotas de módulos. Algumas rotas aceitam somente pessoas conectadas. Nelas, uma chave recebe `403 FORBIDDEN`. Entre essas rotas estão:
 
 - o chat e as conversas (`/v1/chat` e `/v1/conversations`): **não é possível enviar mensagens ao assistente usando uma chave de API**;
-- a gestão das próprias chaves: criar, listar e revogar chaves só é possível pela tela **Configurações → Chaves de API**.
+- a gestão das próprias chaves: criar, listar e revogar chaves só é possível pela tela **Administração → Chaves de API**.
 
 ### Onde está a especificação completa
 

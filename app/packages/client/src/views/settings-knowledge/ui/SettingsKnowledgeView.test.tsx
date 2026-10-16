@@ -51,7 +51,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
       <SettingsKnowledgeView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/knowledge`,
+      path: `/admin/o/${IDS.organization}/knowledge`,
       routes: shellRoutes(permissions, { [DOCUMENTS]: page(LIST), ...routes }),
     },
   );

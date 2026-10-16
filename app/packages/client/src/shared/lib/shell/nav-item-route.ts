@@ -8,7 +8,10 @@ export type NavContext = {
   unitId?: string | undefined;
 };
 
-type OrganizationTarget = Extract<NavTarget, { kind: "organization-home" | "settings" | "settings-module" }>;
+type OrganizationTarget = Extract<
+  NavTarget,
+  { kind: "organization-home" | "approvals" | "administration" | "settings" | "settings-module" }
+>;
 type ProjectTarget = Extract<NavTarget, { kind: "project-home" | "chat" | "module" }>;
 type ProjectContext = { organizationId: string; projectId: string; unitId: string | undefined };
 
@@ -17,6 +20,10 @@ const organizationTargetRoute = (target: OrganizationTarget, organizationId: str
   switch (target.kind) {
     case "organization-home":
       return { id: "organization", organizationId };
+    case "approvals":
+      return { id: "approvals", organizationId };
+    case "administration":
+      return { id: "settings-index", organizationId };
     case "settings":
       return { id: "settings", organizationId, section: target.section };
     case "settings-module":
@@ -48,6 +55,8 @@ export const navItemRoute = (target: NavTarget, context: NavContext): Route | nu
     case "admin":
       return { id: "admin", rest: target.rest };
     case "organization-home":
+    case "approvals":
+    case "administration":
     case "settings":
     case "settings-module":
       return organizationId === undefined ? null : organizationTargetRoute(target, organizationId);
