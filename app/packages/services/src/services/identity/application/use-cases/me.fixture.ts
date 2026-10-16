@@ -6,7 +6,7 @@ import { createInMemoryUserRepository } from "../../adapters/driven/in-memory-us
 import { createIdentityServices } from "../../composition.ts";
 import type { AuthAccount } from "../ports/driven/auth-account-reader.ts";
 
-export const makeMeWorld = (options: { selfServe?: boolean } = {}) => {
+export const makeMeWorld = (options: { selfServe?: boolean; defaultProject?: boolean } = {}) => {
   const world = makeTenancyWorld(options);
   const users = createInMemoryUserRepository();
   const accounts = new Map<string, AuthAccount>();
@@ -21,6 +21,7 @@ export const makeMeWorld = (options: { selfServe?: boolean } = {}) => {
     organizations: world.tenancyStore.organizations,
     loadNode: world.tenancy.loadNode,
     mayCreateOrganization: world.tenancy.mayCreateOrganization,
+    organizationDefaultProject: options.defaultProject ?? false,
     audit: world.deps.audit,
     unitOfWork: world.deps.unitOfWork,
     clock: world.deps.clock,

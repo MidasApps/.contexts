@@ -22,6 +22,7 @@ Profile, preferences, staff flags, capabilities and access version of the signed
 | `isPlatformStaff` | yes | `none` | Whether an active platform-staff doc exists for the user. |  |
 | `lastContext` | yes | `none` | Last organization, project and unit used. |  |
 | `mfaEnrolled` | yes | `none` | Whether the account has at least one second factor enrolled. |  |
+| `organizationDefaultProject` | yes | `none` | Whether the server creates every organization with its one project (ORGANIZATION_DEFAULT_PROJECT). The shell then offers no project creation while the organization has a project, opens a single visible project directly and hides the project switcher. |  |
 | `photoUrl` | no | `personal` | Profile photo URL. |  |
 | `platformRole` | no | `none` | Staff role; present only for active staff. |  |
 | `preferences` | yes | `personal` | Locale, time zone, currency, theme, notifications. |  |
@@ -56,7 +57,8 @@ _None._
     "mfaEnrolled": true,
     "capabilities": {
       "createOrganization": true
-    }
+    },
+    "organizationDefaultProject": false
   }
 ]
 ```

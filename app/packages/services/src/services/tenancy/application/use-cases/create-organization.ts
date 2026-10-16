@@ -1,8 +1,14 @@
-import type { CreateOrganizationInput, Organization, UserPrincipal } from "@core/contracts";
+import type { CreateOrganizationInput, Organization, Project, UserPrincipal } from "@core/contracts";
 import { AccessDeniedError } from "#/services/access/domain/errors/access-denied-error.ts";
 import { auditActorOf } from "#/services/audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "#/services/shared/result/result.ts";
-import { organizationNode, recordTenancyAudit, type TenancyCommand, type TenancyDeps } from "../tenancy-deps.ts";
+import {
+  organizationNode,
+  projectNode,
+  recordTenancyAudit,
+  type TenancyCommand,
+  type TenancyDeps,
+} from "../tenancy-deps.ts";
 
 export type CreateOrganizationCommand = TenancyCommand & {
   readonly actor: UserPrincipal;
@@ -57,6 +63,8 @@ export const makeMayCreateOrganization =
  * writes the organization, the owner membership, the access projection, the caller's
  * `users` doc (created when missing, so `authorize()` sees an active user; the new
  * organization becomes active when none is) and both audit entries; claims sync after.
+ * With the default project on (decision 0078), the same transaction also writes the organization's
+ * one project, named after it, and its audit entry.
  * @throws {UserAccountMissingError} when the Auth account has no email (bug).
  */
 export const makeCreateOrganization =
@@ -79,6 +87,18 @@ export const makeCreateOrganization =
     };
     const node = organizationNode(tenantId);
     const actor = auditActorOf(command.actor);
+    // Built before the transaction function: a retried attempt writes the same project, not a second one.
+    const project: Project | null = deps.defaultProject
+      ? {
+          id: deps.projects.newId(),
+          tenantId,
+          name: organization.name,
+          status: "active",
+          settings: {},
+          createdAt: now,
+          updatedAt: now,
+        }
+      : null;
     await deps.unitOfWork.run(async (tx) => {
       const plan = await deps.access.prepareGrant(tx, {
         tenantId,
@@ -101,6 +121,15 @@ export const makeCreateOrganization =
         target: { type: "organization", id: tenantId },
         node,
       });
+      if (project !== null) {
+        deps.projects.create(tx, { project, actorId: actor.id });
+        await recordTenancyAudit(tx, deps, command, {
+          tenantId,
+          action: "PROJECT_CREATED",
+          target: { type: "project", id: project.id },
+          node: projectNode(project),
+        });
+      }
     });
     await deps.access.syncClaims(command.actor.uid);
     return ok(organization);

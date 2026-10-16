@@ -27,16 +27,19 @@ export type MeDeps = {
   readonly loadNode: LoadNode;
   /** The tenancy creation rule, answered as `capabilities.createOrganization` (decision 0050). */
   readonly mayCreateOrganization: MayCreateOrganization;
+  /** `ORGANIZATION_DEFAULT_PROJECT`, answered as `Me.organizationDefaultProject` (decision 0078). */
+  readonly organizationDefaultProject: boolean;
   readonly audit: AuditWriter;
   readonly unitOfWork: UnitOfWork;
   readonly clock: Clock;
 };
 
-/** Staff flags, MFA enrollment and capabilities `Me` adds to the users doc. */
+/** Staff flags, MFA enrollment, capabilities and the default project option `Me` adds to the users doc. */
 export type MeFlags = {
   readonly platformRole: PlatformRole | null;
   readonly mfaEnrolled: boolean;
   readonly capabilities: MeCapabilities;
+  readonly organizationDefaultProject: boolean;
 };
 
 /** The `Me` view of a users doc (SP1 spec §7.3). */
@@ -53,5 +56,6 @@ export const toMe = (user: User, flags: MeFlags): Me => {
     ...(flags.platformRole === null ? {} : { platformRole: flags.platformRole }),
     mfaEnrolled: flags.mfaEnrolled,
     capabilities: flags.capabilities,
+    organizationDefaultProject: flags.organizationDefaultProject,
   };
 };

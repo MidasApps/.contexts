@@ -28,6 +28,13 @@ export const MeSchema = z.object({
   capabilities: MeCapabilitiesSchema.meta(
     none("Actions the UI may offer the caller; it hides the ones the server would refuse."),
   ),
+  organizationDefaultProject: z
+    .boolean()
+    .meta(
+      none(
+        "Whether the server creates every organization with its one project (ORGANIZATION_DEFAULT_PROJECT). The shell then offers no project creation while the organization has a project, opens a single visible project directly and hides the project switcher.",
+      ),
+    ),
 });
 export type Me = z.infer<typeof MeSchema>;
 
@@ -46,6 +53,7 @@ export const MeContract = defineContract(MeSchema, {
       isPlatformStaff: false,
       mfaEnrolled: true,
       capabilities: { createOrganization: true },
+      organizationDefaultProject: false,
     },
   ],
   pii: "personal",
