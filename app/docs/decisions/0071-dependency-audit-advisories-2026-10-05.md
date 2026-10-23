@@ -30,3 +30,17 @@ The first GitHub CI run of the branch (PR #2) failed `pnpm audit --audit-level h
 ## Addendum (2026-10-06): `source-map-js`
 
 GHSA-68fv-2mgg-jv7q (high, `source-map-js` < 1.2.2, event-loop denial of service from crafted source maps) was published after this decision and failed the audit in CI and the Mastra output audit. It is reached through about 100 paths (`postcss`, `css-tree`, ...), so the override is global, `source-map-js: 1.2.2`, instead of scoped to one parent. 1.2.2 was published on 2026-09-30, inside pnpm's minimum release age, so it is admitted in `minimumReleaseAgeExclude` until 2026-10-07, like the Next 16.3.7 security release. Drop the override once `postcss` and `css-tree` depend on 1.2.2 or later.
+
+## Addendum (2026-10-23): Next.js 16.4, Vite, the MCP SDK and `follow-redirects`
+
+Nine advisories published after the addenda above fail `pnpm audit --audit-level high` in CI, `main` included. All of them have a patched release, so each is pinned, not ignored:
+
+| Advisory | Package | Installed | Patched | Change |
+|---|---|---|---|---|
+| GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr (critical), GHSA-p3m5-59mp-jv5r (high) | `next` | 16.3.8 | ≥ 16.4.1 | catalog `next` and `@next/eslint-plugin-next` to 16.4.2; override `inngest>next` follows |
+| GHSA-587h-7wmj-h5pm | `vite` | 8.3.1 | ≥ 8.3.3 | catalog `vite` to 8.3.4 |
+| GHSA-jm63-cq47-j5jp, GHSA-46jr-4wx8-v453 | `@modelcontextprotocol/server` | 2.2.0 | ≥ 2.3.0 | the three `@mastra/mcp>@modelcontextprotocol/*` overrides to 2.3.1 |
+| GHSA-22jm-h49p-29qw, GHSA-46jr-4wx8-v453 | `@modelcontextprotocol/sdk` | 1.31.0 | ≥ 1.32.0 | override `firebase-tools>@modelcontextprotocol/sdk` 1.32.1 |
+| GHSA-q3jh-wrc6-jgq8, GHSA-8r9p-f939-6h3c | `follow-redirects` | 1.16.0 | ≥ 1.16.1 | override `axios>follow-redirects` 1.16.1 |
+
+Next.js has no 16.3 backport, so the web app moves to the 16.4 minor. Each version is the newest one past pnpm's minimum release age (Next 16.4.3 and Vite 8.3.5 are younger), so `minimumReleaseAgeExclude` does not change. The framework's pin in `.contexts/engineering/MEMORY.md` (Next.js 16.3.6, "16.4 is canary") is now behind the catalog; updating it belongs to the framework, not to this decision.
