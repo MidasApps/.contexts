@@ -304,7 +304,7 @@ three files, use it through `useTranslations("<namespace>")`, then run
 4. **Server** (`src/server/`, optional): the use cases, their repositories, the
    agent commands (`createExampleCommands`) and the `/v1` handlers
    (`createExampleRoutes`, each wrapped in `withApiRoute` from `@core/services`).
-   A module that keeps data in Postgres (decision 0077) adds a `migrations/` folder
+   A module that keeps data in Postgres (decision 0079) adds a `migrations/` folder
    (`meta/_journal.json` plus `.sql` files): a schema named after the module id, every
    table with forced row level security on `app.tenant_id`, and a `<id>_runtime` role
    without DDL. Its repositories take `deps.sql`, run inside `withTenantTransaction`
@@ -343,6 +343,10 @@ three files, use it through `useTranslations("<namespace>")`, then run
    `docs/decisions/`.
 4. Business capabilities plug in as modules under `modules/` through
    `defineModule()` (see "Creating a module" above).
+5. Before the first `pnpm db:migrate` against a remote environment, remove
+   `modules/example` from `migrations.modules.ts` unless the app keeps the
+   example module: otherwise every environment gets the schema `example` and the
+   role `example_runtime`, and taking them out later needs a migration of its own.
 
 ## Decisions and plans
 

@@ -29,7 +29,7 @@ export type ExampleServerDeps = {
   readonly firestore: Firestore;
   readonly access: Pick<AccessCore, "forRequest">;
   readonly audit: AuditWriter;
-  /** The app's Postgres pool (decision 0077); the module's labels use it (`createExampleLabels`). */
+  /** The app's Postgres pool (decision 0079); the module's labels use it (`createExampleLabels`). */
   readonly sql: PostgresClient;
   readonly clock?: Clock;
   /** Test seams (in-memory repository and unit of work). */

@@ -11,7 +11,7 @@ export type Label = {
   readonly createdAt: string;
 };
 
-/** Driven port over `example.labels`: the template of a module repository in Postgres (decision 0077). */
+/** Driven port over `example.labels`: the template of a module repository in Postgres (decision 0079). */
 export type LabelRepository = {
   readonly add: (args: { tenantId: string; name: string; actorId: string }) => Promise<Label>;
   readonly list: (args: { tenantId: string }) => Promise<Label[]>;

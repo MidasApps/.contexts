@@ -84,4 +84,7 @@ silently skip whichever migration is older.
   convention (`migrations/0000_example_labels.sql`), a repository over it (`label-repository.ts`)
   and an isolation suite (`label-repository.postgres.test.ts`); `migrations.modules.ts` lists the
   module and `ExampleServerDeps` requires `sql`. No use case reads the table: it is the template of
-  a module's first table, like the rest of `modules/example`.
+  a module's first table, like the rest of `modules/example`. Listing it means `pnpm db:migrate`
+  creates the schema `example` and the role `example_runtime` in every environment, so an app
+  derived from this core takes the entry out before its first remote migration (README, "Starting
+  a new app from this core") unless it keeps the module.

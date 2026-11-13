@@ -1,4 +1,4 @@
--- Labels of the example module (decision 0077): the template of a module's first Postgres table.
+-- Labels of the example module (decision 0079): the template of a module's first Postgres table.
 -- Schema named after the module id; row level security enabled and forced on app.tenant_id, so the
 -- policy applies to the table owner too; example_runtime is NOLOGIN and NOBYPASSRLS, has DML on
 -- the table and no CREATE on the schema. The web and Mastra login roles may switch to it (SET)
