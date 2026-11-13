@@ -25,6 +25,8 @@ export type DevSessionConfig = {
   projectId: string;
   dataDir: string;
   emulatorUiUrl: string;
+  /** Port of the Functions emulator in `firebase.json` (dev-plan.ts `readEmulatorPorts`). */
+  functionsPort: number;
   /** apps/functions/src/functions-options.ts `FUNCTIONS_REGION`. */
   functionsRegion: string;
 };
@@ -157,7 +159,11 @@ const startLongRunning = async ({ supervisor, stopper, config, bins, tracker }: 
   // A load failure is fixable by editing code (the watcher rebuilds), so it only warns.
   await waitUntilReady(
     "functions",
-    buildFunctionsProbeUrl({ projectId: config.projectId, region: config.functionsRegion }),
+    buildFunctionsProbeUrl({
+      projectId: config.projectId,
+      region: config.functionsRegion,
+      port: config.functionsPort,
+    }),
     stopper.signal,
   );
   if (aborted()) return;

@@ -25,6 +25,7 @@
       "dependsOn": ["^build"],
       "cache": false,
       "passThroughEnv": [
+        "DATABASE_URL",
         "FIREBASE_*",
         "FIRESTORE_EMULATOR_HOST",
         "GCLOUD_PROJECT",

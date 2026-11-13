@@ -26,6 +26,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadMastraEnv } from "../mastra-env.schema.ts";
 import { APP_MODULES } from "../modules.ts";
 import { createAgentRuntime } from "../runtime/create-agent-runtime.ts";
+import { emulatorDatabaseUrl } from "./emulator-database-url.fixture.ts";
 
 // SP4 Tasks 5-7 end to end: the real `/v1/chat`, `/v1/conversations` and `/v1/voice` handlers
 // (Firestore Emulator conversations, Auth Emulator tokens) over the gateway to a Mastra server of
@@ -42,7 +43,7 @@ const baseEnv = {
   APP_ENV: "local",
   AI_MODE: "fake",
   FIREBASE_PROJECT_ID: "demo-core",
-  DATABASE_URL: "postgresql://app:app@127.0.0.1:5432/app",
+  DATABASE_URL: emulatorDatabaseUrl(),
   FIREBASE_AUTH_EMULATOR_HOST: process.env.FIREBASE_AUTH_EMULATOR_HOST,
   FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST,
 };
