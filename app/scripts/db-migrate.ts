@@ -1,6 +1,6 @@
 // `pnpm db:migrate` (root): applies the core's SQL migrations in infra/postgres/migrations
 // (decision 0023), then the migrations of each module listed in migrations.modules.ts, each with
-// its own journal table, and checks every module's schema against the convention (decision 0077).
+// its own journal table, and checks every module's schema against the convention (decision 0079).
 // An explicit pipeline step, never run at app boot (rules/migration.md §2). Refuses anything but
 // the local container unless `--confirm-env <APP_ENV>` names the target (src/db/migrate-target.ts).
 import { existsSync } from "node:fs";

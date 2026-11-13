@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import type { ModuleMigrations } from "./module-migrations.ts";
 
-/** Thrown when a module's schema breaks the convention of decision 0077 after its migrations ran. */
+/** Thrown when a module's schema breaks the convention of decision 0079 after its migrations ran. */
 export class ModuleSchemaConventionError extends Error {
   readonly code = "MODULE_SCHEMA_CONVENTION";
   readonly moduleId: string;

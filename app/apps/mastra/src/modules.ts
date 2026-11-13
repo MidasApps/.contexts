@@ -10,7 +10,7 @@ export type ModuleServerDeps = {
   readonly firestore: FirebaseAdmin["firestore"];
   readonly access: Pick<AccessCore, "forRequest">;
   readonly audit: AuditWriter;
-  /** The app's Postgres pool: a module queries its own schema inside `withTenantTransaction` (decision 0077). */
+  /** The app's Postgres pool: a module queries its own schema inside `withTenantTransaction` (decision 0079). */
   readonly sql: PostgresClient;
 };
 

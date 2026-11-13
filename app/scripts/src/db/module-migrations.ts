@@ -4,7 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { z } from "zod";
 
-/** Composition file at the workspace root that lists the modules with Postgres migrations (decision 0077). */
+/** Composition file at the workspace root that lists the modules with Postgres migrations (decision 0079). */
 export const MODULE_MIGRATIONS_FILE = "migrations.modules.ts";
 
 /**
@@ -60,7 +60,7 @@ export class ModuleMigrationsError extends Error {
   }
 }
 
-/** Schema, runtime role and journal table of a module id (decision 0077). */
+/** Schema, runtime role and journal table of a module id (decision 0079). */
 export const moduleSqlNames = (moduleId: string): Pick<ModuleMigrations, "schema" | "runtimeRole" | "journalTable"> => {
   const schema = moduleId.replaceAll("-", "_");
   return { schema, runtimeRole: `${schema}_runtime`, journalTable: `module_${schema}` };

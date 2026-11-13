@@ -1,4 +1,4 @@
-# 0077. Modules own Postgres schemas: per-module migrations, the SQL client and a checked convention
+# 0079. Modules own Postgres schemas: per-module migrations, the SQL client and a checked convention
 
 - **Status:** accepted
 - **Date:** 2026-10-06
@@ -60,6 +60,9 @@ silently skip whichever migration is older.
 - An app derived from this core adds its modules to `migrations.modules.ts` and never touches
   `infra/postgres/migrations`.
 - The list starts empty. `modules/example` gains a table in this convention in a follow-up change.
+- What the check does not see stays with code review: a `SECURITY DEFINER` function in the
+  module's schema runs as its owner and can read past the policies, and a module's migrations run
+  as the migrating role, so they could change the core's schemas too.
 
 ## Alternatives rejected
 
