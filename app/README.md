@@ -51,6 +51,20 @@ any process still running after 30 s is killed with its children. Press Ctrl+C
 twice to stop at once. Postgres keeps running (`docker compose stop` stops it).
 The desktop app is opt-in because Rust builds take minutes: `pnpm dev:desktop`.
 
+**A page that reloads without end** (the sign-in page shows "Checking your session…" and the
+`next dev` log prints `✓ Compiled` about once a second) comes from an inconsistent Next dev cache:
+its chunk lists name chunks that are not on disk, and Turbopack answers each new HMR connection
+with a restart. Seen in a derived app on Next 16.4.3 with a dev cache weeks old; the cause is not
+known yet. Stop `pnpm dev`, move the cache aside instead of deleting it, so it can be studied, and
+start again:
+
+```bash
+mkdir -p .dev-cache-evidence && mv apps/web/.next ".dev-cache-evidence/web-$(date +%Y%m%dT%H%M%S)"
+```
+
+(Any other Next app under `apps/` the same way.) A clean start rebuilds the cache;
+`.dev-cache-evidence/` is git-ignored. Attach what you moved when reporting it.
+
 `pnpm seed:local` (`scripts/seed-local.ts`) is idempotent and refuses to run
 unless `APP_ENV=local`, `FIREBASE_PROJECT_ID` is a `demo-*` project and both
 `FIREBASE_AUTH_EMULATOR_HOST` and `FIRESTORE_EMULATOR_HOST` are loopback

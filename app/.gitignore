@@ -15,6 +15,8 @@ next-env.d.ts
 # Desktop Vite env for `vite`/`tauri dev`: public VITE_* values only.
 !apps/desktop/.env.development
 .firebase-data/
+# Next dev caches moved aside when a page reloads without end (README, "Local setup"), kept to find the cause.
+.dev-cache-evidence/
 
 # Test and coverage output
 coverage/
