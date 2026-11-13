@@ -177,7 +177,7 @@ test.describe("shell states", () => {
     await expect(async () => {
       await page.clock.fastForward(4_000);
       await expect(errorState).toBeVisible({ timeout: 500 });
-    }).toPass();
+    }).toPass({ timeout: 15_000 });
     failing = false;
     await page.getByRole("button", { name: "Tentar novamente" }).click();
     await expect(page.getByRole("link", { name: world.alpha.projects.launch.name })).toBeVisible();
