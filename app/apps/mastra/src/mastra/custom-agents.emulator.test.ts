@@ -29,6 +29,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { loadMastraEnv } from "../mastra-env.schema.ts";
 import { APP_MODULES } from "../modules.ts";
 import { createAgentRuntime } from "../runtime/create-agent-runtime.ts";
+import { emulatorDatabaseUrl } from "./emulator-database-url.fixture.ts";
 import { makeGateDatabase } from "./sp3-gate.fixture.ts";
 
 // Decision 0046 end to end: the real `/v1` handlers of custom skills, custom agents, the catalog
@@ -48,7 +49,7 @@ const env = loadMastraEnv({
   APP_ENV: "local",
   AI_MODE: "fake",
   FIREBASE_PROJECT_ID: "demo-core",
-  DATABASE_URL: process.env["DATABASE_URL"] ?? "postgresql://app:app@127.0.0.1:5432/app",
+  DATABASE_URL: emulatorDatabaseUrl(),
   FIREBASE_AUTH_EMULATOR_HOST: process.env.FIREBASE_AUTH_EMULATOR_HOST,
   FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST,
 });

@@ -21,6 +21,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadMastraEnv } from "../mastra-env.schema.ts";
 import { APP_MODULES } from "../modules.ts";
 import { createAgentRuntime } from "../runtime/create-agent-runtime.ts";
+import { emulatorDatabaseUrl } from "./emulator-database-url.fixture.ts";
 
 // Runs inside `firebase emulators:exec` (root `pnpm test:emulators`). Four-eyes workflow HITL end
 // to end (decision 0036): real Auth Emulator tokens, SP1 approval requests in the Firestore
@@ -40,7 +41,7 @@ const env = loadMastraEnv({
   APP_ENV: "local",
   AI_MODE: "fake",
   FIREBASE_PROJECT_ID: "demo-core",
-  DATABASE_URL: process.env["DATABASE_URL"] ?? "postgresql://app:app@127.0.0.1:5432/app",
+  DATABASE_URL: emulatorDatabaseUrl(),
   FIREBASE_AUTH_EMULATOR_HOST: process.env.FIREBASE_AUTH_EMULATOR_HOST,
   FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST,
 });
