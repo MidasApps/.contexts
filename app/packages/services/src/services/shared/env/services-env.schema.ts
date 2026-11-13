@@ -66,6 +66,8 @@ const BaseServicesEnvSchema = z.object({
     .regex(/^[a-z]{2,12}$/, { error: "expected 2-12 lower-case letters" })
     .default("core"),
   ORGANIZATION_SELF_SERVE: BooleanStringSchema.default(true),
+  // Every new organization gets its one project, created with it (decision 0078). Off by default.
+  ORGANIZATION_DEFAULT_PROJECT: BooleanStringSchema.default(false),
   MFA_FACTORS: MfaFactorsSchema.default(["totp"]),
   // Proxies in front of the app that append X-Forwarded-For entries (decision 0030 §2).
   TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),

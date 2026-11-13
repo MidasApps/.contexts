@@ -6,7 +6,17 @@ import type { AuthAccount } from "../ports/driven/auth-account-reader.ts";
 
 export type GetMe = (command: { readonly actor: UserPrincipal }) => Promise<Result<Me, AccountMissingError>>;
 
-type Deps = Pick<MeDeps, "users" | "accounts" | "staff" | "clock" | "access" | "mayCreateOrganization" | "membership">;
+type Deps = Pick<
+  MeDeps,
+  | "users"
+  | "accounts"
+  | "staff"
+  | "clock"
+  | "access"
+  | "mayCreateOrganization"
+  | "organizationDefaultProject"
+  | "membership"
+>;
 
 /** The Auth account of the caller and their users doc, created on the first call. */
 export const loadMe = async (
@@ -47,7 +57,7 @@ const liveLastContext = async (
  * outside the `/v1` pipeline).
  */
 export const describeMe = async (
-  deps: Pick<MeDeps, "staff" | "access" | "mayCreateOrganization" | "membership">,
+  deps: Pick<MeDeps, "staff" | "access" | "mayCreateOrganization" | "organizationDefaultProject" | "membership">,
   actor: UserPrincipal,
   user: User,
   account: AuthAccount,
@@ -63,6 +73,7 @@ export const describeMe = async (
       platformRole: staff?.isActive === true ? staff.role : null,
       mfaEnrolled: account.mfaEnrolled,
       capabilities: { createOrganization },
+      organizationDefaultProject: deps.organizationDefaultProject,
     },
   );
 };

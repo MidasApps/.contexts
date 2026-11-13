@@ -12,6 +12,7 @@ const firebase = emulatorFirebase();
 const { firestore, auth } = firebase;
 const harness = buildEmulatorServer({ firebase, uids: ["founder", "outsider"] });
 const closed = buildEmulatorServer({ firebase, uids: ["founder"], selfServe: false });
+const single = buildEmulatorServer({ firebase, uids: ["founder"], defaultProject: true });
 
 const DEFAULTS = { locale: "pt-BR", timeZone: "America/Sao_Paulo", currency: "BRL" };
 type Body = { data?: Record<string, unknown>; error?: { code: string } };
@@ -58,6 +59,28 @@ describe("organizations routes (emulator)", () => {
     expect(audit.docs.map((doc) => doc.data()["action"] as string).sort()).toEqual([
       "MEMBERSHIP_GRANTED",
       "ORGANIZATION_CREATED",
+    ]);
+  });
+
+  it("creates the organization's one project with it when the default project is on", async () => {
+    const created = await createOrganization("founder", single);
+    expect(created.status).toBe(201);
+    const organization = (await body(created)).data as { id: string };
+
+    const listed = await single.call("tenancy.listProjects", {
+      method: "GET",
+      path: `/v1/organizations/${organization.id}/projects`,
+      as: "founder",
+    });
+    expect(listed.status).toBe(200);
+    const projects = (await listed.json()) as { data: { name: string; tenantId: string; status: string }[] };
+    expect(projects.data).toMatchObject([{ name: "Northwind", tenantId: organization.id, status: "active" }]);
+
+    const audit = await firestore.collection("audit-logs").where("tenantId", "==", organization.id).get();
+    expect(audit.docs.map((doc) => doc.data()["action"] as string).sort()).toEqual([
+      "MEMBERSHIP_GRANTED",
+      "ORGANIZATION_CREATED",
+      "PROJECT_CREATED",
     ]);
   });
 

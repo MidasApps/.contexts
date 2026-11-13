@@ -6,6 +6,7 @@ import { useCan } from "#/entities/permission/index.ts";
 import { useProjects } from "#/entities/project/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { CreateProjectDialog } from "#/features/create-project/index.ts";
+import { useDefaultProject } from "#/features/default-project/index.ts";
 import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
@@ -66,7 +67,8 @@ function ProjectItems({ organizationId, currentId }: { organizationId: string; c
 /**
  * Project switcher under the organization (sidebar-07 "projects"): the current project, the
  * visible projects as a radio group, "New project" when `core.project.create` is held at the
- * organization, and a link to all projects. Hidden outside an organization.
+ * organization, and a link to all projects. Hidden outside an organization. Not rendered when the
+ * default project is on and one project is visible.
  */
 export function ProjectSwitcher() {
   const t = useTranslations("shell.switcher");
@@ -75,7 +77,10 @@ export function ProjectSwitcher() {
   const context = useAccessContext(node);
   const canCreate = useCan("core.project.create", node === null ? null : { organizationId: node.organizationId });
   const [creating, setCreating] = useState(false);
+  const mode = useDefaultProject(node?.organizationId);
   if (node === null) return null;
+  // Default project mode with one visible project: there is nothing to switch to (decision 0078).
+  if (mode.pending || mode.project !== undefined) return null;
   const project = node.projectId === undefined ? undefined : context.data?.project;
   const name = project?.name ?? t("chooseProject");
   return (
@@ -101,7 +106,7 @@ export function ProjectSwitcher() {
             <DropdownMenuLabel>{t("projects")}</DropdownMenuLabel>
             <ProjectItems organizationId={node.organizationId} currentId={node.projectId} />
             <DropdownMenuSeparator />
-            {canCreate ? (
+            {canCreate && !mode.enabled ? (
               <DropdownMenuItem onSelect={() => setCreating(true)}>
                 <Icon name="plus" />
                 {t("createProject")}

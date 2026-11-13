@@ -103,6 +103,7 @@ describe("ServicesEnvSchema", () => {
       DESKTOP_SESSION_MAX_AGE_DAYS: 30,
       API_KEY_PREFIX: "core",
       ORGANIZATION_SELF_SERVE: true,
+      ORGANIZATION_DEFAULT_PROJECT: false,
       MFA_FACTORS: ["totp"],
       TRUSTED_PROXY_HOPS: 1,
     });
@@ -115,6 +116,7 @@ describe("ServicesEnvSchema", () => {
       DESKTOP_SESSION_MAX_AGE_DAYS: "90",
       API_KEY_PREFIX: "acme",
       ORGANIZATION_SELF_SERVE: "false",
+      ORGANIZATION_DEFAULT_PROJECT: "true",
       MFA_FACTORS: "phone, totp,phone",
       TRUSTED_PROXY_HOPS: "2",
     };
@@ -123,6 +125,7 @@ describe("ServicesEnvSchema", () => {
       DESKTOP_SESSION_MAX_AGE_DAYS: 90,
       API_KEY_PREFIX: "acme",
       ORGANIZATION_SELF_SERVE: false,
+      ORGANIZATION_DEFAULT_PROJECT: true,
       MFA_FACTORS: ["phone", "totp"],
       TRUSTED_PROXY_HOPS: 2,
     });
@@ -135,6 +138,7 @@ describe("ServicesEnvSchema", () => {
       DESKTOP_SESSION_MAX_AGE_DAYS: "0",
       API_KEY_PREFIX: "Core_1",
       ORGANIZATION_SELF_SERVE: "yes",
+      ORGANIZATION_DEFAULT_PROJECT: "1",
       MFA_FACTORS: "totp,email",
       TRUSTED_PROXY_HOPS: "6",
     };
@@ -143,6 +147,7 @@ describe("ServicesEnvSchema", () => {
       "DESKTOP_SESSION_MAX_AGE_DAYS",
       "API_KEY_PREFIX",
       "ORGANIZATION_SELF_SERVE",
+      "ORGANIZATION_DEFAULT_PROJECT",
       "MFA_FACTORS.1",
       "TRUSTED_PROXY_HOPS",
     ]);
