@@ -2,7 +2,7 @@
 
 Índice dos contextos de engenharia do DDC Framework. Referenciados via `@<path-sem-extensão>`.
 
-**Última revisão de versões:** 2026-09-28.
+**Última revisão de versões:** 2026-09-28; Next.js, Zod e Vite medidos de novo em 2026-11-13.
 
 > A matriz abaixo é o baseline do **framework**. O que estava no npm e nas
 > release notes nesse dia, e o que ficou de fora, está em
@@ -20,15 +20,15 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 | Runtime | **Node.js 26.10.0** (Current; LTS em 2026-10-28) | ADR 0004. **Exceção E1:** deploy de Firebase Functions fica em `nodejs24` (o Google não tem `nodejs26`). Node 24 entra em Maintenance em 2026-10-20. |
 | Linguagem | **TypeScript 7.0.2** | `@typescript/typescript6@6.0.2` só para API programática (typescript-eslint, Volar, deployer). E2. |
 | Lint | **ESLint 9.39.5** | E3: a última é 10.11.0, mas `eslint-plugin-react@7.37.5` só aceita `^9.7`. |
-| Frontend app | **Next.js 16.3.6** + React **19.3.0** | 16.3 é Active LTS. 16.4 é canary. 16.3.7 anunciado para 2026-09-30. |
+| Frontend app | **Next.js 16.4.6** + React **19.3.0** | 16.4 é a linha `latest` desde 2026-10-06. A 16.3 parou em 16.3.8, sem backport dos advisories corrigidos em 16.4.1. |
 | UI | **Tailwind 4.3.3** + **shadcn/ui** + **radix-ui 1.6.7** | React 19.3. |
-| Validação | **Zod 4.6.5** | Schema-first; `z.infer` único source de tipos. Sem Zod 3 no bundle. |
+| Validação | **Zod 4.6.7** | Schema-first; `z.infer` único source de tipos. Sem Zod 3 no bundle. |
 | State client | **Zustand 5.0.15** | Só client components; server state fora. |
 | Backend serverless | **firebase-functions@7.4.0** + **firebase-admin@14.5.0**, runtime **nodejs24** | Gen 2 only. `nodejs24` é o mais novo que o Google oferece (E1). |
 | OLTP | **PostgreSQL 18.6** + Drizzle 0.45.3 | `uuidv7()` nativo. 18.5 não foi publicado. Postgres 19 segue em beta. |
 | Vectors | **pgvector 0.8.6** em Postgres 18 | Imagem `pgvector/pgvector:0.8.6-pg18`. HNSW default. |
 | OLAP | **BigQuery** | Inalterado em major; ver stack. |
-| Unit/integration | **Vitest 5.0.2** | Vite ^6.4, ^7 ou ^8 como peer (medido: 8.3.1). Pacotes `@vitest/*` na mesma versão. |
+| Unit/integration | **Vitest 5.0.2** | Vite ^6.4, ^7 ou ^8 como peer (medido: 8.3.8). Pacotes `@vitest/*` na mesma versão. |
 | E2E | **Playwright 1.63.0** | E5: `@playwright/experimental-ct-react` (1.62.1) não é adotado; componente roda no Vitest. |
 | AI default | **`ai@7.0.120`** | Providers nas majors medidas em `VERSIONS.md` (não a mesma major do `ai`). `@mastra/core@1.71.0` aceita `LanguageModelV4`. E4: `@mastra/evals` fora (peer `vitest <5`). |
 
@@ -89,10 +89,10 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [node@26](stacks/runtime/node@26.md) — Node.js 26 (Current, LTS 2026-10-28), Temporal, strip-types, Permission Model; Functions ficam em `nodejs24` (ADR 0004 E1)
 
 ### language/
-- [typescript@7](stacks/language/typescript@7.md) — TS 7 nativo (Go), strict + `erasableSyntaxOnly`, side-by-side com TS 6 API (`.pnpmfile.cjs` com Next 16.3)
+- [typescript@7](stacks/language/typescript@7.md) — TS 7 nativo (Go), strict + `erasableSyntaxOnly`, side-by-side com TS 6 API (`.pnpmfile.cjs` com Next 16.3+)
 
 ### frontend/
-- [next@16](stacks/frontend/next@16.md) — Next.js 16.3.6 Active LTS, App Router, Turbopack, Instant Navigations
+- [next@16](stacks/frontend/next@16.md) — Next.js 16.4.6, App Router, Turbopack, Instant Navigations
 - [react@19](stacks/frontend/react@19.md) — React 19.3, Actions, `use`, ref como prop, React Compiler
 - [tailwind@4](stacks/frontend/tailwind@4.md) — Tailwind 4, Oxide engine, CSS-first config
 - [shadcn-ui](stacks/frontend/shadcn-ui.md) — Copy-not-install sobre Radix + Tailwind 4 + cva

@@ -14,7 +14,7 @@ category: ai
 
 Framework TypeScript para **AI agents**, **workflows tipados**, **RAG** e **evals**. Fica acima do AI SDK 7 (ver `@stacks/ai/vercel-ai-sdk`): o core recebe o modelo pronto e detecta a spec (`LanguageModelV4` é AI SDK 7, desde `@mastra/core@1.47.0`).
 
-Pins de 2026-09-28: `@mastra/core@1.71.0`, CLI `mastra@1.31.3`. O peer de Zod é `^3.25 || ^4`; o projeto usa só Zod 4.6.5. Fixe core e CLI na mesma leva. Se o CLI puxar `@mastra/deployer` ou `@mastra/loggers` de um trem diferente do core, trave com `pnpm.overrides`. Sob TypeScript 7, o deployer que ainda importa a API programática precisa do pacote TS 6 ao lado (`@stacks/language/typescript@7`).
+Pins de 2026-09-28: `@mastra/core@1.71.0`, CLI `mastra@1.31.3`. O peer de Zod é `^3.25 || ^4`; o projeto usa só Zod 4.6.7. Fixe core e CLI na mesma leva. Se o CLI puxar `@mastra/deployer` ou `@mastra/loggers` de um trem diferente do core, trave com `pnpm.overrides`. Sob TypeScript 7, o deployer que ainda importa a API programática precisa do pacote TS 6 ao lado (`@stacks/language/typescript@7`).
 
 Mastra **não substitui** o AI SDK — usa AI SDK Core como primitiva de modelo. A escolha entre os dois é arquitetural, não competitiva (ver seção "Mastra vs Vercel AI SDK puro").
 

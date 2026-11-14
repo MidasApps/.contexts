@@ -81,6 +81,10 @@ A tabela canônica vive em `@.contexts/engineering/rules/data-modeling.md` (seç
 - Campo monetário e enum mudam de forma em relação a exemplos antigos. Código de aplicação que já gravou `amountCents` ou `ACTIVE` migra com expand/contract; este repositório é o framework, não um banco populado.
 - Node 26 e Postgres 19 continuam explicitamente fora. A janela de outubro de 2026 (Node 26 LTS, possível RC do Postgres 19, Next 16.3.7) pede outra medição, não uma adoção antecipada.
 
+## Amendments
+
+- **2026-11-13 — Next.js e Zod:** as linhas "App" e "Validação" da matriz acima (Next.js 16.3.6, "16.4 é canary"; Zod 4.6.5) foram ultrapassadas pela regra de última estável da [0004](0004-latest-stable-baseline-and-documented-exceptions.md) (ver a emenda de 2026-11-13 lá): o baseline é next@16.4.6 e zod@4.6.7. O texto histórico da tabela não foi reescrito.
+
 ## References
 
 - `stacks/VERSIONS.md`
