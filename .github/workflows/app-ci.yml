@@ -32,7 +32,7 @@ env:
 
 jobs:
   framework-guard:
-    name: framework is read-only
+    name: framework changes travel alone
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -41,9 +41,10 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       # .contexts/ and .claude/ are the DDC framework: app changes never touch them.
+      # A framework change travels alone, touching nothing outside them (decision 0080).
       # Base: the PR base commit; on push, the previous tip of the branch (skipped
       # when it is all zeros, i.e. a new branch); otherwise origin/main.
-      - name: Fail if .contexts or .claude changed
+      - name: Fail if a change mixes the framework with anything else
         working-directory: .
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -59,11 +60,15 @@ jobs:
             echo "No base commit to compare against; skipping the framework guard."
             exit 0
           fi
-          if ! git diff --quiet "$base" HEAD -- .contexts .claude; then
-            echo "::error::.contexts/ or .claude/ changed since $base; the framework is read-only."
-            git diff --stat "$base" HEAD -- .contexts .claude
+          if git diff --quiet "$base" HEAD -- .contexts .claude; then
+            exit 0
+          fi
+          if ! git diff --quiet "$base" HEAD -- . ':!.contexts' ':!.claude'; then
+            echo "::error::.contexts/ or .claude/ changed since $base together with other files; a framework change touches nothing else."
+            git diff --stat "$base" HEAD
             exit 1
           fi
+          echo "Framework-only change since $base."
 
   secret-scan:
     name: secret scan (gitleaks)
