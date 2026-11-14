@@ -11,8 +11,10 @@ in it (their guidance lives in the DDC framework, see below).
 
 `../.contexts` (single source of truth for engineering, product and business
 doctrine) and `../.claude` (rules, skills, agents and hooks that operationalize it)
-are the DDC framework. This workspace follows them and never edits them; CI fails
-when a change touches them (`.github/workflows/app-ci.yml`).
+are the DDC framework. This workspace follows them and never edits them: an app
+change that touches them fails CI (`.github/workflows/app-ci.yml`). A framework
+change travels alone, in its own pull request that touches nothing outside
+`.contexts/` and `.claude/` (decision 0080).
 
 ## Prerequisites
 
@@ -339,8 +341,8 @@ three files, use it through `useTranslations("<namespace>")`, then run
    `--filter` arguments), and set your own identifiers: the desktop
    `identifier` in `apps/desktop/src-tauri/tauri.conf.json` and the Firebase
    project ids for remote environments (local stays `demo-*`).
-3. Keep `.contexts/` and `.claude/` read-only; record app decisions in
-   `docs/decisions/`.
+3. Keep `.contexts/` and `.claude/` out of app changes (a framework change
+   is a pull request of its own); record app decisions in `docs/decisions/`.
 4. Business capabilities plug in as modules under `modules/` through
    `defineModule()` (see "Creating a module" above).
 5. Before the first `pnpm db:migrate` against a remote environment, remove
