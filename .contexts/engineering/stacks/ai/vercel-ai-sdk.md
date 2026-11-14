@@ -24,7 +24,7 @@ Pins medidos em 2026-09-28. A major de `@ai-sdk/*` **não** é a major de `ai`. 
 | `@ai-sdk/google` | 4.0.84 |
 | `@ai-sdk/google-vertex` | 5.0.97 |
 
-Exige Node >= 22. O projeto está no Node 26.10. Peer de Zod: `^3.25.76 || ^4.1.8`. O bundle usa só Zod 4.6.5. ESM obrigatório.
+Exige Node >= 22. O projeto está no Node 26.10. Peer de Zod: `^3.25.76 || ^4.1.8`. O bundle usa só Zod 4.6.7. ESM obrigatório.
 
 `@mastra/core@1.71.0` aceita `LanguageModelV4` (a spec da v7) desde o 1.47. Quando o loop é do Mastra, não aplique renome de tool do AI SDK por conta própria: quem lê o gate humano é o Mastra.
 

@@ -1,10 +1,10 @@
 ---
 name: zod-4
-description: "Use para schemas Zod 4 (zod@4.6.5) — validação na borda, inferência de tipos, branded ids, refinements, migração de Zod 3. Keywords: zod, schema, validation, safeParse, z.infer, .schema.ts."
+description: "Use para schemas Zod 4 (zod@4.6.7) — validação na borda, inferência de tipos, branded ids, refinements, migração de Zod 3. Keywords: zod, schema, validation, safeParse, z.infer, .schema.ts."
 ---
 # Zod 4
 
-Lib de schema validation TS-first com inferência de tipos. Baseline **zod@4.6.5** (sem Zod 3 no mesmo bundle; AI SDK 7 aceita `^4.1.8`). v4 trouxe perf significativa, `z.iso.*` para ISO datetime/date, opção `error` no lugar de `errorMap`, e ergonomia em discriminated unions.
+Lib de schema validation TS-first com inferência de tipos. Baseline **zod@4.6.7** (sem Zod 3 no mesmo bundle; AI SDK 7 aceita `^4.1.8`). v4 trouxe perf significativa, `z.iso.*` para ISO datetime/date, opção `error` no lugar de `errorMap`, e ergonomia em discriminated unions.
 
 ## Essência
 - **Schema-first:** declare shape com Zod; tipo TS via `z.infer<typeof Schema>`.

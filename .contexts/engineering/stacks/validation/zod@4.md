@@ -2,8 +2,8 @@
 title: Zod
 type: stacks
 category: validation
-version: 4.6.5
-last_updated: 2026-09-28
+version: 4.6.7
+last_updated: 2026-11-13
 status: current
 upstream: https://zod.dev
 supersedes: zod@3.23
@@ -11,7 +11,7 @@ supersedes: zod@3.23
 
 # Zod 4.6.x
 
-Pin de referência: **zod@4.6.5** (medido em 2026-09-28). A major 4 segue a API deste documento. Minors podem apertar soundness — leia o changelog ao subir. O AI SDK 7 aceita `zod ^4.1.8`; Zod 3 não entra no mesmo bundle.
+Pin de referência: **zod@4.6.7** (medido em 2026-11-13; 4.6.6 corrige GHSA-mrhx-c7xc-m3w5, que a 3.x não recebe). A major 4 segue a API deste documento. Minors podem apertar soundness — leia o changelog ao subir. O AI SDK 7 aceita `zod ^4.1.8`; Zod 3 não entra no mesmo bundle.
 
 Zod é a biblioteca de schema-first validation adotada pelo projeto. A versão 4, lançada em 2025, é um **major rewrite** com ganhos dramáticos de performance, redução de bundle e mudanças sintáticas em validators de string. Este documento captura o uso correto da versão atual e o que difere de Zod 3.
 

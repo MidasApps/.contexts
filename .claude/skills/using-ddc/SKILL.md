@@ -88,11 +88,11 @@ Auth → validate → authorize → act; schemas Zod; pins da MEMORY; sem path i
 
 A matriz vive **só** em `@.contexts/engineering/MEMORY.md` (evidência de medição em
 `@.contexts/engineering/stacks/VERSIONS.md`). Leia lá antes de citar versão. Snapshot
-de orientação (2026-09-28), não fonte:
+de orientação (2026-11-13), não fonte:
 
 - Node **26.10.0** em app/CI/Docker/tooling; deploy de Firebase Functions em `nodejs24` (E1).
 - TypeScript **7.0.2** (typescript-eslint na API do TS 6, E2); ESLint **9.39.5** (E3).
-- Next **16.3.6** + React **19.3.0**; Tailwind **4.3.3**; Zod **4.6.5**; Postgres **18.6** (`uuidv7()`).
+- Next **16.4.6** + React **19.3.0**; Tailwind **4.3.3**; Zod **4.6.7**; Postgres **18.6** (`uuidv7()`).
 - Vitest **5.0.2**; Playwright **1.63.0** (sem component testing, E5); `ai@7.0.120`; `@mastra/evals` fora (E4).
 
 Política (ADR 0004): baseline = última estável; pacote atrás do `latest` só com linha

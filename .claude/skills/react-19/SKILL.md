@@ -4,7 +4,7 @@ description: "Use ao trabalhar com React 19 (react@19.3.0) — componentes, hook
 ---
 # React 19
 
-Baseline **react@19.3.0** + `react-dom@19.3.0` e `@types/react@19.3.0` (pin exato; peer de `next@16.3.6` é `^19`). Actions estáveis, `useActionState`, `useOptimistic`, `useFormStatus`, `use()` para promessas/context condicional, refs como props, e Suspense melhorado. Arquivo de componente em PascalCase (`AddTodo.tsx`).
+Baseline **react@19.3.0** + `react-dom@19.3.0` e `@types/react@19.3.0` (pin exato; peer de `next@16.4.6` é `^19`). Actions estáveis, `useActionState`, `useOptimistic`, `useFormStatus`, `use()` para promessas/context condicional, refs como props, e Suspense melhorado. Arquivo de componente em PascalCase (`AddTodo.tsx`).
 
 ## Essência
 - **Server Components / Server Actions** integrados (com Next/RSC framework).

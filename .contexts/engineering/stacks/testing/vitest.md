@@ -34,12 +34,12 @@ Pin via `package.json` com versão exata ou caret restrito:
     "@vitest/coverage-v8": "5.0.2",
     "@vitest/ui": "5.0.2",
     "@vitest/browser-playwright": "5.0.2",
-    "vite": "8.3.1"
+    "vite": "8.3.8"
   }
 }
 ```
 
-Manter `vitest`, `@vitest/coverage-v8`, `@vitest/ui` e `@vitest/browser-playwright` na **mesma versão**. Vitest 5.0.2 exige Node `^22.12 || ^24 || >=26` (o projeto está no 26.10.0; o pacote de Functions testa em 24, E1) e Vite `^6.4 || ^7 || ^8` como peer — o `vite` medido é 8.3.1 e serve só ao runner, não ao build do Next. `workspace` já se chama `projects` desde a 3.2/4.
+Manter `vitest`, `@vitest/coverage-v8`, `@vitest/ui` e `@vitest/browser-playwright` na **mesma versão**. Vitest 5.0.2 exige Node `^22.12 || ^24 || >=26` (o projeto está no 26.10.0; o pacote de Functions testa em 24, E1) e Vite `^6.4 || ^7 || ^8` como peer — o `vite` medido é 8.3.8 (2026-11-13) e serve só ao runner, não ao build do Next. `workspace` já se chama `projects` desde a 3.2/4.
 
 Quebras que o código deste framework precisa respeitar (guia: https://vitest.dev/guide/migration):
 

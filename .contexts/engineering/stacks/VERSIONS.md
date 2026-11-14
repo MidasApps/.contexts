@@ -2,12 +2,12 @@
 title: Versões medidas do baseline
 type: stacks
 status: active
-last_updated: 2026-09-28
+last_updated: 2026-11-13
 ---
 
 # Versões medidas
 
-Registro do que o npm e as páginas oficiais mostravam em **2026-09-28**. A matriz de produção está em `MEMORY.md`. Este arquivo é a evidência da medição, não um segundo baseline.
+Registro do que o npm e as páginas oficiais mostravam em **2026-09-28**. As linhas de `next`, `zod` e `vitest` (Vite) foram medidas de novo em **2026-11-13**; as demais seguem a medição de setembro. A matriz de produção está em `MEMORY.md`. Este arquivo é a evidência da medição, não um segundo baseline.
 
 Método: `npm view <pkg> version` e, para runtimes sem pacote npm, a página de release do fornecedor. Não usar a memória do modelo como fonte.
 
@@ -20,11 +20,11 @@ Reavalie antes de subir um pin. A coluna "por que não o mais novo" é parte do 
 | typescript | 7.0.2 | **7.0.2** | API programática estável ainda não saiu (prevista para 7.1). |
 | @typescript/typescript6 | 6.0.2 | **6.0.2** | Só para ferramentas que importam a API JS (typescript-eslint, Volar, deployer Mastra). |
 | typescript-eslint | 8.71.0 | **8.71.0** | **E2:** peer `typescript >=4.8.4 <6.1.0`; roda na API do TS 6, o `tsc` segue no 7. |
-| eslint | 10.11.0 | **9.39.5** | **E3:** `eslint-plugin-react@7.37.5` (última) declara peer `eslint ^9.7`. `eslint-config-next@16.3.6` aceita `>=9`. |
-| next | 16.3.6 (canary 16.4 existe) | **16.3.6** | 16.3 é Active LTS desde 2026-08-03. 16.4 é canary. Release de segurança 16.3.7 anunciada para 2026-09-30: subir no dia em que publicar. |
-| react / react-dom | 19.3.0 | **19.3.0** | Peer de `next@16.3.6` é `^19`. Peer de `@ai-sdk/react@4` aceita `^19.2.1`. |
+| eslint | 10.11.0 | **9.39.5** | **E3:** `eslint-plugin-react@7.37.5` (última) declara peer `eslint ^9.7`. `eslint-config-next@16.4.6` aceita `>=9`. |
+| next | 16.4.6 (2026-11-13) | **16.4.6** | 16.4.0 saiu em 2026-10-06. A 16.3 parou em 16.3.8 (2026-09-30) e não recebeu os patches de GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr e GHSA-p3m5-59mp-jv5r (corrigidos em 16.4.1). Peer `react ^18.2 \|\| ^19`, `engines.node >=20.9`. |
+| react / react-dom | 19.3.0 | **19.3.0** | Peer de `next@16.4.6` é `^19`. Peer de `@ai-sdk/react@4` aceita `^19.2.1`. |
 | @types/react / @types/react-dom | 19.3.0 | **19.3.0** | Mesma linha do runtime React. |
-| zod | 4.6.5 | **4.6.5** | AI SDK 7 aceita `zod ^4.1.8`. Zod 3 não entra no mesmo bundle. |
+| zod | 4.6.7 (2026-11-13) | **4.6.7** | 4.6.6 corrige GHSA-mrhx-c7xc-m3w5 (sem correção na 3.x). AI SDK 7 aceita `zod ^4.1.8`. Zod 3 não entra no mesmo bundle. |
 | tailwindcss | 4.3.3 | **4.3.3** | — |
 | zustand | 5.0.15 | **5.0.15** | — |
 | radix-ui | 1.6.7 | **1.6.7** | Pacote unificado. `@radix-ui/react-slot` medido em 1.3.3. |
@@ -35,7 +35,7 @@ Reavalie antes de subir um pin. A coluna "por que não o mais novo" é parte do 
 | drizzle-orm | 0.45.3 | **0.45.3** | Ainda 0.x. drizzle-kit 0.31.11. |
 | PostgreSQL | 18.6 (2026-08-13). 18.5 não foi publicado. 19 beta 4 em 2026-09-24 | **18.6** | 19 não teve GA. pgvector 0.8.6 publica imagem `0.8.6-pg18`, não `pg19`. |
 | pgvector | 0.8.6 (2026-07-29) | **0.8.6** | Imagem `pgvector/pgvector:0.8.6-pg18`. |
-| vitest | 5.0.2 | **5.0.2** | Exige Node `^22.12 \|\| ^24 \|\| >=26` e Vite `^6.4 \|\| ^7 \|\| ^8` como peer. Vite medido: 8.3.1. Linha 4.1 recebe só correção. |
+| vitest | 5.0.2 | **5.0.2** | Exige Node `^22.12 \|\| ^24 \|\| >=26` e Vite `^6.4 \|\| ^7 \|\| ^8` como peer. Vite medido: 8.3.8 em 2026-11-13 (8.3.3 corrige GHSA-587h-7wmj-h5pm). Linha 4.1 recebe só correção. |
 | @playwright/test | 1.63.0 | **1.63.0** | — |
 | @playwright/experimental-ct-react | 1.62.1 | não adotado | **E5:** depende de `experimental-ct-core` exato 1.62.1, uma versão atrás do `@playwright/test`. Teste de componente roda no Vitest. |
 | ai | 7.0.120 | **7.0.120** | Exige Node >= 22. Peer Zod `^3.25.76 \|\| ^4.1.8`. |

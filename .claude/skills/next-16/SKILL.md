@@ -1,10 +1,10 @@
 ---
 name: next-16
-description: "Use ao trabalhar com Next.js 16 (next@16.3.6 + React 19.3.0) — App Router, Server Actions, RSC, Cache Components, proxy.ts, route handlers. Keywords: next, nextjs, app router, server components, server actions, use cache, route.ts, proxy."
+description: "Use ao trabalhar com Next.js 16 (next@16.4.6 + React 19.3.0) — App Router, Server Actions, RSC, Cache Components, proxy.ts, route handlers. Keywords: next, nextjs, app router, server components, server actions, use cache, route.ts, proxy."
 ---
 # Next.js 16
 
-Framework React com App Router, React Server Components, Server Actions, data cache granular por tag, streaming SSR, Turbopack como bundler default em dev e build. Baseline **next@16.3.6** (Active LTS; 16.4 é canary; subir para 16.3.7 quando publicar) com **React 19.3.0**, Node 26 e TypeScript 7.0.2 (com Next 16.3 a API TS 6 do lint entra por `.pnpmfile.cjs`, não por alias da raiz).
+Framework React com App Router, React Server Components, Server Actions, data cache granular por tag, streaming SSR, Turbopack como bundler default em dev e build. Baseline **next@16.4.6** (linha `latest`; a 16.3 ficou sem patches de segurança) com **React 19.3.0**, Node 26 e TypeScript 7.0.2 (com Next 16.3+ a API TS 6 do lint entra por `.pnpmfile.cjs`, não por alias da raiz).
 
 ## Essência
 - **App Router (`app/`):** layouts aninhados, `page.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`, `route.ts` (handlers).

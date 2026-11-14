@@ -43,6 +43,12 @@ A 0002 deixou Node 26 e outros itens de fora "até estabilizar", sem uma regra g
 - Deixa de valer a invariante "todo JS/TS roda em Node 24": app, CI e tooling rodam em 26; **só o deploy de Functions** roda em 24.
 - Um pacote que ficar atrás do `latest` sem linha nesta tabela é bug de documentação, e a próxima medição o pega.
 
+## Amendments
+
+Correções de conformidade que **não alteram** a política nem as exceções; a decisão original permanece válida.
+
+- **2026-11-13 — Next.js 16.4, Zod 4.6.7 e Vite 8.3.8:** a linha "Next.js: 16.3.6 é o `latest`. 16.4 é canary" (em "Não são exceções") deixou de ser verdade. A 16.4.0 virou `latest` em 2026-10-06, e a 16.3 parou em 16.3.8 sem os patches de GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr e GHSA-p3m5-59mp-jv5r. Pela regra 1, o baseline passa a **next@16.4.6**, **zod@4.6.7** (GHSA-mrhx-c7xc-m3w5) e o Vite medido a **8.3.8** (GHSA-587h-7wmj-h5pm), todos `latest` em 2026-11-13. `MEMORY.md`, `stacks/VERSIONS.md`, os stacks e as skills foram atualizados. A E3 continua: `eslint-config-next@16.4.6` aceita `eslint >=9`, e `eslint-plugin-react@7.37.5` segue a última, com peer `^9.7`. Nenhuma exceção nova.
+
 ## References
 
 - [0002](0002-baseline-2026-09-version-and-naming-alignment.md), `stacks/VERSIONS.md`, `MEMORY.md`
